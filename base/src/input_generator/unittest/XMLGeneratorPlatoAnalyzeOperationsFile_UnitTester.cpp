@@ -838,6 +838,18 @@ TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Solution Z"}, tOutput);
 }
 
+TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_ErrorEmptyUpdateFrequencyKey)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    XMLGen::Scenario tScenario;
+    tScenario.updateProblem("true");
+    tInputData.append(tScenario);
+    ASSERT_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_TRUE(tOperation.empty());
+}
+
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_DoNotWriteUpdateProblemOperation)
 {
     pugi::xml_document tDocument;
@@ -845,7 +857,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_DoNotWrit
     XMLGen::Scenario tScenario;
     tScenario.updateProblem("false");
     tInputData.append(tScenario);
-    XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
 }
@@ -858,7 +870,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
     XMLGen::Scenario tScenario;
     tScenario.updateProblem("true");
     tInputData.append(tScenario);
-    XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
 

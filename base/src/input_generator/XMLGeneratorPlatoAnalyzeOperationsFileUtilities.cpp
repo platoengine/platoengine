@@ -23,6 +23,11 @@ void append_update_problem_to_plato_analyze_operation
     {
         return;
     }
+    if(aXMLMetaData.mProblemUpdateFrequency.empty())
+    {
+        THROWERR("Append Update Problem to Plato Analyze Operation: 'update problem frequency' keyword is empty.")
+    }
+
     auto tIsUpdateFrequencyGreaterThanZero = std::stoi(aXMLMetaData.mProblemUpdateFrequency) > 0;
     if (!aXMLMetaData.mProblemUpdateFrequency.empty() && tIsUpdateFrequencyGreaterThanZero)
     {

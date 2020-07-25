@@ -314,8 +314,8 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimization_type);
-    if(tIsTopologyOptimization)
+    auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData);
+    if(tIsPlatoAnalyzePerformer)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintGradient", "Compute Constraint Gradient" }, tOperation);
@@ -364,6 +364,206 @@ inline void write_optimization_problem
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.max_iterations = "10";
+    tMetaData.discretization = "density";
+    tMetaData.optimization_algorithm = "oc";
+    tMetaData.mProblemUpdateFrequency = "5";
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.code_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato_analyze_1");
+    tScenario.cacheState("false");
+    tScenario.updateProblem("true");
+    tMetaData.append(tScenario);
+
+    XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
+
+    auto tReadData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name>")
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output></Operation><Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output></Operation><Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output></Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName></Output></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    Plato::system("rm -f plato_analyze_operations.xml");
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeConstraintGradient", "Compute Constraint Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeConstraintValue", "Compute Constraint Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Value"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeObjectiveGradient", "Compute Objective Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeObjectiveValue", "Compute Objective Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Value"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.max_iterations = "10";
+    tMetaData.discretization = "density";
+    tMetaData.optimization_algorithm = "oc";
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato_analyze_1");
+    tScenario.cacheState("false");
+    tScenario.updateProblem("true");
+    tMetaData.append(tScenario);
+
+    ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
+
+    auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>InitializeField</Function><Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform>")
+    +"<Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation><Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName>"
+    +"</Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization><Input><ArgumentName>UpperBoundValue</ArgumentName>"
+    +"</Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name>"
+    +"<Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
+    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    Plato::system("rm -f plato_main_operations.xml");
+}
+
+TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.max_iterations = "10";
+    tMetaData.optimization_algorithm = "oc";
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+    XMLGen::Scenario tScenario;
+    tScenario.performer("plato_analyze_1");
+    tScenario.cacheState("false");
+    tScenario.updateProblem("true");
+    tMetaData.append(tScenario);
+
+    ASSERT_NO_THROW(XMLGen::write_interface_xml_file(tMetaData));
+
+    auto tReadData = XMLGen::read_data_from_file("interface.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Console><Verbose>false</Verbose></Console><Performer><Name>platomain</Name><Code>platomain</Code><PerformerID>0</PerformerID></Performer><Performer><Name>1</Name><Code>plato_analyze_1</Code>")
+    +"<PerformerID></PerformerID></Performer><SharedData><Name>Control</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>LowerBoundValue</Name>"
+    +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>LowerBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName>"
+    +"<UserName>platomain</UserName></SharedData><SharedData><Name>UpperBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData>"
+    +"<SharedData><Name>UpperBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>DesignVolume</Name><Type>Scalar</Type>"
+    +"<Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>Topology</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName>"
+    +"<UserName>platomain</UserName><UserName>plato_analyze_1</UserName></SharedData><SharedData><Name>ObjectiveValueID-1</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>plato_analyze_1</OwnerName>"
+    +"<UserName>platomain</UserName></SharedData><SharedData><Name>ObjectiveGradientID-1</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>plato_analyze_1</OwnerName><UserName>platomain</UserName></SharedData>"
+    +"<Stage><Name>DesignVolume</Name><Operation><Name>DesignVolume</Name><PerformerName>platomain</PerformerName><Output><ArgumentName>DesignVolume</ArgumentName><SharedDataName>DesignVolume</SharedDataName></Output></Operation>"
+    +"<Output><SharedDataName>DesignVolume</SharedDataName></Output></Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>platomain</PerformerName><Output><ArgumentName>InitializedField</ArgumentName>"
+    +"<SharedDataName>Control</SharedDataName></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Output><SharedDataName>LowerBoundVector</SharedDataName></Output></Stage>"
+    +"<Stage><Name>SetUpperBounds</Name><Output><SharedDataName>UpperBoundVector</SharedDataName></Output></Stage><Stage><Name>UpdateProblemID-plato_analyze_1</Name><Operation><Name>UpdateProblem</Name><PerformerName>plato_analyze_1</PerformerName>"
+    +"</Operation></Stage><Stage><Name>ComputeObjectiveValueID-1</Name><Type>compliance</Type><Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>platomain</PerformerName>"
+    +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation>"
+    +"<Operation><Name>ComputeObjectiveValue</Name><PerformerName>plato_analyze_1</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName>"
+    +"<SharedDataName>ObjectiveValueID-1</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveValueID-1</SharedDataName></Output></Stage><Stage><Name>ComputeObjectiveGradientID-1</Name><Type>compliance</Type>"
+    +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>platomain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input>"
+    +"<Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>ComputeObjectiveGradient</Name><PerformerName>plato_analyze_1</PerformerName><Input><ArgumentName>Topology</ArgumentName>"
+    +"<SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName><SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Operation><Operation><Name>FilterGradient</Name><PerformerName>platomain</PerformerName>"
+    +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>ObjectiveGradientID-1</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName>"
+    +"<SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Stage><Optimizer><Package>OC</Package><Convergence><MaxIterations>10</MaxIterations></Convergence>"
+    +"<UpdateProblemStage><Name>UpdateProblem</Name></UpdateProblemStage><OptimizationVariables><ValueName>Control</ValueName><InitializationStage>InitialGuess</InitializationStage><FilteredName>Topology</FilteredName>"
+    +"<LowerBoundValueName>LowerBoundValue</LowerBoundValueName><LowerBoundVectorName>LowerBoundVector</LowerBoundVectorName><UpperBoundValueName>UpperBoundValue</UpperBoundValueName><UpperBoundVectorName>UpperBoundVector</UpperBoundVectorName>"
+    +"<SetLowerBoundsStage>SetLowerBounds</SetLowerBoundsStage><SetUpperBoundsStage>SetUpperBounds</SetUpperBoundsStage></OptimizationVariables><Objective><GradientStageName>ComputeObjectiveGradientID-1</GradientStageName>"
+    +"<GradientName>ObjectiveGradientID-1</GradientName><ValueStageName>ComputeObjectiveValueID-1</ValueStageName><ValueName>ObjectiveValueID-1</ValueName></Objective><BoundConstraint><Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    Plato::system("rm -f interface.xml");
+}
+
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
 {
     XMLGen::InputData tMetaData;
@@ -374,7 +574,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tMetaData.objectives.push_back(tObjective);
 
     pugi::xml_document tDocument;
-    XMLGen::append_objective_gradient_stage(tMetaData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_objective_gradient_stage(tMetaData, tDocument));
 
     // STAGE INPUTS
     auto tStage = tDocument.child("Stage");
@@ -435,7 +635,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     tMetaData.objectives.push_back(tObjective);
 
     pugi::xml_document tDocument;
-    XMLGen::append_objective_value_stage(tMetaData, tDocument);
+    ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
 
     // STAGE INPUTS
     auto tStage = tDocument.child("Stage");
