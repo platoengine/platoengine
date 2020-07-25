@@ -425,7 +425,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicSharedData)
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "platomain"};
-    XMLGen::append_nondeterministic_shared_data(tKeys, tValues, tDocument);
+    XMLGen::append_shared_data_multiperformer(tKeys, tValues, tDocument);
 
     // TEST RESULTS AGAINS GOLD VALUES
     std::vector<std::string> tGoldOuterAttributeKeys = {"var", "in"};
@@ -449,7 +449,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData_ErrorEmpty
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", tInputData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
@@ -460,7 +460,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", tInputData, tDocument);
+    XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -525,10 +525,10 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     tScenarioTwo.id("2");
     tScenarioTwo.performer("sierra");
     tInputData.append(tScenarioTwo);
-    tInputData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
+    tInputData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     tInputData.mOutputMetaData.scenarioID("1");
 
-    ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_shared_data(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_multiperformer_qoi_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -539,11 +539,11 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
 
     std::vector<std::string> tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
-    tGoldSharedDataKeys.push_back(std::make_pair("von mises", tTemp));
-    tTemp = {"von mises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+    tGoldSharedDataKeys.push_back(std::make_pair("vonmises", tTemp));
+    tTemp = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "Scalar", "Element Field", "plato analyze_{PerformerIndex}", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
-    tGoldSharedDataValues.push_back(std::make_pair("von mises", tTemp));
+    tGoldSharedDataValues.push_back(std::make_pair("vonmises", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
     auto tValues = tGoldSharedDataValues.begin();
@@ -738,7 +738,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase_E
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
@@ -749,7 +749,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -783,7 +783,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase_Er
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_physics_performers_for_nondeterministic_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
@@ -794,7 +794,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
     tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze");
     tInputData.append(tScenario);
-    ASSERT_NO_THROW(XMLGen::append_physics_performers_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tDocument));
 
     auto tPerformer = tDocument.child("Performer");
     ASSERT_FALSE(tPerformer.empty());
@@ -823,7 +823,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUsecase)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_for_nondeterministic_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1081,36 +1081,6 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStageForNondeterministicUsecase)
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName"};
     tGoldValues = {"Update Problem", "plato_analyze_{PerformerIndex}"};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
-}
-
-TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage_ErrorEmptyObjectiveList)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_update_problem_stage(tInputData, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
-{
-    XMLGen::InputData tInputData;
-    pugi::xml_document tDocument;
-    XMLGen::Scenario tScenario;
-    tScenario.performer("plato analyze");
-    tInputData.append(tScenario);
-
-    ASSERT_NO_THROW(XMLGen::append_update_problem_stage(tInputData, tDocument));
-    ASSERT_FALSE(tDocument.empty());
-
-    // TEST RESULTS AGAINST GOLD VALUES
-    auto tStage = tDocument.child("Stage");
-    std::vector<std::string> tGoldKeys = {"Name", "Operation"};
-    std::vector<std::string> tGoldValues = {"Update Problem : plato analyze 0", ""};
-    PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
-
-    auto tOperation = tStage.child("Operation");
-    tGoldKeys = {"Name", "PerformerName"};
-    tGoldValues = {"Update Problem", "plato analyze"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 }
 
@@ -1738,7 +1708,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
-    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(tXMLMetaData, tDocument);
+    XMLGen::append_objective_value_stage_stochastic_usecase(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
@@ -2167,7 +2137,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
-    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(tXMLMetaData, tDocument);
+    XMLGen::append_objective_gradient_stage_stochastic_usecase(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
@@ -2705,7 +2675,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationBoundConstraintsOptions)
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorEmptyObjective)
 {
     XMLGen::InputData tXMLMetaData;
-    ASSERT_THROW(XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData), std::runtime_error);
+    ASSERT_THROW(XMLGen::write_stochastic_interface_xml_file(tXMLMetaData), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorMultipleObjectives)
@@ -2715,7 +2685,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorMultipleObjectives)
     XMLGen::Objective tObjective2;
     tXMLMetaData.objectives.push_back(tObjective1);
     tXMLMetaData.objectives.push_back(tObjective2);
-    ASSERT_THROW(XMLGen::write_interface_xml_file_for_nondeterministic_usecase(tXMLMetaData), std::runtime_error);
+    ASSERT_THROW(XMLGen::write_stochastic_interface_xml_file(tXMLMetaData), std::runtime_error);
 }
 
 }

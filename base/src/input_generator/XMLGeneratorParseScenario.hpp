@@ -61,15 +61,6 @@ private:
     void checkPhysics(XMLGen::Scenario& aScenario);
 
     /******************************************************************************//**
-     * \fn checkPerformer
-     * \brief If 'performer' keyword is empty, set 'performer' keyword to default \n
-     * value: 'code_keyword' + '0', where 'code_keyword' denotes the value set for \n
-     * 'code' keyword.
-     * \param [in] aScenario scenario metadata
-    **********************************************************************************/
-    void checkPerformer(XMLGen::Scenario& aScenario);
-
-    /******************************************************************************//**
      * \fn checkSpatialDimensions
      * \brief If 'dimensions' keyword value is not supported, throw error.
      * \param [in] aScenario scenario metadata
@@ -77,13 +68,26 @@ private:
     void checkSpatialDimensions(XMLGen::Scenario& aScenario);
 
     /******************************************************************************//**
+     * \fn checkPerformer
+     * \brief If 'performer' keyword is empty, set 'performer' keyword to default \n
+     * value: 'code_keyword' + '0', where 'code_keyword' denotes the value set for \n
+     * 'code' keyword.
+    **********************************************************************************/
+    void checkPerformer();
+
+    /******************************************************************************//**
      * \fn checkScenarioID
      * \brief If scenario 'id' keyword is empty, set 'id' to default = 'code_keyword' + \n
      * 'physics_keyword' + '0', where \n 'code_keyword' denotes the value set for \n
      * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
-     * \param [in] aScenario scenario metadata
     **********************************************************************************/
-    void checkScenarioID(XMLGen::Scenario& aScenario);
+    void checkScenarioID();
+
+    /******************************************************************************//**
+     * \fn finalize
+     * \brief If required keywords are not defined, set values to default.
+    **********************************************************************************/
+    void finalize();
 
 public:
     /******************************************************************************//**

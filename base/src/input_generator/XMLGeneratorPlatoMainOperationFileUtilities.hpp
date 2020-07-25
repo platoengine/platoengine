@@ -14,11 +14,11 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \fn write_plato_main_operations_xml_file_for_nondeterministic_usecase
+ * \fn write_stochastic_plato_main_operations_xml_file
  * \brief Write Plato main operation xml file for nondeterministic use cases.
  * \param [in] aXMLMetaData Plato problem input data
 **********************************************************************************/
-void write_plato_main_operations_xml_file_for_nondeterministic_usecase
+void write_stochastic_plato_main_operations_xml_file
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**
@@ -179,13 +179,13 @@ void append_stochastic_objective_gradient_to_plato_main_operation
  pugi::xml_document &aDocument);
 
 /******************************************************************************//**
- * \fn append_nondeterministic_qoi_statistics_to_plato_main_operation
+ * \fn append_qoi_statistics_to_plato_main_operation
  * \brief Append nondeterministic Quantities of Interest (QoI) plato main outputs \n
  * to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_nondeterministic_qoi_statistics_to_plato_main_operation
+void append_qoi_statistics_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument);
 

@@ -868,12 +868,12 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name"}, {"Update Problem", "Update Problem"}, tOperation);
 }
 
-TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperation)
+TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "element field");
-    ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    ASSERT_NO_THROW(XMLGen::append_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -881,7 +881,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
     ASSERT_FALSE(tOperation.empty());
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = {"Function", "Name" , "Layout", "For", "Output", "Output"};
-    std::vector<std::string> tValues = {"MeanPlusStdDev", "von mises stress Statistics",
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "vonmises Statistics",
         "Element Field", "", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
@@ -894,16 +894,16 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicQoiStatisticsToPlatoMainOperat
     auto tInput = tInnerFor.child("Input");
     ASSERT_FALSE(tInput.empty());
     tKeys = {"ArgumentName", "Probability"};
-    tValues = {"von mises stress {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+    tValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
 
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "von mises stress Mean"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "vonmises Mean"}, tOutput);
     tOutput = tOutput.next_sibling("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "von mises stress StdDev"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "vonmises StdDev"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendStochasticCriterionValueOperation)
@@ -1184,9 +1184,9 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Displacement X", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy_Stress", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("dispX", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1196,40 +1196,40 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     auto tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy stress {SampleIndex}", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy_stress {SampleIndex}", "Element Field"}, tInput);
 
     tFor = tFor.next_sibling("For");
     ASSERT_FALSE(tFor.empty());
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"displacement x {SampleIndex}", "Nodal Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"dispx {SampleIndex}", "Nodal Field"}, tInput);
 
     tFor = tFor.next_sibling("For");
     ASSERT_FALSE(tFor.empty());
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
     tInput = tFor.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"von mises {SampleIndex}", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises {SampleIndex}", "Element Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Von Mises", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Displacement X", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("VonMises", "element field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy stress", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy_stress", "Element Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"displacement x", "Nodal Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"dispx", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"von mises", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises", "Element Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
@@ -1329,7 +1329,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tFilterNode);
 }
 
-TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
+TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.discretization = "density";
@@ -1338,13 +1338,13 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tXMLMetaData.append(tScenario);
     tXMLMetaData.objective_number_standard_deviations = "1";
     tXMLMetaData.mOutputMetaData.outputData(true);
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Von Mises Stress", "element field");
-    XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(tXMLMetaData);
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    XMLGen::write_stochastic_plato_main_operations_xml_file(tXMLMetaData);
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function>")
     +"<Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName></Input><Input><ArgumentName>control</ArgumentName></Input><Forvar=\"SampleIndex\"in=\"Samples\">"
-    +"<Input><ArgumentName>vonmisesstress{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
+    +"<Input><ArgumentName>vonmises{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
     +"<Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation>"
     +"<Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName></Input>"
     +"<Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name>"
@@ -1359,9 +1359,9 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     +"</Output></CriterionValue><CriterionGradient><Layout>NodalField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
     +"<ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
     +"</Input></For></For><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName></Output></CriterionGradient></Operation><Operation>"
-    +"<Function>MeanPlusStdDev</Function><Name>vonmisesstressStatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
-    +"<ArgumentName>vonmisesstress{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesstressMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesstressStdDev</ArgumentName></Output>"
+    +"<Function>MeanPlusStdDev</Function><Name>vonmisesStatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
+    +"<ArgumentName>vonmises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
+    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesStdDev</ArgumentName></Output>"
     +"</Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name><Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName>"
     +"</Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
     +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";

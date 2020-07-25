@@ -34,8 +34,6 @@ void ParseScenario::checkTags(XMLGen::Scenario& aScenario)
 {
     this->checkCode(aScenario);
     this->checkPhysics(aScenario);
-    this->checkPerformer(aScenario);
-    this->checkScenarioID(aScenario);
     this->checkSpatialDimensions(aScenario);
 }
 
@@ -74,16 +72,6 @@ void ParseScenario::checkCode(XMLGen::Scenario& aScenario)
     aScenario.code(tValidCode);
 }
 
-void ParseScenario::checkPerformer(XMLGen::Scenario& aScenario)
-{
-    auto tPerformer = aScenario.value("performer");
-    if (tPerformer.empty())
-    {
-        tPerformer = aScenario.value("code") + "_1";
-        aScenario.performer(tPerformer);
-    }
-}
-
 void ParseScenario::checkSpatialDimensions(XMLGen::Scenario& aScenario)
 {
     auto tDim = aScenario.value("dimensions");
@@ -110,14 +98,36 @@ void ParseScenario::checkPhysics(XMLGen::Scenario& aScenario)
     aScenario.physics(tValidPhysics);
 }
 
-void ParseScenario::checkScenarioID(XMLGen::Scenario& aScenario)
+void ParseScenario::checkPerformer()
 {
-    auto tID = aScenario.value("id");
-    if (tID.empty())
+    for(auto& tScenario : mData)
     {
-        tID = aScenario.value("code") + "_" + aScenario.value("physics") + "_1";
-        aScenario.id(tID);
+        if (tScenario.value("performer").empty())
+        {
+            auto tIndex = &tScenario - &mData[0] + 1u;
+            auto tPerformer = tScenario.value("code") + "_" + std::to_string(tIndex);
+            tScenario.performer(tPerformer);
+        }
     }
+}
+
+void ParseScenario::checkScenarioID()
+{
+    for (auto &tScenario : mData)
+    {
+        if (tScenario.value("id").empty())
+        {
+            auto tIndex = &tScenario - &mData[0] + 1u;
+            auto tID = tScenario.value("code") + "_" + tScenario.value("physics") + "_" + std::to_string(tIndex);
+            tScenario.id(tID);
+        }
+    }
+}
+
+void ParseScenario::finalize()
+{
+    this->checkPerformer();
+    this->checkScenarioID();
 }
 
 std::vector<XMLGen::Scenario> ParseScenario::data() const
@@ -152,6 +162,7 @@ void ParseScenario::parse(std::istream &aInputFile)
             mData.push_back(tScenario);
         }
     }
+    this->finalize();
 }
 
 }

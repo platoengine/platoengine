@@ -65,8 +65,8 @@ void append_random_qoi_samples_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for(auto& tID : tIDs)
+    auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tID : tQoIIDs)
     {
         auto tOuterFor = aParentNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
@@ -86,8 +86,8 @@ void append_deterministic_qoi_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
-    for(auto& tID : tIDs)
+    auto tQoIIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
+    for(auto& tID : tQoIIDs)
     {
         auto tInput = aParentNode.append_child("Input");
         auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
@@ -174,7 +174,8 @@ void append_objective_shared_data
 {
     if(aXMLMetaData.objectives.empty())
     {
-        THROWERR(std::string("Append Criterion Shared Data: ") + "Objective function list is empty.")
+        THROWERR("Append Criterion Shared Data: Objective function list is empty. "
+            + "Plato optimization problems must have at least one objective function defined.")
     }
 
     for(auto& tObjective : aXMLMetaData.objectives)
@@ -299,30 +300,6 @@ void append_initial_guess_stage
     XMLGen::append_children({"SharedDataName"},{"Control"}, tOutputNode);
 }
 // function append_initial_guess_stage
-/******************************************************************************/
-
-/******************************************************************************/
-void append_update_problem_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aXMLMetaData.scenarios().empty())
-    {
-        THROWERR("Append Update Problem Stage: Objective function list is empty.")
-    }
-
-    for(auto &tScenario : aXMLMetaData.scenarios())
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tIndex = &tScenario - &aXMLMetaData.scenarios()[0];
-        auto tStageName = std::string("Update Problem : ") + tScenario.performer() + " " + std::to_string(tIndex);
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-
-        auto tOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children( { "Name", "PerformerName" }, { "Update Problem", tScenario.performer() }, tOperationNode);
-    }
-}
-// function append_update_problem_stage
 /******************************************************************************/
 
 /******************************************************************************/

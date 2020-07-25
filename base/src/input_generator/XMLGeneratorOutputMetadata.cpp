@@ -5,6 +5,7 @@
  */
 
 #include "XMLG_Macros.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorOutputMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
@@ -32,8 +33,8 @@ std::string Output::scenarioID() const
 
 void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLayout)
 {
-    auto tLowerID = XMLGen::to_lower(aID);
-    auto tLowerLayout = XMLGen::to_lower(aDataLayout);
+    auto tLowerID = XMLGen::check_output_keyword(aID);
+    auto tLowerLayout = XMLGen::check_data_layout_keyword(aDataLayout);
     auto tArgumentName = tLowerID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     auto tSharedDataName = tLowerID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
     mRandomQoIs[tLowerID] =
@@ -42,10 +43,10 @@ void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLay
 
 void Output::appendDeterminsiticQoI(const std::string& aID, const std::string& aDataLayout)
 {
-    auto tLowerID = XMLGen::to_lower(aID);
-    auto tLowerLayout = XMLGen::to_lower(aDataLayout);
-    mDeterministicQoIs[tLowerID] =
-        { {"ArgumentName", tLowerID}, {"SharedDataName", tLowerID}, {"DataLayout", tLowerLayout} };
+    auto tValidOutputKeyword = XMLGen::check_output_keyword(aID);
+    auto tLowerLayout = XMLGen::check_data_layout_keyword(aDataLayout);
+    mDeterministicQoIs[tValidOutputKeyword] =
+        { {"ArgumentName", tValidOutputKeyword}, {"SharedDataName", tValidOutputKeyword}, {"DataLayout", tLowerLayout} };
 }
 
 std::string Output::randomLayout(const std::string& aID) const

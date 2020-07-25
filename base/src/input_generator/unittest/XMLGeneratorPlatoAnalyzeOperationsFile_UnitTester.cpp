@@ -119,7 +119,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
 
     // CALL FUNCTION
-    XMLGen::write_plato_analyze_operation_xml_file_for_nondeterministic_usecase(tXMLMetaData);
+    XMLGen::write_stochastic_plato_analyze_operation_xml_file(tXMLMetaData);
     auto tData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
@@ -777,199 +777,6 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearThermoElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorEmptyTags)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags;
-    ASSERT_THROW(XMLGen::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearThermoElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorInvalidTag)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs_modulus_block_id_1", "young modulu"}, {"poissons_ratio_block_id_1", "poissons_ratio"},
-      {"thermal_expansivity_block_id_1", "ther expann cocient"},
-      {"thermal_conductivity_block_id_1", "thermal_conductivity"},
-      {"reference_temperature_block_id_1", "reference_temperature"} };
-    ASSERT_THROW(XMLGen::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearThermoElasticMaterialPropertiesToPlatoAnalyzeOperation)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"},
-      {"thermal_expansivity_block_id_1", "thermal_expansivity"},
-      {"thermal_conductivity_block_id_1", "thermal_conductivity"},
-      {"reference_temperature_block_id_1", "reference_temperature"} };
-    XMLGen::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation(tTags, tDocument);
-
-    auto tParameter = tDocument.child("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
-        "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Poissons Ratio", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal_expansivity_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Expansivity", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"thermal_conductivity_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Thermal Conductivity", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"reference_temperature_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Reference Temperature", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-}
-
-TEST(PlatoTestXMLGenerator, AppendOrthotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorEmptyTags)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags;
-    ASSERT_THROW(XMLGen::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendOrthotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorInvalidTag)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    {
-      {"youngs_modulus_x_block_id_1", "youngs_modulus_x"}, {"youngs_modulus_y_block_id_1", "youngs_modulus_y"},
-      {"youngs_modulus_z_block_id_1", "youngs_modulus_z"}, {"poissons_ratio_xy_block_id_1", "poissons_ratio_xy"},
-      {"poissons_ratio_xz_block_id_1", "poissons_ratio_xz"}, {"poissons_ratio_yz_block_id_1", "poissons_ratio_yz"},
-      {"shear_modulus_xy_block_id_1", "shear_modulus_xy"}, {"shear_modulus_xz_block_id_1", "shear_modulus_xz"},
-      {"shear_modulus_yz_block_id_1", "shear_modulus_yz"}, {"honey_badger_block_id_1", "honey_badger"}
-    };
-    ASSERT_THROW(XMLGen::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendOrthotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    {
-      {"youngs_modulus_x_block_id_1", "youngs_modulus_x"}, {"youngs_modulus_y_block_id_1", "youngs_modulus_y"},
-      {"youngs_modulus_z_block_id_1", "youngs_modulus_z"}, {"poissons_ratio_xy_block_id_1", "poissons_ratio_xy"},
-      {"poissons_ratio_xz_block_id_1", "poissons_ratio_xz"}, {"poissons_ratio_yz_block_id_1", "poissons_ratio_yz"},
-      {"shear_modulus_xy_block_id_1", "shear_modulus_xy"}, {"shear_modulus_xz_block_id_1", "shear_modulus_xz"},
-      {"shear_modulus_yz_block_id_1", "shear_modulus_yz"}
-    };
-    XMLGen::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument);
-
-    // TEST RESULTS
-    auto tParameter = tDocument.child("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs_modulus_x_block_id_1",
-        "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Youngs Modulus X", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs_modulus_y_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Youngs Modulus Y", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"youngs_modulus_z_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Youngs Modulus Z", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons_ratio_xy_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Poissons Ratio XY", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons_ratio_xz_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Poissons Ratio XZ", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons_ratio_yz_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Poissons Ratio YZ", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"shear_modulus_xy_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Shear Modulus XY", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"shear_modulus_xz_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Shear Modulus XZ", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"shear_modulus_yz_block_id_1", "[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:Shear Modulus YZ", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_TRUE(tParameter.empty());
-}
-
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorEmptyTags)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags;
-    ASSERT_THROW(XMLGen::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation_ErrorInvalidTag)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs_modulus_block_id_1", "young modulu"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
-    ASSERT_THROW(XMLGen::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendIsotropicLinearElasticMaterialPropertiesToPlatoAnalyzeOperation)
-{
-    pugi::xml_document tDocument;
-    std::vector<std::pair<std::string,std::string>> tTags =
-    { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
-    XMLGen::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation(tTags, tDocument);
-
-    auto tParameter = tDocument.child("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    std::vector<std::string> tValues = {"youngs_modulus_block_id_1",
-        "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Youngs Modulus", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:Poissons Ratio", "0.0"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
-}
-
 TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
 {
     XMLGen::write_amgx_input_file();
@@ -992,12 +799,11 @@ TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation_NoWriteOutp
     ASSERT_TRUE(tOperation.empty());
 }
 
-TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation_InvalidKey)
+TEST(PlatoTestXMLGenerator, AppendDeterminsiticQoI_InvalidKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mOutputMetaData.appendDeterminsiticQoI("fluid pressure", "fpressure");
-    ASSERT_THROW(XMLGen::append_write_output_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(tInputData.mOutputMetaData.appendDeterminsiticQoI("fluid pressure", "fpressure"), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation)

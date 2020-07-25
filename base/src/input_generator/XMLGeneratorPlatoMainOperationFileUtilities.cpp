@@ -13,7 +13,7 @@ namespace XMLGen
 {
 
 /******************************************************************************/
-void write_plato_main_operations_xml_file_for_nondeterministic_usecase
+void write_stochastic_plato_main_operations_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
     pugi::xml_document tDocument;
@@ -31,7 +31,7 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
     XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_nondeterministic_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
 
     XMLGen::append_update_problem_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
@@ -39,7 +39,7 @@ void write_plato_main_operations_xml_file_for_nondeterministic_usecase
 
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
-// function write_plato_main_operations_xml_file_for_nondeterministic_usecase
+// function write_stochastic_plato_main_operations_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
@@ -360,7 +360,7 @@ void append_stochastic_objective_gradient_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_nondeterministic_qoi_statistics_to_plato_main_operation
+void append_qoi_statistics_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
@@ -394,7 +394,7 @@ void append_nondeterministic_qoi_statistics_to_plato_main_operation
         XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
     }
 }
-// function append_nondeterministic_qoi_statistics_to_plato_main_operation
+// function append_qoi_statistics_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/

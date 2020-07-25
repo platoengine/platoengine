@@ -32,10 +32,10 @@ inline void write_robust_optimization_problem
 (const XMLGen::InputData& aInputData)
 {
     XMLGen::write_define_xml_file(aInputData.mRandomMetaData, aInputData.m_UncertaintyMetaData);
-    XMLGen::write_interface_xml_file_for_nondeterministic_usecase(aInputData);
-    XMLGen::write_plato_main_operations_xml_file_for_nondeterministic_usecase(aInputData);
+    XMLGen::write_stochastic_interface_xml_file(aInputData);
+    XMLGen::write_stochastic_plato_main_operations_xml_file(aInputData);
     XMLGen::write_plato_main_input_deck_file(aInputData);
-    XMLGen::write_plato_analyze_operation_xml_file_for_nondeterministic_usecase(aInputData);
+    XMLGen::write_stochastic_plato_analyze_operation_xml_file(aInputData);
     XMLGen::write_amgx_input_file();
     XMLGen::write_plato_analyze_input_deck_file(aInputData);
     XMLGen::generate_launch_script(aInputData);

@@ -124,16 +124,6 @@ void append_initial_guess_stage
 (pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_update_problem_stage
- * \brief Append initial guess stage to PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aParentNode  pugi::xml_document
-**********************************************************************************/
-void append_update_problem_stage
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
  * \fn append_lower_bound_operation
  * \brief Append lower bound operation to PUGI XML document.
  * \param [in/out] aParentNode  pugi::xml_node

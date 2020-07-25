@@ -135,9 +135,26 @@ bool is_integer(const std::string& aInput);
 void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aToLower = true);
 
 /******************************************************************************//**
+ * \fn check_data_layout_keyword
+ * \brief Throw error if 'data layout' keyword value is not supported.
+ * \param [in] aInput 'data layout' keyword
+ * \return valid 'data layout' keyword
+**********************************************************************************/
+std::string check_data_layout_keyword(const std::string& aInput);
+
+/******************************************************************************//**
+ * \fn check_output_keyword
+ * \brief Throw error if 'output' keyword value is not supported.
+ * \param [in] aInput 'output' keyword
+ * \return valid 'output' keyword
+**********************************************************************************/
+std::string check_output_keyword(const std::string& aInput);
+
+/******************************************************************************//**
  * \fn check_code_keyword
- * \brief Throw error if code 'name' is not supported.
+ * \brief Throw error if 'code' keyword value is not supported.
  * \param [in] aInput 'code' keyword
+ * \return valid 'code' keyword
 **********************************************************************************/
 std::string check_code_keyword(const std::string& aInput);
 

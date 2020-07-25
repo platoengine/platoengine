@@ -252,6 +252,30 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
 }
 // function split
 
+std::string check_data_layout_keyword(const std::string& aInput)
+{
+    auto tLowerKey = XMLGen::to_lower(aInput);
+    XMLGen::ValidLayoutKeys tValidKeys;
+    if(tValidKeys.mKeys.find(tLowerKey) == tValidKeys.mKeys.end())
+    {
+        THROWERR("Check Data Layout Keyword: data layout keyword '" + tLowerKey + "' is not supported.")
+    }
+    return tLowerKey;
+}
+// check_data_layout_keyword
+
+std::string check_output_keyword(const std::string& aInput)
+{
+    auto tLowerKey = XMLGen::to_lower(aInput);
+    XMLGen::ValidOutputKeys tValidKeys;
+    if(tValidKeys.mKeys.find(tLowerKey) == tValidKeys.mKeys.end())
+    {
+        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+    }
+    return tLowerKey;
+}
+// check_output_keyword
+
 std::string check_code_keyword(const std::string& aInput)
 {
     auto tLowerInput = aInput;

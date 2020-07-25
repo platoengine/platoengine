@@ -1598,6 +1598,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
               }
               m_InputData.number_refines = tStringValue;
             }
+            else if(parseSingleValue(tokens, tInputStringList = {"verbose"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"verbose\" keyword(s).\n";
+                return false;
+              }
+              m_InputData.mVerbose = XMLGen::to_lower(tStringValue);
+            }
             else if(parseSingleValue(tokens, tInputStringList = {"mma","move","limit"}, tStringValue))
             {
               if(tStringValue == "")

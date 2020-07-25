@@ -14,7 +14,7 @@ namespace XMLGen
 {
 
 /******************************************************************************/
-void append_nondeterministic_shared_data
+void append_shared_data_multiperformer
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument)
@@ -26,19 +26,18 @@ void append_nondeterministic_shared_data
     auto tSharedDataNode = tForNode.append_child("SharedData");
     XMLGen::append_children(aKeys, aValues, tSharedDataNode);
 }
-// function append_nondeterministic_shared_data
+// function append_shared_data_multiperformer
 /******************************************************************************/
 
 /******************************************************************************/
-void append_criterion_shared_data_for_nondeterministic_usecase
+void append_criterion_shared_data_multiperformer_usecase
 (const std::string& aCriterion,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
     if(aXMLMetaData.scenarios().empty())
     {
-        THROWERR(std::string("Append Criterion Shared Data For Nondeterministic Use Case: ")
-            + "Scenarios list is empty.")
+        THROWERR("Append Criterion Shared Data For Nondeterministic Use Case: Scenarios list is empty.")
     }
 
     // shared data - nondeterministic criterion value
@@ -48,19 +47,19 @@ void append_criterion_shared_data_for_nondeterministic_usecase
         auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
-        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
 
         // shared data - nondeterministic criterion gradient
         tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
-        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
     }
 }
-//function append_criterion_shared_data_for_nondeterministic_usecase
+//function append_criterion_shared_data_multiperformer_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_nondeterministic_qoi_shared_data
+void append_multiperformer_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -80,14 +79,14 @@ void append_nondeterministic_qoi_shared_data
         auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayout->second, "IGNORE", tOwnerName, "platomain"};
-        XMLGen::append_nondeterministic_shared_data(tKeys, tValues, aDocument);
+        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
     }
 }
-//function append_nondeterministic_qoi_shared_data
+//function append_multiperformer_qoi_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
-void append_topology_shared_data_for_nondeterministic_usecase
+void append_topology_shared_data_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -109,11 +108,11 @@ void append_topology_shared_data_for_nondeterministic_usecase
         XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
     }
 }
-//function append_topology_shared_data_for_nondeterministic_usecase
+//function append_topology_shared_data_multiperformer_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_physics_performers_for_nondeterministic_usecase
+void append_physics_performers_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -133,11 +132,11 @@ void append_physics_performers_for_nondeterministic_usecase
         XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tScenario.code() }, tForNode);
     }
 }
-// function append_physics_performers_for_nondeterministic_usecase
+// function append_physics_performers_multiperformer_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_shared_data_for_nondeterministic_usecase
+void append_shared_data_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -150,11 +149,11 @@ void append_shared_data_for_nondeterministic_usecase
     XMLGen::append_constraint_shared_data(aXMLMetaData, aDocument);
 
     // nondeterministic shared data
-    XMLGen::append_nondeterministic_qoi_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_topology_shared_data_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_criterion_shared_data_for_nondeterministic_usecase("Objective", aXMLMetaData, aDocument);
+    XMLGen::append_multiperformer_qoi_shared_data(aXMLMetaData, aDocument);
+    XMLGen::append_topology_shared_data_multiperformer_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", aXMLMetaData, aDocument);
 }
-// function append_shared_data_for_nondeterministic_usecase
+// function append_shared_data_multiperformer_usecase
 /******************************************************************************/
 
 /******************************************************************************/
@@ -202,18 +201,19 @@ void append_cache_state_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.scenario(0u).cacheState())
+    for (auto &tScenario : aXMLMetaData.scenarios())
     {
-        return;
+        if (!tScenario.cacheState())
+        {
+            continue;
+        }
+        auto tStageNode = aDocument.append_child("Stage");
+        XMLGen::append_children( { "Name" }, { "Cache State" }, tStageNode);
+        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Cache State", tPerformerName };
+        XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
     }
-    auto tStageNode = aDocument.append_child("Stage");
-    auto tStageName = std::string("Cache State");
-    XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
-
-    auto tPerformerName = aXMLMetaData.scenario(0u).performer() + "_{PerformerIndex}";
-    std::vector<std::string> tKeys = {"Name", "PerformerName"};
-    std::vector<std::string> tValues = {"Cache State", tPerformerName};
-    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 // function append_cache_state_stage_for_nondeterministic_usecase
 /******************************************************************************/
@@ -223,19 +223,19 @@ void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.scenario(0u).updateProblem())
+    for (auto &tScenario : aXMLMetaData.scenarios())
     {
-        return;
+        if (!tScenario.updateProblem())
+        {
+            continue;
+        }
+        auto tStageNode = aDocument.append_child("Stage");
+        XMLGen::append_children( { "Name" }, { "Update Problem" }, tStageNode);
+        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Update Problem", tPerformerName };
+        XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
     }
-
-    auto tStageNode = aDocument.append_child("Stage");
-    auto tStageName = std::string("Update Problem");
-    XMLGen::append_children( {"Name"}, {tStageName}, tStageNode);
-
-    auto tPerformerName = aXMLMetaData.scenario(0u).performer() + "_{PerformerIndex}";
-    std::vector<std::string> tKeys = {"Name", "PerformerName"};
-    std::vector<std::string> tValues = {"Update Problem", tPerformerName};
-    XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
 }
 // function append_update_problem_stage_for_nondeterministic_usecase
 /******************************************************************************/
@@ -315,7 +315,7 @@ void append_evaluate_nondeterministic_objective_value_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_value_stage_for_nondeterministic_usecase
+void append_objective_value_stage_stochastic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -336,7 +336,7 @@ void append_objective_value_stage_for_nondeterministic_usecase
         XMLGen::append_children( { "SharedDataName" }, { tOutputDataName }, tOutputNode);
     }
 }
-// function append_objective_value_stage_for_nondeterministic_usecase
+// function append_objective_value_stage_stochastic_usecase
 /******************************************************************************/
 
 /******************************************************************************/
@@ -401,7 +401,7 @@ void append_evaluate_nondeterministic_objective_gradient_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_gradient_stage_for_nondeterministic_usecase
+void append_objective_gradient_stage_stochastic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -423,11 +423,11 @@ void append_objective_gradient_stage_for_nondeterministic_usecase
         XMLGen::append_children( { "SharedDataName" }, { tOutputSharedDataName }, tStageOutputNode);
     }
 }
-// function append_objective_gradient_stage_for_nondeterministic_usecase
+// function append_objective_gradient_stage_stochastic_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_stages_for_nondeterministic_usecase
+void append_stages_stochastic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -445,14 +445,14 @@ void append_stages_for_nondeterministic_usecase
     // criteria stages
     XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
     XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
-    XMLGen::append_objective_value_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_objective_gradient_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_objective_value_stage_stochastic_usecase(aXMLMetaData, aDocument);
+    XMLGen::append_objective_gradient_stage_stochastic_usecase(aXMLMetaData, aDocument);
 }
-// function append_stages_for_nondeterministic_usecase
+// function append_stages_stochastic_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void write_interface_xml_file_for_nondeterministic_usecase
+void write_stochastic_interface_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
     if (aXMLMetaData.objectives.empty())
@@ -471,14 +471,14 @@ void write_interface_xml_file_for_nondeterministic_usecase
     XMLGen::append_children({"Verbose"}, {"true"}, tNode);
 
     XMLGen::append_plato_main_performer(tDocument);
-    XMLGen::append_physics_performers_for_nondeterministic_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_shared_data_for_nondeterministic_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_stages_for_nondeterministic_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_physics_performers_multiperformer_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_shared_data_multiperformer_usecase(aXMLMetaData, tDocument);
+    XMLGen::append_stages_stochastic_usecase(aXMLMetaData, tDocument);
     XMLGen::append_optimizer_options(aXMLMetaData, tDocument);
 
     tDocument.save_file("interface.xml", "  ");
 }
-// function write_interface_xml_file_for_nondeterministic_usecase
+// function write_stochastic_interface_xml_file
 /******************************************************************************/
 
 }

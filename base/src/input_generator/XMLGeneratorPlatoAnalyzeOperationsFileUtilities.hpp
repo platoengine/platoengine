@@ -113,42 +113,6 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
 
 /******************************************************************************//**
- * \fn append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
- * \brief Append material properties for an isotropic linear elastic material plus \n
- * corresponding material property values to the plato analyze operation xml file.
- * \param [in]     aMaterialTags list of material tags, i.e. \n
- * vector<pair<material_property_argument_name_tag, material_property_tag>>
- * \param [in/out] aParentNode    pugi::xml_node
-**********************************************************************************/
-void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
- * \fn append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
- * \brief Append material properties for an isotropic linear thermoelastic material plus \n
- * corresponding material property values to the plato analyze operation xml file.
- * \param [in]     aMaterialTags list of material tags, i.e. \n
- * vector<pair<material_property_argument_name_tag, material_property_tag>>
- * \param [in/out] aParentNode   pugi::xml_node
-**********************************************************************************/
-void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
- * \fn append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
- * \brief Append material properties for an orthotropic linear elastic material model \n
- * plus corresponding material property values to the plato_analyze_operation.xml file.
- * \param [in]     aMaterialTags list of material tags, i.e. \n
- *     vector<pair<material_property_argument_name_tag, material_property_tag>>
- * \param [in/out] aParentNode   pugi::xml_node
-**********************************************************************************/
-void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
  * \fn append_random_material_properties_to_plato_analyze_operation
  * \brief Append material properties to the plato analyze operation xml file.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -169,11 +133,11 @@ void append_random_traction_vector_to_plato_analyze_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+ * \fn write_stochastic_plato_analyze_operation_xml_file
  * \brief Write active Plato Analyze operations to plato_analyze_operation.xml file.
  * \param [in] aXMLMetaData Plato problem input data
 **********************************************************************************/
-void write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+void write_stochastic_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**

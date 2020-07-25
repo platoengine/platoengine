@@ -115,10 +115,14 @@ struct ValidOutputKeys
      *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
      **/
     std::unordered_map<std::string, std::string> mKeys =
-        { {"vonmises","element field"}, {"dispx","nodal field"}, {"dispy","nodal field"}, {"dispz","nodal field"},
+        {
+          {"vonmises","element field"}, {"dispx","nodal field"}, {"dispy","nodal field"}, {"dispz","nodal field"},
           {"temperature","nodal field"}, {"accumulated_plastic_strain","element field"}, {"potential","nodal field"},
           {"objective_gradient","nodal field"}, {"constraint_gradient","nodal field"}, {"topology","nodal field"},
-          {"control","nodal field"} };
+          {"control","nodal field"}, {"cauchy_stress","element field"}, {"deviatoric_stress","element field"},
+          {"plastic_multiplier_increment","element field"}, {"elastic_strain","element field"},
+          {"plastic_strain","element field"}, {"backstress","element field"}, {"principal_stresses","element field"}
+        };
 };
 // struct ValidOutputKeys
 
@@ -234,7 +238,7 @@ struct ValidAnalyzeOutputKeys
     std::unordered_map<std::string, std::string> mKeys = { {"vonmises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
       {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
       {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
-      {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"}, {"cauchy_stress", "cauchy stress"} };
+      {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"} };
 };
 // struct ValidAnalyzeOutputKeys
 

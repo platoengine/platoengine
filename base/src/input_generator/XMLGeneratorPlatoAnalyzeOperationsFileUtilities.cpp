@@ -155,8 +155,8 @@ void append_write_output_to_plato_analyze_operation
         auto tKeyItr = tValidKeys.mKeys.find(tID);
         if(tKeyItr == tValidKeys.mKeys.end())
         {
-            THROWERR(std::string("Append Write Output To Plato Analyze Operation: ")
-                + "Output keyword with tag '" + tID + "' is not a valid output key.")
+            THROWERR("Append Write Output To Plato Analyze Operation: "
+                + "Output keyword with tag '" + tID + "' is not supported.")
         }
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children({"ArgumentName"}, {tKeyItr->second}, tOutput);
@@ -193,75 +193,6 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
     }
 
     return tMap;
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode)
-{
-    if(aMaterialTags.empty())
-    {
-        THROWERR("Append Isotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
-    }
-
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    for(auto& tPair : aMaterialTags)
-    {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic linear elastic", tPair.second);
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tValidAnalyzeMaterialPropertyTag;
-        std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
-        auto tParameter = aParentNode.append_child("Parameter");
-        XMLGen::append_children(tKeys, tValues, tParameter);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode)
-{
-    if(aMaterialTags.empty())
-    {
-        THROWERR("Append Isotropic Thermo-elastic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
-    }
-
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    for(auto& tPair : aMaterialTags)
-    {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic linear thermoelastic", tPair.second);
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tValidAnalyzeMaterialPropertyTag;
-        std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
-        auto tParameter = aParentNode.append_child("Parameter");
-        XMLGen::append_children(tKeys, tValues, tParameter);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
-(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
- pugi::xml_node& aParentNode)
-{
-    if(aMaterialTags.empty())
-    {
-        THROWERR("Append Orthotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
-    }
-
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
-    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
-    for(auto& tPair : aMaterialTags)
-    {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("orthotropic linear elastic", tPair.second);
-        auto tTarget = std::string("[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:") + tValidAnalyzeMaterialPropertyTag;
-        std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
-        auto tParameter = aParentNode.append_child("Parameter");
-        XMLGen::append_children(tKeys, tValues, tParameter);
-    }
 }
 /******************************************************************************/
 
@@ -303,7 +234,7 @@ void append_random_traction_vector_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void write_plato_analyze_operation_xml_file_for_nondeterministic_usecase
+void write_stochastic_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
     pugi::xml_document tDocument;

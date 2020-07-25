@@ -155,14 +155,14 @@ public:
     {
         if(mScenarios.empty())
         {
-            THROWERR("XML Generator Input Metadata: 'scenario' list is empty.")
+            THROWERR("XML Generator Input Metadata: 'scenario' list member data is empty.")
         }
         else if(aID.empty())
         {
-            THROWERR("XML Generator Input Metadata: 'scenario' identification (id) is empty.")
+            THROWERR("XML Generator Input Metadata: input 'scenario' identification (id) argument is empty.")
         }
-        size_t tIndex = 0;
-        bool tFoundMatch = false;
+        size_t tIndex = 0u;
+        auto tFoundMatch = false;
         for(auto& tScenario : mScenarios)
         {
             tIndex = &tScenario - &mScenarios[0];
@@ -175,7 +175,7 @@ public:
 
         if(!tFoundMatch)
         {
-            THROWERR("XML Generator Input Metadata: Did not find 'scenario' with identification (id) '" + aID + "'.")
+            THROWERR("XML Generator Input Metadata: Did not find 'scenario' with identification (id) '" + aID + "' in scenario list.")
         }
 
         return mScenarios[tIndex];
@@ -198,6 +198,7 @@ public:
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::Block> blocks;
 
+    std::string mVerbose = "false";
     std::string filter_type;
     std::string filter_radius_scale;
     std::string filter_radius_absolute;
