@@ -152,12 +152,10 @@ void append_cache_state_stage
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Cache State ID-") + tScenario.performer();
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tPerformerName = tScenario.performer();
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Cache State", tPerformerName };
+        XMLGen::append_children( { "Name" }, { "Cache State" }, tStageNode);
         auto tOperationNode = tStageNode.append_child("Operation");
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Cache State", tScenario.performer() };
         XMLGen::append_children(tKeys, tValues, tOperationNode);
     }
 }
@@ -175,12 +173,10 @@ void append_update_problem_stage
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Update Problem ID-") + tScenario.performer();
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tPerformerName = tScenario.performer();
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Update Problem", tPerformerName };
+        XMLGen::append_children( { "Name" }, { "Update Problem" }, tStageNode);
         auto tOperationNode = tStageNode.append_child("Operation");
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Update Problem", tScenario.performer() };
         XMLGen::append_children(tKeys, tValues, tOperationNode);
     }
 }
