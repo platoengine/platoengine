@@ -143,11 +143,6 @@ void XMLGenerator::writeInputFiles()
         switch(tProblemType)
         {
             case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
-            {
-                ComplianceMinTOPlatoAnalyzeInputGenerator tGenerator(m_InputData);
-                tGenerator.generateInputFiles();
-                break;
-            }
             case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
             {
                 XMLGen::Analyze::write_plato_analyze_optimization_problem(m_InputData);

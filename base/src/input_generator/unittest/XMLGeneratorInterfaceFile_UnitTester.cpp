@@ -18,14 +18,6 @@
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 #include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
 
-namespace XMLGen
-{
-
-
-
-}
-// namespace XMLGen
-
 namespace PlatoTestXMLGenerator
 {
 
