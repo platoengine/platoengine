@@ -10,12 +10,13 @@
 
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorLaunchScriptUtilities.hpp"
-#include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
+#include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
+#include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
 
 namespace XMLGen
 {
@@ -39,6 +40,24 @@ inline void write_robust_optimization_problem
     XMLGen::write_amgx_input_file();
     XMLGen::write_plato_analyze_input_deck_file(aInputData);
     XMLGen::generate_launch_script(aInputData);
+}
+// function write_robust_optimization_problem
+
+/******************************************************************************//**
+ * \fn write_optimization_problem
+ * \brief Write input files needed to solve optimization problems with Plato Analyze.
+ * \param [in] aInputData input metadata
+**********************************************************************************/
+inline void write_optimization_problem
+(const XMLGen::InputData& aMetaData)
+{
+    XMLGen::write_interface_xml_file(aMetaData);
+    XMLGen::write_plato_main_operations_xml_file(aMetaData);
+    XMLGen::write_plato_main_input_deck_file(aMetaData);
+    XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
+    XMLGen::write_amgx_input_file();
+    XMLGen::write_plato_analyze_input_deck_file(aMetaData);
+    XMLGen::generate_launch_script(aMetaData);
 }
 
 /******************************************************************************//**

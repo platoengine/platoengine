@@ -16,6 +16,104 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
+ * \fn write_interface_xml_file
+ * \brief Write interface.xml file.
+ * \param [in]  aXMLMetaData Plato problem input metadata
+**********************************************************************************/
+void write_interface_xml_file
+(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
+ * \fn append_physics_performers
+ * \brief Append physics performers to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_physics_performers
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_qoi_shared_data
+ * \brief Append quantities of interest shared data to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_qoi_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_topology_shared_data
+ * \brief Append topology shared data to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_shared_data
+ * \brief Append shared data to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_cache_state_stage
+ * \brief Append cache state stage to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_cache_state_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_update_problem_stage
+ * \brief Append update problem stage to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_objective_value_stage
+ * \brief Append objective value stage to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_objective_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_stages
+ * \brief Append stages to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_stages
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_objective_gradient_stage
+ * \brief Append objective gradient stage to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aDocument    parent xml document
+**********************************************************************************/
+void append_objective_gradient_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_plato_main_output_stage
  * \brief Append plato main output stage to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input data

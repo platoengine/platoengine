@@ -14,8 +14,16 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
+ * \fn write_plato_main_operations_xml_file
+ * \brief Write Plato main operation xml file.
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void write_plato_main_operations_xml_file
+(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
  * \fn write_stochastic_plato_main_operations_xml_file
- * \brief Write Plato main operation xml file for nondeterministic use cases.
+ * \brief Write Plato main operation xml file for stochastic use cases.
  * \param [in] aXMLMetaData Plato problem input data
 **********************************************************************************/
 void write_stochastic_plato_main_operations_xml_file

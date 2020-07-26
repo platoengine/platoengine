@@ -26,21 +26,61 @@ using MaterialPropertyMetadata = std::unordered_map<std::string, XMLGen::Analyze
 // namespace Analyze
 
 /******************************************************************************//**
+ * \fn append_compute_objective_value_to_plato_analyze_operation
+ * \brief Append compute objective value operation to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_value_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_objective_gradient_to_plato_analyze_operation
+ * \brief Append compute objective gradient operation to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_gradient_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_value_to_plato_analyze_operation
+ * \brief Append compute constraint value operation to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_value_to_plato_analyze_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_gradient_to_plato_analyze_operation
+ * \brief Append compute constraint gradient operation to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_gradient_to_plato_analyze_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_update_problem_to_plato_analyze_operation
  * \brief Append update problem operation to PUGI XML document. The update problem \n
  * operation is used to enable safe non-Plato parameter, e.g. physics-only parameters \n
  * updates during optimization.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_update_problem_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_solution_to_plato_analyze_operation
  * \brief Append compute solution operation to PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_compute_solution_to_plato_analyze_operation
@@ -50,55 +90,55 @@ void append_compute_solution_to_plato_analyze_operation
  * \fn append_compute_random_objective_value_to_plato_analyze_operation
  * \brief Append compute objective value operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_compute_random_objective_value_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_random_objective_gradient_to_plato_analyze_operation
  * \brief Append compute objective gradient operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_compute_random_objective_gradient_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_random_constraint_value_to_plato_analyze_operation
  * \brief Append compute constraint value operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_compute_random_constraint_value_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_random_constraint_gradient_to_plato_analyze_operation
  * \brief Append compute constraint gradient operation to PUGI XML document. The \n
  * operation is only appended if Plato Analyze is responsible for its evaluation.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_compute_random_constraint_gradient_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_write_output_to_plato_analyze_operation
  * \brief Append write output operation to PUGI XML document. The operation is only \n
  * appended if the user specified output quantities of interest for visualization.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_write_output_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
@@ -115,29 +155,37 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
 /******************************************************************************//**
  * \fn append_random_material_properties_to_plato_analyze_operation
  * \brief Append material properties to the plato analyze operation xml file.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_random_material_properties_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_random_traction_vector_to_plato_analyze_operation
  * \brief Append random traction vector to the plato analyze operation xml file.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_random_traction_vector_to_plato_analyze_operation
-(const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn write_stochastic_plato_analyze_operation_xml_file
- * \brief Write active Plato Analyze operations to plato_analyze_operation.xml file.
- * \param [in] aXMLMetaData Plato problem input data
+ * \brief Write stochastic Plato Analyze operations to plato_analyze_operation.xml file.
+ * \param [in] aMetaData Plato problem input data
 **********************************************************************************/
 void write_stochastic_plato_analyze_operation_xml_file
+(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
+ * \fn write_plato_analyze_operation_xml_file
+ * \brief Write Plato Analyze operations to plato_analyze_operation.xml file.
+ * \param [in] aMetaData Plato problem input data
+**********************************************************************************/
+void write_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**
@@ -145,7 +193,7 @@ void write_stochastic_plato_analyze_operation_xml_file
  * \brief Write AMGX input .json file. This file is used to assign values for the \n
  * linear solver parameters. Interested readers can find more information on AMGX \n
  * in \see{https://github.com/NVIDIA/AMGX}.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void write_amgx_input_file();

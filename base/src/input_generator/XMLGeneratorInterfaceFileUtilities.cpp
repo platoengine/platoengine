@@ -5,6 +5,7 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp"
@@ -12,6 +13,253 @@
 
 namespace XMLGen
 {
+
+/******************************************************************************/
+void write_interface_xml_file
+(const XMLGen::InputData& aMetaData)
+{
+    pugi::xml_document tDocument;
+    auto tNode = tDocument.append_child("Console");
+    XMLGen::append_children({"Verbose"}, {aMetaData.mVerbose}, tNode);
+    XMLGen::append_plato_main_performer(tDocument);
+    XMLGen::append_physics_performers(aMetaData, tDocument);
+    XMLGen::append_shared_data(aMetaData, tDocument);
+    XMLGen::append_stages(aMetaData, tDocument);
+    XMLGen::append_optimizer_options(aMetaData, tDocument);
+    tDocument.save_file("interface.xml", "  ");
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_physics_performers
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    if(aXMLMetaData.scenarios().empty())
+    {
+        THROWERR("Append Physics Performer: Scenarios list is empty.")
+    }
+
+    std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
+    for(auto& tScenario : aXMLMetaData.scenarios())
+    {
+        const int tID = (&tScenario - &aXMLMetaData.scenarios()[0]) + 1;
+        auto tPerformerNode = aParentNode.append_child("Performer");
+        std::vector<std::string> tValues = { std::to_string(tID), tScenario.performer(), tScenario.code() };
+        XMLGen::append_children( tKeywords, tValues, tPerformerNode);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_qoi_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aParentNode)
+{
+    if(aXMLMetaData.scenarios().empty())
+    {
+        THROWERR("Append QoI Shared Data: list of 'scenarios' is empty.")
+    }
+
+    XMLGen::ValidLayoutKeys tValidLayouts;
+    auto tOutputIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
+    auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
+    for(auto& tID : tOutputIDs)
+    {
+        auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
+        auto tValidLayoutItr = tValidLayouts.mKeys.find(tLayout);
+        if(tValidLayoutItr == tValidLayouts.mKeys.end())
+        {
+            THROWERR("Append QoI Shared Data: Unexpected error while searching valid layout '"
+                + tLayout + "' of quantity of interest with tag '" + tID + "'.")
+        }
+        auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
+        auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer();
+        std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayoutItr->second, "IGNORE", tOwnerName, "platomain"};
+        auto tSharedDataNode = aParentNode.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.scenarios().empty())
+    {
+        THROWERR("Append Topology Shared Data: Scenarios list is empty.")
+    }
+
+    auto tSharedData = aDocument.append_child("SharedData");
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName", "UserName"};
+    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
+    for(auto& tScenario : aXMLMetaData.scenarios())
+    {
+        std::vector<std::string> tValues =
+            {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain", tScenario.performer()};
+        XMLGen::append_children(tKeys, tValues, tSharedData);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument)
+{
+    XMLGen::append_control_shared_data(aDocument);
+    XMLGen::append_lower_bounds_shared_data(aDocument);
+    XMLGen::append_upper_bounds_shared_data(aDocument);
+    XMLGen::append_design_volume_shared_data(aDocument);
+    XMLGen::append_qoi_shared_data(aMetaData, aDocument);
+    XMLGen::append_topology_shared_data(aMetaData, aDocument);
+    XMLGen::append_objective_shared_data(aMetaData, aDocument);
+    XMLGen::append_constraint_shared_data(aMetaData, aDocument);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_stages
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    XMLGen::append_design_volume_stage(aDocument);
+    XMLGen::append_initial_guess_stage(aDocument);
+    XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
+    XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
+    XMLGen::append_cache_state_stage(aXMLMetaData, aDocument);
+    XMLGen::append_update_problem_stage(aXMLMetaData, aDocument);
+    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
+    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
+    XMLGen::append_objective_value_stage(aXMLMetaData, aDocument);
+    XMLGen::append_objective_gradient_stage(aXMLMetaData, aDocument);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_cache_state_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    for (auto &tScenario : aXMLMetaData.scenarios())
+    {
+        if (!tScenario.cacheState())
+        {
+            continue;
+        }
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tStageName = std::string("Cache State ID-") + tScenario.performer();
+        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
+        auto tPerformerName = tScenario.performer();
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Cache State", tPerformerName };
+        auto tOperationNode = tStageNode.append_child("Operation");
+        XMLGen::append_children(tKeys, tValues, tOperationNode);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    for (auto &tScenario : aXMLMetaData.scenarios())
+    {
+        if (!tScenario.updateProblem())
+        {
+            continue;
+        }
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tStageName = std::string("Update Problem ID-") + tScenario.performer();
+        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
+        auto tPerformerName = tScenario.performer();
+        std::vector<std::string> tKeys = { "Name", "PerformerName" };
+        std::vector<std::string> tValues = { "Update Problem", tPerformerName };
+        auto tOperationNode = tStageNode.append_child("Operation");
+        XMLGen::append_children(tKeys, tValues, tOperationNode);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_operation
+(const XMLGen::Objective& aObjective,
+ pugi::xml_node &aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Value", aObjective.performer()}, tOperationNode);
+    auto tOperationInput = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOperationInput);
+    auto tOperationOutput = tOperationNode.append_child("Output");
+    auto tOutputSharedData = std::string("Objective Value ID-") + aObjective.name;
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Value", tOutputSharedData}, tOperationOutput);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
+        XMLGen::append_children( { "Name", "Type" }, { tName, tObjective.category() }, tStageNode);
+        auto tStageInput = tStageNode.append_child("Input");
+        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInput);
+        XMLGen::append_filter_control_operation(tStageNode);
+        XMLGen::append_objective_value_operation(tObjective, tStageNode);
+        auto tStageOutput = tStageNode.append_child("Output");
+        auto tOutputSharedData = std::string("Objective Value ID-") + tObjective.name;
+        XMLGen::append_children( { "SharedDataName" }, { tOutputSharedData }, tStageOutput);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_operation
+(const XMLGen::Objective& aObjective,
+ pugi::xml_node &aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Gradient", aObjective.performer()}, tOperationNode);
+    auto tOperationInput = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOperationInput);
+    auto tOperationOutput = tOperationNode.append_child("Output");
+    auto tOutputSharedData = std::string("Objective Gradient ID-") + aObjective.name;
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", tOutputSharedData}, tOperationOutput);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tStageName = std::string("Compute Objective Gradient ID-") + tObjective.name;
+        XMLGen::append_children({"Name", "Type"}, {tStageName, tObjective.category()}, tStageNode);
+        auto tInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
+
+        XMLGen::append_filter_control_operation(tStageNode);
+        XMLGen::append_objective_gradient_operation(tObjective, tStageNode);
+        auto tSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
+        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
+
+        auto tOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
+    }
+}
+/******************************************************************************/
 
 /******************************************************************************/
 void append_objective_gradient_to_plato_main_output_stage
