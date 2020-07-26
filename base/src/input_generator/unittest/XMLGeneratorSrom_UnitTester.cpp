@@ -42,14 +42,15 @@ TEST(PlatoTestXMLGenerator, CheckRandomLoadIdentificationNumbers)
 
     // POSE UNCERTAINTIES
     XMLGen::Uncertainty tUQCase1;
-    tUQCase1.id = "1";
+    tUQCase1.id("1");
+    tUQCase1.category("load");
     tInputMetadata.uncertainties.push_back(tUQCase1);
 
     // NO ERROR THROWN
     ASSERT_NO_THROW(Plato::srom::check_random_load_identification_numbers(tInputMetadata));
 
     // ERROR THROWN
-    tInputMetadata.uncertainties[0].id = "0";
+    tInputMetadata.uncertainties[0].id("0");
     ASSERT_THROW(Plato::srom::check_random_load_identification_numbers(tInputMetadata), std::runtime_error);
 }
 
@@ -68,15 +69,15 @@ TEST(PlatoTestXMLGenerator, CheckOutputMaterialSetType_Error)
 
     // POSE UNCERTAINTIES
     XMLGen::Uncertainty tUQCase;
-    tUQCase.id = "1";
-    tUQCase.variable_type = "material";
+    tUQCase.id("1");
+    tUQCase.category("material");
     tInputMetadata.uncertainties.push_back(tUQCase);
 
     // NO ERROR THROWN
     ASSERT_NO_THROW(Plato::srom::check_random_material_identification_numbers(tInputMetadata));
 
     // ERROR THROWN
-    tInputMetadata.uncertainties[0].id = "10";
+    tInputMetadata.uncertainties[0].id("10");
     ASSERT_THROW(Plato::srom::check_random_material_identification_numbers(tInputMetadata), std::runtime_error);
 }
 
@@ -510,16 +511,16 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
 {
     // 1. POSE DATA
     XMLGen::Uncertainty tCase1;
-    tCase1.variable_type = "load";
-    tCase1.axis = "x";
-    tCase1.distribution = "beta";
-    tCase1.id = "2";
-    tCase1.lower = "-2";
-    tCase1.upper = "2";
-    tCase1.mean = "0";
-    tCase1.standard_deviation = "0.2";
-    tCase1.num_samples = "12";
-    tCase1.type = "angle variation";
+    tCase1.category("load");
+    tCase1.attribute("x");
+    tCase1.distribution("beta");
+    tCase1.id("2");
+    tCase1.lower("-2");
+    tCase1.upper("2");
+    tCase1.mean("0");
+    tCase1.std("0.2");
+    tCase1.samples("12");
+    tCase1.tag("angle variation");;
 
     XMLGen::Material tMaterial;
     tMaterial.id("30");
@@ -540,40 +541,40 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
 {
     // 1. POSE UNCERTAINTY DATA
     XMLGen::Uncertainty tCase1;
-    tCase1.variable_type = "load";
-    tCase1.axis = "x";
-    tCase1.distribution = "beta";
-    tCase1.id = "2";
-    tCase1.lower = "-2";
-    tCase1.upper = "2";
-    tCase1.mean = "0";
-    tCase1.standard_deviation = "0.2";
-    tCase1.num_samples = "12";
-    tCase1.type = "angle variation";
+    tCase1.category("load");
+    tCase1.attribute("x");
+    tCase1.distribution("beta");
+    tCase1.id("2");
+    tCase1.lower("-2");
+    tCase1.upper("2");
+    tCase1.mean("0");
+    tCase1.std("0.2");
+    tCase1.samples("12");
+    tCase1.tag("angle variation");;
 
     XMLGen::Uncertainty tCase2;
-    tCase2.variable_type = "load";
-    tCase2.axis = "y";
-    tCase2.distribution = "beta";
-    tCase2.id = "20";
-    tCase2.lower = "-20";
-    tCase2.upper = "20";
-    tCase2.mean = "2";
-    tCase2.standard_deviation = "2";
-    tCase2.num_samples = "8";
-    tCase2.type = "angle variation";
+    tCase2.category("load");
+    tCase2.attribute("y");
+    tCase2.distribution("beta");
+    tCase2.id("20");
+    tCase2.lower("-20");
+    tCase2.upper("20");
+    tCase2.mean("2");
+    tCase2.std("2");
+    tCase2.samples("8");
+    tCase2.tag("angle variation");;
 
     XMLGen::Uncertainty tCase3;
-    tCase3.variable_type = "material";
-    tCase3.axis = "homogeneous";
-    tCase3.distribution = "beta";
-    tCase3.id = "3";
-    tCase3.lower = "0.2";
-    tCase3.upper = "0.35";
-    tCase3.mean = "0.27";
-    tCase3.standard_deviation = "0.05";
-    tCase3.num_samples = "6";
-    tCase3.type = "poissons_ratio";
+    tCase3.category("material");
+    tCase3.attribute("homogeneous");
+    tCase3.distribution("beta");
+    tCase3.id("3");
+    tCase3.lower("0.2");
+    tCase3.upper("0.35");
+    tCase3.mean("0.27");
+    tCase3.std("0.05");
+    tCase3.samples("6");
+    tCase3.tag("poissons_ratio");;
 
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(tCase1);
@@ -674,16 +675,16 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
 {
     // 1. BUILD RANDOM MATERIAL VARIABLE
     XMLGen::Uncertainty tCase1;
-    tCase1.id = "3";
-    tCase1.axis = "homogeneous";
-    tCase1.type = "poissons_ratio";
-    tCase1.variable_type = "material";
-    tCase1.distribution = "beta";
-    tCase1.lower = "0.2";
-    tCase1.upper = "0.35";
-    tCase1.mean = "0.27";
-    tCase1.num_samples = "6";
-    tCase1.standard_deviation = "0.05";
+    tCase1.id("3");
+    tCase1.attribute("homogeneous");
+    tCase1.tag("poissons_ratio");
+    tCase1.category("material");
+    tCase1.distribution("beta");
+    tCase1.lower("0.2");
+    tCase1.upper("0.35");
+    tCase1.mean("0.27");
+    tCase1.samples("6");
+    tCase1.std("0.05");
 
     // 2. BUILD RANDOM MATERIAL MAP
     std::vector<XMLGen::Uncertainty> tRandomVars;
@@ -723,28 +724,28 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
 {
     // 1. BUILD RANDOM MATERIAL MAP
     XMLGen::Uncertainty tCase1;
-    tCase1.id = "3";
-    tCase1.axis = "homogeneous";
-    tCase1.type = "poissons_ratio";
-    tCase1.variable_type = "material";
-    tCase1.distribution = "beta";
-    tCase1.lower = "0.2";
-    tCase1.upper = "0.35";
-    tCase1.mean = "0.27";
-    tCase1.num_samples = "6";
-    tCase1.standard_deviation = "0.05";
+    tCase1.id("3");
+    tCase1.attribute("homogeneous");
+    tCase1.tag("poissons_ratio");;
+    tCase1.category("material");
+    tCase1.distribution("beta");
+    tCase1.lower("0.2");
+    tCase1.upper("0.35");
+    tCase1.mean("0.27");
+    tCase1.samples("6");
+    tCase1.std("0.05");
 
     XMLGen::Uncertainty tCase2;
-    tCase2.id = "30";
-    tCase2.axis = "homogeneous";
-    tCase2.type = "youngs_modulus";
-    tCase2.variable_type = "material";
-    tCase2.distribution = "beta";
-    tCase2.lower = "1";
-    tCase2.upper = "2";
-    tCase2.mean = "0.2";
-    tCase2.num_samples = "8";
-    tCase2.standard_deviation = "0.15";
+    tCase2.id("30");
+    tCase2.attribute("homogeneous");
+    tCase2.tag("youngs_modulus");;
+    tCase2.category("material");
+    tCase2.distribution("beta");
+    tCase2.lower("1");
+    tCase2.upper("2");
+    tCase2.mean("0.2");
+    tCase2.samples("8");
+    tCase2.std("0.15");
 
     std::vector<XMLGen::Uncertainty> tRandomVars;
     tRandomVars.push_back(tCase1);
@@ -791,28 +792,28 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
 TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
 {
     XMLGen::Uncertainty tCase1;
-    tCase1.id = "3";
-    tCase1.axis = "homogeneous";
-    tCase1.type = "poissons_ratio";
-    tCase1.variable_type = "material";
-    tCase1.distribution = "beta";
-    tCase1.lower = "0.2";
-    tCase1.upper = "0.35";
-    tCase1.mean = "0.27";
-    tCase1.num_samples = "6";
-    tCase1.standard_deviation = "0.05";
+    tCase1.id("3");
+    tCase1.attribute("homogeneous");
+    tCase1.tag("poissons_ratio");;
+    tCase1.category("material");
+    tCase1.distribution("beta");
+    tCase1.lower("0.2");
+    tCase1.upper("0.35");
+    tCase1.mean("0.27");
+    tCase1.samples("6");
+    tCase1.std("0.05");
 
     XMLGen::Uncertainty tCase2;
-    tCase2.variable_type = "load";
-    tCase2.axis = "y";
-    tCase2.distribution = "beta";
-    tCase2.id = "20";
-    tCase2.lower = "-20";
-    tCase2.upper = "20";
-    tCase2.mean = "2";
-    tCase2.standard_deviation = "2";
-    tCase2.num_samples = "8";
-    tCase2.type = "angle variation";
+    tCase2.category("load");
+    tCase2.attribute("y");
+    tCase2.distribution("beta");
+    tCase2.id("20");
+    tCase2.lower("-20");
+    tCase2.upper("20");
+    tCase2.mean("2");
+    tCase2.std("2");
+    tCase2.samples("8");
+    tCase2.tag("angle variation");;
 
     std::vector<XMLGen::Uncertainty> tRandomVars;
     tRandomVars.push_back(tCase1);
@@ -824,28 +825,28 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
 TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
 {
     XMLGen::Uncertainty tCase1;
-    tCase1.id = "3";
-    tCase1.axis = "homogeneous";
-    tCase1.type = "poissons_ratio";
-    tCase1.variable_type = "material";
-    tCase1.distribution = "beta";
-    tCase1.lower = "0.2";
-    tCase1.upper = "0.35";
-    tCase1.mean = "0.27";
-    tCase1.num_samples = "6";
-    tCase1.standard_deviation = "0.05";
+    tCase1.id("3");
+    tCase1.attribute("homogeneous");
+    tCase1.tag("poissons_ratio");;
+    tCase1.category("material");
+    tCase1.distribution("beta");
+    tCase1.lower("0.2");
+    tCase1.upper("0.35");
+    tCase1.mean("0.27");
+    tCase1.samples("6");
+    tCase1.std("0.05");
 
     XMLGen::Uncertainty tCase2;
-    tCase2.id = "30";
-    tCase2.axis = "homogeneous";
-    tCase2.type = "youngs_modulus";
-    tCase2.variable_type = "material";
-    tCase2.distribution = "beta";
-    tCase2.lower = "1";
-    tCase2.upper = "2";
-    tCase2.mean = "0.2";
-    tCase2.num_samples = "8";
-    tCase2.standard_deviation = "0.15";
+    tCase2.id("30");
+    tCase2.attribute("homogeneous");
+    tCase2.tag("youngs_modulus");;
+    tCase2.category("material");
+    tCase2.distribution("beta");
+    tCase2.lower("1");
+    tCase2.upper("2");
+    tCase2.mean("0.2");
+    tCase2.samples("8");
+    tCase2.std("0.15");
 
     std::vector<XMLGen::Uncertainty> tRandomVars;
     tRandomVars.push_back(tCase1);
@@ -866,28 +867,28 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap)
     }
 
     // TEST MATERIAL 1
-    ASSERT_TRUE(tRandomVarMap.find("3")->second.find("poissons_ratio")->second.file.empty());
-    ASSERT_STREQ("3", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.id.c_str());
-    ASSERT_STREQ("0.27", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.mean.c_str());
-    ASSERT_STREQ("0.2", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.lower.c_str());
-    ASSERT_STREQ("0.35", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.upper.c_str());
-    ASSERT_STREQ("6", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.num_samples.c_str());
-    ASSERT_STREQ("homogeneous", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.axis.c_str());
-    ASSERT_STREQ("beta", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.distribution.c_str());
-    ASSERT_STREQ("material", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.variable_type.c_str());
-    ASSERT_STREQ("0.05", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.standard_deviation.c_str());
+    ASSERT_TRUE(tRandomVarMap.find("3")->second.find("poissons_ratio")->second.filename().empty());
+    ASSERT_STREQ("3", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.id().c_str());
+    ASSERT_STREQ("0.27", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.mean().c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.lower().c_str());
+    ASSERT_STREQ("0.35", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.upper().c_str());
+    ASSERT_STREQ("6", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.samples().c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.attribute().c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.distribution().c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.category().c_str());
+    ASSERT_STREQ("0.05", tRandomVarMap.find("3")->second.find("poissons_ratio")->second.std().c_str());
 
     // TEST MATERIAL 2
-    ASSERT_TRUE(tRandomVarMap.find("30")->second.find("youngs_modulus")->second.file.empty());
-    ASSERT_STREQ("30", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.id.c_str());
-    ASSERT_STREQ("0.2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.mean.c_str());
-    ASSERT_STREQ("1", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.lower.c_str());
-    ASSERT_STREQ("2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.upper.c_str());
-    ASSERT_STREQ("8", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.num_samples.c_str());
-    ASSERT_STREQ("homogeneous", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.axis.c_str());
-    ASSERT_STREQ("beta", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.distribution.c_str());
-    ASSERT_STREQ("material", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.variable_type.c_str());
-    ASSERT_STREQ("0.15", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.standard_deviation.c_str());
+    ASSERT_TRUE(tRandomVarMap.find("30")->second.find("youngs_modulus")->second.filename().empty());
+    ASSERT_STREQ("30", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.id().c_str());
+    ASSERT_STREQ("0.2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.mean().c_str());
+    ASSERT_STREQ("1", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.lower().c_str());
+    ASSERT_STREQ("2", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.upper().c_str());
+    ASSERT_STREQ("8", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.samples().c_str());
+    ASSERT_STREQ("homogeneous", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.attribute().c_str());
+    ASSERT_STREQ("beta", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.distribution().c_str());
+    ASSERT_STREQ("material", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.category().c_str());
+    ASSERT_STREQ("0.15", tRandomVarMap.find("30")->second.find("youngs_modulus")->second.std().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error1)
@@ -902,7 +903,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories_Error2)
     // UNSUPPORTED CATEGORY, I.E. USE CASE
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(XMLGen::Uncertainty());
-    tMetadata.uncertainties[0].variable_type = "boundary condition";
+    tMetadata.uncertainties[0].category("boundary condition");
     EXPECT_THROW(Plato::srom::split_uncertainties_into_categories(tMetadata), std::runtime_error);
 }
 
@@ -910,40 +911,40 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
 {
     // 1. POSE DATA
     XMLGen::Uncertainty tCase1;
-    tCase1.variable_type = "load";
-    tCase1.axis = "x";
-    tCase1.distribution = "beta";
-    tCase1.id = "2";
-    tCase1.lower = "-2";
-    tCase1.upper = "2";
-    tCase1.mean = "0";
-    tCase1.standard_deviation = "0.2";
-    tCase1.num_samples = "12";
-    tCase1.type = "angle variation";
+    tCase1.category("load");
+    tCase1.attribute("x");
+    tCase1.distribution("beta");
+    tCase1.id("2");
+    tCase1.lower("-2");
+    tCase1.upper("2");
+    tCase1.mean("0");
+    tCase1.std("0.2");
+    tCase1.samples("12");
+    tCase1.tag("angle variation");;
 
     XMLGen::Uncertainty tCase2;
-    tCase2.variable_type = "load";
-    tCase2.axis = "y";
-    tCase2.distribution = "beta";
-    tCase2.id = "20";
-    tCase2.lower = "-20";
-    tCase2.upper = "20";
-    tCase2.mean = "2";
-    tCase2.standard_deviation = "2";
-    tCase2.num_samples = "8";
-    tCase2.type = "angle variation";
+    tCase2.category("load");
+    tCase2.attribute("y");
+    tCase2.distribution("beta");
+    tCase2.id("20");
+    tCase2.lower("-20");
+    tCase2.upper("20");
+    tCase2.mean("2");
+    tCase2.std("2");
+    tCase2.samples("8");
+    tCase2.tag("angle variation");;
 
     XMLGen::Uncertainty tCase3;
-    tCase3.variable_type = "material";
-    tCase3.axis = "homogeneous";
-    tCase3.distribution = "beta";
-    tCase3.id = "3";
-    tCase3.lower = "0.2";
-    tCase3.upper = "0.35";
-    tCase3.mean = "0.27";
-    tCase3.standard_deviation = "0.05";
-    tCase3.num_samples = "6";
-    tCase3.type = "poissons_ratio";
+    tCase3.category("material");
+    tCase3.attribute("homogeneous");
+    tCase3.distribution("beta");
+    tCase3.id("3");
+    tCase3.lower("0.2");
+    tCase3.upper("0.35");
+    tCase3.mean("0.27");
+    tCase3.std("0.05");
+    tCase3.samples("6");
+    tCase3.tag("poissons_ratio");;
 
     XMLGen::InputData tMetadata;
     tMetadata.uncertainties.push_back(tCase1);
@@ -956,41 +957,41 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     // 2.1 TEST LOADS
     auto tLoads = tCategoriesMap.find(Plato::srom::category::LOAD);
     ASSERT_EQ(2u, tLoads->second.size());
-    ASSERT_STREQ("load", tLoads->second[0].variable_type.c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[0].type.c_str());
-    ASSERT_STREQ("x", tLoads->second[0].axis.c_str());
-    ASSERT_STREQ("2", tLoads->second[0].id.c_str());
-    ASSERT_STREQ("2", tLoads->second[0].upper.c_str());
-    ASSERT_STREQ("-2", tLoads->second[0].lower.c_str());
-    ASSERT_STREQ("0", tLoads->second[0].mean.c_str());
-    ASSERT_STREQ("0.2", tLoads->second[0].standard_deviation.c_str());
-    ASSERT_STREQ("12", tLoads->second[0].num_samples.c_str());
-    ASSERT_STREQ("beta", tLoads->second[0].distribution.c_str());
+    ASSERT_STREQ("load", tLoads->second[0].category().c_str());
+    ASSERT_STREQ("angle variation", tLoads->second[0].tag().c_str());
+    ASSERT_STREQ("x", tLoads->second[0].attribute().c_str());
+    ASSERT_STREQ("2", tLoads->second[0].id().c_str());
+    ASSERT_STREQ("2", tLoads->second[0].upper().c_str());
+    ASSERT_STREQ("-2", tLoads->second[0].lower().c_str());
+    ASSERT_STREQ("0", tLoads->second[0].mean().c_str());
+    ASSERT_STREQ("0.2", tLoads->second[0].std().c_str());
+    ASSERT_STREQ("12", tLoads->second[0].samples().c_str());
+    ASSERT_STREQ("beta", tLoads->second[0].distribution().c_str());
 
-    ASSERT_STREQ("load", tLoads->second[1].variable_type.c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[1].type.c_str());
-    ASSERT_STREQ("y", tLoads->second[1].axis.c_str());
-    ASSERT_STREQ("20", tLoads->second[1].id.c_str());
-    ASSERT_STREQ("20", tLoads->second[1].upper.c_str());
-    ASSERT_STREQ("-20", tLoads->second[1].lower.c_str());
-    ASSERT_STREQ("2", tLoads->second[1].mean.c_str());
-    ASSERT_STREQ("2", tLoads->second[1].standard_deviation.c_str());
-    ASSERT_STREQ("8", tLoads->second[1].num_samples.c_str());
-    ASSERT_STREQ("beta", tLoads->second[1].distribution.c_str());
+    ASSERT_STREQ("load", tLoads->second[1].category().c_str());
+    ASSERT_STREQ("angle variation", tLoads->second[1].tag().c_str());
+    ASSERT_STREQ("y", tLoads->second[1].attribute().c_str());
+    ASSERT_STREQ("20", tLoads->second[1].id().c_str());
+    ASSERT_STREQ("20", tLoads->second[1].upper().c_str());
+    ASSERT_STREQ("-20", tLoads->second[1].lower().c_str());
+    ASSERT_STREQ("2", tLoads->second[1].mean().c_str());
+    ASSERT_STREQ("2", tLoads->second[1].std().c_str());
+    ASSERT_STREQ("8", tLoads->second[1].samples().c_str());
+    ASSERT_STREQ("beta", tLoads->second[1].distribution().c_str());
 
     // 2.2 TEST MATERIALS
     auto tMaterials = tCategoriesMap.find(Plato::srom::category::MATERIAL);
     ASSERT_EQ(1u, tMaterials->second.size());
-    ASSERT_STREQ("material", tMaterials->second[0].variable_type.c_str());
-    ASSERT_STREQ("poissons_ratio", tMaterials->second[0].type.c_str());
-    ASSERT_STREQ("homogeneous", tMaterials->second[0].axis.c_str());
-    ASSERT_STREQ("3", tMaterials->second[0].id.c_str());
-    ASSERT_STREQ("0.35", tMaterials->second[0].upper.c_str());
-    ASSERT_STREQ("0.2", tMaterials->second[0].lower.c_str());
-    ASSERT_STREQ("0.27", tMaterials->second[0].mean.c_str());
-    ASSERT_STREQ("0.05", tMaterials->second[0].standard_deviation.c_str());
-    ASSERT_STREQ("6", tMaterials->second[0].num_samples.c_str());
-    ASSERT_STREQ("beta", tMaterials->second[0].distribution.c_str());
+    ASSERT_STREQ("material", tMaterials->second[0].category().c_str());
+    ASSERT_STREQ("poissons_ratio", tMaterials->second[0].tag().c_str());
+    ASSERT_STREQ("homogeneous", tMaterials->second[0].attribute().c_str());
+    ASSERT_STREQ("3", tMaterials->second[0].id().c_str());
+    ASSERT_STREQ("0.35", tMaterials->second[0].upper().c_str());
+    ASSERT_STREQ("0.2", tMaterials->second[0].lower().c_str());
+    ASSERT_STREQ("0.27", tMaterials->second[0].mean().c_str());
+    ASSERT_STREQ("0.05", tMaterials->second[0].std().c_str());
+    ASSERT_STREQ("6", tMaterials->second[0].samples().c_str());
+    ASSERT_STREQ("beta", tMaterials->second[0].distribution().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)

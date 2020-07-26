@@ -44,7 +44,7 @@ inline UncertaintyCategories split_uncertainties_into_categories(const XMLGen::I
     Plato::srom::UncertaintyCategories tCategories;
     for(auto& tUncertainty : aMetadata.uncertainties)
     {
-        auto tCategory = Plato::srom::tolower(tUncertainty.variable_type);
+        auto tCategory = Plato::srom::tolower(tUncertainty.category());
         auto tIsLoad = tCategory == "load" ? true : false;
         auto tIsMaterial = tCategory == "material" ? true : false;
         if (tIsLoad && !tIsMaterial)

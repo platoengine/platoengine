@@ -258,16 +258,16 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
     tUncertainty.parse(tInputs);
 
     auto tMetadata = tUncertainty.data();
-    ASSERT_STREQ("10", tMetadata[0].id.c_str());
-    ASSERT_STREQ("x", tMetadata[0].axis.c_str());
-    ASSERT_STREQ("0.0", tMetadata[0].mean.c_str());
-    ASSERT_STREQ("45.0", tMetadata[0].upper.c_str());
-    ASSERT_STREQ("-45.0", tMetadata[0].lower.c_str());
-    ASSERT_STREQ("2", tMetadata[0].num_samples.c_str());
-    ASSERT_STREQ("beta", tMetadata[0].distribution.c_str());
-    ASSERT_STREQ("load", tMetadata[0].variable_type.c_str());
-    ASSERT_STREQ("angle variation", tMetadata[0].type.c_str());
-    ASSERT_STREQ("22.5", tMetadata[0].standard_deviation.c_str());
+    ASSERT_STREQ("10", tMetadata[0].id().c_str());
+    ASSERT_STREQ("x", tMetadata[0].attribute().c_str());
+    ASSERT_STREQ("0.0", tMetadata[0].mean().c_str());
+    ASSERT_STREQ("45.0", tMetadata[0].upper().c_str());
+    ASSERT_STREQ("-45.0", tMetadata[0].lower().c_str());
+    ASSERT_STREQ("2", tMetadata[0].samples().c_str());
+    ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
+    ASSERT_STREQ("load", tMetadata[0].category().c_str());
+    ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
+    ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
@@ -342,15 +342,15 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
     for (auto& tVar : tMetadata)
     {
         auto tIndex = &tVar - &tMetadata[0];
-        ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id.c_str());
-        ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean.c_str());
-        ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper.c_str());
-        ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower.c_str());
-        ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.axis.c_str());
-        ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.variable_type.c_str());
-        ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.num_samples.c_str());
-        ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.standard_deviation.c_str());
-        ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution.c_str());
+        ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id().c_str());
+        ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean().c_str());
+        ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper().c_str());
+        ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower().c_str());
+        ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.attribute().c_str());
+        ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.category().c_str());
+        ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.samples().c_str());
+        ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.std().c_str());
+        ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution().c_str());
     }
 }
 

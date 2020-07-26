@@ -297,14 +297,14 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
                                                const XMLGen::Uncertainty &aRandomVariable)
 {
     Plato::srom::RandomVariable tNewVariable;
-    tNewVariable.tag(aRandomVariable.type);
-    tNewVariable.attribute(aRandomVariable.axis);
-    tNewVariable.mean(aRandomVariable.mean);
-    tNewVariable.lower(aRandomVariable.lower);
-    tNewVariable.upper(aRandomVariable.upper);
-    tNewVariable.samples(aRandomVariable.num_samples);
-    tNewVariable.distribution(aRandomVariable.distribution);
-    tNewVariable.deviation(aRandomVariable.standard_deviation);
+    tNewVariable.tag(aRandomVariable.tag());
+    tNewVariable.attribute(aRandomVariable.attribute());
+    tNewVariable.mean(aRandomVariable.mean());
+    tNewVariable.lower(aRandomVariable.lower());
+    tNewVariable.upper(aRandomVariable.upper());
+    tNewVariable.samples(aRandomVariable.samples());
+    tNewVariable.distribution(aRandomVariable.distribution());
+    tNewVariable.deviation(aRandomVariable.std());
     aRandomLoad.mRandomVars.push_back(tNewVariable);
 }
 // function add_random_variable_to_random_load
@@ -323,7 +323,7 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
                                                  std::set<int> &aRandomLoadIDs,
                                                  std::vector<Plato::srom::Load> &aRandomLoads)
 {
-    const int tRandomVarLoadID = std::stoi(aRandomVariable.id.c_str());
+    const int tRandomVarLoadID = std::stoi(aRandomVariable.id().c_str());
     for(size_t tIndexJ = 0; tIndexJ < aOriginalToNewLoadCaseMap[tRandomVarLoadID].size(); tIndexJ++)
     {
         const int tIndexIntoNewLoadCaseList = aOriginalToNewLoadCaseMap[tRandomVarLoadID][tIndexJ];
@@ -353,7 +353,7 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
     for(auto& tRandomVar : aRandomVariables)
     {
         Plato::srom::VariableType::type_t tVarType = Plato::srom::VariableType::UNDEFINED;
-        Plato::srom::variable_type_string_to_enum(tRandomVar.variable_type, tVarType);
+        Plato::srom::variable_type_string_to_enum(tRandomVar.category(), tVarType);
         if(tVarType == Plato::srom::VariableType::LOAD)
         {
             Plato::srom::create_random_loads_from_uncertainty(tRandomVar, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aLoad);
@@ -490,9 +490,9 @@ return_random_load_identification_numbers
     std::vector<std::string> tOutput;
     for(auto& tUQCase : aInputMetadata.uncertainties)
     {
-        if(tUQCase.variable_type.compare("load") == 0)
+        if(tUQCase.category().compare("load") == 0)
         {
-            tOutput.push_back(tUQCase.id);
+            tOutput.push_back(tUQCase.id());
         }
     }
     return tOutput;

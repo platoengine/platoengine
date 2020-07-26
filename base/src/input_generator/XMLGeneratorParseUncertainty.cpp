@@ -22,16 +22,16 @@ namespace Private
 inline void is_mean_plus_std_dev_greater_than_upper_bound
 (const XMLGen::Uncertainty& aMetadata)
 {
-    auto tMean = std::stod(aMetadata.mean);
-    auto tUpper = std::stod(aMetadata.upper);
-    auto tStdDev = std::stod(aMetadata.standard_deviation);
+    auto tMean = std::stod(aMetadata.mean());
+    auto tUpper = std::stod(aMetadata.upper());
+    auto tStdDev = std::stod(aMetadata.std());
 
     auto tMeanPlusStd = tMean + tStdDev;
     auto tIsGreaterThanUpperBound = tMeanPlusStd >= tUpper;
     if(tIsGreaterThanUpperBound)
     {
-        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.type + "' and id '"
-            + aMetadata.id + "'. The 'mean plus standard deviation' operation must yields a value below the "
+        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.tag() + "' and id '"
+            + aMetadata.id() + "'. The 'mean plus standard deviation' operation must yields a value below the "
             + "'upper bound' to avoid 'NaN' errors during the creation of the stochastic reduced order model. The "
             + "operation 'mean + std_dev' yields '" + std::to_string(tMeanPlusStd) + "' and the 'upper bound' is set to '"
             + std::to_string(tUpper) + "'.")
@@ -41,16 +41,16 @@ inline void is_mean_plus_std_dev_greater_than_upper_bound
 inline void is_mean_minus_std_dev_lesser_than_lower_bound
 (const XMLGen::Uncertainty& aMetadata)
 {
-    auto tMean = std::stod(aMetadata.mean);
-    auto tLower = std::stod(aMetadata.lower);
-    auto tStdDev = std::stod(aMetadata.standard_deviation);
+    auto tMean = std::stod(aMetadata.mean());
+    auto tLower = std::stod(aMetadata.lower());
+    auto tStdDev = std::stod(aMetadata.std());
 
     auto tMeanMinusStd = tMean - tStdDev;
     auto tIsLesserThanLowerBound = tMeanMinusStd <= tLower;
     if(tIsLesserThanLowerBound)
     {
-        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.type + "' and id '"
-            + aMetadata.id + "'. The 'mean minus standard deviation' operation must yields a value above the "
+        THROWERR(std::string("Parse Uncertainty: Check input random variable with tag '") + aMetadata.tag() + "' and id '"
+            + aMetadata.id() + "'. The 'mean minus standard deviation' operation must yields a value above the "
             + "'lower bound' to avoid 'NaN' errors during the creation of the stochastic reduced order model. The "
             + "operation 'mean - std_dev' yields '" + std::to_string(tMeanMinusStd) + "' and the 'lower bound' is set to '"
             + std::to_string(tLower) + "'.")
@@ -65,6 +65,7 @@ void ParseUncertainty::allocate()
     mTags.insert({ "tag", { { {"tag"}, ""}, "" } });
     mTags.insert({ "mean", { { {"mean"}, ""}, "" } });
     mTags.insert({ "load id", { { {"load","id"}, ""}, "" } });
+    mTags.insert({ "filename", { { {"filename"}, ""}, "" } });
     mTags.insert({ "material id", { { {"material","id"}, ""}, "" } });
     mTags.insert({ "category", { { {"category"}, ""}, "" } });
     mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
@@ -80,7 +81,7 @@ void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
     auto tItr = mTags.find("category");
     if(tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        aMetadata.variable_type = tItr->second.first.second;
+        aMetadata.append("category", tItr->second.first.second);
     }
     else
     {
@@ -91,19 +92,19 @@ void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.variable_type.empty())
+    if(aMetadata.category().empty())
     {
         THROWERR("Parse Uncertainty: 'category' keyword is empty, i.e. is not defined.")
     }
     XMLGen::ValidRandomIdentificationKeys tValidKeys;
-    auto tItr = tValidKeys.mKeys.find(aMetadata.variable_type);
+    auto tItr = tValidKeys.mKeys.find(aMetadata.category());
     if(tItr == tValidKeys.mKeys.end())
     {
-        THROWERR(std::string("Parse Uncertainty: 'category' keyword '") + aMetadata.variable_type + "' is not supported.")
+        THROWERR(std::string("Parse Uncertainty: 'category' keyword '") + aMetadata.category() + "' is not supported.")
     }
     auto tID = tItr->second;
-    aMetadata.id = mTags.find(tID)->second.first.second;
-    if(aMetadata.id.empty())
+    aMetadata.append("id", mTags.find(tID)->second.first.second);
+    if(aMetadata.id().empty())
     {
         THROWERR(std::string("Parse Uncertainty: Failed to parse uncertain parameter identification number. ")
             + "User must define the 'load id' or 'material id' keyword based on the uncertain parameter category. "
@@ -115,21 +116,22 @@ void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
     this->setCategory(aMetadata);
     this->setIdentificationNumber(aMetadata);
-    aMetadata.type = mTags.find("tag")->second.first.second;
-    aMetadata.mean = mTags.find("mean")->second.first.second;
-    aMetadata.axis = mTags.find("attribute")->second.first.second;
+    aMetadata.append("tag", mTags.find("tag")->second.first.second);
+    aMetadata.append("mean", mTags.find("mean")->second.first.second);
+    aMetadata.append("attribute", mTags.find("attribute")->second.first.second);
     this->isAttributeEmpty(aMetadata);
-    aMetadata.lower = mTags.find("lower bound")->second.first.second;
-    aMetadata.upper = mTags.find("upper bound")->second.first.second;
-    aMetadata.num_samples = mTags.find("num samples")->second.first.second;
-    aMetadata.distribution = mTags.find("distribution")->second.first.second;
-    aMetadata.standard_deviation = mTags.find("standard deviation")->second.first.second;
+    aMetadata.append("filename", mTags.find("filename")->second.first.second);
+    aMetadata.append("upper_bound", mTags.find("upper bound")->second.first.second);
+    aMetadata.append("lower_bound", mTags.find("lower bound")->second.first.second);
+    aMetadata.append("number_samples", mTags.find("num samples")->second.first.second);
+    aMetadata.append("distribution", mTags.find("distribution")->second.first.second);
+    aMetadata.append("standard_deviation", mTags.find("standard deviation")->second.first.second);
 }
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
 {
     XMLGen::ValidRandomCategoryKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.variable_type);
+    auto tLowerKey = XMLGen::to_lower(aMetadata.category());
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if (tItr == tValidKeys.mKeys.end())
     {
@@ -141,13 +143,13 @@ void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.type.empty())
+    if(aMetadata.tag().empty())
     {
         THROWERR("Parse Uncertainty: 'tag' keyword is empty.")
     }
 
     XMLGen::ValidRandomPropertyKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.type);
+    auto tLowerKey = XMLGen::to_lower(aMetadata.tag());
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if (tItr == tValidKeys.mKeys.end())
     {
@@ -159,21 +161,21 @@ void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::isAttributeEmpty(XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.variable_type.compare("material") == 0 && aMetadata.axis.empty())
+    if(aMetadata.category().compare("material") == 0 && aMetadata.attribute().empty())
     {
-        aMetadata.axis = "homogeneous";
+        aMetadata.attribute("homogeneous");
     }
-    else if(aMetadata.variable_type.compare("load") == 0 && aMetadata.axis.empty())
+    else if(aMetadata.category().compare("load") == 0 && aMetadata.attribute().empty())
     {
-        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword of random variable with tag '") + aMetadata.type
-                 + "', category '" + aMetadata.variable_type + "', and id '" + aMetadata.id + "' is empty.")
+        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword of random variable with tag '") + aMetadata.tag()
+                 + "', category '" + aMetadata.category() + "', and id '" + aMetadata.id() + "' is empty.")
     }
 }
 
 void ParseUncertainty::checkAttribute(const XMLGen::Uncertainty& aMetadata)
 {
     XMLGen::ValidRandomAttributeKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.axis);
+    auto tLowerKey = XMLGen::to_lower(aMetadata.attribute());
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if (tItr == tValidKeys.mKeys.end())
     {
@@ -185,13 +187,13 @@ void ParseUncertainty::checkAttribute(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkDistribution(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.axis.empty())
+    if(aMetadata.attribute().empty())
     {
         THROWERR("Parse Uncertainty: 'distribution' keyword is empty.")
     }
 
     XMLGen::ValidStatisticalDistributionKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.distribution);
+    auto tLowerKey = XMLGen::to_lower(aMetadata.distribution());
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if (tItr == tValidKeys.mKeys.end())
     {
@@ -203,30 +205,30 @@ void ParseUncertainty::checkDistribution(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkMean(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.mean.empty())
+    if(aMetadata.mean().empty())
     {
         THROWERR("Parse Uncertainty: 'mean' keyword is empty.")
     }
 
-    if(!aMetadata.lower.empty() && !aMetadata.upper.empty())
+    if(!aMetadata.lower().empty() && !aMetadata.upper().empty())
     {
-        auto tMean = std::stod(aMetadata.mean);
-        auto tLower = std::stod(aMetadata.lower);
-        auto tUpper = std::stod(aMetadata.upper);
+        auto tMean = std::stod(aMetadata.mean());
+        auto tLower = std::stod(aMetadata.lower());
+        auto tUpper = std::stod(aMetadata.upper());
         auto tIsGreaterThanUpper = tMean > tUpper;
         auto tIsLesserThanLower = tMean < tLower;
         if(tIsGreaterThanUpper || tIsLesserThanLower)
         {
             THROWERR(std::string("Parse Uncertainty: Mean is not within the lower and upper bounds, ")
-                + "mean must be within the bounds. The condition lower bound = '" + aMetadata.lower
-                + "' < mean = '" + aMetadata.mean + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+                + "mean must be within the bounds. The condition lower bound = '" + aMetadata.lower()
+                + "' < mean = '" + aMetadata.mean() + "' < upper bound = '" + aMetadata.upper() + "' is not met.")
         }
     }
 }
 
 void ParseUncertainty::checkID(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.id.empty())
+    if(aMetadata.id().empty())
     {
         THROWERR("Parse Uncertainty: 'id' keyword is empty.")
     }
@@ -234,7 +236,7 @@ void ParseUncertainty::checkID(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkNumSamples(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.num_samples.empty())
+    if(aMetadata.samples().empty())
     {
         THROWERR("Parse Uncertainty: 'num samples' keyword is empty.")
     }
@@ -242,43 +244,43 @@ void ParseUncertainty::checkNumSamples(const XMLGen::Uncertainty& aMetadata)
 
 void ParseUncertainty::checkLowerBound(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.lower.empty())
+    if(aMetadata.lower().empty())
     {
         THROWERR("Parse Uncertainty: 'lower bound' keyword is empty.")
     }
 
-    auto tLower = std::stod(aMetadata.lower);
-    auto tUpper = std::stod(aMetadata.upper);
+    auto tLower = std::stod(aMetadata.lower());
+    auto tUpper = std::stod(aMetadata.upper());
     auto tLowerIsGreaterThanUpper = tLower >= tUpper;
     if(tLowerIsGreaterThanUpper)
     {
         THROWERR(std::string("Parse Uncertainty: Lower bound is greater or equal than the upper bound. ")
             + "Lower bound must be less than the upper bound. The condition lower bound = '"
-            + aMetadata.lower + "' < upper bound = '" + aMetadata.upper + "' is not met.")
+            + aMetadata.lower() + "' < upper bound = '" + aMetadata.upper() + "' is not met.")
     }
 }
 
 void ParseUncertainty::checkUpperBound(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.upper.empty())
+    if(aMetadata.upper().empty())
     {
         THROWERR("Parse Uncertainty: 'upper bound' keyword is empty.")
     }
 
-    auto tLower = std::stod(aMetadata.lower);
-    auto tUpper = std::stod(aMetadata.upper);
+    auto tLower = std::stod(aMetadata.lower());
+    auto tUpper = std::stod(aMetadata.upper());
     auto tIsUpperLesserThanLower = tUpper <= tLower;
     if(tIsUpperLesserThanLower)
     {
         THROWERR(std::string("Parse Uncertainty: Upper bound is lesser or equal than the lower bound. ")
             + "Upper bound must be greater than the lower bound. The condition upper bound = '"
-            + aMetadata.upper + "' > lower bound = '" + aMetadata.lower + "' is not met.")
+            + aMetadata.upper() + "' > lower bound = '" + aMetadata.lower() + "' is not met.")
     }
 }
 
 void ParseUncertainty::checkStandardDeviation(const XMLGen::Uncertainty& aMetadata)
 {
-    if(aMetadata.standard_deviation.empty())
+    if(aMetadata.std().empty())
     {
         THROWERR("Parse Uncertainty: 'standard deviation' keyword is empty.")
     }
@@ -317,15 +319,15 @@ void ParseUncertainty::checkUniform(const XMLGen::Uncertainty& aMetadata)
 void ParseUncertainty::checkStatistics(const XMLGen::Uncertainty& aMetadata)
 {
     this->checkDistribution(aMetadata);
-    if(aMetadata.distribution == "beta")
+    if(aMetadata.distribution() == "beta")
     {
         this->checkBeta(aMetadata);
     }
-    else if(aMetadata.distribution == "normal")
+    else if(aMetadata.distribution() == "normal")
     {
         this->checkNormal(aMetadata);
     }
-    else if(aMetadata.distribution == "uniform")
+    else if(aMetadata.distribution() == "uniform")
     {
         this->checkUniform(aMetadata);
     }

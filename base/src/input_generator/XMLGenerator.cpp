@@ -255,7 +255,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
         }
         if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
         {
-            if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].num_samples)
+            if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].samples())
             {
                 std::cout << "Number of processors must be equal to number of samples " << "with legacy plato analyze uncerainty workflow" << std::endl;
                 return false;

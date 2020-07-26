@@ -52,7 +52,7 @@ std::vector<std::string> return_list_of_objective_functions
     {
         if (tObjective.code().compare("plato_analyze") == 0)
         {
-            auto tToken = std::string("my ") + Plato::tolower(tObjective.type);
+            auto tToken = std::string("my ") + Plato::tolower(tObjective.category());
             tTokens.push_back(tToken);
         }
     }

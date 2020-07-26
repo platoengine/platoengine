@@ -34,13 +34,13 @@ inline Plato::srom::RandomMatPropMap build_material_id_to_random_material_map
     Plato::srom::RandomMatPropMap tMap;
     for(auto& tRandomMatProp : aRandomMatProperties)
     {
-        auto tIsMaterial = tRandomMatProp.variable_type == "material" ? true : false;
+        auto tIsMaterial = tRandomMatProp.category() == "material" ? true : false;
         if(!tIsMaterial)
         {
             THROWERR(std::string("Build Material ID to Random Material Map: Random variable with tag '")
-                + tRandomMatProp.type + "' is not a material.")
+                + tRandomMatProp.tag() + "' is not a material.")
         }
-        tMap[tRandomMatProp.id].insert( {tRandomMatProp.type, tRandomMatProp} );
+        tMap[tRandomMatProp.id()].insert( {tRandomMatProp.tag(), tRandomMatProp} );
     }
     return tMap;
 }
@@ -81,13 +81,13 @@ inline void append_material_properties
             if(tIsMaterialPropertyRandom)
             {
                 Plato::srom::Statistics tStats;
-                tStats.mFile = tIterator->second.file;
-                tStats.mMean = tIterator->second.mean;
-                tStats.mUpperBound = tIterator->second.upper;
-                tStats.mLowerBound = tIterator->second.lower;
-                tStats.mNumSamples = tIterator->second.num_samples;
-                tStats.mDistribution = tIterator->second.distribution;
-                tStats.mStandardDeviation = tIterator->second.standard_deviation;
+                tStats.mFile = tIterator->second.filename();
+                tStats.mMean = tIterator->second.mean();
+                tStats.mUpperBound = tIterator->second.upper();
+                tStats.mLowerBound = tIterator->second.lower();
+                tStats.mNumSamples = tIterator->second.samples();
+                tStats.mDistribution = tIterator->second.distribution();
+                tStats.mStandardDeviation = tIterator->second.std();
                 aSromMaterial.append(tTag, aMaterial.attribute(tTag), tStats);
             }
             else
@@ -197,9 +197,9 @@ return_random_material_identification_numbers
     std::vector<std::string> tOutput;
     for(auto& tUQCase : aInputMetadata.uncertainties)
     {
-        if(tUQCase.variable_type.compare("material") == 0)
+        if(tUQCase.category().compare("material") == 0)
         {
-            tOutput.push_back(tUQCase.id);
+            tOutput.push_back(tUQCase.id());
         }
     }
     return tOutput;

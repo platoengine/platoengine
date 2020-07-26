@@ -78,7 +78,7 @@ public:
     /******************************************************************************//**
      * \fn id
      * \brief Return string value for keyword 'id'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string id() const;
 
@@ -92,7 +92,7 @@ public:
     /******************************************************************************//**
      * \fn code
      * \brief Return string value for keyword 'code'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string code() const;
 
@@ -106,7 +106,7 @@ public:
     /******************************************************************************//**
      * \fn performer
      * \brief Return string value for keyword 'performer'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string performer() const;
 
@@ -120,7 +120,7 @@ public:
     /******************************************************************************//**
      * \fn physics
      * \brief Return string value for keyword 'physics'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string physics() const;
 
@@ -134,7 +134,7 @@ public:
     /******************************************************************************//**
      * \fn dimensions
      * \brief Return string value for keyword 'dimensions'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string dimensions() const;
 
@@ -148,7 +148,7 @@ public:
     /******************************************************************************//**
      * \fn materialPenaltyExponent
      * \brief Return string value for keyword 'material_penalty_exponent'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string materialPenaltyExponent() const;
 
@@ -162,7 +162,7 @@ public:
     /******************************************************************************//**
      * \fn minErsatzMaterialConstant
      * \brief Return string value for keyword 'minimum_ersatz_material_value'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string minErsatzMaterialConstant() const;
 
@@ -176,7 +176,7 @@ public:
     /******************************************************************************//**
      * \fn additiveContinuation
      * \brief Return string value for keyword 'additive_continuation'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string additiveContinuation() const;
 
@@ -190,7 +190,7 @@ public:
     /******************************************************************************//**
      * \fn timeStep
      * \brief Return string value for keyword 'time_step'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string timeStep() const;
 
@@ -204,7 +204,7 @@ public:
     /******************************************************************************//**
      * \fn numTimeSteps
      * \brief Return string value for keyword 'number_time_steps'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string numTimeSteps() const;
 
@@ -218,7 +218,7 @@ public:
     /******************************************************************************//**
      * \fn maxNumTimeSteps
      * \brief Return string value for keyword 'max_number_time_steps'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string maxNumTimeSteps() const;
 
@@ -232,7 +232,7 @@ public:
     /******************************************************************************//**
      * \fn timeStepExpansion
      * \brief Return string value for keyword 'time_step_expansion_multiplier'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string timeStepExpansion() const;
 
@@ -246,7 +246,7 @@ public:
     /******************************************************************************//**
      * \fn newmarkBeta
      * \brief Return string value for keyword 'newmark_beta'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string newmarkBeta() const;
 
@@ -260,7 +260,7 @@ public:
     /******************************************************************************//**
      * \fn newmarkGamma
      * \brief Return string value for keyword 'newmark_gamma'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string newmarkGamma() const;
 
@@ -274,7 +274,7 @@ public:
     /******************************************************************************//**
      * \fn solverTolerance
      * \brief Return string value for keyword 'tolerance'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string solverTolerance() const;
 
@@ -288,7 +288,7 @@ public:
     /******************************************************************************//**
      * \fn solverConvergenceCriterion
      * \brief Return string value for keyword 'convergence_criterion'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string solverConvergenceCriterion() const;
 
@@ -302,7 +302,7 @@ public:
     /******************************************************************************//**
      * \fn solverMaxNumIterations
      * \brief Return string value for keyword 'max_number_iterations'.
-     * \return output string
+     * \return value
     **********************************************************************************/
     std::string solverMaxNumIterations() const;
 

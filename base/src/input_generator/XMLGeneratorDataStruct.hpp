@@ -16,6 +16,7 @@
 #include "XMLGeneratorRandomMetadata.hpp"
 #include "XMLGeneratorScenarioMetadata.hpp"
 #include "XMLGeneratorConstraintMetadata.hpp"
+#include "XMLGeneratorUncertaintyMetadata.hpp"
 
 namespace XMLGen
 {
@@ -115,22 +116,6 @@ struct UncertaintyMetaData
   std::vector<size_t> deterministicVariableIndices;
 };
 // struct UncertaintyMetaData
-
-struct Uncertainty
-{
-    std::string variable_type = "load"; // Load or material
-    std::string type; // currently always "angle variation"
-    std::string id; // which random category identification number, i.e. material or load id
-    std::string axis; // x, y, z
-    std::string distribution; // normal, uniform, beta
-    std::string mean; // scalar value
-    std::string upper; // scalar value
-    std::string lower; // scalar value
-    std::string standard_deviation; // scalar value
-    std::string num_samples; // integer value
-    std::string file = ""; // filename with sample-probability pairs
-};
-// struct Uncertainty
 
 struct InputData
 {

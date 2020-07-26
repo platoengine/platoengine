@@ -121,7 +121,7 @@ inline void set_stochastic_problem_usecase
     std::vector<std::string> tCategories;
     for(auto& tCase : aXMLMetaData.uncertainties)
     {
-        auto tLowerCategory = Plato::tolower(tCase.variable_type);
+        auto tLowerCategory = Plato::tolower(tCase.category());
         tCategories.push_back(tLowerCategory);
     }
 
