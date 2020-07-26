@@ -173,56 +173,6 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     Plato::system("rm -f plato_main_operations.xml");
 }
 
-TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile)
-{
-    XMLGen::InputData tMetaData;
-    tMetaData.max_iterations = "10";
-    tMetaData.optimization_algorithm = "oc";
-    XMLGen::Objective tObjective;
-    tObjective.name = "1";
-    tObjective.type = "compliance";
-    tObjective.mPerformerName = "plato_analyze_1";
-    tMetaData.objectives.push_back(tObjective);
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.code("plato_analyze");
-    tScenario.performer("plato_analyze_1");
-    tScenario.cacheState("false");
-    tScenario.updateProblem("true");
-    tMetaData.append(tScenario);
-
-    ASSERT_NO_THROW(XMLGen::write_interface_xml_file(tMetaData));
-
-    auto tReadData = XMLGen::read_data_from_file("interface.xml");
-    auto tGold = std::string("<?xmlversion=\"1.0\"?><Console><Verbose>false</Verbose></Console><Performer><Name>platomain</Name><Code>platomain</Code><PerformerID>0</PerformerID></Performer><Performer><Name>plato_analyze_1</Name><Code>plato_analyze</Code>")
-    +"<PerformerID>1</PerformerID></Performer><SharedData><Name>Control</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>LowerBoundValue</Name>"
-    +"<Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>LowerBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName>"
-    +"<UserName>platomain</UserName></SharedData><SharedData><Name>UpperBoundValue</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData>"
-    +"<SharedData><Name>UpperBoundVector</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>DesignVolume</Name><Type>Scalar</Type>"
-    +"<Layout>Global</Layout><Size>1</Size><OwnerName>platomain</OwnerName><UserName>platomain</UserName></SharedData><SharedData><Name>Topology</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>platomain</OwnerName>"
-    +"<UserName>platomain</UserName><UserName>plato_analyze_1</UserName></SharedData><SharedData><Name>ObjectiveValueID-1</Name><Type>Scalar</Type><Layout>Global</Layout><Size>1</Size><OwnerName>plato_analyze_1</OwnerName>"
-    +"<UserName>platomain</UserName></SharedData><SharedData><Name>ObjectiveGradientID-1</Name><Type>Scalar</Type><Layout>NodalField</Layout><OwnerName>plato_analyze_1</OwnerName><UserName>platomain</UserName></SharedData>"
-    +"<Stage><Name>DesignVolume</Name><Operation><Name>DesignVolume</Name><PerformerName>platomain</PerformerName><Output><ArgumentName>DesignVolume</ArgumentName><SharedDataName>DesignVolume</SharedDataName></Output></Operation>"
-    +"<Output><SharedDataName>DesignVolume</SharedDataName></Output></Stage><Stage><Name>InitialGuess</Name><Operation><Name>InitializeField</Name><PerformerName>platomain</PerformerName><Output><ArgumentName>InitializedField</ArgumentName>"
-    +"<SharedDataName>Control</SharedDataName></Output></Operation><Output><SharedDataName>Control</SharedDataName></Output></Stage><Stage><Name>SetLowerBounds</Name><Output><SharedDataName>LowerBoundVector</SharedDataName></Output></Stage>"
-    +"<Stage><Name>SetUpperBounds</Name><Output><SharedDataName>UpperBoundVector</SharedDataName></Output></Stage><Stage><Name>UpdateProblem</Name><Operation><Name>UpdateProblem</Name><PerformerName>plato_analyze_1</PerformerName>"
-    +"</Operation></Stage><Stage><Name>ComputeObjectiveValueID-1</Name><Type>compliance</Type><Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>platomain</PerformerName>"
-    +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation>"
-    +"<Operation><Name>ComputeObjectiveValue</Name><PerformerName>plato_analyze_1</PerformerName><Input><ArgumentName>Topology</ArgumentName><SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName>"
-    +"<SharedDataName>ObjectiveValueID-1</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveValueID-1</SharedDataName></Output></Stage><Stage><Name>ComputeObjectiveGradientID-1</Name><Type>compliance</Type>"
-    +"<Input><SharedDataName>Control</SharedDataName></Input><Operation><Name>FilterControl</Name><PerformerName>platomain</PerformerName><Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input>"
-    +"<Output><ArgumentName>FilteredField</ArgumentName><SharedDataName>Topology</SharedDataName></Output></Operation><Operation><Name>ComputeObjectiveGradient</Name><PerformerName>plato_analyze_1</PerformerName><Input><ArgumentName>Topology</ArgumentName>"
-    +"<SharedDataName>Topology</SharedDataName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName><SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Operation><Operation><Name>FilterGradient</Name><PerformerName>platomain</PerformerName>"
-    +"<Input><ArgumentName>Field</ArgumentName><SharedDataName>Control</SharedDataName></Input><Input><ArgumentName>Gradient</ArgumentName><SharedDataName>ObjectiveGradientID-1</SharedDataName></Input><Output><ArgumentName>FilteredGradient</ArgumentName>"
-    +"<SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Operation><Output><SharedDataName>ObjectiveGradientID-1</SharedDataName></Output></Stage><Optimizer><Package>OC</Package><Convergence><MaxIterations>10</MaxIterations></Convergence>"
-    +"<UpdateProblemStage><Name>UpdateProblem</Name></UpdateProblemStage><OptimizationVariables><ValueName>Control</ValueName><InitializationStage>InitialGuess</InitializationStage><FilteredName>Topology</FilteredName>"
-    +"<LowerBoundValueName>LowerBoundValue</LowerBoundValueName><LowerBoundVectorName>LowerBoundVector</LowerBoundVectorName><UpperBoundValueName>UpperBoundValue</UpperBoundValueName><UpperBoundVectorName>UpperBoundVector</UpperBoundVectorName>"
-    +"<SetLowerBoundsStage>SetLowerBounds</SetLowerBoundsStage><SetUpperBoundsStage>SetUpperBounds</SetUpperBoundsStage></OptimizationVariables><Objective><GradientStageName>ComputeObjectiveGradientID-1</GradientStageName>"
-    +"<GradientName>ObjectiveGradientID-1</GradientName><ValueStageName>ComputeObjectiveValueID-1</ValueStageName><ValueName>ObjectiveValueID-1</ValueName></Objective><BoundConstraint><Upper>1.0</Upper><Lower>0.0</Lower></BoundConstraint></Optimizer>";
-    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
-    //Plato::system("rm -f interface.xml");
-}
-
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
 {
     XMLGen::InputData tMetaData;
