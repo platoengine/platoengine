@@ -43,7 +43,7 @@ TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines)
   tInputData.num_opt_processors = "10";
   tInputData.m_UncertaintyMetaData.numPerformers = 5;
   FILE* fp=fopen("appendEngineMPIRunLines.txt", "w");
-  XMLGen::append_analyze_mpirun_lines(tInputData, fp);
+  XMLGen::append_analyze_mpirun_commands_robust_optimization_problems(tInputData, fp);
   fclose(fp);
 
   auto tReadData = XMLGen::read_data_from_file("appendEngineMPIRunLines.txt");
@@ -59,7 +59,7 @@ TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines_noPerformers)
   tInputData.run_mesh_name = "dummy_mesh.exo";
   tInputData.num_opt_processors = "10";
   FILE* fp=fopen("appendEngineMPIRunLines.txt", "w");
-  EXPECT_THROW(XMLGen::append_analyze_mpirun_lines(tInputData, fp),std::runtime_error);
+  EXPECT_THROW(XMLGen::append_analyze_mpirun_commands_robust_optimization_problems(tInputData, fp),std::runtime_error);
   fclose(fp);
 }
 
