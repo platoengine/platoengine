@@ -45,7 +45,7 @@ void append_physics_performers
     {
         const int tID = (&tScenario - &aXMLMetaData.scenarios()[0]) + 1;
         auto tPerformerNode = aParentNode.append_child("Performer");
-        std::vector<std::string> tValues = { std::to_string(tID), tScenario.performer(), tScenario.code() };
+        std::vector<std::string> tValues = { tScenario.performer(), tScenario.code(), std::to_string(tID) };
         XMLGen::append_children( tKeywords, tValues, tPerformerNode);
     }
 }

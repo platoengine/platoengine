@@ -572,7 +572,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     ASSERT_FALSE(tPerformer.empty());
     ASSERT_STREQ("Performer", tPerformer.name());
     std::vector<std::string> tKeys = {"Name", "Code", "PerformerID"};
-    std::vector<std::string> tValues = {"plato_analyze", "plato_analyze_1", "1"};
+    std::vector<std::string> tValues = {"plato_analyze_1", "plato_analyze", "1"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tPerformer);
     tPerformer = tPerformer.next_sibling("Performer");
     ASSERT_TRUE(tPerformer.empty());
