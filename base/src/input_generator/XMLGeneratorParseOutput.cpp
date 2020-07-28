@@ -19,8 +19,8 @@ void ParseOutput::allocate()
     mTags.clear();
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
     mTags.insert({ "output_data_to_file", { { {"output_data_to_file"}, ""}, "" } });
-    mTags.insert({ "quantities_of_interest", { { {"quantities_of_interest"}, ""}, "" } });
-    mTags.insert({ "random_quantities_of_interest", { { {"random_quantities_of_interest"}, ""}, "" } });
+    mTags.insert({ "output_quantities_of_interest", { { {"output_quantities_of_interest"}, ""}, "" } });
+    mTags.insert({ "compute_quantities_of_interest_statistics", { { {"compute_quantities_of_interest_statistics"}, ""}, "" } });
 }
 
 void ParseOutput::setOutputData()
@@ -53,7 +53,7 @@ void ParseOutput::setScenario()
 
 void ParseOutput::setRandomQoI()
 {
-    auto tItr = mTags.find("random_quantities_of_interest");
+    auto tItr = mTags.find("compute_quantities_of_interest_statistics");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputKeys tValidKeys;
@@ -75,7 +75,7 @@ void ParseOutput::setRandomQoI()
 
 void ParseOutput::setDeterministicQoI()
 {
-    auto tItr = mTags.find("quantities_of_interest");
+    auto tItr = mTags.find("output_quantities_of_interest");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputKeys tValidKeys;
