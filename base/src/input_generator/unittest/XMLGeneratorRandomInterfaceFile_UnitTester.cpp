@@ -112,11 +112,13 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     tXMLMetaData.constraints.push_back(tConstraint);
 
     tXMLMetaData.mOutputMetaData.outputData("true");
+    tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
+    tDocument.save_file("dummy.xml", " ");
 
     // TEST RESULTS
     auto tStage = tDocument.child("Stage");
@@ -127,33 +129,23 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
 
     auto tOperation = tStage.child("Operation");
     ASSERT_FALSE(tOperation.empty());
-    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Input", "Input", "For"};
-    tGoldValues = {"PlatoMainOutput", "platomain", "", "", "", "", ""};
+    tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Input", "Input", "For", "Input", "Input"};
+    tGoldValues = {"PlatoMainOutput", "platomain", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     // DEFAULT QoIs
-    auto tGoldNumInputs = 5u;
-    std::vector<std::string> tGoldArguments = {"topology", "control", "objective gradient id-1", "constraint gradient id-1", ""};
-    std::vector<std::string> tGoldSharedData = {"Topology", "Control", "Objective Gradient ID-1", "Constraint Gradient ID-1", ""};
     auto tInput = tOperation.child("Input");
-    auto tGoldArgItr = tGoldArguments.begin();
-    auto tGoldShrdDataItr = tGoldSharedData.begin();
-
-    auto tCounter = 0u;
-    while(!tInput.empty())
-    {
-        ASSERT_STREQ(tGoldArgItr->c_str(), tInput.child("ArgumentName").child_value());
-        ASSERT_STREQ(tGoldShrdDataItr->c_str(), tInput.child("SharedDataName").child_value());
-        tInput = tInput.next_sibling();
-        std::advance(tGoldArgItr, 1);
-        std::advance(tGoldShrdDataItr, 1);
-        if(tCounter > tGoldNumInputs)
-        {
-            break;
-        }
-        tCounter++;
-    }
-    ASSERT_EQ(tGoldNumInputs, tCounter);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"topology", "Topology"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"control", "Control"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"objective gradient id-1", "Objective Gradient ID-1"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"constraint gradient id-1", "Constraint Gradient ID-1"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises mean", "vonmises mean"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises standard deviation", "vonmises standard deviation"}, tInput);
 
     // RANDOM QoIs
     auto tOuterFor = tOperation.child("For");

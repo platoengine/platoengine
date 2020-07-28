@@ -309,6 +309,11 @@ void append_random_qoi_samples_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    if(aXMLMetaData.mOutputMetaData.outputSamples() == false)
+    {
+        return;
+    }
+
     auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     for(auto& tID : tQoIIDs)
     {
@@ -323,6 +328,26 @@ void append_random_qoi_samples_to_plato_main_output_stage
     }
 }
 // function append_random_qoi_samples_to_plato_main_output_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_random_qoi_statistics_to_plato_main_output_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for (auto &tID : tQoIIDs)
+    {
+        auto tMeanName = tID + " mean";
+        auto tInput = aParentNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { tMeanName, tMeanName }, tInput);
+
+        auto tStdDevName = tID + " standard deviation";
+        tInput = aParentNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { tStdDevName, tStdDevName }, tInput);
+    }
+}
+// function append_random_qoi_statistics_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
@@ -358,6 +383,7 @@ void append_plato_main_output_stage
     XMLGen::append_default_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
     XMLGen::append_deterministic_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
     XMLGen::append_random_qoi_samples_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
+    XMLGen::append_random_qoi_statistics_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
 }
 // function append_plato_main_output_stage
 /******************************************************************************/

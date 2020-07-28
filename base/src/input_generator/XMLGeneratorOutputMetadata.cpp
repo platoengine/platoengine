@@ -27,7 +27,7 @@ bool Output::getBool(const std::string& aTag) const
     auto tItr = mMetaData.find(aTag);
     if(tItr == mMetaData.end())
     {
-        THROWERR(std::string("XML Generator Output Metadata: '") + aTag + "' keyword is not defined.")
+        return false;
     }
     return (XMLGen::transform_boolean_key(tItr->second));
 }

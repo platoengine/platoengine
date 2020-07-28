@@ -40,7 +40,7 @@ private:
      * \brief Return string value for property with input tag; else, throw an error if \n
      * property is not defined in the metadata.
      * \param [in] aTag property tag
-     * \return property string value
+     * \return property string value (default = "")
      **********************************************************************************/
     std::string getValue(const std::string &aTag) const;
 
@@ -49,7 +49,7 @@ private:
      * \brief Return bool value for property with input tag; else, throw an error if \n
      * property is not defined in the metadata.
      * \param [in] aTag property tag
-     * \return property bool value
+     * \return property bool value (default = false)
      **********************************************************************************/
     bool getBool(const std::string &aTag) const;
 
