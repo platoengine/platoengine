@@ -159,6 +159,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tScenario.cacheState("false");
     tScenario.updateProblem("true");
     tMetaData.append(tScenario);
+    tMetaData.mOutputMetaData.outputData("false");
 
     ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
 

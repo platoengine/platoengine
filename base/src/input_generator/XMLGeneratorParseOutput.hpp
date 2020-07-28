@@ -24,6 +24,8 @@ private:
     XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
 
 private:
+    void setParameters();
+
     /******************************************************************************//**
      * \fn allocate
      * \brief Allocate map from valid tags to valid tokens-value pair
@@ -41,6 +43,12 @@ private:
      * \brief Set output data flag.
     **********************************************************************************/
     void setOutputData();
+
+    /******************************************************************************//**
+     * \fn setOutputSamples
+     * \brief Set output samples.
+    **********************************************************************************/
+    void setOutputSamples();
 
     /******************************************************************************//**
      * \fn setRandomQoI

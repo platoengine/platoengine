@@ -18,9 +18,27 @@ void ParseOutput::allocate()
 {
     mTags.clear();
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
-    mTags.insert({ "output_data_to_file", { { {"output_data_to_file"}, ""}, "" } });
+    mTags.insert({ "output_samples", { { {"output_samples"}, ""}, "false" } });
+    mTags.insert({ "output_data_to_file", { { {"output_data_to_file"}, ""}, "true" } });
     mTags.insert({ "output_quantities_of_interest", { { {"output_quantities_of_interest"}, ""}, "" } });
     mTags.insert({ "compute_quantities_of_interest_statistics", { { {"compute_quantities_of_interest_statistics"}, ""}, "" } });
+}
+
+void ParseOutput::setParameters()
+{
+    for(auto& tTag : mTags)
+    {
+        if(tTag.second.first.second.empty())
+        {
+            auto tDefaultValue = tTag.second.second;
+            mData.append(tTag.first, tDefaultValue);
+        }
+        else
+        {
+            auto tInputValue = tTag.second.first.second;
+            mData.append(tTag.first, tInputValue);
+        }
+    }
 }
 
 void ParseOutput::setOutputData()
@@ -28,12 +46,24 @@ void ParseOutput::setOutputData()
     auto tItr = mTags.find("output_data_to_file");
     if(tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        auto tFlag = XMLGen::transform_boolean_key(tItr->second.first.second);
-        mData.outputData(tFlag);
+        mData.append("output_data_to_file", tItr->second.first.second);
     }
     else
     {
-        mData.outputData(true);
+        mData.append("output_data_to_file", "true");
+    }
+}
+
+void ParseOutput::setOutputSamples()
+{
+    auto tItr = mTags.find("output_samples");
+    if(tItr != mTags.end() && !tItr->second.first.second.empty())
+    {
+        mData.append("output_samples", tItr->second.first.second);
+    }
+    else
+    {
+        mData.append("output_samples", "true");
     }
 }
 
@@ -47,7 +77,7 @@ void ParseOutput::setScenario()
     }
     else
     {
-        mData.scenarioID(tItr->second.first.second);
+        mData.append("scenario", tItr->second.first.second);
     }
 }
 
@@ -98,8 +128,9 @@ void ParseOutput::setDeterministicQoI()
 void ParseOutput::setMetaData()
 {
     this->setScenario();
-    this->setOutputData();
     this->setRandomQoI();
+    this->setOutputData();
+    this->setOutputSamples();
     this->setDeterministicQoI();
 }
 

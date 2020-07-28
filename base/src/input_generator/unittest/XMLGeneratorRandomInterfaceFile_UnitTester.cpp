@@ -36,6 +36,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStage_EmptyStage_OutputDisabled
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mOutputMetaData.outputData("false");
     ASSERT_NO_THROW(XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument));
     auto tStage = tDocument.child("Stage");
     ASSERT_TRUE(tStage.empty());
@@ -53,7 +54,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     tConstraint.name("1");
     tXMLMetaData.constraints.push_back(tConstraint);
 
-    tXMLMetaData.mOutputMetaData.outputData(true);
+    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 
     // CALL FUNCTION
@@ -110,7 +111,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     tConstraint.name("1");
     tXMLMetaData.constraints.push_back(tConstraint);
 
-    tXMLMetaData.mOutputMetaData.outputData(true);
+    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
 
     // CALL FUNCTION
@@ -2545,7 +2546,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationOutputOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.outputData(true);
+    tXMLMetaData.mOutputMetaData.outputData("true");
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_optimization_output_options(tXMLMetaData, tOptimizerNode);
 

@@ -12,23 +12,83 @@
 namespace XMLGen
 {
 
-bool Output::outputData() const
+std::string Output::getValue(const std::string& aTag) const
 {
-    return mOutputDataToFile;
-}
-void Output::outputData(const bool& aOutputData)
-{
-    mOutputDataToFile = aOutputData;
+    auto tItr = mMetaData.find(aTag);
+    if(tItr == mMetaData.end())
+    {
+        return "";
+    }
+    return tItr->second;
 }
 
-void Output::scenarioID(const std::string& aID)
+bool Output::getBool(const std::string& aTag) const
 {
-    mScenarioID = aID;
+    auto tItr = mMetaData.find(aTag);
+    if(tItr == mMetaData.end())
+    {
+        THROWERR(std::string("XML Generator Output Metadata: '") + aTag + "' keyword is not defined.")
+    }
+    return (XMLGen::transform_boolean_key(tItr->second));
+}
+
+std::string Output::value(const std::string& aTag) const
+{
+    auto tTag = XMLGen::to_lower(aTag);
+    auto tItr = mMetaData.find(tTag);
+    if(tItr == mMetaData.end())
+    {
+        THROWERR(std::string("XML Generator Output Metadata: Parameter with tag '") + aTag + "' is not defined in metadata.")
+    }
+    return (tItr->second);
+}
+
+std::vector<std::string> Output::tags() const
+{
+    std::vector<std::string> tTags;
+    for(auto& tProperty : mMetaData)
+    {
+        tTags.push_back(tProperty.first);
+    }
+    return tTags;
+}
+
+void Output::append(const std::string& aTag, const std::string& aValue)
+{
+    if (aTag.empty())
+    {
+        THROWERR(std::string("XML Generator Output Metadata: Parameter with tag '") + aTag + "' is empty.")
+    }
+    auto tTag = XMLGen::to_lower(aTag);
+    mMetaData[aTag] = aValue;
+}
+
+bool Output::outputData() const
+{
+    return (this->getBool("output_data_to_file"));
+}
+void Output::outputData(const std::string& aInput)
+{
+    mMetaData["output_data_to_file"] = aInput;
+}
+
+bool Output::outputSamples() const
+{
+    return (this->getBool("output_samples"));
+}
+void Output::outputSamples(const std::string& aInput)
+{
+    mMetaData["output_samples"] = aInput;
+}
+
+void Output::scenarioID(const std::string& aInput)
+{
+    mMetaData["scenario"] = aInput;
 }
 
 std::string Output::scenarioID() const
 {
-    return mScenarioID;
+    return (this->getValue("scenario"));
 }
 
 void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLayout)

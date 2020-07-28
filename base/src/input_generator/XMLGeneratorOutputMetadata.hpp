@@ -32,32 +32,87 @@ private:
     std::map<std::string, std::unordered_map<std::string, std::string>> mRandomQoIs;
     std::map<std::string, std::unordered_map<std::string, std::string>> mDeterministicQoIs;
 
-    /*!< output data is associated with a scenario; thus, this member data is used to denote the scenario id */
-    std::string mScenarioID;
-    /*!< if true, output data to file (e.g. platomain.exo) */
-    bool mOutputDataToFile = false;
+    std::unordered_map<std::string, std::string> mMetaData; /*!< scenario metadata, map< tag, value > */
+
+private:
+    /******************************************************************************//**
+     * \fn getValue
+     * \brief Return string value for property with input tag; else, throw an error if \n
+     * property is not defined in the metadata.
+     * \param [in] aTag property tag
+     * \return property string value
+     **********************************************************************************/
+    std::string getValue(const std::string &aTag) const;
+
+    /******************************************************************************//**
+     * \fn getBool
+     * \brief Return bool value for property with input tag; else, throw an error if \n
+     * property is not defined in the metadata.
+     * \param [in] aTag property tag
+     * \return property bool value
+     **********************************************************************************/
+    bool getBool(const std::string &aTag) const;
 
 public:
     /******************************************************************************//**
+     * \fn value
+     * \brief Return value for property with input tag; else, throw an error if \n
+     * property is not defined in the metadata.
+     * \param [in] aTag property tag
+     * \return property string value
+    **********************************************************************************/
+    std::string value(const std::string& aTag) const;
+
+    /******************************************************************************//**
+     * \fn tags
+     * \brief Return list of parameter tags.
+     * \return parameter tags
+    **********************************************************************************/
+    std::vector<std::string> tags() const;
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append parameter to metadata.
+     * \param [in] aTag   parameter tag
+     * \param [in] aValue parameter value
+    **********************************************************************************/
+    void append(const std::string& aTag, const std::string& aValue);
+
+    /******************************************************************************//**
      * \fn outputData
-     * \brief Return true if user enabled output of quantities of interest to file, \n
-     * e.g. output to platomain.exo.
+     * \brief Return 'output_data_to_file' keyword value.
+     * \return value
     **********************************************************************************/
     bool outputData() const;
 
     /******************************************************************************//**
      * \fn outputData
-     * \brief Set flag used to enable output of quantities of interest to file, \n
-     * e.g. output to platomain.exo.
+     * \brief Set 'output_data_to_file' keyword
+     * \param [in] aInput keyword value
     **********************************************************************************/
-    void outputData(const bool& aOutputData);
+    void outputData(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn outputSamples
+     * \brief Return 'output_samples' keyword value.
+     * \return value
+    **********************************************************************************/
+    bool outputSamples() const;
+
+    /******************************************************************************//**
+     * \fn outputSamples
+     * \brief Set 'output_samples' keyword.
+     * \param [in] aInput keyword value
+     * \return value
+    **********************************************************************************/
+    void outputSamples(const std::string& aInput);
 
     /******************************************************************************//**
      * \fn scenarioID
      * \brief Set scenario identifier associated with output quantities of interest.
-     * \param [in] aID scenario identifier (id)
+     * \param [in] aInput scenario identifier (id)
     **********************************************************************************/
-    void scenarioID(const std::string& aID);
+    void scenarioID(const std::string& aInput);
 
     /******************************************************************************//**
      * \fn scenarioID
