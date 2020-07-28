@@ -268,7 +268,8 @@ std::string check_output_keyword(const std::string& aInput)
 {
     auto tLowerKey = XMLGen::to_lower(aInput);
     XMLGen::ValidOutputKeys tValidKeys;
-    if(tValidKeys.mKeys.find(tLowerKey) == tValidKeys.mKeys.end())
+    auto tItr = tValidKeys.mKeys.find(tLowerKey);
+    if(tItr == tValidKeys.mKeys.end())
     {
         THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
     }

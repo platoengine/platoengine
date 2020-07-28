@@ -476,13 +476,13 @@ void ParseObjective::checkEssentialBoundaryConditionIDs(const XMLGen::Objective 
 void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutputKeys)
 {
     XMLGen::ValidOutputKeys tValidKeys;
-    for (auto &tToken : ValidOutputKeys.output_for_plotting)
+    for (auto &tKeyword : ValidOutputKeys.output_for_plotting)
     {
-        auto tLowerToken = Plato::tolower(tToken);
-        auto tItr = tValidKeys.mKeys.find(tLowerToken);
+        auto tLowerKey = Plato::tolower(tKeyword);
+        auto tItr =  tValidKeys.mKeys.find(tLowerKey);
         if (tItr == tValidKeys.mKeys.end())
         {
-            THROWERR(std::string("Parse Objective: 'output' keyword '") + tLowerToken + "' is not supported. ")
+            THROWERR(std::string("Parse Objective: 'output' keyword '") + tLowerKey + "' is not supported. ")
         }
     }
 }

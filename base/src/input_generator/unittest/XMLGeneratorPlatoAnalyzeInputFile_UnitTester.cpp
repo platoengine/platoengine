@@ -24,7 +24,7 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
 {
     XMLGen::Output tOutput;
-    tOutput.appendDeterminsiticQoI("dispx", "nodal field");
+    tOutput.appendDeterminsiticQoI("stress", "element field");
     tOutput.appendDeterminsiticQoI("vonmises", "element field");
     XMLGen::Scenario tScenario;
     tScenario.code("plato_analyze");
@@ -46,7 +46,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{dispx, vonmises}"};
+    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{stress, Vonmises}"};
     PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
@@ -74,6 +74,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
 {
     XMLGen::Output tOutput;
+    tOutput.appendDeterminsiticQoI("vonmises", "element field");
     tOutput.appendDeterminsiticQoI("temperature", "nodal field");
     XMLGen::Scenario tScenario;
     tScenario.code("plato_analyze");
@@ -95,7 +96,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{temperature}"};
+    std::vector<std::string> tValues = {"Plottable", "Array(string)", "{Vonmises}"};
     PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());

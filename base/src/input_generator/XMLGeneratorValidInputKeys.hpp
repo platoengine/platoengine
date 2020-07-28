@@ -121,7 +121,8 @@ struct ValidOutputKeys
           {"objective_gradient","nodal field"}, {"constraint_gradient","nodal field"}, {"topology","nodal field"},
           {"control","nodal field"}, {"cauchy_stress","element field"}, {"deviatoric_stress","element field"},
           {"plastic_multiplier_increment","element field"}, {"elastic_strain","element field"},
-          {"plastic_strain","element field"}, {"backstress","element field"}, {"principal_stresses","element field"}
+          {"plastic_strain","element field"}, {"backstress","element field"}, {"principal_stresses","element field"},
+          {"stress","element field"}, {"strain","element field"}
         };
 };
 // struct ValidOutputKeys
@@ -230,15 +231,34 @@ struct ValidFilterKeys
 struct ValidAnalyzeOutputKeys
 {
     /*!<
-     * valid plato analyze output keywords \n
-     * \brief map from light-input file output key to plato analyze key, i.e. map<light_input_file_output key, plato_analyze_output_key>. \n
-     * Basically, this maps connects the key use for any quantity of interest inside Plato's light input file to the key used in \n
-     * Plato Analyze to identify the quantity of interest.
+     * \brief Map from Plato Main input file output keywords to Plato Analyze output keywords.  These output keywords are \n
+     * recognized by Plato Analyze's Plato::Application interface and used by Plato Main to extract output data from \n
+     * Plato Analyze.  Plato Main is responsible for outputting these quanitities of interests through platomain.exo.
+     *
+     *                        i.e. map<plato_main_input_file_output_keyword, plato_analyze_output_keyword>. \n
      **/
-    std::unordered_map<std::string, std::string> mKeys = { {"vonmises", "vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
-      {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
-      {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
-      {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"} };
+    std::unordered_map<std::string, std::string> mKeys =
+        {
+          {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
+          {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
+          {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
+          {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"}, {"temperature", "Solution"}
+        };
+
+    /*!<
+     * \brief Map from Plato Main input file output keywords to Plato Analyze plottable option output keywords. \n
+     * The plottable feature is used by Plato Analyze to write output data into its global metadata map. Metadata \n
+     * saved in Plato Analyze's metadata map can be accessed by Plato Main through the Plato Analyze application \n
+     * layer during Multiple Program, Multiple Data (MPMD) runs. Similarly, plottable data can be saved by Plato \n
+     * Analyze into an exodus file, foregoing output through Plato Engine, by invoking the Visualization operation \n
+     * in Plato Analyze.
+     **/
+    std::unordered_map<std::string, std::string> mPlottable =
+        {
+          {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"}, {"accumulated_plastic_strain", "accumulated plastic strain"},
+          {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
+          {"backstress", "backstress"}, {"stress", "stress"}, {"strain", "strain"}
+        };
 };
 // struct ValidAnalyzeOutputKeys
 

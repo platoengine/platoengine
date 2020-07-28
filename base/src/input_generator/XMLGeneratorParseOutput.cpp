@@ -57,7 +57,6 @@ void ParseOutput::setRandomQoI()
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputKeys tValidKeys;
-
         std::vector<std::string> tTokens;
         XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
