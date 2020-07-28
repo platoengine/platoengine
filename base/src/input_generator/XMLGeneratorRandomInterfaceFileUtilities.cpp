@@ -14,7 +14,7 @@ namespace XMLGen
 {
 
 /******************************************************************************/
-void append_shared_data_multiperformer
+void append_multiperformer_shared_data
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument)
@@ -26,11 +26,11 @@ void append_shared_data_multiperformer
     auto tSharedDataNode = tForNode.append_child("SharedData");
     XMLGen::append_children(aKeys, aValues, tSharedDataNode);
 }
-// function append_shared_data_multiperformer
+// function append_multiperformer_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
-void append_criterion_shared_data_multiperformer_usecase
+void append_multiperformer_criterion_shared_data
 (const std::string& aCriterion,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -47,15 +47,41 @@ void append_criterion_shared_data_multiperformer_usecase
         auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
-        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
+        XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
 
         // shared data - nondeterministic criterion gradient
         tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
-        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
+        XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
     }
 }
-//function append_criterion_shared_data_multiperformer_usecase
+//function append_multiperformer_criterion_shared_data
+/******************************************************************************/
+
+/******************************************************************************/
+void append_qoi_statistics_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    XMLGen::ValidLayoutKeys tValidLayouts;
+    auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tOutputDataID : tOutputDataIDs)
+    {
+        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
+        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
+        auto tMeanSharedData = tOutputDataID + " mean";
+        std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+        std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tValidLayout->second, "IGNORE", "platomain", "platomain"};
+        auto tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+
+        auto tStdDevSharedData = tOutputDataID + " standard deviation";
+        tValues = {tStdDevSharedData, "Scalar", tValidLayout->second, "IGNORE", "platomain", "platomain"};
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
+}
+//function append_qoi_statistics_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
@@ -68,6 +94,7 @@ void append_multiperformer_qoi_shared_data
         THROWERR("Append Nondeterministic QoI Shared Data: list of 'scenarios' is empty.")
     }
 
+    // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE SCENARIOS - I.E. SUPPORT STD::VECTOR
     XMLGen::ValidLayoutKeys tValidLayouts;
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
@@ -79,14 +106,14 @@ void append_multiperformer_qoi_shared_data
         auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayout->second, "IGNORE", tOwnerName, "platomain"};
-        XMLGen::append_shared_data_multiperformer(tKeys, tValues, aDocument);
+        XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
     }
 }
 //function append_multiperformer_qoi_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
-void append_topology_shared_data_multiperformer_usecase
+void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -108,7 +135,7 @@ void append_topology_shared_data_multiperformer_usecase
         XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
     }
 }
-//function append_topology_shared_data_multiperformer_usecase
+//function append_multiperformer_topology_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
@@ -149,9 +176,10 @@ void append_shared_data_multiperformer_usecase
     XMLGen::append_constraint_shared_data(aXMLMetaData, aDocument);
 
     // nondeterministic shared data
+    XMLGen::append_qoi_statistics_shared_data(aXMLMetaData, aDocument);
     XMLGen::append_multiperformer_qoi_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_topology_shared_data_multiperformer_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", aXMLMetaData, aDocument);
+    XMLGen::append_multiperformer_topology_shared_data(aXMLMetaData, aDocument);
+    XMLGen::append_multiperformer_criterion_shared_data("Objective", aXMLMetaData, aDocument);
 }
 // function append_shared_data_multiperformer_usecase
 /******************************************************************************/

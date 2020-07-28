@@ -15,27 +15,39 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \fn append_shared_data_multiperformer
+ * \fn append_multiperformer_shared_data
  * \brief Append nondeterministic shared data keys and values to PUGI XML document.
  * \param [in]     aKeys      keys to append
  * \param [in]     aValues    values to append
  * \param [in/out] aDocument  pugi::xml_document
 **********************************************************************************/
-void append_shared_data_multiperformer
+void append_multiperformer_shared_data
 (const std::vector<std::string>& aKeys,
  const std::vector<std::string>& aValues,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_criterion_shared_data_multiperformer_usecase
+ * \fn append_multiperformer_criterion_shared_data
  * \brief Append shared data associated with an optimization criterion to PUGI XML document.
  * \param [in]     aCriterion   criterion name
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_criterion_shared_data_multiperformer_usecase
+void append_multiperformer_criterion_shared_data
 (const std::string& aCriterion,
  const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_qoi_statistics_shared_data
+ * \brief Append Quantities of Interest (QoI) statistics shared data xml document. \n
+ * The QoI are assigned in the 'compute_quantity_of_interest_statistics' keyword \n
+ * inside the output block.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_qoi_statistics_shared_data
+(const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
@@ -50,12 +62,12 @@ void append_multiperformer_qoi_shared_data
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_topology_shared_data_multiperformer_usecase
+ * \fn append_multiperformer_topology_shared_data
  * \brief Append Topology shared data to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_topology_shared_data_multiperformer_usecase
+void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 

@@ -419,13 +419,36 @@ TEST(PlatoTestXMLGenerator, AppendAttributes)
     PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tFor);
 }
 
+TEST(PlatoTestXMLGenerator, AppendQoiStatisticsSharedData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tInputData;
+    tInputData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    XMLGen::append_qoi_statistics_shared_data(tInputData, tDocument);
+
+    auto tSharedData = tDocument.child("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    std::vector<std::string> tValues = {"vonmises mean", "Scalar", "Element Field", "platomain", "platomain"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
+
+    tSharedData = tSharedData.next_sibling("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tValues = {"vonmises standard deviation", "Scalar", "Element Field", "platomain", "platomain"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
+
+}
+
 TEST(PlatoTestXMLGenerator, AppendNondeterministicSharedData)
 {
     pugi::xml_document tDocument;
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::string> tValues = {"Objective Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
         "Scalar", "Global", "1", "plato analyze {PerformerIndex}", "platomain"};
-    XMLGen::append_shared_data_multiperformer(tKeys, tValues, tDocument);
+    XMLGen::append_multiperformer_shared_data(tKeys, tValues, tDocument);
 
     // TEST RESULTS AGAINS GOLD VALUES
     std::vector<std::string> tGoldOuterAttributeKeys = {"var", "in"};
@@ -449,7 +472,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData_ErrorEmpty
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_multiperformer_criterion_shared_data("Objective", tInputData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
@@ -460,7 +483,7 @@ TEST(PlatoTestXMLGenerator, AppendNondeterministicCriterionSharedData)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    XMLGen::append_criterion_shared_data_multiperformer_usecase("Objective", tInputData, tDocument);
+    XMLGen::append_multiperformer_criterion_shared_data("Objective", tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -738,7 +761,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase_E
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_multiperformer_topology_shared_data(tInputData, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
@@ -749,7 +772,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUseCase)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_multiperformer_topology_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -823,7 +846,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedDataForNondeterministicUsecase)
     XMLGen::InputData tInputData;
     tInputData.append(tScenario);
 
-    ASSERT_NO_THROW(XMLGen::append_topology_shared_data_multiperformer_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_multiperformer_topology_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
