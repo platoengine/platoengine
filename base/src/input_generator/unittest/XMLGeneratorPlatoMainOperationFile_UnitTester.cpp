@@ -870,18 +870,19 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoMainOperation)
 
 TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 {
+    // TODO: REFACTOR DUE TO NEW CHANGES IN INPUT ARGUMENTS - ALSO ADD MEAN_PLUS_K_STD_DEV ARGUMENT
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     ASSERT_NO_THROW(XMLGen::append_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
-    ASSERT_FALSE(tDocument.empty());
+    tDocument.save_file("dummy.xml", " ");
 
     // TEST RESULTS AGAINST GOLD VALUES
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = {"Function", "Name" , "Layout", "For", "Output", "Output"};
-    std::vector<std::string> tValues = {"MeanPlusStdDev", "vonmises Statistics",
+    std::vector<std::string> tValues = {"MeanPlusStdDev", "compute vonmises statistics",
         "Element Field", "", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
@@ -900,10 +901,10 @@ TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "vonmises Mean"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean", "vonmises mean"}, tOutput);
     tOutput = tOutput.next_sibling("Output");
     ASSERT_FALSE(tOutput.empty());
-    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "vonmises StdDev"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"std_dev", "vonmises standard deviation"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendStochasticCriterionValueOperation)

@@ -36,10 +36,10 @@ void append_compute_qoi_statistics_operation
  pugi::xml_node& aParentNode)
 {
     auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for (auto &tID : tQoIIDs)
+    for (auto &tQoIID : tQoIIDs)
     {
         auto tOperationNode = aParentNode.append_child("Operation");
-        auto tOperationName = "compute " + tID + " statistics";
+        auto tOperationName = "compute " + tQoIID + " statistics";
         XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "platomain"}, tOperationNode);
 
         auto tForNode = tOperationNode.append_child("For");
@@ -48,14 +48,14 @@ void append_compute_qoi_statistics_operation
         XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
 
         auto tInputNode = tForNode.append_child("Input");
-        auto tDataName = tID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        auto tDataName = tQoIID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
-        auto tMeanName = tID + " mean";
+        auto tMeanName = tQoIID + " mean";
         auto tOutputNode = tOperationNode.append_child("Output");
         XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tMeanName, tMeanName }, tOutputNode);
 
-        auto tStdDevName = tID + " standard deviation";
+        auto tStdDevName = tQoIID + " standard deviation";
         tOutputNode = tOperationNode.append_child("Output");
         XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tStdDevName, tStdDevName }, tOutputNode);
     }

@@ -151,6 +151,14 @@ std::string check_data_layout_keyword(const std::string& aInput);
 std::string check_output_keyword(const std::string& aInput);
 
 /******************************************************************************//**
+ * \fn check_data_layout
+ * \brief Throw error if 'data layout' keyword value is not supported.
+ * \param [in] aInput 'data layout' keyword
+ * \return valid 'data layout' keyword
+**********************************************************************************/
+std::string check_data_layout(const std::string& aInput);
+
+/******************************************************************************//**
  * \fn check_code_keyword
  * \brief Throw error if 'code' keyword value is not supported.
  * \param [in] aInput 'code' keyword

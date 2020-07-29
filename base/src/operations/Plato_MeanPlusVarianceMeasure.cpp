@@ -71,10 +71,10 @@ MeanPlusVarianceMeasure::~MeanPlusVarianceMeasure()
 void MeanPlusVarianceMeasure::operator()()
 {
     this->computeMeanQoI();
+    this->computeStandardDeviationQoI();
     bool tStandardDeviationMeasuresRequested = mOutArgumentToStdDevMultiplier.size() > 0u;
     if (tStandardDeviationMeasuresRequested == true)
     {
-        this->computeStandardDeviationQoI();
         this->computeMeanPlusStdDev();
     }
 }

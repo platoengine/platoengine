@@ -49,9 +49,9 @@ void write_stochastic_plato_main_operations_xml_file
     XMLGen::append_compute_volume_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
 
+    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
 
     XMLGen::append_update_problem_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
@@ -384,15 +384,14 @@ void append_qoi_statistics_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    XMLGen::ValidLayoutKeys tValidKeys;
-    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for(auto& tID : tIDs)
+    auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tOutputDataID : tOutputDataIDs)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tValidLayoutItr = tValidKeys.mKeys.find(tLayout);
-        auto tName = tID + " Statistics";
+        auto tDataLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
+        auto tSupportedDataLayout = XMLGen::check_data_layout(tDataLayout);
+        auto tOperationName = "compute " + tOutputDataID + " statistics";
         std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
-        std::vector<std::string> tValues = { "MeanPlusStdDev", tName, tValidLayoutItr->second };
+        std::vector<std::string> tValues = { "MeanPlusStdDev", tOperationName, tSupportedDataLayout };
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children(tKeys, tValues, tOperation);
 
@@ -402,15 +401,15 @@ void append_qoi_statistics_to_plato_main_operation
         XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
         auto tInput = tInnerFor.append_child("Input");
         tKeys = {"ArgumentName", "Probability"};
-        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tID);
+        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tOutputDataID);
         tValues = {tArgumentName, "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
         XMLGen::append_children(tKeys, tValues, tInput);
 
         auto tOutput = tOperation.append_child("Output");
-        tArgumentName = tID + " Mean";
+        tArgumentName = tOutputDataID + " mean";
         XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", tArgumentName}, tOutput);
         tOutput = tOperation.append_child("Output");
-        tArgumentName = tID + " StdDev";
+        tArgumentName = tOutputDataID + " standard deviation";
         XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
     }
 }

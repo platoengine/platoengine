@@ -277,6 +277,19 @@ std::string check_output_keyword(const std::string& aInput)
 }
 // check_output_keyword
 
+std::string check_data_layout(const std::string& aInput)
+{
+    XMLGen::ValidLayoutKeys tValidKeys;
+    auto tLowerKey = XMLGen::to_lower(aInput);
+    auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerKey);
+    if(tValidLayoutItr == tValidKeys.mKeys.end())
+    {
+        THROWERR("Is Data Layout Supported: data layout '" + tLowerKey + "' is not supported.")
+    }
+    return tValidLayoutItr->second;
+}
+// function check_data_layout
+
 std::string check_code_keyword(const std::string& aInput)
 {
     auto tLowerInput = aInput;
