@@ -14,6 +14,25 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
+{
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+
+    pugi::xml_document tDocument;
+    XMLGen::append_qoi_statistics_to_output_operation(tXMLMetaData, tDocument);
+    tDocument.save_file("dummy.xml", " ");
+
+    auto tInput = tDocument.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises mean", "Element Field"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises standard deviation", "Element Field"}, tInput);
+}
+
 TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
 {
     pugi::xml_document tDocument;

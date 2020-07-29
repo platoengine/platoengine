@@ -560,7 +560,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
         auto tItr = std::find(tGoldIDs.begin(), tGoldIDs.end(), tID);
         ASSERT_TRUE(tItr != tGoldIDs.end());
         ASSERT_STREQ(tItr->c_str(), tID.c_str());
-        ASSERT_STREQ("nodal field", tOutputMetadata.deterministicLayout(tID).c_str());
+        ASSERT_STREQ("Nodal Field", tOutputMetadata.deterministicLayout(tID).c_str());
         ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicArgumentName(tID).c_str());
         ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicSharedDataName(tID).c_str());
     }
@@ -590,7 +590,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
     std::vector<std::string> tGoldRandomSharedDataName =
     {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
      "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
-    std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
+    std::vector<std::string> tGoldRandomLayout = {"Element Field", "Nodal Field"};
 
     auto tRandomIDs = tOutputMetadata.randomIDs();
     for(auto& tID : tRandomIDs)
@@ -641,7 +641,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
     std::vector<std::string> tGoldRandomSharedDataName =
     {"accumulated_plastic_strain {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
      "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
-    std::vector<std::string> tGoldRandomLayout = {"element field", "nodal field"};
+    std::vector<std::string> tGoldRandomLayout = {"Element Field", "Nodal Field"};
 
     auto tRandomIDs = tOutputMetadata.randomIDs();
     for(auto& tID : tRandomIDs)
@@ -673,7 +673,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
         auto tItr = std::find(tGoldDeterministicIDs.begin(), tGoldDeterministicIDs.end(), tID);
         ASSERT_TRUE(tItr != tGoldDeterministicIDs.end());
         ASSERT_STREQ(tItr->c_str(), tID.c_str());
-        ASSERT_STREQ("nodal field", tOutputMetadata.deterministicLayout(tID).c_str());
+        ASSERT_STREQ("Nodal Field", tOutputMetadata.deterministicLayout(tID).c_str());
         ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicArgumentName(tID).c_str());
         ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicSharedDataName(tID).c_str());
     }

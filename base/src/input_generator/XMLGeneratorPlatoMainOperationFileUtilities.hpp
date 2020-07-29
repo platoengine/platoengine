@@ -89,6 +89,16 @@ void append_objective_gradient_to_output_operation
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
+ * \fn append_qoi_statistics_to_output_operation
+ * \brief Append compute statistics of Quantities of Interest (QoI) operation.
+ * \param [in]     aXMLMetaData Plato input metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_qoi_statistics_to_output_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
  * \fn append_deterministic_qoi_inputs_to_output_operation
  * \brief Append deterministic Quantities of Interest (QoI) inputs to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data

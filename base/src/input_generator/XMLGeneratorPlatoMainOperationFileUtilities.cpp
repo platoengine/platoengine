@@ -171,19 +171,38 @@ void append_objective_gradient_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_qoi_statistics_to_output_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    auto tOutputQoIs = aXMLMetaData.mOutputMetaData.randomIDs();
+    for(auto& tOutputQoI : tOutputQoIs)
+    {
+        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputQoI);
+        auto tValidLayout = XMLGen::check_data_layout_keyword(tLayout);
+        auto tArgumentName = tOutputQoI + " mean";
+        auto tInput= aParentNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
+
+        tArgumentName = tOutputQoI + " standard deviation";
+        tInput= aParentNode.append_child("Input");
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_deterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidLayoutKeys tValidLayouts;
     auto tIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
     for(auto& tID : tIDs)
     {
         auto tInput= aParentNode.append_child("Input");
         auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
-        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
         auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout->second }, tInput);
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
     }
 }
 // function append_deterministic_qoi_inputs_to_output_operation
@@ -194,7 +213,6 @@ void append_nondeterministic_qoi_inputs_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidLayoutKeys tValidLayouts;
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     for(auto& tID : tIDs)
     {
@@ -203,9 +221,8 @@ void append_nondeterministic_qoi_inputs_to_output_operation
 
         auto tInput= tFor.append_child("Input");
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
         auto tArgumentName = tID + " {SampleIndex}";
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout->second }, tInput);
+        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
     }
 }
 // function append_nondeterministic_qoi_inputs_to_output_operation

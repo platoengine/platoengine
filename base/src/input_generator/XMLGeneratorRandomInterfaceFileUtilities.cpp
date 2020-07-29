@@ -63,22 +63,29 @@ void append_qoi_statistics_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    XMLGen::ValidLayoutKeys tValidLayouts;
+    std::cout << "11\n";
     auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    std::cout << "12\n";
     for(auto& tOutputDataID : tOutputDataIDs)
     {
+    std::cout << "13\n";
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
-        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
+    std::cout << "14 = tLayout = " << tLayout << "\n";
         auto tMeanSharedData = tOutputDataID + " mean";
+    std::cout << "16\n";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tValidLayout->second, "IGNORE", "platomain", "platomain"};
+        std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
+    std::cout << "17\n";
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    std::cout << "18\n";
 
         auto tStdDevSharedData = tOutputDataID + " standard deviation";
-        tValues = {tStdDevSharedData, "Scalar", tValidLayout->second, "IGNORE", "platomain", "platomain"};
+        tValues = {tStdDevSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
         tSharedDataNode = aDocument.append_child("SharedData");
+    std::cout << "19\n";
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    std::cout << "20\n";
     }
 }
 //function append_qoi_statistics_shared_data
@@ -95,17 +102,15 @@ void append_multiperformer_qoi_shared_data
     }
 
     // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE SCENARIOS - I.E. SUPPORT STD::VECTOR
-    XMLGen::ValidLayoutKeys tValidLayouts;
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
     for(auto& tID : tIDs)
     {
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tValidLayout = tValidLayouts.mKeys.find(tLayout);
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
         auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayout->second, "IGNORE", tOwnerName, "platomain"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
         XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
     }
 }

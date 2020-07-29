@@ -93,22 +93,15 @@ void append_qoi_shared_data
         THROWERR("Append QoI Shared Data: list of 'scenarios' is empty.")
     }
 
-    XMLGen::ValidLayoutKeys tValidLayouts;
     auto tOutputIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
     auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
     for(auto& tID : tOutputIDs)
     {
         auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
-        auto tValidLayoutItr = tValidLayouts.mKeys.find(tLayout);
-        if(tValidLayoutItr == tValidLayouts.mKeys.end())
-        {
-            THROWERR("Append QoI Shared Data: Unexpected error while searching valid layout '"
-                + tLayout + "' of quantity of interest with tag '" + tID + "'.")
-        }
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
         auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer();
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tValidLayoutItr->second, "IGNORE", tOwnerName, "platomain"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
         auto tSharedDataNode = aParentNode.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
     }

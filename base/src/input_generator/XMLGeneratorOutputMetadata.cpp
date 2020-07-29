@@ -104,9 +104,9 @@ void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLay
 void Output::appendDeterminsiticQoI(const std::string& aID, const std::string& aDataLayout)
 {
     auto tValidOutputKeyword = XMLGen::check_output_keyword(aID);
-    auto tLowerLayout = XMLGen::check_data_layout_keyword(aDataLayout);
+    auto tValidLayout = XMLGen::check_data_layout_keyword(aDataLayout);
     mDeterministicQoIs[tValidOutputKeyword] =
-        { {"ArgumentName", tValidOutputKeyword}, {"SharedDataName", tValidOutputKeyword}, {"DataLayout", tLowerLayout} };
+        { {"ArgumentName", tValidOutputKeyword}, {"SharedDataName", tValidOutputKeyword}, {"DataLayout", tValidLayout} };
 }
 
 std::string Output::randomLayout(const std::string& aID) const
