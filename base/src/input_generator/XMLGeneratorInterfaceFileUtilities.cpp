@@ -400,6 +400,20 @@ void append_deterministic_qoi_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
+inline void append_platomain_output_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOperation = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"},{"PlatoMainOutput", "platomain"}, tOperation);
+    XMLGen::append_default_qoi_to_plato_main_output_stage(aXMLMetaData, tOperation);
+    XMLGen::append_deterministic_qoi_to_plato_main_output_stage(aXMLMetaData, tOperation);
+    XMLGen::append_random_qoi_samples_to_plato_main_output_stage(aXMLMetaData, tOperation);
+    XMLGen::append_random_qoi_statistics_to_plato_main_output_stage(aXMLMetaData, tOperation);
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -410,12 +424,8 @@ void append_plato_main_output_stage
     }
     auto tOutputStage = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
-    auto tOutputOperation = tOutputStage.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"PlatoMainOutput", "platomain"}, tOutputOperation);
-    XMLGen::append_default_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
-    XMLGen::append_deterministic_qoi_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
-    XMLGen::append_random_qoi_samples_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
-    XMLGen::append_random_qoi_statistics_to_plato_main_output_stage(aXMLMetaData, tOutputOperation);
+    XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
+    XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
 }
 // function append_plato_main_output_stage
 /******************************************************************************/

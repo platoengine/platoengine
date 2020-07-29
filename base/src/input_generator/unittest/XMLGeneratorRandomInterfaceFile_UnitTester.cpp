@@ -119,21 +119,52 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     pugi::xml_document tDocument;
     XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
 
-    // TEST RESULTS
+    // TEST STAGE ARGUMENTS
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
-    std::vector<std::string> tGoldKeys = {"Name", "Operation"};
-    std::vector<std::string> tGoldValues = {"Output To File", ""};
+    std::vector<std::string> tGoldKeys = {"Name", "Operation", "Operation"};
+    std::vector<std::string> tGoldValues = {"Output To File", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
+    // TEST COMPUTE STATISTICS OPERATION
     auto tOperation = tStage.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Name", "PerformerName", "For", "Output", "Output"};
+    std::vector<std::string> tValues = {"compute vonmises statistics", "platomain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises mean", "vonmises mean"}, tOutput);
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_FALSE(tOutput.empty());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises standard deviation", "vonmises standard deviation"}, tOutput);
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_TRUE(tOutput.empty());
+
+    auto tOuterFor = tOperation.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInput = tInnerFor.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tKeys = {"ArgumentName", "SharedDataName"};
+    tValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+               "vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+
+    // TEST PLATOMAIN OUTPUT OPERATION
+    tOperation = tOperation.next_sibling("Operation");
     ASSERT_FALSE(tOperation.empty());
     tGoldKeys = {"Name", "PerformerName", "Input", "Input", "Input", "Input", "For", "Input", "Input"};
     tGoldValues = {"PlatoMainOutput", "platomain", "", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperation);
 
     // DEFAULT QoIs
-    auto tInput = tOperation.child("Input");
+    tInput = tOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"topology", "Topology"}, tInput);
     tInput = tInput.next_sibling("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"control", "Control"}, tInput);
@@ -147,9 +178,9 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises standard deviation", "vonmises standard deviation"}, tInput);
 
     // RANDOM QoIs
-    auto tOuterFor = tOperation.child("For");
+    tOuterFor = tOperation.child("For");
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
-    auto tInnerFor = tOuterFor.child("For");
+    tInnerFor = tOuterFor.child("For");
     PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
     tInput = tInnerFor.child("Input");
     tGoldKeys = {"ArgumentName", "SharedDataName"};
