@@ -513,7 +513,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidQoI)
     std::string tStringInput =
         "begin output\n"
         "   scenario 1\n"
-        "   output_quantities_of_interest dispx dispy dispz hippo\n"
+        "   quantities_of_interest dispx dispy dispz hippo\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -527,8 +527,8 @@ TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidRandomQoI)
     std::string tStringInput =
         "begin output\n"
         "   scenario 1\n"
-        "   output_quantities_of_interest dispx dispy dispz\n"
-        "   compute_quantities_of_interest_statistics dispx dispy hippo dispz\n"
+        "   quantities_of_interest dispx dispy dispz\n"
+        "   statistics dispx dispy hippo dispz\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -542,7 +542,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
     std::string tStringInput =
         "begin output\n"
         "   scenario 1\n"
-        "   output_quantities_of_interest dispx dispy dispz temperature\n"
+        "   quantities_of_interest dispx dispy dispz temperature\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -571,7 +571,7 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
     std::string tStringInput =
         "begin output\n"
         "   scenario 1\n"
-        "   compute_quantities_of_interest_statistics accumulated_plastic_strain temperature\n"
+        "   statistics accumulated_plastic_strain temperature\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -621,8 +621,8 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicPlusRandom)
     std::string tStringInput =
         "begin output\n"
         "   scenario 1\n"
-        "   output_quantities_of_interest dispx dispy dispz temperature\n"
-        "   compute_quantities_of_interest_statistics accumulated_plastic_strain temperature\n"
+        "   quantities_of_interest dispx dispy dispz temperature\n"
+        "   statistics accumulated_plastic_strain temperature\n"
         "end output\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
