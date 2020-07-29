@@ -444,14 +444,10 @@ TEST(PlatoTestXMLGenerator, AppendAttributes)
 
 TEST(PlatoTestXMLGenerator, AppendQoiStatisticsSharedData)
 {
-    std::cout << "1\n";
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    std::cout << "2\n";
     tInputData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
-    std::cout << "3\n";
     XMLGen::append_qoi_statistics_shared_data(tInputData, tDocument);
-    std::cout << "4\n";
 
     auto tSharedData = tDocument.child("SharedData");
     ASSERT_FALSE(tSharedData.empty());

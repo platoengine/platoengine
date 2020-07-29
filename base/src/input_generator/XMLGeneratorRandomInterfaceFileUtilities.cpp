@@ -63,29 +63,20 @@ void append_qoi_statistics_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    std::cout << "11\n";
     auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    std::cout << "12\n";
     for(auto& tOutputDataID : tOutputDataIDs)
     {
-    std::cout << "13\n";
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
-    std::cout << "14 = tLayout = " << tLayout << "\n";
         auto tMeanSharedData = tOutputDataID + " mean";
-    std::cout << "16\n";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
-    std::cout << "17\n";
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
-    std::cout << "18\n";
 
         auto tStdDevSharedData = tOutputDataID + " standard deviation";
         tValues = {tStdDevSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
         tSharedDataNode = aDocument.append_child("SharedData");
-    std::cout << "19\n";
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
-    std::cout << "20\n";
     }
 }
 //function append_qoi_statistics_shared_data
