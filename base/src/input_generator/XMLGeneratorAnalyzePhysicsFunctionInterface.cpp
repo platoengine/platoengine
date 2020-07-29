@@ -203,6 +203,26 @@ transform_analyze_output_keywords
     return tOutput;
 }
 
+inline std::vector<std::string>
+output_quanitites_of_interests
+(const XMLGen::Output& aOutput)
+{
+    std::vector<std::string> tOutput;
+    auto tRandomQoIs = aOutput.randomIDs();
+    for(auto& tQoI : tRandomQoIs)
+    {
+        tOutput.push_back(tQoI);
+    }
+
+    auto tDeterministicQoIs = aOutput.deterministicIDs();
+    for(auto& tQoI : tDeterministicQoIs)
+    {
+        tOutput.push_back(tQoI);
+    }
+
+    return tOutput;
+}
+
 /******************************************************************************//**
  * \fn append_plottable_option
  * \brief Append plottable output keywords.
@@ -213,12 +233,14 @@ inline void append_plottable_option
 (const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tOutputQoIs = aOutput.deterministicIDs();
-    if(tOutputQoIs.empty())
+    auto tRandomQoIs = aOutput.randomIDs();
+    auto tDeterministicQoIs = aOutput.deterministicIDs();
+    if(tDeterministicQoIs.empty() && tRandomQoIs.empty())
     {
         return;
     }
 
+    auto tOutputQoIs = XMLGen::Private::output_quanitites_of_interests(aOutput);
     auto tValidAnalyzeOutputKeywords = XMLGen::Private::transform_analyze_output_keywords(tOutputQoIs);
     auto tTransformQoIIDs = XMLGen::transform_tokens(tValidAnalyzeOutputKeywords);
     tTransformQoIIDs.insert(0u, "{");
