@@ -49,9 +49,9 @@ void write_stochastic_plato_main_operations_xml_file
     XMLGen::append_compute_volume_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
 
-    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
+    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
 
     XMLGen::append_update_problem_to_plato_main_operation(aXMLMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);

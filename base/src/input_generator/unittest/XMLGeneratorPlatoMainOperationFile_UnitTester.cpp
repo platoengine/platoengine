@@ -870,12 +870,10 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoMainOperation)
 
 TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 {
-    // TODO: REFACTOR DUE TO NEW CHANGES IN INPUT ARGUMENTS - ALSO ADD MEAN_PLUS_K_STD_DEV ARGUMENT
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     ASSERT_NO_THROW(XMLGen::append_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
-    tDocument.save_file("dummy.xml", " ");
 
     // TEST RESULTS AGAINST GOLD VALUES
     auto tOperation = tDocument.child("Operation");
@@ -1360,9 +1358,9 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     +"</Output></CriterionValue><CriterionGradient><Layout>NodalField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
     +"<ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
     +"</Input></For></For><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName></Output></CriterionGradient></Operation><Operation>"
-    +"<Function>MeanPlusStdDev</Function><Name>vonmisesStatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
+    +"<Function>MeanPlusStdDev</Function><Name>computevonmisesstatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
     +"<ArgumentName>vonmises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesStdDev</ArgumentName></Output>"
+    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesmean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesstandarddeviation</ArgumentName></Output>"
     +"</Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name><Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName>"
     +"</Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
     +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
