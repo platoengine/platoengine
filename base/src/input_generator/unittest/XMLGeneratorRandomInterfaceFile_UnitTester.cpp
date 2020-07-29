@@ -118,7 +118,6 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", " ");
 
     // TEST RESULTS
     auto tStage = tDocument.child("Stage");

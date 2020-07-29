@@ -55,6 +55,47 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     Plato::system("rm -f plato_analyze_operations.xml");
 }
 
+TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_qoi_statistics_operation(tMetaData, tDocument);
+
+    // TEST OPERATION ARGUMENTS
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Name", "PerformerName", "For", "Output", "Output"};
+    std::vector<std::string> tValues = {"compute vonmises statistics", "platomain", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    // TEST OUTPUTS
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises mean", "vonmises mean"}, tOutput);
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_FALSE(tOutput.empty());
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"vonmises standard deviation", "vonmises standard deviation"}, tOutput);
+    tOutput = tOutput.next_sibling("Output");
+    ASSERT_TRUE(tOutput.empty());
+
+    // TEST RANDOM QoIs
+    auto tOuterFor = tOperation.child("For");
+    ASSERT_FALSE(tOuterFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+    auto tInnerFor = tOuterFor.child("For");
+    ASSERT_FALSE(tInnerFor.empty());
+    PlatoTestXMLGenerator::test_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+    auto tInput = tInnerFor.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    tKeys = {"ArgumentName", "SharedDataName"};
+    tValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+               "vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;

@@ -188,6 +188,16 @@ void append_plato_main_performer
 (pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_compute_qoi_statistics_operation
+ * \brief Append compute QoI statistics operation to output stage
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_compute_qoi_statistics_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_filter_control_operation
  * \brief Append filter control operation to PUGI XML document.
  * \param [in/out] aParentNode pugi::xml_node
