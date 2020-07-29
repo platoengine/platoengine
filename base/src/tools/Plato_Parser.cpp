@@ -337,15 +337,6 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                         throw Plato::ParsingException(ss.str());
                     }
 
-                    // check for nutty ranges
-                    if( tIntRange > 1000 )
-                    {
-                        std::stringstream ss;
-                        ss << "Range (from: " << tIntFrom << ", to: " << tIntTo << ", by: " 
-                           << tIntBy << ") would result in " << tIntRange << " values. " << std::endl;
-                        throw Plato::ParsingException(ss.str());
-                    }
-
                     auto& tValues = tArrays[tVarName];
                     for( int i=tIntFrom; i<=tIntTo; i+=tIntBy )
                     {
@@ -405,15 +396,6 @@ PugiParser::preProcess(std::shared_ptr<pugi::xml_document> doc)
                             std::stringstream ss;
                             ss << "Range (from: " << tRealFrom << ", to: " << tRealTo << ", by: " 
                                << tRealBy << ") doesn't end." << std::endl;
-                            throw Plato::ParsingException(ss.str());
-                        }
-
-                        // check for nutty ranges
-                        if( tNumReals > 1000 )
-                        {
-                            std::stringstream ss;
-                            ss << "Range (from: " << tRealFrom << ", to: " << tRealTo << ", by: " 
-                               << tRealBy << ") would result in " << tNumReals << " values. " << std::endl;
                             throw Plato::ParsingException(ss.str());
                         }
                     }
