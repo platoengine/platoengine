@@ -99,22 +99,22 @@ void append_qoi_statistics_to_output_operation
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
- * \fn append_deterministic_qoi_inputs_to_output_operation
+ * \fn append_deterministic_qoi_to_output_operation
  * \brief Append deterministic Quantities of Interest (QoI) inputs to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_deterministic_qoi_inputs_to_output_operation
+void append_deterministic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
- * \fn append_nondeterministic_qoi_inputs_to_output_operation
+ * \fn append_stochastic_qoi_to_output_operation
  * \brief Append nondeterministic Quantities of Interest (QoI) inputs to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_nondeterministic_qoi_inputs_to_output_operation
+void append_stochastic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode);
 

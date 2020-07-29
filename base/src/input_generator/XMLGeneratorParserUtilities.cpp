@@ -254,8 +254,8 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
 
 std::string check_data_layout_keyword(const std::string& aInput)
 {
-    auto tLowerKey = XMLGen::to_lower(aInput);
     XMLGen::ValidLayoutKeys tValidKeys;
+    auto tLowerKey = XMLGen::to_lower(aInput);
     auto tItr = tValidKeys.mKeys.find(tLowerKey);
     if(tItr == tValidKeys.mKeys.end())
     {
@@ -267,8 +267,8 @@ std::string check_data_layout_keyword(const std::string& aInput)
 
 std::string check_output_keyword(const std::string& aInput)
 {
-    auto tLowerKey = XMLGen::to_lower(aInput);
     XMLGen::ValidOutputKeys tValidKeys;
+    auto tLowerKey = XMLGen::to_lower(aInput);
     auto tItr = tValidKeys.mKeys.find(tLowerKey);
     if(tItr == tValidKeys.mKeys.end())
     {
@@ -277,6 +277,19 @@ std::string check_output_keyword(const std::string& aInput)
     return tItr->first;
 }
 // check_output_keyword
+
+std::string return_output_qoi_data_layout(const std::string& aInput)
+{
+    XMLGen::ValidOutputKeys tValidKeys;
+    auto tLowerKey = XMLGen::to_lower(aInput);
+    auto tItr = tValidKeys.mKeys.find(tLowerKey);
+    if(tItr == tValidKeys.mKeys.end())
+    {
+        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+    }
+    return tItr->second;
+}
+// return_output_qoi_data_layout
 
 std::string check_data_layout(const std::string& aInput)
 {

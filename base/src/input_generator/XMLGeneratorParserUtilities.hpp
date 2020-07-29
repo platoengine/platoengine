@@ -151,6 +151,15 @@ std::string check_data_layout_keyword(const std::string& aInput);
 std::string check_output_keyword(const std::string& aInput);
 
 /******************************************************************************//**
+ * \fn return_output_qoi_data_layout
+ * \brief Return data layout for supported output quantity of interest (QoI). \n
+ * Throw error if QoI keyword is not supported.
+ * \param [in] aInput quantity of interest keyword
+ * \return valid data layout
+**********************************************************************************/
+std::string return_output_qoi_data_layout(const std::string& aInput);
+
+/******************************************************************************//**
  * \fn check_data_layout
  * \brief Throw error if 'data layout' keyword value is not supported.
  * \param [in] aInput 'data layout' keyword

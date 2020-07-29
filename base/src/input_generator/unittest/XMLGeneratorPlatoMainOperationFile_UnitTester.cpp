@@ -1119,10 +1119,10 @@ TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name", "Input", "Input"}, {"PlatoMainOutput", "Plato Main Output", "", ""}, tOperation);
     auto tInput = tOperation.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"topology"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"topology", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"control"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"control", "Nodal Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendSurfaceExtractionToOutputOperation)
@@ -1164,10 +1164,10 @@ TEST(PlatoTestXMLGenerator, AppendDefaultQoiToOutputOperation)
 
     auto tInput = tOperation.child("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"topology"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"topology", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"control"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"control", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient id-0"}, tInput);
@@ -1202,11 +1202,12 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy_Stress", "element field");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("dispX", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
-    ASSERT_NO_THROW(XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
+    ASSERT_NO_THROW(XMLGen::append_stochastic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
 
     auto tFor = tOperation.child("For");
@@ -1239,7 +1240,7 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     auto tOperation = tDocument.append_child("Operation");
-    ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_inputs_to_output_operation(tXMLMetaData, tOperation));
+    ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
@@ -1356,33 +1357,30 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tXMLMetaData.append(tScenario);
     tXMLMetaData.objective_number_standard_deviations = "1";
     tXMLMetaData.mOutputMetaData.outputData("true");
+    tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     XMLGen::write_stochastic_plato_main_operations_xml_file(tXMLMetaData);
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
-    auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function>")
-    +"<Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName></Input><Input><ArgumentName>control</ArgumentName></Input><Forvar=\"SampleIndex\"in=\"Samples\">"
-    +"<Input><ArgumentName>vonmises{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function>"
-    +"<Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation>"
-    +"<Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName></Input>"
-    +"<Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name>"
-    +"<Discretization>density</Discretization><Input><ArgumentName>UpperBoundValue</ArgumentName></Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation>"
-    +"<Operation><Function>MeanPlusStdDev</Function><Name>ComputeNon-DeterministicObjectiveValue</Name><Layout>Scalar</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
-    +"<Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>ObjectiveMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>ObjectiveStdDev</ArgumentName>"
-    +"</Output><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDev</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDevGradient"
-    +"</Function><Name>ComputeNon-DeterministicObjectiveGradient</Name><Layout>NodalField</Layout><CriterionValue><Layout>Global</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\">"
-    +"<Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>ObjectiveMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>ObjectiveStdDev</ArgumentName>"
-    +"</Output></CriterionValue><CriterionGradient><Layout>NodalField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
-    +"<ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName></Output></CriterionGradient></Operation><Operation>"
-    +"<Function>MeanPlusStdDev</Function><Name>computevonmisesstatistics</Name><Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
-    +"<ArgumentName>vonmises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
-    +"</Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesmean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>vonmisesstandarddeviation</ArgumentName></Output>"
-    +"</Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name><Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName>"
-    +"</Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
-    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function><Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName>")
+    +"<Layout>NodalField</Layout></Input><Input><ArgumentName>control</ArgumentName><Layout>NodalField</Layout></Input><Input><ArgumentName>vonmisesmean</ArgumentName><Layout>ElementField</Layout></Input><Input><ArgumentName>vonmisesstandarddeviation</ArgumentName>"
+    +"<Layout>ElementField</Layout></Input><Forvar=\"SampleIndex\"in=\"Samples\"><Input><ArgumentName>vonmises{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function><Name>InitializeField</Name>"
+    +"<Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation><Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization>"
+    +"<Input><ArgumentName>LowerBoundValue</ArgumentName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization>"
+    +"<Input><ArgumentName>UpperBoundValue</ArgumentName></Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDev</Function><Name>ComputeNon-DeterministicObjectiveValue</Name><Layout>Scalar</Layout>"
+    +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName>"
+    +"<Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability></Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>ObjectiveMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic>"
+    +"<ArgumentName>ObjectiveStdDev</ArgumentName></Output><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDev</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDevGradient</Function>"
+    +"<Name>ComputeNon-DeterministicObjectiveGradient</Name><Layout>NodalField</Layout><CriterionValue><Layout>Global</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input>"
+    +"<ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability></Input></For></For><Output><Statistic>mean</Statistic>"
+    +"<ArgumentName>ObjectiveMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic><ArgumentName>ObjectiveStdDev</ArgumentName></Output></CriterionValue><CriterionGradient><Layout>NodalField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\">"
+    +"<Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>ObjectiveGradient{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName><Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability>"
+    +"</Input></For></For><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDevGradient</ArgumentName></Output></CriterionGradient></Operation><Operation><Function>MeanPlusStdDev</Function><Name>computevonmisesstatistics</Name>"
+    +"<Layout>ElementField</Layout><Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>vonmises{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName>"
+    +"<Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability></Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>vonmisesmean</ArgumentName></Output><Output><Statistic>std_dev</Statistic>"
+    +"<ArgumentName>vonmisesstandarddeviation</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name><Gradient>False</Gradient>"
+    +"<Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient><Input><ArgumentName>Field</ArgumentName></Input>"
+    +"<Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_operations.xml");
 }

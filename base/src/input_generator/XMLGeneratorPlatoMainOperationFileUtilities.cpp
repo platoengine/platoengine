@@ -192,7 +192,7 @@ void append_qoi_statistics_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_deterministic_qoi_inputs_to_output_operation
+void append_deterministic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
@@ -205,14 +205,19 @@ void append_deterministic_qoi_inputs_to_output_operation
         XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
     }
 }
-// function append_deterministic_qoi_inputs_to_output_operation
+// function append_deterministic_qoi_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_nondeterministic_qoi_inputs_to_output_operation
+void append_stochastic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
+    if(aXMLMetaData.mOutputMetaData.outputSamples() == false)
+    {
+        return;
+    }
+
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
     for(auto& tID : tIDs)
     {
@@ -225,7 +230,7 @@ void append_nondeterministic_qoi_inputs_to_output_operation
         XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
     }
 }
-// function append_nondeterministic_qoi_inputs_to_output_operation
+// function append_stochastic_qoi_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -248,9 +253,14 @@ void append_default_qoi_to_output_operation
  pugi::xml_node &aParentNode)
 {
     auto tInput = aParentNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"topology"}, tInput);
+    auto tLayout = XMLGen::return_output_qoi_data_layout("topology");
+    auto tValidLayoutKeyword = XMLGen::check_data_layout_keyword(tLayout);
+    XMLGen::append_children({"ArgumentName", "Layout"}, {"topology", tValidLayoutKeyword}, tInput);
+
     tInput = aParentNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"control"}, tInput);
+    tLayout = XMLGen::return_output_qoi_data_layout("control");
+    tValidLayoutKeyword = XMLGen::check_data_layout_keyword(tLayout);
+    XMLGen::append_children({"ArgumentName", "Layout"}, {"control", tValidLayoutKeyword}, tInput);
     XMLGen::append_objective_gradient_to_output_operation(aXMLMetaData, aParentNode);
     XMLGen::append_constraint_gradient_to_output_operation(aXMLMetaData, aParentNode);
 }
@@ -290,8 +300,9 @@ void append_output_to_plato_main_operation
     auto tOperation = aDocument.append_child("Operation");
     XMLGen::append_children_to_output_operation(aXMLMetaData, tOperation);
     XMLGen::append_default_qoi_to_output_operation(aXMLMetaData, tOperation);
-    XMLGen::append_deterministic_qoi_inputs_to_output_operation(aXMLMetaData, tOperation);
-    XMLGen::append_nondeterministic_qoi_inputs_to_output_operation(aXMLMetaData, tOperation);
+    XMLGen::append_qoi_statistics_to_output_operation(aXMLMetaData, tOperation);
+    XMLGen::append_stochastic_qoi_to_output_operation(aXMLMetaData, tOperation);
+    XMLGen::append_deterministic_qoi_to_output_operation(aXMLMetaData, tOperation);
     XMLGen::append_surface_extraction_to_output_operation(aXMLMetaData, tOperation);
 }
 // function append_output_to_plato_main_operation
