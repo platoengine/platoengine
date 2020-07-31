@@ -114,6 +114,16 @@ void append_objective_gradient_stage
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_write_ouput_operation
+ * \brief Append write output operation to output stage.
+ * \param [in]     aMetaData    Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_write_ouput_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_plato_main_output_stage
  * \brief Append plato main output stage to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input data

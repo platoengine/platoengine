@@ -144,7 +144,7 @@ public:
         }
         else if(aID.empty())
         {
-            THROWERR("XML Generator Input Metadata: input 'scenario' identification (id) argument is empty.")
+            THROWERR("XML Generator Input Metadata: 'scenario' identification (id) input argument is empty.")
         }
         size_t tIndex = 0u;
         auto tFoundMatch = false;

@@ -315,7 +315,65 @@ void append_constraint_gradient_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_default_qoi_to_plato_main_output_stage
+inline void append_random_qoi_outputs
+(const XMLGen::Output& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOutputQoIs = aMetaData.randomIDs();
+    for(auto& tQoI : tOutputQoIs)
+    {
+        auto tForNode = aParentNode.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
+        tForNode = tForNode.append_child("For");
+        XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
+        auto tOutput = tForNode.append_child("Output");
+        auto tArgumentName = aMetaData.randomArgumentName(tQoI);
+        auto tSharedDataName = aMetaData.randomSharedDataName(tQoI);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
+    }
+}
+// function append_random_qoi_outputs
+/******************************************************************************/
+
+/******************************************************************************/
+inline void append_deterministic_qoi_outputs
+(const XMLGen::Output& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tOutputQoIs = aMetaData.deterministicIDs();
+    for(auto& tQoI : tOutputQoIs)
+    {
+        auto tOutput = aParentNode.append_child("Output");
+        auto tArgumentName = aMetaData.deterministicArgumentName(tQoI);
+        auto tSharedDataName = aMetaData.deterministicSharedDataName(tQoI);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
+    }
+}
+// function append_deterministic_qoi_outputs
+/******************************************************************************/
+
+/******************************************************************************/
+void append_write_ouput_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    if(aMetaData.mOutputMetaData.outputIDs().empty() || (aMetaData.mOutputMetaData.outputData() == false))
+    {
+        return;
+    }
+
+    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
+    auto tPerformerName = aMetaData.scenario(tScenarioID).performer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Write Output", tPerformerName}, tOperationNode);
+    XMLGen::append_random_qoi_outputs(aMetaData.mOutputMetaData, tOperationNode);
+    XMLGen::append_deterministic_qoi_outputs(aMetaData.mOutputMetaData, tOperationNode);
+}
+// function append_write_ouput_operation
+/******************************************************************************/
+
+/******************************************************************************/
+inline void append_default_qoi_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -330,7 +388,7 @@ void append_default_qoi_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_random_qoi_samples_to_plato_main_output_stage
+inline void append_random_qoi_samples_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -356,7 +414,7 @@ void append_random_qoi_samples_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_random_qoi_statistics_to_plato_main_output_stage
+inline void append_random_qoi_statistics_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -376,7 +434,7 @@ void append_random_qoi_statistics_to_plato_main_output_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_deterministic_qoi_to_plato_main_output_stage
+inline void append_deterministic_qoi_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -417,6 +475,7 @@ void append_plato_main_output_stage
     }
     auto tOutputStage = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+    XMLGen::append_write_ouput_operation(aXMLMetaData, tOutputStage);
     XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
     XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
 }

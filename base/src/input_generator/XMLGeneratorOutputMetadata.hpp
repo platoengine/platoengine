@@ -156,6 +156,17 @@ public:
     std::string deterministicLayout(const std::string& aID) const;
 
     /******************************************************************************//**
+     * \fn argumentName
+     * \brief Return argument name of requested random quantities of interest. The \n
+     * function searches in the random and deterministic lists, if a match is found, \n
+     * the argument name is returned; else, an error is thrown since the requested
+     * quantity of interest is not in any list.
+     * \param [in] aID quantity of interest identifier
+     * \return argument name
+    **********************************************************************************/
+    std::string argumentName(const std::string& aID) const;
+
+    /******************************************************************************//**
      * \fn randomArgumentName
      * \brief Return argument name of requested random quantities of interest.
      * \param [in] aID quantity of interest identifier
@@ -172,6 +183,17 @@ public:
     std::string deterministicArgumentName(const std::string& aID) const;
 
     /******************************************************************************//**
+     * \fn sharedDataName
+     * \brief Return shared data name of requested random quantities of interest. The \n
+     * function searches in the random and deterministic lists, if a match is found, \n
+     * the shared data name is returned; else, an error is thrown since the requested
+     * quantity of interest is not in any list.
+     * \param [in] aID quantity of interest identifier
+     * \return shared data name
+    **********************************************************************************/
+    std::string sharedDataName(const std::string& aID) const;
+
+    /******************************************************************************//**
      * \fn randomSharedDataName
      * \brief Return shared data name of requested random quantities of interest.
      * \param [in] aID quantity of interest identifier
@@ -186,6 +208,14 @@ public:
      * \return shared data name
     **********************************************************************************/
     std::string deterministicSharedDataName(const std::string& aID) const;
+
+    /******************************************************************************//**
+     * \fn output_quanitites_of_interests
+     * \brief Return list of output quantities of interests (QoIs). Function returns \n
+     * both random and deterministic QoIs.
+     * \return list of output quantities of interests.
+    **********************************************************************************/
+    std::vector<std::string> outputIDs() const;
 
     /******************************************************************************//**
      * \fn randomIDs

@@ -21,7 +21,6 @@ TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_statistics_to_output_operation(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml", " ");
 
     auto tInput = tDocument.child("Input");
     ASSERT_FALSE(tInput.empty());

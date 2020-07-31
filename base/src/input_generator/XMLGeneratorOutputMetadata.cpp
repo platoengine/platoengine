@@ -129,6 +129,29 @@ std::string Output::deterministicLayout(const std::string& aID) const
     return (tItr->second.find("DataLayout")->second);
 }
 
+std::string Output::argumentName(const std::string& aID) const
+{
+    auto tRandomItr = mRandomQoIs.find(aID);
+    auto tFoundRandomMatch = tRandomItr != mRandomQoIs.end();
+    auto tDetrmItr = mDeterministicQoIs.find(aID);
+    auto tFoundDetrmMatch = tDetrmItr != mDeterministicQoIs.end();
+
+    std::string tOutput;
+    if(tFoundRandomMatch && !tFoundDetrmMatch)
+    {
+        tOutput = tRandomItr->second.find("ArgumentName")->second;
+    }
+    else if(!tFoundRandomMatch && tFoundDetrmMatch)
+    {
+        tOutput = tDetrmItr->second.find("ArgumentName")->second;
+    }
+    else
+    {
+        THROWERR(std::string("Output Metadata: Did not find QoI with identifier '") + aID + "'.")
+    }
+    return tOutput;
+}
+
 std::string Output::randomArgumentName(const std::string& aID) const
 {
     auto tItr = mRandomQoIs.find(aID);
@@ -149,6 +172,29 @@ std::string Output::deterministicArgumentName(const std::string& aID) const
     return (tItr->second.find("ArgumentName")->second);
 }
 
+std::string Output::sharedDataName(const std::string& aID) const
+{
+    auto tRandomItr = mRandomQoIs.find(aID);
+    auto tFoundRandomMatch = tRandomItr != mRandomQoIs.end();
+    auto tDetrmItr = mDeterministicQoIs.find(aID);
+    auto tFoundDetrmMatch = tDetrmItr != mDeterministicQoIs.end();
+
+    std::string tOutput;
+    if(tFoundRandomMatch && !tFoundDetrmMatch)
+    {
+        tOutput = tRandomItr->second.find("SharedDataName")->second;
+    }
+    else if(!tFoundRandomMatch && tFoundDetrmMatch)
+    {
+        tOutput = tDetrmItr->second.find("SharedDataName")->second;
+    }
+    else
+    {
+        THROWERR(std::string("Output Metadata: Did not find QoI with identifier '") + aID + "'.")
+    }
+    return tOutput;
+}
+
 std::string Output::randomSharedDataName(const std::string& aID) const
 {
     auto tItr = mRandomQoIs.find(aID);
@@ -167,6 +213,22 @@ std::string Output::deterministicSharedDataName(const std::string& aID) const
         THROWERR(std::string("Output Metadata: Did not find QoI with identifier '") + aID + "'.")
     }
     return (tItr->second.find("SharedDataName")->second);
+}
+
+std::vector<std::string> Output::outputIDs() const
+{
+    std::vector<std::string> tOutputIDs;
+    for(auto& tQoI : mRandomQoIs)
+    {
+        tOutputIDs.push_back(tQoI.first);
+    }
+
+    for(auto& tQoI : mDeterministicQoIs)
+    {
+        tOutputIDs.push_back(tQoI.first);
+    }
+
+    return tOutputIDs;
 }
 
 std::vector<std::string> Output::randomIDs() const
