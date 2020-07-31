@@ -41,6 +41,14 @@ void ParseOutput::setParameters()
     }
 }
 
+void ParseOutput::checkOutputData()
+{
+    if(!mData.isDeterministicMapEmpty() && !mData.isRandomMapEmpty())
+    {
+        THROWERR("Parse Output: Invalid use case - 'statistics' and 'data' keywords cannot be used simultaneously.")
+    }
+}
+
 void ParseOutput::checkScenario()
 {
     auto tItr = mTags.find("scenario");
@@ -54,6 +62,7 @@ void ParseOutput::checkScenario()
 void ParseOutput::checkMetaData()
 {
     this->checkScenario();
+    this->checkOutputData();
 }
 
 void ParseOutput::setRandomQoI()
