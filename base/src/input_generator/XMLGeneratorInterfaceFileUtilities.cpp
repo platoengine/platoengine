@@ -316,10 +316,13 @@ void append_constraint_gradient_to_plato_main_output_stage
 
 /******************************************************************************/
 inline void append_random_qoi_to_write_output_operation
-(const XMLGen::Output& aMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tOutputQoIs = aMetaData.randomIDs();
+    XMLGen::ValidPerformerOutputKeys tValidKeys;
+    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
+    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tOutputQoIs = aMetaData.mOutputMetaData.randomIDs();
     for(auto& tQoI : tOutputQoIs)
     {
         auto tForNode = aParentNode.append_child("For");
@@ -327,8 +330,8 @@ inline void append_random_qoi_to_write_output_operation
         tForNode = tForNode.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tForNode);
         auto tOutput = tForNode.append_child("Output");
-        auto tArgumentName = aMetaData.randomArgumentName(tQoI);
-        auto tSharedDataName = aMetaData.randomSharedDataName(tQoI);
+        auto tArgumentName = tValidKeys.argument(tCodeName, tQoI);
+        auto tSharedDataName = aMetaData.mOutputMetaData.randomSharedDataName(tQoI);
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
     }
 }
@@ -337,15 +340,18 @@ inline void append_random_qoi_to_write_output_operation
 
 /******************************************************************************/
 inline void append_deterministic_qoi_to_write_output_operation
-(const XMLGen::Output& aMetaData,
+(const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tOutputQoIs = aMetaData.deterministicIDs();
+    XMLGen::ValidPerformerOutputKeys tValidKeys;
+    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
+    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tOutputQoIs = aMetaData.mOutputMetaData.deterministicIDs();
     for(auto& tQoI : tOutputQoIs)
     {
         auto tOutput = aParentNode.append_child("Output");
-        auto tArgumentName = aMetaData.deterministicArgumentName(tQoI);
-        auto tSharedDataName = aMetaData.deterministicSharedDataName(tQoI);
+        auto tArgumentName = tValidKeys.argument(tCodeName, tQoI);
+        auto tSharedDataName = aMetaData.mOutputMetaData.deterministicSharedDataName(tQoI);
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
     }
 }
@@ -368,8 +374,8 @@ void append_write_ouput_operation
     auto tPerformerName = aMetaData.scenario(tScenarioID).performer();
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Write Output", tPerformerName}, tOperationNode);
-    XMLGen::append_random_qoi_to_write_output_operation(aMetaData.mOutputMetaData, tOperationNode);
-    XMLGen::append_deterministic_qoi_to_write_output_operation(aMetaData.mOutputMetaData, tOperationNode);
+    XMLGen::append_random_qoi_to_write_output_operation(aMetaData, tOperationNode);
+    XMLGen::append_deterministic_qoi_to_write_output_operation(aMetaData, tOperationNode);
 }
 // function append_write_ouput_operation
 /******************************************************************************/

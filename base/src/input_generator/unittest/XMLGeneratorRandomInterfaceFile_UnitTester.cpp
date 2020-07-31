@@ -56,6 +56,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation)
     XMLGen::InputData tMetaData;
     XMLGen::Scenario tScenario;
     tScenario.id("1");
+    tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze_1");
     tMetaData.append(tScenario);
     tMetaData.mOutputMetaData.outputData("true");
@@ -85,15 +86,14 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation)
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"dispx {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
-                   "dispx {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
+    tGoldValues = {"Solution X", "dispx {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 
     tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"vonmises", "vonmises"};
+    tGoldValues = {"Vonmises", "vonmises"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 }
 
@@ -165,7 +165,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"vonmises", "vonmises"};
+    tGoldValues = {"Vonmises", "vonmises"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
     tOutput = tOutput.next_sibling("Output");
     ASSERT_TRUE(tOutput.empty());
@@ -223,6 +223,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
 
     XMLGen::Scenario tScenario;
     tScenario.id("1");
+    tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze_1");
     tXMLMetaData.append(tScenario);
 
@@ -262,7 +263,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
+    tGoldValues = {"Vonmises",
                    "vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 
