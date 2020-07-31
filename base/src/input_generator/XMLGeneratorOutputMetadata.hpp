@@ -71,26 +71,25 @@ public:
     std::vector<std::string> tags() const;
 
     /******************************************************************************//**
-     * \fn append
-     * \brief Append parameter to metadata.
+     * \fn appendParam
+     * \brief Append POD parameters to metadata.
      * \param [in] aTag   parameter tag
      * \param [in] aValue parameter value
     **********************************************************************************/
-    void append(const std::string& aTag, const std::string& aValue);
+    void appendParam(const std::string& aTag, const std::string& aValue);
 
     /******************************************************************************//**
-     * \fn outputData
-     * \brief Return 'output_data_to_file' keyword value.
+     * \fn isOutputDisabled
+     * \brief Return 'disable' keyword value.
      * \return value
     **********************************************************************************/
-    bool outputData() const;
+    bool isOutputDisabled() const;
 
     /******************************************************************************//**
-     * \fn outputData
-     * \brief Set 'output_data_to_file' keyword
-     * \param [in] aInput keyword value
+     * \fn disableOutput
+     * \brief Disable output to file.
     **********************************************************************************/
-    void outputData(const std::string& aInput);
+    void disableOutput();
 
     /******************************************************************************//**
      * \fn outputSamples

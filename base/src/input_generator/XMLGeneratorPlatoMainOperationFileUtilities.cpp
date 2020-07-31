@@ -293,7 +293,7 @@ void append_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(!aXMLMetaData.mOutputMetaData.outputData())
+    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
     {
         return;
     }

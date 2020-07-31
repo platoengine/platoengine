@@ -1108,7 +1108,6 @@ TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.outputData("true");
     ASSERT_NO_THROW(XMLGen::append_output_to_plato_main_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -1355,7 +1354,6 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tScenario.updateProblem("true");
     tXMLMetaData.append(tScenario);
     tXMLMetaData.objective_number_standard_deviations = "1";
-    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
     XMLGen::write_stochastic_plato_main_operations_xml_file(tXMLMetaData);

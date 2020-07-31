@@ -286,7 +286,7 @@ void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.outputData() == false)
+    if(aMetaData.mOutputMetaData.isOutputDisabled())
     {
         return;
     }

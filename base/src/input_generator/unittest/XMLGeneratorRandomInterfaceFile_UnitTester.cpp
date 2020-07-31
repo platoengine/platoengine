@@ -24,8 +24,8 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetFalse)
     tScenario.id("1");
     tScenario.performer("plato_analyze_1");
     tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.outputData("false");
     tMetaData.mOutputMetaData.scenarioID("1");
+    tMetaData.mOutputMetaData.disableOutput();
     tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 
@@ -42,7 +42,6 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetTrueButEmptyO
     tScenario.id("1");
     tScenario.performer("plato_analyze_1");
     tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.outputData("true");
     tMetaData.mOutputMetaData.scenarioID("1");
 
     pugi::xml_document tDocument;
@@ -59,7 +58,6 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation)
     tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze_1");
     tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.outputData("true");
     tMetaData.mOutputMetaData.scenarioID("1");
     tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
@@ -116,7 +114,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStage_EmptyStage_OutputDisabled
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.outputData("false");
+    tXMLMetaData.mOutputMetaData.disableOutput();
     ASSERT_NO_THROW(XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument));
     auto tStage = tDocument.child("Stage");
     ASSERT_TRUE(tStage.empty());
@@ -141,7 +139,6 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     tXMLMetaData.append(tScenario);
 
     tXMLMetaData.mOutputMetaData.scenarioID("1");
-    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 
     // CALL FUNCTION
@@ -228,7 +225,6 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     tXMLMetaData.append(tScenario);
 
     tXMLMetaData.mOutputMetaData.scenarioID("1");
-    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
 
@@ -2709,7 +2705,6 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationOutputOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.outputData("true");
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_optimization_output_options(tXMLMetaData, tOptimizerNode);
 

@@ -24,7 +24,6 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendWriteOutputPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.mOutputMetaData.outputData("true");
     tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 }
@@ -52,6 +51,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     tScenario.cacheState("false");
     tScenario.updateProblem("true");
     tMetaData.append(tScenario);
+    tMetaData.mOutputMetaData.disableOutput();
 
     XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
 
@@ -210,8 +210,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tScenario.cacheState("false");
     tScenario.updateProblem("true");
     tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.outputData("false");
 
+    tMetaData.mOutputMetaData.disableOutput();
     ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");

@@ -35,7 +35,6 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
     tXMLMetaData.mOutputMetaData.scenarioID("1");
-    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");

@@ -53,7 +53,7 @@ std::vector<std::string> Output::tags() const
     return tTags;
 }
 
-void Output::append(const std::string& aTag, const std::string& aValue)
+void Output::appendParam(const std::string& aTag, const std::string& aValue)
 {
     if (aTag.empty())
     {
@@ -63,13 +63,13 @@ void Output::append(const std::string& aTag, const std::string& aValue)
     mMetaData[aTag] = aValue;
 }
 
-bool Output::outputData() const
+bool Output::isOutputDisabled() const
 {
-    return (this->getBool("output_data_to_file"));
+    return (this->getBool("disable"));
 }
-void Output::outputData(const std::string& aInput)
+void Output::disableOutput()
 {
-    mMetaData["output_data_to_file"] = aInput;
+    mMetaData["disable"] = "true";
 }
 
 bool Output::outputSamples() const

@@ -365,7 +365,7 @@ void append_write_ouput_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.outputIDs().empty() || aMetaData.mOutputMetaData.outputData() == false)
+    if(aMetaData.mOutputMetaData.outputIDs().empty() || aMetaData.mOutputMetaData.isOutputDisabled())
     {
         return;
     }
@@ -477,7 +477,7 @@ void append_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData.outputData() == false)
+    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
     {
         return;
     }
@@ -944,7 +944,7 @@ void append_optimization_output_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.mOutputMetaData.outputData())
+    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
     {
         return;
     }

@@ -17,11 +17,11 @@ namespace XMLGen
 void ParseOutput::allocate()
 {
     mTags.clear();
+    mTags.insert({ "data", { { {"data"}, ""}, "" } });
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
+    mTags.insert({ "disable", { { {"disable"}, ""}, "false" } });
     mTags.insert({ "statistics", { { {"statistics"}, ""}, "" } });
     mTags.insert({ "output_samples", { { {"output_samples"}, ""}, "false" } });
-    mTags.insert({ "output_data_to_file", { { {"output_data_to_file"}, ""}, "true" } });
-    mTags.insert({ "quantities_of_interest", { { {"quantities_of_interest"}, ""}, "" } });
 }
 
 void ParseOutput::setParameters()
@@ -31,12 +31,12 @@ void ParseOutput::setParameters()
         if(tTag.second.first.second.empty())
         {
             auto tDefaultValue = tTag.second.second;
-            mData.append(tTag.first, tDefaultValue);
+            mData.appendParam(tTag.first, tDefaultValue);
         }
         else
         {
             auto tInputValue = tTag.second.first.second;
-            mData.append(tTag.first, tInputValue);
+            mData.appendParam(tTag.first, tInputValue);
         }
     }
 }
@@ -49,6 +49,11 @@ void ParseOutput::checkScenario()
         THROWERR(std::string("Parse Output: Scenario identifier (id) is not defined. ")
            + "Output quantities of interest must be associated with a Plato 'scenario'.")
     }
+}
+
+void ParseOutput::checkMetaData()
+{
+    this->checkScenario();
 }
 
 void ParseOutput::setRandomQoI()
@@ -75,7 +80,7 @@ void ParseOutput::setRandomQoI()
 
 void ParseOutput::setDeterministicQoI()
 {
-    auto tItr = mTags.find("quantities_of_interest");
+    auto tItr = mTags.find("data");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputToLayoutKeys tValidKeys;
@@ -125,7 +130,7 @@ void ParseOutput::parse(std::istream &aInputFile)
         {
             XMLGen::parse_input_metadata( { "end", "output" }, aInputFile, mTags);
             this->setMetaData();
-            this->checkScenario();
+            this->checkMetaData();
         }
     }
 }
