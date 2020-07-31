@@ -17,21 +17,6 @@
 namespace PlatoTestXMLGenerator
 {
 
-TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_NoOutput)
-{
-    XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.scenarioID("1");
-
-    pugi::xml_document tDocument;
-    append_write_ouput_operation(tMetaData, tDocument);
-    auto tOperation = tDocument.child("Operation");
-    ASSERT_TRUE(tOperation.empty());
-}
-
 TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetFalse)
 {
     XMLGen::InputData tMetaData;
@@ -45,7 +30,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetFalse)
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 
     pugi::xml_document tDocument;
-    append_write_ouput_operation(tMetaData, tDocument);
+    XMLGen::append_write_ouput_operation(tMetaData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
 }
@@ -57,11 +42,11 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetTrueButEmptyO
     tScenario.id("1");
     tScenario.performer("plato_analyze_1");
     tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.outputData("false");
+    tMetaData.mOutputMetaData.outputData("true");
     tMetaData.mOutputMetaData.scenarioID("1");
 
     pugi::xml_document tDocument;
-    append_write_ouput_operation(tMetaData, tDocument);
+    XMLGen::append_write_ouput_operation(tMetaData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
 }
@@ -79,7 +64,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation)
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 
     pugi::xml_document tDocument;
-    append_write_ouput_operation(tMetaData, tDocument);
+    XMLGen::append_write_ouput_operation(tMetaData, tDocument);
 
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
@@ -151,6 +136,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
 
     XMLGen::Scenario tScenario;
     tScenario.id("1");
+    tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze_1");
     tXMLMetaData.append(tScenario);
 

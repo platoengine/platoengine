@@ -267,7 +267,7 @@ std::string check_data_layout_keyword(const std::string& aInput)
 
 std::string check_output_keyword(const std::string& aInput)
 {
-    XMLGen::ValidOutputKeys tValidKeys;
+    XMLGen::ValidOutputToLayoutKeys tValidKeys;
     auto tLowerKey = XMLGen::to_lower(aInput);
     auto tItr = tValidKeys.mKeys.find(tLowerKey);
     if(tItr == tValidKeys.mKeys.end())
@@ -280,7 +280,7 @@ std::string check_output_keyword(const std::string& aInput)
 
 std::string return_output_qoi_data_layout(const std::string& aInput)
 {
-    XMLGen::ValidOutputKeys tValidKeys;
+    XMLGen::ValidOutputToLayoutKeys tValidKeys;
     auto tLowerKey = XMLGen::to_lower(aInput);
     auto tItr = tValidKeys.mKeys.find(tLowerKey);
     if(tItr == tValidKeys.mKeys.end())

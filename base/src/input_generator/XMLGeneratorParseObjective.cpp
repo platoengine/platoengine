@@ -473,10 +473,10 @@ void ParseObjective::checkEssentialBoundaryConditionIDs(const XMLGen::Objective 
     }
 }
 
-void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutputKeys)
+void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutputToLayoutKeys)
 {
-    XMLGen::ValidOutputKeys tValidKeys;
-    for (auto &tKeyword : ValidOutputKeys.output_for_plotting)
+    XMLGen::ValidOutputToLayoutKeys tValidKeys;
+    for (auto &tKeyword : ValidOutputToLayoutKeys.output_for_plotting)
     {
         auto tLowerKey = Plato::tolower(tKeyword);
         auto tItr =  tValidKeys.mKeys.find(tLowerKey);

@@ -23,7 +23,10 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tXMLMetaData.mProblemUpdateFrequency = "5";
     tXMLMetaData.optimization_type = "topology";
     XMLGen::Scenario tScenario;
+    tScenario.id("1");
     tScenario.updateProblem("true");
+    tScenario.code("plato_analyze");
+    tScenario.performer("plato_analyze_1");
     tXMLMetaData.append(tScenario);
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
@@ -31,6 +34,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.mOutputMetaData.scenarioID("1");
+    tXMLMetaData.mOutputMetaData.outputData("true");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
@@ -160,7 +165,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
-    Plato::system("rm -f plato_analyze_operations.xml");
+    //Plato::system("rm -f plato_analyze_operations.xml");
 }
 
 TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
@@ -790,52 +795,11 @@ TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
     Plato::system("rm -f amgx.json");
 }
 
-TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation_NoWriteOutputOperation)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tInputData;
-    ASSERT_NO_THROW(XMLGen::append_write_output_to_plato_analyze_operation(tInputData, tDocument));
-    auto tOperation = tDocument.child("Operation");
-    ASSERT_TRUE(tOperation.empty());
-}
-
 TEST(PlatoTestXMLGenerator, AppendDeterminsiticQoI_InvalidKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     ASSERT_THROW(tInputData.mOutputMetaData.appendDeterminsiticQoI("fluid pressure", "fpressure"), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, AppendWriteOutputToPlatoAnalyzeOperation)
-{
-    pugi::xml_document tDocument;
-    XMLGen::InputData tInputData;
-    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
-    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
-    tInputData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
-    ASSERT_NO_THROW(XMLGen::append_write_output_to_plato_analyze_operation(tInputData, tDocument));
-
-    auto tOperation = tDocument.child("Operation");
-    ASSERT_FALSE(tOperation.empty());
-    ASSERT_STREQ("Operation", tOperation.name());
-    std::vector<std::string> tKeys = {"Function", "Name", "Output", "Output", "Output"};
-    std::vector<std::string> tValues = {"WriteOutput", "Write Output", "", "", ""};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
-
-    auto tOutput = tOperation.child("Output");
-    ASSERT_FALSE(tOutput.empty());
-    ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Solution X"}, tOutput);
-
-    tOutput = tOutput.next_sibling("Output");
-    ASSERT_FALSE(tOutput.empty());
-    ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Solution Y"}, tOutput);
-
-    tOutput = tOutput.next_sibling("Output");
-    ASSERT_FALSE(tOutput.empty());
-    ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Solution Z"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_ErrorEmptyUpdateFrequencyKey)

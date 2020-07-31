@@ -56,7 +56,7 @@ void ParseOutput::setRandomQoI()
     auto tItr = mTags.find("statistics");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        XMLGen::ValidOutputKeys tValidKeys;
+        XMLGen::ValidOutputToLayoutKeys tValidKeys;
         std::vector<std::string> tTokens;
         XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)
@@ -78,7 +78,7 @@ void ParseOutput::setDeterministicQoI()
     auto tItr = mTags.find("quantities_of_interest");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
-        XMLGen::ValidOutputKeys tValidKeys;
+        XMLGen::ValidOutputToLayoutKeys tValidKeys;
         std::vector<std::string> tTokens;
         XMLGen::split(tItr->second.first.second, tTokens);
         for (auto &tToken : tTokens)

@@ -108,7 +108,7 @@ struct ValidEssentialBoundaryConditionsKeys
 };
 // struct ValidCriterionKeys
 
-struct ValidOutputKeys
+struct ValidOutputToLayoutKeys
 {
     /*!<
      * \brief Valid plato main output keywords. \n
@@ -125,7 +125,7 @@ struct ValidOutputKeys
           {"stress","element field"}, {"strain","element field"}
         };
 };
-// struct ValidOutputKeys
+// struct ValidOutputToLayoutKeys
 
 struct ValidPhysicsKeys
 {
@@ -231,21 +231,6 @@ struct ValidFilterKeys
 struct ValidAnalyzeOutputKeys
 {
     /*!<
-     * \brief Map from Plato Main input file output keywords to Plato Analyze output keywords.  These output keywords are \n
-     * recognized by Plato Analyze's Plato::Application interface and used by Plato Main to extract output data from \n
-     * Plato Analyze.  Plato Main is responsible for outputting these quanitities of interests through platomain.exo.
-     *
-     *                        i.e. map<plato_main_input_file_output_keyword, plato_analyze_output_keyword>. \n
-     **/
-    std::unordered_map<std::string, std::string> mKeys =
-        {
-          {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
-          {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"},
-          {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"}, {"backstress", "backstress"}, {"dispx", "Solution X"},
-          {"dispy", "Solution Y"}, {"dispz", "Solution Z"}, {"principal_stresses", "principal stresses"}, {"temperature", "Solution"}
-        };
-
-    /*!<
      * \brief Map from Plato Main input file output keywords to Plato Analyze plottable option output keywords. \n
      * The plottable feature is used by Plato Analyze to write output data into its global metadata map. Metadata \n
      * saved in Plato Analyze's metadata map can be accessed by Plato Main through the Plato Analyze application \n
@@ -253,7 +238,7 @@ struct ValidAnalyzeOutputKeys
      * Analyze into an exodus file, foregoing output through Plato Engine, by invoking the Visualization operation \n
      * in Plato Analyze.
      **/
-    std::unordered_map<std::string, std::string> mPlottable =
+    std::unordered_map<std::string, std::string> mKeys =
         {
           {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"}, {"accumulated_plastic_strain", "accumulated plastic strain"},
           {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
@@ -261,6 +246,60 @@ struct ValidAnalyzeOutputKeys
         };
 };
 // struct ValidAnalyzeOutputKeys
+
+struct ValidPerformerOutputKeys
+{
+private:
+    /*!<
+     * \brief Map from Plato Main input file output keywords to performer codes output argument keywords. These \n
+     * output argument keywords are recognized by the Plato::Application interface of the performer and are used \n
+     * to extract data from the performer. Thus, Plato Main relies on these output argument names to extract data \n
+     * from the performer, e.g. Plato Analyze. Plato Main relies on these output argument keywords to output the \n
+     * quantities of interests associated with these keywords in the platomain.exo file.
+     *
+     *      i.e. map<code_keyword, pair<plato_main_output_keyword, code_output_keyword>. \n
+     **/
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string> > mKeys =
+      {
+        { "plato_analyze", { {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
+          {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"},
+          {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
+          {"backstress", "backstress"}, {"dispx", "Solution X"}, {"dispy", "Solution Y"}, {"dispz", "Solution Z"},
+          {"principal_stresses", "principal stresses"}, {"temperature", "Solution"} }
+        }
+      };
+
+public:
+    /******************************************************************************//**
+     * \fn argument
+     * \brief Return valid output argument name.
+     * \param [in] aCode  code name
+     * \param [in] aKey   output keyword
+     * \return valid output argument name
+    **********************************************************************************/
+    std::string argument(const std::string& aCode, const std::string& aKey) const
+    {
+        if(aCode.empty())
+        {
+            THROWERR("Valid Performer Output Keys: input 'code' argument is empty.")
+        }
+        if(aKey.empty())
+        {
+            THROWERR("Valid Performer Output Keys: input 'key' argument is empty.")
+        }
+        auto tCodeItr = mKeys.find(aCode);
+        if(tCodeItr == mKeys.end())
+        {
+            THROWERR("Valid Performer Output Keys: code '" + aCode + "' is not supported.")
+        }
+        auto tKeyItr = tCodeItr->second.find(aKey);
+        if(tKeyItr == tCodeItr->second.end())
+        {
+            THROWERR("Valid Performer Output Keys: output keyword '" + aKey + "' is not supported by code '" + aCode + ".")
+        }
+        return (tKeyItr->second);
+    }
+};
 
 struct ValidAnalyzeMaterialPropertyKeys
 {

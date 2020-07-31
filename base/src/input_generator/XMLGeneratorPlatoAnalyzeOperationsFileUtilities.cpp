@@ -213,35 +213,6 @@ void append_compute_random_constraint_gradient_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_write_output_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument)
-{
-    if(aMetaData.mOutputMetaData.isDeterministicMapEmpty())
-    {
-        return;
-    }
-
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperation);
-
-    XMLGen::ValidAnalyzeOutputKeys tValidKeys;
-    auto tIDs = aMetaData.mOutputMetaData.deterministicIDs();
-    for(auto& tID : tIDs)
-    {
-        auto tKeyItr = tValidKeys.mKeys.find(tID);
-        if(tKeyItr == tValidKeys.mKeys.end())
-        {
-            THROWERR("Append Write Output To Plato Analyze Operation: "
-                + "Output keyword with tag '" + tID + "' is not supported.")
-        }
-        auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children({"ArgumentName"}, {tKeyItr->second}, tOutput);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
 XMLGen::Analyze::MaterialPropertyMetadata
 return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
@@ -306,6 +277,32 @@ void append_random_traction_vector_to_plato_analyze_operation
             auto tParameter = aParentNode.append_child("Parameter");
             XMLGen::append_children(tKeys, tValues, tParameter);
         }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_write_output_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    if(aMetaData.mOutputMetaData.outputData() == false)
+    {
+        return;
+    }
+
+    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
+    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperationNode);
+
+    XMLGen::ValidPerformerOutputKeys tValidKeys;
+    auto tOutputQoIs = aMetaData.mOutputMetaData.outputIDs();
+    for(auto& tQoI : tOutputQoIs)
+    {
+        auto tOutput = tOperationNode.append_child("Output");
+        auto tArgumentName = tValidKeys.argument(tCodeName, tQoI);
+        XMLGen::append_children({"ArgumentName"}, {tArgumentName}, tOutput);
     }
 }
 /******************************************************************************/

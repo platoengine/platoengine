@@ -194,8 +194,8 @@ transform_analyze_output_keywords
     XMLGen::ValidAnalyzeOutputKeys tValidKeys;
     for(auto& tKey : aKeywords)
     {
-        auto tItr = tValidKeys.mPlottable.find(tKey);
-        if(tItr != tValidKeys.mPlottable.end())
+        auto tItr = tValidKeys.mKeys.find(tKey);
+        if(tItr != tValidKeys.mKeys.end())
         {
             tOutput.push_back(tItr->second);
         }

@@ -21,6 +21,14 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendWriteOutputPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.mOutputMetaData.outputData("true");
+    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+}
+
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
 {
     XMLGen::InputData tMetaData;
@@ -38,6 +46,8 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     tConstraint.code("plato_analyze");
     tMetaData.constraints.push_back(tConstraint);
     XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.code("plato_analyze");
     tScenario.performer("plato_analyze_1");
     tScenario.cacheState("false");
     tScenario.updateProblem("true");

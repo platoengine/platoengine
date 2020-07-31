@@ -131,17 +131,6 @@ void append_compute_random_constraint_gradient_to_plato_analyze_operation
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_write_output_to_plato_analyze_operation
- * \brief Append write output operation to PUGI XML document. The operation is only \n
- * appended if the user specified output quantities of interest for visualization.
- * \param [in]     aMetaData Plato problem input data
- * \param [in/out] aDocument    pugi::xml_document
-**********************************************************************************/
-void append_write_output_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
  * \fn return_random_material_metadata_for_plato_analyze_operation_xml_file
  * \brief Return material metadata needed to write the plato analyze operation xml file.
  * \param [in] aRandomMetaData random samples metadata
@@ -169,6 +158,16 @@ void append_random_material_properties_to_plato_analyze_operation
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_random_traction_vector_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_write_output_to_plato_analyze_operation
+ * \brief Append random traction vector to the plato analyze operation xml file.
+ * \param [in]     aMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
 
