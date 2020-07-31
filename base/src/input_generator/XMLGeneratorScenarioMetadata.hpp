@@ -308,28 +308,28 @@ public:
 
     /******************************************************************************//**
      * \fn cacheState
-     * \brief Set string value for keyword 'enable_cache_state'.
+     * \brief Set string value for keyword 'cache_state'.
      * \param [in] aInput string value
     **********************************************************************************/
     void cacheState(const std::string& aInput);
 
     /******************************************************************************//**
      * \fn cacheState
-     * \brief Return bool value for keyword 'enable_cache_state'.
+     * \brief Return bool value for keyword 'cache_state'.
      * \return output bool
     **********************************************************************************/
     bool cacheState() const;
 
     /******************************************************************************//**
      * \fn updateProblem
-     * \brief Set string value for keyword 'enable_update_problem'.
+     * \brief Set string value for keyword 'update_problem'.
      * \param [in] aInput string value
     **********************************************************************************/
     void updateProblem(const std::string& aInput);
 
     /******************************************************************************//**
      * \fn updateProblem
-     * \brief Return bool value for keyword 'enable_update_problem'.
+     * \brief Return bool value for keyword 'update_problem'.
      * \return output bool
     **********************************************************************************/
     bool updateProblem() const;

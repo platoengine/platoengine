@@ -235,22 +235,22 @@ std::string Scenario::solverMaxNumIterations() const
 
 void Scenario::cacheState(const std::string& aInput)
 {
-    mMetaData["enable_cache_state"] = aInput;
+    mMetaData["cache_state"] = aInput;
 }
 
 bool Scenario::cacheState() const
 {
-    return (this->getBool("enable_cache_state"));
+    return (this->getBool("cache_state"));
 }
 
 void Scenario::updateProblem(const std::string& aInput)
 {
-    mMetaData["enable_update_problem"] = aInput;
+    mMetaData["update_problem"] = aInput;
 }
 
 bool Scenario::updateProblem() const
 {
-    return (this->getBool("enable_update_problem"));
+    return (this->getBool("update_problem"));
 }
 
 void Scenario::useNewAnalyzeUQWorkflow(const std::string& aInput)
