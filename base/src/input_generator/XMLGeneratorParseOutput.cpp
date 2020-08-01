@@ -41,6 +41,14 @@ void ParseOutput::setParameters()
     }
 }
 
+void ParseOutput::checkOutputData()
+{
+    if(!mData.isDeterministicMapEmpty() && !mData.isRandomMapEmpty())
+    {
+        THROWERR("Parse Output: Invalid use case - 'statistics' and 'data' keywords cannot be used simultaneously.")
+    }
+}
+
 void ParseOutput::checkService()
 {
     auto tItr = mTags.find("service");
@@ -54,6 +62,7 @@ void ParseOutput::checkService()
 void ParseOutput::checkMetaData()
 {
     this->checkService();
+    this->checkOutputData();
 }
 
 void ParseOutput::setRandomQoI()

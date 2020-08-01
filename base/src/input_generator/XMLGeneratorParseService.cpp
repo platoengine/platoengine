@@ -45,9 +45,9 @@ void ParseService::allocate()
     mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
     mTags.insert({ "performer", { { {"performer"}, ""}, "" } });
     mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "" } });
-    mTags.insert({ "enable_cache_state", { { {"enable_cache_state"}, ""}, "false" } });
+    mTags.insert({ "cache_state", { { {"cache_state"}, ""}, "false" } });
     mTags.insert({ "analyze_new_workflow", { { {"analyze_new_workflow"}, ""}, "false" } });
-    mTags.insert({ "enable_update_problem", { { {"enable_update_problem"}, ""}, "false" } });
+    mTags.insert({ "update_problem", { { {"update_problem"}, ""}, "false" } });
     mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });

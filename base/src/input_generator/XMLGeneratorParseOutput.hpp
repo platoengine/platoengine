@@ -37,6 +37,12 @@ private:
     void checkService();
 
     /******************************************************************************//**
+     * \fn checkOutputData
+     * \brief Check if 'statistics' and 'data' keywords are requested at the same time.
+    **********************************************************************************/
+    void checkOutputData();
+
+    /******************************************************************************//**
      * \fn checkMetaData
      * \brief Check if output metadata is set correctly.
     **********************************************************************************/

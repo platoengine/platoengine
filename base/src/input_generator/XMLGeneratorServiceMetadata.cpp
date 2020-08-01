@@ -235,22 +235,22 @@ std::string Service::solverMaxNumIterations() const
 
 void Service::cacheState(const std::string& aInput)
 {
-    mMetaData["enable_cache_state"] = aInput;
+    mMetaData["cache_state"] = aInput;
 }
 
 bool Service::cacheState() const
 {
-    return (this->getBool("enable_cache_state"));
+    return (this->getBool("cache_state"));
 }
 
 void Service::updateProblem(const std::string& aInput)
 {
-    mMetaData["enable_update_problem"] = aInput;
+    mMetaData["update_problem"] = aInput;
 }
 
 bool Service::updateProblem() const
 {
-    return (this->getBool("enable_update_problem"));
+    return (this->getBool("update_problem"));
 }
 
 void Service::useNewAnalyzeUQWorkflow(const std::string& aInput)
