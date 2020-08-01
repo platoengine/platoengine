@@ -18,7 +18,7 @@ namespace XMLGen
 struct Uncertainty
 {
 private:
-    std::unordered_map<std::string, std::string> mMetaData; /*!< scenario metadata, map< tag, value > */
+    std::unordered_map<std::string, std::string> mMetaData; /*!< service metadata, map< tag, value > */
 
 private:
     /******************************************************************************//**

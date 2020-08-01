@@ -8,7 +8,7 @@
 
 #include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorParseMetadata.hpp"
-#include "XMLGeneratorParserUtilities.hpp"
+#include <XMLGeneratorParserUtilities.hpp>
 
 namespace XMLGen
 {
@@ -31,10 +31,10 @@ private:
     void setParameters();
 
     /******************************************************************************//**
-     * \fn checkScenario
-     * \brief Check if 'scenario' keyword is defined.
+     * \fn checkService
+     * \brief Check if 'service' keyword is defined.
     **********************************************************************************/
-    void checkScenario();
+    void checkService();
 
     /******************************************************************************//**
      * \fn checkMetaData

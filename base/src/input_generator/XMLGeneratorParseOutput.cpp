@@ -18,7 +18,7 @@ void ParseOutput::allocate()
 {
     mTags.clear();
     mTags.insert({ "data", { { {"data"}, ""}, "" } });
-    mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
+    mTags.insert({ "service", { { {"service"}, ""}, "" } });
     mTags.insert({ "disable", { { {"disable"}, ""}, "false" } });
     mTags.insert({ "statistics", { { {"statistics"}, ""}, "" } });
     mTags.insert({ "output_samples", { { {"output_samples"}, ""}, "false" } });
@@ -41,19 +41,19 @@ void ParseOutput::setParameters()
     }
 }
 
-void ParseOutput::checkScenario()
+void ParseOutput::checkService()
 {
-    auto tItr = mTags.find("scenario");
+    auto tItr = mTags.find("service");
     if(tItr->second.first.second.empty())
     {
-        THROWERR(std::string("Parse Output: Scenario identifier (id) is not defined. ")
-           + "Output quantities of interest must be associated with a Plato 'scenario'.")
+        THROWERR(std::string("Parse Output: Service identifier (id) is not defined. ")
+           + "Output quantities of interest must be associated with a Plato 'service'.")
     }
 }
 
 void ParseOutput::checkMetaData()
 {
-    this->checkScenario();
+    this->checkService();
 }
 
 void ParseOutput::setRandomQoI()

@@ -21,7 +21,7 @@ struct Constraint
 {
 // private member data
 private:
-    std::unordered_map<std::string, std::string> mMetaData; /*!< scenario metadata, map< tag, value > */
+    std::unordered_map<std::string, std::string> mMetaData; /*!< service metadata, map< tag, value > */
 
 // private member functions
 private:

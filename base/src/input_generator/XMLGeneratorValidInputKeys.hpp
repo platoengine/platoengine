@@ -32,7 +32,7 @@ struct ValidPlatoInputFileMetaDataBlockKeys
      * \brief plato input file metadata block names
      **/
     std::vector<std::string> mKeys =
-        {"scenario", "objective", "constraint", "material", "block", "uncertainty", "mesh", "output"};
+        {"service", "objective", "constraint", "material", "block", "uncertainty", "mesh", "output"};
 };
 // struct ValidPlatoInputFileMetaDataBlockKeys
 

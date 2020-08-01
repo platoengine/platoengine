@@ -18,11 +18,11 @@ namespace Private
 /******************************************************************************//**
  * \fn append_simp_penalty_function
  * \brief Append Solid Isotropic Material with Penalization function inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_simp_penalty_function
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tPenaltyFunction = aParentNode.append_child("ParameterList");
@@ -46,11 +46,11 @@ inline void append_simp_penalty_function
  * \fn append_parabolic_pde_time_step_option
  * \brief Append parabolic partial differential equation (PDE) time step
  * integration inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_parabolic_pde_time_step_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
@@ -68,11 +68,11 @@ inline void append_parabolic_pde_time_step_option
  * \fn append_hyperbolic_pde_time_step_option
  * \brief Append hyperbolic parabolic partial differential equation (PDE) time
  * step integration inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_hyperbolic_pde_time_step_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
@@ -96,11 +96,11 @@ inline void append_hyperbolic_pde_time_step_option
  * \fn append_stabilized_elliptic_pde_time_step_option
  * \brief Append stabilized elliptic partial differential equation (PDE) time
  * stepping routine inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_stabilized_elliptic_pde_time_step_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
@@ -117,11 +117,11 @@ inline void append_stabilized_elliptic_pde_time_step_option
 /******************************************************************************//**
  * \fn append_pseudo_time_step_option
  * \brief Append plasticity physics pseudo time step routine inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_plasticity_pseudo_time_step_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepNode = aParentNode.append_child("ParameterList");
@@ -141,11 +141,11 @@ inline void append_plasticity_pseudo_time_step_option
 /******************************************************************************//**
  * \fn append_stabilized_elliptic_newton_solver_option
  * \brief Append stabilized elliptic Newton solver inputs.
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_stabilized_elliptic_newton_solver_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepping = aParentNode.append_child("ParameterList");
@@ -159,11 +159,11 @@ inline void append_stabilized_elliptic_newton_solver_option
 /******************************************************************************//**
  * \fn append_newton_raphson_solver_option
  * \brief Append Newton solver inputs (e.g. plasticity use case).
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_newton_raphson_solver_option
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node& aParentNode)
 {
     auto tTimeStepping = aParentNode.append_child("ParameterList");
@@ -232,11 +232,11 @@ inline void append_plottable_option
 /******************************************************************************//**
  * \fn append_state_gradient_projection_residual_to_analyze_input_deck
  * \brief Append state gradient projection residual inputs
- * \param [in]     aMetadata    Scenario metadata
+ * \param [in]     aMetadata    Service metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_state_gradient_projection_residual_to_analyze_input_deck
-(const XMLGen::Scenario& aMetadata,
+(const XMLGen::Service& aMetadata,
  pugi::xml_node &aParentNode)
 {
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
@@ -247,100 +247,100 @@ inline void append_state_gradient_projection_residual_to_analyze_input_deck
 /******************************************************************************//**
  * \fn append_elliptic_pde_to_analyze_input_deck
  * \brief Append elliptic partial differential equation (PDE) inputs.
- * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aService    Service metadata
  * \param [in]     aOutput      Output metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_elliptic_pde_to_analyze_input_deck
-(const XMLGen::Scenario& aScenario,
+(const XMLGen::Service& aService,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tPhysicsTag = aScenario.physics();
+    auto tPhysicsTag = aService.physics();
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
-    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aService, tPhysicsNode);
 }
 
 /******************************************************************************//**
  * \fn append_hyperbolic_pde_to_analyze_input_deck
  * \brief Append hyperbolic partial differential equation (PDE) inputs.
- * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aService    Service metadata
  * \param [in]     aOutput      Output metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_hyperbolic_pde_to_analyze_input_deck
-(const XMLGen::Scenario& aScenario,
+(const XMLGen::Service& aService,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tPhysicsTag = aScenario.physics();
+    auto tPhysicsTag = aService.physics();
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
-    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
-    XMLGen::Private::append_hyperbolic_pde_time_step_option(aScenario, aParentNode);
+    XMLGen::Private::append_simp_penalty_function(aService, tPhysicsNode);
+    XMLGen::Private::append_hyperbolic_pde_time_step_option(aService, aParentNode);
 }
 
 /******************************************************************************//**
  * \fn append_stabilized_elliptic_pde_to_analyze_input_deck
  * \brief Append stabilized elliptic partial differential equation (PDE) inputs.
- * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aService    Service metadata
  * \param [in]     aOutput      Output metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_stabilized_elliptic_pde_to_analyze_input_deck
-(const XMLGen::Scenario& aScenario,
+(const XMLGen::Service& aService,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tPhysicsTag = aScenario.physics();
+    auto tPhysicsTag = aService.physics();
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
-    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
-    XMLGen::Private::append_stabilized_elliptic_pde_time_step_option(aScenario, aParentNode);
-    XMLGen::Private::append_stabilized_elliptic_newton_solver_option(aScenario, aParentNode);
+    XMLGen::Private::append_simp_penalty_function(aService, tPhysicsNode);
+    XMLGen::Private::append_stabilized_elliptic_pde_time_step_option(aService, aParentNode);
+    XMLGen::Private::append_stabilized_elliptic_newton_solver_option(aService, aParentNode);
 }
 
 /******************************************************************************//**
  * \fn append_parabolic_residual_to_analyze_input_deck
  * \brief Append parabolic partial differential equation (PDE) inputs.
- * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aService    Service metadata
  * \param [in]     aOutput      Output metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_parabolic_residual_to_analyze_input_deck
-(const XMLGen::Scenario& aScenario,
+(const XMLGen::Service& aService,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
-    auto tPhysicsTag = aScenario.physics();
+    auto tPhysicsTag = aService.physics();
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
     auto tPDECategory = tValidKeys.pde(tPhysicsTag);
     auto tPhysicsNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
-    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
-    XMLGen::Private::append_parabolic_pde_time_step_option(aScenario, aParentNode);
+    XMLGen::Private::append_simp_penalty_function(aService, tPhysicsNode);
+    XMLGen::Private::append_parabolic_pde_time_step_option(aService, aParentNode);
 }
 
 /******************************************************************************//**
  * \fn append_elliptic_plasticity_pde_to_analyze_input_deck
  * \brief Append elliptic plasticity partial differential equation (PDE) inputs.
- * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aService    Service metadata
  * \param [in]     aOutput      Output metadata
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 inline void append_elliptic_plasticity_pde_to_analyze_input_deck
-(const XMLGen::Scenario& aSenario,
+(const XMLGen::Service& aSenario,
  const XMLGen::Output& aOutput,
  pugi::xml_node &aParentNode)
 {
@@ -424,29 +424,29 @@ AnalyzePhysicsFunctionInterface::AnalyzePhysicsFunctionInterface()
     this->insert();
 }
 
-void AnalyzePhysicsFunctionInterface::call(const XMLGen::Scenario& aScenarioMetaData,
+void AnalyzePhysicsFunctionInterface::call(const XMLGen::Service& aServiceMetaData,
           const XMLGen::Output& aOutputMetaData,
           pugi::xml_node &aParentNode) const
 {
-    auto tCode = XMLGen::to_lower(aScenarioMetaData.code());
+    auto tCode = XMLGen::to_lower(aServiceMetaData.code());
     if(tCode.compare("plato_analyze") != 0)
     {
         return;
     }
 
-    auto tPhysics = XMLGen::to_lower(aScenarioMetaData.physics());
+    auto tPhysics = XMLGen::to_lower(aServiceMetaData.physics());
     auto tMapItr = mMap.find(tPhysics);
     if(tMapItr == mMap.end())
     {
         THROWERR(std::string("Physics Function Interface: Did not find physics function with tag '") + tPhysics
             + "' in function list. " + "Physics '" + tPhysics + "' is not supported in Plato Analyze.")
     }
-    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Scenario&, const XMLGen::Output&, pugi::xml_node&)>(tMapItr->second.first);
+    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Service&, const XMLGen::Output&, pugi::xml_node&)>(tMapItr->second.first);
     if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
     {
         THROWERR(std::string("Physics Function Interface: Reinterpret cast for physics function with tag '") + tPhysics + "' failed.")
     }
-    tTypeCastedFunc(aScenarioMetaData, aOutputMetaData, aParentNode);
+    tTypeCastedFunc(aServiceMetaData, aOutputMetaData, aParentNode);
 }
 
 }

@@ -25,7 +25,7 @@ std::string Uncertainty::value(const std::string& aTag) const
     auto tItr = mMetaData.find(tTag);
     if(tItr == mMetaData.end())
     {
-        THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is not defined in metadata.")
+        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is not defined in metadata.")
     }
     return (tItr->second);
 }
@@ -44,7 +44,7 @@ void Uncertainty::append(const std::string& aTag, const std::string& aValue)
 {
     if (aTag.empty())
     {
-        THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is empty.")
+        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is empty.")
     }
     auto tTag = XMLGen::to_lower(aTag);
     mMetaData[aTag] = aValue;

@@ -39,14 +39,14 @@ private:
 
     /******************************************************************************//**
      * \fn set
-     * \brief Set XMLGen::Scenario metadata.
+     * \brief Set XMLGen::Service metadata.
      * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
     void set(XMLGen::Constraint& aMetaData);
 
     /******************************************************************************//**
      * \fn check
-     * \brief Check XMLGen::Scenario metadata.
+     * \brief Check XMLGen::Service metadata.
      * \param [in] aMetaData XMLGen::Constraint metadata
     **********************************************************************************/
     void check(XMLGen::Constraint& aMetaData);

@@ -386,7 +386,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setMinimumErsatzValue(aMetadata);
     this->setStressConstrainedParam(aMetadata);
 
-    // scenario info
+    // service info
     this->setCode(aMetadata);
     this->setNumRanks(aMetadata);
     this->setNumProcessors(aMetadata);
@@ -399,7 +399,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     aMetadata.wtmass_scale_factor = mTags.find("weightmass scale factor")->second.first.second;
     aMetadata.complex_error_measure = mTags.find("complex error measure")->second.first.second;
 
-    // array info, plus these should be inside the scenario block, excluding the output for plotting
+    // array info, plus these should be inside the service block, excluding the output for plotting
     this->setOutputForPlotting(aMetadata);
     this->setNaturalBoundaryConditionsCaseIDs(aMetadata);
     this->setEssentialBoundaryConditionsCaseIDs(aMetadata);

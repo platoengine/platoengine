@@ -5,13 +5,13 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGenerator.cpp
                       DefaultInputGenerator.cpp
                       XMLGeneratorParseOutput.cpp
-                      XMLGeneratorParseScenario.cpp
+                      XMLGeneratorParseService.cpp
                       XMLGeneratorOutputMetadata.cpp 
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
-                      XMLGeneratorScenarioMetadata.cpp
+                      XMLGeneratorServiceMetadata.cpp
                       XMLGeneratorParseUncertainty.cpp
                       XMLGeneratorConstraintMetadata.cpp
                       XMLGeneratorUncertaintyMetadata.cpp
@@ -45,7 +45,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorRandomMetadata.hpp
                       XMLGeneratorOutputMetadata.hpp 
                       XMLGeneratorParserUtilities.hpp 
-                      XMLGeneratorScenarioMetadata.hpp
+                      XMLGeneratorServiceMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
                       XMLGeneratorBoundaryMetadata.hpp 
                       XMLGeneratorConstraintMetadata.hpp
@@ -82,7 +82,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorParseMaterial.hpp 
                       XMLGeneratorParseObjective.hpp 
                       XMLGeneratorParseMetadata.hpp 
-                      XMLGeneratorParseScenario.hpp 
+                      XMLGeneratorParseService.hpp 
                       XMLGeneratorParseConstraint.hpp 
                       XMLGeneratorParseUncertainty.hpp
                       DefaultInputGenerator.hpp 

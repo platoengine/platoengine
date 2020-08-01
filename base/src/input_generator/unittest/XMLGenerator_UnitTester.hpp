@@ -70,7 +70,7 @@ public:
                                          const std::vector<std::string> &aUnLoweredTokens,
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
-    void publicParseScenario(std::istream &sin);
+    void publicParseService(std::istream &sin);
     bool publicParseObjectives(std::istream &sin);
     bool publicParseLoads(std::istream &sin);
     bool publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);

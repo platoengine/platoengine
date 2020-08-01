@@ -88,7 +88,7 @@ DefaultInputGenerator::~DefaultInputGenerator()
 bool DefaultInputGenerator::generateInputFiles()
 /******************************************************************************/
 {
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow())
     {
 
       if(!generateDefinesXML())
@@ -353,7 +353,7 @@ bool DefaultInputGenerator::generateLaunchScript()
           fprintf(fp, "%s plato_main_input_deck.xml \\\n", m_InputData.plato_main_path.c_str());
       else
           fprintf(fp, "plato_main plato_main_input_deck.xml \\\n");
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
 
           fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers).c_str(), envString.c_str(),separationString.c_str());
@@ -551,7 +551,7 @@ void DefaultInputGenerator::generatePerformerBashScripts()
 void DefaultInputGenerator::generateAnalyzeBashScripts()
 /******************************************************************************/
 {
-  if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
   {
     std::ofstream analyzeBash;
     std::string filename = "analyze.sh";
@@ -603,7 +603,7 @@ void DefaultInputGenerator::generateJSRunScript()
   std::ofstream jsrun;
   jsrun.open("jsrun.source");
   jsrun << "1 : eng : bash engine.sh\n";
-  if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
   {
     jsrun << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " : per : bash analyze.sh\n";
   }
@@ -629,7 +629,7 @@ void DefaultInputGenerator::generateBatchScript()
   batchFile << "#BSUB -W 0:00\n";
 
   size_t tNumGPUsNeeded;
-  if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
   else
     tNumGPUsNeeded = m_InputData.objectives.size();
@@ -646,7 +646,7 @@ void DefaultInputGenerator::generateBatchScript()
   batchFile << "date\n";
   batchFile << "jsrun -A eng -n1 -a1 -c1 -g0\n";
 
-  if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
   {
     batchFile << "jsrun -A per -n" << Plato::to_string(m_InputData.m_UncertaintyMetaData.numPerformers) << " -a1 -c1 -g1\n";
   }
@@ -669,7 +669,7 @@ size_t DefaultInputGenerator::computeNumberOfNodesNeeded()
 /******************************************************************************/
 {
   size_t tNumGPUsNeeded;
-  if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
   else
     tNumGPUsNeeded = m_InputData.objectives.size();
@@ -1105,7 +1105,7 @@ bool DefaultInputGenerator::generateAlbanyInputDecks()
 bool DefaultInputGenerator::generatePlatoAnalyzeInputDecks(std::ostringstream *aStringStream)
 /******************************************************************************/
 {
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
         if(!generatePlatoAnalyzeInputDeckForNewUncertaintyWorkflow())
             return false;
@@ -1966,7 +1966,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeOperationsXML()
   int num_plato_analyze_objs = 0;
   if(m_InputData.optimization_type == "topology")
   {
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_document doc;
       pugi::xml_node tmp_node, tmp_node1;
@@ -2519,7 +2519,7 @@ void DefaultInputGenerator::addStochasticObjectiveValueOperation(pugi::xml_docum
     addChild(tmp_node, "Function", "MeanPlusStdDev");
     addChild(tmp_node, "Name", "Stochastic Objective Value");
     addChild(tmp_node, "Layout", "Scalar");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -2574,7 +2574,7 @@ void DefaultInputGenerator::addVonMisesStatisticsOperation(pugi::xml_document &a
     addChild(tmp_node, "Function", "MeanPlusStdDev");
     addChild(tmp_node, "Name", "VonMises Statistics");
     addChild(tmp_node, "Layout", "Element Field");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -2641,7 +2641,7 @@ bool DefaultInputGenerator::addAggregateGradientOperation(pugi::xml_document &aD
     addChild(tmp_node, "Name", "AggregateGradient");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2663,7 +2663,7 @@ bool DefaultInputGenerator::addAggregateGradientOperation(pugi::xml_document &aD
     addChild(tmp_node2, "ArgumentName", "Field");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2681,7 +2681,7 @@ bool DefaultInputGenerator::addAggregateGradientOperation(pugi::xml_document &aD
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         std::cerr << "Error: Normalization not supported for uncertain loads" << std::endl;
         return false;
@@ -2710,7 +2710,7 @@ bool DefaultInputGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Value");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2735,7 +2735,7 @@ bool DefaultInputGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc
     tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2760,7 +2760,7 @@ bool DefaultInputGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc
 
     tmp_node1 = tmp_node.append_child("Weighting");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2779,7 +2779,7 @@ bool DefaultInputGenerator::addAggregateEnergyOperation(pugi::xml_document &aDoc
 
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
           std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
           return false;
@@ -2807,7 +2807,7 @@ bool DefaultInputGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc
     addChild(tmp_node, "Name", "AggregateValues");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Value");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2829,7 +2829,7 @@ bool DefaultInputGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc
     addChild(tmp_node2, "ArgumentName", "Values");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2847,7 +2847,7 @@ bool DefaultInputGenerator::addAggregateValuesOperation(pugi::xml_document &aDoc
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
           std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
           return false;
@@ -2875,7 +2875,7 @@ bool DefaultInputGenerator::addAggregateHessianOperation(pugi::xml_document &aDo
     addChild(tmp_node, "Name", "AggregateHessian");
     pugi::xml_node tmp_node1 = tmp_node.append_child("Aggregate");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2897,7 +2897,7 @@ bool DefaultInputGenerator::addAggregateHessianOperation(pugi::xml_document &aDo
     addChild(tmp_node2, "ArgumentName", "Field");
 
     tmp_node1 = tmp_node.append_child("Weighting");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -2915,7 +2915,7 @@ bool DefaultInputGenerator::addAggregateHessianOperation(pugi::xml_document &aDo
     }
     if(m_InputData.mUseNormalizationInAggregator == "true")
     {
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
           std::cerr << "Error: Normalization is not supported with uncertain loads" << std::endl;
           return false;
@@ -3292,7 +3292,7 @@ void DefaultInputGenerator::addPlatoMainOutputOperation(pugi::xml_document &aDoc
         }
     }
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node.append_child("For");
       for_node.append_attribute("var") = "sampleIndex";
@@ -3433,7 +3433,7 @@ void DefaultInputGenerator::addStochasticObjectiveGradientOperation(pugi::xml_do
 
     tmp_node1 = tmp_node.append_child("CriterionValue");
     addChild(tmp_node1, "Layout", "Global");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -3470,7 +3470,7 @@ void DefaultInputGenerator::addStochasticObjectiveGradientOperation(pugi::xml_do
 
     tmp_node1 = tmp_node.append_child("CriterionGradient");
     addChild(tmp_node1, "Layout", "Nodal Field");
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = tmp_node1.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -3523,7 +3523,7 @@ bool DefaultInputGenerator::generatePlatoMainOperationsXML()
     pugi::xml_attribute tmp_att = tmp_node.append_attribute("version");
     tmp_att.set_value("1.0");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node def_node = doc.append_child("include");
       def_node.append_attribute("filename") = "defines.xml";
@@ -4011,7 +4011,7 @@ bool DefaultInputGenerator::outputObjectiveStage(pugi::xml_document &doc,
     if(!m_InputData.mPlatoAnalyzePerformerExists)
         addEnforceBoundsOperationToStage(stage_node);
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       addComputeObjectiveValueOperationForNewUncertaintyWorkflow(stage_node);
     }
@@ -4061,7 +4061,7 @@ bool DefaultInputGenerator::outputObjectiveStage(pugi::xml_document &doc,
     addChild(op_node, "Name", "AggregateEnergy");
     addChild(op_node, "PerformerName", "PlatoMain");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
         pugi::xml_node for_node = op_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -4122,7 +4122,7 @@ bool DefaultInputGenerator::outputObjectiveStage(pugi::xml_document &doc,
       addChild(op_node, "Name", "Stochastic Objective Value");
       addChild(op_node, "PerformerName", "PlatoMain");
 
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         pugi::xml_node for_node = op_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -4491,7 +4491,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
         addEnforceBoundsOperationToStage(stage_node);
 
     
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       addComputeObjectiveGradientOperationForNewUncertaintyWorkflow(stage_node);
     }
@@ -4541,7 +4541,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
     addChild(op_node, "Name", "AggregateGradient");
     addChild(op_node, "PerformerName", "PlatoMain");
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = op_node.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -4621,7 +4621,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
         addChild(op_node, "Name", "Stochastic Objective Gradient");
         addChild(op_node, "PerformerName", "PlatoMain");
 
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
           pugi::xml_node for_node = op_node.append_child("For");
           for_node.append_attribute("var") = "performerIndex";
@@ -4711,7 +4711,7 @@ bool DefaultInputGenerator::outputObjectiveHessianStage(pugi::xml_document &doc)
         addEnforceBoundsOperationToStage(stage_node);
 
     pugi::xml_node cur_parent = stage_node;
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
         pugi::xml_node for_node = stage_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -4769,7 +4769,7 @@ bool DefaultInputGenerator::outputObjectiveHessianStage(pugi::xml_document &doc)
     addChild(op_node, "Name", "AggregateHessian");
     addChild(op_node, "PerformerName", "PlatoMain");
     
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
         pugi::xml_node for_node = op_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -5079,7 +5079,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
 {
     pugi::xml_document doc;
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node def_node = doc.append_child("include");
       def_node.append_attribute("filename") = "defines.xml";
@@ -5110,7 +5110,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     pugi::xml_node sd_node;
     char tmp_buf[200];
 
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
         performer_node = doc.append_child("Performer");
         pugi::xml_node for_node = performer_node.append_child("For");
@@ -5139,7 +5139,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     /////////////////////////////////////////////////
 
     // Internal Energy XXX shared data
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = doc.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -5184,7 +5184,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
       }
     }
     // Internal Energy XXX Gradient shared data
-    if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+    if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
     {
       pugi::xml_node for_node = doc.append_child("For");
       for_node.append_attribute("var") = "performerIndex";
@@ -5242,7 +5242,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
 
 
       // QOI shared data
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         pugi::xml_node for_node = doc.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -5303,7 +5303,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
             m_InputData.optimization_algorithm == "rol ksal" ||
             m_InputData.optimization_algorithm == "rol ksbc")
     {
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         pugi::xml_node for_node = doc.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
@@ -5354,7 +5354,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
        m_InputData.optimization_algorithm == "rol ksal" ||
        m_InputData.optimization_algorithm == "rol ksbc")
     {
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
         sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
@@ -5394,7 +5394,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     }
     else if(m_InputData.optimization_type == "topology")
     {
-      if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+      if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
       {
         sd_node = createSingleUserNodalSharedData(doc, "Optimization DOFs", "Scalar", "PlatoMain", "PlatoMain");
         pugi::xml_node for_node = sd_node.append_child("For");
@@ -6240,7 +6240,7 @@ void DefaultInputGenerator::outputInitializeOptimizationStageForTO(pugi::xml_doc
         addChild(output_node, "ArgumentName", "Filtered Field");
         addChild(output_node, "SharedDataName", "Topology");
 
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
             pugi::xml_node for_node = stage_node.append_child("For");
             for_node.append_attribute("var") = "performerIndex";
@@ -6356,7 +6356,7 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
             addChild(op_node, "PerformerName", "PlatoMain");
             // We are assuming only one load case per objective/performer which
             // means we will only have one vonmises per performer.
-            if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
+            if(m_InputData.service(0u).useNewAnalyzeUQWorkflow())
             {
               pugi::xml_node for_node = op_node.append_child("For");
               for_node.append_attribute("var") = "performerIndex";
@@ -6430,7 +6430,7 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
                 addChild(input_node, "SharedDataName", "Surface Area Gradient");
             }
         }
-        if(m_InputData.scenario(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
+        if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
         {
           pugi::xml_node for_node = op_node.append_child("For");
           for_node.append_attribute("var") = "performerIndex";

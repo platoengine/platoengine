@@ -91,7 +91,7 @@ void append_update_problem_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aMetaData.scenario(0u).updateProblem())
+    if(!aMetaData.service(0u).updateProblem())
     {
         return;
     }
@@ -291,8 +291,8 @@ void append_write_output_to_plato_analyze_operation
         return;
     }
 
-    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
-    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tCodeName = aMetaData.service(tServiceID).code();
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperationNode);
 

@@ -109,10 +109,10 @@ bool XMLGenerator_UnitTester::publicParseObjectives(std::istream &sin)
 }
 
 /******************************************************************************/
-void XMLGenerator_UnitTester::publicParseScenario(std::istream &sin)
+void XMLGenerator_UnitTester::publicParseService(std::istream &sin)
 /******************************************************************************/
 {
-    parseScenario(sin);
+    parseService(sin);
 }
 
 /******************************************************************************/

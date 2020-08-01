@@ -2340,11 +2340,11 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   XMLGenerator_UnitTester tTester;
   std::istringstream iss;
   std::string stringInput =
-  "begin scenario\n"
+  "begin service\n"
   "   physics mechanical\n"
   "   dimensions 3\n"
   "   use_new_analyze_uq_workflow true\n"
-  "end scenario\n"
+  "end service\n"
   "begin objective\n"
   "   type maximize stiffness\n"
   "   load ids 10\n"
@@ -2389,7 +2389,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 
   iss.clear();
   iss.seekg(0);
-  EXPECT_EQ(tTester.parseScenario(iss), true);
+  EXPECT_EQ(tTester.parseService(iss), true);
 
   iss.clear();
   iss.seekg(0);
@@ -2439,11 +2439,11 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-    "begin scenario\n"
+    "begin service\n"
     "   physics mechanical\n"
     "   dimensions 3\n"
     "   use_new_analyze_uq_workflow true\n"
-    "end scenario\n"
+    "end service\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10 1\n"
@@ -2477,7 +2477,7 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
 
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_EQ(tTester.parseScenario(tInputSS), true);
+    EXPECT_EQ(tTester.parseService(tInputSS), true);
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_EQ(tTester.publicParseObjectives(tInputSS), true);
@@ -2569,10 +2569,10 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
     XMLGenerator_UnitTester tTester;
     std::istringstream iss;
     std::string stringInput =
-    "begin scenario 1\n"
+    "begin service 1\n"
     "    physics mechanical\n"
     "    dimensions 3\n"
-    "end scenario\n"
+    "end service\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10\n"
@@ -2606,7 +2606,7 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeOldWorkflow)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    tTester.publicParseScenario(iss);
+    tTester.publicParseService(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_TRUE(tTester.publicParseObjectives(iss));
@@ -2670,10 +2670,10 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
     XMLGenerator_UnitTester tTester;
     std::istringstream iss;
     std::string stringInput =
-    "begin scenario 1\n"
+    "begin service 1\n"
     "    physics mechanical\n"
     "    dimensions 3\n"
-    "end scenario\n"
+    "end service\n"
     "begin objective\n"
     "   type maximize stiffness\n"
     "   load ids 10\n"
@@ -2707,7 +2707,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_sierra)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    tTester.publicParseScenario(iss);
+    tTester.publicParseService(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_TRUE(tTester.publicParseObjectives(iss));
@@ -2769,10 +2769,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
-            "begin scenario 1\n"
+            "begin service 1\n"
             "    physics mechanical\n"
             "    dimensions 3\n"
-            "end scenario\n"
+            "end service\n"
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1\n"
@@ -2798,7 +2798,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    tester.publicParseScenario(iss);
+    tester.publicParseService(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
@@ -2918,10 +2918,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
-            "begin scenario 1\n"
+            "begin service 1\n"
             "    physics mechanical\n"
             "    dimensions 3\n"
-            "end scenario\n"
+            "end service\n"
             "begin objective\n"
             "    type maximize stiffness\n"
             "    load ids 1\n"
@@ -2947,7 +2947,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_na
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    tester.publicParseScenario(iss);
+    tester.publicParseService(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
@@ -3022,10 +3022,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
-            "begin scenario 1\n"
+            "begin service 1\n"
             "    physics thermal\n"
             "    dimensions 3\n"
-            "end scenario\n"
+            "end service\n"
             "begin objective\n"
             "    type maximize heat conduction\n"
             "    load ids 1\n"
@@ -3052,7 +3052,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    tester.publicParseScenario(iss);
+    tester.publicParseService(iss);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);
@@ -3079,10 +3079,10 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
     XMLGenerator_UnitTester tester;
     std::istringstream iss;
     std::string stringInput =
-            "begin scenario 1\n"
+            "begin service 1\n"
             "    physics thermomechanical\n"
             "    dimensions 3\n"
-            "end scenario\n"
+            "end service\n"
             "begin objective\n"
             "    type minimize thermoelastic energy\n"
             "    load ids 1 2\n"
@@ -3119,7 +3119,7 @@ TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
     iss.str(stringInput);
     iss.clear();
     iss.seekg(0);
-    EXPECT_EQ(tester.parseScenario(iss), true);
+    EXPECT_EQ(tester.parseService(iss), true);
     iss.clear();
     iss.seekg(0);
     EXPECT_EQ(tester.publicParseObjectives(iss), true);

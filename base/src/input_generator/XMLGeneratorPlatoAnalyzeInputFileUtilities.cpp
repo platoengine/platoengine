@@ -145,11 +145,11 @@ void append_problem_description_to_plato_analyze_input_deck
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidSpatialDimsKeys tValidKeys;
-    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.scenario(0u).dimensions());
+    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.service(0u).dimensions());
     if (tSpatialDim == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '")
-            + aXMLMetaData.scenario(0u).dimensions() + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
+            + aXMLMetaData.service(0u).dimensions() + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
     }
     XMLGen::check_input_mesh_file_keyword(aXMLMetaData);
 
@@ -172,7 +172,7 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPhysicsTag = tValidKeys.physics(aXMLMetaData.scenario(0u).physics());
+    auto tPhysicsTag = tValidKeys.physics(aXMLMetaData.service(0u).physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Physics", "string", tPhysicsTag};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
@@ -186,7 +186,7 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPDE = tValidKeys.pde(aXMLMetaData.scenario(0u).physics());
+    auto tPDE = tValidKeys.pde(aXMLMetaData.service(0u).physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"PDE Constraint", "string", tPDE};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
@@ -455,7 +455,7 @@ void append_physics_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode)
 {
     XMLGen::AnalyzePhysicsFunctionInterface tPhysicsInterface;
-    tPhysicsInterface.call(aXMLMetaData.scenario(0u), aXMLMetaData.mOutputMetaData, aParentNode);
+    tPhysicsInterface.call(aXMLMetaData.service(0u), aXMLMetaData.mOutputMetaData, aParentNode);
 }
 // function append_physics_to_plato_analyze_input_deck
 /**********************************************************************************/

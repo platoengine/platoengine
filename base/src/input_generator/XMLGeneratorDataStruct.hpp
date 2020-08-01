@@ -14,7 +14,8 @@
 #include "Plato_SromHelpers.hpp"
 #include "XMLGeneratorOutputMetadata.hpp"
 #include "XMLGeneratorRandomMetadata.hpp"
-#include "XMLGeneratorScenarioMetadata.hpp"
+#include "XMLGeneratorServiceMetadata.hpp"
+#include "XMLGeneratorServiceMetadata.hpp"
 #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 
@@ -115,43 +116,42 @@ struct UncertaintyMetaData
   std::vector<size_t> randomVariableIndices;
   std::vector<size_t> deterministicVariableIndices;
 };
-// struct UncertaintyMetaData
 
 struct InputData
 {
 private:
-    std::vector<XMLGen::Scenario> mScenarios;
+    std::vector<XMLGen::Service> mServices;
 
 public:
-    const XMLGen::Scenario& scenario(const size_t& aIndex) const
+    const XMLGen::Service& service(const size_t& aIndex) const
     {
-        if(mScenarios.empty())
+        if(mServices.empty())
         {
-            THROWERR("XML Generator Input Metadata: 'scenario' list is empty.")
+            THROWERR("XML Generator Input Metadata: 'service' list is empty.")
         }
-        else if(aIndex >= mScenarios.size())
+        else if(aIndex >= mServices.size())
         {
-            THROWERR("XML Generator Input Metadata: index is out-of-bounds, 'scenario' size is '"
-                + std::to_string(mScenarios.size()) + "'.")
+            THROWERR("XML Generator Input Metadata: index is out-of-bounds, 'service' size is '"
+                + std::to_string(mServices.size()) + "'.")
         }
-        return mScenarios[aIndex];
+        return mServices[aIndex];
     }
-    const XMLGen::Scenario& scenario(const std::string& aID) const
+    const XMLGen::Service& service(const std::string& aID) const
     {
-        if(mScenarios.empty())
+        if(mServices.empty())
         {
-            THROWERR("XML Generator Input Metadata: 'scenario' list member data is empty.")
+            THROWERR("XML Generator Input Metadata: 'service' list member data is empty.")
         }
         else if(aID.empty())
         {
-            THROWERR("XML Generator Input Metadata: 'scenario' identification (id) input argument is empty.")
+            THROWERR("XML Generator Input Metadata: 'service' identification (id) input argument is empty.")
         }
         size_t tIndex = 0u;
         auto tFoundMatch = false;
-        for(auto& tScenario : mScenarios)
+        for(auto& tService : mServices)
         {
-            tIndex = &tScenario - &mScenarios[0];
-            if(tScenario.id().compare(aID) == 0)
+            tIndex = &tService - &mServices[0];
+            if(tService.id().compare(aID) == 0)
             {
                 tFoundMatch = true;
                 break;
@@ -160,22 +160,22 @@ public:
 
         if(!tFoundMatch)
         {
-            THROWERR("XML Generator Input Metadata: Did not find 'scenario' with identification (id) '" + aID + "' in scenario list.")
+            THROWERR("XML Generator Input Metadata: Did not find 'service' with identification (id) '" + aID + "' in service list.")
         }
 
-        return mScenarios[tIndex];
+        return mServices[tIndex];
     }
-    const std::vector<XMLGen::Scenario>& scenarios() const
+    const std::vector<XMLGen::Service>& services() const
     {
-        return mScenarios;
+        return mServices;
     }
-    void set(const std::vector<XMLGen::Scenario>& aScenarios)
+    void set(const std::vector<XMLGen::Service>& aServices)
     {
-        mScenarios = aScenarios;
+        mServices = aServices;
     }
-    void append(const XMLGen::Scenario& aScenario)
+    void append(const XMLGen::Service& aService)
     {
-        mScenarios.push_back(aScenario);
+        mServices.push_back(aService);
     }
 
     std::vector<XMLGen::Objective> objectives;

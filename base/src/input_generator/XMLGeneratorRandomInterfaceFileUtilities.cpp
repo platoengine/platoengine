@@ -35,15 +35,15 @@ void append_multiperformer_criterion_shared_data
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Criterion Shared Data For Nondeterministic Use Case: Scenarios list is empty.")
+        THROWERR("Append Criterion Shared Data For Nondeterministic Use Case: Services list is empty.")
     }
 
     // shared data - nondeterministic criterion value
-    for (auto &tScenario : aXMLMetaData.scenarios())
+    for (auto &tService : aXMLMetaData.services())
     {
-        auto tOwnerName = tScenario.performer() + "_{PerformerIndex}";
+        auto tOwnerName = tService.performer() + "_{PerformerIndex}";
         auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
         std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
@@ -87,19 +87,19 @@ void append_multiperformer_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Nondeterministic QoI Shared Data: list of 'scenarios' is empty.")
+        THROWERR("Append Nondeterministic QoI Shared Data: list of 'services' is empty.")
     }
 
-    // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE SCENARIOS - I.E. SUPPORT STD::VECTOR
+    // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE serviceS - I.E. SUPPORT STD::VECTOR
     auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
+    auto tServiceID = aXMLMetaData.mOutputMetaData.serviceID();
     for(auto& tID : tIDs)
     {
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
-        auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer() + "_{PerformerIndex}";
+        auto tOwnerName = aXMLMetaData.service(tServiceID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
         XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
@@ -113,9 +113,9 @@ void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Topology Shared Data for a Nondeterministic Use Case: Scenarios list is empty.")
+        THROWERR("Append Topology Shared Data for a Nondeterministic Use Case: Services list is empty.")
     }
 
     auto tSharedData = aDocument.append_child("SharedData");
@@ -123,11 +123,11 @@ void append_multiperformer_topology_shared_data
     std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
     XMLGen::append_children(tKeys, tValues, tSharedData);
 
-    for(auto& tScenario : aXMLMetaData.scenarios())
+    for(auto& tService : aXMLMetaData.services())
     {
         auto tForNode = tSharedData.append_child("For");
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tUserName = tScenario.performer() + "_{PerformerIndex}";
+        auto tUserName = tService.performer() + "_{PerformerIndex}";
         XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
     }
 }
@@ -139,20 +139,20 @@ void append_physics_performers_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Physics Performer for a Nondeterministic Use Case: Scenarios list is empty.")
+        THROWERR("Append Physics Performer for a Nondeterministic Use Case: Services list is empty.")
     }
 
-    for(auto& tScenario : aXMLMetaData.scenarios())
+    for(auto& tService : aXMLMetaData.services())
     {
-        const int tID = (&tScenario - &aXMLMetaData.scenarios()[0]) + 1;
+        const int tID = (&tService - &aXMLMetaData.services()[0]) + 1;
         auto tPerformerNode = aDocument.append_child("Performer");
         XMLGen::append_children( { "PerformerID" }, { std::to_string(tID) }, tPerformerNode);
         auto tForNode = tPerformerNode.append_child("For");
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
-        XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tScenario.code() }, tForNode);
+        auto tPerformerName = tService.performer() + "_{PerformerIndex}";
+        XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tService.code() }, tForNode);
     }
 }
 // function append_physics_performers_multiperformer_usecase
@@ -225,15 +225,15 @@ void append_cache_state_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tScenario : aXMLMetaData.scenarios())
+    for (auto &tService : aXMLMetaData.services())
     {
-        if (!tScenario.cacheState())
+        if (!tService.cacheState())
         {
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
         XMLGen::append_children( { "Name" }, { "Cache State" }, tStageNode);
-        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        auto tPerformerName = tService.performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
         std::vector<std::string> tValues = { "Cache State", tPerformerName };
         XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);
@@ -247,15 +247,15 @@ void append_update_problem_stage_for_nondeterministic_usecase
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tScenario : aXMLMetaData.scenarios())
+    for (auto &tService : aXMLMetaData.services())
     {
-        if (!tScenario.updateProblem())
+        if (!tService.updateProblem())
         {
             continue;
         }
         auto tStageNode = aDocument.append_child("Stage");
         XMLGen::append_children( { "Name" }, { "Update Problem" }, tStageNode);
-        auto tPerformerName = tScenario.performer() + "_{PerformerIndex}";
+        auto tPerformerName = tService.performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
         std::vector<std::string> tValues = { "Update Problem", tPerformerName };
         XMLGen::append_nondeterministic_operation(tKeys, tValues, tStageNode);

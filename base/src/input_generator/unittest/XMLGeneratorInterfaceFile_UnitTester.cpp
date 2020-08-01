@@ -44,13 +44,13 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tMetaData.constraints.push_back(tConstraint);
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.code("plato_analyze");
-    tScenario.performer("plato_analyze_1");
-    tScenario.cacheState("false");
-    tScenario.updateProblem("true");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.performer("plato_analyze_1");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
     tMetaData.mOutputMetaData.disableOutput();
 
     XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
@@ -205,11 +205,11 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tObjective.type = "compliance";
     tObjective.mPerformerName = "plato_analyze_1";
     tMetaData.objectives.push_back(tObjective);
-    XMLGen::Scenario tScenario;
-    tScenario.performer("plato_analyze_1");
-    tScenario.cacheState("false");
-    tScenario.updateProblem("true");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.performer("plato_analyze_1");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
 
     tMetaData.mOutputMetaData.disableOutput();
     ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
@@ -338,10 +338,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
 TEST(PlatoTestXMLGenerator, AppendCacheStateStage)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.performer("plato_analyze_1");
-    tScenario.cacheState("true");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.performer("plato_analyze_1");
+    tService.cacheState("true");
+    tMetaData.append(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_cache_state_stage(tMetaData, tDocument));
@@ -359,10 +359,10 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStage)
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.performer("plato_analyze_1");
-    tScenario.updateProblem("true");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.performer("plato_analyze_1");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_update_problem_stage(tMetaData, tDocument));
@@ -380,11 +380,11 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
 TEST(PlatoTestXMLGenerator, AppendSharedData)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.scenarioID("1");
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
+    tMetaData.mOutputMetaData.serviceID("1");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     XMLGen::Objective tObjective;
     tObjective.name = "1";
@@ -466,7 +466,7 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 }
 
-TEST(PlatoTestXMLGenerator, AppendTopologySharedData_ErrorEmptyScenario)
+TEST(PlatoTestXMLGenerator, AppendTopologySharedData_ErrorEmptyService)
 {
     XMLGen::InputData tMetaData;
     pugi::xml_document tDocument;
@@ -476,10 +476,10 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedData_ErrorEmptyScenario)
 TEST(PlatoTestXMLGenerator, AppendTopologySharedData)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_topology_shared_data(tMetaData, tDocument));
@@ -494,7 +494,7 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedData)
     ASSERT_TRUE(tSharedData.empty());
 }
 
-TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorEmptyScenario)
+TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorEmptyService)
 {
     XMLGen::InputData tMetaData;
     pugi::xml_document tDocument;
@@ -504,10 +504,10 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorEmptyScenario)
 TEST(PlatoTestXMLGenerator, AppendQoISharedData_EmptySharedData)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_qoi_shared_data(tMetaData, tDocument));
@@ -516,14 +516,14 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_EmptySharedData)
     ASSERT_TRUE(tSharedData.empty());
 }
 
-TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputScenarioID)
+TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputServiceID)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.scenarioID("2");
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
+    tMetaData.mOutputMetaData.serviceID("2");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
 
     pugi::xml_document tDocument;
@@ -533,11 +533,11 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputScenarioID)
 TEST(PlatoTestXMLGenerator, AppendQoISharedData)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
-    tMetaData.mOutputMetaData.scenarioID("1");
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
+    tMetaData.mOutputMetaData.serviceID("1");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
 
     pugi::xml_document tDocument;
@@ -553,7 +553,7 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData)
     ASSERT_TRUE(tSharedData.empty());
 }
 
-TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers_EmptyScenario)
+TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers_EmptyService)
 {
     XMLGen::InputData tMetaData;
     pugi::xml_document tDocument;
@@ -563,11 +563,11 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers_EmptyScenario)
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
 {
     XMLGen::InputData tMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.code("plato_analyze");
-    tScenario.performer("plato_analyze_1");
-    tMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.performer("plato_analyze_1");
+    tMetaData.append(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_physics_performers(tMetaData, tDocument));

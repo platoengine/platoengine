@@ -1,43 +1,43 @@
 /*
- * XMLGeneratorParseScenario.cpp
+ * XMLGeneratorParseService.cpp
  *
  *  Created on: Jun 18, 2020
  */
 
 #include <algorithm>
 
-#include "XMLGeneratorParseScenario.hpp"
+#include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace XMLGen
 {
 
-void ParseScenario::setTags(XMLGen::Scenario& aScenario)
+void ParseService::setTags(XMLGen::Service& aService)
 {
     for(auto& tTag : mTags)
     {
         if(tTag.second.first.second.empty())
         {
             auto tDefaultValue = tTag.second.second;
-            aScenario.append(tTag.first, tDefaultValue);
+            aService.append(tTag.first, tDefaultValue);
         }
         else
         {
             auto tInputValue = tTag.second.first.second;
-            aScenario.append(tTag.first, tInputValue);
+            aService.append(tTag.first, tInputValue);
         }
     }
 }
 
-void ParseScenario::checkTags(XMLGen::Scenario& aScenario)
+void ParseService::checkTags(XMLGen::Service& aService)
 {
-    this->checkCode(aScenario);
-    this->checkPhysics(aScenario);
-    this->checkSpatialDimensions(aScenario);
+    this->checkCode(aService);
+    this->checkPhysics(aService);
+    this->checkSpatialDimensions(aService);
 }
 
-void ParseScenario::allocate()
+void ParseService::allocate()
 {
     mTags.clear();
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
@@ -66,76 +66,76 @@ void ParseScenario::allocate()
     mTags.insert({ "convergence_criterion", { { {"convergence_criterion"}, ""}, "residual" } });
 }
 
-void ParseScenario::checkCode(XMLGen::Scenario& aScenario)
+void ParseService::checkCode(XMLGen::Service& aService)
 {
-    auto tValidCode = XMLGen::check_code_keyword(aScenario.value("code"));
-    aScenario.code(tValidCode);
+    auto tValidCode = XMLGen::check_code_keyword(aService.value("code"));
+    aService.code(tValidCode);
 }
 
-void ParseScenario::checkSpatialDimensions(XMLGen::Scenario& aScenario)
+void ParseService::checkSpatialDimensions(XMLGen::Service& aService)
 {
-    auto tDim = aScenario.value("dimensions");
+    auto tDim = aService.value("dimensions");
     if (tDim.empty())
     {
-        THROWERR("Parse Scenario: 'dimensions' keyword is empty.")
+        THROWERR("Parse Service: 'dimensions' keyword is empty.")
     }
     XMLGen::ValidSpatialDimsKeys tValidKeys;
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tDim);
     if (tItr == tValidKeys.mKeys.end())
     {
-        THROWERR("Parse Scenario: Problems with " + tDim + "-D spatial dimensions are not supported.")
+        THROWERR("Parse Service: Problems with " + tDim + "-D spatial dimensions are not supported.")
     }
 }
 
-void ParseScenario::checkPhysics(XMLGen::Scenario& aScenario)
+void ParseService::checkPhysics(XMLGen::Service& aService)
 {
-    auto tPhysics = aScenario.value("physics");
+    auto tPhysics = aService.value("physics");
     if (tPhysics.empty())
     {
-        THROWERR("Parse Scenario: 'physics' keyword is empty.")
+        THROWERR("Parse Service: 'physics' keyword is empty.")
     }
     auto tValidPhysics = XMLGen::check_physics_keyword(tPhysics);
-    aScenario.physics(tValidPhysics);
+    aService.physics(tValidPhysics);
 }
 
-void ParseScenario::checkPerformer()
+void ParseService::checkPerformer()
 {
-    for(auto& tScenario : mData)
+    for(auto& tService : mData)
     {
-        if (tScenario.value("performer").empty())
+        if (tService.value("performer").empty())
         {
-            auto tIndex = &tScenario - &mData[0] + 1u;
-            auto tPerformer = tScenario.value("code") + "_" + std::to_string(tIndex);
-            tScenario.performer(tPerformer);
+            auto tIndex = &tService - &mData[0] + 1u;
+            auto tPerformer = tService.value("code") + "_" + std::to_string(tIndex);
+            tService.performer(tPerformer);
         }
     }
 }
 
-void ParseScenario::checkScenarioID()
+void ParseService::checkServiceID()
 {
-    for (auto &tScenario : mData)
+    for (auto &tService : mData)
     {
-        if (tScenario.value("id").empty())
+        if (tService.value("id").empty())
         {
-            auto tIndex = &tScenario - &mData[0] + 1u;
-            auto tID = tScenario.value("code") + "_" + tScenario.value("physics") + "_" + std::to_string(tIndex);
-            tScenario.id(tID);
+            auto tIndex = &tService - &mData[0] + 1u;
+            auto tID = tService.value("code") + "_" + tService.value("physics") + "_" + std::to_string(tIndex);
+            tService.id(tID);
         }
     }
 }
 
-void ParseScenario::finalize()
+void ParseService::finalize()
 {
     this->checkPerformer();
-    this->checkScenarioID();
+    this->checkServiceID();
 }
 
-std::vector<XMLGen::Scenario> ParseScenario::data() const
+std::vector<XMLGen::Service> ParseService::data() const
 {
     return mData;
 }
 
-void ParseScenario::parse(std::istream &aInputFile)
+void ParseService::parse(std::istream &aInputFile)
 {
     mData.clear();
     this->allocate();
@@ -149,17 +149,17 @@ void ParseScenario::parse(std::istream &aInputFile)
         XMLGen::parse_tokens(tBuffer.data(), tTokens);
         XMLGen::to_lower(tTokens);
 
-        std::string tScenarioBlockID;
-        if (XMLGen::parse_single_value(tTokens, { "begin", "scenario" }, tScenarioBlockID))
+        std::string tServiceBlockID;
+        if (XMLGen::parse_single_value(tTokens, { "begin", "service" }, tServiceBlockID))
         {
-            XMLGen::Scenario tScenario;
+            XMLGen::Service tService;
             XMLGen::is_metadata_block_id_valid(tTokens);
             XMLGen::erase_tag_values(mTags);
-            XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
-            this->setTags(tScenario);
-            tScenario.id(tScenarioBlockID);
-            this->checkTags(tScenario);
-            mData.push_back(tScenario);
+            XMLGen::parse_input_metadata( { "end", "service" }, aInputFile, mTags);
+            this->setTags(tService);
+            tService.id(tServiceBlockID);
+            this->checkTags(tService);
+            mData.push_back(tService);
         }
     }
     this->finalize();

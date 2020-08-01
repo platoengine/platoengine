@@ -26,15 +26,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
     XMLGen::Output tOutput;
     tOutput.appendDeterminsiticQoI("stress", "element field");
     tOutput.appendDeterminsiticQoI("vonmises", "element field");
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("mechanical");
-    tScenario.additiveContinuation("");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("mechanical");
+    tService.additiveContinuation("");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -76,15 +76,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
     XMLGen::Output tOutput;
     tOutput.appendDeterminsiticQoI("vonmises", "element field");
     tOutput.appendDeterminsiticQoI("temperature", "nodal field");
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("thermal");
-    tScenario.additiveContinuation("");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("thermal");
+    tService.additiveContinuation("");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -124,15 +124,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
 TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("thermomechanical");
-    tScenario.additiveContinuation("");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("thermomechanical");
+    tService.additiveContinuation("");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -166,15 +166,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("electromechanical");
-    tScenario.additiveContinuation("");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("electromechanical");
+    tService.additiveContinuation("");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -208,16 +208,16 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("heat conduction");
-    tScenario.timeStep("1.0");
-    tScenario.numTimeSteps("10");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("heat conduction");
+    tService.timeStep("1.0");
+    tService.numTimeSteps("10");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -266,16 +266,16 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
 TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("transient thermomechanics");
-    tScenario.timeStep("2.0");
-    tScenario.numTimeSteps("20");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("transient thermomechanics");
+    tService.timeStep("2.0");
+    tService.numTimeSteps("20");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -324,18 +324,18 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("transient mechanics");
-    tScenario.timeStep("2.0");
-    tScenario.numTimeSteps("20");
-    tScenario.newmarkBeta("0.25");
-    tScenario.newmarkGamma("0.5");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("transient mechanics");
+    tService.timeStep("2.0");
+    tService.numTimeSteps("20");
+    tService.newmarkBeta("0.25");
+    tService.newmarkGamma("0.5");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -392,16 +392,16 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("stabilized mechanics");
-    tScenario.timeStep("2.0");
-    tScenario.numTimeSteps("20");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("stabilized mechanics");
+    tService.timeStep("2.0");
+    tService.numTimeSteps("20");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -450,20 +450,20 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
 {
     XMLGen::Output tOutput;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("plasticity");
-    tScenario.timeStep("2.0");
-    tScenario.numTimeSteps("20");
-    tScenario.maxNumTimeSteps("40");
-    tScenario.timeStepExpansion("1.1");
-    tScenario.solverTolerance("1e-5");
-    tScenario.solverMaxNumIterations("10");
-    tScenario.materialPenaltyExponent("3.0");
-    tScenario.minErsatzMaterialConstant("1e-9");
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("plasticity");
+    tService.timeStep("2.0");
+    tService.numTimeSteps("20");
+    tService.maxNumTimeSteps("40");
+    tService.timeStepExpansion("1.1");
+    tService.solverTolerance("1e-5");
+    tService.solverMaxNumIterations("10");
+    tService.materialPenaltyExponent("3.0");
+    tService.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tScenario, tOutput, tDocument);
+    tPhysics.call(tService, tOutput, tDocument);
 
     // TEST RESULTS
     // global residual
@@ -1751,10 +1751,10 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.physics("mechanical");
-    tScenario.code("plato_analyze");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("mechanical");
+    tService.code("plato_analyze");
+    tXMLMetaData.append(tService);
     ASSERT_NO_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tPDE = tDocument.child("ParameterList");
@@ -1782,10 +1782,10 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck_ErrorInvalidPhy
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.code("plato_analyze");
-    tScenario.physics("computational fluid dynamics");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.physics("computational fluid dynamics");
+    tXMLMetaData.append(tService);
     ASSERT_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -1793,10 +1793,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendPa
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Scenario tScenario;
-    tScenario.physics("mechanical");
-    tScenario.dimensions("2");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("mechanical");
+    tService.dimensions("2");
+    tXMLMetaData.append(tService);
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
     tObjective.code_name = "sierra";
@@ -1812,10 +1812,10 @@ TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendP
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Scenario tScenario;
-    tScenario.physics("mechanical");
-    tScenario.dimensions("2");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("mechanical");
+    tService.dimensions("2");
+    tXMLMetaData.append(tService);
     XMLGen::Constraint tConstraint;
     tConstraint.category("maximize stiffness");
     tConstraint.code("sierra_sd");
@@ -1847,9 +1847,9 @@ TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorInvali
 TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.physics("computational fluid dynamics");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("computational fluid dynamics");
+    tXMLMetaData.append(tService);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_pde_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1857,9 +1857,9 @@ TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInva
 TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.physics("computational fluid dynamics");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("computational fluid dynamics");
+    tXMLMetaData.append(tService);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_physics_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1867,9 +1867,9 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhy
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorInvalidSpatialDim)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.dimensions("1");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.dimensions("1");
+    tXMLMetaData.append(tService);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1877,9 +1877,9 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorEmptyMeshFile)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Scenario tScenario;
-    tScenario.dimensions("2");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.dimensions("2");
+    tXMLMetaData.append(tService);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -2119,9 +2119,9 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Scenario tScenario;
-    tScenario.dimensions("2");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.dimensions("2");
+    tXMLMetaData.append(tService);
     ASSERT_NO_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tProblem = tDocument.child("ParameterList");
@@ -2149,10 +2149,10 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Scenario tScenario;
-    tScenario.physics("mechanical");
-    tScenario.dimensions("2");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.physics("mechanical");
+    tService.dimensions("2");
+    tXMLMetaData.append(tService);
     XMLGen::Objective tObjective;
     tObjective.type = "maximize stiffness";
     tObjective.code_name = "plato_analyze";

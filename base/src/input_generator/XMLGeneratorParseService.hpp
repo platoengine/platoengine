@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorParseScenario.hpp
+ * XMLGeneratorParseService.hpp
  *
  *  Created on: Jun 18, 2020
  */
@@ -8,20 +8,20 @@
 
 #include "XMLGeneratorParseMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
-#include "XMLGeneratorScenarioMetadata.hpp"
+#include "XMLGeneratorServiceMetadata.hpp"
 
 namespace XMLGen
 {
 
 /******************************************************************************//**
- * \class ParseScenario
- * \brief Parse inputs in scenario block and store values in XMLGen::Scenario.
+ * \class ParseService
+ * \brief Parse inputs in Service block and store values in XMLGen::Service.
 **********************************************************************************/
-class ParseScenario : public XMLGen::ParseMetadata<std::vector<XMLGen::Scenario>>
+class ParseService : public XMLGen::ParseMetadata<std::vector<XMLGen::Service>>
 {
 private:
-    std::vector<XMLGen::Scenario> mData; /*!< scenarios metadata */
-    /*!< map from main scenario tags to pair< valid tokens, pair<value,default> >, \n
+    std::vector<XMLGen::Service> mData; /*!< Services metadata */
+    /*!< map from main service tags to pair< valid tokens, pair<value,default> >, \n
      * i.e. map< tag, pair<valid tokens, pair<value,default>> > */
     XMLGen::MetaDataTags mTags;
 
@@ -34,38 +34,38 @@ private:
 
     /******************************************************************************//**
      * \fn setTags
-     * \brief Set scenario metadata.
-     * \param [in] aScenario scenario metadata
+     * \brief Set service metadata.
+     * \param [in] aService service metadata
     **********************************************************************************/
-    void setTags(XMLGen::Scenario& aScenario);
+    void setTags(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkTags
-     * \brief Check scenario metadata.
-     * \param [in] aScenario scenario metadata
+     * \brief Check service metadata.
+     * \param [in] aService service metadata
     **********************************************************************************/
-    void checkTags(XMLGen::Scenario& aScenario);
+    void checkTags(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkCode
      * \brief If 'code' keyword value is not supported, throw error.
-     * \param [in] aScenario scenario metadata
+     * \param [in] aService service metadata
     **********************************************************************************/
-    void checkCode(XMLGen::Scenario& aScenario);
+    void checkCode(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkPhysics
      * \brief Set 'physics' keyword, throw error if input keyword is empty.
-     * \param [in] aScenario scenario metadata
+     * \param [in] aService service metadata
     **********************************************************************************/
-    void checkPhysics(XMLGen::Scenario& aScenario);
+    void checkPhysics(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkSpatialDimensions
      * \brief If 'dimensions' keyword value is not supported, throw error.
-     * \param [in] aScenario scenario metadata
+     * \param [in] aService service metadata
     **********************************************************************************/
-    void checkSpatialDimensions(XMLGen::Scenario& aScenario);
+    void checkSpatialDimensions(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkPerformer
@@ -76,12 +76,12 @@ private:
     void checkPerformer();
 
     /******************************************************************************//**
-     * \fn checkScenarioID
-     * \brief If scenario 'id' keyword is empty, set 'id' to default = 'code_keyword' + \n
+     * \fn checkServiceID
+     * \brief If service 'id' keyword is empty, set 'id' to default = 'code_keyword' + \n
      * 'physics_keyword' + '0', where \n 'code_keyword' denotes the value set for \n
      * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
     **********************************************************************************/
-    void checkScenarioID();
+    void checkServiceID();
 
     /******************************************************************************//**
      * \fn finalize
@@ -92,14 +92,14 @@ private:
 public:
     /******************************************************************************//**
      * \fn data
-     * \brief Return scenarios metadata.
+     * \brief Return services metadata.
      * \return metadata
     **********************************************************************************/
-    std::vector<XMLGen::Scenario> data() const override;
+    std::vector<XMLGen::Service> data() const override;
 
     /******************************************************************************//**
      * \fn parse
-     * \brief Parse scenarios metadata.
+     * \brief Parse services metadata.
      * \param [in] aInputFile input file metadata.
     **********************************************************************************/
     void parse(std::istream &aInputFile) override;

@@ -67,17 +67,17 @@ void append_physics_performers
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Physics Performer: Scenarios list is empty.")
+        THROWERR("Append Physics Performer: Services list is empty.")
     }
 
     std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
-    for(auto& tScenario : aXMLMetaData.scenarios())
+    for(auto& tService : aXMLMetaData.services())
     {
-        const int tID = (&tScenario - &aXMLMetaData.scenarios()[0]) + 1;
+        const int tID = (&tService - &aXMLMetaData.services()[0]) + 1;
         auto tPerformerNode = aParentNode.append_child("Performer");
-        std::vector<std::string> tValues = { tScenario.performer(), tScenario.code(), std::to_string(tID) };
+        std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
         XMLGen::append_children( tKeywords, tValues, tPerformerNode);
     }
 }
@@ -88,18 +88,18 @@ void append_qoi_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aParentNode)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append QoI Shared Data: list of 'scenarios' is empty.")
+        THROWERR("Append QoI Shared Data: list of 'services' is empty.")
     }
 
     auto tOutputIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
-    auto tScenarioID = aXMLMetaData.mOutputMetaData.scenarioID();
+    auto tServiceID = aXMLMetaData.mOutputMetaData.serviceID();
     for(auto& tID : tOutputIDs)
     {
         auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
         auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
-        auto tOwnerName = aXMLMetaData.scenario(tScenarioID).performer();
+        auto tOwnerName = aXMLMetaData.service(tServiceID).performer();
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
         auto tSharedDataNode = aParentNode.append_child("SharedData");
@@ -113,18 +113,18 @@ void append_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.scenarios().empty())
+    if(aXMLMetaData.services().empty())
     {
-        THROWERR("Append Topology Shared Data: Scenarios list is empty.")
+        THROWERR("Append Topology Shared Data: Services list is empty.")
     }
 
     auto tSharedData = aDocument.append_child("SharedData");
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName", "UserName"};
     std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
-    for(auto& tScenario : aXMLMetaData.scenarios())
+    for(auto& tService : aXMLMetaData.services())
     {
         std::vector<std::string> tValues =
-            {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain", tScenario.performer()};
+            {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain", tService.performer()};
         XMLGen::append_children(tKeys, tValues, tSharedData);
     }
 }
@@ -170,9 +170,9 @@ void append_cache_state_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tScenario : aXMLMetaData.scenarios())
+    for (auto &tService : aXMLMetaData.services())
     {
-        if (!tScenario.cacheState())
+        if (!tService.cacheState())
         {
             continue;
         }
@@ -180,7 +180,7 @@ void append_cache_state_stage
         XMLGen::append_children( { "Name" }, { "Cache State" }, tStageNode);
         auto tOperationNode = tStageNode.append_child("Operation");
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Cache State", tScenario.performer() };
+        std::vector<std::string> tValues = { "Cache State", tService.performer() };
         XMLGen::append_children(tKeys, tValues, tOperationNode);
     }
 }
@@ -191,9 +191,9 @@ void append_update_problem_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tScenario : aXMLMetaData.scenarios())
+    for (auto &tService : aXMLMetaData.services())
     {
-        if (!tScenario.updateProblem())
+        if (!tService.updateProblem())
         {
             continue;
         }
@@ -201,7 +201,7 @@ void append_update_problem_stage
         XMLGen::append_children( { "Name" }, { "Update Problem" }, tStageNode);
         auto tOperationNode = tStageNode.append_child("Operation");
         std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Update Problem", tScenario.performer() };
+        std::vector<std::string> tValues = { "Update Problem", tService.performer() };
         XMLGen::append_children(tKeys, tValues, tOperationNode);
     }
 }
@@ -320,8 +320,8 @@ inline void append_random_qoi_to_write_output_operation
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidPerformerOutputKeys tValidKeys;
-    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
-    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tCodeName = aMetaData.service(tServiceID).code();
     auto tOutputQoIs = aMetaData.mOutputMetaData.randomIDs();
     for(auto& tQoI : tOutputQoIs)
     {
@@ -344,8 +344,8 @@ inline void append_deterministic_qoi_to_write_output_operation
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidPerformerOutputKeys tValidKeys;
-    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
-    auto tCodeName = aMetaData.scenario(tScenarioID).code();
+    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tCodeName = aMetaData.service(tServiceID).code();
     auto tOutputQoIs = aMetaData.mOutputMetaData.deterministicIDs();
     for(auto& tQoI : tOutputQoIs)
     {
@@ -370,8 +370,8 @@ void append_write_ouput_operation
         return;
     }
 
-    auto tScenarioID = aMetaData.mOutputMetaData.scenarioID();
-    auto tPerformerName = aMetaData.scenario(tScenarioID).performer();
+    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tPerformerName = aMetaData.service(tServiceID).performer();
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Write Output", tPerformerName}, tOperationNode);
     XMLGen::append_random_qoi_to_write_output_operation(aMetaData, tOperationNode);
@@ -959,7 +959,7 @@ void append_optimization_cache_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.scenario(0u).cacheState())
+    if(!aXMLMetaData.service(0u).cacheState())
     {
         return;
     }
@@ -974,7 +974,7 @@ void append_optimization_update_problem_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.scenario(0u).updateProblem())
+    if(!aXMLMetaData.service(0u).updateProblem())
     {
         return;
     }

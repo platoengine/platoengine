@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorScenarioMetadata.cpp
+ * XMLGeneratorServiceMetadata.cpp
  *
  *  Created on: Jul 22, 2020
  */
@@ -7,12 +7,12 @@
 #include "XMLG_Macros.hpp"
 #include "Plato_FreeFunctions.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
-#include "XMLGeneratorScenarioMetadata.hpp"
+#include "XMLGeneratorServiceMetadata.hpp"
 
 namespace XMLGen
 {
 
-std::string Scenario::getValue(const std::string& aTag) const
+std::string Service::getValue(const std::string& aTag) const
 {
     auto tItr = mMetaData.find(aTag);
     if(tItr == mMetaData.end())
@@ -22,28 +22,28 @@ std::string Scenario::getValue(const std::string& aTag) const
     return tItr->second;
 }
 
-bool Scenario::getBool(const std::string& aTag) const
+bool Service::getBool(const std::string& aTag) const
 {
     auto tItr = mMetaData.find(aTag);
     if(tItr == mMetaData.end())
     {
-        THROWERR(std::string("XML Generator Scenario Metadata: '") + aTag + "' keyword is not defined.")
+        THROWERR(std::string("XML Generator Service Metadata: '") + aTag + "' keyword is not defined.")
     }
     return (XMLGen::transform_boolean_key(tItr->second));
 }
 
-std::string Scenario::value(const std::string& aTag) const
+std::string Service::value(const std::string& aTag) const
 {
     auto tTag = Plato::tolower(aTag);
     auto tItr = mMetaData.find(tTag);
     if(tItr == mMetaData.end())
     {
-        THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is not defined in metadata.")
+        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is not defined in metadata.")
     }
     return (tItr->second);
 }
 
-std::vector<std::string> Scenario::tags() const
+std::vector<std::string> Service::tags() const
 {
     std::vector<std::string> tTags;
     for(auto& tProperty : mMetaData)
@@ -53,212 +53,212 @@ std::vector<std::string> Scenario::tags() const
     return tTags;
 }
 
-void Scenario::append(const std::string& aTag, const std::string& aValue)
+void Service::append(const std::string& aTag, const std::string& aValue)
 {
     if (aTag.empty())
     {
-        THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is empty.")
+        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is empty.")
     }
     auto tTag = Plato::tolower(aTag);
     mMetaData[aTag] = aValue;
 }
 
-void Scenario::id(const std::string& aInput)
+void Service::id(const std::string& aInput)
 {
     mMetaData["id"] = aInput;
 }
 
-std::string Scenario::id() const
+std::string Service::id() const
 {
     return (this->getValue("id"));
 }
 
-void Scenario::code(const std::string& aInput)
+void Service::code(const std::string& aInput)
 {
     mMetaData["code"] = aInput;
 }
 
-std::string Scenario::code() const
+std::string Service::code() const
 {
     return (this->getValue("code"));
 }
 
-void Scenario::performer(const std::string& aInput)
+void Service::performer(const std::string& aInput)
 {
     mMetaData["performer"] = aInput;
 }
 
-std::string Scenario::performer() const
+std::string Service::performer() const
 {
     return (this->getValue("performer"));
 }
 
-void Scenario::physics(const std::string& aInput)
+void Service::physics(const std::string& aInput)
 {
     mMetaData["physics"] = aInput;
 }
 
-std::string Scenario::physics() const
+std::string Service::physics() const
 {
     return (this->getValue("physics"));
 }
 
-void Scenario::dimensions(const std::string& aInput)
+void Service::dimensions(const std::string& aInput)
 {
     mMetaData["dimensions"] = aInput;
 }
 
-std::string Scenario::dimensions() const
+std::string Service::dimensions() const
 {
     return (this->getValue("dimensions"));
 }
 
-void Scenario::materialPenaltyExponent(const std::string& aInput)
+void Service::materialPenaltyExponent(const std::string& aInput)
 {
     mMetaData["material_penalty_exponent"] = aInput;
 }
 
-std::string Scenario::materialPenaltyExponent() const
+std::string Service::materialPenaltyExponent() const
 {
     return (this->getValue("material_penalty_exponent"));
 }
 
-void Scenario::minErsatzMaterialConstant(const std::string& aInput)
+void Service::minErsatzMaterialConstant(const std::string& aInput)
 {
     mMetaData["minimum_ersatz_material_value"] = aInput;
 }
 
-std::string Scenario::minErsatzMaterialConstant() const
+std::string Service::minErsatzMaterialConstant() const
 {
     return (this->getValue("minimum_ersatz_material_value"));
 }
 
-void Scenario::additiveContinuation(const std::string& aInput)
+void Service::additiveContinuation(const std::string& aInput)
 {
     mMetaData["additive_continuation"] = aInput;
 }
 
-std::string Scenario::additiveContinuation() const
+std::string Service::additiveContinuation() const
 {
     return (this->getValue("additive_continuation"));
 }
 
-void Scenario::timeStep(const std::string& aInput)
+void Service::timeStep(const std::string& aInput)
 {
     mMetaData["time_step"] = aInput;
 }
 
-std::string Scenario::timeStep() const
+std::string Service::timeStep() const
 {
     return (this->getValue("time_step"));
 }
 
-void Scenario::numTimeSteps(const std::string& aInput)
+void Service::numTimeSteps(const std::string& aInput)
 {
     mMetaData["number_time_steps"] = aInput;
 }
 
-std::string Scenario::numTimeSteps() const
+std::string Service::numTimeSteps() const
 {
     return (this->getValue("number_time_steps"));
 }
 
-void Scenario::maxNumTimeSteps(const std::string& aInput)
+void Service::maxNumTimeSteps(const std::string& aInput)
 {
     mMetaData["max_number_time_steps"] = aInput;
 }
 
-std::string Scenario::maxNumTimeSteps() const
+std::string Service::maxNumTimeSteps() const
 {
     return (this->getValue("max_number_time_steps"));
 }
 
-void Scenario::timeStepExpansion(const std::string& aInput)
+void Service::timeStepExpansion(const std::string& aInput)
 {
     mMetaData["time_step_expansion_multiplier"] = aInput;
 }
 
-std::string Scenario::timeStepExpansion() const
+std::string Service::timeStepExpansion() const
 {
     return (this->getValue("time_step_expansion_multiplier"));
 }
 
-void Scenario::newmarkBeta(const std::string& aInput)
+void Service::newmarkBeta(const std::string& aInput)
 {
     mMetaData["newmark_beta"] = aInput;
 }
 
-std::string Scenario::newmarkBeta() const
+std::string Service::newmarkBeta() const
 {
     return (this->getValue("newmark_beta"));
 }
 
-void Scenario::newmarkGamma(const std::string& aInput)
+void Service::newmarkGamma(const std::string& aInput)
 {
     mMetaData["newmark_gamma"] = aInput;
 }
 
-std::string Scenario::newmarkGamma() const
+std::string Service::newmarkGamma() const
 {
     return (this->getValue("newmark_gamma"));
 }
 
-void Scenario::solverTolerance(const std::string& aInput)
+void Service::solverTolerance(const std::string& aInput)
 {
     mMetaData["tolerance"] = aInput;
 }
 
-std::string Scenario::solverTolerance() const
+std::string Service::solverTolerance() const
 {
     return (this->getValue("tolerance"));
 }
 
-void Scenario::solverConvergenceCriterion(const std::string& aInput)
+void Service::solverConvergenceCriterion(const std::string& aInput)
 {
     mMetaData["convergence_criterion"] = aInput;
 }
 
-std::string Scenario::solverConvergenceCriterion() const
+std::string Service::solverConvergenceCriterion() const
 {
     return (this->getValue("convergence_criterion"));
 }
 
-void Scenario::solverMaxNumIterations(const std::string& aInput)
+void Service::solverMaxNumIterations(const std::string& aInput)
 {
     mMetaData["max_number_iterations"] = aInput;
 }
 
-std::string Scenario::solverMaxNumIterations() const
+std::string Service::solverMaxNumIterations() const
 {
     return (this->getValue("max_number_iterations"));
 }
 
-void Scenario::cacheState(const std::string& aInput)
+void Service::cacheState(const std::string& aInput)
 {
     mMetaData["enable_cache_state"] = aInput;
 }
 
-bool Scenario::cacheState() const
+bool Service::cacheState() const
 {
     return (this->getBool("enable_cache_state"));
 }
 
-void Scenario::updateProblem(const std::string& aInput)
+void Service::updateProblem(const std::string& aInput)
 {
     mMetaData["enable_update_problem"] = aInput;
 }
 
-bool Scenario::updateProblem() const
+bool Service::updateProblem() const
 {
     return (this->getBool("enable_update_problem"));
 }
 
-void Scenario::useNewAnalyzeUQWorkflow(const std::string& aInput)
+void Service::useNewAnalyzeUQWorkflow(const std::string& aInput)
 {
     mMetaData["use_new_analyze_uq_workflow"] = aInput;
 }
 
-bool Scenario::useNewAnalyzeUQWorkflow() const
+bool Service::useNewAnalyzeUQWorkflow() const
 {
     return (this->getBool("use_new_analyze_uq_workflow"));
 }

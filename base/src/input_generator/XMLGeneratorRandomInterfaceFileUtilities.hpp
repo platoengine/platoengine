@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <XMLGeneratorDataStruct.hpp>
+
 #include "pugixml.hpp"
 
 namespace XMLGen

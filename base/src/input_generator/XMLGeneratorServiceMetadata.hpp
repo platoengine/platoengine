@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorScenarioMetadata.hpp
+ * XMLGeneratorServiceMetadata.hpp
  *
  *  Created on: Jul 22, 2020
  */
@@ -14,14 +14,14 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \struct Scenario
- * \brief Scenario metadata for Plato problems.
+ * \struct Service
+ * \brief Service metadata for Plato problems.
 **********************************************************************************/
-struct Scenario
+struct Service
 {
 // private member data
 private:
-    std::unordered_map<std::string, std::string> mMetaData; /*!< scenario metadata, map< tag, value > */
+    std::unordered_map<std::string, std::string> mMetaData; /*!< Service metadata, map< tag, value > */
 
 // private member functions
 private:
@@ -348,6 +348,6 @@ public:
     **********************************************************************************/
     bool useNewAnalyzeUQWorkflow() const;
 };
-// struct Scenario
+// struct Service
 
 }

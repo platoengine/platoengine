@@ -69,13 +69,9 @@ inline bool is_robust_optimization_problem
 (const XMLGen::InputData& aMetaData)
 {
     if(aMetaData.mRandomMetaData.empty())
-    {
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 // function is_robust_optimization_problem
 
@@ -88,13 +84,10 @@ inline void write_plato_analyze_optimization_problem
 (const XMLGen::InputData& aInputData)
 {
     if(XMLGen::Analyze::is_robust_optimization_problem(aInputData))
-    {
         XMLGen::Analyze::write_robust_optimization_problem(aInputData);
-    }
     else
-    {
         XMLGen::Analyze::write_optimization_problem(aInputData);
-    }
+
     std::cout << "Successfully wrote XML files." << std::endl;
 }
 // function write_plato_analyze_optimization_problem

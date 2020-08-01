@@ -58,9 +58,9 @@
 #include <string>
 #include <map>
 
-#include "Plato_SromXML.hpp"
 #include "XMLGenerator.hpp"
 
+#include "Plato_SromXML.hpp"
 #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "Plato_SolveUncertaintyProblem.hpp"
@@ -76,7 +76,7 @@
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
-#include "XMLGeneratorParseScenario.hpp"
+#include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParseObjective.hpp"
@@ -253,7 +253,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
             std::cout << "ERROR: Only one objective is supported for optimization under uncertainty problem." << std::endl;
             return false;
         }
-        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
+        if (m_InputData.objectives[0].code_name == "plato_analyze" && !m_InputData.service(0u).useNewAnalyzeUQWorkflow())
         {
             if (m_InputData.objectives[0].atmost_total_num_processors < m_InputData.uncertainties[0].samples())
             {
@@ -274,7 +274,7 @@ bool XMLGenerator::runSROMForUncertainVariables()
 void XMLGenerator::setNumPerformers()
 /******************************************************************************/
 {
-    if (m_InputData.scenario(0u).useNewAnalyzeUQWorkflow())
+    if (m_InputData.service(0u).useNewAnalyzeUQWorkflow())
     {
         m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
@@ -519,13 +519,13 @@ bool XMLGenerator::parseOutput(std::istream &aInputFile)
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseScenario(std::istream &aInputFile)
+bool XMLGenerator::parseService(std::istream &aInputFile)
 /******************************************************************************/
 {
-    XMLGen::ParseScenario tParseScenario;
-    tParseScenario.parse(aInputFile);
-    auto tScenarios = tParseScenario.data();
-    m_InputData.set(tScenarios);
+    XMLGen::ParseService tParseService;
+    tParseService.parse(aInputFile);
+    auto tServices = tParseService.data();
+    m_InputData.set(tServices);
     return true;
 }
 
@@ -2653,7 +2653,7 @@ bool XMLGenerator::parseFile()
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  this->parseScenario(tInputFile);
+  this->parseService(tInputFile);
   tInputFile.close();
 
   // If we will need to run the prune_and_refine executable for any

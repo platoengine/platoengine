@@ -32,7 +32,7 @@ private:
     std::map<std::string, std::unordered_map<std::string, std::string>> mRandomQoIs;
     std::map<std::string, std::unordered_map<std::string, std::string>> mDeterministicQoIs;
 
-    std::unordered_map<std::string, std::string> mMetaData; /*!< scenario metadata, map< tag, value > */
+    std::unordered_map<std::string, std::string> mMetaData; /*!< service metadata, map< tag, value > */
 
 private:
     /******************************************************************************//**
@@ -107,18 +107,18 @@ public:
     void outputSamples(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn scenarioID
-     * \brief Set scenario identifier associated with output quantities of interest.
-     * \param [in] aInput scenario identifier (id)
+     * \fn serviceID
+     * \brief Set service identifier associated with output quantities of interest.
+     * \param [in] aInput service identifier (id)
     **********************************************************************************/
-    void scenarioID(const std::string& aInput);
+    void serviceID(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn scenarioID
-     * \brief Return scenario identifier associated with output quantities of interest.
-     * \return scenario identifier (id)
+     * \fn serviceID
+     * \brief Return service identifier associated with output quantities of interest.
+     * \return service identifier (id)
     **********************************************************************************/
-    std::string scenarioID() const;
+    std::string serviceID() const;
 
     /******************************************************************************//**
      * \fn appendRandomQoI

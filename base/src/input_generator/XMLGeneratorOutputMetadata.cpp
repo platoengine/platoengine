@@ -81,14 +81,14 @@ void Output::outputSamples(const std::string& aInput)
     mMetaData["output_samples"] = aInput;
 }
 
-void Output::scenarioID(const std::string& aInput)
+void Output::serviceID(const std::string& aInput)
 {
-    mMetaData["scenario"] = aInput;
+    mMetaData["service"] = aInput;
 }
 
-std::string Output::scenarioID() const
+std::string Output::serviceID() const
 {
-    return (this->getValue("scenario"));
+    return (this->getValue("service"));
 }
 
 void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLayout)

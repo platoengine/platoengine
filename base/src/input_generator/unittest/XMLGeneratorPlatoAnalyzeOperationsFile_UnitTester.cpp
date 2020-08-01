@@ -22,19 +22,19 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mProblemUpdateFrequency = "5";
     tXMLMetaData.optimization_type = "topology";
-    XMLGen::Scenario tScenario;
-    tScenario.id("1");
-    tScenario.updateProblem("true");
-    tScenario.code("plato_analyze");
-    tScenario.performer("plato_analyze_1");
-    tXMLMetaData.append(tScenario);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.updateProblem("true");
+    tService.code("plato_analyze");
+    tService.performer("plato_analyze_1");
+    tXMLMetaData.append(tService);
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
-    tXMLMetaData.mOutputMetaData.scenarioID("1");
+    tXMLMetaData.mOutputMetaData.serviceID("1");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
     tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
@@ -805,9 +805,9 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_ErrorEmpt
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    XMLGen::Scenario tScenario;
-    tScenario.updateProblem("true");
-    tInputData.append(tScenario);
+    XMLGen::Service tService;
+    tService.updateProblem("true");
+    tInputData.append(tService);
     ASSERT_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument), std::runtime_error);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -817,9 +817,9 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_DoNotWrit
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    XMLGen::Scenario tScenario;
-    tScenario.updateProblem("false");
-    tInputData.append(tScenario);
+    XMLGen::Service tService;
+    tService.updateProblem("false");
+    tInputData.append(tService);
     ASSERT_NO_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -830,9 +830,9 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     tInputData.mProblemUpdateFrequency = "5";
-    XMLGen::Scenario tScenario;
-    tScenario.updateProblem("true");
-    tInputData.append(tScenario);
+    XMLGen::Service tService;
+    tService.updateProblem("true");
+    tInputData.append(tService);
     ASSERT_NO_THROW(XMLGen::append_update_problem_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
