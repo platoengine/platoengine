@@ -25,42 +25,6 @@ namespace Analyze
 {
 
 /******************************************************************************//**
- * \fn write_robust_optimization_problem
- * \brief Write input files needed to solve robust optimization problems with Plato Analyze.
- * \param [in] aInputData input metadata
-**********************************************************************************/
-inline void write_robust_optimization_problem
-(const XMLGen::InputData& aInputData)
-{
-    XMLGen::write_define_xml_file(aInputData.mRandomMetaData, aInputData.m_UncertaintyMetaData);
-    XMLGen::write_stochastic_interface_xml_file(aInputData);
-    XMLGen::write_stochastic_plato_main_operations_xml_file(aInputData);
-    XMLGen::write_plato_main_input_deck_file(aInputData);
-    XMLGen::write_stochastic_plato_analyze_operation_xml_file(aInputData);
-    XMLGen::write_amgx_input_file();
-    XMLGen::write_plato_analyze_input_deck_file(aInputData);
-    XMLGen::generate_launch_script(aInputData);
-}
-// function write_robust_optimization_problem
-
-/******************************************************************************//**
- * \fn write_optimization_problem
- * \brief Write input files needed to solve optimization problems with Plato Analyze.
- * \param [in] aInputData input metadata
-**********************************************************************************/
-inline void write_optimization_problem
-(const XMLGen::InputData& aMetaData)
-{
-    XMLGen::write_interface_xml_file(aMetaData);
-    XMLGen::write_plato_main_operations_xml_file(aMetaData);
-    XMLGen::write_plato_main_input_deck_file(aMetaData);
-    XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
-    XMLGen::write_amgx_input_file();
-    XMLGen::write_plato_analyze_input_deck_file(aMetaData);
-    XMLGen::generate_launch_script(aMetaData);
-}
-
-/******************************************************************************//**
  * \fn is_robust_optimization_problem
  * \brief Write input files needed to solve optimization problems with Plato Analyze.
  * \param [in] aInputData input metadata
@@ -76,21 +40,31 @@ inline bool is_robust_optimization_problem
 // function is_robust_optimization_problem
 
 /******************************************************************************//**
- * \fn write_plato_analyze_optimization_problem
+ * \fn write_optimization_problem
  * \brief Write input files needed to solve optimization problems with Plato Analyze.
  * \param [in] aInputData input metadata
 **********************************************************************************/
-inline void write_plato_analyze_optimization_problem
-(const XMLGen::InputData& aInputData)
+inline void write_optimization_problem
+(const XMLGen::InputData& aMetaData)
 {
-    if(XMLGen::Analyze::is_robust_optimization_problem(aInputData))
-        XMLGen::Analyze::write_robust_optimization_problem(aInputData);
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
+        XMLGen::write_stochastic_interface_xml_file(aMetaData);
+        XMLGen::write_stochastic_plato_main_operations_xml_file(aMetaData);
+    }
     else
-        XMLGen::Analyze::write_optimization_problem(aInputData);
+    {
+        XMLGen::write_interface_xml_file(aMetaData);
+        XMLGen::write_plato_main_operations_xml_file(aMetaData);
+    }
 
-    std::cout << "Successfully wrote XML files." << std::endl;
+    XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
+    XMLGen::write_plato_main_input_deck_file(aMetaData);
+    XMLGen::write_plato_analyze_input_deck_file(aMetaData);
+    XMLGen::write_amgx_input_file();
+    XMLGen::generate_launch_script(aMetaData);
 }
-// function write_plato_analyze_optimization_problem
 
 }
 // namespace Analyze

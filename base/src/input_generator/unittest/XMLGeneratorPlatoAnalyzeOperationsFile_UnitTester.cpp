@@ -123,7 +123,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
 
     // CALL FUNCTION
-    XMLGen::write_stochastic_plato_analyze_operation_xml_file(tXMLMetaData);
+    XMLGen::write_plato_analyze_operation_xml_file(tXMLMetaData);
     auto tData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"

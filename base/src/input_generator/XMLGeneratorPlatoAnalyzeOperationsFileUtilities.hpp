@@ -36,6 +36,16 @@ void append_compute_objective_value_to_plato_analyze_operation
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_compute_random_objective_value_to_plato_analyze_operation
+ * \brief Append compute objective value operation to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_random_objective_value_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_compute_objective_gradient_to_plato_analyze_operation
  * \brief Append compute objective gradient operation to plato_analyze_operation.xml.
  * \param [in]     aMetaData   Plato problem input data
@@ -85,17 +95,6 @@ void append_update_problem_to_plato_analyze_operation
 **********************************************************************************/
 void append_compute_solution_to_plato_analyze_operation
 (pugi::xml_document& aDocument);
-
-/******************************************************************************//**
- * \fn append_compute_random_objective_value_to_plato_analyze_operation
- * \brief Append compute objective value operation to PUGI XML document. The \n
- * operation is only appended if Plato Analyze is responsible for its evaluation.
- * \param [in]     aMetaData Plato problem input data
- * \param [in/out] aDocument    pugi::xml_document
-**********************************************************************************/
-void append_compute_random_objective_value_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_random_objective_gradient_to_plato_analyze_operation
@@ -170,14 +169,6 @@ void append_random_traction_vector_to_plato_analyze_operation
 void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
- * \fn write_stochastic_plato_analyze_operation_xml_file
- * \brief Write stochastic Plato Analyze operations to plato_analyze_operation.xml file.
- * \param [in] aMetaData Plato problem input data
-**********************************************************************************/
-void write_stochastic_plato_analyze_operation_xml_file
-(const XMLGen::InputData& aMetaData);
 
 /******************************************************************************//**
  * \fn write_plato_analyze_operation_xml_file

@@ -61,13 +61,6 @@
 namespace XMLGen
 {
 
-enum ProblemType
-{
-   COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE,
-   COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES,
-   UNKNOWN 
-};
-
 class XMLGenerator
 {
 
@@ -130,16 +123,6 @@ protected:
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
 private:
-
-    /******************************************************************************//**
-     * @brief Identify Plato Analyze problem types 
-     **********************************************************************************/
-    ProblemType identifyPlatoAnalyzeProblemTypes();
-
-    /******************************************************************************//**
-     * @brief Determine the problem type 
-     **********************************************************************************/
-    ProblemType getProblemType();
 
     /******************************************************************************//**
      * @brief Initialize Plato problem options

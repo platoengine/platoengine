@@ -126,21 +126,7 @@ XMLGenerator::~XMLGenerator()
 **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
-    ProblemType tProblemType = this->getProblemType();
-    switch(tProblemType)
-    {
-        case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
-        case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
-        {
-            XMLGen::Analyze::write_plato_analyze_optimization_problem(m_InputData);
-            break;
-        }
-        default:
-        {
-            PRINTERR("Unknown problem type")
-            break;
-        }
-    }
+    XMLGen::Analyze::write_optimization_problem(m_InputData);
 }
 
 /******************************************************************************/
@@ -169,46 +155,6 @@ bool XMLGenerator::generate()
     this->writeInputFiles();
 
     return true;
-}
-
-/******************************************************************************/
-ProblemType XMLGenerator::getProblemType()
-/******************************************************************************/
-{
-    ProblemType tProblemType = UNKNOWN;
-
-    // Look for PA problem types.
-    tProblemType = identifyPlatoAnalyzeProblemTypes();
-
-    if(tProblemType == UNKNOWN)
-    {
-        // Look for other recognized problem types...
-    }
-    
-    return tProblemType;
-}
-
-/******************************************************************************/
-ProblemType XMLGenerator::identifyPlatoAnalyzeProblemTypes()
-/******************************************************************************/
-{
-    ProblemType tProblemType = UNKNOWN;
-
-    if(m_InputData.mAllPerformersArePlatoAnalyze)
-    {
-        if(m_InputData.optimization_type == "topology")
-        {
-            if(m_InputData.mAllObjectivesAreComplianceMinimization)
-            {
-                if(m_InputData.m_HasUncertainties == false)
-                    tProblemType = COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE;
-                else
-                    tProblemType = COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES;
-            }
-        }
-    }
-
-    return tProblemType;
 }
 
 /******************************************************************************/
