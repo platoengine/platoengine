@@ -5,8 +5,9 @@
  */
 
 #include "XMLGeneratorUtilities.hpp"
-#include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
 namespace XMLGen
@@ -17,6 +18,13 @@ void write_plato_main_operations_xml_file
 (const XMLGen::InputData& aMetaData)
 {
     pugi::xml_document tDocument;
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        auto tInclude = tDocument.append_child("include");
+        XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
+    }
+
     XMLGen::append_filter_options_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_initialize_field_to_plato_main_operation(aMetaData, tDocument);
@@ -25,41 +33,19 @@ void write_plato_main_operations_xml_file
     XMLGen::append_design_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aMetaData, tDocument);
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        XMLGen::append_stochastic_objective_value_to_plato_main_operation(aMetaData, tDocument);
+        XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aMetaData, tDocument);
+        XMLGen::append_qoi_statistics_to_plato_main_operation(aMetaData, tDocument);
+    }
+
     XMLGen::append_update_problem_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
     XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
-/******************************************************************************/
-
-/******************************************************************************/
-void write_stochastic_plato_main_operations_xml_file
-(const XMLGen::InputData& aXMLMetaData)
-{
-    pugi::xml_document tDocument;
-    auto tInclude = tDocument.append_child("include");
-    XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
-
-    XMLGen::append_filter_options_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_output_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_initialize_field_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_set_lower_bounds_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_set_upper_bounds_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_design_volume_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_volume_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_compute_volume_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
-
-    XMLGen::append_stochastic_objective_value_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_qoi_statistics_to_plato_main_operation(aXMLMetaData, tDocument);
-
-    XMLGen::append_update_problem_to_plato_main_operation(aXMLMetaData, tDocument);
-    XMLGen::append_filter_control_to_plato_main_operation(tDocument);
-    XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
-
-    tDocument.save_file("plato_main_operations.xml", "  ");
-}
-// function write_stochastic_plato_main_operations_xml_file
 /******************************************************************************/
 
 /******************************************************************************/

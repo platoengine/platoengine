@@ -51,14 +51,13 @@ inline void write_optimization_problem
     {
         XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
         XMLGen::write_stochastic_interface_xml_file(aMetaData);
-        XMLGen::write_stochastic_plato_main_operations_xml_file(aMetaData);
     }
     else
     {
         XMLGen::write_interface_xml_file(aMetaData);
-        XMLGen::write_plato_main_operations_xml_file(aMetaData);
     }
 
+    XMLGen::write_plato_main_operations_xml_file(aMetaData);
     XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
     XMLGen::write_plato_main_input_deck_file(aMetaData);
     XMLGen::write_plato_analyze_input_deck_file(aMetaData);

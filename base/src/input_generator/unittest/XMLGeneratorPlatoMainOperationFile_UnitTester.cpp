@@ -1356,7 +1356,25 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tXMLMetaData.objective_number_standard_deviations = "1";
     tXMLMetaData.mOutputMetaData.outputSamples("true");
     tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
-    XMLGen::write_stochastic_plato_main_operations_xml_file(tXMLMetaData);
+
+    // add random metadata
+    XMLGen::RandomMetaData tRandomMetaData;
+    XMLGen::RandomLoadCase tRandomLoadCase;
+    XMLGen::LoadCase tLoadCase;
+    std::vector<XMLGen::Load> tLoads;
+    XMLGen::Load tLoad;
+    tLoads.push_back(tLoad);
+    tLoadCase.loads = tLoads;
+    tLoadCase.id = 1;
+    tLoadCase.mCode = "plato_analyze";
+    tRandomLoadCase.first = 1;
+    tRandomLoadCase.second = tLoadCase;
+    tRandomMetaData.append(tRandomLoadCase);
+    tRandomMetaData.finalize();
+    tXMLMetaData.mRandomMetaData = tRandomMetaData;
+    EXPECT_EQ(tRandomMetaData.numSamples(), 1u);
+
+    XMLGen::write_plato_main_operations_xml_file(tXMLMetaData);
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function><Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName>")

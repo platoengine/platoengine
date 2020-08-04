@@ -22,14 +22,6 @@ void write_plato_main_operations_xml_file
 (const XMLGen::InputData& aMetaData);
 
 /******************************************************************************//**
- * \fn write_stochastic_plato_main_operations_xml_file
- * \brief Write Plato main operation xml file for stochastic use cases.
- * \param [in] aXMLMetaData Plato problem input data
-**********************************************************************************/
-void write_stochastic_plato_main_operations_xml_file
-(const XMLGen::InputData& aXMLMetaData);
-
-/******************************************************************************//**
  * \fn is_volume_constraint_defined
  * \brief Return true if volume constraint is defined.
  * \param [in] aXMLMetaData Plato problem input data
