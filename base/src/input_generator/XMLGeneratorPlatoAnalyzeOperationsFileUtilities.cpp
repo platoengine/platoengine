@@ -20,24 +20,6 @@ void append_compute_objective_value_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
-    if(tIsPlatoAnalyzePerformer)
-    {
-        auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveValue", "Compute Objective Value" }, tOperation);
-        auto tInput = tOperation.append_child("Input");
-        XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
-        auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_compute_random_objective_value_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument)
-{
     auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_type);
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
     auto tAppendComputeObjectiveValueOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
@@ -50,8 +32,12 @@ void append_compute_random_objective_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
-        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
-        XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        {
+            XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
+            XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
+        }
     }
 }
 /******************************************************************************/
@@ -61,8 +47,11 @@ void append_compute_objective_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_type);
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
-    if(tIsPlatoAnalyzePerformer)
+    auto tAppendComputeObjectiveGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
+
+    if(tAppendComputeObjectiveGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveGradient", "Compute Objective Gradient" }, tOperation);
@@ -70,17 +59,25 @@ void append_compute_objective_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        {
+            XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
+            XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
+        }
     }
 }
-/******************************************************************************/
 
 /******************************************************************************/
 void append_compute_constraint_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimization_type);
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData);
-    if(tIsPlatoAnalyzePerformer)
+    auto tAppendComputeConstraintValueOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
+
+    if(tAppendComputeConstraintValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintValue", "Compute Constraint Value" }, tOperation);
@@ -88,6 +85,12 @@ void append_compute_constraint_value_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        {
+            XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
+            XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
+        }
     }
 }
 /******************************************************************************/
@@ -97,8 +100,11 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimization_type);
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData);
-    if(tIsPlatoAnalyzePerformer)
+    auto tAppendComputeConstraintGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
+
+    if(tAppendComputeConstraintGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintGradient", "Compute Constraint Gradient" }, tOperation);
@@ -106,6 +112,12 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        {
+            XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
+            XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
+        }
     }
 }
 /******************************************************************************/
@@ -141,75 +153,6 @@ void append_compute_solution_to_plato_analyze_operation
     XMLGen::append_children({"Function", "Name"}, {"Compute Solution", "Compute Displacement Solution"}, tOperation);
     auto tInput = tOperation.append_child("Input");
     XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInput);
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_compute_random_objective_gradient_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_type);
-    auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
-    auto tAppendComputeObjectiveGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
-
-    if(tAppendComputeObjectiveGradientOperation)
-    {
-        auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveGradient", "Compute Objective Gradient" }, tOperation);
-        auto tInput = tOperation.append_child("Input");
-        XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
-        auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
-        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
-        XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_compute_random_constraint_value_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_type);
-    auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aMetaData);
-    auto tAppendComputeConstraintValueOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
-
-    if(tAppendComputeConstraintValueOperation)
-    {
-        auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintValue", "Compute Constraint Value" }, tOperation);
-        auto tInput = tOperation.append_child("Input");
-        XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
-        auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
-        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
-        XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
-void append_compute_random_constraint_gradient_to_plato_analyze_operation
-(const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument)
-{
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_type);
-    auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aMetaData);
-    auto tAppendComputeConstraintGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
-
-    if(tAppendComputeConstraintGradientOperation)
-    {
-        auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintGradient", "Compute Constraint Gradient" }, tOperation);
-        auto tInput = tOperation.append_child("Input");
-        XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
-        auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
-        XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
-        XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
-    }
 }
 /******************************************************************************/
 
@@ -309,39 +252,16 @@ void append_write_output_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void write_stochastic_plato_analyze_operation_xml_file
-(const XMLGen::InputData& aMetaData)
-{
-    pugi::xml_document tDocument;
-    XMLGen::append_write_output_to_plato_analyze_operation(aMetaData, tDocument);
-    XMLGen::append_update_problem_to_plato_analyze_operation(aMetaData, tDocument);
-    tDocument.save_file("plato_analyze_operations.xml", "  ");
-}
-/******************************************************************************/
-
-/******************************************************************************/
 void write_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
     pugi::xml_document tDocument;
     XMLGen::append_write_output_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_update_problem_to_plato_analyze_operation(aXMLMetaData, tDocument);
-
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-    {
-        XMLGen::append_compute_random_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_random_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_random_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_random_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    }
-    else
-    {
-        XMLGen::append_compute_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
-        XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    }
-
+    XMLGen::append_compute_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
+    XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
     tDocument.save_file("plato_analyze_operations.xml", "  ");
 }
 /******************************************************************************/

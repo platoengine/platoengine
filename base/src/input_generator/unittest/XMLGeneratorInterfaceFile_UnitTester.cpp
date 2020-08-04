@@ -34,6 +34,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     tMetaData.max_iterations = "10";
     tMetaData.discretization = "density";
     tMetaData.optimization_algorithm = "oc";
+    tMetaData.optimization_type = "topology";
     tMetaData.mProblemUpdateFrequency = "5";
     XMLGen::Objective tObjective;
     tObjective.name = "1";
@@ -111,6 +112,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperati
     XMLGen::InputData tMetaData;
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
+    tMetaData.optimization_type = "topology";
     tMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -134,6 +136,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tMetaData.constraints.push_back(tConstraint);
+    tMetaData.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
@@ -156,6 +159,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperatio
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
@@ -178,6 +182,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
