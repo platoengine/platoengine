@@ -214,13 +214,6 @@ bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables()
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicDistributeObjectivesForGenerate()
-/******************************************************************************/
-{
-    return distributeObjectivesForGenerate();
-}
-
-/******************************************************************************/
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {

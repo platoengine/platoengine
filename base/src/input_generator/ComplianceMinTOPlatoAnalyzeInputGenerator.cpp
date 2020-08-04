@@ -59,7 +59,6 @@
 #include <map>
 #include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
 #include "XMLGeneratorUtilities.hpp"
-#include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "PlatoAnalyzeInputDeckWriter.hpp"

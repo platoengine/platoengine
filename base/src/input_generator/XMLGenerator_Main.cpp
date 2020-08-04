@@ -62,13 +62,9 @@ void parse_command_line_arguments(int &argc, char **argv)
   for (int i = 1; i < argc; i++)
   {
     if (strcmp(argv[i],"--use_launch")==0)
-    {
       use_launch = true;
-    }
     else if (strcmp(argv[i],"--arch=summit")==0)
-    {
       arch = XMLGen::Arch::SUMMIT;
-    }
   }
 }
 

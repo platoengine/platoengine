@@ -66,15 +66,10 @@
 #include "Plato_SolveUncertaintyProblem.hpp"
 #include "Plato_UniqueCounter.hpp"
 #include "Plato_Vector3DVariations.hpp"
-#include "PlatoAnalyzeInputDeckWriter.hpp"
-#include "SalinasInputDeckWriter.hpp"
 #include "Plato_FreeFunctions.hpp"
-
 #include "XMLG_Macros.hpp"
-#include "DefaultInputGenerator.hpp"
-#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
-#include "ComplianceMinTOPlatoAnalyzeInputGenerator.hpp"
 
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
@@ -126,34 +121,24 @@ XMLGenerator::~XMLGenerator()
 }
 
 /******************************************************************************//**
- * \fn wirteInputFiles
+ * \fn writeInputFiles
  * \brief Write input files, i.e. write all the XML files needed by Plato.
 **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
-
-    if(m_InputData.input_generator_version == "old")
+    ProblemType tProblemType = this->getProblemType();
+    switch(tProblemType)
     {
-        DefaultInputGenerator tGenerator(m_InputData);
-        tGenerator.generateInputFiles();
-    }
-    else
-    {
-        ProblemType tProblemType = this->getProblemType();
-        switch(tProblemType)
+        case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
+        case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
         {
-            case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE:
-            case COMPLIANCE_MINIMIZATION_TO_PLATO_ANLYZE_WITH_UNCERTAINTIES:
-            {
-                XMLGen::Analyze::write_plato_analyze_optimization_problem(m_InputData);
-                break;
-            }
-            default:
-            {
-                DefaultInputGenerator tGenerator(m_InputData);
-                tGenerator.generateInputFiles();
-                break;
-            }
+            XMLGen::Analyze::write_plato_analyze_optimization_problem(m_InputData);
+            break;
+        }
+        default:
+        {
+            PRINTERR("Unknown problem type")
+            break;
         }
     }
 }
@@ -172,27 +157,11 @@ bool XMLGenerator::generate()
         return false;
     }
 
-    if(m_InputData.optimization_type == "shape" && m_InputData.csm_filename.length() > 0)
-    {
-        if(!parseCSMFile())
-        {
-            PRINTERR("Failed to parse CSM file.")
-            return false;
-        }
-    }
-
     this->getUncertaintyFlags();
 
     if(!runSROMForUncertainVariables())
     {
         PRINTERR("Failed to expand uncertainties in file generation.")
-        return false;
-    }
-
-    // NOTE: modifies objectives to resolves distribution
-    if(!distributeObjectivesForGenerate())
-    {
-        PRINTERR("Failed to distribute objectives in file generation.")
         return false;
     }
 
@@ -290,77 +259,6 @@ void XMLGenerator::setNumPerformers()
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseCSMFile()
-/******************************************************************************/
-{
-    bool tRet = true;
-
-    std::ifstream tInputStream;
-    tInputStream.open(m_InputData.csm_filename.c_str());
-    if(tInputStream.good())
-    {
-        tRet = parseCSMFileFromStream(tInputStream);
-        tInputStream.close();
-    }
-    else
-        tRet = false;
-
-    // Build a tesselation and exodus filenames from the csm filename
-    size_t tPosition = m_InputData.csm_filename.find(".csm");
-    if(tPosition != std::string::npos)
-    {
-        m_InputData.csm_tesselation_filename = m_InputData.csm_filename.substr(0, tPosition);
-        m_InputData.csm_tesselation_filename += ".eto";
-        m_InputData.csm_exodus_filename = m_InputData.csm_filename.substr(0, tPosition);
-        m_InputData.csm_exodus_filename += ".exo";
-    }
-    else
-    {
-        std::cout << "\n\nError: CSM filename did not have .csm extension\n\n";
-        tRet = false;
-    }
-
-    return tRet;
-}
-
-/******************************************************************************/
-bool XMLGenerator::parseCSMFileFromStream(std::istream &aStream)
-/******************************************************************************/
-{
-    bool tRet = true;
-
-    char tBuffer[MAX_CHARS_PER_LINE];
-
-    // read each line of the file (could optimize this to not read the whole file)
-    while(!aStream.eof())
-    {
-        // read an entire line into memory
-        aStream.getline(tBuffer, MAX_CHARS_PER_LINE);
-
-        char *tCharPointer = std::strtok(tBuffer, " ");
-
-        // skip comments
-        if(tCharPointer && tCharPointer[0] == '#')
-            continue;
-
-        if(tCharPointer && std::strcmp(tCharPointer, "despmtr") == 0)
-        {
-            // Get the variable name
-            tCharPointer = std::strtok(0, " ");
-            if(!tCharPointer)
-                break;
-            // Get the variable value
-            tCharPointer = std::strtok(0, " ");
-            m_InputData.mShapeDesignVariableValues.push_back(tCharPointer);
-            m_InputData.num_shape_design_variables++;
-        }
-    }
-
-    return tRet;
-}
-
-
-/******************************************************************************/
 void XMLGenerator::lookForPlatoAnalyzePerformers()
 /******************************************************************************/
 {
@@ -384,96 +282,6 @@ void XMLGenerator::lookForPlatoAnalyzePerformers()
         m_InputData.mAllPerformersArePlatoAnalyze = true;
     if(tNumObjectiveCriteria == m_InputData.objectives.size())
         m_InputData.mAllObjectivesAreComplianceMinimization = true;
-}
-
-/******************************************************************************/
-bool XMLGenerator::distributeObjectivesForGenerate()
-/******************************************************************************/
-{
-    // for each objective, consider if should distribute
-    for(auto& tObjective : m_InputData.objectives)
-    {
-        auto tObjectiveIndex = &tObjective - &m_InputData.objectives[0];
-        auto tThisObjective_distributeType = XMLGen::to_lower(m_InputData.objectives[tObjectiveIndex].distribute_objective_type);
-        if( (tThisObjective_distributeType.compare("none") == 0) || tThisObjective_distributeType.empty())
-        { /* no distribute; nothing to do for this objective.*/ }
-        else if(tThisObjective_distributeType == "atmost")
-        {
-            // distribute by "atmost" rule
-
-            // get inputs to distributed
-            const size_t total_number_of_tasks = m_InputData.objectives[tObjectiveIndex].load_case_ids.size();
-            const int num_processors_in_group = std::stoi(m_InputData.objectives[tObjectiveIndex].num_procs);
-            const int atmost_processor_count = std::stoi(m_InputData.objectives[tObjectiveIndex].atmost_total_num_processors);
-            if(num_processors_in_group <= 0 || atmost_processor_count <= 0)
-            {
-                std::cout << "ERROR:XMLGenerator:distributeObjectives: read a non-positive processor count.\n";
-                return false;
-            }
-
-            // divide up distributed objective
-            const size_t num_distributed_objectives =
-                Plato::divide_up_atmost_processors(total_number_of_tasks, num_processors_in_group, atmost_processor_count);
-
-            // store original load ids and weights
-            const std::vector<std::string> orig_load_case_ids = m_InputData.objectives[tObjectiveIndex].load_case_ids;
-            const std::vector<std::string> orig_load_case_weights = m_InputData.objectives[tObjectiveIndex].load_case_weights;
-
-            const size_t num_loads_this_original_objective = orig_load_case_ids.size();
-            if(num_loads_this_original_objective != orig_load_case_weights.size())
-            {
-                std::cout << "ERROR:XMLGenerator:distributeObjectives: "
-                          << "Found length mismatch between load case ids and weights.\n";
-                return false;
-            }
-
-            // clear load ids/weights in preparation for re-allocation
-            m_InputData.objectives[tObjectiveIndex].load_case_ids.clear();
-            m_InputData.objectives[tObjectiveIndex].load_case_weights.clear();
-
-            // clear distribute type in preparation for completion
-            m_InputData.objectives[tObjectiveIndex].distribute_objective_type = "";
-            m_InputData.objectives[tObjectiveIndex].atmost_total_num_processors = "";
-
-            // pushback indices for this distributed objective
-            std::vector<size_t> fromOriginal_newDistributed_objectiveIndices(1u, tObjectiveIndex);
-            for(size_t distributed_index = 1u; distributed_index < num_distributed_objectives; distributed_index++)
-            {
-                fromOriginal_newDistributed_objectiveIndices.push_back(m_InputData.objectives.size());
-                m_InputData.objectives.push_back(m_InputData.objectives[tObjectiveIndex]);
-            }
-
-            // stride load case ids and weights across distributed objectives
-            size_t strided_distributed_index = 0u;
-            for(size_t abstract_load_id = 0u; abstract_load_id < num_loads_this_original_objective; abstract_load_id++)
-            {
-                // resolve strided index to objective index
-                const size_t this_distributed_objectiveIndex =
-                        fromOriginal_newDistributed_objectiveIndices[strided_distributed_index];
-
-                // transfer ids/weights
-                m_InputData.objectives[this_distributed_objectiveIndex].load_case_ids.push_back(orig_load_case_ids[abstract_load_id]);
-                m_InputData.objectives[this_distributed_objectiveIndex].load_case_weights.push_back(orig_load_case_weights[abstract_load_id]);
-
-                // remove name in distributed
-                m_InputData.objectives[this_distributed_objectiveIndex].name="";
-                m_InputData.objectives[this_distributed_objectiveIndex].mPerformerName="";
-
-                // advance distributed index
-                strided_distributed_index = (strided_distributed_index + 1) % num_distributed_objectives;
-            }
-        }
-    }
-
-    // assign names
-    const bool filling_did_pass = fillObjectiveAndPerfomerNames();
-    if(!filling_did_pass)
-    {
-        std::cout << "ERROR:XMLGenerator:distributeObjectives: Failed to fill objective and performer names.\n";
-        return false;
-    }
-
-    return true;
 }
 
 /******************************************************************************/

@@ -80,8 +80,6 @@ public:
 
 protected:
 
-    bool parseCSMFileFromStream(std::istream &aStream);
-    bool parseCSMFile();
     bool parseLoads(std::istream &fin);
     bool parseLoadsBlock(std::istream &fin);
     bool parseLoadLine(std::vector<std::string>& tokens);
@@ -99,7 +97,6 @@ protected:
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool runSROMForUncertainVariables();
     void setNumPerformers();
-    bool distributeObjectivesForGenerate();
     bool parseFile();
     bool parseMesh(std::istream &fin);
     bool parseOutput(std::istream &fin);
