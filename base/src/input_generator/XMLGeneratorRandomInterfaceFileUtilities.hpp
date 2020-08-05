@@ -84,16 +84,6 @@ void append_physics_performers_multiperformer_usecase
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_shared_data_multiperformer_usecase
- * \brief Append shared data associated with a nondeterministic use case to PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aDocument    pugi::xml_document
-**********************************************************************************/
-void append_shared_data_multiperformer_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
  * \fn append_filter_criterion_gradient_samples_operation
  * \brief Append filter criterion gradient samples operation to PUGI XML document.
  * \param [in]     aCriterionName criterion, e.g. objective, constraint, name
@@ -170,16 +160,6 @@ void append_evaluate_nondeterministic_objective_value_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_objective_value_stage_stochastic_usecase
- * \brief Append nondeterministic objective value stage to PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aParentNode  pugi::xml_node
-**********************************************************************************/
-void append_objective_value_stage_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
  * \fn append_sample_objective_gradient_operation
  * \brief Append sample criterion gradient operation to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -200,34 +180,6 @@ void append_evaluate_nondeterministic_objective_gradient_operation
 (const std::string& aOutputSharedDataName,
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
- * \fn append_objective_gradient_stage_stochastic_usecase
- * \brief Append objective gradient stage to PUGI XML document.
- * \param [in]     aXMLMetaData   Plato problem input data
- * \param [in/out] aParentNode    pugi::xml_node
-**********************************************************************************/
-void append_objective_gradient_stage_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
- * \fn append_stages_stochastic_usecase
- * \brief Append stages for a nondeterministic use case to the PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aParentNode  pugi::xml_node
-**********************************************************************************/
-void append_stages_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
-
-/******************************************************************************//**
- * \fn write_stochastic_interface_xml_file
- * \brief Write interface.xml file for a nondeterministic use case.
- * \param [in] aXMLMetaData Plato problem input data
-**********************************************************************************/
-void write_stochastic_interface_xml_file
-(const XMLGen::InputData& aXMLMetaData);
 
 }
 // namespace XMLGen

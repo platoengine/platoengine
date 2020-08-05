@@ -159,28 +159,6 @@ void append_physics_performers_multiperformer_usecase
 /******************************************************************************/
 
 /******************************************************************************/
-void append_shared_data_multiperformer_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // deterministic shared data
-    XMLGen::append_control_shared_data(aDocument);
-    XMLGen::append_lower_bounds_shared_data(aDocument);
-    XMLGen::append_upper_bounds_shared_data(aDocument);
-    XMLGen::append_design_volume_shared_data(aDocument);
-    XMLGen::append_objective_shared_data(aXMLMetaData, aDocument, "platomain");
-    XMLGen::append_constraint_shared_data(aXMLMetaData, aDocument);
-
-    // nondeterministic shared data
-    XMLGen::append_qoi_statistics_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_multiperformer_qoi_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_multiperformer_topology_shared_data(aXMLMetaData, aDocument);
-    XMLGen::append_multiperformer_criterion_shared_data("Objective", aXMLMetaData, aDocument);
-}
-// function append_shared_data_multiperformer_usecase
-/******************************************************************************/
-
-/******************************************************************************/
 void append_filter_criterion_gradient_samples_operation
 (const std::string& aCriterionName,
  pugi::xml_node& aParentNode)
@@ -339,31 +317,6 @@ void append_evaluate_nondeterministic_objective_value_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_value_stage_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
-        XMLGen::append_children( { "Name" }, { tName }, tStageNode);
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tInputNode);
-
-        XMLGen::append_filter_control_operation(tStageNode);
-        XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
-        auto tOutputDataName = std::string("Objective Value ID-") + tObjective.name;
-        XMLGen::append_evaluate_nondeterministic_objective_value_operation(tOutputDataName, aXMLMetaData, tStageNode);
-
-        auto tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children( { "SharedDataName" }, { tOutputDataName }, tOutputNode);
-    }
-}
-// function append_objective_value_stage_stochastic_usecase
-/******************************************************************************/
-
-/******************************************************************************/
 void append_sample_objective_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -422,87 +375,6 @@ void append_evaluate_nondeterministic_objective_gradient_operation
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, aOutputSharedDataName }, tOutputNode);
 }
 // function append_evaluate_nondeterministic_objective_gradient_operation
-/******************************************************************************/
-
-/******************************************************************************/
-void append_objective_gradient_stage_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Compute Objective Gradient ID-") + tObjective.name;
-        XMLGen::append_children( { "Name" }, { tStageName }, tStageNode);
-        auto tStageInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
-
-        XMLGen::append_filter_control_operation(tStageNode);
-        XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
-        auto tOutputSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
-        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tOutputSharedDataName, aXMLMetaData, tStageNode);
-        XMLGen::append_filter_criterion_gradient_operation(tOutputSharedDataName, tStageNode);
-
-        auto tStageOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children( { "SharedDataName" }, { tOutputSharedDataName }, tStageOutputNode);
-    }
-}
-// function append_objective_gradient_stage_stochastic_usecase
-/******************************************************************************/
-
-/******************************************************************************/
-void append_stages_stochastic_usecase
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
-{
-    // deterministic stages
-    XMLGen::append_design_volume_stage(aDocument);
-    XMLGen::append_initial_guess_stage(aDocument);
-    XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
-    XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
-    XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
-
-    // nondeterministic stages
-    XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
-
-    // criteria stages
-    XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
-    XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
-    XMLGen::append_objective_value_stage_stochastic_usecase(aXMLMetaData, aDocument);
-    XMLGen::append_objective_gradient_stage_stochastic_usecase(aXMLMetaData, aDocument);
-}
-// function append_stages_stochastic_usecase
-/******************************************************************************/
-
-/******************************************************************************/
-void write_stochastic_interface_xml_file
-(const XMLGen::InputData& aXMLMetaData)
-{
-    if (aXMLMetaData.objectives.empty())
-    {
-        THROWERR("Write Interface XML File for a Nondeterministic Optimization Use Case: Objective block was not defined.")
-    }
-    if (aXMLMetaData.objectives.size() > 1u)
-    {
-        THROWERR(std::string("Write Interface XML File for a Nondeterministic Optimization Use Case: Only one objective, ")
-            + "i.e. objective block, is expected to be defined for a nondeterministic optimization use case.")
-    }
-
-    pugi::xml_document tDocument;
-    XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
-    auto tNode = tDocument.append_child("Console");
-    XMLGen::append_children({"Verbose"}, {"true"}, tNode);
-
-    XMLGen::append_plato_main_performer(tDocument);
-    XMLGen::append_physics_performers_multiperformer_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_shared_data_multiperformer_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_stages_stochastic_usecase(aXMLMetaData, tDocument);
-    XMLGen::append_optimizer_options(aXMLMetaData, tDocument);
-
-    tDocument.save_file("interface.xml", "  ");
-}
-// function write_stochastic_interface_xml_file
 /******************************************************************************/
 
 }

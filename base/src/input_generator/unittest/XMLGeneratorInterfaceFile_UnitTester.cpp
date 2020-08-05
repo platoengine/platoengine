@@ -445,20 +445,6 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tSharedData = tSharedData.next_sibling("SharedData");
     ASSERT_FALSE(tSharedData.empty());
     ASSERT_STREQ("SharedData", tSharedData.name());
-    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
-    tValues = {"dispx", "Scalar", "Nodal Field", "plato_analyze_1", "platomain"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
-
-    tSharedData = tSharedData.next_sibling("SharedData");
-    ASSERT_FALSE(tSharedData.empty());
-    ASSERT_STREQ("SharedData", tSharedData.name());
-    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName", "UserName"};
-    tValues = {"Topology", "Scalar", "Nodal Field", "platomain", "platomain", "plato_analyze_1"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
-
-    tSharedData = tSharedData.next_sibling("SharedData");
-    ASSERT_FALSE(tSharedData.empty());
-    ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     tValues = {"Objective Value ID-1", "Scalar", "Global", "1", "plato_analyze_1", "platomain"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
@@ -468,6 +454,20 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tValues = {"Objective Gradient ID-1", "Scalar", "Nodal Field", "plato_analyze_1", "platomain"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
+
+    tSharedData = tSharedData.next_sibling("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tValues = {"dispx", "Scalar", "Nodal Field", "plato_analyze_1", "platomain"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
+
+    tSharedData = tSharedData.next_sibling("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName", "UserName"};
+    tValues = {"Topology", "Scalar", "Nodal Field", "platomain", "platomain", "plato_analyze_1"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 }
 

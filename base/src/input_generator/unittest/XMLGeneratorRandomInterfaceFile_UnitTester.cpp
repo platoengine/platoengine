@@ -1915,14 +1915,14 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
-    XMLGen::append_objective_value_stage_stochastic_usecase(tXMLMetaData, tDocument);
+    XMLGen::append_objective_value_stage(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
-    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Compute Objective Value ID-0", "", "", "", "", ""};
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "For", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Objective Value ID-0", "maximize stiffness", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -2344,14 +2344,14 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
-    XMLGen::append_objective_gradient_stage_stochastic_usecase(tXMLMetaData, tDocument);
+    XMLGen::append_objective_gradient_stage(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
-    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Compute Objective Gradient ID-0", "", "", "", "", "", ""};
+    std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "For", "For", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Objective Gradient ID-0", "maximize stiffness", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -2881,7 +2881,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationBoundConstraintsOptions)
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorEmptyObjective)
 {
     XMLGen::InputData tXMLMetaData;
-    ASSERT_THROW(XMLGen::write_stochastic_interface_xml_file(tXMLMetaData), std::runtime_error);
+    ASSERT_THROW(XMLGen::write_interface_xml_file(tXMLMetaData), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorMultipleObjectives)
@@ -2891,7 +2891,7 @@ TEST(PlatoTestXMLGenerator, WriteInterfaceXmlFile_ErrorMultipleObjectives)
     XMLGen::Objective tObjective2;
     tXMLMetaData.objectives.push_back(tObjective1);
     tXMLMetaData.objectives.push_back(tObjective2);
-    ASSERT_THROW(XMLGen::write_stochastic_interface_xml_file(tXMLMetaData), std::runtime_error);
+    ASSERT_THROW(XMLGen::write_interface_xml_file(tXMLMetaData), std::runtime_error);
 }
 
 }

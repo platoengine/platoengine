@@ -7,6 +7,7 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp"
 #include "XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp"
@@ -18,14 +19,35 @@ namespace XMLGen
 void write_interface_xml_file
 (const XMLGen::InputData& aMetaData)
 {
+    if (aMetaData.objectives.empty())
+    {
+        THROWERR("Write Interface XML File for a Nondeterministic Optimization Use Case: Objective block was not defined.")
+    }
+    if (aMetaData.objectives.size() > 1u)
+    {
+        THROWERR(std::string("Write Interface XML File for a Nondeterministic Optimization Use Case: Only one objective, ")
+            + "i.e. objective block, is expected to be defined for a nondeterministic optimization use case.")
+    }
+
     pugi::xml_document tDocument;
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
+
     auto tNode = tDocument.append_child("Console");
     XMLGen::append_children({"Verbose"}, {aMetaData.mVerbose}, tNode);
     XMLGen::append_plato_main_performer(tDocument);
-    XMLGen::append_physics_performers(aMetaData, tDocument);
+
+    // note: multiperformer use case currently only works with Plato Analyze, and is only used currently with the robust optimization workflow
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, tDocument);
+    else
+        XMLGen::append_physics_performers(aMetaData, tDocument);
+
     XMLGen::append_shared_data(aMetaData, tDocument);
     XMLGen::append_stages(aMetaData, tDocument);
     XMLGen::append_optimizer_options(aMetaData, tDocument);
+
     tDocument.save_file("interface.xml", "  ");
 }
 /******************************************************************************/
@@ -139,10 +161,22 @@ void append_shared_data
     XMLGen::append_lower_bounds_shared_data(aDocument);
     XMLGen::append_upper_bounds_shared_data(aDocument);
     XMLGen::append_design_volume_shared_data(aDocument);
-    XMLGen::append_qoi_shared_data(aMetaData, aDocument);
-    XMLGen::append_topology_shared_data(aMetaData, aDocument);
-    XMLGen::append_objective_shared_data(aMetaData, aDocument);
     XMLGen::append_constraint_shared_data(aMetaData, aDocument);
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        XMLGen::append_objective_shared_data(aMetaData, aDocument, "platomain");
+        XMLGen::append_qoi_statistics_shared_data(aMetaData, aDocument);
+        XMLGen::append_multiperformer_qoi_shared_data(aMetaData, aDocument);
+        XMLGen::append_multiperformer_topology_shared_data(aMetaData, aDocument);
+        XMLGen::append_multiperformer_criterion_shared_data("Objective", aMetaData, aDocument);
+    }
+    else
+    {
+        XMLGen::append_objective_shared_data(aMetaData, aDocument);
+        XMLGen::append_qoi_shared_data(aMetaData, aDocument);
+        XMLGen::append_topology_shared_data(aMetaData, aDocument);
+    }
 }
 /******************************************************************************/
 
@@ -151,13 +185,21 @@ void append_stages
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    // deterministic stages
     XMLGen::append_design_volume_stage(aDocument);
     XMLGen::append_initial_guess_stage(aDocument);
     XMLGen::append_lower_bound_stage(aXMLMetaData, aDocument);
     XMLGen::append_upper_bound_stage(aXMLMetaData, aDocument);
     XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
-    XMLGen::append_cache_state_stage(aXMLMetaData, aDocument);
-    XMLGen::append_update_problem_stage(aXMLMetaData, aDocument);
+
+    // nondeterministic stages
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
+        XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+        XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    }
+
+    // criteria stages
     XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
     XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
     XMLGen::append_objective_value_stage(aXMLMetaData, aDocument);
@@ -232,13 +274,22 @@ void append_objective_value_stage
         auto tStageNode = aDocument.append_child("Stage");
         auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
         XMLGen::append_children( { "Name", "Type" }, { tName, tObjective.category() }, tStageNode);
-        auto tStageInput = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInput);
+        auto tStageInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
         XMLGen::append_filter_control_operation(tStageNode);
-        XMLGen::append_objective_value_operation(tObjective, tStageNode);
-        auto tStageOutput = tStageNode.append_child("Output");
-        auto tOutputSharedData = std::string("Objective Value ID-") + tObjective.name;
-        XMLGen::append_children( { "SharedDataName" }, { tOutputSharedData }, tStageOutput);
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+            XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
+        else
+            XMLGen::append_objective_value_operation(tObjective, tStageNode);
+
+        auto tSharedDataName = std::string("Objective Value ID-") + tObjective.name;
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+            XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
+
+        auto tStageOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children( { "SharedDataName" }, { tSharedDataName }, tStageOutputNode);
     }
 }
 /******************************************************************************/
@@ -268,16 +319,23 @@ void append_objective_gradient_stage
         auto tStageNode = aDocument.append_child("Stage");
         auto tStageName = std::string("Compute Objective Gradient ID-") + tObjective.name;
         XMLGen::append_children({"Name", "Type"}, {tStageName, tObjective.category()}, tStageNode);
-        auto tInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
-
+        auto tStageInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageInputNode);
         XMLGen::append_filter_control_operation(tStageNode);
-        XMLGen::append_objective_gradient_operation(tObjective, tStageNode);
-        auto tSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
-        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
 
-        auto tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+            XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
+        else
+            XMLGen::append_objective_gradient_operation(tObjective, tStageNode);
+
+        auto tSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
+
+        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+            XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
+
+        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
+        auto tStageOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tStageOutputNode);
     }
 }
 /******************************************************************************/
