@@ -45,7 +45,7 @@
       </ParameterList>        
     </ParameterList>
 
-    <ParameterList  name="Velocity Boundary Conditions">
+    <ParameterList  name="Displacement Boundary Conditions">
       <ParameterList  name="X Fixed">
         <Parameter  name="Type"     type="string" value="Zero Value"/>
         <Parameter  name="Index"    type="int"    value="0"/>
