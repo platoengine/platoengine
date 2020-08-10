@@ -74,6 +74,7 @@ public:
 
   virtual void setName(const char* name) { myName = name; }
   virtual void setIgnoreNodeMap(bool ignore_node_map) { myIgnoreNodeMap = ignore_node_map; }
+  virtual void setIgnoreElemMap(bool ignore_elem_map) { myIgnoreElemMap = ignore_elem_map; }
   virtual void setMode(Type type) { myType = type; }
   virtual void setData(DataContainer *dc) { myData = dc; }
   virtual void setMesh(DataMesh *mesh) { myMesh = mesh; }
@@ -99,6 +100,7 @@ protected:
   int myType;
   string myName;
   bool myIgnoreNodeMap;
+  bool myIgnoreElemMap;
   string myTitle;
   int myFileID;
   DataMesh* myMesh;
@@ -141,7 +143,11 @@ protected:
   void GetExodusNodeIds(int * a_NodeIds, int a_MyFileId);
   void GetSerialNodeIds(int * a_NodeIds, int a_MyFileId);
   void GetParallelNodeIds(int * a_NodeIds, int a_MyFileId);
+
   void GetExodusElementIds(int * a_ElemIds, int a_MyField);
+  void GetSerialElementIds(int * a_ElemIds, int a_MyFileId);
+  void GetParallelElementIds(int * a_ElemIds, int a_MyFileId);
+
 private: //!no copy allowed
   ExodusIO(const ExodusIO&);
   ExodusIO& operator=(const ExodusIO&);
