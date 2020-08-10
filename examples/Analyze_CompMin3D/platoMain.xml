@@ -1,7 +1,8 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>bolted_bracket.gen</mesh>
+  <mesh>bolted_bracket.exo</mesh>
+  <ignore_node_map>true</ignore_node_map>
   <block>
     <index>1</index>
     <integration>

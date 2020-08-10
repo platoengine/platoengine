@@ -25,16 +25,20 @@
 
 <Operation>
   <Name>Compute Objective</Name>
-  <Function>ComputeObjectiveValue</Function>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
   <Name>Compute Constraint</Name>
-  <Function>ComputeConstraintValue</Function>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Volume</Criterion>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Constraint Value</ArgumentName>
   </Output>
 </Operation>

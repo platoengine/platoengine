@@ -13,23 +13,27 @@
 </Operation>
 
 <Operation>
-  <Function>ComputeObjectiveValue</Function>
   <Name>Compute Objective Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Stress Constraint General</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
-  <Function>ComputeObjectiveGradient</Function>
   <Name>Compute Objective Gradient</Name>
+  <Function>ComputeCriterionGradient</Function>
+  <Criterion>Stress Constraint General</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>
