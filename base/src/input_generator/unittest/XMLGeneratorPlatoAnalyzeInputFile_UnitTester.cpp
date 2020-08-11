@@ -1789,44 +1789,6 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck_ErrorInvalidPhy
     ASSERT_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, AppendObjectiveParameterToPlatoProblem_DoNotAppendParameter)
-{
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Service tService;
-    tService.physics("mechanical");
-    tService.dimensions("2");
-    tXMLMetaData.append(tService);
-    XMLGen::Objective tObjective;
-    tObjective.type = "maximize stiffness";
-    tObjective.code_name = "sierra";
-    tXMLMetaData.objectives.push_back(tObjective);
-
-    pugi::xml_document tDocument;
-    XMLGen::append_objective_parameter_to_plato_problem(tXMLMetaData, tDocument);
-    auto tParameter = tDocument.child("Parameter");
-    ASSERT_TRUE(tParameter.empty());
-}
-
-TEST(PlatoTestXMLGenerator, AppendConstraintParameterToPlatoProblem_DoNotAppendParameter)
-{
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Service tService;
-    tService.physics("mechanical");
-    tService.dimensions("2");
-    tXMLMetaData.append(tService);
-    XMLGen::Constraint tConstraint;
-    tConstraint.category("maximize stiffness");
-    tConstraint.code("sierra_sd");
-    tXMLMetaData.constraints.push_back(tConstraint);
-
-    pugi::xml_document tDocument;
-    XMLGen::append_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument);
-    auto tParameter = tDocument.child("Parameter");
-    ASSERT_TRUE(tParameter.empty());
-}
-
 TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorEmptyObjective)
 {
     XMLGen::InputData tXMLMetaData;
@@ -1924,7 +1886,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstrai
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
+TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 {
     XMLGen::InputData tXMLMetaData;
     XMLGen::Objective tObjective1;
@@ -1939,10 +1901,11 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
     tXMLMetaData.objectives.push_back(tObjective2);
 
     pugi::xml_document tDocument;
-    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    auto tCriteriaList = tDocument.append_child("ParameterList");
+    XMLGen::append_objective_criteria_to_criteria_list(tXMLMetaData, tCriteriaList);
 
     // TEST MY OBJECTIVE
-    auto tParamList = tDocument.child("ParameterList");
+    auto tParamList = tCriteriaList.child("ParameterList");
     ASSERT_FALSE(tParamList.empty());
     ASSERT_STREQ("ParameterList", tParamList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"My Objective"}, tParamList);
@@ -2038,7 +2001,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoAnalyzeInputDeck)
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
+TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToCriteriaList)
 {
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint;
@@ -2051,10 +2014,11 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToPlatoAnalyzeInputDeck)
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
-    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    auto tCriteriaList = tDocument.append_child("ParameterList");
+    XMLGen::append_constraint_criteria_to_criteria_list(tXMLMetaData, tCriteriaList);
 
     // TEST MY CONSTRAINT
-    auto tParamList = tDocument.child("ParameterList");
+    auto tParamList = tCriteriaList.child("ParameterList");
     ASSERT_FALSE(tParamList.empty());
     ASSERT_STREQ("ParameterList", tParamList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"My Constraint"}, tParamList);
@@ -2179,8 +2143,8 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Physics", "string", "Mechanical"}, {"PDE Constraint", "string", "Elliptic"}, {"Constraint", "string", "My Constraint"},
-          {"Objective", "string", "My Objective"}, {"Self-Adjoint", "bool", "true"} };
+        { {"Physics", "string", "Mechanical"}, {"PDE Constraint", "string", "Elliptic"},
+          {"Self-Adjoint", "bool", "true"} };
     auto tGoldValuesItr = tGoldValues.begin();
 
     auto tParameter = tPlatoProblem.child("Parameter");

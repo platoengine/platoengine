@@ -16,6 +16,44 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.max_iterations = "10";
+    tMetaData.discretization = "density";
+    tMetaData.optimization_algorithm = "oc";
+    tMetaData.optimization_type = "topology";
+    tMetaData.mProblemUpdateFrequency = "5";
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.code_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.performer("plato_analyze_1");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+    tMetaData.mOutputMetaData.disableOutput();
+
+    XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
+
+    auto tReadData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation>")
+        +"<Operation><Function>ComputeCriterionValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Value</Argument><ArgumentName>ObjectiveValue</ArgumentName></Output></Operation>"
+        +"<Operation><Function>ComputeCriterionGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Gradient</Argument><ArgumentName>ObjectiveGradient</ArgumentName></Output></Operation>"
+        +"<Operation><Function>ComputeCriterionValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Value</Argument><ArgumentName>ConstraintValue</ArgumentName></Output></Operation>"
+        +"<Operation><Function>ComputeCriterionGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Gradient</Argument><ArgumentName>ConstraintGradient</ArgumentName></Output></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    Plato::system("rm -f plato_analyze_operations.xml");
+}
+
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministicUsecase)
 {
     // POSE INPUTS
@@ -127,7 +165,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     auto tData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
-    +"</Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output>"
+    +"</Operation><Operation><Function>ComputeCriterionValue</Function><Name>ComputeObjectiveValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Value</Argument><ArgumentName>ObjectiveValue</ArgumentName></Output>"
     +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
@@ -136,7 +174,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
-    +"<Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output>"
+    +"<Operation><Function>ComputeCriterionGradient</Function><Name>ComputeObjectiveGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Gradient</Argument><ArgumentName>ObjectiveGradient</ArgumentName></Output>"
     +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
@@ -145,7 +183,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>"
-    +"<Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output>"
+    +"<Operation><Function>ComputeCriterionValue</Function><Name>ComputeConstraintValue</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Value</Argument><ArgumentName>ConstraintValue</ArgumentName></Output>"
     +"<Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter>"+"<Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
@@ -154,7 +192,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     +"</Parameter><Parameter><ArgumentName>traction_load_id_1_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID1]:Values(2)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter>"
-    +"</Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName>"
+    +"</Operation><Operation><Function>ComputeCriterionGradient</Function><Name>ComputeConstraintGradient</Name><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Gradient</Argument><ArgumentName>ConstraintGradient</ArgumentName>"
     +"</Output><Parameter><ArgumentName>traction_load_id_2_x_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(0)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_y_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(1)</Target><InitialValue>0.0</InitialValue>"
     +"</Parameter><Parameter><ArgumentName>traction_load_id_2_z_axis</ArgumentName><Target>[PlatoProblem]:[NaturalBoundaryConditions]:[RandomTractionVectorBoundaryConditionwithID2]:Values(2)</Target><InitialValue>0.0</InitialValue>"
@@ -398,7 +436,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = { "Function", "Name", "Input", "Output", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Parameter", "Parameter", "Parameter", "Parameter", "Parameter" };
-    std::vector<std::string> tValues = { "ComputeConstraintValue", "Compute Constraint Value", "", "",
+    std::vector<std::string> tValues = { "ComputeCriterionValue", "Compute Constraint Value", "", "",
         "", "", "", "", "", "", "", "", "", "" };
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
@@ -410,7 +448,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({ "ArgumentName" }, { "Constraint Value" }, tOutput);
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Value", "Constraint Value"}, tOutput);
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
@@ -840,6 +878,98 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name"}, {"UpdateProblem", "Update Problem"}, tOperation);
 }
 
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeCriterionValue", "Compute Objective Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"Argument","ArgumentName"}, {"Value", "Objective Value"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeCriterionGradient", "Compute Objective Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Gradient", "Objective Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeCriterionValue", "Compute Constraint Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"Argument","ArgumentName"}, {"Value", "Constraint Value"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.optimization_type = "topology";
+    tMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeCriterionGradient", "Compute Constraint Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Gradient", "Constraint Gradient"}, tOutput);
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeSolutionToPlatoAnalyzeOperation)
 {
     pugi::xml_document tDocument;
@@ -953,7 +1083,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = { "Function", "Name", "Input", "Output", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Parameter", "Parameter" };
-    std::vector<std::string> tValues = { "ComputeConstraintValue", "Compute Constraint Value", "", "", "", "", "", "", "", "", "" };
+    std::vector<std::string> tValues = { "ComputeCriterionValue", "Compute Constraint Value", "", "", "", "", "", "", "", "", "" };
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.child("Input");
@@ -964,7 +1094,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({ "ArgumentName" }, { "Constraint Value" }, tOutput);
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Value", "Constraint Value"}, tOutput);
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
@@ -1108,7 +1238,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = { "Function", "Name", "Input", "Output", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Parameter", "Parameter" };
-    std::vector<std::string> tValues = { "ComputeConstraintGradient", "Compute Constraint Gradient", "", "", "", "", "", "", "", "", "" };
+    std::vector<std::string> tValues = { "ComputeCriterionGradient", "Compute Constraint Gradient", "", "", "", "", "", "", "", "", "" };
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.child("Input");
@@ -1119,7 +1249,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({ "ArgumentName" }, { "Constraint Gradient" }, tOutput);
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Gradient", "Constraint Gradient"}, tOutput);
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
@@ -1261,7 +1391,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = { "Function", "Name", "Input", "Output", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Parameter", "Parameter" };
-    std::vector<std::string> tValues = { "ComputeObjectiveValue", "Compute Objective Value", "", "", "", "", "", "", "", "", "" };
+    std::vector<std::string> tValues = { "ComputeCriterionValue", "Compute Objective Value", "", "", "", "", "", "", "", "", "" };
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.child("Input");
@@ -1272,7 +1402,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({ "ArgumentName" }, { "Objective Value" }, tOutput);
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Value", "Objective Value"}, tOutput);
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
@@ -1414,7 +1544,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     ASSERT_STREQ("Operation", tOperation.name());
     std::vector<std::string> tKeys = { "Function", "Name", "Input", "Output", "Parameter", "Parameter",
         "Parameter", "Parameter", "Parameter", "Parameter", "Parameter" };
-    std::vector<std::string> tValues = { "ComputeObjectiveGradient", "Compute Objective Gradient", "", "", "", "", "", "", "", "", "" };
+    std::vector<std::string> tValues = { "ComputeCriterionGradient", "Compute Objective Gradient", "", "", "", "", "", "", "", "", "" };
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.child("Input");
@@ -1425,7 +1555,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     auto tOutput = tOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({ "ArgumentName" }, { "Objective Gradient" }, tOutput);
+    PlatoTestXMLGenerator::test_children({"Argument", "ArgumentName"}, {"Gradient", "Objective Gradient"}, tOutput);
 
     // TEST RANDOM PARAMETERS
     auto tParameter = tOperation.child("Parameter");
