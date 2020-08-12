@@ -5108,6 +5108,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     // Console output control
     tTmpNode = doc.append_child("Console");
     addChild(tTmpNode, "Verbose", "true");
+    addChild(tTmpNode, "Enabled", "true");
 
     //////////////////////////////////////////////////
     // Performers
