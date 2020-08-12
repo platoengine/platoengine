@@ -639,6 +639,15 @@ void PlatoAnalyzeInputDeckWriter::buildMechanicalNBCsForPlatoAnalyze(const XMLGe
                     sprintf(tBuffer, "%s", cur_load.app_name.c_str());
                     addNTVParameter(tPugiNode2, "Sides", "string", tBuffer);
                 }
+                else if(cur_load.type == "pressure")
+                {
+                    tPugiNode2 = tPugiNode1.append_child("ParameterList");
+                    sprintf(tBuffer, "Pressure Boundary Condition %d", aBCCounter++);
+                    tPugiNode2.append_attribute("name") = tBuffer;
+                    addNTVParameter(tPugiNode2, "Type", "string", "Uniform Pressure");
+                    addNTVParameter(tPugiNode2, "Value", "double", cur_load.values[0]);
+                    addNTVParameter(tPugiNode2, "Sides", "string", cur_load.app_name);
+                }
             }
         }
     }
