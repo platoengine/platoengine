@@ -1198,6 +1198,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInterfaceXML(std::
     // Console output control
     tTmpNode = doc.append_child("Console");
     addChild(tTmpNode, "Verbose", "true");
+    addChild(tTmpNode, "Enabled", "true");
 
     //////////////////////////////////////////////////
     // Performers

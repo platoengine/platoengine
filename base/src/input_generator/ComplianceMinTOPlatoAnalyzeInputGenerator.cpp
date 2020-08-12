@@ -876,6 +876,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     // Console output control
     tTmpNode = doc.append_child("Console");
     addChild(tTmpNode, "Verbose", "true");
+    addChild(tTmpNode, "Enabled", "true");
 
     //////////////////////////////////////////////////
     // Performers
