@@ -14,8 +14,8 @@
 namespace XMLGen
 {
 
-/*!< map from xml file input keyword to pair< pair<token,input_keyword_value>, input_keyword_default_value> >, \n
- * i.e. map< input_keyword, pair< pair<tokens,input_keyword_value>, input_keyword_default_value > > */
+/*!< map from xml file input keyword string to pair< pair<tokens,input_keyword_value>, input_keyword_default_value> >, \n
+ * i.e. map< input_keyword_string, pair< pair<tokens,input_keyword_value>, input_keyword_default_value > > */
 using MetaDataTags = std::unordered_map<std::string, std::pair<std::pair<std::vector<std::string>,std::string>, std::string>>;
 
 /******************************************************************************//**
