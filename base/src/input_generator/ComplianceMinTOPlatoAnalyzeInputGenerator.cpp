@@ -471,6 +471,8 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generatePlatoAnalyzeOperationsXM
                 addChild(tmp_node1, "ArgumentName", "Solution Z");
             else if(tCurObjective.output_for_plotting[j] == "temperature")
                 addChild(tmp_node1, "ArgumentName", "Solution");
+            else if(tCurObjective.output_for_plotting[j] == "vonmises")
+                addChild(tmp_node1, "ArgumentName", "Vonmises");
         }
   
         char buf[200];
@@ -1229,6 +1231,8 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::outputOutputToFileStage(pugi::xm
                 addChild(output_node, "ArgumentName", "Solution Z");
             else if(cur_obj.output_for_plotting[j] == "temperature")
                 addChild(output_node, "ArgumentName", "Solution");
+            else if(cur_obj.output_for_plotting[j] == "vonmises")
+                addChild(output_node, "ArgumentName", "Vonmises");
         }
     }
 

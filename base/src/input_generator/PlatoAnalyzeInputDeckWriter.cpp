@@ -259,7 +259,7 @@ void PlatoAnalyzeInputDeckWriter::buildMaximizeStiffnessParamsForPlatoAnalyze(co
     // Internal Elastic Energy Objective
     addPAObjectiveBlock(aNode, "My Internal Elastic Energy");
     // Elliptic
-    addPAPDEConstraintBlock(aNode, "Elliptic");
+    addPAPDEConstraintBlock(aNode, "Elliptic", aObjective);
 
     // Material model
     addPAMaterialModelBlock(aNode, "Isotropic Linear Elastic");
@@ -292,7 +292,7 @@ void PlatoAnalyzeInputDeckWriter::buildMinimizeThermoelasticEnergyParamsForPlato
     addPAObjectiveBlock(aNode, "My Internal Thermoelastic Energy");
 
     // Thermoelastostatics
-    addPAPDEConstraintBlock(aNode, "Elliptic");
+    addPAPDEConstraintBlock(aNode, "Elliptic", aObjective);
 
     // Material Model
     addPAMaterialModelBlock(aNode, "Isotropic Linear Thermoelastic");
@@ -326,7 +326,7 @@ void PlatoAnalyzeInputDeckWriter::buildMaximizeHeatConductionParamsForPlatoAnaly
     // Internal Elastic Energy Objective
     addPAObjectiveBlock(aNode, "My Internal Thermal Energy");
     // Thermostatics
-    addPAPDEConstraintBlock(aNode, "Elliptic");
+    addPAPDEConstraintBlock(aNode, "Elliptic", aObjective);
     // Material Model
     addPAMaterialModelBlock(aNode, "Isotropic Linear Thermal");
 
@@ -380,12 +380,25 @@ void PlatoAnalyzeInputDeckWriter::addPAObjectiveBlock(pugi::xml_node aNode, cons
     }
 }
 
-void PlatoAnalyzeInputDeckWriter::addPAPDEConstraintBlock(pugi::xml_node aNode, const char* aPDEConstraintName)
+void PlatoAnalyzeInputDeckWriter::addPAPDEConstraintBlock(pugi::xml_node aNode, 
+                                                          const char* aPDEConstraintName,
+                                                          const XMLGen::Objective& aObjective)
 {
     pugi::xml_node tPugiNode1, tPugiNode2;
 
+    bool tFoundVonmises = false;
+    for(size_t i=0; i<aObjective.output_for_plotting.size(); ++i)
+    {
+        if(aObjective.output_for_plotting[i] == "vonmises")
+            tFoundVonmises = true;
+    }
+
     tPugiNode1 = aNode.append_child("ParameterList");
     tPugiNode1.append_attribute("name") = aPDEConstraintName;
+
+    if(tFoundVonmises)
+        addNTVParameter(tPugiNode1, "Plottable", "Array(string)", "{Vonmises}");
+
     tPugiNode2 = tPugiNode1.append_child("ParameterList");
     tPugiNode2.append_attribute("name") = "Penalty Function";
     addNTVParameter(tPugiNode2, "Type", "string", "SIMP");
