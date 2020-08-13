@@ -2355,6 +2355,7 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.check_hessian = "false";
     m_InputData.filter_type = "kernel";
     m_InputData.filter_power = "1";
+    m_InputData.mAmgxSolverType = "PBICGSTAB";
 
     m_InputData.mInnerKKTtoleranceGCMMA = "";
     m_InputData.mOuterKKTtoleranceGCMMA = "";
@@ -2531,6 +2532,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                 return false;
               }
               m_InputData.input_generator_version = tStringValue;
+            }
+            else if(parseSingleValue(tokens, tInputStringList = {"amgx","solver","type"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"amgx solver type\" keyword(s).\n";
+                return false;
+              }
+              m_InputData.mAmgxSolverType = toUpper(tStringValue);
             }
             else if(parseSingleValue(tokens, tInputStringList = {"initial","density","value"}, tStringValue))
             {
