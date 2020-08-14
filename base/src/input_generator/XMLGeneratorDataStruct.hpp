@@ -113,7 +113,7 @@ public:
     // std::vector<XMLGen::Criterion> criteria;
     // std::vector<XMLGen::Material> materials;
     // std::vector<XMLGen::Block> blocks;
-    // std::vector<XMLGen::Load> loads;
+    std::vector<XMLGen::Load> loads;
     std::vector<XMLGen::BC> bcs;
     // std::vector<XMLGen::Uncertainty> uncertainties;
 

@@ -12,17 +12,16 @@
 namespace XMLGen
 {
 
-// struct Load
-// {
-//     bool mIsRandom = false;
-//     std::string type; // traction, heat flux, force, pressure ...
-//     std::string app_type; // nodeset or sideset
-//     std::string app_id; // nodeset/sideset id
-//     std::string app_name; // nodeset/sideset name
-//     std::vector<std::string> values;
-//     std::string dof;  // x, y, or z
-//     std::string load_id;
-// };
+struct Load
+{
+    std::string type; // traction, heat flux, force, pressure ...
+    std::string app_type; // nodeset or sideset
+    std::string app_id; // nodeset/sideset id
+    std::string app_name; // nodeset/sideset name
+    std::vector<std::string> values;
+    std::string dof;  // x, y, or z
+    std::string load_id;
+};
 
 // struct LoadCase
 // {

@@ -75,15 +75,15 @@ public:
 
 protected:
 
-    // bool parseLoads(std::istream &fin);
-    // bool parseLoadsBlock(std::istream &fin);
-    // bool parseLoadLine(std::vector<std::string>& tokens);
-    // bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    // bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    // bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    // bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    // bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    // bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseLoads(std::istream &fin);
+    bool parseLoadsBlock(std::istream &fin);
+    bool parseLoadLine(std::vector<std::string>& tokens);
+    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     bool parseBCs(std::istream &fin);
     bool parseBCsBlock(std::istream &fin);
@@ -92,7 +92,7 @@ protected:
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     // bool runSROMForUncertainVariables();
     // void setNumPerformers();
-    bool parseFile();
+    bool parseInputFile();
     // bool parseMesh(std::istream &fin);
     // bool parseOutput(std::istream &fin);
     // bool parseCodePaths(std::istream &fin);

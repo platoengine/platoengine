@@ -140,7 +140,7 @@ bool XMLGenerator::generate()
     // Parse input and gather various info
     /////////////////////////////////////////////////
     
-    if(!parseFile())
+    if(!parseInputFile())
     {
         PRINTERR("Failed to parse input file.")
         return false;
@@ -247,66 +247,66 @@ bool XMLGenerator::parseTokens(char *buffer, std::vector<std::string> &tokens)
 //     return true;
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseLoads(std::istream &fin)
-// /******************************************************************************/
-// {
-//     std::vector<std::string> tInputStringList;
-//     std::vector<std::string> tokens;
-//     std::string tStringValue;
-//     bool load_block_found = false;
+/******************************************************************************/
+bool XMLGenerator::parseLoads(std::istream &fin)
+/******************************************************************************/
+{
+    std::vector<std::string> tInputStringList;
+    std::vector<std::string> tokens;
+    std::string tStringValue;
+    bool load_block_found = false;
 
-//     // read each line of the file
-//     while (!fin.eof())
-//     {
-//         getTokensFromLine(fin,tokens);
+    // read each line of the file
+    while (!fin.eof())
+    {
+        getTokensFromLine(fin,tokens);
 
-//         // process the tokens
-//         if(tokens.size() > 0)
-//         {
-//             if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
-//             {
-//               if(!parseLoadsBlock(fin))
-//                 return false;
-//               load_block_found = true;
-//             }
-//         }
-//     }
+        // process the tokens
+        if(tokens.size() > 0)
+        {
+            if(parseSingleValue(tokens, tInputStringList = {"begin","loads"}, tStringValue))
+            {
+              if(!parseLoadsBlock(fin))
+                return false;
+              load_block_found = true;
+            }
+        }
+    }
 
-//     if(!load_block_found)
-//     {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: No load block found \n";
-//       return false;
-//     }
+    if(!load_block_found)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: No load block found \n";
+      return false;
+    }
 
-//     return true;
-// }
+    return true;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseLoadsBlock(std::istream &fin)
-// /******************************************************************************/
-// {
-//   std::vector<std::string> tInputStringList;
-//   std::vector<std::string> tokens;
-//   std::string tStringValue;
+/******************************************************************************/
+bool XMLGenerator::parseLoadsBlock(std::istream &fin)
+/******************************************************************************/
+{
+  std::vector<std::string> tInputStringList;
+  std::vector<std::string> tokens;
+  std::string tStringValue;
   
-//   while (!fin.eof())
-//   {
-//     getTokensFromLine(fin,tokens);
+  while (!fin.eof())
+  {
+    getTokensFromLine(fin,tokens);
 
-//     if(tokens.size() > 0)
-//     {
-//       for(size_t j=0; j<tokens.size(); ++j)
-//           tokens[j] = toLower(tokens[j]);
-//       if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
-//         break;
-//       else
-//         if(!parseLoadLine(tokens))
-//           return false;
-//     }
-//   }
-//   return true;
-// }
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+          tokens[j] = toLower(tokens[j]);
+      if(parseSingleValue(tokens, tInputStringList = {"end","loads"}, tStringValue))
+        break;
+      else
+        if(!parseLoadLine(tokens))
+          return false;
+    }
+  }
+  return true;
+}
 
 /******************************************************************************/
 void XMLGenerator::getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens)
@@ -319,271 +319,271 @@ void XMLGenerator::getTokensFromLine(std::istream &fin, std::vector<std::string>
     parseTokens(buf, tokens);
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
-// /******************************************************************************/
-// {
-//     XMLGen::Load new_load;
-//     new_load.type = tokens[0];
-//     bool return_status = true;
+/******************************************************************************/
+bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
+/******************************************************************************/
+{
+    XMLGen::Load new_load;
+    new_load.type = tokens[0];
+    bool return_status = true;
 
-//     if(!new_load.type.compare("traction"))
-//       return_status = parseTractionLoad(tokens,new_load);
-//     else if(!new_load.type.compare("pressure"))
-//       return_status = parsePressureLoad(tokens,new_load);
-//     else if(!new_load.type.compare("acceleration"))
-//       return_status = parseAccelerationLoad(tokens,new_load);
-//     else if(!new_load.type.compare("heat"))
-//       return_status = parseHeatFluxLoad(tokens,new_load);
-//     else if(!new_load.type.compare("force"))
-//       return_status = parseForceLoad(tokens,new_load);
-//     else
-//     {
-//         PrintUnrecognizedTokens(tokens);
-//         std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.\n";
-//         return false;
-//     }
+    if(!new_load.type.compare("traction"))
+      return_status = parseTractionLoad(tokens,new_load);
+    else if(!new_load.type.compare("pressure"))
+      return_status = parsePressureLoad(tokens,new_load);
+    else if(!new_load.type.compare("acceleration"))
+      return_status = parseAccelerationLoad(tokens,new_load);
+    else if(!new_load.type.compare("heat"))
+      return_status = parseHeatFluxLoad(tokens,new_load);
+    else if(!new_load.type.compare("force"))
+      return_status = parseForceLoad(tokens,new_load);
+    else
+    {
+        PrintUnrecognizedTokens(tokens);
+        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized load type.\n";
+        return false;
+    }
 
-//     if(return_status)
-//       m_InputData.loads.push_back(new_load);
+    if(return_status)
+      m_InputData.loads.push_back(new_load);
 
-//     return return_status;
-// }
+    return return_status;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     size_t tMin_parameters = 10;
-//     if(tokens.size() < tMin_parameters)
-//     {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-//       return false;
-//     }
+/******************************************************************************/
+bool XMLGenerator::parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    size_t tMin_parameters = 10;
+    if(tokens.size() < tMin_parameters)
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+      return false;
+    }
 
-//     size_t tTokenIndex = 0;
+    size_t tTokenIndex = 0;
 
-//     new_load.app_type = tokens[++tTokenIndex];
+    new_load.app_type = tokens[++tTokenIndex];
 
-//     if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//     {
-//       if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//         --tTokenIndex;
-//     }
-//     else
-//     {
-//       new_load.app_name = "";
-//       new_load.app_id = tokens[tTokenIndex];
-//     }
+    if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+    {
+      if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+        --tTokenIndex;
+    }
+    else
+    {
+      new_load.app_name = "";
+      new_load.app_id = tokens[tTokenIndex];
+    }
 
-//     if(tokens[++tTokenIndex] != "value")
-//     {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-//       return false;
-//     }
+    if(tokens[++tTokenIndex] != "value")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+    }
 
-//     new_load.values.push_back(tokens[++tTokenIndex]);
-//     new_load.values.push_back(tokens[++tTokenIndex]);
-//     new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    new_load.values.push_back(tokens[++tTokenIndex]);
 
-//     if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
-//     {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-//       return false;
-//     }
+    if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+    {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+    }
 
-//     new_load.load_id = tokens[++tTokenIndex];
+    new_load.load_id = tokens[++tTokenIndex];
 
 
-//     return true;
-// }
+    return true;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     if(tokens[++aTokenIndex] == "id")
-//     {
-//       new_load.app_id = tokens[++aTokenIndex];
-//       return true;
-//     }
-//     else if(tokens[aTokenIndex] == "name")
-//     {
-//       new_load.app_name = tokens[++aTokenIndex];
-//       return true;
-//     }
-//     else
-//       return false;
-// }
+/******************************************************************************/
+bool XMLGenerator::parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    if(tokens[++aTokenIndex] == "id")
+    {
+      new_load.app_id = tokens[++aTokenIndex];
+      return true;
+    }
+    else if(tokens[aTokenIndex] == "name")
+    {
+      new_load.app_name = tokens[++aTokenIndex];
+      return true;
+    }
+    else
+      return false;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//   size_t tMin_parameters = 8;
-//   if(tokens.size() < tMin_parameters)
-//   {
-//     std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-//     return false;
-//   }
+/******************************************************************************/
+bool XMLGenerator::parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 8;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
 
-//   size_t tTokenIndex = 0;
-//   new_load.app_type = tokens[++tTokenIndex];
-//   if(new_load.app_type != "sideset")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
-//       return false;
-//   }
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Pressures can currently only be specified on sidesets.\n";
+      return false;
+  }
 
-//   if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//   {
-//     if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//       --tTokenIndex;
-//   }
-//   else
-//   {
-//     new_load.app_name = "";
-//     new_load.app_id = tokens[tTokenIndex];
-//   }
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
 
-//   if(tokens[++tTokenIndex] != "value")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
-//       return false;
-//   }
-//   new_load.values.push_back(tokens[++tTokenIndex]);
-//   if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-//       return false;
-//   }
-//   new_load.load_id = tokens[++tTokenIndex];
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
 
-//   return true;
-// }
+  return true;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//   size_t tMin_parameters = 7;
-//   if(tokens.size() != tMin_parameters)
-//   {
-//     std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-//     return false;
-//   }
-//   new_load.app_type = "body";
-//   new_load.values.push_back(tokens[1]);
-//   new_load.values.push_back(tokens[2]);
-//   new_load.values.push_back(tokens[3]);
-//   if(tokens[4] != "load" || tokens[5] != "id")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
-//       return false;
-//   }
-//   new_load.load_id = tokens[6];
-//   return true;
-// }
+/******************************************************************************/
+bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 7;
+  if(tokens.size() != tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  new_load.app_type = "body";
+  new_load.values.push_back(tokens[1]);
+  new_load.values.push_back(tokens[2]);
+  new_load.values.push_back(tokens[3]);
+  if(tokens[4] != "load" || tokens[5] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after acceleration components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[6];
+  return true;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//   size_t tMin_parameters = 9;
-//   if(tokens.size() < tMin_parameters)
-//   {
-//     std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-//     return false;
-//   }
-//   size_t tTokenIndex = 0;
-//   if(!tokens[++tTokenIndex].compare("flux"))
-//   {
-//       new_load.app_type = tokens[++tTokenIndex];
-//       if(new_load.app_type != "sideset")
-//       {
-//           std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
-//           return false;
-//       }
+/******************************************************************************/
+bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 9;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  if(!tokens[++tTokenIndex].compare("flux"))
+  {
+      new_load.app_type = tokens[++tTokenIndex];
+      if(new_load.app_type != "sideset")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
+          return false;
+      }
 
-//       if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//       {
-//         if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//           --tTokenIndex;
-//       }
-//       else
-//       {
-//         new_load.app_name = "";
-//         new_load.app_id = tokens[tTokenIndex];
-//       }
+      if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      {
+        if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+          --tTokenIndex;
+      }
+      else
+      {
+        new_load.app_name = "";
+        new_load.app_id = tokens[tTokenIndex];
+      }
 
-//       if(tokens[++tTokenIndex] != "value")
-//       {
-//           std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
-//           return false;
-//       }
-//       new_load.values.push_back(tokens[++tTokenIndex]);
-//       if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
-//       {
-//           std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-//           return false;
-//       }
-//       new_load.load_id = tokens[++tTokenIndex];
-//   }
-//   else
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
-//       return false;
-//   }
+      if(tokens[++tTokenIndex] != "value")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
+          return false;
+      }
+      new_load.values.push_back(tokens[++tTokenIndex]);
+      if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+      {
+          std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+          return false;
+      }
+      new_load.load_id = tokens[++tTokenIndex];
+  }
+  else
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
+      return false;
+  }
 
-//   return true;
-// }
+  return true;
+}
 
-// /******************************************************************************/
-// bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//   size_t tMin_parameters = 10;
-//   if(tokens.size() < tMin_parameters)
-//   {
-//     std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-//     return false;
-//   }
-//   size_t tTokenIndex = 0;
-//   new_load.app_type = tokens[++tTokenIndex];
-//   if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
-//       return false;
-//   }
+/******************************************************************************/
+bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+  size_t tMin_parameters = 10;
+  if(tokens.size() < tMin_parameters)
+  {
+    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
+    return false;
+  }
+  size_t tTokenIndex = 0;
+  new_load.app_type = tokens[++tTokenIndex];
+  if(new_load.app_type != "sideset" && new_load.app_type != "nodeset")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: Forces can only be applied to nodesets or sidesets currently.\n";
+      return false;
+  }
 
-//   if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//   {
-//     if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-//       --tTokenIndex;
-//   }
-//   else
-//   {
-//     new_load.app_name = "";
-//     new_load.app_id = tokens[tTokenIndex];
-//   }
+  if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+  {
+    if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+      --tTokenIndex;
+  }
+  else
+  {
+    new_load.app_name = "";
+    new_load.app_id = tokens[tTokenIndex];
+  }
   
-//   if(tokens[++tTokenIndex] != "value")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
-//       return false;
-//   }
-//   new_load.values.push_back(tokens[++tTokenIndex]);
-//   new_load.values.push_back(tokens[++tTokenIndex]);
-//   new_load.values.push_back(tokens[++tTokenIndex]);
-//   if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
-//   {
-//       std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-//       return false;
-//   }
-//   new_load.load_id = tokens[++tTokenIndex];
+  if(tokens[++tTokenIndex] != "value")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"value\" keyword not specified after nodeset or sideset id.\n";
+      return false;
+  }
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  new_load.values.push_back(tokens[++tTokenIndex]);
+  if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+  {
+      std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+      return false;
+  }
+  new_load.load_id = tokens[++tTokenIndex];
 
-//   return true;
-// }
+  return true;
+}
 
 // /******************************************************************************/
 // bool XMLGenerator::parseUncertainties(std::istream &aInputFile)
@@ -2247,7 +2247,7 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 // }
 
 /******************************************************************************/
-bool XMLGenerator::parseFile()
+bool XMLGenerator::parseInputFile()
 /******************************************************************************/
 {
   std::ifstream tInputFile;
@@ -2261,9 +2261,9 @@ bool XMLGenerator::parseFile()
   parseBCs(tInputFile);
   tInputFile.close();
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseLoads(tInputFile);
-  // tInputFile.close();
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseLoads(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
   // parseOptimizationParameters(tInputFile);
   // tInputFile.close();
   // tInputFile.open(m_InputFilename.c_str()); // open a file

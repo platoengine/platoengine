@@ -115,40 +115,40 @@ bool XMLGenerator_UnitTester::publicParseTokens(char *buffer, std::vector<std::s
 //     parseService(sin);
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseLoads(std::istream &sin)
-// /******************************************************************************/
-// {
-//     return parseLoads(sin);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseLoads(std::istream &sin)
+/******************************************************************************/
+{
+    return parseLoads(sin);
+}
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     return parseTractionLoad(tokens,new_load);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    return parseTractionLoad(tokens,new_load);
+}
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     return parsePressureLoad(tokens,new_load);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    return parsePressureLoad(tokens,new_load);
+}
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     return parseHeatFluxLoad(tokens,new_load);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    return parseHeatFluxLoad(tokens,new_load);
+}
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
-// /******************************************************************************/
-// {
-//     return parseForceLoad(tokens,new_load);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+/******************************************************************************/
+{
+    return parseForceLoad(tokens,new_load);
+}
 
 /******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)

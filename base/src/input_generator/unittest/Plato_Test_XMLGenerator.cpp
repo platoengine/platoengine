@@ -1729,387 +1729,387 @@ TEST(PlatoTestXMLGenerator, parseTokens)
 //     EXPECT_EQ(tester.getBlockMaterialID(1), "34");
 // }
 
-// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "traction sideset 2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "traction sideset 2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"traction");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"traction");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "traction sideset name ss_2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "traction sideset name ss_2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"traction");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"traction");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "traction sideset id 2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "traction sideset id 2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"traction");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"traction");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_and_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_and_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "traction sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "traction sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"traction");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"traction");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "pressure sideset 2 value 5 load id 1\n";
+    std::string stringInput =
+    "pressure sideset 2 value 5 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"pressure");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     std::vector<std::string> values = {"5"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"pressure");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    std::vector<std::string> values = {"5"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "pressure sideset name ss_2 value 5 load id 1\n";
+    std::string stringInput =
+    "pressure sideset name ss_2 value 5 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"pressure");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"5"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"pressure");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"5"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "pressure sideset id 2 value -3e3 load id 1\n";
+    std::string stringInput =
+    "pressure sideset id 2 value -3e3 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"pressure");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"");
-//     std::vector<std::string> values = {"-3e3"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"pressure");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"");
+    std::vector<std::string> values = {"-3e3"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_and_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_and_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "pressure sideset id 2 name ss_2 value -3e3 load id 1\n";
+    std::string stringInput =
+    "pressure sideset id 2 name ss_2 value -3e3 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"pressure");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"-3e3"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"pressure");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"-3e3"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "heat flux sideset id 2 value -3e3 load id 1\n";
+    std::string stringInput =
+    "heat flux sideset id 2 value -3e3 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"heat");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"");
-//     std::vector<std::string> values = {"-3e3"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"heat");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"");
+    std::vector<std::string> values = {"-3e3"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "heat flux sideset id 2 name ss_2 value -3e3 load id 1\n";
+    std::string stringInput =
+    "heat flux sideset id 2 name ss_2 value -3e3 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"heat");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"-3e3"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"heat");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"-3e3"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "force sideset id 2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "force sideset id 2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"force");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"force");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
-// TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::vector<std::string> tokens;
-//     XMLGen::Load new_load;
-//     std::istringstream iss;
+TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
+{
+    XMLGenerator_UnitTester tester;
+    std::vector<std::string> tokens;
+    XMLGen::Load new_load;
+    std::istringstream iss;
 
-//     std::string stringInput =
-//     "force sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
+    std::string stringInput =
+    "force sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
 
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg(0);
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg(0);
 
-//     char buf[MAX_CHARS_PER_LINE];
+    char buf[MAX_CHARS_PER_LINE];
     
-//     tokens.clear();
-//     iss.getline(buf, MAX_CHARS_PER_LINE);
-//     tester.publicParseTokens(buf, tokens);
+    tokens.clear();
+    iss.getline(buf, MAX_CHARS_PER_LINE);
+    tester.publicParseTokens(buf, tokens);
 
-//     new_load.type = tokens[0];
+    new_load.type = tokens[0];
 
-//     EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
-//     EXPECT_EQ(new_load.type,"force");
-//     EXPECT_EQ(new_load.app_type,"sideset");
-//     EXPECT_EQ(new_load.app_id,"2");
-//     EXPECT_EQ(new_load.app_name,"ss_2");
-//     std::vector<std::string> values = {"0","-3e3","0"};
-//     EXPECT_EQ(new_load.values,values);
-//     EXPECT_EQ(new_load.load_id,"1");
-// }
+    EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
+    EXPECT_EQ(new_load.type,"force");
+    EXPECT_EQ(new_load.app_type,"sideset");
+    EXPECT_EQ(new_load.app_id,"2");
+    EXPECT_EQ(new_load.app_name,"ss_2");
+    std::vector<std::string> values = {"0","-3e3","0"};
+    EXPECT_EQ(new_load.values,values);
+    EXPECT_EQ(new_load.load_id,"1");
+}
 
 // TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 // {
