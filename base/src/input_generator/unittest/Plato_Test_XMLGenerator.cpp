@@ -452,1053 +452,1053 @@ TEST(PlatoTestXMLGenerator, parseTokens)
     EXPECT_EQ(tokens[2], "trike");
 }
 
-// TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::istringstream iss;
-//     std::string stringInput;
+TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
 
-//     // material_box
-//     stringInput = "begin optimization parameters\n"
-//             "begin material_box\n"
-//             "min coords 0 0 0\n"
-//             "end material_box\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "begin material_box\n"
-//             "max coords 0 0 0\n"
-//             "end material_box\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "begin material_box\n"
-//             "min coords 0 0 1 \n"
-//             "max coords 0 0 \n"
-//             "end material_box\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "begin material_box\n"
-//             "min coords 0 0  \n"
-//             "max coords 0 0 1\n"
-//             "end material_box\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "begin material_box\n"
-//             "min coords 1 2 3 \n"
-//             "max coords 4 5 6\n"
-//             "end material_box\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getMatBoxMinCoords(), "1 2 3");
-//     EXPECT_EQ(tester.getMatBoxMaxCoords(), "4 5 6");
+    // material_box
+    stringInput = "begin optimization parameters\n"
+            "begin material_box\n"
+            "min coords 0 0 0\n"
+            "end material_box\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "begin material_box\n"
+            "max coords 0 0 0\n"
+            "end material_box\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "begin material_box\n"
+            "min coords 0 0 1 \n"
+            "max coords 0 0 \n"
+            "end material_box\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "begin material_box\n"
+            "min coords 0 0  \n"
+            "max coords 0 0 1\n"
+            "end material_box\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "begin material_box\n"
+            "min coords 1 2 3 \n"
+            "max coords 4 5 6\n"
+            "end material_box\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getMatBoxMinCoords(), "1 2 3");
+    EXPECT_EQ(tester.getMatBoxMaxCoords(), "4 5 6");
 
-//     // Invalid keywords
-//     stringInput = "begin optimization parameters\n"
-//             "hippo\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    // Invalid keywords
+    stringInput = "begin optimization parameters\n"
+            "hippo\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
 
-//     // initial density value
-//     stringInput = "begin optimization parameters\n"
-//             "initial density value\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "initial density value .1\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getInitDensityValue(), ".1");
+    // initial density value
+    stringInput = "begin optimization parameters\n"
+            "initial density value\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "initial density value .1\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getInitDensityValue(), ".1");
 
-//     // create levelset spheres
-//     stringInput = "begin optimization parameters\n"
-//             "create levelset spheres\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "create levelset spheres true\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getCreateLevelsetSpheres(), "true");
+    // create levelset spheres
+    stringInput = "begin optimization parameters\n"
+            "create levelset spheres\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "create levelset spheres true\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getCreateLevelsetSpheres(), "true");
 
-//     // levelset initialization method
-//     stringInput = "begin optimization parameters\n"
-//             "levelset initialization method\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "levelset initialization method primitives\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getLevelsetInitMethod(), "primitives");
+    // levelset initialization method
+    stringInput = "begin optimization parameters\n"
+            "levelset initialization method\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "levelset initialization method primitives\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getLevelsetInitMethod(), "primitives");
 
-//     // max iterations
-//     stringInput = "begin optimization parameters\n"
-//             "max iterations\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "max iterations 45\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getMaxIterations(), "45");
+    // max iterations
+    stringInput = "begin optimization parameters\n"
+            "max iterations\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "max iterations 45\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getMaxIterations(), "45");
 
-//     // restart iteration
-//     stringInput = "begin optimization parameters\n"
-//             "restart iteration\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "restart iteration 22\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getRestartIteration(), "1");
-//     stringInput = "begin optimization parameters\n"
-//             "initial guess filename file.gen\n"
-//             "initial guess field name topology\n"
-//             "restart iteration 22\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getRestartIteration(), "22");
-//     EXPECT_EQ(tester.getRestartFieldName(), "topology");
-//     EXPECT_EQ(tester.getRestartMeshFilename(), "file.gen");
-//     stringInput = "begin optimization parameters\n"
-//             "initial guess filename fIle.gen\n"
-//             "initial guess field name TopologY\n"
-//             "restart iteration 22\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getRestartIteration(), "22");
-//     EXPECT_EQ(tester.getRestartFieldName(), "TopologY");
-//     EXPECT_EQ(tester.getRestartMeshFilename(), "fIle.gen");
+    // restart iteration
+    stringInput = "begin optimization parameters\n"
+            "restart iteration\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "restart iteration 22\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getRestartIteration(), "1");
+    stringInput = "begin optimization parameters\n"
+            "initial guess filename file.gen\n"
+            "initial guess field name topology\n"
+            "restart iteration 22\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getRestartIteration(), "22");
+    EXPECT_EQ(tester.getRestartFieldName(), "topology");
+    EXPECT_EQ(tester.getRestartMeshFilename(), "file.gen");
+    stringInput = "begin optimization parameters\n"
+            "initial guess filename fIle.gen\n"
+            "initial guess field name TopologY\n"
+            "restart iteration 22\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getRestartIteration(), "22");
+    EXPECT_EQ(tester.getRestartFieldName(), "TopologY");
+    EXPECT_EQ(tester.getRestartMeshFilename(), "fIle.gen");
 
-//     // ks max trust region iterations
-//     stringInput = "begin optimization parameters\n"
-//             "ks max trust region iterations\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks max trust region iterations 10\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
+    // ks max trust region iterations
+    stringInput = "begin optimization parameters\n"
+            "ks max trust region iterations\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks max trust region iterations 10\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
 
-//     // ks trust region ratio low/mid/upper
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region ratio low\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region ratio mid\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region ratio high\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region ratio low 1.1\n"
-//             "ks trust region ratio mid 2.1\n"
-//             "ks trust region ratio high 3.1\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioLowKS, "1.1");
-//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioMidKS, "2.1");
-//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioUpperKS, "3.1");
+    // ks trust region ratio low/mid/upper
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio low\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio mid\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio high\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region ratio low 1.1\n"
+            "ks trust region ratio mid 2.1\n"
+            "ks trust region ratio high 3.1\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.mTrustRegionRatioLowKS, "1.1");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.mTrustRegionRatioMidKS, "2.1");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.mTrustRegionRatioUpperKS, "3.1");
 
-//     // ks disable post smoothing
-//     stringInput = "begin optimization parameters\n"
-//             "ks disable post smoothing\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "end optimization parameters\n";
-//     stringInput = "begin optimization parameters\n"
-//             "ks disable post smoothing fALse\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "false");
-//     stringInput = "begin optimization parameters\n"
-//             "ks disable post smoothing tRuE\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "true");
+    // ks disable post smoothing
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "end optimization parameters\n";
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing fALse\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.mDisablePostSmoothingKS, "false");
+    stringInput = "begin optimization parameters\n"
+            "ks disable post smoothing tRuE\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.mDisablePostSmoothingKS, "true");
 
 
-//     // ks trust region expansion factor
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region expansion factor\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region expansion factor .5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSExpansionFactor(), ".5");
+    // ks trust region expansion factor
+    stringInput = "begin optimization parameters\n"
+            "ks trust region expansion factor\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region expansion factor .5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSExpansionFactor(), ".5");
 
-//     // ks trust region contraction factor
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region contraction factor\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks trust region contraction factor .2\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSContractionFactor(), ".2");
+    // ks trust region contraction factor
+    stringInput = "begin optimization parameters\n"
+            "ks trust region contraction factor\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks trust region contraction factor .2\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSContractionFactor(), ".2");
 
-//     // ks outer gradient tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer gradient tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer gradient tolerance .001\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSOuterGradientTolerance(), ".001");
+    // ks outer gradient tolerance
+    stringInput = "begin optimization parameters\n"
+            "ks outer gradient tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks outer gradient tolerance .001\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSOuterGradientTolerance(), ".001");
 
-//     // ks outer stationarity tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer stationarity tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer stationarity tolerance .00001\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSOuterStationarityTolerance(), ".00001");
+    // ks outer stationarity tolerance
+    stringInput = "begin optimization parameters\n"
+            "ks outer stationarity tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks outer stationarity tolerance .00001\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSOuterStationarityTolerance(), ".00001");
 
-//     // ks outer stagnation tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer stagnation tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer stagnation tolerance 2.3\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSOuterStagnationTolerance(), "2.3");
+    // ks outer stagnation tolerance
+    stringInput = "begin optimization parameters\n"
+            "ks outer stagnation tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks outer stagnation tolerance 2.3\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSOuterStagnationTolerance(), "2.3");
 
-//     // ks outer control stagnation tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer control stagnation tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer control stagnation tolerance 1e-8\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSOuterControlStagnationTolerance(), "1e-8");
+    // ks outer control stagnation tolerance
+    stringInput = "begin optimization parameters\n"
+            "ks outer control stagnation tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks outer control stagnation tolerance 1e-8\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSOuterControlStagnationTolerance(), "1e-8");
 
-//     // ks outer actual reduction tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer actual reduction tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "ks outer actual reduction tolerance 1e-7\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getKSOuterActualReductionTolerance(), "1e-7");
+    // ks outer actual reduction tolerance
+    stringInput = "begin optimization parameters\n"
+            "ks outer actual reduction tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "ks outer actual reduction tolerance 1e-7\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getKSOuterActualReductionTolerance(), "1e-7");
 
-//     // gcmma max inner iterations
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma max inner iterations\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma max inner iterations 100\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAMaxInnerIterations(), "100");
+    // gcmma max inner iterations
+    stringInput = "begin optimization parameters\n"
+            "gcmma max inner iterations\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma max inner iterations 100\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAMaxInnerIterations(), "100");
 
-//     // gcmma inner kkt tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma inner kkt tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma inner kkt tolerance 1e-12\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAInnerKKTTolerance(), "1e-12");
+    // gcmma inner kkt tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma inner kkt tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma inner kkt tolerance 1e-12\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAInnerKKTTolerance(), "1e-12");
 
-//     // gcmma inner control stagnation tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma inner control stagnation tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma inner control stagnation tolerance 5e-10\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAInnerControlStagnationTolerance(), "5e-10");
+    // gcmma inner control stagnation tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma inner control stagnation tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma inner control stagnation tolerance 5e-10\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAInnerControlStagnationTolerance(), "5e-10");
 
-//     // gcmma outer kkt tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer kkt tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer kkt tolerance 1e-8\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAOuterKKTTolerance(), "1e-8");
+    // gcmma outer kkt tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer kkt tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer kkt tolerance 1e-8\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAOuterKKTTolerance(), "1e-8");
 
-//     // gcmma outer control stagnation tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer control stagnation tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer control stagnation tolerance 1e-11\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAOuterControlStagnationTolerance(), "1e-11");
+    // gcmma outer control stagnation tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer control stagnation tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer control stagnation tolerance 1e-11\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAOuterControlStagnationTolerance(), "1e-11");
 
-//     // gcmma outer objective stagnation tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer objective stagnation tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer objective stagnation tolerance 4e-8\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAOuterObjectiveStagnationTolerance(), "4e-8");
+    // gcmma outer objective stagnation tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer objective stagnation tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer objective stagnation tolerance 4e-8\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAOuterObjectiveStagnationTolerance(), "4e-8");
 
-//     // gcmma outer stationarity tolerance
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer stationarity tolerance\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma outer stationarity tolerance 2e-10\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAOuterStationarityTolerance(), "2e-10");
+    // gcmma outer stationarity tolerance
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer stationarity tolerance\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma outer stationarity tolerance 2e-10\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAOuterStationarityTolerance(), "2e-10");
 
-//     // gcmma initial moving asymptotes scale factor
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma initial moving asymptotes scale factor\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "gcmma initial moving asymptotes scale factor 0.4\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getGCMMAInitialMovingAsymptotesScaleFactor(), "0.4");
+    // gcmma initial moving asymptotes scale factor
+    stringInput = "begin optimization parameters\n"
+            "gcmma initial moving asymptotes scale factor\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "gcmma initial moving asymptotes scale factor 0.4\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getGCMMAInitialMovingAsymptotesScaleFactor(), "0.4");
 
-//     // levelset sphere packing factor
-//     stringInput = "begin optimization parameters\n"
-//             "levelset sphere packing factor\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "levelset sphere packing factor .2\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getLevelsetSpherePackingFactor(), ".2");
+    // levelset sphere packing factor
+    stringInput = "begin optimization parameters\n"
+            "levelset sphere packing factor\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "levelset sphere packing factor .2\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getLevelsetSpherePackingFactor(), ".2");
 
-//     // levelset sphere radius
-//     stringInput = "begin optimization parameters\n"
-//             "levelset sphere radius\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "levelset sphere radius .33\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getLevelsetSphereRadius(), ".33");
+    // levelset sphere radius
+    stringInput = "begin optimization parameters\n"
+            "levelset sphere radius\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "levelset sphere radius .33\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getLevelsetSphereRadius(), ".33");
 
-//     // levelset nodesets
-//     stringInput = "begin optimization parameters\n"
-//             "levelset nodesets\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "levelset nodesets 4 10 22\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getLevelsetNodeset(0), "4");
-//     EXPECT_EQ(tester.getLevelsetNodeset(1), "10");
-//     EXPECT_EQ(tester.getLevelsetNodeset(2), "22");
+    // levelset nodesets
+    stringInput = "begin optimization parameters\n"
+            "levelset nodesets\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "levelset nodesets 4 10 22\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getLevelsetNodeset(0), "4");
+    EXPECT_EQ(tester.getLevelsetNodeset(1), "10");
+    EXPECT_EQ(tester.getLevelsetNodeset(2), "22");
 
-//     // output frequency
-//     stringInput = "begin optimization parameters\n"
-//             "output frequency\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "output frequency 5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getOutputFrequency(), "5");
+    // // output frequency
+    // stringInput = "begin optimization parameters\n"
+    //         "output frequency\n"
+    //         "end optimization parameters\n";
+    // iss.str(stringInput);
+    // iss.clear();
+    // iss.seekg (0);
+    // tester.clearInputData();
+    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    // stringInput = "begin optimization parameters\n"
+    //         "output frequency 5\n"
+    //         "end optimization parameters\n";
+    // iss.str(stringInput);
+    // iss.clear();
+    // iss.seekg (0);
+    // tester.clearInputData();
+    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    // EXPECT_EQ(tester.getOutputFrequency(), "5");
 
-//     // output method
-//     stringInput = "begin optimization parameters\n"
-//             "output method\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "output method parallel write\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getOutputMethod(), "parallel write");
+    // // output method
+    // stringInput = "begin optimization parameters\n"
+    //         "output method\n"
+    //         "end optimization parameters\n";
+    // iss.str(stringInput);
+    // iss.clear();
+    // iss.seekg (0);
+    // tester.clearInputData();
+    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    // stringInput = "begin optimization parameters\n"
+    //         "output method parallel write\n"
+    //         "end optimization parameters\n";
+    // iss.str(stringInput);
+    // iss.clear();
+    // iss.seekg (0);
+    // tester.clearInputData();
+    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    // EXPECT_EQ(tester.getOutputMethod(), "parallel write");
 
-//     // fixed blocks
-//     stringInput = "begin optimization parameters\n"
-//             "fixed blocks\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "fixed blocks 1 3 5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFixedBlock(0), "1");
-//     EXPECT_EQ(tester.getFixedBlock(1), "3");
-//     EXPECT_EQ(tester.getFixedBlock(2), "5");
+    // fixed blocks
+    stringInput = "begin optimization parameters\n"
+            "fixed blocks\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "fixed blocks 1 3 5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFixedBlock(0), "1");
+    EXPECT_EQ(tester.getFixedBlock(1), "3");
+    EXPECT_EQ(tester.getFixedBlock(2), "5");
 
-//     // fixed sidesets
-//     stringInput = "begin optimization parameters\n"
-//             "fixed sidesets\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "fixed sidesets 33 44 55\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFixedSideset(0), "33");
-//     EXPECT_EQ(tester.getFixedSideset(1), "44");
-//     EXPECT_EQ(tester.getFixedSideset(2), "55");
+    // fixed sidesets
+    stringInput = "begin optimization parameters\n"
+            "fixed sidesets\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "fixed sidesets 33 44 55\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFixedSideset(0), "33");
+    EXPECT_EQ(tester.getFixedSideset(1), "44");
+    EXPECT_EQ(tester.getFixedSideset(2), "55");
 
-//     // fixed nodesets
-//     stringInput = "begin optimization parameters\n"
-//             "fixed nodesets\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "fixed nodesets 5 7 33\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFixedNodeset(0), "5");
-//     EXPECT_EQ(tester.getFixedNodeset(1), "7");
-//     EXPECT_EQ(tester.getFixedNodeset(2), "33");
+    // fixed nodesets
+    stringInput = "begin optimization parameters\n"
+            "fixed nodesets\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "fixed nodesets 5 7 33\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFixedNodeset(0), "5");
+    EXPECT_EQ(tester.getFixedNodeset(1), "7");
+    EXPECT_EQ(tester.getFixedNodeset(2), "33");
 
-//     // number processors
-//     stringInput = "begin optimization parameters\n"
-//             "number processors\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "number processors 16\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getNumberProcessors(), "16");
+    // number processors
+    stringInput = "begin optimization parameters\n"
+            "number processors\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "number processors 16\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getNumberProcessors(), "16");
 
-//     // filter scale
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius scale\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius scale 1.6\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFilterScale(), "1.6");
+    // filter scale
+    stringInput = "begin optimization parameters\n"
+            "filter radius scale\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter radius scale 1.6\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterScale(), "1.6");
 
-//     // filter type
-//     stringInput = "begin optimization parameters\n"
-//             "filter type kernel\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel");
-//     stringInput = "begin optimization parameters\n"
-//             "filter type kernel then heaviside\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel then heaviside");
-//     stringInput = "begin optimization parameters\n"
-//             "filter type\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter type lions and tigers\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    // filter type
+    stringInput = "begin optimization parameters\n"
+            "filter type kernel\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_type,"kernel");
+    stringInput = "begin optimization parameters\n"
+            "filter type kernel then heaviside\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_type,"kernel then heaviside");
+    stringInput = "begin optimization parameters\n"
+            "filter type\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter type lions and tigers\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
 
-//     // filter heaviside min
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside min\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside min 1.526\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
+    // filter heaviside min
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside min\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside min 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_min,"1.526");
 
-//     // filter heaviside update
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside update\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside update 1.526\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"1.526");
+    // filter heaviside update
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_update,"1.526");
 
-//     // filter heaviside max
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside max\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside max 1.526\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+    // filter heaviside max
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside max\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside max 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_max,"1.526");
 
-//     // filter heaviside scale
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside scale\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside scale 1.526\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+    // filter heaviside scale
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside scale\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside scale 1.526\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_min,"1.526");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_max,"1.526");
 
-//     // filter heaviside various
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside update 4.4\n"
-//             "filter heaviside scale 1.2\n"
-//             "filter heaviside min 0.5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside update 4.4\n"
-//             "filter heaviside scale 1.2\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.2");
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.2");
-//     stringInput = "begin optimization parameters\n"
-//             "filter heaviside update 4.4\n"
-//             "filter heaviside min 0.5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"0.5");
-//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
+    // filter heaviside various
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside scale 1.2\n"
+            "filter heaviside min 0.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside scale 1.2\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_min,"1.2");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_update,"4.4");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_max,"1.2");
+    stringInput = "begin optimization parameters\n"
+            "filter heaviside update 4.4\n"
+            "filter heaviside min 0.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_min,"0.5");
+    EXPECT_EQ(tester.exposeInputData()->optimizer.filter_heaviside_update,"4.4");
 
-//     // filter absolute
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius absolute\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius absolute 1.6\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
+    // filter absolute
+    stringInput = "begin optimization parameters\n"
+            "filter radius absolute\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter radius absolute 1.6\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
-//     // filter absolute
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius absolute\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter radius absolute 1.6\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
+    // filter absolute
+    stringInput = "begin optimization parameters\n"
+            "filter radius absolute\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter radius absolute 1.6\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
-//     // filter radial power
-//     stringInput = "begin optimization parameters\n"
-//             "filter radial power\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "filter radial power 2.5\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getFilterPower(), "2.5");
+    // filter radial power
+    stringInput = "begin optimization parameters\n"
+            "filter radial power\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "filter radial power 2.5\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getFilterPower(), "2.5");
 
-//     // algorithm
-//     stringInput = "begin optimization parameters\n"
-//             "algorithm\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "algorithm ksbc\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getAlgorithm(), "ksbc");
+    // algorithm
+    stringInput = "begin optimization parameters\n"
+            "algorithm\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "algorithm ksbc\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getAlgorithm(), "ksbc");
 
-//     // discretization
-//     stringInput = "begin optimization parameters\n"
-//             "discretization\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "discretization levelset\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getDiscretization(), "levelset");
+    // discretization
+    stringInput = "begin optimization parameters\n"
+            "discretization\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "discretization levelset\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getDiscretization(), "levelset");
 
-//     // check gradient
-//     stringInput = "begin optimization parameters\n"
-//             "check gradient\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "check gradient false\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getCheckGradient(), "false");
+    // check gradient
+    stringInput = "begin optimization parameters\n"
+            "check gradient\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "check gradient false\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getCheckGradient(), "false");
 
-//     // check hessian
-//     stringInput = "begin optimization parameters\n"
-//             "check hessian\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-//     stringInput = "begin optimization parameters\n"
-//             "check hessian true\n"
-//             "end optimization parameters\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-//     EXPECT_EQ(tester.getCheckHessian(), "true");
-// }
+    // check hessian
+    stringInput = "begin optimization parameters\n"
+            "check hessian\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+    stringInput = "begin optimization parameters\n"
+            "check hessian true\n"
+            "end optimization parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+    EXPECT_EQ(tester.getCheckHessian(), "true");
+}
 
 // TEST(PlatoTestXMLGenerator, parseConstraints)
 // {

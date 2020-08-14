@@ -101,7 +101,7 @@ protected:
     // bool parseObjectives(std::istream &fin);
     // bool fillObjectiveAndPerfomerNames();
     // bool parseConstraints(std::istream &fin);
-    // bool parseOptimizationParameters(std::istream &fin);
+    bool parseOptimizationParameters(std::istream &fin);
     void parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
     // void getUncertaintyFlags();
@@ -129,7 +129,7 @@ private:
     // /******************************************************************************//**
     //  * @brief Initialize Plato problem options
     //  **********************************************************************************/
-    // void initializePlatoProblemOptions();
+    void initializePlatoProblemOptions();
 
     // void putLoadInLoadCase(XMLGen::Load& new_load);
     // bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);

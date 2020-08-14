@@ -192,12 +192,12 @@ bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
     return parseMesh(sin);
 }
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &sin)
-// /******************************************************************************/
-// {
-//     return parseOptimizationParameters(sin);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &sin)
+/******************************************************************************/
+{
+    return parseOptimizationParameters(sin);
+}
 
 // /******************************************************************************/
 // bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
@@ -218,61 +218,62 @@ void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
     m_InputData.bcs.clear();
-    // m_InputData.load_cases.clear();
-    // m_InputData.objectives.clear();
-    // m_InputData.constraints.clear();
-    // m_InputData.materials.clear();
-    m_InputData.blocks.clear();
-    // m_InputData.levelset_nodesets.clear();
-    // m_InputData.fixed_block_ids.clear();
-    // m_InputData.fixed_sideset_ids.clear();
-    // m_InputData.fixed_nodeset_ids.clear();
-    // m_InputData.filter_radius_scale="";
-    // m_InputData.filter_radius_absolute="";
-    // m_InputData.filter_power="";
-    // m_InputData.num_opt_processors="";
-    // m_InputData.output_frequency="";
-    // m_InputData.output_method="";
-    // m_InputData.max_iterations="";
-    // m_InputData.discretization="";
-    // m_InputData.volume_fraction="";
     m_InputData.mesh.name="";
     m_InputData.mesh.name_without_extension="";
-    // m_InputData.plato_main_path="";
-    // m_InputData.lightmp_path="";
-    // m_InputData.sierra_sd_path="";
-    // m_InputData.albany_path="";
-    // m_InputData.optimization_algorithm="";
-    // m_InputData.check_gradient="";
-    // m_InputData.check_hessian="";
-    // m_InputData.restart_iteration="";
-    // m_InputData.initial_density_value="";
-    // m_InputData.create_levelset_spheres="";
-    // m_InputData.levelset_sphere_radius="";
-    // m_InputData.levelset_sphere_packing_factor="";
-    // m_InputData.levelset_initialization_method="";
-    // m_InputData.levelset_material_box_min="";
-    // m_InputData.levelset_material_box_max="";
-    // m_InputData.mInnerKKTtoleranceGCMMA="";
-    // m_InputData.mOuterKKTtoleranceGCMMA="";
-    // m_InputData.mInnerControlStagnationToleranceGCMMA="";
-    // m_InputData.mOuterControlStagnationToleranceGCMMA="";
-    // m_InputData.mOuterObjectiveStagnationToleranceGCMMA="";
-    // m_InputData.mMaxInnerIterationsGCMMA="";
-    // m_InputData.mOuterStationarityToleranceGCMMA="";
-    // m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA="";
-    // m_InputData.mMaxTrustRegionIterations="";
-    // m_InputData.mTrustRegionExpansionFactor="";
-    // m_InputData.mTrustRegionContractionFactor="";
-    // m_InputData.mOuterGradientToleranceKS="";
-    // m_InputData.mOuterStationarityToleranceKS="";
-    // m_InputData.mOuterStagnationToleranceKS="";
-    // m_InputData.mOuterControlStagnationToleranceKS="";
-    // m_InputData.mOuterActualReductionToleranceKS="";
-    // m_InputData.mTrustRegionRatioLowKS="";
-    // m_InputData.mTrustRegionRatioMidKS="";
-    // m_InputData.mTrustRegionRatioUpperKS="";
-    // m_InputData.mDisablePostSmoothingKS="";
+    m_InputData.blocks.clear();
+    // m_InputData.constraints.clear();
+    // m_InputData.materials.clear();
+    m_InputData.optimizer.levelset_nodesets.clear();
+    m_InputData.optimizer.fixed_block_ids.clear();
+    m_InputData.optimizer.fixed_sideset_ids.clear();
+    m_InputData.optimizer.fixed_nodeset_ids.clear();
+    m_InputData.optimizer.filter_radius_scale="";
+    m_InputData.optimizer.filter_radius_absolute="";
+    m_InputData.optimizer.filter_power="";
+    m_InputData.optimizer.filter_heaviside_min="";
+    m_InputData.optimizer.filter_heaviside_max="";
+    m_InputData.optimizer.filter_heaviside_update="";
+    m_InputData.optimizer.num_opt_processors="";
+    // m_InputData.optimizer.output_frequency="";
+    // m_InputData.optimizer.output_method="";
+    m_InputData.optimizer.max_iterations="";
+    m_InputData.optimizer.discretization="";
+    // m_InputData.optimizer.volume_fraction="";
+    m_InputData.codepaths.plato_main_path="";
+    m_InputData.codepaths.lightmp_path="";
+    m_InputData.codepaths.sierra_sd_path="";
+    m_InputData.codepaths.albany_path="";
+    m_InputData.optimizer.optimization_algorithm="";
+    m_InputData.optimizer.check_gradient="";
+    m_InputData.optimizer.check_hessian="";
+    m_InputData.optimizer.restart_iteration="";
+    m_InputData.optimizer.initial_density_value="";
+    m_InputData.optimizer.create_levelset_spheres="";
+    m_InputData.optimizer.levelset_sphere_radius="";
+    m_InputData.optimizer.levelset_sphere_packing_factor="";
+    m_InputData.optimizer.levelset_initialization_method="";
+    m_InputData.optimizer.levelset_material_box_min="";
+    m_InputData.optimizer.levelset_material_box_max="";
+    m_InputData.optimizer.mInnerKKTtoleranceGCMMA="";
+    m_InputData.optimizer.mOuterKKTtoleranceGCMMA="";
+    m_InputData.optimizer.mInnerControlStagnationToleranceGCMMA="";
+    m_InputData.optimizer.mOuterControlStagnationToleranceGCMMA="";
+    m_InputData.optimizer.mOuterObjectiveStagnationToleranceGCMMA="";
+    m_InputData.optimizer.mMaxInnerIterationsGCMMA="";
+    m_InputData.optimizer.mOuterStationarityToleranceGCMMA="";
+    m_InputData.optimizer.mInitialMovingAsymptotesScaleFactorGCMMA="";
+    m_InputData.optimizer.mMaxTrustRegionIterations="";
+    m_InputData.optimizer.mTrustRegionExpansionFactor="";
+    m_InputData.optimizer.mTrustRegionContractionFactor="";
+    m_InputData.optimizer.mOuterGradientToleranceKS="";
+    m_InputData.optimizer.mOuterStationarityToleranceKS="";
+    m_InputData.optimizer.mOuterStagnationToleranceKS="";
+    m_InputData.optimizer.mOuterControlStagnationToleranceKS="";
+    m_InputData.optimizer.mOuterActualReductionToleranceKS="";
+    m_InputData.optimizer.mTrustRegionRatioLowKS="";
+    m_InputData.optimizer.mTrustRegionRatioMidKS="";
+    m_InputData.optimizer.mTrustRegionRatioUpperKS="";
+    m_InputData.optimizer.mDisablePostSmoothingKS="";
     // m_InputData.uncertainties.clear();
 }
 
