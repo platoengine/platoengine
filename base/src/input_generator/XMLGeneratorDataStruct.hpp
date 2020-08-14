@@ -12,9 +12,8 @@
 #include <map>
 
 // #include "Plato_SromHelpers.hpp"
-// #include "XMLGeneratorOutputMetadata.hpp"
+#include "XMLGeneratorOutputMetadata.hpp"
 // #include "XMLGeneratorRandomMetadata.hpp"
-// #include "XMLGeneratorServiceMetadata.hpp"
 // #include "XMLGeneratorServiceMetadata.hpp"
 // #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
@@ -158,6 +157,7 @@ public:
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;
+    XMLGen::Output mOutputMetaData;
 
     // std::string mVerbose = "false";
     // std::string filter_type;
@@ -275,7 +275,6 @@ public:
     // std::string m_filterType_kernelThenTANH_generatorName;
     // std::string m_filterType_kernelThenTANH_XMLName;
 
-    // XMLGen::Output mOutputMetaData;
     // XMLGen::RandomMetaData mRandomMetaData;
     // XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     // std::string input_generator_version;

@@ -3,9 +3,9 @@
 ###############################################################################
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
-                      # XMLGeneratorParseOutput.cpp
+                      XMLGeneratorParseOutput.cpp
                       # XMLGeneratorParseService.cpp
-                      # XMLGeneratorOutputMetadata.cpp 
+                      XMLGeneratorOutputMetadata.cpp 
                       # XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseCriteria.cpp
@@ -43,7 +43,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorDataStruct.hpp
                       # XMLGeneratorValidInputKeys.hpp
                       # XMLGeneratorRandomMetadata.hpp
-                      # XMLGeneratorOutputMetadata.hpp 
+                      XMLGeneratorOutputMetadata.hpp 
                       XMLGeneratorParserUtilities.hpp 
                       # XMLGeneratorServiceMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
@@ -78,7 +78,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorDataStruct.hpp
                       # PlatoAnalyzeInputDeckWriter.hpp
                       # XMLGeneratorUtilities.hpp
-                      # XMLGeneratorParseOutput.hpp 
+                      XMLGeneratorParseOutput.hpp 
                       XMLGeneratorParseMaterial.hpp 
                       XMLGeneratorParseCriteria.hpp 
                       # XMLGeneratorParseObjective.hpp 

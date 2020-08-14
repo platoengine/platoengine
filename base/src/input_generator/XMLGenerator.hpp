@@ -93,7 +93,7 @@ protected:
     // void setNumPerformers();
     void parseInputFile();
     bool parseMesh(std::istream &fin);
-    // bool parseOutput(std::istream &fin);
+    void parseOutput(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
     void parseMaterials(std::istream &fin);
     void parseCriteria(std::istream &fin);

@@ -73,7 +73,7 @@
 // #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 
-// #include "XMLGeneratorParseOutput.hpp"
+#include "XMLGeneratorParseOutput.hpp"
 // #include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
@@ -206,15 +206,14 @@ bool XMLGenerator::parseTokens(char *buffer, std::vector<std::string> &tokens)
     return true;
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseOutput(std::istream &aInputFile)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseOutput tParseOutput;
-//     tParseOutput.parse(aInputFile);
-//     m_InputData.mOutputMetaData = tParseOutput.data();
-//     return true;
-// }
+/******************************************************************************/
+void XMLGenerator::parseOutput(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseOutput tParseOutput;
+    tParseOutput.parse(aInputFile);
+    m_InputData.mOutputMetaData = tParseOutput.data();
+}
 
 // /******************************************************************************/
 // bool XMLGenerator::parseService(std::istream &aInputFile)
@@ -2268,9 +2267,9 @@ void XMLGenerator::parseInputFile()
   this->parseUncertainties(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseOutput(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseOutput(tInputFile);
+  tInputFile.close();
 
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // this->parseService(tInputFile);
