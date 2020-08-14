@@ -1572,38 +1572,38 @@ TEST(PlatoTestXMLGenerator, parseTokens)
 //     EXPECT_EQ(tester.getConstraintSurfAreaSidesetID(0), "20");
 // }
 
-// TEST(PlatoTestXMLGenerator, parseMesh)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::istringstream iss;
-//     std::string stringInput;
+TEST(PlatoTestXMLGenerator, parseMesh)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
 
-//     stringInput = "begin mesh\n"
-//             "name\n"
-//             "end mesh\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseMesh(iss), false);
-//     stringInput = "begin mesh\n"
-//             "bad_keyword\n"
-//             "end mesh\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseMesh(iss), false);
-//     stringInput = "begin mesh\n"
-//             "name file.gen\n"
-//             "end mesh\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseMesh(iss), true);
-//     EXPECT_EQ(tester.getMeshName(), "file.gen");
-// }
+    stringInput = "begin mesh\n"
+            "name\n"
+            "end mesh\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseMesh(iss), false);
+    stringInput = "begin mesh\n"
+            "bad_keyword\n"
+            "end mesh\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseMesh(iss), false);
+    stringInput = "begin mesh\n"
+            "name file.gen\n"
+            "end mesh\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseMesh(iss), true);
+    EXPECT_EQ(tester.getMeshName(), "file.gen");
+}
 
 // TEST(PlatoTestXMLGenerator, parseCodePaths)
 // {

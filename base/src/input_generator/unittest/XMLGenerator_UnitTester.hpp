@@ -80,7 +80,7 @@ public:
     bool publicParseBCs(std::istream &sin);
     // bool publicParseOptimizationParameters(std::istream &sin);
     // bool publicParseConstraints(std::istream &sin);
-    // bool publicParseMesh(std::istream &sin);
+    bool publicParseMesh(std::istream &sin);
     // bool publicParseCodePaths(std::istream &sin);
     // bool publicParseBlocks(std::istream &sin);
     // bool publicParseMaterials(std::istream &sin);
@@ -166,7 +166,7 @@ public:
     // std::string getDiscretization() {return m_InputData.discretization;}
     // std::string getCheckGradient() {return m_InputData.check_gradient;}
     // std::string getCheckHessian() {return m_InputData.check_hessian;}
-    // std::string getMeshName() {return m_InputData.mesh_name;}
+    std::string getMeshName() {return m_InputData.mesh.name;}
     // std::string getSalinasPath() {return m_InputData.sierra_sd_path;}
     // std::string getAlbanyPath() {return m_InputData.albany_path;}
     // std::string getLightMPPath() {return m_InputData.lightmp_path;}

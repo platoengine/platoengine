@@ -185,12 +185,12 @@ bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
 //     return parseConstraints(sin);
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
-// /******************************************************************************/
-// {
-//     return parseMesh(sin);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
+/******************************************************************************/
+{
+    return parseMesh(sin);
+}
 
 // /******************************************************************************/
 // bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &sin)

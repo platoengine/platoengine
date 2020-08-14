@@ -1930,91 +1930,91 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 //   return true;
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseMesh(std::istream &fin)
-// /******************************************************************************/
-// {
-//   std::string tStringValue;
-//   std::vector<std::string> tInputStringList;
+/******************************************************************************/
+bool XMLGenerator::parseMesh(std::istream &fin)
+/******************************************************************************/
+{
+  std::string tStringValue;
+  std::vector<std::string> tInputStringList;
 
-//   // read each line of the file
-//   while (!fin.eof())
-//   {
-//     // read an entire line into memory
-//     char buf[MAX_CHARS_PER_LINE];
-//     fin.getline(buf, MAX_CHARS_PER_LINE);
-//     std::vector<std::string> tokens;
-//     parseTokens(buf, tokens);
+  // read each line of the file
+  while (!fin.eof())
+  {
+    // read an entire line into memory
+    char buf[MAX_CHARS_PER_LINE];
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+    std::vector<std::string> tokens;
+    parseTokens(buf, tokens);
 
-//     // process the tokens
-//     if(tokens.size() > 0)
-//     {
-//       for(size_t j=0; j<tokens.size(); ++j)
-//         tokens[j] = toLower(tokens[j]);
+    // process the tokens
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+        tokens[j] = toLower(tokens[j]);
 
-//       if(parseSingleValue(tokens, tInputStringList = {"begin","mesh"}, tStringValue))
-//       {
-//         // found mesh block
-//         while (!fin.eof())
-//         {
-//           fin.getline(buf, MAX_CHARS_PER_LINE);
-//           tokens.clear();
-//           parseTokens(buf, tokens);
-//           // process the tokens
-//           if(tokens.size() > 0)
-//           {
-//             std::vector<std::string> unlowered_tokens = tokens;
+      if(parseSingleValue(tokens, tInputStringList = {"begin","mesh"}, tStringValue))
+      {
+        // found mesh block
+        while (!fin.eof())
+        {
+          fin.getline(buf, MAX_CHARS_PER_LINE);
+          tokens.clear();
+          parseTokens(buf, tokens);
+          // process the tokens
+          if(tokens.size() > 0)
+          {
+            std::vector<std::string> unlowered_tokens = tokens;
 
-//             for(size_t j=0; j<tokens.size(); ++j)
-//               tokens[j] = toLower(tokens[j]);
+            for(size_t j=0; j<tokens.size(); ++j)
+              tokens[j] = toLower(tokens[j]);
 
-//             if(parseSingleValue(tokens, tInputStringList = {"end","mesh"}, tStringValue))
-//             {
-//               break;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"name"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseMesh: No value specified after \"name\" keyword.\n";
-//                 return false;
-//               }
-//               m_InputData.mesh_name = tStringValue;
+            if(parseSingleValue(tokens, tInputStringList = {"end","mesh"}, tStringValue))
+            {
+              break;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"name"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseMesh: No value specified after \"name\" keyword.\n";
+                return false;
+              }
+              m_InputData.mesh.name = tStringValue;
 
-//               // find last dot in filename, get mesh filename base from this
-//               size_t loc = tStringValue.find_last_of('.');
-//               if(loc == std::string::npos)
-//               {
-//                 // mesh name: mesh_file
-//                 // without extension: mesh_file
-//                 m_InputData.mesh_name_without_extension = m_InputData.mesh_name;
-//               }
-//               else if(tStringValue[loc] == '.')
-//               {
-//                 // mesh name: some_file.gen
-//                 // without extension: some_file
-//                 m_InputData.mesh_name_without_extension = tStringValue.substr(0,loc);
-//                 m_InputData.mesh_extension = tStringValue.substr(loc);
-//               }
-//               else
-//               {
-//                 // I don't know when this case will ever occur
-//                 m_InputData.mesh_name_without_extension = m_InputData.mesh_name;
-//               }
-//             }
-//             else
-//             {
-//               PrintUnrecognizedTokens(tokens);
-//               std::cout << "ERROR:XMLGenerator:parseMesh: Unrecognized keyword.\n";
-//               return false;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//   return true;
-// }
+              // find last dot in filename, get mesh filename base from this
+              size_t loc = tStringValue.find_last_of('.');
+              if(loc == std::string::npos)
+              {
+                // mesh name: mesh_file
+                // without extension: mesh_file
+                m_InputData.mesh.name_without_extension = m_InputData.mesh.name;
+              }
+              else if(tStringValue[loc] == '.')
+              {
+                // mesh name: some_file.gen
+                // without extension: some_file
+                m_InputData.mesh.name_without_extension = tStringValue.substr(0,loc);
+                m_InputData.mesh.file_extension = tStringValue.substr(loc);
+              }
+              else
+              {
+                // I don't know when this case will ever occur
+                m_InputData.mesh.name_without_extension = m_InputData.mesh.name;
+              }
+            }
+            else
+            {
+              PrintUnrecognizedTokens(tokens);
+              std::cout << "ERROR:XMLGenerator:parseMesh: Unrecognized keyword.\n";
+              return false;
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
 // /******************************************************************************/
 // bool XMLGenerator::parseCodePaths(std::istream &fin)
 // /******************************************************************************/
@@ -2267,9 +2267,9 @@ bool XMLGenerator::parseInputFile()
   // parseOptimizationParameters(tInputFile);
   // tInputFile.close();
   // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseMesh(tInputFile);
-  // tInputFile.close();
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseMesh(tInputFile);
+  tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
   // parseBlocks(tInputFile);
   // tInputFile.close();
   // tInputFile.open(m_InputFilename.c_str()); // open a file

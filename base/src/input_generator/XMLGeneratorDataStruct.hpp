@@ -47,6 +47,13 @@ namespace XMLGen
 //   std::vector<size_t> deterministicVariableIndices;
 // };
 
+struct Mesh
+{
+    std::string name;
+    std::string name_without_extension;
+    std::string file_extension;
+};
+
 struct InputData
 {
 private:
@@ -115,6 +122,7 @@ public:
     // std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
     std::vector<XMLGen::BC> bcs;
+    XMLGen::Mesh mesh;
     // std::vector<XMLGen::Uncertainty> uncertainties;
 
     // std::string mVerbose = "false";
@@ -137,11 +145,6 @@ public:
     // std::string max_iterations;
     // std::string discretization;
     // std::string volume_fraction;
-    // std::string mesh_name;
-    // std::string run_mesh_name;
-    // std::string mesh_name_without_extension;
-    // std::string run_mesh_name_without_extension;
-    // std::string mesh_extension;
     // std::string plato_main_path;
     // std::string lightmp_path;
     // std::string sierra_sd_path;
