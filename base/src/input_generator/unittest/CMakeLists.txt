@@ -21,7 +21,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       # ../XMLGeneratorParseOutput.cpp
                                       # ../XMLGeneratorParseService.cpp
                                       ../XMLGeneratorParseMaterial.cpp
-                                      # ../XMLGeneratorParseCriteria.cpp
+                                      ../XMLGeneratorParseCriteria.cpp
                                       # ../XMLGeneratorOutputMetadata.cpp
                                       # ../XMLGeneratorParseObjective.cpp
                                       # ../XMLGeneratorParseConstraint.cpp

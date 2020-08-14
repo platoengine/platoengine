@@ -19,7 +19,7 @@
 // #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
 // #include "XMLGeneratorUncertaintyMetadata.hpp"
-// #include "XMLGeneratorCriterionMetadata.hpp"
+#include "XMLGeneratorCriterionMetadata.hpp"
 
 namespace XMLGen
 {
@@ -150,7 +150,7 @@ public:
 
     // XMLGen::Objective objective;
     // std::vector<XMLGen::Constraint> constraints;
-    // std::vector<XMLGen::Criterion> criteria;
+    std::vector<XMLGen::Criterion> criteria;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;

@@ -10,7 +10,7 @@
 
 // #include "XMLGeneratorParseOutput.hpp"
 // #include "XMLGeneratorParseService.hpp"
-// #include "XMLGeneratorParseCriteria.hpp"
+#include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 // #include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
@@ -167,190 +167,190 @@ namespace PlatoTestXMLGenerator
 //     ASSERT_STREQ("1", tObjectiveMetaData.weights[1].c_str());
 // }
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorEmptyCriterionBlock)
-// {
-//     std::string tStringInput =
-//         "begin criterion\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorEmptyCriterionBlock)
+{
+    std::string tStringInput =
+        "begin criterion\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorNoCriteriaID)
-// {
-//     std::string tStringInput =
-//         "begin criterion\n"
-//         "type elastic_energy\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorNoCriteriaID)
+{
+    std::string tStringInput =
+        "begin criterion\n"
+        "type elastic_energy\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorDuplicateIDs)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type elastic_energy\n"
-//         "end criterion\n"
-//         "begin criterion 1\n"
-//         "type volume\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorDuplicateIDs)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type elastic_energy\n"
+        "end criterion\n"
+        "begin criterion 1\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidCriterionType)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type invalid_type\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidCriterionType)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type invalid_type\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_MissingRequiredParameter)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type stress_p-norm\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, DISABLED_ParseCriteria_MissingRequiredParameter)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidParameterForCriteria)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type volume\n"
-//         "p 3\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, DISABLED_ParseCriteria_InvalidParameterForCriteria)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type volume\n"
+        "p 3\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_ElasticEnergy)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type elastic_energy\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_ElasticEnergy)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type elastic_energy\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
 
-//     auto tCriterionMetaData = tCriteriaParser.data();
-//     ASSERT_EQ(1u, tCriterionMetaData.size());
-//     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-//     ASSERT_STREQ("elastic_energy", tCriterionMetaData[0].type().c_str());
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("elastic_energy", tCriterionMetaData[0].type().c_str());
 
-//     auto tParameters = tCriterionMetaData[0].parameters();
-//     ASSERT_EQ(0u, tParameters.size());
-// }
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type volume\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
 
-//     auto tCriterionMetaData = tCriteriaParser.data();
-//     ASSERT_EQ(1u, tCriterionMetaData.size());
-//     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-//     ASSERT_STREQ("volume", tCriterionMetaData[0].type().c_str());
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("volume", tCriterionMetaData[0].type().c_str());
 
-//     auto tParameters = tCriterionMetaData[0].parameters();
-//     ASSERT_EQ(0u, tParameters.size());
-// }
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type stress_p-norm\n"
-//         "p 3\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "p 3\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
 
-//     auto tCriterionMetaData = tCriteriaParser.data();
-//     ASSERT_EQ(1u, tCriterionMetaData.size());
-//     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-//     ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
 
-//     auto tParameters = tCriterionMetaData[0].parameters();
-//     ASSERT_EQ(1u, tParameters.size());
-//     ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
-// }
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(1u, tParameters.size());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+}
 
-// TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
-// {
-//     std::string tStringInput =
-//         "begin criterion 1\n"
-//         "type stress_p-norm\n"
-//         "p 3\n"
-//         "end criterion\n"
-//         "begin criterion 2\n"
-//         "type elastic_energy\n"
-//         "end criterion\n"
-//         "begin criterion 3\n"
-//         "type volume\n"
-//         "end criterion\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "p 3\n"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "type elastic_energy\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseCriteria tCriteriaParser;
-//     ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
 
-//     auto tCriterionMetaData = tCriteriaParser.data();
-//     ASSERT_EQ(3u, tCriterionMetaData.size());
-//     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-//     ASSERT_STREQ("2", tCriterionMetaData[1].id().c_str());
-//     ASSERT_STREQ("3", tCriterionMetaData[2].id().c_str());
-//     ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
-//     ASSERT_STREQ("elastic_energy", tCriterionMetaData[1].type().c_str());
-//     ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(3u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("2", tCriterionMetaData[1].id().c_str());
+    ASSERT_STREQ("3", tCriterionMetaData[2].id().c_str());
+    ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
+    ASSERT_STREQ("elastic_energy", tCriterionMetaData[1].type().c_str());
+    ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
 
-//     auto tParameters = tCriterionMetaData[0].parameters();
-//     ASSERT_EQ(1u, tParameters.size());
-//     ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(1u, tParameters.size());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
 
-//     tParameters = tCriterionMetaData[1].parameters();
-//     ASSERT_EQ(0u, tParameters.size());
+    tParameters = tCriterionMetaData[1].parameters();
+    ASSERT_EQ(0u, tParameters.size());
 
-//     tParameters = tCriterionMetaData[2].parameters();
-//     ASSERT_EQ(0u, tParameters.size());
-// }
+    tParameters = tCriterionMetaData[2].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
 
 TEST(PlatoTestXMLGenerator, ParseMaterial_ErrorEmptyMaterialBlock)
 {

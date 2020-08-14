@@ -8,7 +8,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       # XMLGeneratorOutputMetadata.cpp 
                       # XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
-                      # XMLGeneratorParseCriteria.cpp
+                      XMLGeneratorParseCriteria.cpp
                       # XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
                       # XMLGeneratorServiceMetadata.cpp
@@ -80,7 +80,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorUtilities.hpp
                       # XMLGeneratorParseOutput.hpp 
                       XMLGeneratorParseMaterial.hpp 
-                      # XMLGeneratorParseCriteria.hpp 
+                      XMLGeneratorParseCriteria.hpp 
                       # XMLGeneratorParseObjective.hpp 
                       # XMLGeneratorParseMetadata.hpp 
                       # XMLGeneratorParseService.hpp 

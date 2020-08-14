@@ -30,16 +30,16 @@ struct ValidCriterionParameterKeyMap
     {
 
         mMap.insert({"elastic_energy", {}});
-        mMap.insert({"volume", {"volume_misfit_target"}});
+        mMap.insert({"volume", {}});
         mMap.insert({"stress_p-norm", {"p"}});
-        mMap.insert({"stress", {"stress_limit", "relative_stress_limit", "stress_ramp_factor", "limit_power_min", "limit_power_max",
-                                "limit_power_feasible_bias", "limit_power_feasible_slope", "limit_power_infeasible_bias", "limit_power_infeasible_slope",
-                                "limit_reset_subfrequency", "limit_reset_count", "inequality_allowable_feasiblity_lower", "inequality_allowable_feasiblity_upper",
-                                "inequality_feasibility_scale", "inequality_infeasibility_scale", "stress_favor_final", "stress_favor_updates",
-                                "stress_inequality_power", "volume_penalty_power", "volume_penalty_divisor", "volume_penalty_bias",
-                                "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
-                                "constraint_exponent", "constraint_exponent", "initial_lagrange_multiplier", "initial_mass_weight_factor",
-                                "control_stagnation_tolerance", "write_debug_output_files"}});
+        // mMap.insert({"stress", {"stress_limit", "relative_stress_limit", "stress_ramp_factor", "limit_power_min", "limit_power_max",
+        //                         "limit_power_feasible_bias", "limit_power_feasible_slope", "limit_power_infeasible_bias", "limit_power_infeasible_slope",
+        //                         "limit_reset_subfrequency", "limit_reset_count", "inequality_allowable_feasiblity_lower", "inequality_allowable_feasiblity_upper",
+        //                         "inequality_feasibility_scale", "inequality_infeasibility_scale", "stress_favor_final", "stress_favor_updates",
+        //                         "stress_inequality_power", "volume_penalty_power", "volume_penalty_divisor", "volume_penalty_bias",
+        //                         "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
+        //                         "constraint_exponent", "constraint_exponent", "initial_lagrange_multiplier", "initial_mass_weight_factor",
+        //                         "control_stagnation_tolerance", "write_debug_output_files"}});
     }
 
     std::vector<std::string> getValidKeysForCriterion(std::string& aCriterion)

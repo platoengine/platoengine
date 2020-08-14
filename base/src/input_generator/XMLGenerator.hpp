@@ -96,6 +96,7 @@ protected:
     // bool parseOutput(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
     void parseMaterials(std::istream &fin);
+    void parseCriteria(std::istream &fin);
     bool parseBlocks(std::istream &fin);
     // bool parseObjectives(std::istream &fin);
     // bool fillObjectiveAndPerfomerNames();

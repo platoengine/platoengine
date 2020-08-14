@@ -76,7 +76,7 @@
 // #include "XMLGeneratorParseOutput.hpp"
 // #include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
-// #include "XMLGeneratorParseCriteria.hpp"
+#include "XMLGeneratorParseCriteria.hpp"
 // #include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
 // #include "XMLGeneratorParseUncertainty.hpp"
@@ -2186,15 +2186,15 @@ void XMLGenerator::parseMaterials(std::istream &aInput)
     m_InputData.materials = tParseMaterial.data();
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseCriteria(std::istream &aInput)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseCriteria tParseCriteria;
-//     tParseCriteria.parse(aInput);
-//     m_InputData.criteria = tParseCriteria.data();
-//     return true;
-// }
+/******************************************************************************/
+void XMLGenerator::parseCriteria(std::istream &aInput)
+/******************************************************************************/
+{
+    XMLGen::ParseCriteria tParseCriteria;
+    tParseCriteria.parse(aInput);
+    m_InputData.criteria = tParseCriteria.data();
+}
+
 // /******************************************************************************/
 // bool XMLGenerator::parseConstraints(std::istream &aInput)
 // /******************************************************************************/
@@ -2253,9 +2253,9 @@ void XMLGenerator::parseInputFile()
   parseMaterials(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseCriteria(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseCriteria(tInputFile);
+  tInputFile.close();
 
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // this->parseObjective(tInputFile);
