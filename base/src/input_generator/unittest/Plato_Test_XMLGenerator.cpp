@@ -54,7 +54,7 @@
 
 #include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorUtilities.hpp"
-// #include "XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParseUncertainty.hpp"
 // #include "XMLGeneratorDefinesFileUtilities.hpp"
 // #include "XMLGeneratorInterfaceFileUtilities.hpp"
 // #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
@@ -143,71 +143,73 @@ TEST(PlatoTestXMLGenerator, ParseTagValues)
     ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.first.second.c_str());
 }
 
-// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
-// {
-//     std::string tStringInput =
-//         "begin uncertainty\n"
-//         "    category load\n"
-//         "    tag angle variation\n"
-//         "    load id 10\n"
-//         "    attribute X\n"
-//         "    distribution beta\n"
-//         "    mean -50.0\n"
-//         "    upper bound 45.0\n"
-//         "    lower bound -45.0\n"
-//         "    standard deviation 22.5\n"
-//         "    num samples 2\n"
-//         "end uncertainty\n";
+TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
+{
+    std::string tStringInput =
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean -50.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n";
 
-//     std::istringstream tInputs;
-//     tInputs.str(tStringInput);
-//     XMLGen::ParseUncertainty tUncertainty;
-//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-// }
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBound)
-// {
-//     std::string tStringInput =
-//         "begin uncertainty\n"
-//         "    category load\n"
-//         "    tag angle variation\n"
-//         "    load id 10\n"
-//         "    attribute X\n"
-//         "    distribution beta\n"
-//         "    mean -20.0\n"
-//         "    upper bound 45.0\n"
-//         "    lower bound -45.0\n"
-//         "    standard deviation 30\n"
-//         "    num samples 2\n"
-//         "end uncertainty\n";
+TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBound)
+{
+    std::string tStringInput =
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean -20.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 30\n"
+        "    num samples 2\n"
+        "end uncertainty\n";
 
-//     std::istringstream tInputs;
-//     tInputs.str(tStringInput);
-//     XMLGen::ParseUncertainty tUncertainty;
-//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-// }
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBound)
-// {
-//     std::string tStringInput =
-//         "begin uncertainty\n"
-//         "    category load\n"
-//         "    tag angle variation\n"
-//         "    load id 10\n"
-//         "    attribute X\n"
-//         "    distribution beta\n"
-//         "    mean 20.0\n"
-//         "    upper bound 45.0\n"
-//         "    lower bound -45.0\n"
-//         "    standard deviation 30\n"
-//         "    num samples 2\n"
-//         "end uncertainty\n";
+TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBound)
+{
+    std::string tStringInput =
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 20.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 30\n"
+        "    num samples 2\n"
+        "end uncertainty\n";
 
-//     std::istringstream tInputs;
-//     tInputs.str(tStringInput);
-//     XMLGen::ParseUncertainty tUncertainty;
-//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-// }
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+}
+
+//TODO needs more uncertainty parsing unit tests
 
 // TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
 // {

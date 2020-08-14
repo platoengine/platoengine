@@ -79,7 +79,7 @@
 #include "XMLGeneratorParseCriteria.hpp"
 // #include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
-// #include "XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParseUncertainty.hpp"
 
 namespace XMLGen
 {
@@ -575,15 +575,14 @@ bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load
   return true;
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseUncertainties(std::istream &aInputFile)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseUncertainty tParseUncertainty;
-//     tParseUncertainty.parse(aInputFile);
-//     m_InputData.uncertainties = tParseUncertainty.data();
-//     return true;
-// }
+/******************************************************************************/
+void XMLGenerator::parseUncertainties(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseUncertainty tParseUncertainty;
+    tParseUncertainty.parse(aInputFile);
+    m_InputData.uncertainties = tParseUncertainty.data();
+}
 
 /******************************************************************************/
 void XMLGenerator::parseBCs(std::istream &fin)
@@ -2265,9 +2264,9 @@ void XMLGenerator::parseInputFile()
   // this->parseConstraints(tInputFile);
   // tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseUncertainties(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseUncertainties(tInputFile);
+  tInputFile.close();
 
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // this->parseOutput(tInputFile);

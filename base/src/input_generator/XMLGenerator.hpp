@@ -102,7 +102,7 @@ protected:
     // bool fillObjectiveAndPerfomerNames();
     // bool parseConstraints(std::istream &fin);
     // bool parseOptimizationParameters(std::istream &fin);
-    // bool parseUncertainties(std::istream &fin);
+    void parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
     // void getUncertaintyFlags();
     // void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,

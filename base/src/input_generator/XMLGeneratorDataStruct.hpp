@@ -18,7 +18,7 @@
 // #include "XMLGeneratorServiceMetadata.hpp"
 // #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
-// #include "XMLGeneratorUncertaintyMetadata.hpp"
+#include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
 
 namespace XMLGen
@@ -157,7 +157,7 @@ public:
     std::vector<XMLGen::BC> bcs;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
-    // std::vector<XMLGen::Uncertainty> uncertainties;
+    std::vector<XMLGen::Uncertainty> uncertainties;
 
     // std::string mVerbose = "false";
     // std::string filter_type;
