@@ -75,7 +75,7 @@
 
 // #include "XMLGeneratorParseOutput.hpp"
 // #include "XMLGeneratorParseService.hpp"
-// #include "XMLGeneratorParseMaterial.hpp"
+#include "XMLGeneratorParseMaterial.hpp"
 // #include "XMLGeneratorParseCriteria.hpp"
 // #include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
@@ -133,18 +133,10 @@ XMLGenerator::~XMLGenerator()
 // }
 
 /******************************************************************************/
-bool XMLGenerator::generate()
+void XMLGenerator::generate()
 /******************************************************************************/
 {
-    /////////////////////////////////////////////////
-    // Parse input and gather various info
-    /////////////////////////////////////////////////
-    
-    if(!parseInputFile())
-    {
-        PRINTERR("Failed to parse input file.")
-        return false;
-    }
+    this->parseInputFile();
 
     // this->getUncertaintyFlags();
 
@@ -155,8 +147,6 @@ bool XMLGenerator::generate()
     // }
 
     // this->writeInputFiles();
-
-    return true;
 }
 
 // /******************************************************************************/
@@ -596,7 +586,7 @@ bool XMLGenerator::parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load
 // }
 
 /******************************************************************************/
-bool XMLGenerator::parseBCs(std::istream &fin)
+void XMLGenerator::parseBCs(std::istream &fin)
 /******************************************************************************/
 {
     std::vector<std::string> tInputStringList;
@@ -614,24 +604,18 @@ bool XMLGenerator::parseBCs(std::istream &fin)
         {
             if(parseSingleValue(tokens, tInputStringList = {"begin","boundary","conditions"}, tStringValue))
             {
-              if(!parseBCsBlock(fin))
-                return false;
+              this->parseBCsBlock(fin);
               bc_block_found = true;
             }
         }
     }
 
     if(!bc_block_found)
-    {
-      std::cout << "ERROR:XMLGenerator:parseBCs: No boundary condition block found \n";
-      return false;
-    }
-
-    return true;
+        THROWERR("ERROR:XMLGenerator:parseBCs: No boundary condition block found \n")
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseBCsBlock(std::istream &fin)
+void XMLGenerator::parseBCsBlock(std::istream &fin)
 /******************************************************************************/
 {
   std::vector<std::string> tInputStringList;
@@ -649,24 +633,20 @@ bool XMLGenerator::parseBCsBlock(std::istream &fin)
       if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
         break;
       else
-        if(!parseBCLine(tokens))
-          return false;
+        parseBCLine(tokens);
     }
   }
-  return true;
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
+void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
 /******************************************************************************/
 {
     XMLGen::BC new_bc;
-    bool return_status = true;
 
     if(tokens.size() < 7)
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n")
     }
 
     XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
@@ -674,29 +654,25 @@ bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if (tItr == tValidKeys.mKeys.end())
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" << tLowerKey << "' is not supported.";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" + tLowerKey + "' is not supported.")
     }
     new_bc.type = tokens[1];
 
     if(!new_bc.type.compare("displacement"))
-      return_status = parseDisplacementBC(tokens,new_bc);
+      parseDisplacementBC(tokens,new_bc);
     else if(!new_bc.type.compare("temperature"))
-      return_status = parseTemperatureBC(tokens,new_bc);
+      parseTemperatureBC(tokens,new_bc);
     else
     {
         PrintUnrecognizedTokens(tokens);
-        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n")
     }
 
     m_InputData.bcs.push_back(new_bc);
-
-    return return_status;
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+void XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
 /******************************************************************************/
 {
   // Potential syntax:
@@ -710,8 +686,7 @@ bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
   new_bc.mCategory = tokens[0];
   if(tokens[++tTokenIndex] != "nodeset" && tokens[tTokenIndex] != "sideset")
   {
-    std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-    return false;
+      THROWERR("ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n")
   }
   new_bc.app_type = tokens[tTokenIndex];
 
@@ -747,8 +722,7 @@ bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
   {
     if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n")
     }
     new_bc.dof = tokens[tTokenIndex];
     if(tokens[++tTokenIndex] != "bc")
@@ -768,12 +742,10 @@ bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
     tTokenIndex += 2;
     new_bc.bc_id = tokens[tTokenIndex];
   }
-
-  return true;
 }
 
 /******************************************************************************/
-bool XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
+void XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
 /******************************************************************************/
 {
   // Potential syntax:
@@ -781,8 +753,7 @@ bool XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::
   // fixed temperature nodeset 1 value 25.0 bc id 1
   if(tokens[2] != "nodeset" && tokens[2] != "sideset")
   {
-      std::cout << "ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n";
-      return false;
+      THROWERR("ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n")
   }
   new_bc.app_type = tokens[2];
 
@@ -825,21 +796,17 @@ bool XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::
   {
       if(tokens[4+tOffset] != "value")
       {
-          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-          return false;
+          THROWERR("ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n")
       }
       new_bc.value = tokens[5+tOffset];
       if(tokens[6+tOffset] != "bc")
       {
-          std::cout << "ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n";
-          return false;
+          THROWERR("ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n")
       }
       new_bc.bc_id = tokens[8+tOffset];
   }
   else
       new_bc.bc_id = tokens[6+tOffset];
-
-  return true;
 }
 
 /******************************************************************************/
@@ -2015,115 +1982,115 @@ bool XMLGenerator::parseMesh(std::istream &fin)
   }
   return true;
 }
-// /******************************************************************************/
-// bool XMLGenerator::parseCodePaths(std::istream &fin)
-// /******************************************************************************/
-// {
-//   std::string tStringValue;
-//   std::vector<std::string> tInputStringList;
+/******************************************************************************/
+bool XMLGenerator::parseCodePaths(std::istream &fin)
+/******************************************************************************/
+{
+  std::string tStringValue;
+  std::vector<std::string> tInputStringList;
 
-//   // read each line of the file
-//   while (!fin.eof())
-//   {
-//     // read an entire line into memory
-//     char buf[MAX_CHARS_PER_LINE];
-//     fin.getline(buf, MAX_CHARS_PER_LINE);
-//     std::vector<std::string> tokens;
-//     parseTokens(buf, tokens);
+  // read each line of the file
+  while (!fin.eof())
+  {
+    // read an entire line into memory
+    char buf[MAX_CHARS_PER_LINE];
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+    std::vector<std::string> tokens;
+    parseTokens(buf, tokens);
 
-//     // process the tokens
-//     if(tokens.size() > 0)
-//     {
-//       for(size_t j=0; j<tokens.size(); ++j)
-//         tokens[j] = toLower(tokens[j]);
+    // process the tokens
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+        tokens[j] = toLower(tokens[j]);
 
-//       if(parseSingleValue(tokens, tInputStringList = {"begin","paths"}, tStringValue))
-//       {
-//         // found mesh block
-//         while (!fin.eof())
-//         {
-//           fin.getline(buf, MAX_CHARS_PER_LINE);
-//           tokens.clear();
-//           parseTokens(buf, tokens);
-//           // process the tokens
-//           if(tokens.size() > 0)
-//           {
-//             std::vector<std::string> unlowered_tokens = tokens;
+      if(parseSingleValue(tokens, tInputStringList = {"begin","paths"}, tStringValue))
+      {
+        // found mesh block
+        while (!fin.eof())
+        {
+          fin.getline(buf, MAX_CHARS_PER_LINE);
+          tokens.clear();
+          parseTokens(buf, tokens);
+          // process the tokens
+          if(tokens.size() > 0)
+          {
+            std::vector<std::string> unlowered_tokens = tokens;
 
-//             for(size_t j=0; j<tokens.size(); ++j)
-//               tokens[j] = toLower(tokens[j]);
+            for(size_t j=0; j<tokens.size(); ++j)
+              tokens[j] = toLower(tokens[j]);
 
-//             if(parseSingleValue(tokens, tInputStringList = {"end","paths"}, tStringValue))
-//             {
-//               break;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","sierra_sd"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code sierra_sd\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.sierra_sd_path = tStringValue;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","platomain"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code platomain\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.plato_main_path = tStringValue;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","lightmp"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code lightmp\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.lightmp_path = tStringValue;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","prune_and_refine"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code prune_and_refine\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.prune_and_refine_path = tStringValue;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","albany"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code albany\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.albany_path = tStringValue;
-//             }
-//             else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","plato_analyze"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code plato_analyze\" keywords.\n";
-//                 return false;
-//               }
-//               m_InputData.plato_analyze_path = tStringValue;
-//             }
-//             else
-//             {
-//               PrintUnrecognizedTokens(tokens);
-//               std::cout << "ERROR:XMLGenerator:parseCodePaths: Unrecognized keyword.\n";
-//               return false;
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-//   return true;
-// }
+            if(parseSingleValue(tokens, tInputStringList = {"end","paths"}, tStringValue))
+            {
+              break;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","sierra_sd"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code sierra_sd\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.sierra_sd_path = tStringValue;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","platomain"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code platomain\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.plato_main_path = tStringValue;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","lightmp"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code lightmp\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.lightmp_path = tStringValue;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","prune_and_refine"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code prune_and_refine\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.prune_and_refine_path = tStringValue;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","albany"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code albany\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.albany_path = tStringValue;
+            }
+            else if(parseSingleUnLoweredValue(tokens, unlowered_tokens, tInputStringList = {"code","plato_analyze"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseCodePaths: No value specified after \"code plato_analyze\" keywords.\n";
+                return false;
+              }
+              m_InputData.codepaths.plato_analyze_path = tStringValue;
+            }
+            else
+            {
+              PrintUnrecognizedTokens(tokens);
+              std::cout << "ERROR:XMLGenerator:parseCodePaths: Unrecognized keyword.\n";
+              return false;
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
 
 /******************************************************************************/
 bool XMLGenerator::parseBlocks(std::istream &fin)
@@ -2209,15 +2176,16 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
   }
   return true;
 }
-// /******************************************************************************/
-// bool XMLGenerator::parseMaterials(std::istream &aInput)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseMaterial tParseMaterial;
-//     tParseMaterial.parse(aInput);
-//     m_InputData.materials = tParseMaterial.data();
-//     return true;
-// }
+
+/******************************************************************************/
+void XMLGenerator::parseMaterials(std::istream &aInput)
+/******************************************************************************/
+{
+    XMLGen::ParseMaterial tParseMaterial;
+    tParseMaterial.parse(aInput);
+    m_InputData.materials = tParseMaterial.data();
+}
+
 // /******************************************************************************/
 // bool XMLGenerator::parseCriteria(std::istream &aInput)
 // /******************************************************************************/
@@ -2248,15 +2216,14 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
 // }
 
 /******************************************************************************/
-bool XMLGenerator::parseInputFile()
+void XMLGenerator::parseInputFile()
 /******************************************************************************/
 {
   std::ifstream tInputFile;
   tInputFile.open(m_InputFilename.c_str()); // open a file
   if (!tInputFile.good())
   {
-    std::cout << "Failed to open " << m_InputFilename << "." << std::endl;
-    return false; // exit if file not found
+      THROWERR("Failed to open " + m_InputFilename + ".")
   }
 
   parseBCs(tInputFile);
@@ -2278,13 +2245,13 @@ bool XMLGenerator::parseInputFile()
   parseBlocks(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseCodePaths(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseCodePaths(tInputFile);
+  tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseMaterials(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  parseMaterials(tInputFile);
+  tInputFile.close();
 
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // parseCriteria(tInputFile);
@@ -2329,7 +2296,6 @@ bool XMLGenerator::parseInputFile()
   //   m_InputData.run_mesh_name = m_InputData.mesh_name;
   //   m_InputData.run_mesh_name_without_extension = m_InputData.mesh_name_without_extension;
   // }
-  return true;
 }
 
 /******************************************************************************/

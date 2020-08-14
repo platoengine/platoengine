@@ -77,11 +77,11 @@ public:
     bool publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool publicParseBCs(std::istream &sin);
+    void publicParseBCs(std::istream &sin);
     // bool publicParseOptimizationParameters(std::istream &sin);
     // bool publicParseConstraints(std::istream &sin);
     bool publicParseMesh(std::istream &sin);
-    // bool publicParseCodePaths(std::istream &sin);
+    bool publicParseCodePaths(std::istream &sin);
     bool publicParseBlocks(std::istream &sin);
     // bool publicParseMaterials(std::istream &sin);
     // bool publicParseUncertainties(std::istream &sin);
@@ -167,10 +167,10 @@ public:
     // std::string getCheckGradient() {return m_InputData.check_gradient;}
     // std::string getCheckHessian() {return m_InputData.check_hessian;}
     std::string getMeshName() {return m_InputData.mesh.name;}
-    // std::string getSalinasPath() {return m_InputData.sierra_sd_path;}
-    // std::string getAlbanyPath() {return m_InputData.albany_path;}
-    // std::string getLightMPPath() {return m_InputData.lightmp_path;}
-    // std::string getPlatoMainPath() {return m_InputData.plato_main_path;}
+    std::string getSalinasPath() {return m_InputData.codepaths.sierra_sd_path;}
+    std::string getAlbanyPath() {return m_InputData.codepaths.albany_path;}
+    std::string getLightMPPath() {return m_InputData.codepaths.lightmp_path;}
+    std::string getPlatoMainPath() {return m_InputData.codepaths.plato_main_path;}
     // size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPerformers;}
     void clearInputData();
     // XMLGen::InputData* exposeInputData() {return &m_InputData;}

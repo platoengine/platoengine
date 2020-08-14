@@ -68,7 +68,7 @@ class XMLGenerator
 public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
-    bool generate();
+    void generate();
     // const InputData& getInputData(){ return m_InputData; }
     // bool parseService(std::istream &fin);
 
@@ -84,18 +84,18 @@ protected:
     bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
-    bool parseBCs(std::istream &fin);
-    bool parseBCsBlock(std::istream &fin);
-    bool parseBCLine(std::vector<std::string>& tokens);
-    bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    void parseBCs(std::istream &fin);
+    void parseBCsBlock(std::istream &fin);
+    void parseBCLine(std::vector<std::string>& tokens);
+    void parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    void parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     // bool runSROMForUncertainVariables();
     // void setNumPerformers();
-    bool parseInputFile();
+    void parseInputFile();
     bool parseMesh(std::istream &fin);
     // bool parseOutput(std::istream &fin);
-    // bool parseCodePaths(std::istream &fin);
-    // bool parseMaterials(std::istream &fin);
+    bool parseCodePaths(std::istream &fin);
+    void parseMaterials(std::istream &fin);
     bool parseBlocks(std::istream &fin);
     // bool parseObjectives(std::istream &fin);
     // bool fillObjectiveAndPerfomerNames();

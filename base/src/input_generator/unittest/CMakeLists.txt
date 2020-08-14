@@ -11,7 +11,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       # XMLGeneratorDefineFile_UnitTester.cpp
                                       # XMLGeneratorLaunchScript_UnitTester.cpp
                                       # XMLGeneratorAnalyzeUncertaintyLaunchScript_UnitTester.cpp
-                                      # XMLGeneratorParseMetaData_UnitTester.cpp
+                                      XMLGeneratorParseMetaData_UnitTester.cpp
                                       # XMLGeneratorInterfaceFile_UnitTester.cpp
                                       # XMLGeneratorRandomInterfaceFile_UnitTester.cpp
                                       # XMLGeneratorPlatoMainInputDeckFile_UnitTester.cpp
@@ -20,7 +20,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       # XMLGeneratorPlatoAnalyzeOperationsFile_UnitTester.cpp
                                       # ../XMLGeneratorParseOutput.cpp
                                       # ../XMLGeneratorParseService.cpp
-                                      # ../XMLGeneratorParseMaterial.cpp
+                                      ../XMLGeneratorParseMaterial.cpp
                                       # ../XMLGeneratorParseCriteria.cpp
                                       # ../XMLGeneratorOutputMetadata.cpp
                                       # ../XMLGeneratorParseObjective.cpp

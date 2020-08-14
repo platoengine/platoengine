@@ -151,10 +151,10 @@ bool XMLGenerator_UnitTester::publicParseForceLoad(std::vector<std::string>& tok
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
+void XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
 /******************************************************************************/
 {
-    return parseBCs(sin);
+    parseBCs(sin);
 }
 
 /******************************************************************************/
@@ -171,12 +171,12 @@ bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
 //     return parseMaterials(sin);
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseCodePaths(std::istream &sin)
-// /******************************************************************************/
-// {
-//     return parseCodePaths(sin);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseCodePaths(std::istream &sin)
+/******************************************************************************/
+{
+    return parseCodePaths(sin);
+}
 
 // /******************************************************************************/
 // bool XMLGenerator_UnitTester::publicParseConstraints(std::istream &sin)

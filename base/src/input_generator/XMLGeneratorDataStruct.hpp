@@ -17,6 +17,7 @@
 // #include "XMLGeneratorServiceMetadata.hpp"
 // #include "XMLGeneratorServiceMetadata.hpp"
 // #include "XMLGeneratorConstraintMetadata.hpp"
+#include "XMLGeneratorMaterialMetadata.hpp"
 // #include "XMLGeneratorUncertaintyMetadata.hpp"
 // #include "XMLGeneratorCriterionMetadata.hpp"
 
@@ -60,6 +61,16 @@ struct Block
     std::string block_id;
     std::string material_id;
     std::string element_type;
+};
+
+struct CodePaths
+{
+    std::string plato_main_path;
+    std::string lightmp_path;
+    std::string sierra_sd_path;
+    std::string albany_path;
+    std::string plato_analyze_path;
+    std::string prune_and_refine_path;
 };
 
 // struct UncertaintyMetaData
@@ -140,11 +151,12 @@ public:
     // XMLGen::Objective objective;
     // std::vector<XMLGen::Constraint> constraints;
     // std::vector<XMLGen::Criterion> criteria;
-    // std::vector<XMLGen::Material> materials;
+    std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
     std::vector<XMLGen::BC> bcs;
     XMLGen::Mesh mesh;
+    XMLGen::CodePaths codepaths;
     // std::vector<XMLGen::Uncertainty> uncertainties;
 
     // std::string mVerbose = "false";
@@ -167,12 +179,6 @@ public:
     // std::string max_iterations;
     // std::string discretization;
     // std::string volume_fraction;
-    // std::string plato_main_path;
-    // std::string lightmp_path;
-    // std::string sierra_sd_path;
-    // std::string albany_path;
-    // std::string plato_analyze_path;
-    // std::string prune_and_refine_path;
     // std::string number_prune_and_refine_processors;
     // std::string optimization_algorithm;
     // std::string check_gradient;

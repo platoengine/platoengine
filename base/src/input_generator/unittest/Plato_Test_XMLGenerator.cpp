@@ -61,7 +61,7 @@
 
 // #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGenerator_UnitTester.hpp"
-#include "Plato_Vector3DVariations.hpp"
+// #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
 
 #include "XMLG_Macros.hpp"
@@ -1605,68 +1605,68 @@ TEST(PlatoTestXMLGenerator, parseMesh)
     EXPECT_EQ(tester.getMeshName(), "file.gen");
 }
 
-// TEST(PlatoTestXMLGenerator, parseCodePaths)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::istringstream iss;
-//     std::string stringInput;
+TEST(PlatoTestXMLGenerator, parseCodePaths)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
 
-//     stringInput = "begin paths\n"
-//             "code sierra_sd\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-//     stringInput = "begin paths\n"
-//             "code lightmp\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-//     stringInput = "begin paths\n"
-//             "code albany\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-//     stringInput = "begin paths\n"
-//             "code platomain\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-//     stringInput = "begin paths\n"
-//             "bad_keyword\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-//     stringInput = "begin paths\n"
-//             "code sierra_sd /Users/bwclark/salinas\n"
-//             "code albany /Users/bwclark/albany\n"
-//             "code lightmp /Users/bwclark/lightmp\n"
-//             "code platomain /Users/bwclark/platomain\n"
-//             "end paths\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseCodePaths(iss), true);
-//     EXPECT_EQ(tester.getSalinasPath(), "/Users/bwclark/salinas");
-//     EXPECT_EQ(tester.getAlbanyPath(), "/Users/bwclark/albany");
-//     EXPECT_EQ(tester.getLightMPPath(), "/Users/bwclark/lightmp");
-//     EXPECT_EQ(tester.getPlatoMainPath(), "/Users/bwclark/platomain");
-// }
+    stringInput = "begin paths\n"
+            "code sierra_sd\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+    stringInput = "begin paths\n"
+            "code lightmp\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+    stringInput = "begin paths\n"
+            "code albany\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+    stringInput = "begin paths\n"
+            "code platomain\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+    stringInput = "begin paths\n"
+            "bad_keyword\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+    stringInput = "begin paths\n"
+            "code sierra_sd /Users/bwclark/salinas\n"
+            "code albany /Users/bwclark/albany\n"
+            "code lightmp /Users/bwclark/lightmp\n"
+            "code platomain /Users/bwclark/platomain\n"
+            "end paths\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseCodePaths(iss), true);
+    EXPECT_EQ(tester.getSalinasPath(), "/Users/bwclark/salinas");
+    EXPECT_EQ(tester.getAlbanyPath(), "/Users/bwclark/albany");
+    EXPECT_EQ(tester.getLightMPPath(), "/Users/bwclark/lightmp");
+    EXPECT_EQ(tester.getPlatoMainPath(), "/Users/bwclark/platomain");
+}
 
 TEST(PlatoTestXMLGenerator, parseBlocks)
 {
@@ -2111,6 +2111,8 @@ TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
     EXPECT_EQ(new_load.load_id,"1");
 }
 
+//TODO: needs BC parsing unit tests
+
 // TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 // {
 //     // POSE PROBLEM
@@ -2162,7 +2164,7 @@ TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
 
 //   iss.clear();
 //   iss.seekg(0);
-//   EXPECT_EQ(tTester.publicParseBCs(iss), true);
+//   EXPECT_NO_THROW(tTester.publicParseBCs(iss));
 
 //   iss.clear();
 //   iss.seekg(0);
@@ -2262,7 +2264,7 @@ TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
 //     EXPECT_EQ(tTester.publicParseLoads(tInputSS), true);
 //     tInputSS.clear();
 //     tInputSS.seekg(0);
-//     EXPECT_EQ(tTester.publicParseBCs(tInputSS), true);
+//     EXPECT_NO_THROW(tTester.publicParseBCs(tInputSS));
 //     tInputSS.clear();
 //     tInputSS.seekg(0);
 //     EXPECT_EQ(tTester.publicParseUncertainties(tInputSS), true);
