@@ -82,7 +82,7 @@ public:
     // bool publicParseConstraints(std::istream &sin);
     bool publicParseMesh(std::istream &sin);
     // bool publicParseCodePaths(std::istream &sin);
-    // bool publicParseBlocks(std::istream &sin);
+    bool publicParseBlocks(std::istream &sin);
     // bool publicParseMaterials(std::istream &sin);
     // bool publicParseUncertainties(std::istream &sin);
     // bool publicDistributeObjectivesForGenerate();
@@ -100,8 +100,8 @@ public:
     // std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons_ratio");}
     // std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal_conductivity");}
     // std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].property("density");}
-    // std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
-    // std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
+    std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
+    std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
     // size_t getNumObjectives() {return m_InputData.objectives.size();}
     // std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
     // std::string getObjectiveType(const int &aIndex) {return m_InputData.objectives[aIndex].type;}

@@ -157,12 +157,12 @@ bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
     return parseBCs(sin);
 }
 
-// /******************************************************************************/
-// bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
-// /******************************************************************************/
-// {
-//     return parseBlocks(sin);
-// }
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
+/******************************************************************************/
+{
+    return parseBlocks(sin);
+}
 
 // /******************************************************************************/
 // bool XMLGenerator_UnitTester::publicParseMaterials(std::istream &sin)
@@ -222,7 +222,7 @@ void XMLGenerator_UnitTester::clearInputData()
     // m_InputData.objectives.clear();
     // m_InputData.constraints.clear();
     // m_InputData.materials.clear();
-    // m_InputData.blocks.clear();
+    m_InputData.blocks.clear();
     // m_InputData.levelset_nodesets.clear();
     // m_InputData.fixed_block_ids.clear();
     // m_InputData.fixed_sideset_ids.clear();
@@ -236,8 +236,8 @@ void XMLGenerator_UnitTester::clearInputData()
     // m_InputData.max_iterations="";
     // m_InputData.discretization="";
     // m_InputData.volume_fraction="";
-    // m_InputData.mesh_name="";
-    // m_InputData.mesh_name_without_extension="";
+    m_InputData.mesh.name="";
+    m_InputData.mesh.name_without_extension="";
     // m_InputData.plato_main_path="";
     // m_InputData.lightmp_path="";
     // m_InputData.sierra_sd_path="";

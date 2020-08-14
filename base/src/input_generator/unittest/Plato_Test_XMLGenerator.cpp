@@ -1668,66 +1668,66 @@ TEST(PlatoTestXMLGenerator, parseMesh)
 //     EXPECT_EQ(tester.getPlatoMainPath(), "/Users/bwclark/platomain");
 // }
 
-// TEST(PlatoTestXMLGenerator, parseBlocks)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::istringstream iss;
-//     std::string stringInput;
+TEST(PlatoTestXMLGenerator, parseBlocks)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
 
-//     stringInput = "begin block\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-//     stringInput = "begin block 1\n"
-//             "material\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-//     stringInput = "begin block 1\n"
-//             "bad_keywordl\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-//     stringInput = "begin block 1\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), true);
-//     stringInput = "begin block\n"
-//             "material 1\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
-//     stringInput = "begin block 44\n"
-//             "material 89\n"
-//             "end block\n"
-//             "begin block 33\n"
-//             "material 34\n"
-//             "end block\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseBlocks(iss), true);
-//     EXPECT_EQ(tester.getBlockID(0), "44");
-//     EXPECT_EQ(tester.getBlockMaterialID(0), "89");
-//     EXPECT_EQ(tester.getBlockID(1), "33");
-//     EXPECT_EQ(tester.getBlockMaterialID(1), "34");
-// }
+    stringInput = "begin block\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), false);
+    stringInput = "begin block 1\n"
+            "material\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), false);
+    stringInput = "begin block 1\n"
+            "bad_keywordl\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), false);
+    stringInput = "begin block 1\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), true);
+    stringInput = "begin block\n"
+            "material 1\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), false);
+    stringInput = "begin block 44\n"
+            "material 89\n"
+            "end block\n"
+            "begin block 33\n"
+            "material 34\n"
+            "end block\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    EXPECT_EQ(tester.publicParseBlocks(iss), true);
+    EXPECT_EQ(tester.getBlockID(0), "44");
+    EXPECT_EQ(tester.getBlockMaterialID(0), "89");
+    EXPECT_EQ(tester.getBlockID(1), "33");
+    EXPECT_EQ(tester.getBlockMaterialID(1), "34");
+}
 
 TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
 {

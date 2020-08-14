@@ -33,12 +33,12 @@ namespace XMLGen
 //     std::vector<std::string> weights;
 // };
 
-// struct Block
-// {
-//     std::string block_id;
-//     std::string material_id;
-//     std::string element_type;
-// };
+struct Block
+{
+    std::string block_id;
+    std::string material_id;
+    std::string element_type;
+};
 
 // struct UncertaintyMetaData
 // {
@@ -119,7 +119,7 @@ public:
     // std::vector<XMLGen::Constraint> constraints;
     // std::vector<XMLGen::Criterion> criteria;
     // std::vector<XMLGen::Material> materials;
-    // std::vector<XMLGen::Block> blocks;
+    std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
     std::vector<XMLGen::BC> bcs;
     XMLGen::Mesh mesh;

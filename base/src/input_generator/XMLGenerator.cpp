@@ -2124,90 +2124,91 @@ bool XMLGenerator::parseMesh(std::istream &fin)
 //   }
 //   return true;
 // }
-// /******************************************************************************/
-// bool XMLGenerator::parseBlocks(std::istream &fin)
-// /******************************************************************************/
-// {
-//   std::string tStringValue;
-//   std::vector<std::string> tInputStringList;
 
-//   // read each line of the file
-//   while (!fin.eof())
-//   {
-//     // read an entire line into memory
-//     char buf[MAX_CHARS_PER_LINE];
-//     fin.getline(buf, MAX_CHARS_PER_LINE);
-//     std::vector<std::string> tokens;
-//     parseTokens(buf, tokens);
+/******************************************************************************/
+bool XMLGenerator::parseBlocks(std::istream &fin)
+/******************************************************************************/
+{
+  std::string tStringValue;
+  std::vector<std::string> tInputStringList;
 
-//     // process the tokens
-//     if(tokens.size() > 0)
-//     {
-//       for(size_t j=0; j<tokens.size(); ++j)
-//         tokens[j] = toLower(tokens[j]);
+  // read each line of the file
+  while (!fin.eof())
+  {
+    // read an entire line into memory
+    char buf[MAX_CHARS_PER_LINE];
+    fin.getline(buf, MAX_CHARS_PER_LINE);
+    std::vector<std::string> tokens;
+    parseTokens(buf, tokens);
 
-//       if(parseSingleValue(tokens, tInputStringList = {"begin","block"}, tStringValue))
-//       {
-//         XMLGen::Block new_block;
-//         if(tStringValue == "")
-//         {
-//           std::cout << "ERROR:XMLGenerator:parseBlocks: No block id specified.\n";
-//           return false;
-//         }
-//         new_block.block_id = tStringValue;
-//         // found mesh block
-//         while (!fin.eof())
-//         {
-//           fin.getline(buf, MAX_CHARS_PER_LINE);
-//           tokens.clear();
-//           parseTokens(buf, tokens);
-//           // process the tokens
-//           if(tokens.size() > 0)
-//           {
-//             for(size_t j=0; j<tokens.size(); ++j)
-//               tokens[j] = toLower(tokens[j]);
+    // process the tokens
+    if(tokens.size() > 0)
+    {
+      for(size_t j=0; j<tokens.size(); ++j)
+        tokens[j] = toLower(tokens[j]);
 
-//             if(parseSingleValue(tokens, tInputStringList = {"end","block"}, tStringValue))
-//             {
-//               if(new_block.block_id == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseBlocks: Block id was not specified for block.\n";
-//                 return false;
-//               }
-//               break;
-//             }
-//             else if(parseSingleValue(tokens, tInputStringList = {"material"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"material\" keyword.\n";
-//                 return false;
-//               }
-//               new_block.material_id = tStringValue;
-//             }
-//             else if(parseSingleValue(tokens, tInputStringList = {"element","type"}, tStringValue))
-//             {
-//               if(tStringValue == "")
-//               {
-//                 std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"element type\" keywords.\n";
-//                 return false;
-//               }
-//               new_block.element_type = tStringValue;
-//             }
-//             else
-//             {
-//               PrintUnrecognizedTokens(tokens);
-//               std::cout << "ERROR:XMLGenerator:parseBlocks: Unrecognized keyword.\n";
-//               return false;
-//             }
-//           }
-//         }
-//         m_InputData.blocks.push_back(new_block);
-//       }
-//     }
-//   }
-//   return true;
-// }
+      if(parseSingleValue(tokens, tInputStringList = {"begin","block"}, tStringValue))
+      {
+        XMLGen::Block new_block;
+        if(tStringValue == "")
+        {
+          std::cout << "ERROR:XMLGenerator:parseBlocks: No block id specified.\n";
+          return false;
+        }
+        new_block.block_id = tStringValue;
+        // found mesh block
+        while (!fin.eof())
+        {
+          fin.getline(buf, MAX_CHARS_PER_LINE);
+          tokens.clear();
+          parseTokens(buf, tokens);
+          // process the tokens
+          if(tokens.size() > 0)
+          {
+            for(size_t j=0; j<tokens.size(); ++j)
+              tokens[j] = toLower(tokens[j]);
+
+            if(parseSingleValue(tokens, tInputStringList = {"end","block"}, tStringValue))
+            {
+              if(new_block.block_id == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseBlocks: Block id was not specified for block.\n";
+                return false;
+              }
+              break;
+            }
+            else if(parseSingleValue(tokens, tInputStringList = {"material"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"material\" keyword.\n";
+                return false;
+              }
+              new_block.material_id = tStringValue;
+            }
+            else if(parseSingleValue(tokens, tInputStringList = {"element","type"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseBlocks: No value specified after \"element type\" keywords.\n";
+                return false;
+              }
+              new_block.element_type = tStringValue;
+            }
+            else
+            {
+              PrintUnrecognizedTokens(tokens);
+              std::cout << "ERROR:XMLGenerator:parseBlocks: Unrecognized keyword.\n";
+              return false;
+            }
+          }
+        }
+        m_InputData.blocks.push_back(new_block);
+      }
+    }
+  }
+  return true;
+}
 // /******************************************************************************/
 // bool XMLGenerator::parseMaterials(std::istream &aInput)
 // /******************************************************************************/
@@ -2260,18 +2261,23 @@ bool XMLGenerator::parseInputFile()
 
   parseBCs(tInputFile);
   tInputFile.close();
+
   tInputFile.open(m_InputFilename.c_str()); // open a file
   parseLoads(tInputFile);
   tInputFile.close();
-  tInputFile.open(m_InputFilename.c_str()); // open a file
+
+  // tInputFile.open(m_InputFilename.c_str()); // open a file
   // parseOptimizationParameters(tInputFile);
   // tInputFile.close();
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
+  
+  tInputFile.open(m_InputFilename.c_str()); // open a file
   parseMesh(tInputFile);
   tInputFile.close();
+
   tInputFile.open(m_InputFilename.c_str()); // open a file
-  // parseBlocks(tInputFile);
-  // tInputFile.close();
+  parseBlocks(tInputFile);
+  tInputFile.close();
+
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // parseCodePaths(tInputFile);
   // tInputFile.close();
