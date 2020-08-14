@@ -17,6 +17,37 @@
 namespace XMLGen
 {
 
+struct ValidKeys
+{
+    std::vector<std::string> mKeys;
+};
+
+struct ValidCriterionParameterKeyMap
+{
+    std::unordered_map<std::string, std::vector<std::string>> mMap;
+    
+    ValidCriterionParameterKeyMap()
+    {
+
+        mMap.insert({"elastic_energy", {}});
+        mMap.insert({"volume", {"volume_misfit_target"}});
+        mMap.insert({"stress_p-norm", {"p"}});
+        mMap.insert({"stress", {"stress_limit", "relative_stress_limit", "stress_ramp_factor", "limit_power_min", "limit_power_max",
+                                "limit_power_feasible_bias", "limit_power_feasible_slope", "limit_power_infeasible_bias", "limit_power_infeasible_slope",
+                                "limit_reset_subfrequency", "limit_reset_count", "inequality_allowable_feasiblity_lower", "inequality_allowable_feasiblity_upper",
+                                "inequality_feasibility_scale", "inequality_infeasibility_scale", "stress_favor_final", "stress_favor_updates",
+                                "stress_inequality_power", "volume_penalty_power", "volume_penalty_divisor", "volume_penalty_bias",
+                                "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
+                                "constraint_exponent", "constraint_exponent", "initial_lagrange_multiplier", "initial_mass_weight_factor",
+                                "control_stagnation_tolerance", "write_debug_output_files"}});
+    }
+
+    std::vector<std::string> getValidKeysForCriterion(std::string& aCriterion)
+    {
+        return mMap.find(aCriterion)->second;
+    }
+};
+
 struct ValidBoolKeys
 {
     /*!<
@@ -24,7 +55,7 @@ struct ValidBoolKeys
      **/
     std::vector<std::string> mKeys = {"true", "false"};
 };
-// struct ValidCriterionKeys
+// struct ValidBoolKeys
 
 struct ValidPlatoInputFileMetaDataBlockKeys
 {
@@ -36,7 +67,7 @@ struct ValidPlatoInputFileMetaDataBlockKeys
 };
 // struct ValidPlatoInputFileMetaDataBlockKeys
 
-struct ValidCriterionKeys
+struct ValidObjectiveTypeKeys
 {
     /*!<
      * \brief Valid plato input deck criterion keywords.
@@ -47,7 +78,17 @@ struct ValidCriterionKeys
          "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
          "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
 };
-// struct ValidCriterionKeys
+// struct ValidObjectiveTypeKeys
+
+struct ValidCriterionTypeKeys
+{
+    /*!<
+     * \brief Valid plato input deck criterion keywords.
+     **/
+    std::vector<std::string> mKeys =
+        {"elastic_energy", "volume", "stress_p-norm"};
+};
+// struct ValidCriterionTypeKeys
 
 struct ValidRandomCategoryKeys
 {
@@ -98,6 +139,15 @@ struct ValidStatisticalDistributionKeys
     std::vector<std::string> mKeys = {"normal", "beta", "uniform"};
 };
 // struct ValidStatisticalDistributionKeys
+//
+struct ValidLoadKeys
+{
+    /*!<
+     * \brief Valid plato input deck essential boundary condition keywords.
+     **/
+    std::vector<std::string> mKeys = {"traction", "heat_flux", "force", "pressure"};
+};
+// struct ValidEssentialBoundaryConditionsKeys
 
 struct ValidEssentialBoundaryConditionsKeys
 {
@@ -106,7 +156,7 @@ struct ValidEssentialBoundaryConditionsKeys
      **/
     std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed value", "insulated"};
 };
-// struct ValidCriterionKeys
+// struct ValidEssentialBoundaryConditionsKeys
 
 struct ValidOutputToLayoutKeys
 {
@@ -499,10 +549,10 @@ struct ValidAnalyzeCriteriaKeys
 {
     /*!<
      * valid plato analyze optimization criteria \n
-     * \brief map from plato main criterion key to pair of plato analyze criterion \n
+     * \brief map from plato main objective type key to pair of plato analyze criterion \n
      * key and self-adjoint flag, i.e. \n
      *
-     * map< plato_main_cirterion_key, pair<plato_analyze_criterion_key, plato_analyze_self_adjoint_key> >.
+     * map< plato_main_objective_type_key, pair<plato_analyze_criterion_key, plato_analyze_self_adjoint_key> >.
      *
      **/
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =

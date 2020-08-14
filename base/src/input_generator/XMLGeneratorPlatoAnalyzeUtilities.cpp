@@ -36,13 +36,13 @@ bool is_topology_optimization_problem(const std::string& aProblemType)
 /******************************************************************************/
 
 /******************************************************************************/
-bool is_any_objective_computed_by_plato_analyze
+bool is_any_service_provided_by_plato_analyze
 (const XMLGen::InputData& aXMLMetaData)
 {
     auto tAtLeastOnePerformerIsPlatoAnalyze = false;
-    for(auto& tObjective : aXMLMetaData.objectives)
+    for(auto& tService : aXMLMetaData.services())
     {
-        if(XMLGen::is_plato_analyze_code(tObjective.code_name))
+        if(XMLGen::is_plato_analyze_code(tService.code()))
         {
             tAtLeastOnePerformerIsPlatoAnalyze = true;
             break;
@@ -87,20 +87,20 @@ return_constraints_computed_by_plato_analyze
 /******************************************************************************/
 
 /******************************************************************************/
-std::vector<std::string>
-return_objectives_computed_by_plato_analyze
-(const XMLGen::InputData& aXMLMetaData)
-{
-    std::vector<std::string> tCategories;
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        if(tObjective.code().compare("plato_analyze") == 0)
-        {
-            tCategories.push_back(tObjective.category());
-        }
-    }
-    return tCategories;
-}
+// std::vector<std::string>
+// return_objectives_computed_by_plato_analyze
+// (const XMLGen::InputData& aXMLMetaData)
+// {
+//     std::vector<std::string> tCategories;
+//     for(auto& tObjective : aXMLMetaData.objectives)
+//     {
+//         if(tObjective.code().compare("plato_analyze") == 0)
+//         {
+//             tCategories.push_back(tObjective.category());
+//         }
+//     }
+//     return tCategories;
+// }
 /******************************************************************************/
 
 }

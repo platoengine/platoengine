@@ -10,6 +10,7 @@
 
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseService.hpp"
+#include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
@@ -17,6 +18,339 @@
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoType)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "service 1\n"
+        "criteria 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoServices)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoCriteria)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "service 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorMultipleCriteriaInSingleCriterionObjective)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "service 1 2\n"
+        "criteria 1 2\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorWeightsForSingleCriterion)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "service 1 \n"
+        "criteria 1 \n"
+        "weights 1 \n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoWeights)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type weighted_sum\n"
+        "service 1 2\n"
+        "criteria 1 2\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_InvalidObjectiveType)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type invalid_type\n"
+        "service 1\n"
+        "criteria 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_SingleCriterion)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "service 1\n"
+        "criteria 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
+
+    auto tObjectiveMetaData = tObjectiveParser.data();
+    ASSERT_EQ("single_criterion", tObjectiveMetaData.type);
+    ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseObjective_WeightedSum)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type weighted_sum\n"
+        "service 1 2\n"
+        "criteria 1 2\n"
+        "weights 1 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
+
+    auto tObjectiveMetaData = tObjectiveParser.data();
+    ASSERT_EQ("weighted_sum", tObjectiveMetaData.type);
+    ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
+    ASSERT_STREQ("2", tObjectiveMetaData.serviceIDs[1].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
+    ASSERT_STREQ("2", tObjectiveMetaData.criteriaIDs[1].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.weights[0].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.weights[1].c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorEmptyCriterionBlock)
+{
+    std::string tStringInput =
+        "begin criterion\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorNoCriteriaID)
+{
+    std::string tStringInput =
+        "begin criterion\n"
+        "type elastic_energy\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorDuplicateIDs)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type elastic_energy\n"
+        "end criterion\n"
+        "begin criterion 1\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidCriterionType)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type invalid_type\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_MissingRequiredParameter)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidParameterForCriteria)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type volume\n"
+        "p 3\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_ElasticEnergy)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type elastic_energy\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("elastic_energy", tCriterionMetaData[0].type().c_str());
+
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("volume", tCriterionMetaData[0].type().c_str());
+
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "p 3\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(1u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
+
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(1u, tParameters.size());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
+{
+    std::string tStringInput =
+        "begin criterion 1\n"
+        "type stress_p-norm\n"
+        "p 3\n"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "type elastic_energy\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "type volume\n"
+        "end criterion\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseCriteria tCriteriaParser;
+    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+
+    auto tCriterionMetaData = tCriteriaParser.data();
+    ASSERT_EQ(3u, tCriterionMetaData.size());
+    ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
+    ASSERT_STREQ("2", tCriterionMetaData[1].id().c_str());
+    ASSERT_STREQ("3", tCriterionMetaData[2].id().c_str());
+    ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
+    ASSERT_STREQ("elastic_energy", tCriterionMetaData[1].type().c_str());
+    ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
+
+    auto tParameters = tCriterionMetaData[0].parameters();
+    ASSERT_EQ(1u, tParameters.size());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+
+    tParameters = tCriterionMetaData[1].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+
+    tParameters = tCriterionMetaData[2].parameters();
+    ASSERT_EQ(0u, tParameters.size());
+}
 
 TEST(PlatoTestXMLGenerator, ParseMaterial_ErrorEmptyMaterialBlock)
 {
@@ -613,296 +947,6 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
         tItr = std::find(tGoldRandomSharedDataName.begin(), tGoldRandomSharedDataName.end(), tSharedDataName);
         ASSERT_TRUE(tItr != tGoldRandomSharedDataName.end());
         ASSERT_STREQ(tItr->c_str(), tSharedDataName.c_str());
-    }
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCriterion)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type hippo\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorDimMistmachNaturalBCArrays)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type stress p-norm\n"
-        "   load ids 10\n"
-        "   load case weights 1 2\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidCode)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code dog\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorInvalidOutputKey)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz bats\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorEmptyNaturalBCIDs)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorEmptyEssentialBCIDs)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   load ids 10\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNumProcessorIsNotNumber)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "   distribute objective at most P3 processors\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_OneObjective)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   performer ferrari\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    tObjectiveParser.parse(tInputSS);
-    auto tObjectiveMetadata = tObjectiveParser.data();
-    ASSERT_EQ(1u, tObjectiveMetadata.size());
-
-    ASSERT_STREQ("maximize stiffness", tObjectiveMetadata[0].type.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[0].num_procs.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[0].num_ranks.c_str());
-    ASSERT_STREQ("1.0", tObjectiveMetadata[0].weight.c_str());
-    ASSERT_STREQ("3.0", tObjectiveMetadata[0].mPenaltyParam.c_str());
-    ASSERT_STREQ("6.0", tObjectiveMetadata[0].mPnormExponent.c_str());
-    ASSERT_STREQ("1e-9", tObjectiveMetadata[0].mMinimumErsatzValue.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].code_name.c_str());
-    ASSERT_STREQ("ferrari", tObjectiveMetadata[0].mPerformerName.c_str());
-    ASSERT_STREQ("true", tObjectiveMetadata[0].normalize_objective.c_str());
-    ASSERT_STREQ("1e-7", tObjectiveMetadata[0].analysis_solver_tolerance.c_str());
-    ASSERT_STREQ("false", tObjectiveMetadata[0].multi_load_case.c_str());
-    ASSERT_STREQ("none", tObjectiveMetadata[0].distribute_objective_type.c_str());
-
-    ASSERT_EQ(1u, tObjectiveMetadata[0].bc_ids.size());
-    ASSERT_STREQ("11", tObjectiveMetadata[0].bc_ids[0].c_str());
-    ASSERT_EQ(1u, tObjectiveMetadata[0].load_case_ids.size());
-    ASSERT_STREQ("10", tObjectiveMetadata[0].load_case_ids[0].c_str());
-
-    ASSERT_EQ(3u, tObjectiveMetadata[0].output_for_plotting.size());
-    std::vector<std::string> tGoldOutputs = {"dispx", "dispy", "dispz"};
-    for(auto& tValue : tObjectiveMetadata[0].output_for_plotting)
-    {
-        auto tIndex = &tValue - &tObjectiveMetadata[0].output_for_plotting[0];
-        ASSERT_STREQ(tGoldOutputs[tIndex].c_str(), tValue.c_str());
-    }
-}
-
-TEST(PlatoTestXMLGenerator, ParseObjective_TwoObjective)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type compliance\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dispy dispz\n"
-        "end objective\n"
-        "begin objective\n"
-        "   type stress p-norm\n"
-        "   normalize objective false\n"
-        "   load ids 10 20\n"
-        "   boundary condition ids 11 21\n"
-        "   number processors 1\n"
-        "   weight 1.0\n"
-        "   number ranks 1\n"
-        "   output for plotting DISpx dIspy dispz vonmises\n"
-        "   distribute objective at most 3 processors\n"
-        "end objective\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseObjective tObjectiveParser;
-    tObjectiveParser.parse(tInputSS);
-    auto tObjectiveMetadata = tObjectiveParser.data();
-    ASSERT_EQ(2u, tObjectiveMetadata.size());
-
-    // TEST OBJECTIVE 1
-    ASSERT_STREQ("compliance", tObjectiveMetadata[0].type.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[0].num_procs.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[0].num_ranks.c_str());
-    ASSERT_STREQ("1.0", tObjectiveMetadata[0].weight.c_str());
-    ASSERT_STREQ("3.0", tObjectiveMetadata[0].mPenaltyParam.c_str());
-    ASSERT_STREQ("6.0", tObjectiveMetadata[0].mPnormExponent.c_str());
-    ASSERT_STREQ("1e-9", tObjectiveMetadata[0].mMinimumErsatzValue.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[0].code_name.c_str());
-    ASSERT_STREQ("plato_analyze_1", tObjectiveMetadata[0].mPerformerName.c_str());
-    ASSERT_STREQ("true", tObjectiveMetadata[0].normalize_objective.c_str());
-    ASSERT_STREQ("1e-7", tObjectiveMetadata[0].analysis_solver_tolerance.c_str());
-    ASSERT_STREQ("false", tObjectiveMetadata[0].multi_load_case.c_str());
-    ASSERT_STREQ("none", tObjectiveMetadata[0].distribute_objective_type.c_str());
-
-    ASSERT_EQ(1u, tObjectiveMetadata[0].bc_ids.size());
-    ASSERT_STREQ("11", tObjectiveMetadata[0].bc_ids[0].c_str());
-    ASSERT_EQ(1u, tObjectiveMetadata[0].load_case_ids.size());
-    ASSERT_STREQ("10", tObjectiveMetadata[0].load_case_ids[0].c_str());
-
-    ASSERT_EQ(3u, tObjectiveMetadata[0].output_for_plotting.size());
-    std::vector<std::string> tGoldOutputs = {"dispx", "dispy", "dispz"};
-    for(auto& tValue : tObjectiveMetadata[0].output_for_plotting)
-    {
-        auto tIndex = &tValue - &tObjectiveMetadata[0].output_for_plotting[0];
-        ASSERT_STREQ(tGoldOutputs[tIndex].c_str(), tValue.c_str());
-    }
-
-    // TEST OBJECTIVE 2
-    ASSERT_STREQ("stress p-norm", tObjectiveMetadata[1].type.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[1].num_procs.c_str());
-    ASSERT_STREQ("1", tObjectiveMetadata[1].num_ranks.c_str());
-    ASSERT_STREQ("1.0", tObjectiveMetadata[1].weight.c_str());
-    ASSERT_STREQ("3.0", tObjectiveMetadata[1].mPenaltyParam.c_str());
-    ASSERT_STREQ("6.0", tObjectiveMetadata[1].mPnormExponent.c_str());
-    ASSERT_STREQ("1e-9", tObjectiveMetadata[1].mMinimumErsatzValue.c_str());
-    ASSERT_STREQ("plato_analyze", tObjectiveMetadata[1].code_name.c_str());
-    ASSERT_STREQ("plato_analyze_2", tObjectiveMetadata[1].mPerformerName.c_str());
-    ASSERT_STREQ("false", tObjectiveMetadata[1].normalize_objective.c_str());
-    ASSERT_STREQ("1e-7", tObjectiveMetadata[1].analysis_solver_tolerance.c_str());
-    ASSERT_STREQ("true", tObjectiveMetadata[1].multi_load_case.c_str());
-    ASSERT_STREQ("3", tObjectiveMetadata[1].atmost_total_num_processors.c_str());
-    ASSERT_STREQ("atmost", tObjectiveMetadata[1].distribute_objective_type.c_str());
-
-    std::vector<std::string> tGoldEssentialBCIDs = {"11", "21"};
-    ASSERT_EQ(2u, tObjectiveMetadata[1].bc_ids.size());
-    for(auto& tValue : tObjectiveMetadata[1].bc_ids)
-    {
-        auto tIndex = &tValue - &tObjectiveMetadata[1].bc_ids[0];
-        ASSERT_STREQ(tGoldEssentialBCIDs[tIndex].c_str(), tValue.c_str());
-    }
-
-    std::vector<std::string> tGoldNaturalBCIDs = {"10", "20"};
-    ASSERT_EQ(2u, tObjectiveMetadata[1].load_case_ids.size());
-    for(auto& tValue : tObjectiveMetadata[1].load_case_ids)
-    {
-        auto tIndex = &tValue - &tObjectiveMetadata[1].load_case_ids[0];
-        ASSERT_STREQ(tGoldNaturalBCIDs[tIndex].c_str(), tValue.c_str());
-    }
-
-    ASSERT_EQ(4u, tObjectiveMetadata[1].output_for_plotting.size());
-    tGoldOutputs = {"dispx", "dispy", "dispz", "vonmises"};
-    for(auto& tValue : tObjectiveMetadata[0].output_for_plotting)
-    {
-        auto tIndex = &tValue - &tObjectiveMetadata[0].output_for_plotting[0];
-        ASSERT_STREQ(tGoldOutputs[tIndex].c_str(), tValue.c_str());
     }
 }
 

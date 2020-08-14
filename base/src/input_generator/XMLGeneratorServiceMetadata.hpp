@@ -19,6 +19,10 @@ namespace XMLGen
 **********************************************************************************/
 struct Service
 {
+public:
+    std::vector<std::string> LoadIDs;
+    std::vector<std::string> BCIDs;
+
 // private member data
 private:
     std::unordered_map<std::string, std::string> mMetaData; /*!< Service metadata, map< tag, value > */
@@ -95,20 +99,6 @@ public:
      * \return value
     **********************************************************************************/
     std::string code() const;
-
-    /******************************************************************************//**
-     * \fn performer
-     * \brief Set string value for keyword 'performer'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void performer(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn performer
-     * \brief Return string value for keyword 'performer'.
-     * \return value
-    **********************************************************************************/
-    std::string performer() const;
 
     /******************************************************************************//**
      * \fn physics
@@ -307,6 +297,48 @@ public:
     std::string solverMaxNumIterations() const;
 
     /******************************************************************************//**
+     * \fn numberRanks
+     * \brief Set string value for keyword 'number_ranks'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void numberRanks(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn numberRanks
+     * \brief Return string value for keyword 'number_ranks'.
+     * \return value
+    **********************************************************************************/
+    std::string numberRanks() const;
+
+    /******************************************************************************//**
+     * \fn numberProcessors
+     * \brief Set string value for keyword 'number_processors'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void numberProcessors(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn numberProcessors
+     * \brief Return string value for keyword 'number_processors'.
+     * \return value
+    **********************************************************************************/
+    std::string numberProcessors() const;
+
+    /******************************************************************************//**
+     * \fn performer
+     * \brief Set string value for keyword 'performer'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void performer(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn performer
+     * \brief Return string value for keyword 'performer'.
+     * \return value
+    **********************************************************************************/
+    std::string performer() const;
+
+    /******************************************************************************//**
      * \fn cacheState
      * \brief Set string value for keyword 'cache_state'.
      * \param [in] aInput string value
@@ -333,20 +365,6 @@ public:
      * \return output bool
     **********************************************************************************/
     bool updateProblem() const;
-
-    /******************************************************************************//**
-     * \fn useNewAnalyzeUQWorkflow
-     * \brief Set string value for keyword 'use_new_analyze_uq_workflow'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void useNewAnalyzeUQWorkflow(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn useNewAnalyzeUQWorkflow
-     * \brief Return bool value for keyword 'use_new_analyze_uq_workflow'.
-     * \return output bool
-    **********************************************************************************/
-    bool useNewAnalyzeUQWorkflow() const;
 };
 // struct Service
 

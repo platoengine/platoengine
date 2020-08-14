@@ -83,16 +83,6 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
-void Service::performer(const std::string& aInput)
-{
-    mMetaData["performer"] = aInput;
-}
-
-std::string Service::performer() const
-{
-    return (this->getValue("performer"));
-}
-
 void Service::physics(const std::string& aInput)
 {
     mMetaData["physics"] = aInput;
@@ -233,6 +223,36 @@ std::string Service::solverMaxNumIterations() const
     return (this->getValue("max_number_iterations"));
 }
 
+void Service::numberRanks(const std::string& aInput)
+{
+    mMetaData["number_ranks"] = aInput;
+}
+
+std::string Service::numberRanks() const
+{
+    return (this->getValue("number_ranks"));
+}
+
+void Service::numberProcessors(const std::string& aInput)
+{
+    mMetaData["number_processors"] = aInput;
+}
+
+std::string Service::numberProcessors() const
+{
+    return (this->getValue("number_processors"));
+}
+
+void Service::performer(const std::string& aInput)
+{
+    mMetaData["performer"] = aInput;
+}
+
+std::string Service::performer() const
+{
+    return (this->getValue("performer"));
+}
+
 void Service::cacheState(const std::string& aInput)
 {
     mMetaData["cache_state"] = aInput;
@@ -251,16 +271,6 @@ void Service::updateProblem(const std::string& aInput)
 bool Service::updateProblem() const
 {
     return (this->getBool("update_problem"));
-}
-
-void Service::useNewAnalyzeUQWorkflow(const std::string& aInput)
-{
-    mMetaData["use_new_analyze_uq_workflow"] = aInput;
-}
-
-bool Service::useNewAnalyzeUQWorkflow() const
-{
-    return (this->getBool("use_new_analyze_uq_workflow"));
 }
 
 }

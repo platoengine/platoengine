@@ -40,6 +40,20 @@ private:
     void setTags(XMLGen::Service& aService);
 
     /******************************************************************************//**
+     * \fn setLoadIDs
+     * \brief Set service load ids.
+     * \param [in] aService service metadata
+    **********************************************************************************/
+    void setLoadIDs(XMLGen::Service& aService);
+
+    /******************************************************************************//**
+     * \fn setBCIDs
+     * \brief Set service boundary condition ids.
+     * \param [in] aService service metadata
+    **********************************************************************************/
+    void setBCIDs(XMLGen::Service& aService);
+
+    /******************************************************************************//**
      * \fn checkTags
      * \brief Check service metadata.
      * \param [in] aService service metadata
@@ -66,14 +80,6 @@ private:
      * \param [in] aService service metadata
     **********************************************************************************/
     void checkSpatialDimensions(XMLGen::Service& aService);
-
-    /******************************************************************************//**
-     * \fn checkPerformer
-     * \brief If 'performer' keyword is empty, set 'performer' keyword to default \n
-     * value: 'code_keyword' + '0', where 'code_keyword' denotes the value set for \n
-     * 'code' keyword.
-    **********************************************************************************/
-    void checkPerformer();
 
     /******************************************************************************//**
      * \fn checkServiceID

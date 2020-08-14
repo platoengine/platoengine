@@ -30,6 +30,102 @@ void ParseService::setTags(XMLGen::Service& aService)
     }
 }
 
+void ParseService::setLoadIDs(XMLGen::Service &aMetadata)
+{
+    auto tItr = mTags.find("loads");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tLoadIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tLoadIDs);
+        aMetadata.LoadIDs = tLoadIDs;
+    }
+    else
+    {
+        THROWERR("Objective criteria are not defined");
+    }
+}
+
+void ParseService::setBCIDs(XMLGen::Service &aMetadata)
+{
+    auto tItr = mTags.find("boundary_conditions");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tBCIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tBCIDs);
+        aMetadata.LoadIDs = tBCIDs;
+    }
+    else
+    {
+        THROWERR("Objective criteria are not defined");
+    }
+}
+// /******************************************************************************/
+// bool XMLGenerator::fillObjectiveAndPerfomerNames()
+// /******************************************************************************/
+// {
+//     // assigns objective names to yet un-named objectives
+//     // assigns performer name to each objective
+
+//     char buf2[200];
+//     size_t num_objs = m_InputData.objectives.size();
+//     // If there were objectives without names add a default name
+//     for(size_t i=0; i<num_objs; ++i)
+//     {
+//         // For each code name we will make sure there are names set
+//         std::string cur_code_name = m_InputData.objectives[i].code_name;
+//         int num_cur_code_objs=0;
+//         for(size_t j=i; j<num_objs; ++j)
+//         {
+//             if(!m_InputData.objectives[j].code_name.compare(cur_code_name))
+//             {
+//                 num_cur_code_objs++;
+//                 if(m_InputData.objectives[j].name.empty())
+//                 {
+//                     sprintf(buf2, "%d", num_cur_code_objs);
+//                     m_InputData.objectives[j].name = buf2;
+//                 }
+//             }
+//         }
+//     }
+//     // Set the performer names
+//     for(size_t i=0; i<num_objs; ++i)
+//     {
+//         m_InputData.objectives[i].mPerformerName =
+//                 m_InputData.objectives[i].code_name +
+//                 "_" + m_InputData.objectives[i].name;
+//     }
+
+//     return true;
+// }
+
+
+// void ParseObjective::setIdentification()
+// {
+//     for (auto &tOuterObjective : mData)
+//     {
+//         // For each code name we will make sure there are names set
+//         auto tMyCodeName = tOuterObjective.code_name;
+//         size_t tObjectiveIdentificationNumber = 0;
+//         for (auto &tInnerObjective : mData)
+//         {
+//             if (!tInnerObjective.code_name.compare(tMyCodeName))
+//             {
+//                 tObjectiveIdentificationNumber++;
+//                 if (tInnerObjective.name.empty())
+//                 {
+//                     tInnerObjective.name = std::to_string(tObjectiveIdentificationNumber);
+//                 }
+//             }
+//         }
+//     }
+// }
+
 void ParseService::checkTags(XMLGen::Service& aService)
 {
     this->checkCode(aService);
@@ -64,6 +160,25 @@ void ParseService::allocate()
     mTags.insert({ "tolerance", { { {"tolerance"}, ""}, "1e-8" } });
     mTags.insert({ "max_number_iterations", { { {"max_number_iterations"}, ""}, "25" } });
     mTags.insert({ "convergence_criterion", { { {"convergence_criterion"}, ""}, "residual" } });
+
+    mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "" } });
+    mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "" } });
+
+    mTags.insert({ "loads", { { {"loads"}, ""}, "" } });
+    mTags.insert({ "boundary_conditions", { { {"boundary_conditions"}, ""}, "" } });
+
+    //frf matching
+    // mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
+    // mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
+    // mTags.insert({ "frf_match_nodesets", { { {"frf_match_nodesets"}, ""}, "" } });
+    // mTags.insert({ "freq_min", { { {"freq_min"}, ""}, "" } });
+    // mTags.insert({ "freq_max", { { {"freq_max"}, ""}, "" } });
+    // mTags.insert({ "freq_step", { { {"freq_step"}, ""}, "" } });
+    // mTags.insert({ "ref_frf_file", { { {"ref_frf_file"}, ""}, "" } });
+    // mTags.insert({ "raleigh_damping_alpha", { { {"raleigh_damping_alpha"}, ""}, "" } });
+    // mTags.insert({ "raleigh_damping_beta", { { {"raleigh_damping_beta"}, ""}, "" } });
+    // mTags.insert({ "wtmass_scale_factor", { { {"wtmass_scale_factor"}, ""}, "" } });
+    // mTags.insert({ "normalize_objective", { { {"normalize_objective"}, ""}, "" } });
 }
 
 void ParseService::checkCode(XMLGen::Service& aService)
@@ -98,19 +213,6 @@ void ParseService::checkPhysics(XMLGen::Service& aService)
     aService.physics(tValidPhysics);
 }
 
-void ParseService::checkPerformer()
-{
-    for(auto& tService : mData)
-    {
-        if (tService.value("performer").empty())
-        {
-            auto tIndex = &tService - &mData[0] + 1u;
-            auto tPerformer = tService.value("code") + "_" + std::to_string(tIndex);
-            tService.performer(tPerformer);
-        }
-    }
-}
-
 void ParseService::checkServiceID()
 {
     for (auto &tService : mData)
@@ -126,7 +228,6 @@ void ParseService::checkServiceID()
 
 void ParseService::finalize()
 {
-    this->checkPerformer();
     this->checkServiceID();
 }
 

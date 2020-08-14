@@ -19,16 +19,6 @@ namespace XMLGen
 void write_interface_xml_file
 (const XMLGen::InputData& aMetaData)
 {
-    if (aMetaData.objectives.empty())
-    {
-        THROWERR("Write Interface XML File for a Nondeterministic Optimization Use Case: Objective block was not defined.")
-    }
-    if (aMetaData.objectives.size() > 1u)
-    {
-        THROWERR(std::string("Write Interface XML File for a Nondeterministic Optimization Use Case: Only one objective, ")
-            + "i.e. objective block, is expected to be defined for a nondeterministic optimization use case.")
-    }
-
     pugi::xml_document tDocument;
 
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -199,9 +189,11 @@ void append_stages
         XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
     }
 
-    // criteria stages
+    // constraint stages
     XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
     XMLGen::append_constraint_gradient_stage(aXMLMetaData, aDocument);
+
+    // objective stages
     XMLGen::append_objective_value_stage(aXMLMetaData, aDocument);
     XMLGen::append_objective_gradient_stage(aXMLMetaData, aDocument);
 }
@@ -269,28 +261,25 @@ void append_objective_value_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
-        XMLGen::append_children( { "Name", "Type" }, { tName, tObjective.category() }, tStageNode);
-        auto tStageInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
-        XMLGen::append_filter_control_operation(tStageNode);
+    auto tStageNode = aDocument.append_child("Stage");
+    auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
+    XMLGen::append_children( { "Name", "Type" }, { tName, tObjective.category() }, tStageNode);
+    auto tStageInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
+    XMLGen::append_filter_control_operation(tStageNode);
 
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
-        else
-            XMLGen::append_objective_value_operation(tObjective, tStageNode);
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
+    else
+        XMLGen::append_objective_value_operation(tObjective, tStageNode);
 
-        auto tSharedDataName = std::string("Objective Value ID-") + tObjective.name;
+    auto tSharedDataName = std::string("Objective Value ID-") + tObjective.name;
 
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
 
-        auto tStageOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children( { "SharedDataName" }, { tSharedDataName }, tStageOutputNode);
-    }
+    auto tStageOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children( { "SharedDataName" }, { tSharedDataName }, tStageOutputNode);
 }
 /******************************************************************************/
 

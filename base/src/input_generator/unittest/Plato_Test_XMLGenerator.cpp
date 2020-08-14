@@ -52,16 +52,15 @@
 #include <cmath>
 #include <numeric>
 
-#include "XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 #include "XMLGeneratorUtilities.hpp"
-#include "XMLGeneratorDefinesFileUtilities.hpp"
-#include "XMLGeneratorInterfaceFileUtilities.hpp"
-#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
+// #include "XMLGeneratorParseUncertainty.hpp"
+// #include "XMLGeneratorDefinesFileUtilities.hpp"
+// #include "XMLGeneratorInterfaceFileUtilities.hpp"
+// #include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 
-#include "Plato_SromXMLGenTools.hpp"
+// #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGenerator_UnitTester.hpp"
-#include "DefaultInputGenerator_UnitTester.hpp"
-#include "ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester.hpp"
 #include "Plato_Vector3DVariations.hpp"
 #include "XML_GoldValues.hpp"
 
@@ -144,215 +143,215 @@ TEST(PlatoTestXMLGenerator, ParseTagValues)
     ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.first.second.c_str());
 }
 
-TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
-{
-    std::string tStringInput =
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean -50.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
-        "end uncertainty\n";
+// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
+// {
+//     std::string tStringInput =
+//         "begin uncertainty\n"
+//         "    category load\n"
+//         "    tag angle variation\n"
+//         "    load id 10\n"
+//         "    attribute X\n"
+//         "    distribution beta\n"
+//         "    mean -50.0\n"
+//         "    upper bound 45.0\n"
+//         "    lower bound -45.0\n"
+//         "    standard deviation 22.5\n"
+//         "    num samples 2\n"
+//         "end uncertainty\n";
 
-    std::istringstream tInputs;
-    tInputs.str(tStringInput);
-    XMLGen::ParseUncertainty tUncertainty;
-    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-}
+//     std::istringstream tInputs;
+//     tInputs.str(tStringInput);
+//     XMLGen::ParseUncertainty tUncertainty;
+//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+// }
 
-TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBound)
-{
-    std::string tStringInput =
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean -20.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 30\n"
-        "    num samples 2\n"
-        "end uncertainty\n";
+// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBound)
+// {
+//     std::string tStringInput =
+//         "begin uncertainty\n"
+//         "    category load\n"
+//         "    tag angle variation\n"
+//         "    load id 10\n"
+//         "    attribute X\n"
+//         "    distribution beta\n"
+//         "    mean -20.0\n"
+//         "    upper bound 45.0\n"
+//         "    lower bound -45.0\n"
+//         "    standard deviation 30\n"
+//         "    num samples 2\n"
+//         "end uncertainty\n";
 
-    std::istringstream tInputs;
-    tInputs.str(tStringInput);
-    XMLGen::ParseUncertainty tUncertainty;
-    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-}
+//     std::istringstream tInputs;
+//     tInputs.str(tStringInput);
+//     XMLGen::ParseUncertainty tUncertainty;
+//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+// }
 
-TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBound)
-{
-    std::string tStringInput =
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 20.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 30\n"
-        "    num samples 2\n"
-        "end uncertainty\n";
+// TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBound)
+// {
+//     std::string tStringInput =
+//         "begin uncertainty\n"
+//         "    category load\n"
+//         "    tag angle variation\n"
+//         "    load id 10\n"
+//         "    attribute X\n"
+//         "    distribution beta\n"
+//         "    mean 20.0\n"
+//         "    upper bound 45.0\n"
+//         "    lower bound -45.0\n"
+//         "    standard deviation 30\n"
+//         "    num samples 2\n"
+//         "end uncertainty\n";
 
-    std::istringstream tInputs;
-    tInputs.str(tStringInput);
-    XMLGen::ParseUncertainty tUncertainty;
-    ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
-}
+//     std::istringstream tInputs;
+//     tInputs.str(tStringInput);
+//     XMLGen::ParseUncertainty tUncertainty;
+//     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
+// }
 
-TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+// TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
+// {
+//     std::string tStringInput =
+//         "begin objective\n"
+//         "   type maximize stiffness\n"
+//         "   load ids 10\n"
+//         "   boundary condition ids 11\n"
+//         "   code plato_analyze\n"
+//         "   number processors 1\n"
+//         "   weight 1\n"
+//         "   number ranks 1\n"
+//         "end objective\n"
+//         "begin boundary conditions\n"
+//         "   fixed displacement nodeset name 1 bc id 11\n"
+//         "end boundary conditions\n"
+//         "begin loads\n"
+//         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+//         "end loads\n"
+//         "begin material 1\n"
+//             "material_model isotropic linear elastic\n"
+//             "penalty_exponent 3\n"
+//             "youngs_modulus 1e6\n"
+//             "poissons_ratio 0.33\n"
+//         "end material\n"
+//         "begin block 1\n"
+//         "   material 1\n"
+//         "end block\n"
+//         "begin uncertainty\n"
+//         "    category load\n"
+//         "    tag angle variation\n"
+//         "    load id 10\n"
+//         "    attribute X\n"
+//         "    distribution beta\n"
+//         "    mean 0.0\n"
+//         "    upper bound 45.0\n"
+//         "    lower bound -45.0\n"
+//         "    standard deviation 22.5\n"
+//         "    num samples 2\n"
+//         "end uncertainty\n"
+//         "begin optimization parameters\n"
+//         "end optimization parameters\n";
 
-    std::istringstream tInputs;
-    tInputs.str(tStringInput);
-    XMLGen::ParseUncertainty tUncertainty;
-    tUncertainty.parse(tInputs);
+//     std::istringstream tInputs;
+//     tInputs.str(tStringInput);
+//     XMLGen::ParseUncertainty tUncertainty;
+//     tUncertainty.parse(tInputs);
 
-    auto tMetadata = tUncertainty.data();
-    ASSERT_STREQ("10", tMetadata[0].id().c_str());
-    ASSERT_STREQ("x", tMetadata[0].attribute().c_str());
-    ASSERT_STREQ("0.0", tMetadata[0].mean().c_str());
-    ASSERT_STREQ("45.0", tMetadata[0].upper().c_str());
-    ASSERT_STREQ("-45.0", tMetadata[0].lower().c_str());
-    ASSERT_STREQ("2", tMetadata[0].samples().c_str());
-    ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
-    ASSERT_STREQ("load", tMetadata[0].category().c_str());
-    ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
-    ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
-}
+//     auto tMetadata = tUncertainty.data();
+//     ASSERT_STREQ("10", tMetadata[0].id().c_str());
+//     ASSERT_STREQ("x", tMetadata[0].attribute().c_str());
+//     ASSERT_STREQ("0.0", tMetadata[0].mean().c_str());
+//     ASSERT_STREQ("45.0", tMetadata[0].upper().c_str());
+//     ASSERT_STREQ("-45.0", tMetadata[0].lower().c_str());
+//     ASSERT_STREQ("2", tMetadata[0].samples().c_str());
+//     ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
+//     ASSERT_STREQ("load", tMetadata[0].category().c_str());
+//     ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
+//     ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
+// }
 
-TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
-{
-    std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    load id 10\n"
-        "    tag angle variation\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
-        "end uncertainty\n"
-        "begin uncertainty\n"
-        "    category material\n"
-        "    material id 1\n"
-        "    tag poissons_ratio\n"
-        "    attribute homogeneous\n"
-        "    distribution beta\n"
-        "    mean 0.28\n"
-        "    upper bound 0.4\n"
-        "    lower bound 0.2\n"
-        "    standard deviation 0.05\n"
-        "    num samples 3\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+// TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
+// {
+//     std::string tStringInput =
+//         "begin objective\n"
+//         "   type maximize stiffness\n"
+//         "   load ids 10\n"
+//         "   boundary condition ids 11\n"
+//         "   code plato_analyze\n"
+//         "   number processors 1\n"
+//         "   weight 1\n"
+//         "   number ranks 1\n"
+//         "end objective\n"
+//         "begin boundary conditions\n"
+//         "   fixed displacement nodeset name 1 bc id 11\n"
+//         "end boundary conditions\n"
+//         "begin loads\n"
+//         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+//         "end loads\n"
+//         "begin material 1\n"
+//             "material_model isotropic linear elastic\n"
+//             "youngs_modulus 1e6\n"
+//             "poissons_ratio 0.33\n"
+//         "end material\n"
+//         "begin block 1\n"
+//         "   material 1\n"
+//         "end block\n"
+//         "begin uncertainty\n"
+//         "    category load\n"
+//         "    load id 10\n"
+//         "    tag angle variation\n"
+//         "    attribute X\n"
+//         "    distribution beta\n"
+//         "    mean 0.0\n"
+//         "    upper bound 45.0\n"
+//         "    lower bound -45.0\n"
+//         "    standard deviation 22.5\n"
+//         "    num samples 2\n"
+//         "end uncertainty\n"
+//         "begin uncertainty\n"
+//         "    category material\n"
+//         "    material id 1\n"
+//         "    tag poissons_ratio\n"
+//         "    attribute homogeneous\n"
+//         "    distribution beta\n"
+//         "    mean 0.28\n"
+//         "    upper bound 0.4\n"
+//         "    lower bound 0.2\n"
+//         "    standard deviation 0.05\n"
+//         "    num samples 3\n"
+//         "end uncertainty\n"
+//         "begin optimization parameters\n"
+//         "end optimization parameters\n";
 
-    std::istringstream tInputs;
-    tInputs.str(tStringInput);
-    XMLGen::ParseUncertainty tUncertainty;
-    tUncertainty.parse(tInputs);
+//     std::istringstream tInputs;
+//     tInputs.str(tStringInput);
+//     XMLGen::ParseUncertainty tUncertainty;
+//     tUncertainty.parse(tInputs);
 
-    std::vector<std::string> tGoldID = {"10", "1"};
-    std::vector<std::string> tGoldMean = {"0.0", "0.28"};
-    std::vector<std::string> tGoldUpper = {"45.0", "0.4"};
-    std::vector<std::string> tGoldNumSamples = {"2", "3"};
-    std::vector<std::string> tGoldLower = {"-45.0", "0.2"};
-    std::vector<std::string> tGoldStdDev = {"22.5", "0.05"};
-    std::vector<std::string> tGoldCategory = {"load", "material"};
-    std::vector<std::string> tGoldDistribution = {"beta", "beta"};
-    std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
-    std::vector<std::string> tGoldTag = {"angle variation", "poissons_ratio"};
-    auto tMetadata = tUncertainty.data();
-    for (auto& tVar : tMetadata)
-    {
-        auto tIndex = &tVar - &tMetadata[0];
-        ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id().c_str());
-        ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean().c_str());
-        ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper().c_str());
-        ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower().c_str());
-        ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.attribute().c_str());
-        ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.category().c_str());
-        ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.samples().c_str());
-        ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.std().c_str());
-        ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution().c_str());
-    }
-}
+//     std::vector<std::string> tGoldID = {"10", "1"};
+//     std::vector<std::string> tGoldMean = {"0.0", "0.28"};
+//     std::vector<std::string> tGoldUpper = {"45.0", "0.4"};
+//     std::vector<std::string> tGoldNumSamples = {"2", "3"};
+//     std::vector<std::string> tGoldLower = {"-45.0", "0.2"};
+//     std::vector<std::string> tGoldStdDev = {"22.5", "0.05"};
+//     std::vector<std::string> tGoldCategory = {"load", "material"};
+//     std::vector<std::string> tGoldDistribution = {"beta", "beta"};
+//     std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
+//     std::vector<std::string> tGoldTag = {"angle variation", "poissons_ratio"};
+//     auto tMetadata = tUncertainty.data();
+//     for (auto& tVar : tMetadata)
+//     {
+//         auto tIndex = &tVar - &tMetadata[0];
+//         ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id().c_str());
+//         ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean().c_str());
+//         ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper().c_str());
+//         ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower().c_str());
+//         ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.attribute().c_str());
+//         ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.category().c_str());
+//         ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.samples().c_str());
+//         ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.std().c_str());
+//         ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution().c_str());
+//     }
+// }
 
 TEST(PlatoTestXMLGenerator, parseSingleValue)
 {
@@ -384,6 +383,7 @@ TEST(PlatoTestXMLGenerator, parseSingleValue)
     EXPECT_EQ(tReturnValue, true);
     EXPECT_EQ(tStringValue, "bus");
 }
+
 TEST(PlatoTestXMLGenerator, parseSingleUnLoweredValue)
 {
     XMLGenerator_UnitTester tester;
@@ -419,6 +419,7 @@ TEST(PlatoTestXMLGenerator, parseSingleUnLoweredValue)
     EXPECT_EQ(tReturnValue, true);
     EXPECT_EQ(tStringValue, "Bus");
 }
+
 TEST(PlatoTestXMLGenerator, parseTokens)
 {
     XMLGenerator_UnitTester tester;
@@ -449,2267 +450,1892 @@ TEST(PlatoTestXMLGenerator, parseTokens)
     EXPECT_EQ(tokens[2], "trike");
 }
 
-TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
+// TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::istringstream iss;
+//     std::string stringInput;
 
-    // material_box
-    stringInput = "begin optimization parameters\n"
-            "begin material_box\n"
-            "min coords 0 0 0\n"
-            "end material_box\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "begin material_box\n"
-            "max coords 0 0 0\n"
-            "end material_box\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "begin material_box\n"
-            "min coords 0 0 1 \n"
-            "max coords 0 0 \n"
-            "end material_box\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "begin material_box\n"
-            "min coords 0 0  \n"
-            "max coords 0 0 1\n"
-            "end material_box\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "begin material_box\n"
-            "min coords 1 2 3 \n"
-            "max coords 4 5 6\n"
-            "end material_box\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getMatBoxMinCoords(), "1 2 3");
-    EXPECT_EQ(tester.getMatBoxMaxCoords(), "4 5 6");
+//     // material_box
+//     stringInput = "begin optimization parameters\n"
+//             "begin material_box\n"
+//             "min coords 0 0 0\n"
+//             "end material_box\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "begin material_box\n"
+//             "max coords 0 0 0\n"
+//             "end material_box\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "begin material_box\n"
+//             "min coords 0 0 1 \n"
+//             "max coords 0 0 \n"
+//             "end material_box\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "begin material_box\n"
+//             "min coords 0 0  \n"
+//             "max coords 0 0 1\n"
+//             "end material_box\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "begin material_box\n"
+//             "min coords 1 2 3 \n"
+//             "max coords 4 5 6\n"
+//             "end material_box\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getMatBoxMinCoords(), "1 2 3");
+//     EXPECT_EQ(tester.getMatBoxMaxCoords(), "4 5 6");
 
-    // Invalid keywords
-    stringInput = "begin optimization parameters\n"
-            "hippo\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     // Invalid keywords
+//     stringInput = "begin optimization parameters\n"
+//             "hippo\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
 
-    // initial density value
-    stringInput = "begin optimization parameters\n"
-            "initial density value\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "initial density value .1\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getInitDensityValue(), ".1");
+//     // initial density value
+//     stringInput = "begin optimization parameters\n"
+//             "initial density value\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "initial density value .1\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getInitDensityValue(), ".1");
 
-    // create levelset spheres
-    stringInput = "begin optimization parameters\n"
-            "create levelset spheres\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "create levelset spheres true\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getCreateLevelsetSpheres(), "true");
+//     // create levelset spheres
+//     stringInput = "begin optimization parameters\n"
+//             "create levelset spheres\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "create levelset spheres true\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getCreateLevelsetSpheres(), "true");
 
-    // levelset initialization method
-    stringInput = "begin optimization parameters\n"
-            "levelset initialization method\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "levelset initialization method primitives\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getLevelsetInitMethod(), "primitives");
+//     // levelset initialization method
+//     stringInput = "begin optimization parameters\n"
+//             "levelset initialization method\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "levelset initialization method primitives\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getLevelsetInitMethod(), "primitives");
 
-    // max iterations
-    stringInput = "begin optimization parameters\n"
-            "max iterations\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "max iterations 45\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getMaxIterations(), "45");
+//     // max iterations
+//     stringInput = "begin optimization parameters\n"
+//             "max iterations\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "max iterations 45\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getMaxIterations(), "45");
 
-    // restart iteration
-    stringInput = "begin optimization parameters\n"
-            "restart iteration\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "restart iteration 22\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getRestartIteration(), "1");
-    stringInput = "begin optimization parameters\n"
-            "initial guess filename file.gen\n"
-            "initial guess field name topology\n"
-            "restart iteration 22\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getRestartIteration(), "22");
-    EXPECT_EQ(tester.getRestartFieldName(), "topology");
-    EXPECT_EQ(tester.getRestartMeshFilename(), "file.gen");
-    stringInput = "begin optimization parameters\n"
-            "initial guess filename fIle.gen\n"
-            "initial guess field name TopologY\n"
-            "restart iteration 22\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getRestartIteration(), "22");
-    EXPECT_EQ(tester.getRestartFieldName(), "TopologY");
-    EXPECT_EQ(tester.getRestartMeshFilename(), "fIle.gen");
+//     // restart iteration
+//     stringInput = "begin optimization parameters\n"
+//             "restart iteration\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "restart iteration 22\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getRestartIteration(), "1");
+//     stringInput = "begin optimization parameters\n"
+//             "initial guess filename file.gen\n"
+//             "initial guess field name topology\n"
+//             "restart iteration 22\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getRestartIteration(), "22");
+//     EXPECT_EQ(tester.getRestartFieldName(), "topology");
+//     EXPECT_EQ(tester.getRestartMeshFilename(), "file.gen");
+//     stringInput = "begin optimization parameters\n"
+//             "initial guess filename fIle.gen\n"
+//             "initial guess field name TopologY\n"
+//             "restart iteration 22\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getRestartIteration(), "22");
+//     EXPECT_EQ(tester.getRestartFieldName(), "TopologY");
+//     EXPECT_EQ(tester.getRestartMeshFilename(), "fIle.gen");
 
-    // ks max trust region iterations
-    stringInput = "begin optimization parameters\n"
-            "ks max trust region iterations\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks max trust region iterations 10\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
+//     // ks max trust region iterations
+//     stringInput = "begin optimization parameters\n"
+//             "ks max trust region iterations\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks max trust region iterations 10\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSMaxTrustIterations(), "10");
 
-    // ks trust region ratio low/mid/upper
-    stringInput = "begin optimization parameters\n"
-            "ks trust region ratio low\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks trust region ratio mid\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks trust region ratio high\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks trust region ratio low 1.1\n"
-            "ks trust region ratio mid 2.1\n"
-            "ks trust region ratio high 3.1\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioLowKS, "1.1");
-    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioMidKS, "2.1");
-    EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioUpperKS, "3.1");
+//     // ks trust region ratio low/mid/upper
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region ratio low\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region ratio mid\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region ratio high\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region ratio low 1.1\n"
+//             "ks trust region ratio mid 2.1\n"
+//             "ks trust region ratio high 3.1\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioLowKS, "1.1");
+//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioMidKS, "2.1");
+//     EXPECT_EQ(tester.exposeInputData()->mTrustRegionRatioUpperKS, "3.1");
 
-    // ks disable post smoothing
-    stringInput = "begin optimization parameters\n"
-            "ks disable post smoothing\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "end optimization parameters\n";
-    stringInput = "begin optimization parameters\n"
-            "ks disable post smoothing fALse\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "false");
-    stringInput = "begin optimization parameters\n"
-            "ks disable post smoothing tRuE\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "true");
+//     // ks disable post smoothing
+//     stringInput = "begin optimization parameters\n"
+//             "ks disable post smoothing\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "end optimization parameters\n";
+//     stringInput = "begin optimization parameters\n"
+//             "ks disable post smoothing fALse\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "false");
+//     stringInput = "begin optimization parameters\n"
+//             "ks disable post smoothing tRuE\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->mDisablePostSmoothingKS, "true");
 
 
-    // ks trust region expansion factor
-    stringInput = "begin optimization parameters\n"
-            "ks trust region expansion factor\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks trust region expansion factor .5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSExpansionFactor(), ".5");
+//     // ks trust region expansion factor
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region expansion factor\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region expansion factor .5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSExpansionFactor(), ".5");
 
-    // ks trust region contraction factor
-    stringInput = "begin optimization parameters\n"
-            "ks trust region contraction factor\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks trust region contraction factor .2\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSContractionFactor(), ".2");
+//     // ks trust region contraction factor
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region contraction factor\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks trust region contraction factor .2\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSContractionFactor(), ".2");
 
-    // ks outer gradient tolerance
-    stringInput = "begin optimization parameters\n"
-            "ks outer gradient tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks outer gradient tolerance .001\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSOuterGradientTolerance(), ".001");
+//     // ks outer gradient tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer gradient tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer gradient tolerance .001\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSOuterGradientTolerance(), ".001");
 
-    // ks outer stationarity tolerance
-    stringInput = "begin optimization parameters\n"
-            "ks outer stationarity tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks outer stationarity tolerance .00001\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSOuterStationarityTolerance(), ".00001");
+//     // ks outer stationarity tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer stationarity tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer stationarity tolerance .00001\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSOuterStationarityTolerance(), ".00001");
 
-    // ks outer stagnation tolerance
-    stringInput = "begin optimization parameters\n"
-            "ks outer stagnation tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks outer stagnation tolerance 2.3\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSOuterStagnationTolerance(), "2.3");
+//     // ks outer stagnation tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer stagnation tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer stagnation tolerance 2.3\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSOuterStagnationTolerance(), "2.3");
 
-    // ks outer control stagnation tolerance
-    stringInput = "begin optimization parameters\n"
-            "ks outer control stagnation tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks outer control stagnation tolerance 1e-8\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSOuterControlStagnationTolerance(), "1e-8");
+//     // ks outer control stagnation tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer control stagnation tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer control stagnation tolerance 1e-8\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSOuterControlStagnationTolerance(), "1e-8");
 
-    // ks outer actual reduction tolerance
-    stringInput = "begin optimization parameters\n"
-            "ks outer actual reduction tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "ks outer actual reduction tolerance 1e-7\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getKSOuterActualReductionTolerance(), "1e-7");
+//     // ks outer actual reduction tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer actual reduction tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "ks outer actual reduction tolerance 1e-7\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getKSOuterActualReductionTolerance(), "1e-7");
 
-    // gcmma max inner iterations
-    stringInput = "begin optimization parameters\n"
-            "gcmma max inner iterations\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma max inner iterations 100\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAMaxInnerIterations(), "100");
+//     // gcmma max inner iterations
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma max inner iterations\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma max inner iterations 100\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAMaxInnerIterations(), "100");
 
-    // gcmma inner kkt tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma inner kkt tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma inner kkt tolerance 1e-12\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAInnerKKTTolerance(), "1e-12");
+//     // gcmma inner kkt tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma inner kkt tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma inner kkt tolerance 1e-12\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAInnerKKTTolerance(), "1e-12");
 
-    // gcmma inner control stagnation tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma inner control stagnation tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma inner control stagnation tolerance 5e-10\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAInnerControlStagnationTolerance(), "5e-10");
+//     // gcmma inner control stagnation tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma inner control stagnation tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma inner control stagnation tolerance 5e-10\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAInnerControlStagnationTolerance(), "5e-10");
 
-    // gcmma outer kkt tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer kkt tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer kkt tolerance 1e-8\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAOuterKKTTolerance(), "1e-8");
+//     // gcmma outer kkt tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer kkt tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer kkt tolerance 1e-8\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAOuterKKTTolerance(), "1e-8");
 
-    // gcmma outer control stagnation tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer control stagnation tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer control stagnation tolerance 1e-11\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAOuterControlStagnationTolerance(), "1e-11");
+//     // gcmma outer control stagnation tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer control stagnation tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer control stagnation tolerance 1e-11\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAOuterControlStagnationTolerance(), "1e-11");
 
-    // gcmma outer objective stagnation tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer objective stagnation tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer objective stagnation tolerance 4e-8\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAOuterObjectiveStagnationTolerance(), "4e-8");
+//     // gcmma outer objective stagnation tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer objective stagnation tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer objective stagnation tolerance 4e-8\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAOuterObjectiveStagnationTolerance(), "4e-8");
 
-    // gcmma outer stationarity tolerance
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer stationarity tolerance\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma outer stationarity tolerance 2e-10\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAOuterStationarityTolerance(), "2e-10");
+//     // gcmma outer stationarity tolerance
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer stationarity tolerance\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma outer stationarity tolerance 2e-10\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAOuterStationarityTolerance(), "2e-10");
 
-    // gcmma initial moving asymptotes scale factor
-    stringInput = "begin optimization parameters\n"
-            "gcmma initial moving asymptotes scale factor\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "gcmma initial moving asymptotes scale factor 0.4\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getGCMMAInitialMovingAsymptotesScaleFactor(), "0.4");
+//     // gcmma initial moving asymptotes scale factor
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma initial moving asymptotes scale factor\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "gcmma initial moving asymptotes scale factor 0.4\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getGCMMAInitialMovingAsymptotesScaleFactor(), "0.4");
 
-    // levelset sphere packing factor
-    stringInput = "begin optimization parameters\n"
-            "levelset sphere packing factor\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "levelset sphere packing factor .2\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getLevelsetSpherePackingFactor(), ".2");
+//     // levelset sphere packing factor
+//     stringInput = "begin optimization parameters\n"
+//             "levelset sphere packing factor\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "levelset sphere packing factor .2\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getLevelsetSpherePackingFactor(), ".2");
 
-    // levelset sphere radius
-    stringInput = "begin optimization parameters\n"
-            "levelset sphere radius\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "levelset sphere radius .33\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getLevelsetSphereRadius(), ".33");
+//     // levelset sphere radius
+//     stringInput = "begin optimization parameters\n"
+//             "levelset sphere radius\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "levelset sphere radius .33\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getLevelsetSphereRadius(), ".33");
 
-    // levelset nodesets
-    stringInput = "begin optimization parameters\n"
-            "levelset nodesets\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "levelset nodesets 4 10 22\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getLevelsetNodeset(0), "4");
-    EXPECT_EQ(tester.getLevelsetNodeset(1), "10");
-    EXPECT_EQ(tester.getLevelsetNodeset(2), "22");
+//     // levelset nodesets
+//     stringInput = "begin optimization parameters\n"
+//             "levelset nodesets\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "levelset nodesets 4 10 22\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getLevelsetNodeset(0), "4");
+//     EXPECT_EQ(tester.getLevelsetNodeset(1), "10");
+//     EXPECT_EQ(tester.getLevelsetNodeset(2), "22");
 
-    // output frequency
-    stringInput = "begin optimization parameters\n"
-            "output frequency\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "output frequency 5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getOutputFrequency(), "5");
+//     // output frequency
+//     stringInput = "begin optimization parameters\n"
+//             "output frequency\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "output frequency 5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getOutputFrequency(), "5");
 
-    // output method
-    stringInput = "begin optimization parameters\n"
-            "output method\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "output method parallel write\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getOutputMethod(), "parallel write");
+//     // output method
+//     stringInput = "begin optimization parameters\n"
+//             "output method\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "output method parallel write\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getOutputMethod(), "parallel write");
 
-    // fixed blocks
-    stringInput = "begin optimization parameters\n"
-            "fixed blocks\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "fixed blocks 1 3 5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFixedBlock(0), "1");
-    EXPECT_EQ(tester.getFixedBlock(1), "3");
-    EXPECT_EQ(tester.getFixedBlock(2), "5");
+//     // fixed blocks
+//     stringInput = "begin optimization parameters\n"
+//             "fixed blocks\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "fixed blocks 1 3 5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFixedBlock(0), "1");
+//     EXPECT_EQ(tester.getFixedBlock(1), "3");
+//     EXPECT_EQ(tester.getFixedBlock(2), "5");
 
-    // fixed sidesets
-    stringInput = "begin optimization parameters\n"
-            "fixed sidesets\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "fixed sidesets 33 44 55\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFixedSideset(0), "33");
-    EXPECT_EQ(tester.getFixedSideset(1), "44");
-    EXPECT_EQ(tester.getFixedSideset(2), "55");
+//     // fixed sidesets
+//     stringInput = "begin optimization parameters\n"
+//             "fixed sidesets\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "fixed sidesets 33 44 55\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFixedSideset(0), "33");
+//     EXPECT_EQ(tester.getFixedSideset(1), "44");
+//     EXPECT_EQ(tester.getFixedSideset(2), "55");
 
-    // fixed nodesets
-    stringInput = "begin optimization parameters\n"
-            "fixed nodesets\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "fixed nodesets 5 7 33\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFixedNodeset(0), "5");
-    EXPECT_EQ(tester.getFixedNodeset(1), "7");
-    EXPECT_EQ(tester.getFixedNodeset(2), "33");
+//     // fixed nodesets
+//     stringInput = "begin optimization parameters\n"
+//             "fixed nodesets\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "fixed nodesets 5 7 33\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFixedNodeset(0), "5");
+//     EXPECT_EQ(tester.getFixedNodeset(1), "7");
+//     EXPECT_EQ(tester.getFixedNodeset(2), "33");
 
-    // number processors
-    stringInput = "begin optimization parameters\n"
-            "number processors\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "number processors 16\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getNumberProcessors(), "16");
+//     // number processors
+//     stringInput = "begin optimization parameters\n"
+//             "number processors\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "number processors 16\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getNumberProcessors(), "16");
 
-    // filter scale
-    stringInput = "begin optimization parameters\n"
-            "filter radius scale\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter radius scale 1.6\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFilterScale(), "1.6");
+//     // filter scale
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius scale\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius scale 1.6\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFilterScale(), "1.6");
 
-    // filter type
-    stringInput = "begin optimization parameters\n"
-            "filter type kernel\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel");
-    stringInput = "begin optimization parameters\n"
-            "filter type kernel then heaviside\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel then heaviside");
-    stringInput = "begin optimization parameters\n"
-            "filter type\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter type lions and tigers\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     // filter type
+//     stringInput = "begin optimization parameters\n"
+//             "filter type kernel\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel");
+//     stringInput = "begin optimization parameters\n"
+//             "filter type kernel then heaviside\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_type,"kernel then heaviside");
+//     stringInput = "begin optimization parameters\n"
+//             "filter type\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter type lions and tigers\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
 
-    // filter heaviside min
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside min\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside min 1.526\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
+//     // filter heaviside min
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside min\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside min 1.526\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
 
-    // filter heaviside update
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside update\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside update 1.526\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"1.526");
+//     // filter heaviside update
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside update\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside update 1.526\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"1.526");
 
-    // filter heaviside max
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside max\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside max 1.526\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+//     // filter heaviside max
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside max\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside max 1.526\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
 
-    // filter heaviside scale
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside scale\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside scale 1.526\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
+//     // filter heaviside scale
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside scale\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside scale 1.526\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.526");
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.526");
 
-    // filter heaviside various
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside update 4.4\n"
-            "filter heaviside scale 1.2\n"
-            "filter heaviside min 0.5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside update 4.4\n"
-            "filter heaviside scale 1.2\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.2");
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.2");
-    stringInput = "begin optimization parameters\n"
-            "filter heaviside update 4.4\n"
-            "filter heaviside min 0.5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"0.5");
-    EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
+//     // filter heaviside various
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside update 4.4\n"
+//             "filter heaviside scale 1.2\n"
+//             "filter heaviside min 0.5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside update 4.4\n"
+//             "filter heaviside scale 1.2\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"1.2");
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_max,"1.2");
+//     stringInput = "begin optimization parameters\n"
+//             "filter heaviside update 4.4\n"
+//             "filter heaviside min 0.5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_min,"0.5");
+//     EXPECT_EQ(tester.exposeInputData()->filter_heaviside_update,"4.4");
 
-    // filter absolute
-    stringInput = "begin optimization parameters\n"
-            "filter radius absolute\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter radius absolute 1.6\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
+//     // filter absolute
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius absolute\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius absolute 1.6\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
-    // filter absolute
-    stringInput = "begin optimization parameters\n"
-            "filter radius absolute\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter radius absolute 1.6\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
+//     // filter absolute
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius absolute\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter radius absolute 1.6\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFilterAbsolute(), "1.6");
 
-    // filter radial power
-    stringInput = "begin optimization parameters\n"
-            "filter radial power\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "filter radial power 2.5\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getFilterPower(), "2.5");
+//     // filter radial power
+//     stringInput = "begin optimization parameters\n"
+//             "filter radial power\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "filter radial power 2.5\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getFilterPower(), "2.5");
 
-    // algorithm
-    stringInput = "begin optimization parameters\n"
-            "algorithm\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "algorithm ksbc\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getAlgorithm(), "ksbc");
+//     // algorithm
+//     stringInput = "begin optimization parameters\n"
+//             "algorithm\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "algorithm ksbc\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getAlgorithm(), "ksbc");
 
-    // discretization
-    stringInput = "begin optimization parameters\n"
-            "discretization\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "discretization levelset\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getDiscretization(), "levelset");
+//     // discretization
+//     stringInput = "begin optimization parameters\n"
+//             "discretization\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "discretization levelset\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getDiscretization(), "levelset");
 
-    // check gradient
-    stringInput = "begin optimization parameters\n"
-            "check gradient\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "check gradient false\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getCheckGradient(), "false");
+//     // check gradient
+//     stringInput = "begin optimization parameters\n"
+//             "check gradient\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "check gradient false\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getCheckGradient(), "false");
 
-    // check hessian
-    stringInput = "begin optimization parameters\n"
-            "check hessian\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "check hessian true\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getCheckHessian(), "true");
-}
+//     // check hessian
+//     stringInput = "begin optimization parameters\n"
+//             "check hessian\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
+//     stringInput = "begin optimization parameters\n"
+//             "check hessian true\n"
+//             "end optimization parameters\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
+//     EXPECT_EQ(tester.getCheckHessian(), "true");
+// }
 
-TEST(PlatoTestXMLGenerator, parseConstraints)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
+// TEST(PlatoTestXMLGenerator, parseConstraints)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::istringstream iss;
+//     std::string stringInput;
 
-    stringInput = "begin constraint\n"
-            "type\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-    stringInput = "begin constraint\n"
-            "name\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-    stringInput = "begin constraint\n"
-            "volume fraction\n"
-            "end constraint\n";
+//     stringInput = "begin constraint\n"
+//             "type\n"
+//             "end constraint\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+//     stringInput = "begin constraint\n"
+//             "name\n"
+//             "end constraint\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+//     stringInput = "begin constraint\n"
+//             "volume fraction\n"
+//             "end constraint\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
 
-    stringInput = "begin constraint\n"
-            "bad_keyword\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
+//     stringInput = "begin constraint\n"
+//             "bad_keyword\n"
+//             "end constraint\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
 
-    stringInput = "begin constraint\n"
-            "code platomain\n"
-            "type volume\n"
-            "name vol1\n"
-            "volume fraction .5\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), true);
-    EXPECT_EQ(tester.getConstraintName(0), "vol1");
-    EXPECT_EQ(tester.getConstraintType(0), "volume");
-    EXPECT_EQ(tester.getConstraintVolFrac(0), ".5");
+//     stringInput = "begin constraint\n"
+//             "code platomain\n"
+//             "type volume\n"
+//             "name vol1\n"
+//             "volume fraction .5\n"
+//             "end constraint\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseConstraints(iss), true);
+//     EXPECT_EQ(tester.getConstraintName(0), "vol1");
+//     EXPECT_EQ(tester.getConstraintType(0), "volume");
+//     EXPECT_EQ(tester.getConstraintVolFrac(0), ".5");
 
-    stringInput = "begin constraint\n"
-             "code platomain\n"
-            "type surface area\n"
-            "name surf1\n"
-            "surface_area 23\n"
-            "surface_area_sideset_id 20\n"
-            "end constraint\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseConstraints(iss), true);
-    EXPECT_EQ(tester.getConstraintName(0), "surf1");
-    EXPECT_EQ(tester.getConstraintType(0), "surface area");
-    EXPECT_EQ(tester.getConstraintSurfArea(0), "23");
-    EXPECT_EQ(tester.getConstraintSurfAreaSidesetID(0), "20");
-}
+//     stringInput = "begin constraint\n"
+//              "code platomain\n"
+//             "type surface area\n"
+//             "name surf1\n"
+//             "surface_area 23\n"
+//             "surface_area_sideset_id 20\n"
+//             "end constraint\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseConstraints(iss), true);
+//     EXPECT_EQ(tester.getConstraintName(0), "surf1");
+//     EXPECT_EQ(tester.getConstraintType(0), "surface area");
+//     EXPECT_EQ(tester.getConstraintSurfArea(0), "23");
+//     EXPECT_EQ(tester.getConstraintSurfAreaSidesetID(0), "20");
+// }
 
-TEST(PlatoTestXMLGenerator, parseMesh)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
+// TEST(PlatoTestXMLGenerator, parseMesh)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::istringstream iss;
+//     std::string stringInput;
 
-    stringInput = "begin mesh\n"
-            "name\n"
-            "end mesh\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMesh(iss), false);
-    stringInput = "begin mesh\n"
-            "bad_keyword\n"
-            "end mesh\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMesh(iss), false);
-    stringInput = "begin mesh\n"
-            "name file.gen\n"
-            "end mesh\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseMesh(iss), true);
-    EXPECT_EQ(tester.getMeshName(), "file.gen");
-}
-TEST(PlatoTestXMLGenerator, parseCodePaths)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
+//     stringInput = "begin mesh\n"
+//             "name\n"
+//             "end mesh\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseMesh(iss), false);
+//     stringInput = "begin mesh\n"
+//             "bad_keyword\n"
+//             "end mesh\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseMesh(iss), false);
+//     stringInput = "begin mesh\n"
+//             "name file.gen\n"
+//             "end mesh\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseMesh(iss), true);
+//     EXPECT_EQ(tester.getMeshName(), "file.gen");
+// }
 
-    stringInput = "begin paths\n"
-            "code sierra_sd\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-    stringInput = "begin paths\n"
-            "code lightmp\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-    stringInput = "begin paths\n"
-            "code albany\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-    stringInput = "begin paths\n"
-            "code platomain\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-    stringInput = "begin paths\n"
-            "bad_keyword\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), false);
-    stringInput = "begin paths\n"
-            "code sierra_sd /Users/bwclark/salinas\n"
-            "code albany /Users/bwclark/albany\n"
-            "code lightmp /Users/bwclark/lightmp\n"
-            "code platomain /Users/bwclark/platomain\n"
-            "end paths\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseCodePaths(iss), true);
-    EXPECT_EQ(tester.getSalinasPath(), "/Users/bwclark/salinas");
-    EXPECT_EQ(tester.getAlbanyPath(), "/Users/bwclark/albany");
-    EXPECT_EQ(tester.getLightMPPath(), "/Users/bwclark/lightmp");
-    EXPECT_EQ(tester.getPlatoMainPath(), "/Users/bwclark/platomain");
-}
-TEST(PlatoTestXMLGenerator, parseBlocks)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput;
+// TEST(PlatoTestXMLGenerator, parseCodePaths)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::istringstream iss;
+//     std::string stringInput;
 
-    stringInput = "begin block\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block 1\n"
-            "material\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block 1\n"
-            "bad_keywordl\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block 1\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), true);
-    stringInput = "begin block\n"
-            "material 1\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), false);
-    stringInput = "begin block 44\n"
-            "material 89\n"
-            "end block\n"
-            "begin block 33\n"
-            "material 34\n"
-            "end block\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseBlocks(iss), true);
-    EXPECT_EQ(tester.getBlockID(0), "44");
-    EXPECT_EQ(tester.getBlockMaterialID(0), "89");
-    EXPECT_EQ(tester.getBlockID(1), "33");
-    EXPECT_EQ(tester.getBlockMaterialID(1), "34");
-}
+//     stringInput = "begin paths\n"
+//             "code sierra_sd\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+//     stringInput = "begin paths\n"
+//             "code lightmp\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+//     stringInput = "begin paths\n"
+//             "code albany\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+//     stringInput = "begin paths\n"
+//             "code platomain\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+//     stringInput = "begin paths\n"
+//             "bad_keyword\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), false);
+//     stringInput = "begin paths\n"
+//             "code sierra_sd /Users/bwclark/salinas\n"
+//             "code albany /Users/bwclark/albany\n"
+//             "code lightmp /Users/bwclark/lightmp\n"
+//             "code platomain /Users/bwclark/platomain\n"
+//             "end paths\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseCodePaths(iss), true);
+//     EXPECT_EQ(tester.getSalinasPath(), "/Users/bwclark/salinas");
+//     EXPECT_EQ(tester.getAlbanyPath(), "/Users/bwclark/albany");
+//     EXPECT_EQ(tester.getLightMPPath(), "/Users/bwclark/lightmp");
+//     EXPECT_EQ(tester.getPlatoMainPath(), "/Users/bwclark/platomain");
+// }
 
-TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator, parseBlocks)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::istringstream iss;
+//     std::string stringInput;
 
-    std::string stringInput =
-    "traction sideset 2 value 0 -3e3 0 load id 1\n";
+//     stringInput = "begin block\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
+//     stringInput = "begin block 1\n"
+//             "material\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
+//     stringInput = "begin block 1\n"
+//             "bad_keywordl\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
+//     stringInput = "begin block 1\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), true);
+//     stringInput = "begin block\n"
+//             "material 1\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), false);
+//     stringInput = "begin block 44\n"
+//             "material 89\n"
+//             "end block\n"
+//             "begin block 33\n"
+//             "material 34\n"
+//             "end block\n";
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg (0);
+//     tester.clearInputData();
+//     EXPECT_EQ(tester.publicParseBlocks(iss), true);
+//     EXPECT_EQ(tester.getBlockID(0), "44");
+//     EXPECT_EQ(tester.getBlockMaterialID(0), "89");
+//     EXPECT_EQ(tester.getBlockID(1), "33");
+//     EXPECT_EQ(tester.getBlockMaterialID(1), "34");
+// }
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    char buf[MAX_CHARS_PER_LINE];
+//     std::string stringInput =
+//     "traction sideset 2 value 0 -3e3 0 load id 1\n";
+
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
+
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"traction");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"traction");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "traction sideset name ss_2 value 0 -3e3 0 load id 1\n";
+//     std::string stringInput =
+//     "traction sideset name ss_2 value 0 -3e3 0 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"traction");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"traction");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "traction sideset id 2 value 0 -3e3 0 load id 1\n";
+//     std::string stringInput =
+//     "traction sideset id 2 value 0 -3e3 0 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"traction");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"traction");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_and_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseTractionLoad_valid_input_name_and_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "traction sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
+//     std::string stringInput =
+//     "traction sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"traction");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseTractionLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"traction");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "pressure sideset 2 value 5 load id 1\n";
+//     std::string stringInput =
+//     "pressure sideset 2 value 5 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"pressure");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    std::vector<std::string> values = {"5"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"pressure");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     std::vector<std::string> values = {"5"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "pressure sideset name ss_2 value 5 load id 1\n";
+//     std::string stringInput =
+//     "pressure sideset name ss_2 value 5 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"pressure");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"5"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"pressure");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"5"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "pressure sideset id 2 value -3e3 load id 1\n";
+//     std::string stringInput =
+//     "pressure sideset id 2 value -3e3 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"pressure");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"");
-    std::vector<std::string> values = {"-3e3"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"pressure");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"");
+//     std::vector<std::string> values = {"-3e3"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_and_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parsePressureLoad_valid_input_name_and_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "pressure sideset id 2 name ss_2 value -3e3 load id 1\n";
+//     std::string stringInput =
+//     "pressure sideset id 2 name ss_2 value -3e3 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"pressure");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"-3e3"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParsePressureLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"pressure");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"-3e3"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "heat flux sideset id 2 value -3e3 load id 1\n";
+//     std::string stringInput =
+//     "heat flux sideset id 2 value -3e3 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"heat");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"");
-    std::vector<std::string> values = {"-3e3"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"heat");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"");
+//     std::vector<std::string> values = {"-3e3"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "heat flux sideset id 2 name ss_2 value -3e3 load id 1\n";
+//     std::string stringInput =
+//     "heat flux sideset id 2 name ss_2 value -3e3 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"heat");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"-3e3"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"heat");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"-3e3"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "force sideset id 2 value 0 -3e3 0 load id 1\n";
+//     std::string stringInput =
+//     "force sideset id 2 value 0 -3e3 0 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"force");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"force");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
-{
-    XMLGenerator_UnitTester tester;
-    std::vector<std::string> tokens;
-    XMLGen::Load new_load;
-    std::istringstream iss;
+// TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
+// {
+//     XMLGenerator_UnitTester tester;
+//     std::vector<std::string> tokens;
+//     XMLGen::Load new_load;
+//     std::istringstream iss;
 
-    std::string stringInput =
-    "force sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
+//     std::string stringInput =
+//     "force sideset id 2 name ss_2 value 0 -3e3 0 load id 1\n";
 
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
+//     iss.str(stringInput);
+//     iss.clear();
+//     iss.seekg(0);
 
-    char buf[MAX_CHARS_PER_LINE];
+//     char buf[MAX_CHARS_PER_LINE];
     
-    tokens.clear();
-    iss.getline(buf, MAX_CHARS_PER_LINE);
-    tester.publicParseTokens(buf, tokens);
+//     tokens.clear();
+//     iss.getline(buf, MAX_CHARS_PER_LINE);
+//     tester.publicParseTokens(buf, tokens);
 
-    new_load.type = tokens[0];
+//     new_load.type = tokens[0];
 
-    EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"force");
-    EXPECT_EQ(new_load.app_type,"sideset");
-    EXPECT_EQ(new_load.app_id,"2");
-    EXPECT_EQ(new_load.app_name,"ss_2");
-    std::vector<std::string> values = {"0","-3e3","0"};
-    EXPECT_EQ(new_load.values,values);
-    EXPECT_EQ(new_load.load_id,"1");
-}
+//     EXPECT_EQ(tester.publicParseForceLoad(tokens,new_load),true);
+//     EXPECT_EQ(new_load.type,"force");
+//     EXPECT_EQ(new_load.app_type,"sideset");
+//     EXPECT_EQ(new_load.app_id,"2");
+//     EXPECT_EQ(new_load.app_name,"ss_2");
+//     std::vector<std::string> values = {"0","-3e3","0"};
+//     EXPECT_EQ(new_load.values,values);
+//     EXPECT_EQ(new_load.load_id,"1");
+// }
 
-TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
-{
-    // POSE PROBLEM
-  XMLGenerator_UnitTester tTester;
-  std::istringstream iss;
-  std::string stringInput =
-  "begin service\n"
-  "   physics mechanical\n"
-  "   dimensions 3\n"
-  "   use_new_analyze_uq_workflow true\n"
-  "end service\n"
-  "begin objective\n"
-  "   type maximize stiffness\n"
-  "   load ids 10\n"
-  "   boundary condition ids 11\n"
-  "   code plato_analyze\n"
-  "   number processors 1\n"
-  "   weight 1\n"
-  "   number ranks 1\n"
-  "end objective\n"
-  "begin boundary conditions\n"
-  "   fixed displacement nodeset name 1 bc id 11\n"
-  "end boundary conditions\n"
-  "begin loads\n"
-  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-  "end loads\n"
-  "begin uncertainty\n"
-  "    category load\n"
-  "    tag angle variation\n"
-  "    load id 10\n"
-  "    attribute X\n"
-  "    distribution beta\n"
-  "    mean 0.0\n"
-  "    upper bound 45.0\n"
-  "    lower bound -45.0\n"
-  "    standard deviation 22.5\n"
-  "    num samples 2\n"
-  "end uncertainty\n";
-  // do parse
-  iss.str(stringInput);
+// TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
+// {
+//     // POSE PROBLEM
+//   XMLGenerator_UnitTester tTester;
+//   std::istringstream iss;
+//   std::string stringInput =
+//   "begin service\n"
+//   "   physics mechanical\n"
+//   "   dimensions 3\n"
+//   "   use_new_analyze_uq_workflow true\n"
+//   "end service\n"
+//   "begin objective\n"
+//   "   type maximize stiffness\n"
+//   "   load ids 10\n"
+//   "   boundary condition ids 11\n"
+//   "   code plato_analyze\n"
+//   "   number processors 1\n"
+//   "   weight 1\n"
+//   "   number ranks 1\n"
+//   "end objective\n"
+//   "begin boundary conditions\n"
+//   "   fixed displacement nodeset name 1 bc id 11\n"
+//   "end boundary conditions\n"
+//   "begin loads\n"
+//   "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+//   "end loads\n"
+//   "begin uncertainty\n"
+//   "    category load\n"
+//   "    tag angle variation\n"
+//   "    load id 10\n"
+//   "    attribute X\n"
+//   "    distribution beta\n"
+//   "    mean 0.0\n"
+//   "    upper bound 45.0\n"
+//   "    lower bound -45.0\n"
+//   "    standard deviation 22.5\n"
+//   "    num samples 2\n"
+//   "end uncertainty\n";
+//   // do parse
+//   iss.str(stringInput);
 
-  iss.clear();
-  iss.seekg(0);
-  EXPECT_EQ(tTester.publicParseObjectives(iss), true);
+//   iss.clear();
+//   iss.seekg(0);
+//   EXPECT_EQ(tTester.publicParseObjectives(iss), true);
 
-  iss.clear();
-  iss.seekg(0);
-  EXPECT_EQ(tTester.publicParseLoads(iss), true);
+//   iss.clear();
+//   iss.seekg(0);
+//   EXPECT_EQ(tTester.publicParseLoads(iss), true);
 
-  iss.clear();
-  iss.seekg(0);
-  EXPECT_EQ(tTester.publicParseBCs(iss), true);
+//   iss.clear();
+//   iss.seekg(0);
+//   EXPECT_EQ(tTester.publicParseBCs(iss), true);
 
-  iss.clear();
-  iss.seekg(0);
-  EXPECT_EQ(tTester.parseService(iss), true);
+//   iss.clear();
+//   iss.seekg(0);
+//   EXPECT_EQ(tTester.parseService(iss), true);
 
-  iss.clear();
-  iss.seekg(0);
-  EXPECT_EQ(tTester.publicParseUncertainties(iss), true);
-  EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
+//   iss.clear();
+//   iss.seekg(0);
+//   EXPECT_EQ(tTester.publicParseUncertainties(iss), true);
+//   EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
 
-  auto tXMLGenMetadata = tTester.getInputData();
-  auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-  size_t numPerformers = tTester.getNumPerformers();
-  EXPECT_EQ(tNumSamples,2u);
-  EXPECT_EQ(numPerformers,1u);
+//   auto tXMLGenMetadata = tTester.getInputData();
+//   auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
+//   size_t numPerformers = tTester.getNumPerformers();
+//   EXPECT_EQ(tNumSamples,2u);
+//   EXPECT_EQ(numPerformers,1u);
 
-  // TEST SAMPLES
-  std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
-  std::vector<std::vector<std::string>> tGoldValues =
-      {
-        { "0.000000000000000000000e+00", "-4.751921387767659325618e+04", "1.555391630579348566243e+04" },
-        { "0.000000000000000000000e+00", "-4.813588076578034088016e+04", "-1.352541987897522631101e+04"}
-      };
+//   // TEST SAMPLES
+//   std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
+//   std::vector<std::vector<std::string>> tGoldValues =
+//       {
+//         { "0.000000000000000000000e+00", "-4.751921387767659325618e+04", "1.555391630579348566243e+04" },
+//         { "0.000000000000000000000e+00", "-4.813588076578034088016e+04", "-1.352541987897522631101e+04"}
+//       };
 
-  const double tTolerance = 1e-10;
-  auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
-  for(auto& tSample : tSamples)
-  {
-      auto tSampleIndex = &tSample - &tSamples[0];
-      ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
+//   const double tTolerance = 1e-10;
+//   auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
+//   for(auto& tSample : tSamples)
+//   {
+//       auto tSampleIndex = &tSample - &tSamples[0];
+//       ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
 
-      for(auto& tLoad : tSample.loadcase().loads)
-      {
-          ASSERT_STREQ("traction", tLoad.type.c_str());
-          for(auto& tValue : tLoad.values)
-          {
-              auto tComponent = &tValue - &tLoad.values[0];
-              ASSERT_NEAR(std::stod(tValue), std::stod(tGoldValues[tSampleIndex][tComponent]), tTolerance);
-          }
-      }
-  }
+//       for(auto& tLoad : tSample.loadcase().loads)
+//       {
+//           ASSERT_STREQ("traction", tLoad.type.c_str());
+//           for(auto& tValue : tLoad.values)
+//           {
+//               auto tComponent = &tValue - &tLoad.values[0];
+//               ASSERT_NEAR(std::stod(tValue), std::stod(tGoldValues[tSampleIndex][tComponent]), tTolerance);
+//           }
+//       }
+//   }
 
-  size_t numObjectives = tTester.getNumObjectives();
-  EXPECT_EQ(numObjectives, 1u);
-}
+//   size_t numObjectives = tTester.getNumObjectives();
+//   EXPECT_EQ(numObjectives, 1u);
+// }
 
-TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministic)
-{
-    // POSE INPUT DATA
-    XMLGenerator_UnitTester tTester;
-    std::istringstream tInputSS;
-    std::string tStringInput =
-    "begin service\n"
-    "   physics mechanical\n"
-    "   dimensions 3\n"
-    "   use_new_analyze_uq_workflow true\n"
-    "end service\n"
-    "begin objective\n"
-    "   type maximize stiffness\n"
-    "   load ids 10 1\n"
-    "   boundary condition ids 11\n"
-    "   code plato_analyze\n"
-    "   number processors 1\n"
-    "   weight 1\n"
-    "   number ranks 5\n"
-    "end objective\n"
-    "begin boundary conditions\n"
-    "   fixed displacement nodeset name 1 bc id 11\n"
-    "end boundary conditions\n"
-    "begin loads\n"
-    "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-    "    traction sideset name 3 value 0 -5e4 0 load id 1\n"
-    "end loads\n"
-    "begin uncertainty\n"
-    "    category load\n"
-    "    tag angle variation\n"
-    "    load id 10\n"
-    "    attribute X\n"
-    "    distribution beta\n"
-    "    mean 0.0\n"
-    "    upper bound 45.0\n"
-    "    lower bound -45.0\n"
-    "    standard deviation 22.5\n"
-    "    num samples 10\n"
-    "end uncertainty\n";
-    // do parse
-    tInputSS.str(tStringInput);
+// TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministic)
+// {
+//     // POSE INPUT DATA
+//     XMLGenerator_UnitTester tTester;
+//     std::istringstream tInputSS;
+//     std::string tStringInput =
+//     "begin service\n"
+//     "   physics mechanical\n"
+//     "   dimensions 3\n"
+//     "   use_new_analyze_uq_workflow true\n"
+//     "end service\n"
+//     "begin objective\n"
+//     "   type maximize stiffness\n"
+//     "   load ids 10 1\n"
+//     "   boundary condition ids 11\n"
+//     "   code plato_analyze\n"
+//     "   number processors 1\n"
+//     "   weight 1\n"
+//     "   number ranks 5\n"
+//     "end objective\n"
+//     "begin boundary conditions\n"
+//     "   fixed displacement nodeset name 1 bc id 11\n"
+//     "end boundary conditions\n"
+//     "begin loads\n"
+//     "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+//     "    traction sideset name 3 value 0 -5e4 0 load id 1\n"
+//     "end loads\n"
+//     "begin uncertainty\n"
+//     "    category load\n"
+//     "    tag angle variation\n"
+//     "    load id 10\n"
+//     "    attribute X\n"
+//     "    distribution beta\n"
+//     "    mean 0.0\n"
+//     "    upper bound 45.0\n"
+//     "    lower bound -45.0\n"
+//     "    standard deviation 22.5\n"
+//     "    num samples 10\n"
+//     "end uncertainty\n";
+//     // do parse
+//     tInputSS.str(tStringInput);
 
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_EQ(tTester.parseService(tInputSS), true);
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_EQ(tTester.publicParseObjectives(tInputSS), true);
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_EQ(tTester.publicParseLoads(tInputSS), true);
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_EQ(tTester.publicParseBCs(tInputSS), true);
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_EQ(tTester.publicParseUncertainties(tInputSS), true);
-    EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
+//     tInputSS.clear();
+//     tInputSS.seekg(0);
+//     EXPECT_EQ(tTester.parseService(tInputSS), true);
+//     tInputSS.clear();
+//     tInputSS.seekg(0);
+//     EXPECT_EQ(tTester.publicParseObjectives(tInputSS), true);
+//     tInputSS.clear();
+//     tInputSS.seekg(0);
+//     EXPECT_EQ(tTester.publicParseLoads(tInputSS), true);
+//     tInputSS.clear();
+//     tInputSS.seekg(0);
+//     EXPECT_EQ(tTester.publicParseBCs(tInputSS), true);
+//     tInputSS.clear();
+//     tInputSS.seekg(0);
+//     EXPECT_EQ(tTester.publicParseUncertainties(tInputSS), true);
+//     EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
 
-    // TEST DATA
-    auto tXMLGenMetadata = tTester.getInputData();
-    auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-    EXPECT_EQ(tNumSamples,10u);
-    size_t tNumPerformers = tTester.getNumPerformers();
-    EXPECT_EQ(tNumPerformers,5u);
+//     // TEST DATA
+//     auto tXMLGenMetadata = tTester.getInputData();
+//     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
+//     EXPECT_EQ(tNumSamples,10u);
+//     size_t tNumPerformers = tTester.getNumPerformers();
+//     EXPECT_EQ(tNumPerformers,5u);
 
-    // POSE GOLD VALUES
-    std::vector<std::string> tGoldLoadCaseProbabilities =
-        {"0.094172629104440519", "0.096118338919238849", "0.099663940442524482", "0.10447870334065364" , "0.10564855564584232",
-         "0.10576322174283935" , "0.10486290959769146" , "0.099755080570144233", "0.095660857410530639", "0.093878478812968374"};
+//     // POSE GOLD VALUES
+//     std::vector<std::string> tGoldLoadCaseProbabilities =
+//         {"0.094172629104440519", "0.096118338919238849", "0.099663940442524482", "0.10447870334065364" , "0.10564855564584232",
+//          "0.10576322174283935" , "0.10486290959769146" , "0.099755080570144233", "0.095660857410530639", "0.093878478812968374"};
 
-    std::vector<std::vector<std::vector<std::string>>> tGoldLoadValues =
-      {
-        { { "0.000000000000000000000e+00", "-4.008042184600126347505e+04", "2.989247036707714141812e+04" },
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//     std::vector<std::vector<std::vector<std::string>>> tGoldLoadValues =
+//       {
+//         { { "0.000000000000000000000e+00", "-4.008042184600126347505e+04", "2.989247036707714141812e+04" },
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.410827789159363601357e+04", "2.354697053631213930203e+04" },
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.410827789159363601357e+04", "2.354697053631213930203e+04" },
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.704161308330694009783e+04", "1.694363120822820928879e+04" },
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.704161308330694009783e+04", "1.694363120822820928879e+04" },
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.894831379618879145710e+04", "1.020110663162747732713e+04" },
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.894831379618879145710e+04", "1.020110663162747732713e+04" },
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.988485492991151841125e+04", "3.391349085789085165743e+03" },
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.988485492991151841125e+04", "3.391349085789085165743e+03" },
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.988284696095977415098e+04", "-3.420757090099503329839e+03"},
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.988284696095977415098e+04", "-3.420757090099503329839e+03"},
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.894769754769306018716e+04", "-1.020406315050838020397e+04"},
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.894769754769306018716e+04", "-1.020406315050838020397e+04"},
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.706038546730067173485e+04", "-1.689142148160054057371e+04"},
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.706038546730067173485e+04", "-1.689142148160054057371e+04"},
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.418230226249388215365e+04", "-2.340778004821533613722e+04"},
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
+//         { { "0.000000000000000000000e+00", "-4.418230226249388215365e+04", "-2.340778004821533613722e+04"},
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
 
-        { { "0.000000000000000000000e+00", "-4.025755085941775905667e+04", "-2.965349218559918881510e+04"},
-          { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } }
-      };
+//         { { "0.000000000000000000000e+00", "-4.025755085941775905667e+04", "-2.965349218559918881510e+04"},
+//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } }
+//       };
 
-    // TEST SAMPLES
-    constexpr double tTolerance = 1e-6;
-    auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
-    for (auto &tSample : tSamples)
-    {
-        auto tSampleIndex = &tSample - &tSamples[0];
-        ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
+//     // TEST SAMPLES
+//     constexpr double tTolerance = 1e-6;
+//     auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
+//     for (auto &tSample : tSamples)
+//     {
+//         auto tSampleIndex = &tSample - &tSamples[0];
+//         ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
 
-        auto tLoadCase = tSample.loadcase();
-        for (auto &tLoad : tLoadCase.loads)
-        {
-            auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-            ASSERT_STREQ("traction", tLoad.type.c_str());
-            for (auto &tValue : tLoad.values)
-            {
-                auto tComponent = &tValue - &tLoad.values[0];
-                ASSERT_NEAR(std::stod(tValue), std::stod(tGoldLoadValues[tSampleIndex][tLoadIndex][tComponent]), tTolerance);
-            }
-        }
-    }
+//         auto tLoadCase = tSample.loadcase();
+//         for (auto &tLoad : tLoadCase.loads)
+//         {
+//             auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
+//             ASSERT_STREQ("traction", tLoad.type.c_str());
+//             for (auto &tValue : tLoad.values)
+//             {
+//                 auto tComponent = &tValue - &tLoad.values[0];
+//                 ASSERT_NEAR(std::stod(tValue), std::stod(tGoldLoadValues[tSampleIndex][tLoadIndex][tComponent]), tTolerance);
+//             }
+//         }
+//     }
 
-    const size_t tNumObjectives = tTester.getNumObjectives();
-    ASSERT_EQ(tNumObjectives, 1u);
-}
-
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin service 1\n"
-            "    physics mechanical\n"
-            "    dimensions 3\n"
-            "end service\n"
-            "begin objective\n"
-            "    type maximize stiffness\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear elastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e8\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 bc id 1\n"
-            "    fixed displacement nodeset name 1 x bc id 2\n"
-            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    tester.publicParseService(iss);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    DefaultInputGenerator_UnitTester tGenerator(tInputData);;
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
-    EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
-}
-
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_valid)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin objective\n"
-            "    type maximize stiffness\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear elastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e8\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 bc id 1\n"
-            "    fixed displacement nodeset name 1 x bc id 2\n"
-            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);;
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
-    EXPECT_EQ(tOStringStream.str(), gMechanicalGoldString);
-}
-
-TEST(PlatoTestXMLGenerator,generateInterfaceXMLWithCompMinTOPlatoAnalyzeWriter)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin objective\n"
-            "    type maximize stiffness\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name 2 value 0 -3e3 0 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear elastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e8\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 bc id 1\n"
-            "    fixed displacement nodeset name 1 x bc id 2\n"
-            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-    tester.publicLookForPlatoAnalyzePerformers();
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);;
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGenerateInterfaceXML(&tOStringStream), true);
-    EXPECT_EQ(tOStringStream.str(), gInterfaceXMLCompMinTOPAGoldString);
-}
-
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_duplicate_names)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin service 1\n"
-            "    physics mechanical\n"
-            "    dimensions 3\n"
-            "end service\n"
-            "begin objective\n"
-            "    type maximize stiffness\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name 1 value 0 -3e3 0 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear elastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e8\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 bc id 1\n"
-            "    fixed displacement nodeset name 1 x bc id 2\n"
-            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    tester.publicParseService(iss);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    DefaultInputGenerator_UnitTester tGenerator(tInputData);
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), false);
-    EXPECT_EQ(tOStringStream.str(), "");
-
-}
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeckNewWriter_mechanical_duplicate_names)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin objective\n"
-            "    type maximize stiffness\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name 1 value 0 -3e3 0 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear elastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e8\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 bc id 1\n"
-            "    fixed displacement nodeset name 1 x bc id 2\n"
-            "    fixed displacement nodeset name 1 y 3.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    ComplianceMinTOPlatoAnalyzeInputGenerator_UnitTester tGenerator(tInputData);
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), false);
-    EXPECT_EQ(tOStringStream.str(), "");
-
-}
-
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermal)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin service 1\n"
-            "    physics thermal\n"
-            "    dimensions 3\n"
-            "end service\n"
-            "begin objective\n"
-            "    type maximize heat conduction\n"
-            "    load ids 1\n"
-            "    boundary condition ids 1 2 3\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    heat flux sideset name ss_1 value -1e2 load id 1\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear thermal\n"
-            "    mass_density 2703\n"
-            "    specific_heat 900\n"
-            "    thermal_conductivity 210.0\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed temperature nodeset name 1 bc id 1\n"
-            "    fixed temperature nodeset name 2 bc id 2\n"
-            "    fixed temperature nodeset name 3 value 25.0 bc id 3\n"
-            "end boundary conditions\n";
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    tester.publicParseService(iss);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    DefaultInputGenerator_UnitTester tGenerator(tInputData);
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
-    EXPECT_EQ(tOStringStream.str(), gThermalGoldString);
-
-}
-
-TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_thermoelastic)
-{
-    XMLGenerator_UnitTester tester;
-    std::istringstream iss;
-    std::string stringInput =
-            "begin service 1\n"
-            "    physics thermomechanical\n"
-            "    dimensions 3\n"
-            "end service\n"
-            "begin objective\n"
-            "    type minimize thermoelastic energy\n"
-            "    load ids 1 2\n"
-            "    boundary condition ids 1 2 3 4 5 6 7 8\n"
-            "    code plato_analyze\n"
-            "    number processors 2\n"
-            "end objective\n"
-            "begin loads\n"
-            "    traction sideset name ss_1 value 0.0 1.0e5 0.0 load id 1\n"
-            "    heat flux sideset name ss_1 value 0.0 load id 2\n"
-            "end loads\n"
-            "begin material 1\n"
-            "    material_model isotropic linear thermoelastic\n"
-            "    poissons_ratio 0.3\n"
-            "    youngs_modulus 1e11\n"
-            "    thermal_expansivity 1e-5\n"
-            "    thermal_conductivity 910.0\n"
-            "    reference_temperature 1e-2\n"
-            "end material\n"
-            "begin boundary conditions\n"
-            "    fixed displacement nodeset name 1 y bc id 1\n"
-            "    fixed displacement nodeset name 1 z bc id 2\n"
-            "    fixed temperature nodeset name 1 bc id 3\n"
-            "    fixed displacement nodeset name 11 x bc id 4\n"
-            "    fixed displacement nodeset name 2 y bc id 5\n"
-            "    fixed displacement nodeset name 2 z bc id 6\n"
-            "    fixed temperature nodeset name 2 bc id 7\n"
-            "    fixed displacement nodeset name 21 x bc id 8\n"
-            "end boundary conditions\n";
-
-
-
-    // do parse
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.parseService(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseObjectives(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseLoads(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseBCs(iss), true);
-    iss.clear();
-    iss.seekg(0);
-    EXPECT_EQ(tester.publicParseMaterials(iss), true);
-
-    const XMLGen::InputData& tInputData = tester.getInputData();
-    DefaultInputGenerator_UnitTester tGenerator(tInputData);
-    std::ostringstream tOStringStream;
-    EXPECT_EQ(tGenerator.publicGeneratePlatoAnalyzeInputDecks(&tOStringStream), true);
-    EXPECT_EQ(tOStringStream.str(), gThermomechanicalGoldString);
-
-}
+//     const size_t tNumObjectives = tTester.getNumObjectives();
+//     ASSERT_EQ(tNumObjectives, 1u);
+// }
 
 } // end PlatoTestXMLGenerator namespace

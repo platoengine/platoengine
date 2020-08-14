@@ -49,6 +49,9 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "Plato_FreeFunctions.hpp"
+#include "XMLG_Macros.hpp"
+#include <fstream>
 
 namespace XMLGen
 {

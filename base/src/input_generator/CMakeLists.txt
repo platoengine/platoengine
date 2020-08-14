@@ -3,90 +3,92 @@
 ###############################################################################
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
-                      DefaultInputGenerator.cpp
-                      XMLGeneratorParseOutput.cpp
-                      XMLGeneratorParseService.cpp
-                      XMLGeneratorOutputMetadata.cpp 
-                      XMLGeneratorParseObjective.cpp
-                      XMLGeneratorParseMaterial.cpp
-                      XMLGeneratorParseConstraint.cpp
+                      # XMLGeneratorParseOutput.cpp
+                      # XMLGeneratorParseService.cpp
+                      # XMLGeneratorOutputMetadata.cpp 
+                      # XMLGeneratorParseObjective.cpp
+                      # XMLGeneratorParseMaterial.cpp
+                      # XMLGeneratorParseCriteria.cpp
+                      # XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
-                      XMLGeneratorServiceMetadata.cpp
-                      XMLGeneratorParseUncertainty.cpp
-                      XMLGeneratorConstraintMetadata.cpp
-                      XMLGeneratorUncertaintyMetadata.cpp
-                      XMLGeneratorDefinesFileUtilities.cpp
-                      XMLGeneratorPlatoAnalyzeUtilities.cpp
-                      XMLGeneratorInterfaceFileUtilities.cpp
-                      XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
-                      XMLGeneratorMaterialFunctionInterface.cpp
-                      XMLGeneratorRandomInterfaceFileUtilities.cpp
-                      XMLGeneratorPlatoMainInputFileUtilities.cpp
-                      XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
-                      XMLGeneratorPlatoMainOperationFileUtilities.cpp
-                      XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
-                      XMLGeneratorLaunchScriptUtilities.cpp
-                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
-                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
-                      XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
-                      XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
-                      XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
-                      XMLGeneratorPlatoMainConstraintValueOperationInterface.cpp
-                      XMLGeneratorPlatoMainConstraintGradientOperationInterface.cpp
-                      XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
-                      ComplianceMinTOPlatoAnalyzeInputGenerator.cpp
-                      PlatoAnalyzeInputDeckWriter.cpp
-                      XMLGeneratorUtilities.cpp
-                      SalinasInputDeckWriter.cpp)
+                      # XMLGeneratorServiceMetadata.cpp
+                      # XMLGeneratorParseUncertainty.cpp
+                      # XMLGeneratorConstraintMetadata.cpp
+                      # XMLGeneratorUncertaintyMetadata.cpp
+                      # XMLGeneratorDefinesFileUtilities.cpp
+                      # XMLGeneratorPlatoAnalyzeUtilities.cpp
+                      # XMLGeneratorInterfaceFileUtilities.cpp
+                      # XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
+                      # XMLGeneratorMaterialFunctionInterface.cpp
+                      # XMLGeneratorRandomInterfaceFileUtilities.cpp
+                      # XMLGeneratorPlatoMainInputFileUtilities.cpp
+                      # XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
+                      # XMLGeneratorPlatoMainOperationFileUtilities.cpp
+                      # XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
+                      # XMLGeneratorLaunchScriptUtilities.cpp
+                      # XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
+                      # XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                      # XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
+                      # XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
+                      # XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
+                      # XMLGeneratorPlatoMainConstraintValueOperationInterface.cpp
+                      # XMLGeneratorPlatoMainConstraintGradientOperationInterface.cpp
+                      # XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
+                      # PlatoAnalyzeInputDeckWriter.cpp
+                      # XMLGeneratorUtilities.cpp
+                      # SalinasInputDeckWriter.cpp
+                      )
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
-                      XMLGeneratorDataStruct.hpp 
-                      XMLGeneratorValidInputKeys.hpp
-                      XMLGeneratorRandomMetadata.hpp
-                      XMLGeneratorOutputMetadata.hpp 
-                      XMLGeneratorParserUtilities.hpp 
-                      XMLGeneratorServiceMetadata.hpp
-                      XMLGeneratorMaterialMetadata.hpp 
-                      XMLGeneratorBoundaryMetadata.hpp 
-                      XMLGeneratorConstraintMetadata.hpp
-                      XMLGeneratorUncertaintyMetadata.hpp
-                      XMLGeneratorPlatoAnalyzeProblem.hpp 
-                      XMLGeneratorDefinesFileUtilities.hpp 
-                      XMLGeneratorPlatoAnalyzeUtilities.hpp 
-                      XMLGeneratorInterfaceFileUtilities.hpp 
-                      XMLGeneratorAnalyzeFunctionMapTypes.hpp
-                      XMLGeneratorAnalyzePhysicsFunctionInterface.hpp
-                      XMLGeneratorMaterialFunctionInterface.hpp
-                      XMLGeneratorPlatoMainInputFileUtilities.hpp
-                      XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
-                      XMLGeneratorPlatoMainOperationFileUtilities.hpp
-                      XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp
-                      XMLGeneratorLaunchScriptUtilities.hpp
-                      XMLGeneratorAnalyzeCriterionUtilities.hpp
-                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
-                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp
-                      XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp
-                      XMLGeneratorAnalyzeEssentiallBCTagFunctionInterface.hpp
-                      XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp
-                      XMLGeneratorAnalyzeAppendCriterionFunctionInterface.hpp
-                      XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp
-                      XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp
-                      XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp
-                      XMLGeneratorRandomInterfaceFileUtilities.hpp 
-                      XMLGeneratorPlatoMainFunctionMapTypes.hpp
-                      ComplianceMinTOPlatoAnalyzeInputGenerator.hpp 
                       XMLGeneratorDataStruct.hpp
-                      PlatoAnalyzeInputDeckWriter.hpp
-                      XMLGeneratorUtilities.hpp
-                      XMLGeneratorParseOutput.hpp 
-                      XMLGeneratorParseMaterial.hpp 
-                      XMLGeneratorParseObjective.hpp 
-                      XMLGeneratorParseMetadata.hpp 
-                      XMLGeneratorParseService.hpp 
-                      XMLGeneratorParseConstraint.hpp 
-                      XMLGeneratorParseUncertainty.hpp
-                      DefaultInputGenerator.hpp 
-                      SalinasInputDeckWriter.hpp)
+                      # XMLGeneratorValidInputKeys.hpp
+                      # XMLGeneratorRandomMetadata.hpp
+                      # XMLGeneratorOutputMetadata.hpp 
+                      XMLGeneratorParserUtilities.hpp 
+                      # XMLGeneratorServiceMetadata.hpp
+                      # XMLGeneratorMaterialMetadata.hpp 
+                      # XMLGeneratorCriterionMetadata.hpp 
+                      # XMLGeneratorCriterionMetadata.hpp 
+                      # XMLGeneratorBoundaryMetadata.hpp 
+                      # XMLGeneratorConstraintMetadata.hpp
+                      # XMLGeneratorUncertaintyMetadata.hpp
+                      # XMLGeneratorPlatoAnalyzeProblem.hpp 
+                      # XMLGeneratorDefinesFileUtilities.hpp 
+                      # XMLGeneratorPlatoAnalyzeUtilities.hpp 
+                      # XMLGeneratorInterfaceFileUtilities.hpp 
+                      # XMLGeneratorAnalyzeFunctionMapTypes.hpp
+                      # XMLGeneratorAnalyzePhysicsFunctionInterface.hpp
+                      # XMLGeneratorMaterialFunctionInterface.hpp
+                      # XMLGeneratorPlatoMainInputFileUtilities.hpp
+                      # XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
+                      # XMLGeneratorPlatoMainOperationFileUtilities.hpp
+                      # XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp
+                      # XMLGeneratorLaunchScriptUtilities.hpp
+                      # XMLGeneratorAnalyzeCriterionUtilities.hpp
+                      # XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
+                      # XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp
+                      # XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp
+                      # XMLGeneratorAnalyzeEssentiallBCTagFunctionInterface.hpp
+                      # XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp
+                      # XMLGeneratorAnalyzeAppendCriterionFunctionInterface.hpp
+                      # XMLGeneratorPlatoMainConstraintValueOperationInterface.hpp
+                      # XMLGeneratorPlatoMainConstraintGradientOperationInterface.hpp
+                      # XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp
+                      # XMLGeneratorRandomInterfaceFileUtilities.hpp 
+                      # XMLGeneratorPlatoMainFunctionMapTypes.hpp
+                      # XMLGeneratorDataStruct.hpp
+                      # PlatoAnalyzeInputDeckWriter.hpp
+                      # XMLGeneratorUtilities.hpp
+                      # XMLGeneratorParseOutput.hpp 
+                      # XMLGeneratorParseMaterial.hpp 
+                      # XMLGeneratorParseCriteria.hpp 
+                      # XMLGeneratorParseObjective.hpp 
+                      # XMLGeneratorParseMetadata.hpp 
+                      # XMLGeneratorParseService.hpp 
+                      # XMLGeneratorParseConstraint.hpp 
+                      # XMLGeneratorParseUncertainty.hpp
+                      # SalinasInputDeckWriter.hpp
+                      )
 
 find_package(MPI)
 

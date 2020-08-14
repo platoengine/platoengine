@@ -55,6 +55,17 @@
 
 namespace XMLGen
 {
+    /******************************************************************************//**
+     * \enum \struct High-Performance Platform
+     * \brief Denotes the High-Performance Platform use to run stochastic use cases.
+    **********************************************************************************/
+    enum struct Arch
+    {
+      CEE,
+      SUMMIT
+    };
+    // enum struct Arch
+    
     void append_version_entry(pugi::xml_document& aDocument);
 
     bool addNTVParameter(pugi::xml_node parent_node,

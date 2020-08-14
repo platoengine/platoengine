@@ -56,7 +56,9 @@
 #include <fstream>
 
 #include "Plato_Parser.hpp"
+#include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorBoundaryMetadata.hpp"
 
 namespace XMLGen
 {
@@ -68,47 +70,47 @@ public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     bool generate();
-    const InputData& getInputData(){ return m_InputData; }
-    bool parseService(std::istream &fin);
+    // const InputData& getInputData(){ return m_InputData; }
+    // bool parseService(std::istream &fin);
 
 protected:
 
-    bool parseLoads(std::istream &fin);
-    bool parseLoadsBlock(std::istream &fin);
-    bool parseLoadLine(std::vector<std::string>& tokens);
-    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parseLoads(std::istream &fin);
+    // bool parseLoadsBlock(std::istream &fin);
+    // bool parseLoadLine(std::vector<std::string>& tokens);
+    // bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    // bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     bool parseBCs(std::istream &fin);
     bool parseBCsBlock(std::istream &fin);
     bool parseBCLine(std::vector<std::string>& tokens);
     bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
     bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    bool runSROMForUncertainVariables();
-    void setNumPerformers();
+    // bool runSROMForUncertainVariables();
+    // void setNumPerformers();
     bool parseFile();
-    bool parseMesh(std::istream &fin);
-    bool parseOutput(std::istream &fin);
-    bool parseCodePaths(std::istream &fin);
-    bool parseMaterials(std::istream &fin);
-    bool parseBlocks(std::istream &fin);
-    bool parseObjectives(std::istream &fin);
-    bool fillObjectiveAndPerfomerNames();
-    bool parseConstraints(std::istream &fin);
-    bool parseOptimizationParameters(std::istream &fin);
-    bool parseUncertainties(std::istream &fin);
+    // bool parseMesh(std::istream &fin);
+    // bool parseOutput(std::istream &fin);
+    // bool parseCodePaths(std::istream &fin);
+    // bool parseMaterials(std::istream &fin);
+    // bool parseBlocks(std::istream &fin);
+    // bool parseObjectives(std::istream &fin);
+    // bool fillObjectiveAndPerfomerNames();
+    // bool parseConstraints(std::istream &fin);
+    // bool parseOptimizationParameters(std::istream &fin);
+    // bool parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    void getUncertaintyFlags();
-    void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
-                                 bool &aHasUncertainties,
-                                 bool &aRequestedVonMises);
+    // void getUncertaintyFlags();
+    // void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
+    //                              bool &aHasUncertainties,
+    //                              bool &aRequestedVonMises);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
-    bool find_tokens(std::vector<std::string> &tokens, const int &start_index, const char *str1, const char *str2);
+    // bool find_tokens(std::vector<std::string> &tokens, const int &start_index, const char *str1, const char *str2);
     bool parseSingleValue(const std::vector<std::string> &aTokens,
                           const std::vector<std::string> &aInputStrings,
                           std::string &aReturnStringValue);
@@ -117,22 +119,22 @@ protected:
                                    const std::vector<std::string> &aUnLoweredTokens,
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
-    void lookForPlatoAnalyzePerformers();
-    bool checkForNodesetSidesetNameConflicts();
+    // void lookForPlatoAnalyzePerformers();
+    // bool checkForNodesetSidesetNameConflicts();
 
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
 private:
 
-    /******************************************************************************//**
-     * @brief Initialize Plato problem options
-     **********************************************************************************/
-    void initializePlatoProblemOptions();
+    // /******************************************************************************//**
+    //  * @brief Initialize Plato problem options
+    //  **********************************************************************************/
+    // void initializePlatoProblemOptions();
 
-    void putLoadInLoadCase(XMLGen::Load& new_load);
-    bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
-    void createNewLoadCase(XMLGen::Load& new_load);
-    void writeInputFiles();
+    // void putLoadInLoadCase(XMLGen::Load& new_load);
+    // bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
+    // void createNewLoadCase(XMLGen::Load& new_load);
+    // void writeInputFiles();
 };
 
 }

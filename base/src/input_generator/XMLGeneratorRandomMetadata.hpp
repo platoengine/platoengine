@@ -13,16 +13,6 @@
 namespace XMLGen
 {
 
-/******************************************************************************//**
- * \enum \struct High-Performance Platform
- * \brief Denotes the High-Performance Platform use to run stochastic use cases.
-**********************************************************************************/
-enum struct Arch
-{
-  CEE,
-  SUMMIT
-};
-// enum struct Arch
 
 /*!< map between block identification number and material metadata, i.e. map<block id, material metadata> */
 using MaterialSet = std::unordered_map<std::string, XMLGen::Material>;
