@@ -6,7 +6,6 @@
 
 #pragma once
 
-#include "XMLGeneratorBoundaryMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
 #include <unordered_map>
 

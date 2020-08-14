@@ -10,7 +10,6 @@
 
 #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGeneratorRandomMetadata.hpp"
-#include "XMLGeneratorBoundaryMetadata.hpp"
 
 namespace PlatoTestXMLGenerator
 {

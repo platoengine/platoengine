@@ -11,7 +11,6 @@
 #include <vector>
 #include <map>
 
-#include "XMLGeneratorBoundaryMetadata.hpp"
 // #include "Plato_SromHelpers.hpp"
 // #include "XMLGeneratorOutputMetadata.hpp"
 // #include "XMLGeneratorRandomMetadata.hpp"
@@ -32,6 +31,29 @@ namespace XMLGen
 //     std::vector<std::string> scenarioIDs;
 //     std::vector<std::string> weights;
 // };
+
+struct Load
+{
+    std::string type; // traction, heat flux, force, pressure ...
+    std::string app_type; // nodeset or sideset
+    std::string app_id; // nodeset/sideset id
+    std::string app_name; // nodeset/sideset name
+    std::vector<std::string> values;
+    std::string dof;  // x, y, or z
+    std::string load_id;
+};
+
+struct BC
+{
+    std::string mCategory = "rigid";
+    std::string type;     // temperature, displacement
+    std::string app_type; // nodeset or sideset
+    std::string app_id; // nodeset/sideset id
+    std::string app_name; // nodeset/sideset name
+    std::string dof;
+    std::string bc_id;
+    std::string value;
+};
 
 struct Block
 {

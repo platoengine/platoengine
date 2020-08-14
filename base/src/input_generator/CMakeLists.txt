@@ -49,7 +49,6 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorMaterialMetadata.hpp 
                       # XMLGeneratorCriterionMetadata.hpp 
                       # XMLGeneratorCriterionMetadata.hpp 
-                      # XMLGeneratorBoundaryMetadata.hpp 
                       # XMLGeneratorConstraintMetadata.hpp
                       # XMLGeneratorUncertaintyMetadata.hpp
                       # XMLGeneratorPlatoAnalyzeProblem.hpp 
