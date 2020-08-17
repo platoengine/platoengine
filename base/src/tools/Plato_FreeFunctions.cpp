@@ -57,23 +57,6 @@ namespace Plato
 {
 
 /**********************************************************************************/
-size_t divide_up_atmost_processors
-(const size_t& total_number_of_tasks,
- const size_t& num_processors_in_group,
- const size_t& atmost_processor_count)
-{
-    // this logic is used to divide tasks into groups of processors.
-    // total number of processors used will not exceed "atmost_processor_count"
-
-    // how many tasks would you have if you used all the processors in groups
-    const size_t equal_division_of_tasks = (atmost_processor_count / num_processors_in_group);
-
-    // you can't do more tasks than total
-    return std::min(total_number_of_tasks, equal_division_of_tasks);
-}
-/**********************************************************************************/
-
-/**********************************************************************************/
 std::string to_string(const double d)
 {
   int sig_digits = DECIMAL_DIG;
@@ -159,7 +142,8 @@ std::string transform_tokens(const std::vector<std::string>& aTokens)
 void system(const char* aString)
 {
   int return_val = std::system(aString);
-  return_val = return_val;
+  int temp = return_val;
+  return_val = temp;
 }
 /**********************************************************************************/
 

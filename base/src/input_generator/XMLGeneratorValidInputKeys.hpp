@@ -72,11 +72,7 @@ struct ValidObjectiveTypeKeys
     /*!<
      * \brief Valid plato input deck criterion keywords.
      **/
-    std::vector<std::string> mKeys =
-        {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
-         "volume", "surface area", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
-         "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
-         "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
+    std::vector<std::string> mKeys = {"single_criterion", "weighted_sum"};
 };
 // struct ValidObjectiveTypeKeys
 
@@ -87,6 +83,12 @@ struct ValidCriterionTypeKeys
      **/
     std::vector<std::string> mKeys =
         {"elastic_energy", "volume", "stress_p-norm"};
+
+    // std::vector<std::string> mKeys =
+    //     {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
+    //      "volume", "surface area", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
+    //      "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
+    //      "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
 };
 // struct ValidCriterionTypeKeys
 

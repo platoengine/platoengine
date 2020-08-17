@@ -98,7 +98,7 @@ protected:
     void parseMaterials(std::istream &fin);
     void parseCriteria(std::istream &fin);
     bool parseBlocks(std::istream &fin);
-    // bool parseObjectives(std::istream &fin);
+    void parseObjective(std::istream &fin);
     // bool fillObjectiveAndPerfomerNames();
     // bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);

@@ -21,6 +21,7 @@ void ParseObjective::allocate()
     mTags.insert({ "weights", { { {"weights"}, ""}, "" } });
     mTags.insert({ "criteria", { { {"criteria"}, ""}, "" } });
     mTags.insert({ "services", { { {"services"}, ""}, "" } });
+    mTags.insert({ "scenarios", { { {"scenarios"}, ""}, "" } });
 }
 
 void ParseObjective::setType(XMLGen::Objective &aMetadata)
@@ -37,24 +38,6 @@ void ParseObjective::setType(XMLGen::Objective &aMetadata)
     }
 }
 
-void ParseObjective::setWeights(XMLGen::Objective &aMetadata)
-{
-    auto tItr = mTags.find("weights");
-    std::string tValues = tItr->second.first.second;
-    if (tItr != mTags.end() && !tValues.empty())
-    {
-        std::vector<std::string> tWeights;
-        char tValuesBuffer[10000];
-        strcpy(tValuesBuffer, tValues.c_str());
-        XMLGen::parse_tokens(tValuesBuffer, tWeights);
-        aMetadata.weights = tWeights;
-    }
-    else
-    {
-        THROWERR("Weights for criteria are not defined");
-    }
-}
-
 void ParseObjective::setCriteriaIDs(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("criteria");
@@ -66,6 +49,7 @@ void ParseObjective::setCriteriaIDs(XMLGen::Objective &aMetadata)
         strcpy(tValuesBuffer, tValues.c_str());
         XMLGen::parse_tokens(tValuesBuffer, tCriteriaIDs);
         aMetadata.criteriaIDs = tCriteriaIDs;
+        mNumberComponents = tCriteriaIDs.size();
     }
     else
     {
@@ -91,12 +75,54 @@ void ParseObjective::setServiceIDs(XMLGen::Objective &aMetadata)
     }
 }
 
+void ParseObjective::setScenarioIDs(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("scenarios");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tScenarioIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tScenarioIDs);
+        aMetadata.scenarioIDs = tScenarioIDs;
+    }
+    else
+    {
+        THROWERR("Objective scenarios are not defined");
+    }
+}
+
+void ParseObjective::setWeights(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("weights");
+    std::string tValues = tItr->second.first.second;
+    if(aMetadata.type == "single_criterion" && tItr !=mTags.end() && !tValues.empty())
+        THROWERR("Weights defined for single_criterion objective type")
+    if(aMetadata.type == "weighted_sum")
+    {
+        if (tItr != mTags.end() && !tValues.empty())
+        {
+            std::vector<std::string> tWeights;
+            char tValuesBuffer[10000];
+            strcpy(tValuesBuffer, tValues.c_str());
+            XMLGen::parse_tokens(tValuesBuffer, tWeights);
+            aMetadata.weights = tWeights;
+        }
+        else
+        {
+            THROWERR("Objective Weights are not defined for weighted_sum objective type");
+        }
+    }
+}
+
 void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
 {
     this->setType(aMetadata);
-    this->setWeights(aMetadata);
-    this->setServiceIDs(aMetadata);
     this->setCriteriaIDs(aMetadata);
+    this->setServiceIDs(aMetadata);
+    this->setScenarioIDs(aMetadata);
+    this->setWeights(aMetadata);
 }
 
 void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
@@ -109,14 +135,57 @@ void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
     }
 }
 
-void ParseObjective::checkMetaData(XMLGen::Objective &aMetadata)
+void ParseObjective::checkMetaData(const XMLGen::Objective &aMetadata)
 {
     this->checkType(aMetadata);
+    this->checkCriteriaIDs(aMetadata);
+    this->checkServiceIDs(aMetadata);
+    this->checkScenanarioIDs(aMetadata);
+    this->checkWeights(aMetadata);
 }
 
-void ParseObjective::finalize()
+void ParseObjective::checkCriteriaIDs(const XMLGen::Objective &aMetadata)
 {
+    if(aMetadata.type == "single_criterion")
+    {
+        if(aMetadata.criteriaIDs.size() != 1)
+            THROWERR("Exactly 1 criterion is expected to be defined for single_criterion objective type")
+    }
+    else if(aMetadata.criteriaIDs.size() != mNumberComponents)
+        THROWERR("All objective parameters must have the same number of entries")
+}
 
+void ParseObjective::checkServiceIDs(const XMLGen::Objective &aMetadata)
+{
+    if(aMetadata.type == "single_criterion")
+    {
+        if(aMetadata.serviceIDs.size() != 1)
+            THROWERR("Exactly 1 service is expected to be defined for single_criterion objective type")
+    }
+    else if(aMetadata.serviceIDs.size() != mNumberComponents)
+        THROWERR("All objective parameters must have the same number of entries")
+}
+
+void ParseObjective::checkScenanarioIDs(const XMLGen::Objective &aMetadata)
+{
+    if(aMetadata.type == "single_criterion")
+    {
+        if(aMetadata.scenarioIDs.size() != 1)
+            THROWERR("Exactly 1 scenario is expected to be defined for single_criterion objective type")
+    }
+    else if(aMetadata.scenarioIDs.size() != mNumberComponents)
+        THROWERR("All objective parameters must have the same number of entries")
+}
+
+void ParseObjective::checkWeights(const XMLGen::Objective &aMetadata)
+{
+    if(aMetadata.type == "single_criterion")
+    {
+        if(aMetadata.weights.size() > 0)
+            THROWERR("Weights should not be specified for single_criterion objective type")
+    }
+    else if(aMetadata.weights.size() != mNumberComponents)
+        THROWERR("All objective parameters must have the same number of entries")
 }
 
 XMLGen::Objective ParseObjective::data() const
@@ -152,7 +221,6 @@ void ParseObjective::parse(std::istream &aInputFile)
             mObjective = tMetadata;
         }
     }
-    this->finalize();
 }
 
 }

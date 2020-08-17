@@ -24,7 +24,6 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_Bounds.cpp
 							 Plato_Test_SimpleTopOpt.cpp
 							 Plato_Test_Statistics.cpp
-							 Plato_Test_FreeFunctions.cpp
 							 Plato_Test_ElementWiseCCSA.cpp
 							 Plato_Test_OptimizationTestFunctions.cpp
 							 Plato_Test_Vector3DVariations.cpp

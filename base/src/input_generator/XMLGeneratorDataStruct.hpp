@@ -23,14 +23,14 @@
 namespace XMLGen
 {
 
-// struct Objective
-// {
-//     std::string type;
-//     std::vector<std::string> criteriaIDs;
-//     std::vector<std::string> serviceIDs;
-//     std::vector<std::string> scenarioIDs;
-//     std::vector<std::string> weights;
-// };
+struct Objective
+{
+    std::string type;
+    std::vector<std::string> criteriaIDs;
+    std::vector<std::string> serviceIDs;
+    std::vector<std::string> scenarioIDs;
+    std::vector<std::string> weights;
+};
 
 struct Load
 {
@@ -232,7 +232,7 @@ public:
     //     mServices.push_back(aService);
     // }
 
-    // XMLGen::Objective objective;
+    XMLGen::Objective objective;
     // std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Criterion> criteria;
     std::vector<XMLGen::Material> materials;
@@ -256,7 +256,6 @@ public:
     // bool m_UseLaunch;
     // bool m_HasUncertainties;
     // bool m_RequestedVonMisesOutput;
-    // bool m_UseNewPlatoAnalyzeUncertaintyWorkflow;
     // Arch m_Arch;
     // std::string m_filterType_identity_XMLName;
     // std::string m_filterType_kernel_XMLName;

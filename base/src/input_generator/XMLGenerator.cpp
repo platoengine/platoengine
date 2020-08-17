@@ -77,7 +77,7 @@
 // #include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
-// #include "XMLGeneratorParseObjective.hpp"
+#include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 
@@ -226,15 +226,14 @@ void XMLGenerator::parseOutput(std::istream &aInputFile)
 //     return true;
 // }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseObjective(std::istream &aInputFile)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseObjective tParseObjective;
-//     tParseObjective.parse(aInputFile);
-//     m_InputData.objective = tParseObjective.data();
-//     return true;
-// }
+/******************************************************************************/
+void XMLGenerator::parseObjective(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseObjective tParseObjective;
+    tParseObjective.parse(aInputFile);
+    m_InputData.objective = tParseObjective.data();
+}
 
 /******************************************************************************/
 bool XMLGenerator::parseLoads(std::istream &fin)

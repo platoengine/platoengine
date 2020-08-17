@@ -12,160 +12,187 @@
 // #include "XMLGeneratorParseService.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
-// #include "XMLGeneratorParseObjective.hpp"
+#include "XMLGeneratorParseObjective.hpp"
 // #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
 {
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoType)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "service 1\n"
-//         "criteria 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoType)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "criteria 1\n"
+        "services 1\n"
+        "scenarios 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoServices)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type single_criterion\n"
-//         "criteria 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoCriteria)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "services 1\n"
+        "scenarios 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoCriteria)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type single_criterion\n"
-//         "service 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoServices)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1\n"
+        "scenarios 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorMultipleCriteriaInSingleCriterionObjective)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type single_criterion\n"
-//         "service 1 2\n"
-//         "criteria 1 2\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoScenarios)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1\n"
+        "services 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorWeightsForSingleCriterion)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type single_criterion\n"
-//         "service 1 \n"
-//         "criteria 1 \n"
-//         "weights 1 \n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorMultipleCriteriaInSingleCriterionObjective)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1 2\n"
+        "services 1 2\n"
+        "scenarios 1 2\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoWeights)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type weighted_sum\n"
-//         "service 1 2\n"
-//         "criteria 1 2\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorWeightsForSingleCriterion)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1 \n"
+        "services 1 \n"
+        "scenarios 1 \n"
+        "weights 1 \n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_InvalidObjectiveType)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type invalid_type\n"
-//         "service 1\n"
-//         "criteria 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoWeights)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type weighted_sum\n"
+        "criteria 1 2\n"
+        "services 1 2\n"
+        "scenarios 1 2\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
-// }
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_SingleCriterion)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type single_criterion\n"
-//         "service 1\n"
-//         "criteria 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+TEST(PlatoTestXMLGenerator, ParseObjective_InvalidObjectiveType)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type invalid_type\n"
+        "criteria 1\n"
+        "services 1\n"
+        "scenarios 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_THROW(tObjectiveParser.parse(tInputSS), std::runtime_error);
+}
 
-//     auto tObjectiveMetaData = tObjectiveParser.data();
-//     ASSERT_EQ("single_criterion", tObjectiveMetaData.type);
-//     ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
-//     ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
-// }
+TEST(PlatoTestXMLGenerator, ParseObjective_SingleCriterion)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type single_criterion\n"
+        "criteria 1\n"
+        "services 1\n"
+        "scenarios 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
 
-// TEST(PlatoTestXMLGenerator, ParseObjective_WeightedSum)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "type weighted_sum\n"
-//         "service 1 2\n"
-//         "criteria 1 2\n"
-//         "weights 1 1\n"
-//         "end objective\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
 
-//     XMLGen::ParseObjective tObjectiveParser;
-//     ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
+    auto tObjectiveMetaData = tObjectiveParser.data();
+    ASSERT_EQ("single_criterion", tObjectiveMetaData.type);
+    ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.scenarioIDs[0].c_str());
+}
 
-//     auto tObjectiveMetaData = tObjectiveParser.data();
-//     ASSERT_EQ("weighted_sum", tObjectiveMetaData.type);
-//     ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
-//     ASSERT_STREQ("2", tObjectiveMetaData.serviceIDs[1].c_str());
-//     ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
-//     ASSERT_STREQ("2", tObjectiveMetaData.criteriaIDs[1].c_str());
-//     ASSERT_STREQ("1", tObjectiveMetaData.weights[0].c_str());
-//     ASSERT_STREQ("1", tObjectiveMetaData.weights[1].c_str());
-// }
+TEST(PlatoTestXMLGenerator, ParseObjective_WeightedSum)
+{
+    std::string tStringInput =
+        "begin objective\n"
+        "type weighted_sum\n"
+        "criteria 1 2\n"
+        "services 1 2\n"
+        "scenarios 1 2\n"
+        "weights 1 1\n"
+        "end objective\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseObjective tObjectiveParser;
+    ASSERT_NO_THROW(tObjectiveParser.parse(tInputSS));
+
+    auto tObjectiveMetaData = tObjectiveParser.data();
+    ASSERT_EQ("weighted_sum", tObjectiveMetaData.type);
+    ASSERT_STREQ("1", tObjectiveMetaData.criteriaIDs[0].c_str());
+    ASSERT_STREQ("2", tObjectiveMetaData.criteriaIDs[1].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.serviceIDs[0].c_str());
+    ASSERT_STREQ("2", tObjectiveMetaData.serviceIDs[1].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.scenarioIDs[0].c_str());
+    ASSERT_STREQ("2", tObjectiveMetaData.scenarioIDs[1].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.weights[0].c_str());
+    ASSERT_STREQ("1", tObjectiveMetaData.weights[1].c_str());
+}
 
 TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorEmptyCriterionBlock)
 {

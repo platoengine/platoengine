@@ -126,7 +126,7 @@ void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::MetaDataT
 bool is_integer(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn is_integer
+ * \fn split
  * \brief Split input string into list of tokens
  * \param [in]      aInput   input string
  * \param [in/out]  aOutput  list of tokens

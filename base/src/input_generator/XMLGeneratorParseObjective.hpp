@@ -22,6 +22,7 @@ class ParseObjective : public XMLGen::ParseMetadata<XMLGen::Objective>
 private:
     XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
     XMLGen::Objective mObjective; /*!< objective functions metadata */
+    size_t mNumberComponents = 0;
 
 private:
     /******************************************************************************//**
@@ -36,20 +37,6 @@ private:
      * functions without an identification number/name, assign default values.
     **********************************************************************************/
     void setIdentification();
-
-    /******************************************************************************//**
-     * \fn checkPerfomerNames
-     * \brief If performer keywords are empty, set to default value 'code_name' + 'id', \n
-     * where 'code_name' denotes the input code name provided by the user and 'id' \n
-     * denotes the identification name/number for an objective function.
-    **********************************************************************************/
-    void checkPerfomerNames();
-
-    /******************************************************************************//**
-     * \fn finalize
-     * \brief Perform final checks and member data definitions for objective functions.
-    **********************************************************************************/
-    void finalize();
 
     /******************************************************************************//**
      * \fn setType
@@ -80,11 +67,25 @@ private:
     void setServiceIDs(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
+     * \fn setScenarioIDs
+     * \brief Set IDs of scenarios that will be used for criteria evaluations.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setScenarioIDs(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set objective metadata.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
     void setMetaData(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkMetaData
+     * \brief Check if objective metadata is properly defined.
+     * \param [in] aMetadata objective metadata
+     **********************************************************************************/
+    void checkMetaData(const XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn checkType
@@ -94,11 +95,32 @@ private:
     void checkType(const XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn checkMetaData
-     * \brief Check if objective metadata is properly defined.
+     * \fn checkCriteriaIDs
+     * \brief Throw error if values are not valid.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void checkMetaData(XMLGen::Objective& aMetadata);
+    void checkCriteriaIDs(const XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkServiceIDs
+     * \brief Throw error if values are not valid.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
+    void checkServiceIDs(const XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkScenanarioIDs
+     * \brief Throw error if values are not valid.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
+    void checkScenanarioIDs(const XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
+     * \fn checkWeights
+     * \brief Throw error if values are not valid.
+     * \param [in] aMetadata objective metadata
+    **********************************************************************************/
+    void checkWeights(const XMLGen::Objective& aMetadata);
 
 public:
     /******************************************************************************//**
