@@ -56,6 +56,13 @@
 namespace XMLGen
 {
 
+enum PA_MATERIAL_TYPE 
+{
+    ISOTROPIC_LINEAR_ELASTIC,
+    ISOTROPIC_LINEAR_THERMAL,
+    ISOTROPIC_LINEAR_THERMO_ELASTIC
+};
+
 class PlatoAnalyzeInputDeckWriter
 {
 
@@ -76,7 +83,7 @@ private:
     void addPAPDEConstraintBlock(pugi::xml_node aNode, 
                                  const char* aPDEConstraintName,
                                  const XMLGen::Objective& aObjective);
-    void addPAMaterialModelBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
+    void addPAMaterialModelBlock(pugi::xml_node aNode, PA_MATERIAL_TYPE aMateriaType);
     void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
     void buildThermalEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter,
                                          const char* aVariableIndex);
