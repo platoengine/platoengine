@@ -1792,7 +1792,7 @@ void DefaultInputGenerator::generateAMGXInput()
             fprintf(fp, "\"postsweeps\": 1,\n");
             fprintf(fp, "\"cycle\": \"W\"\n");
             fprintf(fp, "},\n");
-            fprintf(fp, "\"solver\": \"PBICGSTAB\",\n");
+            fprintf(fp, "\"solver\": \"%s\",\n", m_InputData.mAmgxSolverType.c_str());
             fprintf(fp, "\"print_solve_stats\": 0,\n");
             fprintf(fp, "\"obtain_timings\": 0,\n");
             fprintf(fp, "\"max_iters\": 1000,\n");
@@ -5096,6 +5096,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     // Console output control
     tTmpNode = doc.append_child("Console");
     addChild(tTmpNode, "Verbose", "true");
+    addChild(tTmpNode, "Enabled", "true");
 
     //////////////////////////////////////////////////
     // Performers

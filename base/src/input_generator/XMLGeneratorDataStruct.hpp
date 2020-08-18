@@ -298,6 +298,7 @@ public:
     std::string filter_projection_update_interval;
     std::string filter_use_additive_continuation;
     std::string mUseNormalizationInAggregator;
+    std::string mAmgxSolverType;
 
     bool mPlatoAnalyzePerformerExists;
     bool mAllPerformersArePlatoAnalyze;

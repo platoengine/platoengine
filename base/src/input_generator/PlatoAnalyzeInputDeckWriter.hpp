@@ -73,7 +73,9 @@ private:
     void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
     void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
     void addPAObjectiveBlock(pugi::xml_node aNode, const char* aObjectiveName);
-    void addPAPDEConstraintBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
+    void addPAPDEConstraintBlock(pugi::xml_node aNode, 
+                                 const char* aPDEConstraintName,
+                                 const XMLGen::Objective& aObjective);
     void addPAMaterialModelBlock(pugi::xml_node aNode, const char* aPDEConstraintName);
     void buildThermalNBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, const std::string &aTitle, int &aBCCounter);
     void buildThermalEBCsForPlatoAnalyze(const XMLGen::Objective& aObjective, pugi::xml_node aNode, int &aBCCounter,
