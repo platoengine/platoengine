@@ -4,14 +4,16 @@
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
                       XMLGeneratorParseOutput.cpp
-                      # XMLGeneratorParseService.cpp
+                      XMLGeneratorParseScenario.cpp
+                      XMLGeneratorParseServices.cpp
                       XMLGeneratorOutputMetadata.cpp 
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseCriteria.cpp
                       # XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
-                      # XMLGeneratorServiceMetadata.cpp
+                      XMLGeneratorScenarioMetadata.cpp
+                      XMLGeneratorServiceMetadata.cpp
                       XMLGeneratorParseUncertainty.cpp
                       # XMLGeneratorConstraintMetadata.cpp
                       XMLGeneratorUncertaintyMetadata.cpp
@@ -45,7 +47,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorRandomMetadata.hpp
                       XMLGeneratorOutputMetadata.hpp 
                       XMLGeneratorParserUtilities.hpp 
-                      # XMLGeneratorServiceMetadata.hpp
+                      XMLGeneratorScenarioMetadata.hpp
+                      XMLGeneratorServiceMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
                       # XMLGeneratorCriterionMetadata.hpp 
                       # XMLGeneratorCriterionMetadata.hpp 
@@ -83,7 +86,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorParseCriteria.hpp 
                       XMLGeneratorParseObjective.hpp 
                       # XMLGeneratorParseMetadata.hpp 
-                      # XMLGeneratorParseService.hpp 
+                      XMLGeneratorParseScenario.hpp 
+                      XMLGeneratorParseServices.hpp 
                       # XMLGeneratorParseConstraint.hpp 
                       XMLGeneratorParseUncertainty.hpp
                       # SalinasInputDeckWriter.hpp

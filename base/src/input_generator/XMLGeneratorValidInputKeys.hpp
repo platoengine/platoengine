@@ -29,9 +29,22 @@ struct ValidCriterionParameterKeyMap
     ValidCriterionParameterKeyMap()
     {
 
-        mMap.insert({"elastic_energy", {}});
+        mMap.insert({"compliance", {}});
         mMap.insert({"volume", {}});
+        mMap.insert({"mass", {}});
         mMap.insert({"stress_p-norm", {"p"}});
+        mMap.insert({"total_work", {}});
+        mMap.insert({"surface_area", {}});
+        mMap.insert({"thermoelastic_energy", {}});
+        mMap.insert({"heat_conduction", {}});
+        mMap.insert({"flux_p-norm", {"p"}});
+        mMap.insert({"effective_energy", {}});
+        mMap.insert({"stress", {}});
+        mMap.insert({"flux", {}});
+        mMap.insert({"electroelastic_energy", {}});
+        mMap.insert({"thermal_energy", {}});
+
+        // most of these probably belong in the contraint block..
         // mMap.insert({"stress", {"stress_limit", "relative_stress_limit", "stress_ramp_factor", "limit_power_min", "limit_power_max",
         //                         "limit_power_feasible_bias", "limit_power_feasible_slope", "limit_power_infeasible_bias", "limit_power_infeasible_slope",
         //                         "limit_reset_subfrequency", "limit_reset_count", "inequality_allowable_feasiblity_lower", "inequality_allowable_feasiblity_upper",
@@ -40,6 +53,7 @@ struct ValidCriterionParameterKeyMap
         //                         "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
         //                         "constraint_exponent", "constraint_exponent", "initial_lagrange_multiplier", "initial_mass_weight_factor",
         //                         "control_stagnation_tolerance", "write_debug_output_files"}});
+        //
     }
 
     std::vector<std::string> getValidKeysForCriterion(std::string& aCriterion)
@@ -82,13 +96,8 @@ struct ValidCriterionTypeKeys
      * \brief Valid plato input deck criterion keywords.
      **/
     std::vector<std::string> mKeys =
-        {"elastic_energy", "volume", "stress_p-norm"};
-
-    // std::vector<std::string> mKeys =
-    //     {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
-    //      "volume", "surface area", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
-    //      "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
-    //      "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
+        {"compliance", "volume", "mass", "stress_p-norm", "total_work", "surface_area", "thermoelastic_energy", "heat_conduction",
+        "flux_p-norm", "effective_energy", "stress", "flux", "electroelastic_energy", "thermal_energy"};
 };
 // struct ValidCriterionTypeKeys
 

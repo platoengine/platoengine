@@ -101,62 +101,6 @@ public:
     std::string code() const;
 
     /******************************************************************************//**
-     * \fn physics
-     * \brief Set string value for keyword 'physics'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void physics(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn physics
-     * \brief Return string value for keyword 'physics'.
-     * \return value
-    **********************************************************************************/
-    std::string physics() const;
-
-    /******************************************************************************//**
-     * \fn dimensions
-     * \brief Set string value for keyword 'dimensions'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void dimensions(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn dimensions
-     * \brief Return string value for keyword 'dimensions'.
-     * \return value
-    **********************************************************************************/
-    std::string dimensions() const;
-
-    /******************************************************************************//**
-     * \fn materialPenaltyExponent
-     * \brief Set string value for keyword 'material_penalty_exponent'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void materialPenaltyExponent(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn materialPenaltyExponent
-     * \brief Return string value for keyword 'material_penalty_exponent'.
-     * \return value
-    **********************************************************************************/
-    std::string materialPenaltyExponent() const;
-
-    /******************************************************************************//**
-     * \fn minErsatzMaterialConstant
-     * \brief Set string value for keyword 'minimum_ersatz_material_value'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void minErsatzMaterialConstant(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn minErsatzMaterialConstant
-     * \brief Return string value for keyword 'minimum_ersatz_material_value'.
-     * \return value
-    **********************************************************************************/
-    std::string minErsatzMaterialConstant() const;
-
-    /******************************************************************************//**
      * \fn additiveContinuation
      * \brief Set string value for keyword 'additive_continuation'.
      * \param [in] aInput string value

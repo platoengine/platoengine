@@ -70,7 +70,6 @@ public:
     ~XMLGenerator();
     void generate();
     // const InputData& getInputData(){ return m_InputData; }
-    // bool parseService(std::istream &fin);
 
 protected:
 
@@ -99,6 +98,7 @@ protected:
     void parseCriteria(std::istream &fin);
     bool parseBlocks(std::istream &fin);
     void parseObjective(std::istream &fin);
+    void parseScenarios(std::istream &fin);
     // bool fillObjectiveAndPerfomerNames();
     // bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);

@@ -74,7 +74,7 @@
 #include "XMLGeneratorValidInputKeys.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
-// #include "XMLGeneratorParseService.hpp"
+#include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseObjective.hpp"
@@ -166,7 +166,7 @@ void XMLGenerator::generate()
 // void XMLGenerator::setNumPerformers()
 // /******************************************************************************/
 // {
-//     m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.services()[0].numberRanks());
+//     m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.scenarios()[0].numberRanks());
 
 //     if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPerformers != 0)
 //     {
@@ -215,16 +215,15 @@ void XMLGenerator::parseOutput(std::istream &aInputFile)
     m_InputData.mOutputMetaData = tParseOutput.data();
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseService(std::istream &aInputFile)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseService tParseService;
-//     tParseService.parse(aInputFile);
-//     auto tServices = tParseService.data();
-//     m_InputData.set(tServices);
-//     return true;
-// }
+/******************************************************************************/
+void XMLGenerator::parseScenarios(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseScenario tParseScenario;
+    tParseScenario.parse(aInputFile);
+    auto tScenarios = tParseScenario.data();
+    m_InputData.set(tScenarios);
+}
 
 /******************************************************************************/
 void XMLGenerator::parseObjective(std::istream &aInputFile)
@@ -2245,9 +2244,9 @@ void XMLGenerator::parseInputFile()
   parseCriteria(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseObjective(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseObjective(tInputFile);
+  tInputFile.close();
 
   // tInputFile.open(m_InputFilename.c_str()); // open a file
   // this->parseConstraints(tInputFile);
@@ -2261,13 +2260,13 @@ void XMLGenerator::parseInputFile()
   this->parseOutput(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseService(tInputFile);
-  // tInputFile.close();
-  //
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseScenario(tInputFile);
-  // tInputFile.close();
+   // tInputFile.open(m_InputFilename.c_str()); // open a file
+   // this->parseServices(tInputFile);
+   // tInputFile.close();
+  
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseScenarios(tInputFile);
+  tInputFile.close();
 
   // // If we will need to run the prune_and_refine executable for any
   // // reason we need to have our "run" mesh name not be the same

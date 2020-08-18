@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorParseService.hpp
+ * XMLGeneratorParseServices.hpp
  *
  *  Created on: Jun 18, 2020
  */
@@ -15,7 +15,7 @@ namespace XMLGen
 
 /******************************************************************************//**
  * \class ParseService
- * \brief Parse inputs in Service block and store values in XMLGen::Service.
+ * \brief Parse inputs in service block and store values in XMLGen::Service.
 **********************************************************************************/
 class ParseService : public XMLGen::ParseMetadata<std::vector<XMLGen::Service>>
 {
@@ -40,52 +40,23 @@ private:
     void setTags(XMLGen::Service& aService);
 
     /******************************************************************************//**
-     * \fn setLoadIDs
-     * \brief Set service load ids.
-     * \param [in] aService service metadata
-    **********************************************************************************/
-    void setLoadIDs(XMLGen::Service& aService);
-
-    /******************************************************************************//**
-     * \fn setBCIDs
-     * \brief Set service boundary condition ids.
-     * \param [in] aService service metadata
-    **********************************************************************************/
-    void setBCIDs(XMLGen::Service& aService);
-
-    /******************************************************************************//**
      * \fn checkTags
-     * \brief Check service metadata.
-     * \param [in] aService service metadata
+     * \brief Check Service metadata.
+     * \param [in] aService Service metadata
     **********************************************************************************/
     void checkTags(XMLGen::Service& aService);
 
     /******************************************************************************//**
      * \fn checkCode
      * \brief If 'code' keyword value is not supported, throw error.
-     * \param [in] aService service metadata
+     * \param [in] aService Service metadata
     **********************************************************************************/
     void checkCode(XMLGen::Service& aService);
 
     /******************************************************************************//**
-     * \fn checkPhysics
-     * \brief Set 'physics' keyword, throw error if input keyword is empty.
-     * \param [in] aService service metadata
-    **********************************************************************************/
-    void checkPhysics(XMLGen::Service& aService);
-
-    /******************************************************************************//**
-     * \fn checkSpatialDimensions
-     * \brief If 'dimensions' keyword value is not supported, throw error.
-     * \param [in] aService service metadata
-    **********************************************************************************/
-    void checkSpatialDimensions(XMLGen::Service& aService);
-
-    /******************************************************************************//**
      * \fn checkServiceID
-     * \brief If service 'id' keyword is empty, set 'id' to default = 'code_keyword' + \n
-     * 'physics_keyword' + '0', where \n 'code_keyword' denotes the value set for \n
-     * 'code' keyword and 'physics_keyword' denotes the value set for 'physics' keyword.
+     * \brief If service 'id' keyword is empty, set 'id' to default = 'code_keyword'+ '0',
+     * where 'code_keyword' denotes the value set for 'code' keyword.
     **********************************************************************************/
     void checkServiceID();
 
@@ -105,7 +76,7 @@ public:
 
     /******************************************************************************//**
      * \fn parse
-     * \brief Parse services metadata.
+     * \brief Parse Services metadata.
      * \param [in] aInputFile input file metadata.
     **********************************************************************************/
     void parse(std::istream &aInputFile) override;

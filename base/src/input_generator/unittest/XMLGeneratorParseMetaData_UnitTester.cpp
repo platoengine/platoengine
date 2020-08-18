@@ -9,7 +9,8 @@
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
-// #include "XMLGeneratorParseService.hpp"
+#include "XMLGeneratorParseScenario.hpp"
+#include "XMLGeneratorParseServices.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseObjective.hpp"
@@ -210,7 +211,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorNoCriteriaID)
 {
     std::string tStringInput =
         "begin criterion\n"
-        "type elastic_energy\n"
+        "type compliance\n"
         "end criterion\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -223,7 +224,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ErrorDuplicateIDs)
 {
     std::string tStringInput =
         "begin criterion 1\n"
-        "type elastic_energy\n"
+        "type compliance\n"
         "end criterion\n"
         "begin criterion 1\n"
         "type volume\n"
@@ -275,11 +276,11 @@ TEST(PlatoTestXMLGenerator, DISABLED_ParseCriteria_InvalidParameterForCriteria)
     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, ParseCriteria_ElasticEnergy)
+TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
 {
     std::string tStringInput =
         "begin criterion 1\n"
-        "type elastic_energy\n"
+        "type compliance\n"
         "end criterion\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -290,7 +291,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ElasticEnergy)
     auto tCriterionMetaData = tCriteriaParser.data();
     ASSERT_EQ(1u, tCriterionMetaData.size());
     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-    ASSERT_STREQ("elastic_energy", tCriterionMetaData[0].type().c_str());
+    ASSERT_STREQ("compliance", tCriterionMetaData[0].type().c_str());
 
     auto tParameters = tCriterionMetaData[0].parameters();
     ASSERT_EQ(0u, tParameters.size());
@@ -348,7 +349,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
         "p 3\n"
         "end criterion\n"
         "begin criterion 2\n"
-        "type elastic_energy\n"
+        "type compliance\n"
         "end criterion\n"
         "begin criterion 3\n"
         "type volume\n"
@@ -365,7 +366,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
     ASSERT_STREQ("2", tCriterionMetaData[1].id().c_str());
     ASSERT_STREQ("3", tCriterionMetaData[2].id().c_str());
     ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
-    ASSERT_STREQ("elastic_energy", tCriterionMetaData[1].type().c_str());
+    ASSERT_STREQ("compliance", tCriterionMetaData[1].type().c_str());
     ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
 
     auto tParameters = tCriterionMetaData[0].parameters();
@@ -567,7 +568,6 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 //         ASSERT_STREQ("3.0", tConstraint.materialPenaltyExponent().c_str());
 //         ASSERT_STREQ("1e-9", tConstraint.minErsatzMaterialConstant().c_str());
 //         ASSERT_STREQ("1", tConstraint.name().c_str());
-//         ASSERT_STREQ("plato_analyze", tConstraint.performer().c_str());
 //         ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
 //         ASSERT_STREQ("1.0", tConstraint.weight().c_str());
 //     }
@@ -580,7 +580,6 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 //         "   type volume\n"
 //         "   name dog\n"
 //         "   weight 2.0\n"
-//         "   performer sierra_sd_0\n"
 //         "   volume absolute 40.0\n"
 //         "   code sierra_sd\n"
 //         "   penalty power 1.0\n"
@@ -603,7 +602,6 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 //         ASSERT_STREQ("1e-6", tConstraint.minErsatzMaterialConstant().c_str());
 //         ASSERT_STREQ("1", tConstraint.id().c_str());
 //         ASSERT_STREQ("dog", tConstraint.name().c_str());
-//         ASSERT_STREQ("sierra_sd_0", tConstraint.performer().c_str());
 //         ASSERT_STREQ("6.0", tConstraint.pnormExponent().c_str());
 //         ASSERT_STREQ("2.0", tConstraint.weight().c_str());
 //     }
@@ -638,7 +636,6 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 //     ASSERT_STREQ("6.0", tConstraintMetadata[0].pnormExponent().c_str());
 //     ASSERT_STREQ("platomain", tConstraintMetadata[0].code().c_str());
 //     ASSERT_STREQ("10.0", tConstraintMetadata[0].absoluteTarget().c_str());
-//     ASSERT_STREQ("platomain", tConstraintMetadata[0].performer().c_str());
 //     ASSERT_STREQ("3.0", tConstraintMetadata[0].materialPenaltyExponent().c_str());
 //     ASSERT_STREQ("1e-9", tConstraintMetadata[0].minErsatzMaterialConstant().c_str());
 
@@ -650,206 +647,186 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 //     ASSERT_STREQ("30.0", tConstraintMetadata[1].pnormExponent().c_str());
 //     ASSERT_STREQ("plato_analyze", tConstraintMetadata[1].code().c_str());
 //     ASSERT_STREQ("0.4", tConstraintMetadata[1].normalizedTarget().c_str());
-//     ASSERT_STREQ("plato_analyze", tConstraintMetadata[1].performer().c_str());
 //     ASSERT_STREQ("3.0", tConstraintMetadata[1].materialPenaltyExponent().c_str());
 //     ASSERT_STREQ("1e-9", tConstraintMetadata[1].minErsatzMaterialConstant().c_str());
 // }
 
-// TEST(PlatoTestXMLGenerator, ParseService_ErrorEmptyPhysicsMetadata)
-// {
-//     std::string tStringInput =
-//         "begin service\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidPhysics)
-// {
-//     std::string tStringInput =
-//         "begin service\n"
-//         "   physics mechanics\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidDimensions)
-// {
-//     std::string tStringInput =
-//         "begin service\n"
-//         "   physics mechanical\n"
-//         "   code sierra_sd\n"
-//         "   dimensions 1\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidCode)
-// {
-//     std::string tStringInput =
-//         "begin service\n"
-//         "   physics mechanical\n"
-//         "   dimensions 3\n"
-//         "   code dog\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService_DefaultMainValues)
-// {
-//     std::string tStringInput =
-//         "begin service\n"
-//         "   physics mechanical\n"
-//         "   dimensions 3\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     tServiceParser.parse(tInputSS);
-//     auto tServices = tServiceParser.data();
-//     for (auto& tService : tServices)
-//     {
-//         ASSERT_STREQ("false", tService.value("use_new_analyze_uq_workflow").c_str());
-//         ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
-//         ASSERT_STREQ("mechanical", tService.value("physics").c_str());
-//         ASSERT_STREQ("plato_analyze_1", tService.value("performer").c_str());
-//         ASSERT_STREQ("plato_analyze_mechanical_1", tService.value("id").c_str());
-//         ASSERT_STREQ("3", tService.value("dimensions").c_str());
-//         ASSERT_STREQ("3.0", tService.value("material_penalty_exponent").c_str());
-//         ASSERT_STREQ("1e-9", tService.value("minimum_ersatz_material_value").c_str());
-//     }
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidServiceBlockID)
-// {
-//     // NOTE: examples for support of service ids are:
-//     // 1. begin service 1  GOOD!
-//     // 2. begin service name1_name2_name3  GOOD!
-//     // 3. begin service name1 name2 name3  BAD!
-//     std::string tStringInput =
-//         "begin service air_force one\n"
-//         "   physics thermal\n"
-//         "   use_new_analyze_uq_workflow true\n"
-//         "   dimensions 2\n"
-//         "   code sierra_sd\n"
-//         "   performer sierra_sd_0\n"
-//         "   material_penalty_exponent 1.0\n"
-//         "   minimum_ersatz_material_value 1e-6\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseService)
-// {
-//     // NOTE: examples for support of service ids are:
-//     // 1. begin service 1  GOOD!
-//     // 2. begin service name1_name2_name3  GOOD!
-//     // 3. begin service name1 name2 name3  BAD!
-//     std::string tStringInput =
-//         "begin service air_force_one\n"
-//         "   physics thermal\n"
-//         "   use_new_analyze_uq_workflow true\n"
-//         "   dimensions 2\n"
-//         "   code sierra_sd\n"
-//         "   performer sierra_sd_0\n"
-//         "   material_penalty_exponent 1.0\n"
-//         "   minimum_ersatz_material_value 1e-6\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     tServiceParser.parse(tInputSS);
-//     auto tServices = tServiceParser.data();
-//     for (auto &tService : tServices)
-//     {
-//         ASSERT_STREQ("true", tService.value("use_new_analyze_uq_workflow").c_str());
-//         ASSERT_STREQ("sierra_sd", tService.value("code").c_str());
-//         ASSERT_STREQ("thermal", tService.value("physics").c_str());
-//         ASSERT_STREQ("sierra_sd_0", tService.value("performer").c_str());
-//         ASSERT_STREQ("air_force_one", tService.value("id").c_str());
-//         ASSERT_STREQ("2", tService.value("dimensions").c_str());
-//         ASSERT_STREQ("1.0", tService.value("material_penalty_exponent").c_str());
-//         ASSERT_STREQ("1e-6", tService.value("minimum_ersatz_material_value").c_str());
-//     }
-// }
-
-// TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
-// {
-//     std::string tStringInput =
-//         "begin service 1\n"
-//         "   physics plasticity\n"
-//         "   dimensions 3\n"
-//         "   code plato_analyze\n"
-//         "   begin time\n"
-//         "     number_time_steps 80\n"
-//         "     max_number_time_steps 160\n"
-//         "     time_step_expansion_multiplier 1.2\n"
-//         "   end time\n"
-//         "   begin solver\n"
-//         "     tolerance 1e-10\n"
-//         "     max_number_iterations 20\n"
-//         "   end solver\n"
-//         "end service\n";
-//     std::istringstream tInputSS;
-//     tInputSS.str(tStringInput);
-
-//     XMLGen::ParseService tServiceParser;
-//     tServiceParser.parse(tInputSS);
-//     auto tServices = tServiceParser.data();
-//     for (auto &tService : tServices)
-//     {
-//         ASSERT_STREQ("false", tService.value("use_new_analyze_uq_workflow").c_str());
-//         ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
-//         ASSERT_STREQ("plasticity", tService.value("physics").c_str());
-//         ASSERT_STREQ("plato_analyze_1", tService.value("performer").c_str());
-//         ASSERT_STREQ("1", tService.value("id").c_str());
-//         ASSERT_STREQ("3", tService.value("dimensions").c_str());
-//         ASSERT_STREQ("3.0", tService.value("material_penalty_exponent").c_str());
-//         ASSERT_STREQ("1e-9", tService.value("minimum_ersatz_material_value").c_str());
-//         ASSERT_STREQ("80", tService.value("number_time_steps").c_str());
-//         ASSERT_STREQ("160", tService.value("max_number_time_steps").c_str());
-//         ASSERT_STREQ("1.2", tService.value("time_step_expansion_multiplier").c_str());
-//         ASSERT_STREQ("1e-10", tService.value("tolerance").c_str());
-//         ASSERT_STREQ("20", tService.value("max_number_iterations").c_str());
-//         ASSERT_STREQ("residual", tService.value("convergence_criterion").c_str());
-//     }
-// }
-
-TEST(PlatoTestXMLGenerator, ParseOutput_ErrorServicenIdIsNotDefined)
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorEmptyPhysicsMetadata)
 {
     std::string tStringInput =
-        "begin output\n"
-        "end output\n";
+        "begin scenario\n"
+        "end scenario\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
 
-    XMLGen::ParseOutput tOutputParser;
-    ASSERT_THROW(tOutputParser.parse(tInputSS), std::runtime_error);
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
 
-    auto tOutputMetadata = tOutputParser.data();
-    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
-    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidPhysics)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanics\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidDimensions)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanical\n"
+        "   dimensions 1\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
+{
+    std::string tStringInput =
+        "begin scenario\n"
+        "   physics mechanical\n"
+        "   dimensions 3\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarios = tScenarioParser.data();
+    for (auto& tScenario : tScenarios)
+    {
+        ASSERT_STREQ("mechanical", tScenario.value("physics").c_str());
+        ASSERT_STREQ("3", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("3.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-9", tScenario.value("minimum_ersatz_material_value").c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidScenarioBlockID)
+{
+    // NOTE: examples for support of scenario ids are:
+    // 1. begin scenario 1  GOOD!
+    // 2. begin scenario name1_name2_name3  GOOD!
+    // 3. begin scenario name1 name2 name3  BAD!
+    std::string tStringInput =
+        "begin scenario air_force one\n"
+        "   physics thermal\n"
+        "   dimensions 2\n"
+        "   material_penalty_exponent 1.0\n"
+        "   minimum_ersatz_material_value 1e-6\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseScenario)
+{
+    // NOTE: examples for support of scenario ids are:
+    // 1. begin scenario 1  GOOD!
+    // 2. begin scenario name1_name2_name3  GOOD!
+    // 3. begin scenario name1 name2 name3  BAD!
+    std::string tStringInput =
+        "begin scenario air_force_one\n"
+        "   physics thermal\n"
+        "   dimensions 2\n"
+        "   material_penalty_exponent 1.0\n"
+        "   minimum_ersatz_material_value 1e-6\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarios = tScenarioParser.data();
+    for (auto &tScenario : tScenarios)
+    {
+        ASSERT_STREQ("thermal", tScenario.value("physics").c_str());
+        ASSERT_STREQ("air_force_one", tScenario.value("id").c_str());
+        ASSERT_STREQ("2", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("1.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-6", tScenario.value("minimum_ersatz_material_value").c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidCode)
+{
+    std::string tStringInput =
+        "begin service\n"
+        "   code dog\n"
+        "end service\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseService tServiceParser;
+    ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseService_NoCode)
+{
+    std::string tStringInput =
+        "begin service\n"
+        "end service\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseService tServiceParser;
+    ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
+{
+    std::string tStringInput =
+        "begin service 1\n"
+        "code plato_analyze\n"
+        "cache_state false\n"
+        "update_problem false\n"
+        "additive_continuation false\n"
+        "number_processors 1\n"
+        "number_ranks 1\n"
+        "   begin time\n"
+        "     time_step 0.1\n"
+        "     number_time_steps 80\n"
+        "     max_number_time_steps 160\n"
+        "     time_step_expansion_multiplier 1.2\n"
+        "     newmark_beta 0.5\n"
+        "     newmark_gamma 0.25\n"
+        "   end time\n"
+        "   begin solver\n"
+        "     tolerance 1e-10\n"
+        "     max_number_iterations 20\n"
+        "     convergence_criterion residual\n"
+        "   end solver\n"
+        "end service\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseService tServiceParser;
+    ASSERT_NO_THROW(tServiceParser.parse(tInputSS));
+    auto tServices = tServiceParser.data();
+    for (auto &tService : tServices)
+    {
+        ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
+        ASSERT_STREQ("1", tService.value("id").c_str());
+        ASSERT_STREQ("80", tService.value("number_time_steps").c_str());
+        ASSERT_STREQ("160", tService.value("max_number_time_steps").c_str());
+        ASSERT_STREQ("1.2", tService.value("time_step_expansion_multiplier").c_str());
+        ASSERT_STREQ("1e-10", tService.value("tolerance").c_str());
+        ASSERT_STREQ("20", tService.value("max_number_iterations").c_str());
+        ASSERT_STREQ("residual", tService.value("convergence_criterion").c_str());
+    }
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)

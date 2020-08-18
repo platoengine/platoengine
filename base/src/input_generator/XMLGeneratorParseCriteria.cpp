@@ -31,8 +31,9 @@ void ParseCriteria::allocate()
 
     // core properties
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
+    mTags.insert({ "normalize", { { {"normalize"}, ""}, "true" } });
 
-    // stress p-norm parameter
+    // stress/flux p-norm parameter
     mTags.insert({ "p", { { {"p"}, ""}, "" } });
 }
 

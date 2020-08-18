@@ -83,46 +83,6 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
-void Service::physics(const std::string& aInput)
-{
-    mMetaData["physics"] = aInput;
-}
-
-std::string Service::physics() const
-{
-    return (this->getValue("physics"));
-}
-
-void Service::dimensions(const std::string& aInput)
-{
-    mMetaData["dimensions"] = aInput;
-}
-
-std::string Service::dimensions() const
-{
-    return (this->getValue("dimensions"));
-}
-
-void Service::materialPenaltyExponent(const std::string& aInput)
-{
-    mMetaData["material_penalty_exponent"] = aInput;
-}
-
-std::string Service::materialPenaltyExponent() const
-{
-    return (this->getValue("material_penalty_exponent"));
-}
-
-void Service::minErsatzMaterialConstant(const std::string& aInput)
-{
-    mMetaData["minimum_ersatz_material_value"] = aInput;
-}
-
-std::string Service::minErsatzMaterialConstant() const
-{
-    return (this->getValue("minimum_ersatz_material_value"));
-}
-
 void Service::additiveContinuation(const std::string& aInput)
 {
     mMetaData["additive_continuation"] = aInput;
