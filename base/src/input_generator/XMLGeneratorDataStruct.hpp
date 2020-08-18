@@ -15,6 +15,7 @@
 #include "XMLGeneratorOutputMetadata.hpp"
 // #include "XMLGeneratorRandomMetadata.hpp"
 #include "XMLGeneratorServiceMetadata.hpp"
+#include "XMLGeneratorModelMetadata.hpp"
 #include "XMLGeneratorScenarioMetadata.hpp"
 // #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
@@ -56,13 +57,6 @@ struct BC
     std::string value;
 };
 
-struct Block
-{
-    std::string block_id;
-    std::string material_id;
-    std::string element_type;
-};
-
 struct CodePaths
 {
     std::string plato_main_path;
@@ -71,6 +65,20 @@ struct CodePaths
     std::string albany_path;
     std::string plato_analyze_path;
     std::string prune_and_refine_path;
+};
+
+struct Mesh
+{
+    std::string name;
+    std::string name_without_extension;
+    std::string file_extension;
+};
+
+struct Block
+{
+    std::string block_id;
+    std::string material_id;
+    std::string element_type;
 };
 
 struct Optimizer
@@ -165,13 +173,6 @@ struct Optimizer
 //   std::vector<size_t> deterministicVariableIndices;
 // };
 
-struct Mesh
-{
-    std::string name;
-    std::string name_without_extension;
-    std::string file_extension;
-};
-
 struct InputData
 {
 private:
@@ -234,14 +235,15 @@ public:
     }
 
     XMLGen::Objective objective;
-    // std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Service> services;
     std::vector<XMLGen::Criterion> criteria;
-    std::vector<XMLGen::Material> materials;
-    std::vector<XMLGen::Block> blocks;
+    // std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Load> loads;
     std::vector<XMLGen::BC> bcs;
+    std::vector<XMLGen::Material> materials;
     XMLGen::Mesh mesh;
+    std::vector<XMLGen::Block> blocks;
+    std::vector<XMLGen::Model> models;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;
     XMLGen::Output mOutputMetaData;

@@ -11,6 +11,7 @@
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseServices.hpp"
+#include "XMLGeneratorParseModels.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseObjective.hpp"
@@ -826,6 +827,30 @@ TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
         ASSERT_STREQ("1e-10", tService.value("tolerance").c_str());
         ASSERT_STREQ("20", tService.value("max_number_iterations").c_str());
         ASSERT_STREQ("residual", tService.value("convergence_criterion").c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseModel)
+{
+    std::string tStringInput =
+        "begin model 1\n"
+        "  blocks 1 2 3\n"
+        "  materials 4 5 6\n"
+        "end model\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseModel tModelParser;
+    ASSERT_NO_THROW(tModelParser.parse(tInputSS));
+    auto tModels = tModelParser.data();
+    for (auto &tModel : tModels)
+    {
+        ASSERT_STREQ("1", tModel.block_ids[0].c_str());
+        ASSERT_STREQ("2", tModel.block_ids[1].c_str());
+        ASSERT_STREQ("3", tModel.block_ids[2].c_str());
+        ASSERT_STREQ("4", tModel.material_ids[0].c_str());
+        ASSERT_STREQ("5", tModel.material_ids[1].c_str());
+        ASSERT_STREQ("6", tModel.material_ids[2].c_str());
     }
 }
 

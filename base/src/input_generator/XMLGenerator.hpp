@@ -91,6 +91,7 @@ protected:
     // bool runSROMForUncertainVariables();
     // void setNumPerformers();
     void parseInputFile();
+    bool parseModels(std::istream &fin);
     bool parseMesh(std::istream &fin);
     void parseOutput(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
