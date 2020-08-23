@@ -1,5 +1,5 @@
 /*
-//@HEADER
+//\HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
 //                    Solutions of Sandia, LLC (NTESS).
@@ -34,9 +34,9 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Questions? Contact the Plato team (plato3D-help@sandia.gov)
+// Questions? Contact the Plato team (plato3D-help\sandia.gov)
 // *************************************************************************
-//@HEADER
+//\HEADER
 */
 
 /*
@@ -61,11 +61,11 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Output Stochastic Reduced Order Model (SROM) and Monte Carlo cumulative distribution functions.
- * @param [in] aCommWrapper distributed memory communicator wrapper
- * @param [in] aFinalControl solution from SROM optimization problem
- * @param [in] aDistribution probability distribution function interface
- * @param [in] aStatsInputs probability distribution function inputs
+ * \brief Output Stochastic Reduced Order Model (SROM) and Monte Carlo cumulative distribution functions.
+ * \param [in] aCommWrapper distributed memory communicator wrapper
+ * \param [in] aFinalControl solution from SROM optimization problem
+ * \param [in] aDistribution probability distribution function interface
+ * \param [in] aStatsInputs probability distribution function inputs
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
@@ -96,13 +96,13 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
 }
 
 /******************************************************************************//**
- * @brief Build SROM objective and constraint
- * @param [in] aStatisticInputs data structure with inputs for probability distribution function
- * @param [in,out] aDataFactory data factory for optimizer
- * @param [in,out] aDistribution probability distribution function interface
- * @param [in,out] aSromObjective stochastic reduced order model problem objective
- * @param [in,out] aDataMng optimization algorithm data manager
- * @param [in,out] aStageMng optimization problem stage manager (manages criteria evaluations)
+ * \brief Build SROM objective and constraint
+ * \param [in] aStatisticInputs data structure with inputs for probability distribution function
+ * \param [in,out] aDataFactory data factory for optimizer
+ * \param [in,out] aDistribution probability distribution function interface
+ * \param [in,out] aSromObjective stochastic reduced order model problem objective
+ * \param [in,out] aDataMng optimization algorithm data manager
+ * \param [in,out] aStageMng optimization problem stage manager (manages criteria evaluations)
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void build_srom_criteria(const Plato::SromInputs<ScalarType, OrdinalType> & aSromInputs,
@@ -125,9 +125,9 @@ inline void build_srom_criteria(const Plato::SromInputs<ScalarType, OrdinalType>
 }
 
 /******************************************************************************//**
- * @brief Set initial guess for stochastic reduced order model (SROM) problem
- * @param [in] aNumSamples number of SROM samples
- * @param [in,out] aInputsKSAL input data structure for KSAL algorithm
+ * \brief Set initial guess for stochastic reduced order model (SROM) problem
+ * \param [in] aNumSamples number of SROM samples
+ * \param [in,out] aInputsKSAL input data structure for KSAL algorithm
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL)
@@ -157,10 +157,10 @@ inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plat
 }
 
 /******************************************************************************//**
- * @brief Output diagnostics for stochastic reduced order model (SROM) optimization problem
- * @param [in] aCommWrapper distributed memory communicator wrapper
- * @param [in] aSromDiagnostics SROM problem diagnostics
- * @param [in] aOutputsKSAL optimizer diagnostics
+ * \brief Output diagnostics for stochastic reduced order model (SROM) optimization problem
+ * \param [in] aCommWrapper distributed memory communicator wrapper
+ * \param [in] aSromDiagnostics SROM problem diagnostics
+ * \param [in] aOutputsKSAL optimizer diagnostics
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
@@ -211,12 +211,12 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
 }
 
 /******************************************************************************//**
- * @brief Solve optimization problem to construct a stochastic reduced order model (SROM)
- * @param [in] aStatsInputs data structure with inputs for probability distribution function
- * @param [in,out] aInputsKSAL input data structure for KSAL algorithm
- * @param [in,out] aSromDiagnostics diagnostics associated with the SROM optimization problem
- * @param [in,out] aSolution outputs from SROM optimization problem
- * @param [in] aPrintDiagnostics flag use to enable output to file (default = false)
+ * \brief Solve optimization problem to construct a stochastic reduced order model (SROM)
+ * \param [in] aStatsInputs data structure with inputs for probability distribution function
+ * \param [in,out] aInputsKSAL input data structure for KSAL algorithm
+ * \param [in,out] aSromDiagnostics diagnostics associated with the SROM optimization problem
+ * \param [in,out] aSolution outputs from SROM optimization problem
+ * \param [in] aPrintDiagnostics flag use to enable output to file (default = false)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
