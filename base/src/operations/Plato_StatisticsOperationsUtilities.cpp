@@ -201,7 +201,7 @@ void compute_sample_set_mean_plus_std_dev_gradient(const double& aCriterionValue
 
     Plato::zero(aCriterionGradPairs.begin()->mLength, aOutput);
 
-    // [ p_i + frac{k}{std[f(x)]} * ( p_i * ( f_i - E[f(x)] ) * ( grad(f_i(x)) - E[grad(f(x))] ) ) ], where i denotes sample's index
+    // [ p_i + frac{k}{std[f(x)]} * ( p_i * ( f_i - E[f(x)] ) * ( grad(f_i(x)) - E[grad(f(x))] ) ) ], where i denotes the sample index
     std::vector<double> tCriterionGradMean(aCriterionGradPairs.begin()->mLength);
     Plato::compute_sample_set_mean(aCriterionGradPairs, tCriterionGradMean.data());
 

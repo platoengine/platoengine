@@ -165,9 +165,9 @@ inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitial
 {
     assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
     const OrdinalType tNumSample = aInitialGuess.size();
+    ScalarType tValue = (1. / static_cast<ScalarType>(tNumSample + 1u));
     for(OrdinalType tIndex = 0; tIndex < tNumSample; tIndex++)
     {
-        ScalarType tValue = (1. / static_cast<ScalarType>(tNumSample + 1u));
         aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
     }
 }
