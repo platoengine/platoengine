@@ -1348,6 +1348,7 @@ TEST(PlatoTest, SetSromProblemInitialGuess_UniformSampleInitialGuess)
     size_t tNumSamples = 2;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::set_srom_problem_initial_guess(tNumSamples, tInputsKSAL);
+    Plato::set_srom_problem_bounds(tInputsKSAL);
     // TEST SAMPLES INITIAL GUESS
     const double tTol = 1e-6;
     EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[0][0], 1.0 / 3.0, tTol);

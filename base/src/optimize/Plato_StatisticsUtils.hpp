@@ -1,5 +1,5 @@
 /*
-//@HEADER
+//\HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
 //                    Solutions of Sandia, LLC (NTESS).
@@ -34,9 +34,9 @@
 // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-// Questions? Contact the Plato team (plato3D-help@sandia.gov)
+// Questions? Contact the Plato team (plato3D-help\sandia.gov)
 // *************************************************************************
-//@HEADER
+//\HEADER
 */
 
 /*
@@ -58,9 +58,9 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Compute mean of the elements in the input vector
- * @param [in] aReductions common parallel programming operations (e.g. reductions)
- * @param [in] aInput input container
+ * \brief Compute mean of the elements in the input vector
+ * \param [in] aReductions common parallel programming operations (e.g. reductions)
+ * \param [in] aInput input container
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType> & aReductions,
@@ -79,10 +79,10 @@ inline ScalarType mean(const Plato::ReductionOperations<ScalarType, OrdinalType>
 // function mean
 
 /******************************************************************************//**
- * @brief Compute standard deviation of the elements in the input vector
- * @param [in] aMean mean of the elements in the input vector
- * @param [in] aInput input container
- * @param [in] aReductions common parallel programming operations (e.g. reductions)
+ * \brief Compute standard deviation of the elements in the input vector
+ * \param [in] aMean mean of the elements in the input vector
+ * \param [in] aInput input container
+ * \param [in] aReductions common parallel programming operations (e.g. reductions)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline ScalarType standard_deviation(const ScalarType & aMean,
@@ -118,6 +118,12 @@ inline ScalarType standard_deviation(const ScalarType & aMean,
 }
 // function standard_deviation
 
+/******************************************************************************//**
+ * \brief Compute the factorial of a positive integer \f$ n \f$, denoted by \n
+ * \f$ n! \f$, is the product of all positive integers less than or equal to \f$ n \f$.
+ * \param [in] aInput positive integer
+ * \return factorial product
+**********************************************************************************/
 template<typename OrdinalType>
 inline OrdinalType factorial(const OrdinalType & aInput)
 {
@@ -160,8 +166,13 @@ inline void shape_parameters(const ScalarType & aMinValue,
 }
 // function shape_parameters
 
+/******************************************************************************//**
+ * \brief Compute samples initial guess, where \f$ x_i = \frac{1}{N}*i \f$,
+ * where \f$ i\in\{1,N\} \f$ and \f$ N \f$ is the total number of samples.
+ * \param [in\out] aInitialGuess samples
+**********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
+inline void uniform_sample_initial_guess(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
 {
     assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
     const OrdinalType tNumSample = aInitialGuess.size();
@@ -171,6 +182,6 @@ inline void make_uniform_sample(Plato::Vector<ScalarType, OrdinalType>& aInitial
         aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
     }
 }
-// function make_uniform_sample
+// function uniform_sample_initial_guess
 
 } // namespace Plato

@@ -125,12 +125,34 @@ inline void build_srom_criteria(const Plato::SromInputs<ScalarType, OrdinalType>
 }
 
 /******************************************************************************//**
+ * \brief Set lower and upper bounds for the stochastic reduced order model (SROM) problem.
+ * \param [in,out] aInputsKSAL input data structure for KSAL algorithm
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void set_srom_problem_bounds
+(Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL)
+{
+    if(aInputsKSAL.mInitialGuess->getNumVectors() <= static_cast<OrdinalType>(0))
+    {
+        THROWERR("Set SROM Problem Bounds: Initial guess multi-vector is empty, which is used to allocate the lower and upper bound vectors.")
+    }
+    ScalarType tScalarValue = 0;
+    aInputsKSAL.mLowerBounds = aInputsKSAL.mInitialGuess->create();
+    Plato::fill(tScalarValue, *aInputsKSAL.mLowerBounds);
+    tScalarValue = 1;
+    aInputsKSAL.mUpperBounds = aInputsKSAL.mInitialGuess->create();
+    Plato::fill(tScalarValue, *aInputsKSAL.mUpperBounds);
+}
+
+/******************************************************************************//**
  * \brief Set initial guess for stochastic reduced order model (SROM) problem
  * \param [in] aNumSamples number of SROM samples
  * \param [in,out] aInputsKSAL input data structure for KSAL algorithm
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL)
+inline void set_srom_problem_initial_guess
+(const OrdinalType & aNumSamples,
+ Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL)
 {
     const OrdinalType tNumConstraints = 1;
     const OrdinalType tNumDualVectors = 1;
@@ -140,20 +162,12 @@ inline void set_srom_problem_initial_guess(const OrdinalType & aNumSamples, Plat
     OrdinalType tVectorIndex = 0;
     const OrdinalType tNumControlVectors = 2;
     aInputsKSAL.mInitialGuess = std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(tNumControlVectors, aNumSamples);
-    Plato::make_uniform_sample((*aInputsKSAL.mInitialGuess)[tVectorIndex]);
+    Plato::uniform_sample_initial_guess((*aInputsKSAL.mInitialGuess)[tVectorIndex]);
 
     // ********* SET INTIAL GUESS FOR VECTOR OF PROBABILITIES *********
     tVectorIndex = 1;
     ScalarType tScalarValue = static_cast<ScalarType>(1) / static_cast<ScalarType>(aNumSamples);
     (*aInputsKSAL.mInitialGuess)[tVectorIndex].fill(tScalarValue);
-
-    // ********* SET UPPER AND LOWER BOUNDS *********
-    tScalarValue = 0;
-    aInputsKSAL.mLowerBounds = aInputsKSAL.mInitialGuess->create();
-    Plato::fill(tScalarValue, *aInputsKSAL.mLowerBounds);
-    tScalarValue = 1;
-    aInputsKSAL.mUpperBounds = aInputsKSAL.mInitialGuess->create();
-    Plato::fill(tScalarValue, *aInputsKSAL.mUpperBounds);
 }
 
 /******************************************************************************//**
@@ -238,6 +252,7 @@ inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>&
     // set initial guess and bounds
     const OrdinalType tNumSamples = aStatsInputs.mNumSamples;
     Plato::set_srom_problem_initial_guess(tNumSamples, aInputsKSAL);
+    Plato::set_srom_problem_bounds(aInputsKSAL);
 
     // solve srom optimization problem
     aInputsKSAL.mMaxTrustRegionRadius = 1.0;
