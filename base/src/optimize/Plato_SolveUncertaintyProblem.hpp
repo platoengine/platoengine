@@ -145,7 +145,7 @@ inline void set_sample_probability_pairs_bounds
            + std::to_string(aSromInputs.mDimension) + "'.")
     }
 
-    const OrdinalType tNumVectors = 2;
+    const OrdinalType tNumVectors = aSromInputs.mDimension + static_cast<OrdinalType>(1);
     aInputsKSAL.mLowerBounds =
         std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(tNumVectors, aSromInputs.mNumSamples);
     ScalarType tScalarValue = 0;
