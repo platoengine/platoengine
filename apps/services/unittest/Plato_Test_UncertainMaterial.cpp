@@ -171,7 +171,7 @@ TEST(PlatoTest, SROM_SolveSromProblem)
     tMyRandomVar.deviation("2e8");
     tMyRandomVar.samples("3");
 
-    auto tSamplerProbPairs = Plato::srom::solve_srom_problem(tMyRandomVar);
+    auto tSamplerProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tMyRandomVar);
 
     double tSum = 0;
     double tTolerance = 1e-4;
