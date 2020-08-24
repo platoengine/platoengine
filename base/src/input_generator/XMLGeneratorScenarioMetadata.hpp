@@ -22,7 +22,6 @@ struct Scenario
 public:
     std::vector<std::string> LoadIDs;
     std::vector<std::string> BCIDs;
-    std::string modelID;
 
 // private member data
 private:
