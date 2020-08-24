@@ -331,15 +331,19 @@ TEST(PlatoTest, compute_random_variable_statistics_error)
 
 TEST(PlatoTest, random_sample_initial_guess)
 {
+    size_t tNumVectors = 1;
     size_t tNumSamples = 10;
-    Plato::StandardVector<double> tLower(tNumSamples, 0.0);
-    Plato::StandardVector<double> tUpper(tNumSamples, 1.0);
-    Plato::StandardVector<double> tGuess(tNumSamples, 0.0);
+    Plato::StandardMultiVector<double> tLower(tNumVectors, tNumSamples, 0.0);
+    Plato::StandardMultiVector<double> tUpper(tNumVectors, tNumSamples, 1.0);
+    Plato::StandardMultiVector<double> tGuess(tNumVectors, tNumSamples, 0.0);
     Plato::random_sample_initial_guess(tLower, tUpper, tGuess);
-    for(decltype(tNumSamples) tIndex; tIndex < tGuess.size(); tIndex++)
+    for (decltype(tNumVectors) tDim; tDim < tNumVectors; tDim++)
     {
-        EXPECT_TRUE(tGuess[tIndex] >= 0.0);
-        EXPECT_TRUE(tGuess[tIndex] <= 1.0);
+        for (decltype(tNumSamples) tSample; tSample < tNumSamples; tSample++)
+        {
+            EXPECT_TRUE(tGuess(tDim, tSample) >= 0.0);
+            EXPECT_TRUE(tGuess(tDim, tSample) <= 1.0);
+        }
     }
 }
 

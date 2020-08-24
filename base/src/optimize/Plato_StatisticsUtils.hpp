@@ -50,6 +50,8 @@
 #include <cmath>
 #include <cstdlib>
 
+#include "Plato_Macros.hpp"
+#include "Plato_MultiVector.hpp"
 #include "Plato_StandardVector.hpp"
 #include "Plato_ReductionOperations.hpp"
 
@@ -170,37 +172,65 @@ inline void shape_parameters(const ScalarType & aMinValue,
 /******************************************************************************//**
  * \brief Compute uniform initial guess, where \f$ x_i = \frac{1}{N}*i \f$,
  * where \f$ i\in\{1,N\} \f$ and \f$ N \f$ is the total number of samples.
- * \param [in\out] aInitialGuess samples
+ * \param [in\out] aInput sample-probability pairs
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void uniform_sample_initial_guess(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
+inline void uniform_samples_initial_guess
+(Plato::MultiVector<ScalarType, OrdinalType>& aInput)
 {
-    assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
-    auto tNumSample = aInitialGuess.size();
-    ScalarType tValue = (1.0 / static_cast<ScalarType>(tNumSample + 1u));
-    for(OrdinalType tIndex = 0; tIndex < tNumSample; tIndex++)
+    if(aInput.getNumVectors() <= static_cast<OrdinalType>(0))
     {
-        aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
+        THROWERR("Uniform Samples Initial Guess: input multi-vector is empty.")
+    }
+    // last dimension, i.e. N, is for the probabilities. random vectors dimensions are from 1 to N-1
+    auto tRandomVectorDim = aInput.getNumVectors() - static_cast<OrdinalType>(1);
+    for(decltype(tRandomVectorDim) tDim = 0; tDim < tRandomVectorDim; tDim++)
+    {
+        auto tNumSample = aInput[tDim].size();
+        auto tValue = (static_cast<ScalarType>(1.0) / static_cast<ScalarType>(tNumSample + 1u));
+        for(decltype(tNumSample) tSample = 0; tSample < tNumSample; tSample++)
+        {
+            aInput(tDim, tSample) = static_cast<ScalarType>(tSample + 1u) * tValue;
+        }
     }
 }
-// function uniform_sample_initial_guess
+// function uniform_samples_initial_guess
 
 /******************************************************************************//**
- * \brief Compute random initial guess, values are numbers between 0.0 and 1.0.
+ * \brief Compute initial guess for random vector of samples, values are between 0.0 and 1.0.
  * \param [in]  aLower lower bounds
  * \param [in]  aUpper upper bounds
  * \param [out] aGuess samples initial guess
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void random_sample_initial_guess
-(const Plato::Vector<ScalarType, OrdinalType>& aLower,
- const Plato::Vector<ScalarType, OrdinalType>& aUpper,
- Plato::Vector<ScalarType, OrdinalType>& aGuess)
+(const Plato::MultiVector<ScalarType, OrdinalType>& aLower,
+ const Plato::MultiVector<ScalarType, OrdinalType>& aUpper,
+ Plato::MultiVector<ScalarType, OrdinalType>& aGuess)
 {
-    for (OrdinalType tIndex = 0; tIndex < aGuess.size(); tIndex++)
+    if(aLower.getNumVectors() != aUpper.getNumVectors())
     {
-        auto tNormalizedRandNum = static_cast<ScalarType>(std::rand()) / static_cast<ScalarType>(RAND_MAX);
-        aGuess[tIndex] = aLower[tIndex] + ((aUpper[tIndex] - aLower[tIndex]) * tNormalizedRandNum);
+        THROWERR(std::string("Random Samples Initial Guess: dimensions mismatch between lower and upper bound multi-vector. ")
+            + "Number of Lower Bound Vectors is '" + std::to_string(aLower.getNumVectors()) + "' and number of Upper Bound "
+            + "Vectors is '" + std::to_string(aUpper.getNumVectors()) + "'.")
+    }
+    if(aGuess.getNumVectors() != aUpper.getNumVectors())
+    {
+        THROWERR(std::string("Random Samples Initial Guess: dimensions mismatch between initial guess and lower/upper bound multi-vectors. ")
+            + "Number of Initial Guess Vectors is '" + std::to_string(aGuess.getNumVectors()) + "' and number of Lower/Upper Bound Vectors is '"
+            + std::to_string(aUpper.getNumVectors()) + "'.")
+    }
+
+    // last dimension, i.e. N, is for the probabilities. random vectors dimensions are from 1 to N-1
+    auto tRandomVectorDim = aGuess.getNumVectors() - static_cast<OrdinalType>(1);
+    for(decltype(tRandomVectorDim) tDim = 0; tDim < tRandomVectorDim; tDim++)
+    {
+        auto tNumSample = aGuess[tDim].size();
+        for(decltype(tNumSample) tSample = 0; tSample < tNumSample; tSample++)
+        {
+            auto tNormalizedRandNum = static_cast<ScalarType>(std::rand()) / static_cast<ScalarType>(RAND_MAX);
+            aGuess(tDim, tSample) = aLower(tDim, tSample) + ((aUpper(tDim, tSample) - aLower(tDim, tSample)) * tNormalizedRandNum);
+        }
     }
 }
 // function random_sample_initial_guess

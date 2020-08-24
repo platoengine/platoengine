@@ -1343,13 +1343,13 @@ TEST(PlatoTest, solve_srom_problem_normal)
     EXPECT_NEAR(tTotalProbability, 0.99992125876824889, tTol);
 }
 
-TEST(PlatoTest, SetSromProblemInitialGuess_UniformSampleInitialGuess)
+TEST(PlatoTest, SetSampleProbabilityPairsInitialGuess_UniformSampleInitialGuess)
 {
     Plato::SromInputs<double> tSromInputs;
     tSromInputs.mNumSamples = 2;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::set_srom_problem_initial_guess(tSromInputs, tInputsKSAL);
-    Plato::set_srom_problem_bounds(tInputsKSAL);
+    Plato::set_sample_probability_pairs_initial_guess(tSromInputs, tInputsKSAL);
+    Plato::set_sample_probability_pairs_bounds(tInputsKSAL);
     // TEST SAMPLES INITIAL GUESS
     const double tTol = 1e-6;
     EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[0][0], 1.0 / 3.0, tTol);

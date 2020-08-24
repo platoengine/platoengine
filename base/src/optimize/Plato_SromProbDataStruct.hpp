@@ -55,7 +55,12 @@
 namespace Plato
 {
 
-// TODO: ADD INITIAL GUESS OPTION
+enum struct SromInitialGuess
+{
+    random = 0, uniform = 1
+};
+// struct SromInitialGuess
+
 enum struct DistributionName
 {
     beta = 0, normal = 1, uniform = 2, undefined = 3
@@ -65,6 +70,7 @@ enum struct DistributionName
 template<typename ScalarType, typename OrdinalType = size_t>
 struct SromInputs
 {
+    Plato::SromInitialGuess mInitialGuess; /*!< initial guess type, options: random, uniform */
     Plato::DistributionName mDistribution; /*!< distribution type, options: beta, normal, uniform */
     ScalarType mMean; /*!< distribution's mean */
     ScalarType mLowerBound; /*!< distribution's lower bound */
@@ -79,16 +85,17 @@ struct SromInputs
     OrdinalType mMaxNumDistributionMoments;/*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */
 
     SromInputs() :   // default Constructor
-            mDistribution(Plato::DistributionName::beta),
-            mMean(0.),
-            mLowerBound(0.),
-            mUpperBound(0.),
-            mVariance(0.),
-            mMomentErrorCriterionWeight(1.0),
-            mCumulativeDistributionFuncErrorWeight(1.0),
-            mNumSamples(0),
-            mNumMonteCarloSamples(1000),
-            mMaxNumDistributionMoments(4)
+        mInitialGuess(Plato::SromInitialGuess::uniform),
+        mDistribution(Plato::DistributionName::beta),
+        mMean(0.),
+        mLowerBound(0.),
+        mUpperBound(0.),
+        mVariance(0.),
+        mMomentErrorCriterionWeight(1.0),
+        mCumulativeDistributionFuncErrorWeight(1.0),
+        mNumSamples(0),
+        mNumMonteCarloSamples(1000),
+        mMaxNumDistributionMoments(4)
     {
     }
 };
