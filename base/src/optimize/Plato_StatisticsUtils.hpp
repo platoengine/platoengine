@@ -48,6 +48,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdlib>
 
 #include "Plato_StandardVector.hpp"
 #include "Plato_ReductionOperations.hpp"
@@ -167,7 +168,7 @@ inline void shape_parameters(const ScalarType & aMinValue,
 // function shape_parameters
 
 /******************************************************************************//**
- * \brief Compute samples initial guess, where \f$ x_i = \frac{1}{N}*i \f$,
+ * \brief Compute uniform initial guess, where \f$ x_i = \frac{1}{N}*i \f$,
  * where \f$ i\in\{1,N\} \f$ and \f$ N \f$ is the total number of samples.
  * \param [in\out] aInitialGuess samples
 **********************************************************************************/
@@ -175,13 +176,33 @@ template<typename ScalarType, typename OrdinalType>
 inline void uniform_sample_initial_guess(Plato::Vector<ScalarType, OrdinalType>& aInitialGuess)
 {
     assert(aInitialGuess.size() > static_cast<OrdinalType>(0));
-    const OrdinalType tNumSample = aInitialGuess.size();
-    ScalarType tValue = (1. / static_cast<ScalarType>(tNumSample + 1u));
+    auto tNumSample = aInitialGuess.size();
+    ScalarType tValue = (1.0 / static_cast<ScalarType>(tNumSample + 1u));
     for(OrdinalType tIndex = 0; tIndex < tNumSample; tIndex++)
     {
         aInitialGuess[tIndex] = static_cast<ScalarType>(tIndex + 1u) * tValue;
     }
 }
 // function uniform_sample_initial_guess
+
+/******************************************************************************//**
+ * \brief Compute random initial guess, values are numbers between 0.0 and 1.0.
+ * \param [in]  aLower lower bounds
+ * \param [in]  aUpper upper bounds
+ * \param [out] aGuess samples initial guess
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void random_sample_initial_guess
+(const Plato::Vector<ScalarType, OrdinalType>& aLower,
+ const Plato::Vector<ScalarType, OrdinalType>& aUpper,
+ Plato::Vector<ScalarType, OrdinalType>& aGuess)
+{
+    for (OrdinalType tIndex = 0; tIndex < aGuess.size(); tIndex++)
+    {
+        auto tNormalizedRandNum = static_cast<ScalarType>(std::rand()) / static_cast<ScalarType>(RAND_MAX);
+        aGuess[tIndex] = aLower[tIndex] + ((aUpper[tIndex] - aLower[tIndex]) * tNormalizedRandNum);
+    }
+}
+// function random_sample_initial_guess
 
 } // namespace Plato

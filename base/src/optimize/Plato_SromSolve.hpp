@@ -168,15 +168,15 @@ inline bool define_distribution
 {
     if(aMyRandomVar.distribution() == "normal")
     {
-        aInput.mDistribution = Plato::DistrubtionName::normal;
+        aInput.mDistribution = Plato::DistributionName::normal;
     }
     else if(aMyRandomVar.distribution() == "uniform")
     {
-        aInput.mDistribution = Plato::DistrubtionName::uniform;
+        aInput.mDistribution = Plato::DistributionName::uniform;
     }
     else if(aMyRandomVar.distribution() == "beta")
     {
-        aInput.mDistribution = Plato::DistrubtionName::beta;
+        aInput.mDistribution = Plato::DistributionName::beta;
     }
     else
     {
@@ -312,8 +312,8 @@ inline bool compute_random_variable_statistics
 {
     switch(aInputMetaData.mDistribution)
     {
-        case Plato::DistrubtionName::beta:
-        case Plato::DistrubtionName::normal:
+        case Plato::DistributionName::beta:
+        case Plato::DistributionName::normal:
         {
             // solve stochastic reduced order model sub-problem
             const bool tEnableOutput = true;
@@ -322,13 +322,13 @@ inline bool compute_random_variable_statistics
             Plato::solve_srom_problem(aInputMetaData, tAlgoInputs, tSromDiagnostics, aOutputMetaData, tEnableOutput);
             break;
         }
-        case Plato::DistrubtionName::uniform:
+        case Plato::DistributionName::uniform:
         {
             Plato::srom::compute_uniform_random_variable_statistics(aInputMetaData, aOutputMetaData);
             break;
         }
         default:
-        case Plato::DistrubtionName::undefined:
+        case Plato::DistributionName::undefined:
         {
             PRINTERR("Compute Random Variable Statistics: INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n");
             return (false);

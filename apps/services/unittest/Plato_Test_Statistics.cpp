@@ -892,7 +892,7 @@ TEST(PlatoTest, PlotBetaCDF)
 
     // POSE SROM PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tStatsInputs.mDistribution = Plato::DistributionName::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -1241,7 +1241,7 @@ TEST(PlatoTest, solve_srom_problem_beta)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tStatsInputs.mDistribution = Plato::DistributionName::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -1279,7 +1279,7 @@ TEST(PlatoTest, solve_srom_problem_uniform)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
+    tStatsInputs.mDistribution = Plato::DistributionName::uniform;
     tStatsInputs.mMean = 0.;
     tStatsInputs.mUpperBound = 75.;
     tStatsInputs.mLowerBound = 25.;
@@ -1316,7 +1316,7 @@ TEST(PlatoTest, solve_srom_problem_normal)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
+    tStatsInputs.mDistribution = Plato::DistributionName::normal;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 0.;
     tStatsInputs.mLowerBound = 0.;
@@ -1345,9 +1345,10 @@ TEST(PlatoTest, solve_srom_problem_normal)
 
 TEST(PlatoTest, SetSromProblemInitialGuess_UniformSampleInitialGuess)
 {
-    size_t tNumSamples = 2;
+    Plato::SromInputs<double> tSromInputs;
+    tSromInputs.mNumSamples = 2;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::set_srom_problem_initial_guess(tNumSamples, tInputsKSAL);
+    Plato::set_srom_problem_initial_guess(tSromInputs, tInputsKSAL);
     Plato::set_srom_problem_bounds(tInputsKSAL);
     // TEST SAMPLES INITIAL GUESS
     const double tTol = 1e-6;

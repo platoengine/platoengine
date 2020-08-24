@@ -55,19 +55,17 @@
 namespace Plato
 {
 
-struct DistrubtionName
+// TODO: ADD INITIAL GUESS OPTION
+enum struct DistributionName
 {
-    enum type_t
-    {
-        beta = 0, normal = 1, uniform = 2, undefined = 3
-    };
+    beta = 0, normal = 1, uniform = 2, undefined = 3
 };
-// struct DistrubtionName
+// struct DistributionName
 
 template<typename ScalarType, typename OrdinalType = size_t>
 struct SromInputs
 {
-    DistrubtionName::type_t mDistribution; /*!< distribution type, options: beta, normal, uniform */
+    Plato::DistributionName mDistribution; /*!< distribution type, options: beta, normal, uniform */
     ScalarType mMean; /*!< distribution's mean */
     ScalarType mLowerBound; /*!< distribution's lower bound */
     ScalarType mUpperBound; /*!< distribution's upper bound */
@@ -81,7 +79,7 @@ struct SromInputs
     OrdinalType mMaxNumDistributionMoments;/*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */
 
     SromInputs() :   // default Constructor
-            mDistribution(DistrubtionName::type_t::beta),
+            mDistribution(Plato::DistributionName::beta),
             mMean(0.),
             mLowerBound(0.),
             mUpperBound(0.),

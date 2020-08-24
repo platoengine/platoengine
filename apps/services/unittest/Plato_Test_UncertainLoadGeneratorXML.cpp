@@ -48,6 +48,8 @@
 
 #include "gtest/gtest.h"
 
+#include "Plato_UnitTestUtils.hpp"
+
 #include "Plato_SromXMLGenLoad.hpp"
 #include "Plato_SromLoadUtils.hpp"
 #include "Plato_SromSolve.hpp"
@@ -258,7 +260,7 @@ TEST(PlatoTest, define_input_statistics)
     ASSERT_TRUE(Plato::srom::define_input_statistics(tMyRandomVar, tSromInputs));
 
     ASSERT_EQ(4u, tSromInputs.mNumSamples);
-    ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
+    ASSERT_EQ(Plato::DistributionName::beta, tSromInputs.mDistribution);
 
     const double tTolerance = 1e-4;
     ASSERT_NEAR(80.0, tSromInputs.mMean, tTolerance);
@@ -274,15 +276,15 @@ TEST(PlatoTest, define_distribution)
 
     tMyRandomVar.distribution("normal");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
-    ASSERT_EQ(Plato::DistrubtionName::normal, tSromInputs.mDistribution);
+    ASSERT_EQ(Plato::DistributionName::normal, tSromInputs.mDistribution);
 
     tMyRandomVar.distribution("beta");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
-    ASSERT_EQ(Plato::DistrubtionName::beta, tSromInputs.mDistribution);
+    ASSERT_EQ(Plato::DistributionName::beta, tSromInputs.mDistribution);
 
     tMyRandomVar.distribution("uniform");
     ASSERT_TRUE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
-    ASSERT_EQ(Plato::DistrubtionName::uniform, tSromInputs.mDistribution);
+    ASSERT_EQ(Plato::DistributionName::uniform, tSromInputs.mDistribution);
 
     tMyRandomVar.distribution("lognormal");
     ASSERT_FALSE(Plato::srom::define_distribution(tMyRandomVar, tSromInputs));
@@ -294,7 +296,7 @@ TEST(PlatoTest, compute_uniform_random_variable_statistics)
     tSromInputs.mNumSamples = 4;
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
-    tSromInputs.mDistribution = Plato::DistrubtionName::uniform;
+    tSromInputs.mDistribution = Plato::DistributionName::uniform;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
     ASSERT_TRUE(Plato::srom::compute_uniform_random_variable_statistics(tSromInputs, tSromOutputs));
 
@@ -318,7 +320,7 @@ TEST(PlatoTest, compute_random_variable_statistics_error)
     tSromInputs.mNumSamples = 4;
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
-    tSromInputs.mDistribution = Plato::DistrubtionName::undefined;
+    tSromInputs.mDistribution = Plato::DistributionName::undefined;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
     ASSERT_FALSE(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs));
 
@@ -327,13 +329,27 @@ TEST(PlatoTest, compute_random_variable_statistics_error)
     Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
+TEST(PlatoTest, random_sample_initial_guess)
+{
+    size_t tNumSamples = 10;
+    Plato::StandardVector<double> tLower(tNumSamples, 0.0);
+    Plato::StandardVector<double> tUpper(tNumSamples, 1.0);
+    Plato::StandardVector<double> tGuess(tNumSamples, 0.0);
+    Plato::random_sample_initial_guess(tLower, tUpper, tGuess);
+    for(decltype(tNumSamples) tIndex; tIndex < tGuess.size(); tIndex++)
+    {
+        EXPECT_TRUE(tGuess[tIndex] >= 0.0);
+        EXPECT_TRUE(tGuess[tIndex] <= 1.0);
+    }
+}
+
 TEST(PlatoTest, compute_random_variable_statistics)
 {
     Plato::SromInputs<double> tSromInputs;
     tSromInputs.mNumSamples = 4;
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
-    tSromInputs.mDistribution = Plato::DistrubtionName::uniform;
+    tSromInputs.mDistribution = Plato::DistributionName::uniform;
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
     ASSERT_TRUE(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs));
 
