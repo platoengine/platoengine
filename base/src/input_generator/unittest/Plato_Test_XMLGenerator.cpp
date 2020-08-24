@@ -2145,6 +2145,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   "    lower_bound -45.0\n"
   "    standard_deviation 22.5\n"
   "    number_samples 2\n"
+  "    initial_guess uniform\n"
   "end uncertainty\n";
   // do parse
   iss.str(stringInput);
@@ -2204,6 +2205,10 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 
   size_t numObjectives = tTester.getNumObjectives();
   EXPECT_EQ(numObjectives, 1u);
+
+  Plato::system("rm -f plato_cdf_output.txt");
+  Plato::system("rm -f plato_srom_diagnostics.txt");
+  Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministic)
@@ -2244,6 +2249,7 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     "    lower_bound -45.0\n"
     "    standard_deviation 22.5\n"
     "    number_samples 10\n"
+    "    initial_guess uniform\n"
     "end uncertainty\n";
     // do parse
     tInputSS.str(tStringInput);
@@ -2333,6 +2339,10 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
 
     const size_t tNumObjectives = tTester.getNumObjectives();
     ASSERT_EQ(tNumObjectives, 1u);
+
+    Plato::system("rm -f plato_cdf_output.txt");
+    Plato::system("rm -f plato_srom_diagnostics.txt");
+    Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
 TEST(PlatoTestXMLGenerator,generatePlatoAnalyzeInputDeck_mechanical_valid)

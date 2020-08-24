@@ -396,6 +396,7 @@ compute_stochastic_reduced_order_model
     Plato::SromInputs<double> tSromInputs;
     Plato::srom::define_distribution(tRandomVar, tSromInputs);
     Plato::srom::define_input_statistics(tRandomVar, tSromInputs);
+    Plato::srom::define_random_samples_initial_guess_method(tRandomVar, tSromInputs);
 
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
     Plato::srom::compute_sample_probability_pairs(tSromInputs, tSromOutputs);

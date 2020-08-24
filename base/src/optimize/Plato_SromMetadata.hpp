@@ -66,14 +66,14 @@ namespace srom
 **********************************************************************************/
 struct Statistics
 {
-    std::string mFile;              /*!< filename: contains sample-probability pairs */
-    std::string mNumSamples;        /*!< number of samples */
-    std::string mDistribution;      /*!< probability distribution */
-    std::string mMean;              /*!< probability distribution mean */
-    std::string mUpperBound;        /*!< probability distribution upper bound */
-    std::string mLowerBound;        /*!< probability distribution lower bound */
-    std::string mInitialGuess;      /*!< method used to compute samples' initial guess, options: random, uniform */
-    std::string mStandardDeviation; /*!< probability distribution standard deviation */
+    std::string mFile;                      /*!< filename: contains sample-probability pairs */
+    std::string mNumSamples;                /*!< number of samples */
+    std::string mDistribution;              /*!< probability distribution */
+    std::string mMean;                      /*!< probability distribution mean */
+    std::string mUpperBound;                /*!< probability distribution upper bound */
+    std::string mLowerBound;                /*!< probability distribution lower bound */
+    std::string mInitialGuess = "uniform";  /*!< method used to compute samples' initial guess, options: random, uniform */
+    std::string mStandardDeviation;         /*!< probability distribution standard deviation */
 
     /******************************************************************************//**
      * \fn check
@@ -130,14 +130,10 @@ public:
     void check() const
     {
         if(mTag.empty())
-        {
-            THROWERR("Random Variable: Random variable tag is not defined.")
-        }
+            { THROWERR("Random Variable: Random variable tag is not defined.") }
 
         if(mAttribute.empty())
-        {
-            THROWERR("Random Variable: Random variable attribute is not defined.")
-        }
+            { THROWERR("Random Variable: Random variable attribute is not defined.") }
 
         if(mStatistics.mFile.empty())
         {

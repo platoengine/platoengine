@@ -404,6 +404,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_OneRandVar)
     tMyRandomVar.lower("135");
     tMyRandomVar.deviation("15");
     tMyRandomVar.samples("3");
+    tMyRandomVar.guess("uniform");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 

@@ -349,7 +349,7 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
                                          const std::vector<XMLGen::LoadCase> &aNewLoadCases,
                                          std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
                                          std::set<int> &aRandomLoadIDs,
-                                         std::vector<Plato::srom::Load> &aLoad)
+                                         std::vector<Plato::srom::Load> &aRandomLoads)
 {
     for(auto& tRandomVar : aRandomVariables)
     {
@@ -357,7 +357,7 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
         Plato::srom::variable_type_string_to_enum(tRandomVar.category(), tVarType);
         if(tVarType == Plato::srom::VariableType::LOAD)
         {
-            Plato::srom::create_random_loads_from_uncertainty(tRandomVar, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aLoad);
+            Plato::srom::create_random_loads_from_uncertainty(tRandomVar, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aRandomLoads);
         }
     }
 }
@@ -405,13 +405,12 @@ generate_srom_load_inputs
     Plato::srom::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
 
     std::set<int> tRandomLoadIDs;
-    std::vector<Plato::srom::Load> tLoads;
+    std::vector<Plato::srom::Load> tAllLoads;
     Plato::srom::create_random_load_variables
-        (aUncertainties, tNewSetLoadCases, tOriginalToNewLoadCaseMap, tRandomLoadIDs, tLoads);
+        (aUncertainties, tNewSetLoadCases, tOriginalToNewLoadCaseMap, tRandomLoadIDs, tAllLoads);
+    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, tAllLoads);
 
-    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, tLoads);
-
-    return (tLoads);
+    return (tAllLoads);
 }
 // function generate_srom_load_inputs
 

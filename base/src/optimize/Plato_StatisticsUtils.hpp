@@ -208,6 +208,18 @@ inline void random_sample_initial_guess
  const Plato::MultiVector<ScalarType, OrdinalType>& aUpper,
  Plato::MultiVector<ScalarType, OrdinalType>& aGuess)
 {
+    if(aLower.getNumVectors() <= 0)
+    {
+        THROWERR("Random Samples Initial Guess: Lower bound multi-vector is empty.")
+    }
+    if(aUpper.getNumVectors() <= 0)
+    {
+        THROWERR("Random Samples Initial Guess: Upper bound multi-vector is empty.")
+    }
+    if(aGuess.getNumVectors() <= 0)
+    {
+        THROWERR("Random Samples Initial Guess: Initial guess multi-vector is empty.")
+    }
     if(aLower.getNumVectors() != aUpper.getNumVectors())
     {
         THROWERR(std::string("Random Samples Initial Guess: dimensions mismatch between lower and upper bound multi-vector. ")

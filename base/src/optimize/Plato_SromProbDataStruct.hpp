@@ -80,6 +80,7 @@ struct SromInputs
     ScalarType mMomentErrorCriterionWeight; /*!< weight on moment misfit term in the SROM objective function */
     ScalarType mCumulativeDistributionFuncErrorWeight; /*!< weight on cumulative distribution function misfit term in the SROM objective function */
 
+    OrdinalType mDimension = 1; /*!< random vector dimensions */
     OrdinalType mNumSamples; /*!< number of SROM samples */
     OrdinalType mNumMonteCarloSamples; /*!< number of Monte Carlo samples */
     OrdinalType mMaxNumDistributionMoments;/*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */

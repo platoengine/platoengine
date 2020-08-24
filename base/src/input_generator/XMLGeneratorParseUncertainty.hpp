@@ -31,13 +31,6 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn parseMetadata
-     * \brief Parse uncertainty blocks.
-     * \param [in] aInputFile input file metadata
-    **********************************************************************************/
-    void parseMetadata(std::istream& aInputFile);
-
-    /******************************************************************************//**
      * \fn setIdentificationNumber
      * \brief Set non-deterministic variable's identification number.
      * \param [in] aMetadata uncertainty metadata
