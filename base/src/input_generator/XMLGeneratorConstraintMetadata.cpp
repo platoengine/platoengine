@@ -63,104 +63,44 @@ std::string Constraint::id() const
     return (this->getValue("id"));
 }
 
-void Constraint::name(const std::string& aInput)
+void Constraint::criterion(const std::string& aInput)
 {
-    mMetaData["name"] = aInput;
+    mMetaData["criterion"] = aInput;
 }
 
-std::string Constraint::name() const
+std::string Constraint::criterion() const
 {
-    return (this->getValue("name"));
+    return (this->getValue("criterion"));
 }
 
-void Constraint::code(const std::string& aInput)
+void Constraint::service(const std::string& aInput)
 {
-    mMetaData["code"] = aInput;
+    mMetaData["service"] = aInput;
 }
 
-std::string Constraint::code() const
+std::string Constraint::service() const
 {
-    return (this->getValue("code"));
+    return (this->getValue("service"));
 }
 
-void Constraint::weight(const std::string& aInput)
+
+void Constraint::scenario(const std::string& aInput)
 {
-    mMetaData["weight"] = aInput;
+    mMetaData["scenario"] = aInput;
 }
 
-std::string Constraint::weight() const
+std::string Constraint::scenario() const
 {
-    return (this->getValue("weight"));
+    return (this->getValue("scenario"));
+}
+void Constraint::target(const std::string& aInput)
+{
+    mMetaData["target"] = aInput;
 }
 
-void Constraint::category(const std::string& aInput)
+std::string Constraint::target() const
 {
-    mMetaData["type"] = aInput;
-}
-
-std::string Constraint::category() const
-{
-    return (this->getValue("type"));
-}
-
-void Constraint::performer(const std::string& aInput)
-{
-    mMetaData["performer"] = aInput;
-}
-
-std::string Constraint::performer() const
-{
-    return (this->getValue("performer"));
-}
-
-void Constraint::pnormExponent(const std::string& aInput)
-{
-    mMetaData["pnorm exponent"] = aInput;
-}
-
-std::string Constraint::pnormExponent() const
-{
-    return (this->getValue("pnorm exponent"));
-}
-
-void Constraint::normalizedTarget(const std::string& aInput)
-{
-    mMetaData["target normalized"] = aInput;
-}
-
-std::string Constraint::normalizedTarget() const
-{
-    return (this->getValue("target normalized"));
-}
-
-void Constraint::absoluteTarget(const std::string& aInput)
-{
-    mMetaData["target absolute"] = aInput;
-}
-
-std::string Constraint::absoluteTarget() const
-{
-    return (this->getValue("target absolute"));
-}
-
-void Constraint::materialPenaltyExponent(const std::string& aInput)
-{
-    mMetaData["penalty power"] = aInput;
-}
-
-std::string Constraint::materialPenaltyExponent() const
-{
-    return (this->getValue("penalty power"));
-}
-
-void Constraint::minErsatzMaterialConstant(const std::string& aInput)
-{
-    mMetaData["minimum ersatz material value"] = aInput;
-}
-
-std::string Constraint::minErsatzMaterialConstant() const
-{
-    return (this->getValue("minimum ersatz material value"));
+    return (this->getValue("target"));
 }
 
 }

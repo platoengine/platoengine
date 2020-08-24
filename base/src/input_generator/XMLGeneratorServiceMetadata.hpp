@@ -20,8 +20,6 @@ namespace XMLGen
 struct Service
 {
 public:
-    std::vector<std::string> LoadIDs;
-    std::vector<std::string> BCIDs;
 
 // private member data
 private:

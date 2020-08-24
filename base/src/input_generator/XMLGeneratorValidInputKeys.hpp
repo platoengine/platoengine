@@ -51,7 +51,7 @@ struct ValidCriterionParameterKeyMap
         //                         "inequality_feasibility_scale", "inequality_infeasibility_scale", "stress_favor_final", "stress_favor_updates",
         //                         "stress_inequality_power", "volume_penalty_power", "volume_penalty_divisor", "volume_penalty_bias",
         //                         "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
-        //                         "constraint_exponent", "constraint_exponent", "initial_lagrange_multiplier", "initial_mass_weight_factor",
+        //                         "constraint_exponent", "constraint_exponent", "initial_mass_weight_factor",
         //                         "control_stagnation_tolerance", "write_debug_output_files"}});
         //
     }
@@ -220,24 +220,6 @@ struct ValidMaterialModelKeys
         "isotropic linear thermoelastic" };
 };
 // struct ValidMaterialModelKeys
-
-struct ValidConstraintTargetAbsoluteKeys
-{
-    /*!<
-     * \brief Valid plato input deck constraint absolute target keywords.
-     **/
-    std::vector<std::string> mKeys = {"volume absolute", "target absolute", "surface_area"};
-};
-// struct ValidConstraintTargetAbsoluteKeys
-
-struct ValidConstraintTargetNormalizedKeys
-{
-    /*!<
-     * \brief Valid plato deck constraint normalized target keywords.
-     **/
-    std::vector<std::string> mKeys = {"volume fraction", "target normalized"};
-};
-// struct ValidConstraintTargetNormalizedKeys
 
 struct ValidAxesKeys
 {

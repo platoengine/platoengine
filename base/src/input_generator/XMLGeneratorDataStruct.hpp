@@ -16,7 +16,7 @@
 // #include "XMLGeneratorRandomMetadata.hpp"
 #include "XMLGeneratorServiceMetadata.hpp"
 #include "XMLGeneratorScenarioMetadata.hpp"
-// #include "XMLGeneratorConstraintMetadata.hpp"
+#include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
@@ -158,13 +158,6 @@ struct Optimizer
     std::string mMinTrustRegionRadius;
 };
 
-// struct UncertaintyMetaData
-// {
-//   size_t numPerformers = 0;
-//   std::vector<size_t> randomVariableIndices;
-//   std::vector<size_t> deterministicVariableIndices;
-// };
-
 struct Mesh
 {
     std::string name;
@@ -234,7 +227,7 @@ public:
     }
 
     XMLGen::Objective objective;
-    // std::vector<XMLGen::Constraint> constraints;
+    std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Service> services;
     std::vector<XMLGen::Criterion> criteria;
     std::vector<XMLGen::Material> materials;

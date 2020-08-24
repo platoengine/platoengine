@@ -61,7 +61,6 @@ public:
     XMLGenerator_UnitTester();
     ~XMLGenerator_UnitTester();
 
-    // void publicGetUncertaintyFlags();
     bool publicParseSingleValue(const std::vector<std::string> &aTokens,
                                 const std::vector<std::string> &aInputStrings,
                                 std::string &aReturnStringValue);
@@ -70,8 +69,6 @@ public:
                                          const std::vector<std::string> &aUnLoweredTokens,
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
-    // void publicParseService(std::istream &sin);
-    // bool publicParseObjectives(std::istream &sin);
     bool publicParseLoads(std::istream &sin);
     bool publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
@@ -79,52 +76,14 @@ public:
     bool publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void publicParseBCs(std::istream &sin);
     bool publicParseOptimizationParameters(std::istream &sin);
-    // bool publicParseConstraints(std::istream &sin);
     bool publicParseMesh(std::istream &sin);
     bool publicParseCodePaths(std::istream &sin);
     bool publicParseBlocks(std::istream &sin);
-    // bool publicParseMaterials(std::istream &sin);
-    // bool publicParseUncertainties(std::istream &sin);
-    // bool publicDistributeObjectivesForGenerate();
-    // bool publicGeneratePlatoAnalyzeInputDecks(std::ostringstream *aStringStream = NULL);
-    // bool publicRunSROMForUncertainVariables();
-    // void publicLookForPlatoAnalyzePerformers();
-    // std::string getConstraintName(const int &aIndex) {return m_InputData.constraints[aIndex].name();}
-    // std::string getConstraintType(const int &aIndex) {return m_InputData.constraints[aIndex].category();}
-    // std::string getConstraintVolFrac(const int &aIndex) {return m_InputData.constraints[aIndex].normalizedTarget();}
-    // std::string getConstraintSurfArea(const int &aIndex) {return m_InputData.constraints[aIndex].value("surface_area");}
-    // std::string getConstraintSurfAreaSidesetID(const int &aIndex) {return m_InputData.constraints[aIndex].value("surface_area_sideset_id");}
-    // std::string getMaterialID(const int &aIndex) {return m_InputData.materials[aIndex].id();}
-    // std::string getMaterialPenaltyExponent(const int &aIndex) {return m_InputData.materials[aIndex].property("penalty_exponent");}
-    // std::string getMaterialYoungsModulus(const int &aIndex) {return m_InputData.materials[aIndex].property("youngs_modulus");}
-    // std::string getMaterialPoissonsRatio(const int &aIndex) {return m_InputData.materials[aIndex].property("poissons_ratio");}
-    // std::string getMaterialThermalConductivity(const int &aIndex) {return m_InputData.materials[aIndex].property("thermal_conductivity");}
-    // std::string getMaterialDensity(const int &aIndex) {return m_InputData.materials[aIndex].property("density");}
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
-    // size_t getNumObjectives() {return m_InputData.objectives.size();}
-    // std::string getObjectiveName(const int &aIndex) {return m_InputData.objectives[aIndex].name;}
-    // std::string getObjectiveType(const int &aIndex) {return m_InputData.objectives[aIndex].type;}
-    // std::string getObjCodeName(const int &aIndex) {return m_InputData.objectives[aIndex].code_name;}
-    // std::string getObjPerfName(const int &aIndex) {return m_InputData.objectives[aIndex].mPerformerName;}
-    // std::string getObjFreqMin(const int &aIndex) {return m_InputData.objectives[aIndex].freq_min;}
-    // std::string getObjFreqMax(const int &aIndex) {return m_InputData.objectives[aIndex].freq_max;}
-    // std::string getObjFreqStep(const int &aIndex) {return m_InputData.objectives[aIndex].freq_step;}
-    // std::vector<std::string> getObjLoadIds(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_ids;}
-    // std::vector<std::string> getObjLoadWeights(const int &aIndex) {return m_InputData.objectives[aIndex].load_case_weights;}
-    // std::string getObjStressLimit(const int &aIndex) {return m_InputData.objectives[aIndex].stress_limit;}
-    // std::string getObjStressRampFactor(const int &aIndex) {return m_InputData.objectives[aIndex].stress_ramp_factor;}
-    // std::vector<XMLGen::LoadCase> getLoadCases() {return m_InputData.load_cases;}
-    // std::vector<double> getLoadCaseProbabilities() {return m_InputData.load_case_probabilities;}
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
-    // std::string getLoadType(const std::string &aLoadID, const int &aLoadIndex);
-    // std::string getLoadApplicationType(const std::string &aLoadID, const int &aLoadIndex);
-    // std::string getLoadApplicationID(const std::string &aLoadID, const int &aLoadIndex);
-    // std::string getLoadDirectionX(const std::string &aLoadID, const int &aLoadIndex);
-    // std::string getLoadDirectionY(const std::string &aLoadID, const int &aLoadIndex);
-    // std::string getLoadDirectionZ(const std::string &aLoadID, const int &aLoadIndex);
     std::string getMatBoxMinCoords() {return m_InputData.optimizer.levelset_material_box_min;}
     std::string getMatBoxMaxCoords() {return m_InputData.optimizer.levelset_material_box_max;}
     std::string getInitDensityValue() {return m_InputData.optimizer.initial_density_value;}
@@ -154,8 +113,6 @@ public:
     std::string getLevelsetSphereRadius() {return m_InputData.optimizer.levelset_sphere_radius;}
     std::string getLevelsetNodeset(const int &aIndex) {return m_InputData.optimizer.levelset_nodesets[aIndex];}
     std::string getFixedBlock(const int &aIndex) {return m_InputData.optimizer.fixed_block_ids[aIndex];}
-    // std::string getOutputFrequency() {return m_InputData.optimizer.output_frequency;}
-    // std::string getOutputMethod() {return m_InputData.optimizer.output_method;}
     std::string getFixedSideset(const int &aIndex) {return m_InputData.optimizer.fixed_sideset_ids[aIndex];}
     std::string getFixedNodeset(const int &aIndex) {return m_InputData.optimizer.fixed_nodeset_ids[aIndex];}
     std::string getNumberProcessors() {return m_InputData.optimizer.num_opt_processors;}

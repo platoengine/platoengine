@@ -25,11 +25,11 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorParseCriteria.cpp
                                       ../XMLGeneratorOutputMetadata.cpp
                                       ../XMLGeneratorParseObjective.cpp
-                                      # ../XMLGeneratorParseConstraint.cpp
+                                      ../XMLGeneratorParseConstraint.cpp
                                       ../XMLGeneratorParseUncertainty.cpp
                                       ../XMLGeneratorScenarioMetadata.cpp
                                       ../XMLGeneratorServiceMetadata.cpp
-                                      # ../XMLGeneratorConstraintMetadata.cpp
+                                      ../XMLGeneratorConstraintMetadata.cpp
                                       ../XMLGeneratorUncertaintyMetadata.cpp
                                       # ../XMLGeneratorDefinesFileUtilities.cpp
                                       # ../XMLGeneratorPlatoAnalyzeUtilities.cpp

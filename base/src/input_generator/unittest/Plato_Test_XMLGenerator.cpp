@@ -209,151 +209,109 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBou
     ASSERT_THROW(tUncertainty.parse(tInputs), std::runtime_error);
 }
 
-//TODO needs more uncertainty parsing unit tests
+TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
+{
+    std::string tStringInput =
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin uncertainty\n"
+        "    category load\n"
+        "    tag angle variation\n"
+        "    load id 10\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n";
 
-// TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "   type maximize stiffness\n"
-//         "   load ids 10\n"
-//         "   boundary condition ids 11\n"
-//         "   code plato_analyze\n"
-//         "   number processors 1\n"
-//         "   weight 1\n"
-//         "   number ranks 1\n"
-//         "end objective\n"
-//         "begin boundary conditions\n"
-//         "   fixed displacement nodeset name 1 bc id 11\n"
-//         "end boundary conditions\n"
-//         "begin loads\n"
-//         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-//         "end loads\n"
-//         "begin material 1\n"
-//             "material_model isotropic linear elastic\n"
-//             "penalty_exponent 3\n"
-//             "youngs_modulus 1e6\n"
-//             "poissons_ratio 0.33\n"
-//         "end material\n"
-//         "begin block 1\n"
-//         "   material 1\n"
-//         "end block\n"
-//         "begin uncertainty\n"
-//         "    category load\n"
-//         "    tag angle variation\n"
-//         "    load id 10\n"
-//         "    attribute X\n"
-//         "    distribution beta\n"
-//         "    mean 0.0\n"
-//         "    upper bound 45.0\n"
-//         "    lower bound -45.0\n"
-//         "    standard deviation 22.5\n"
-//         "    num samples 2\n"
-//         "end uncertainty\n"
-//         "begin optimization parameters\n"
-//         "end optimization parameters\n";
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    tUncertainty.parse(tInputs);
 
-//     std::istringstream tInputs;
-//     tInputs.str(tStringInput);
-//     XMLGen::ParseUncertainty tUncertainty;
-//     tUncertainty.parse(tInputs);
+    auto tMetadata = tUncertainty.data();
+    ASSERT_STREQ("10", tMetadata[0].id().c_str());
+    ASSERT_STREQ("x", tMetadata[0].attribute().c_str());
+    ASSERT_STREQ("0.0", tMetadata[0].mean().c_str());
+    ASSERT_STREQ("45.0", tMetadata[0].upper().c_str());
+    ASSERT_STREQ("-45.0", tMetadata[0].lower().c_str());
+    ASSERT_STREQ("2", tMetadata[0].samples().c_str());
+    ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
+    ASSERT_STREQ("load", tMetadata[0].category().c_str());
+    ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
+    ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
+}
 
-//     auto tMetadata = tUncertainty.data();
-//     ASSERT_STREQ("10", tMetadata[0].id().c_str());
-//     ASSERT_STREQ("x", tMetadata[0].attribute().c_str());
-//     ASSERT_STREQ("0.0", tMetadata[0].mean().c_str());
-//     ASSERT_STREQ("45.0", tMetadata[0].upper().c_str());
-//     ASSERT_STREQ("-45.0", tMetadata[0].lower().c_str());
-//     ASSERT_STREQ("2", tMetadata[0].samples().c_str());
-//     ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
-//     ASSERT_STREQ("load", tMetadata[0].category().c_str());
-//     ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
-//     ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
-// }
+TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
+{
+    std::string tStringInput =
+        "begin loads\n"
+        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+        "end loads\n"
+        "begin material 1\n"
+            "material_model isotropic linear elastic\n"
+            "youngs_modulus 1e6\n"
+            "poissons_ratio 0.33\n"
+        "end material\n"
+        "begin uncertainty\n"
+        "    category load\n"
+        "    load id 10\n"
+        "    tag angle variation\n"
+        "    attribute X\n"
+        "    distribution beta\n"
+        "    mean 0.0\n"
+        "    upper bound 45.0\n"
+        "    lower bound -45.0\n"
+        "    standard deviation 22.5\n"
+        "    num samples 2\n"
+        "end uncertainty\n"
+        "begin uncertainty\n"
+        "    category material\n"
+        "    material id 1\n"
+        "    tag poissons_ratio\n"
+        "    attribute homogeneous\n"
+        "    distribution beta\n"
+        "    mean 0.28\n"
+        "    upper bound 0.4\n"
+        "    lower bound 0.2\n"
+        "    standard deviation 0.05\n"
+        "    num samples 3\n"
+        "end uncertainty\n";
 
-// TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
-// {
-//     std::string tStringInput =
-//         "begin objective\n"
-//         "   type maximize stiffness\n"
-//         "   load ids 10\n"
-//         "   boundary condition ids 11\n"
-//         "   code plato_analyze\n"
-//         "   number processors 1\n"
-//         "   weight 1\n"
-//         "   number ranks 1\n"
-//         "end objective\n"
-//         "begin boundary conditions\n"
-//         "   fixed displacement nodeset name 1 bc id 11\n"
-//         "end boundary conditions\n"
-//         "begin loads\n"
-//         "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-//         "end loads\n"
-//         "begin material 1\n"
-//             "material_model isotropic linear elastic\n"
-//             "youngs_modulus 1e6\n"
-//             "poissons_ratio 0.33\n"
-//         "end material\n"
-//         "begin block 1\n"
-//         "   material 1\n"
-//         "end block\n"
-//         "begin uncertainty\n"
-//         "    category load\n"
-//         "    load id 10\n"
-//         "    tag angle variation\n"
-//         "    attribute X\n"
-//         "    distribution beta\n"
-//         "    mean 0.0\n"
-//         "    upper bound 45.0\n"
-//         "    lower bound -45.0\n"
-//         "    standard deviation 22.5\n"
-//         "    num samples 2\n"
-//         "end uncertainty\n"
-//         "begin uncertainty\n"
-//         "    category material\n"
-//         "    material id 1\n"
-//         "    tag poissons_ratio\n"
-//         "    attribute homogeneous\n"
-//         "    distribution beta\n"
-//         "    mean 0.28\n"
-//         "    upper bound 0.4\n"
-//         "    lower bound 0.2\n"
-//         "    standard deviation 0.05\n"
-//         "    num samples 3\n"
-//         "end uncertainty\n"
-//         "begin optimization parameters\n"
-//         "end optimization parameters\n";
+    std::istringstream tInputs;
+    tInputs.str(tStringInput);
+    XMLGen::ParseUncertainty tUncertainty;
+    tUncertainty.parse(tInputs);
 
-//     std::istringstream tInputs;
-//     tInputs.str(tStringInput);
-//     XMLGen::ParseUncertainty tUncertainty;
-//     tUncertainty.parse(tInputs);
-
-//     std::vector<std::string> tGoldID = {"10", "1"};
-//     std::vector<std::string> tGoldMean = {"0.0", "0.28"};
-//     std::vector<std::string> tGoldUpper = {"45.0", "0.4"};
-//     std::vector<std::string> tGoldNumSamples = {"2", "3"};
-//     std::vector<std::string> tGoldLower = {"-45.0", "0.2"};
-//     std::vector<std::string> tGoldStdDev = {"22.5", "0.05"};
-//     std::vector<std::string> tGoldCategory = {"load", "material"};
-//     std::vector<std::string> tGoldDistribution = {"beta", "beta"};
-//     std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
-//     std::vector<std::string> tGoldTag = {"angle variation", "poissons_ratio"};
-//     auto tMetadata = tUncertainty.data();
-//     for (auto& tVar : tMetadata)
-//     {
-//         auto tIndex = &tVar - &tMetadata[0];
-//         ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id().c_str());
-//         ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean().c_str());
-//         ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper().c_str());
-//         ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower().c_str());
-//         ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.attribute().c_str());
-//         ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.category().c_str());
-//         ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.samples().c_str());
-//         ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.std().c_str());
-//         ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution().c_str());
-//     }
-// }
+    std::vector<std::string> tGoldID = {"10", "1"};
+    std::vector<std::string> tGoldMean = {"0.0", "0.28"};
+    std::vector<std::string> tGoldUpper = {"45.0", "0.4"};
+    std::vector<std::string> tGoldNumSamples = {"2", "3"};
+    std::vector<std::string> tGoldLower = {"-45.0", "0.2"};
+    std::vector<std::string> tGoldStdDev = {"22.5", "0.05"};
+    std::vector<std::string> tGoldCategory = {"load", "material"};
+    std::vector<std::string> tGoldDistribution = {"beta", "beta"};
+    std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
+    std::vector<std::string> tGoldTag = {"angle variation", "poissons_ratio"};
+    auto tMetadata = tUncertainty.data();
+    for (auto& tVar : tMetadata)
+    {
+        auto tIndex = &tVar - &tMetadata[0];
+        ASSERT_STREQ(tGoldID[tIndex].c_str(), tVar.id().c_str());
+        ASSERT_STREQ(tGoldMean[tIndex].c_str(), tVar.mean().c_str());
+        ASSERT_STREQ(tGoldUpper[tIndex].c_str(), tVar.upper().c_str());
+        ASSERT_STREQ(tGoldLower[tIndex].c_str(), tVar.lower().c_str());
+        ASSERT_STREQ(tGoldAttribute[tIndex].c_str(), tVar.attribute().c_str());
+        ASSERT_STREQ(tGoldCategory[tIndex].c_str(), tVar.category().c_str());
+        ASSERT_STREQ(tGoldNumSamples[tIndex].c_str(), tVar.samples().c_str());
+        ASSERT_STREQ(tGoldStdDev[tIndex].c_str(), tVar.std().c_str());
+        ASSERT_STREQ(tGoldDistribution[tIndex].c_str(), tVar.distribution().c_str());
+    }
+}
 
 TEST(PlatoTestXMLGenerator, parseSingleValue)
 {
@@ -1079,44 +1037,6 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.getLevelsetNodeset(1), "10");
     EXPECT_EQ(tester.getLevelsetNodeset(2), "22");
 
-    // // output frequency
-    // stringInput = "begin optimization parameters\n"
-    //         "output frequency\n"
-    //         "end optimization parameters\n";
-    // iss.str(stringInput);
-    // iss.clear();
-    // iss.seekg (0);
-    // tester.clearInputData();
-    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    // stringInput = "begin optimization parameters\n"
-    //         "output frequency 5\n"
-    //         "end optimization parameters\n";
-    // iss.str(stringInput);
-    // iss.clear();
-    // iss.seekg (0);
-    // tester.clearInputData();
-    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    // EXPECT_EQ(tester.getOutputFrequency(), "5");
-
-    // // output method
-    // stringInput = "begin optimization parameters\n"
-    //         "output method\n"
-    //         "end optimization parameters\n";
-    // iss.str(stringInput);
-    // iss.clear();
-    // iss.seekg (0);
-    // tester.clearInputData();
-    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    // stringInput = "begin optimization parameters\n"
-    //         "output method parallel write\n"
-    //         "end optimization parameters\n";
-    // iss.str(stringInput);
-    // iss.clear();
-    // iss.seekg (0);
-    // tester.clearInputData();
-    // EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    // EXPECT_EQ(tester.getOutputMethod(), "parallel write");
-
     // fixed blocks
     stringInput = "begin optimization parameters\n"
             "fixed blocks\n"
@@ -1499,80 +1419,6 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
     EXPECT_EQ(tester.getCheckHessian(), "true");
 }
-
-// TEST(PlatoTestXMLGenerator, parseConstraints)
-// {
-//     XMLGenerator_UnitTester tester;
-//     std::istringstream iss;
-//     std::string stringInput;
-
-//     stringInput = "begin constraint\n"
-//             "type\n"
-//             "end constraint\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-//     stringInput = "begin constraint\n"
-//             "name\n"
-//             "end constraint\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-//     stringInput = "begin constraint\n"
-//             "volume fraction\n"
-//             "end constraint\n";
-
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-
-//     stringInput = "begin constraint\n"
-//             "bad_keyword\n"
-//             "end constraint\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     ASSERT_THROW(tester.publicParseConstraints(iss), std::runtime_error);
-
-//     stringInput = "begin constraint\n"
-//             "code platomain\n"
-//             "type volume\n"
-//             "name vol1\n"
-//             "volume fraction .5\n"
-//             "end constraint\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseConstraints(iss), true);
-//     EXPECT_EQ(tester.getConstraintName(0), "vol1");
-//     EXPECT_EQ(tester.getConstraintType(0), "volume");
-//     EXPECT_EQ(tester.getConstraintVolFrac(0), ".5");
-
-//     stringInput = "begin constraint\n"
-//              "code platomain\n"
-//             "type surface area\n"
-//             "name surf1\n"
-//             "surface_area 23\n"
-//             "surface_area_sideset_id 20\n"
-//             "end constraint\n";
-//     iss.str(stringInput);
-//     iss.clear();
-//     iss.seekg (0);
-//     tester.clearInputData();
-//     EXPECT_EQ(tester.publicParseConstraints(iss), true);
-//     EXPECT_EQ(tester.getConstraintName(0), "surf1");
-//     EXPECT_EQ(tester.getConstraintType(0), "surface area");
-//     EXPECT_EQ(tester.getConstraintSurfArea(0), "23");
-//     EXPECT_EQ(tester.getConstraintSurfAreaSidesetID(0), "20");
-// }
 
 TEST(PlatoTestXMLGenerator, parseMesh)
 {
@@ -2112,234 +1958,5 @@ TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
     EXPECT_EQ(new_load.values,values);
     EXPECT_EQ(new_load.load_id,"1");
 }
-
-//TODO: needs BC parsing unit tests
-
-// TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
-// {
-//     // POSE PROBLEM
-//   XMLGenerator_UnitTester tTester;
-//   std::istringstream iss;
-//   std::string stringInput =
-//   "begin service\n"
-//   "   physics mechanical\n"
-//   "   dimensions 3\n"
-//   "   use_new_analyze_uq_workflow true\n"
-//   "end service\n"
-//   "begin objective\n"
-//   "   type maximize stiffness\n"
-//   "   load ids 10\n"
-//   "   boundary condition ids 11\n"
-//   "   code plato_analyze\n"
-//   "   number processors 1\n"
-//   "   weight 1\n"
-//   "   number ranks 1\n"
-//   "end objective\n"
-//   "begin boundary conditions\n"
-//   "   fixed displacement nodeset name 1 bc id 11\n"
-//   "end boundary conditions\n"
-//   "begin loads\n"
-//   "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-//   "end loads\n"
-//   "begin uncertainty\n"
-//   "    category load\n"
-//   "    tag angle variation\n"
-//   "    load id 10\n"
-//   "    attribute X\n"
-//   "    distribution beta\n"
-//   "    mean 0.0\n"
-//   "    upper bound 45.0\n"
-//   "    lower bound -45.0\n"
-//   "    standard deviation 22.5\n"
-//   "    num samples 2\n"
-//   "end uncertainty\n";
-//   // do parse
-//   iss.str(stringInput);
-
-//   iss.clear();
-//   iss.seekg(0);
-//   EXPECT_EQ(tTester.publicParseObjectives(iss), true);
-
-//   iss.clear();
-//   iss.seekg(0);
-//   EXPECT_EQ(tTester.publicParseLoads(iss), true);
-
-//   iss.clear();
-//   iss.seekg(0);
-//   EXPECT_NO_THROW(tTester.publicParseBCs(iss));
-
-//   iss.clear();
-//   iss.seekg(0);
-//   EXPECT_EQ(tTester.parseService(iss), true);
-
-//   iss.clear();
-//   iss.seekg(0);
-//   EXPECT_EQ(tTester.publicParseUncertainties(iss), true);
-//   EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
-
-//   auto tXMLGenMetadata = tTester.getInputData();
-//   auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-//   size_t numPerformers = tTester.getNumPerformers();
-//   EXPECT_EQ(tNumSamples,2u);
-//   EXPECT_EQ(numPerformers,1u);
-
-//   // TEST SAMPLES
-//   std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
-//   std::vector<std::vector<std::string>> tGoldValues =
-//       {
-//         { "0.000000000000000000000e+00", "-4.751921387767659325618e+04", "1.555391630579348566243e+04" },
-//         { "0.000000000000000000000e+00", "-4.813588076578034088016e+04", "-1.352541987897522631101e+04"}
-//       };
-
-//   const double tTolerance = 1e-10;
-//   auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
-//   for(auto& tSample : tSamples)
-//   {
-//       auto tSampleIndex = &tSample - &tSamples[0];
-//       ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
-
-//       for(auto& tLoad : tSample.loadcase().loads)
-//       {
-//           ASSERT_STREQ("traction", tLoad.type.c_str());
-//           for(auto& tValue : tLoad.values)
-//           {
-//               auto tComponent = &tValue - &tLoad.values[0];
-//               ASSERT_NEAR(std::stod(tValue), std::stod(tGoldValues[tSampleIndex][tComponent]), tTolerance);
-//           }
-//       }
-//   }
-
-//   size_t numObjectives = tTester.getNumObjectives();
-//   EXPECT_EQ(numObjectives, 1u);
-// }
-
-// TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministic)
-// {
-//     // POSE INPUT DATA
-//     XMLGenerator_UnitTester tTester;
-//     std::istringstream tInputSS;
-//     std::string tStringInput =
-//     "begin service\n"
-//     "   physics mechanical\n"
-//     "   dimensions 3\n"
-//     "   use_new_analyze_uq_workflow true\n"
-//     "end service\n"
-//     "begin objective\n"
-//     "   type maximize stiffness\n"
-//     "   load ids 10 1\n"
-//     "   boundary condition ids 11\n"
-//     "   code plato_analyze\n"
-//     "   number processors 1\n"
-//     "   weight 1\n"
-//     "   number ranks 5\n"
-//     "end objective\n"
-//     "begin boundary conditions\n"
-//     "   fixed displacement nodeset name 1 bc id 11\n"
-//     "end boundary conditions\n"
-//     "begin loads\n"
-//     "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-//     "    traction sideset name 3 value 0 -5e4 0 load id 1\n"
-//     "end loads\n"
-//     "begin uncertainty\n"
-//     "    category load\n"
-//     "    tag angle variation\n"
-//     "    load id 10\n"
-//     "    attribute X\n"
-//     "    distribution beta\n"
-//     "    mean 0.0\n"
-//     "    upper bound 45.0\n"
-//     "    lower bound -45.0\n"
-//     "    standard deviation 22.5\n"
-//     "    num samples 10\n"
-//     "end uncertainty\n";
-//     // do parse
-//     tInputSS.str(tStringInput);
-
-//     tInputSS.clear();
-//     tInputSS.seekg(0);
-//     EXPECT_EQ(tTester.parseService(tInputSS), true);
-//     tInputSS.clear();
-//     tInputSS.seekg(0);
-//     EXPECT_EQ(tTester.publicParseObjectives(tInputSS), true);
-//     tInputSS.clear();
-//     tInputSS.seekg(0);
-//     EXPECT_EQ(tTester.publicParseLoads(tInputSS), true);
-//     tInputSS.clear();
-//     tInputSS.seekg(0);
-//     EXPECT_NO_THROW(tTester.publicParseBCs(tInputSS));
-//     tInputSS.clear();
-//     tInputSS.seekg(0);
-//     EXPECT_EQ(tTester.publicParseUncertainties(tInputSS), true);
-//     EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
-
-//     // TEST DATA
-//     auto tXMLGenMetadata = tTester.getInputData();
-//     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-//     EXPECT_EQ(tNumSamples,10u);
-//     size_t tNumPerformers = tTester.getNumPerformers();
-//     EXPECT_EQ(tNumPerformers,5u);
-
-//     // POSE GOLD VALUES
-//     std::vector<std::string> tGoldLoadCaseProbabilities =
-//         {"0.094172629104440519", "0.096118338919238849", "0.099663940442524482", "0.10447870334065364" , "0.10564855564584232",
-//          "0.10576322174283935" , "0.10486290959769146" , "0.099755080570144233", "0.095660857410530639", "0.093878478812968374"};
-
-//     std::vector<std::vector<std::vector<std::string>>> tGoldLoadValues =
-//       {
-//         { { "0.000000000000000000000e+00", "-4.008042184600126347505e+04", "2.989247036707714141812e+04" },
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.410827789159363601357e+04", "2.354697053631213930203e+04" },
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.704161308330694009783e+04", "1.694363120822820928879e+04" },
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.894831379618879145710e+04", "1.020110663162747732713e+04" },
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.988485492991151841125e+04", "3.391349085789085165743e+03" },
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.988284696095977415098e+04", "-3.420757090099503329839e+03"},
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.894769754769306018716e+04", "-1.020406315050838020397e+04"},
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.706038546730067173485e+04", "-1.689142148160054057371e+04"},
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.418230226249388215365e+04", "-2.340778004821533613722e+04"},
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } },
-
-//         { { "0.000000000000000000000e+00", "-4.025755085941775905667e+04", "-2.965349218559918881510e+04"},
-//           { "0.000000000000000000000e+00", "-5.000000000000000000000e+04", "0.000000000000000000000e+00" } }
-//       };
-
-//     // TEST SAMPLES
-//     constexpr double tTolerance = 1e-6;
-//     auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
-//     for (auto &tSample : tSamples)
-//     {
-//         auto tSampleIndex = &tSample - &tSamples[0];
-//         ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
-
-//         auto tLoadCase = tSample.loadcase();
-//         for (auto &tLoad : tLoadCase.loads)
-//         {
-//             auto tLoadIndex = &tLoad - &tLoadCase.loads[0];
-//             ASSERT_STREQ("traction", tLoad.type.c_str());
-//             for (auto &tValue : tLoad.values)
-//             {
-//                 auto tComponent = &tValue - &tLoad.values[0];
-//                 ASSERT_NEAR(std::stod(tValue), std::stod(tGoldLoadValues[tSampleIndex][tLoadIndex][tComponent]), tTolerance);
-//             }
-//         }
-//     }
-
-//     const size_t tNumObjectives = tTester.getNumObjectives();
-//     ASSERT_EQ(tNumObjectives, 1u);
-// }
 
 } // end PlatoTestXMLGenerator namespace

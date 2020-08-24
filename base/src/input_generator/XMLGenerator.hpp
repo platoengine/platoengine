@@ -69,7 +69,7 @@ public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     void generate();
-    // const InputData& getInputData(){ return m_InputData; }
+    const InputData& getInputData(){ return m_InputData; }
 
 protected:
 
@@ -99,18 +99,13 @@ protected:
     bool parseBlocks(std::istream &fin);
     void parseObjective(std::istream &fin);
     void parseScenarios(std::istream &fin);
-    // bool fillObjectiveAndPerfomerNames();
-    // bool parseConstraints(std::istream &fin);
+    void parseServices(std::istream &fin);
+    bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);
     void parseUncertainties(std::istream &fin);
     bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    // void getUncertaintyFlags();
-    // void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
-    //                              bool &aHasUncertainties,
-    //                              bool &aRequestedVonMises);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
-    // bool find_tokens(std::vector<std::string> &tokens, const int &start_index, const char *str1, const char *str2);
     bool parseSingleValue(const std::vector<std::string> &aTokens,
                           const std::vector<std::string> &aInputStrings,
                           std::string &aReturnStringValue);
@@ -119,8 +114,6 @@ protected:
                                    const std::vector<std::string> &aUnLoweredTokens,
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
-    // void lookForPlatoAnalyzePerformers();
-    // bool checkForNodesetSidesetNameConflicts();
 
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
@@ -131,9 +124,6 @@ private:
     //  **********************************************************************************/
     void initializePlatoProblemOptions();
 
-    // void putLoadInLoadCase(XMLGen::Load& new_load);
-    // bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
-    // void createNewLoadCase(XMLGen::Load& new_load);
     // void writeInputFiles();
 };
 

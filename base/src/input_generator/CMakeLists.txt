@@ -10,12 +10,12 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseCriteria.cpp
-                      # XMLGeneratorParseConstraint.cpp
+                      XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
                       XMLGeneratorScenarioMetadata.cpp
                       XMLGeneratorServiceMetadata.cpp
                       XMLGeneratorParseUncertainty.cpp
-                      # XMLGeneratorConstraintMetadata.cpp
+                      XMLGeneratorConstraintMetadata.cpp
                       XMLGeneratorUncertaintyMetadata.cpp
                       # XMLGeneratorDefinesFileUtilities.cpp
                       # XMLGeneratorPlatoAnalyzeUtilities.cpp
@@ -50,9 +50,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorScenarioMetadata.hpp
                       XMLGeneratorServiceMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
-                      # XMLGeneratorCriterionMetadata.hpp 
-                      # XMLGeneratorCriterionMetadata.hpp 
-                      # XMLGeneratorConstraintMetadata.hpp
+                      XMLGeneratorCriterionMetadata.hpp 
+                      XMLGeneratorConstraintMetadata.hpp
                       XMLGeneratorUncertaintyMetadata.hpp
                       # XMLGeneratorPlatoAnalyzeProblem.hpp 
                       # XMLGeneratorDefinesFileUtilities.hpp 
@@ -88,7 +87,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorParseMetadata.hpp 
                       XMLGeneratorParseScenario.hpp 
                       XMLGeneratorParseServices.hpp 
-                      # XMLGeneratorParseConstraint.hpp 
+                      XMLGeneratorParseConstraint.hpp 
                       XMLGeneratorParseUncertainty.hpp
                       # SalinasInputDeckWriter.hpp
                       )

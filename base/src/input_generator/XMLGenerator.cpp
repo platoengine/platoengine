@@ -75,10 +75,11 @@
 
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
+#include "XMLGeneratorParseServices.hpp"
 #include "XMLGeneratorParseMaterial.hpp"
 #include "XMLGeneratorParseCriteria.hpp"
 #include "XMLGeneratorParseObjective.hpp"
-// #include "XMLGeneratorParseConstraint.hpp"
+#include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 
 namespace XMLGen
@@ -223,6 +224,16 @@ void XMLGenerator::parseScenarios(std::istream &aInputFile)
     tParseScenario.parse(aInputFile);
     auto tScenarios = tParseScenario.data();
     m_InputData.set(tScenarios);
+}
+
+/******************************************************************************/
+void XMLGenerator::parseServices(std::istream &aInputFile)
+/******************************************************************************/
+{
+    XMLGen::ParseService tParseService;
+    tParseService.parse(aInputFile);
+    auto tServices = tParseService.data();
+    m_InputData.services = tServices;
 }
 
 /******************************************************************************/
@@ -2182,25 +2193,15 @@ void XMLGenerator::parseCriteria(std::istream &aInput)
     m_InputData.criteria = tParseCriteria.data();
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::parseConstraints(std::istream &aInput)
-// /******************************************************************************/
-// {
-//     XMLGen::ParseConstraint tParseConstraint;
-//     tParseConstraint.parse(aInput);
-//     m_InputData.constraints = tParseConstraint.data();
-//     return true;
-// }
-
-// /******************************************************************************/
-// bool XMLGenerator::find_tokens(std::vector<std::string> &tokens,
-//     const int &start_index,
-//     const char *str1,
-//     const char *str2)
-// /******************************************************************************/
-// {
-//   return true;
-// }
+/******************************************************************************/
+bool XMLGenerator::parseConstraints(std::istream &aInput)
+/******************************************************************************/
+{
+    XMLGen::ParseConstraint tParseConstraint;
+    tParseConstraint.parse(aInput);
+    m_InputData.constraints = tParseConstraint.data();
+    return true;
+}
 
 /******************************************************************************/
 void XMLGenerator::parseInputFile()
@@ -2248,9 +2249,9 @@ void XMLGenerator::parseInputFile()
   this->parseObjective(tInputFile);
   tInputFile.close();
 
-  // tInputFile.open(m_InputFilename.c_str()); // open a file
-  // this->parseConstraints(tInputFile);
-  // tInputFile.close();
+  tInputFile.open(m_InputFilename.c_str()); // open a file
+  this->parseConstraints(tInputFile);
+  tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file
   this->parseUncertainties(tInputFile);
@@ -2260,9 +2261,9 @@ void XMLGenerator::parseInputFile()
   this->parseOutput(tInputFile);
   tInputFile.close();
 
-   // tInputFile.open(m_InputFilename.c_str()); // open a file
-   // this->parseServices(tInputFile);
-   // tInputFile.close();
+   tInputFile.open(m_InputFilename.c_str()); // open a file
+   this->parseServices(tInputFile);
+   tInputFile.close();
   
   tInputFile.open(m_InputFilename.c_str()); // open a file
   this->parseScenarios(tInputFile);
@@ -2330,15 +2331,5 @@ std::string XMLGenerator::toUpper(const std::string &s)
   }
   return ret;
 }
-
-// /******************************************************************************/
-// void XMLGenerator::getUncertaintyFlags()
-// /******************************************************************************/
-// {
-//     if(!m_InputData.uncertainties.empty())
-//     {
-//         m_InputData.m_HasUncertainties = true;
-//     }
-// }
 
 }
