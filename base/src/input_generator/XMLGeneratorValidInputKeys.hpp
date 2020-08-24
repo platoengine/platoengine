@@ -86,7 +86,7 @@ struct ValidRandomIdentificationKeys
      * \brief Valid plato input deck identification keywords.
      * Map from random 'category' keyword to identification keyword, i.e. map<category_key, identification_key>.
      **/
-    std::unordered_map<std::string, std::string> mKeys = { { "load", "load id" }, { "material", "material id" } };
+    std::unordered_map<std::string, std::string> mKeys = { { "load", "load_id" }, { "material", "material_id" } };
 };
 // struct ValidStatisticalDistributionKeys
 

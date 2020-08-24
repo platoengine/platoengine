@@ -64,46 +64,59 @@ void ParseUncertainty::allocate()
     mTags.clear();
     mTags.insert({ "tag", { { {"tag"}, ""}, "" } });
     mTags.insert({ "mean", { { {"mean"}, ""}, "" } });
-    mTags.insert({ "load id", { { {"load","id"}, ""}, "" } });
+    mTags.insert({ "load_id", { { {"load_id"}, ""}, "" } });
     mTags.insert({ "filename", { { {"filename"}, ""}, "" } });
-    mTags.insert({ "material id", { { {"material","id"}, ""}, "" } });
     mTags.insert({ "category", { { {"category"}, ""}, "" } });
     mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
+    mTags.insert({ "lower_bound", { { {"lower_bound"}, ""}, "" } });
+    mTags.insert({ "upper_bound", { { {"upper_bound"}, ""}, "" } });
+    mTags.insert({ "material_id", { { {"material_id"}, ""}, "" } });
     mTags.insert({ "distribution", { { {"distribution"}, ""}, "" } });
-    mTags.insert({ "num samples", { { {"num", "samples"}, ""}, "" } });
-    mTags.insert({ "lower bound", { { {"lower", "bound"}, ""}, "" } });
-    mTags.insert({ "upper bound", { { {"upper", "bound"}, ""}, "" } });
-    mTags.insert({ "standard deviation", { { {"standard", "deviation"}, ""}, "" } });
+    mTags.insert({ "number_samples", { { {"number_samples"}, ""}, "" } });
+    mTags.insert({ "initial_guess", { { {"initial_guess"}, ""}, "random" } });
+    mTags.insert({ "standard_deviation", { { {"standard_deviation"}, ""}, "" } });
 }
 
-void ParseUncertainty::setCategory(XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
 {
-    auto tItr = mTags.find("category");
-    if(tItr != mTags.end() && !tItr->second.first.second.empty())
+    for(auto& tTag : mTags)
     {
-        aMetadata.append("category", tItr->second.first.second);
+        if(tTag.second.first.second.empty())
+        {
+            auto tDefaultValue = tTag.second.second;
+            aMetadata.append(tTag.first, tDefaultValue);
+        }
+        else
+        {
+            auto tInputValue = tTag.second.first.second;
+            aMetadata.append(tTag.first, tInputValue);
+        }
     }
-    else
-    {
-        THROWERR(std::string("Parse Uncertainty: 'category' keyword is not defined. User must define ")
-            + "the uncertain parameter 'category'. Supported options are 'load' and 'material'.")
-    }
+    this->setID(aMetadata);
+    this->setAttribute(aMetadata);
 }
 
-void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::setID(XMLGen::Uncertainty& aMetadata)
 {
     if(aMetadata.category().empty())
     {
         THROWERR("Parse Uncertainty: 'category' keyword is empty, i.e. is not defined.")
     }
+
     XMLGen::ValidRandomIdentificationKeys tValidKeys;
     auto tItr = tValidKeys.mKeys.find(aMetadata.category());
     if(tItr == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Parse Uncertainty: 'category' keyword '") + aMetadata.category() + "' is not supported.")
     }
-    auto tID = tItr->second;
-    aMetadata.append("id", mTags.find(tID)->second.first.second);
+
+    auto tValidIdItr = mTags.find(tItr->second) ;
+    if(tValidIdItr == mTags.end())
+    {
+        THROWERR(std::string("Parse Uncertainty: Did not find keyword '") + tItr->second + "' in uncertainty block keywords map.")
+    }
+
+    aMetadata.append("id", tValidIdItr->second.first.second);
     if(aMetadata.id().empty())
     {
         THROWERR(std::string("Parse Uncertainty: Failed to parse uncertain parameter identification number. ")
@@ -112,20 +125,17 @@ void ParseUncertainty::setIdentificationNumber(XMLGen::Uncertainty& aMetadata)
     }
 }
 
-void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)
+void ParseUncertainty::setAttribute(XMLGen::Uncertainty& aMetadata)
 {
-    this->setCategory(aMetadata);
-    this->setIdentificationNumber(aMetadata);
-    aMetadata.append("tag", mTags.find("tag")->second.first.second);
-    aMetadata.append("mean", mTags.find("mean")->second.first.second);
-    aMetadata.append("attribute", mTags.find("attribute")->second.first.second);
-    this->isAttributeEmpty(aMetadata);
-    aMetadata.append("filename", mTags.find("filename")->second.first.second);
-    aMetadata.append("upper_bound", mTags.find("upper bound")->second.first.second);
-    aMetadata.append("lower_bound", mTags.find("lower bound")->second.first.second);
-    aMetadata.append("number_samples", mTags.find("num samples")->second.first.second);
-    aMetadata.append("distribution", mTags.find("distribution")->second.first.second);
-    aMetadata.append("standard_deviation", mTags.find("standard deviation")->second.first.second);
+    if(aMetadata.category().compare("material") == 0 && aMetadata.attribute().empty())
+    {
+        aMetadata.attribute("homogeneous");
+    }
+    else if(aMetadata.category().compare("load") == 0 && aMetadata.attribute().empty())
+    {
+        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword of random variable with tag '") + aMetadata.tag()
+                 + "', category '" + aMetadata.category() + "', and id '" + aMetadata.id() + "' is empty.")
+    }
 }
 
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
@@ -156,19 +166,6 @@ void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
         std::ostringstream tMsg;
         tMsg << "Parse Uncertainty: 'tag' keyword '" << tLowerKey << "' is not supported. ";
         THROWERR(tMsg.str().c_str())
-    }
-}
-
-void ParseUncertainty::isAttributeEmpty(XMLGen::Uncertainty& aMetadata)
-{
-    if(aMetadata.category().compare("material") == 0 && aMetadata.attribute().empty())
-    {
-        aMetadata.attribute("homogeneous");
-    }
-    else if(aMetadata.category().compare("load") == 0 && aMetadata.attribute().empty())
-    {
-        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword of random variable with tag '") + aMetadata.tag()
-                 + "', category '" + aMetadata.category() + "', and id '" + aMetadata.id() + "' is empty.")
     }
 }
 

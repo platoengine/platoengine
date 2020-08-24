@@ -116,11 +116,11 @@ TEST(PlatoTestXMLGenerator, ParseTagValues)
     tTags.insert({ "load", { { {"load"}, ""}, "" } });
     tTags.insert({ "mean", { { {"mean"}, ""}, "" } });
     tTags.insert({ "distribution", { { {"distribution"}, ""}, "" } });
-    tTags.insert({ "num samples", { { {"num", "samples"}, ""}, "" } });
-    tTags.insert({ "lower bound", { { {"lower", "bound"}, ""}, "" } });
-    tTags.insert({ "upper bound", { { {"upper", "bound"}, ""}, "" } });
+    tTags.insert({ "number_samples", { { {"num", "samples"}, ""}, "" } });
+    tTags.insert({ "lower_bound", { { {"lower", "bound"}, ""}, "" } });
+    tTags.insert({ "upper_bound", { { {"upper", "bound"}, ""}, "" } });
     tTags.insert({ "category", { { {"category"}, ""}, "" } });
-    tTags.insert({ "standard deviation", { { {"standard", "deviation"}, ""}, "" } });
+    tTags.insert({ "standard_deviation", { { {"standard", "deviation"}, ""}, "" } });
 
     XMLGen::parse_tag_values(std::vector<std::string>{"tag", "angle", "variation"}, tTags);
     ASSERT_STREQ("angle variation", tTags.find("tag")->second.first.second.c_str());
@@ -133,15 +133,15 @@ TEST(PlatoTestXMLGenerator, ParseTagValues)
     XMLGen::parse_tag_values(std::vector<std::string>{"distribution", "beta"}, tTags);
     ASSERT_STREQ("beta", tTags.find("distribution")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"num", "samples", "4"}, tTags);
-    ASSERT_STREQ("4", tTags.find("num samples")->second.first.second.c_str());
+    ASSERT_STREQ("4", tTags.find("number_samples")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"lower", "bound", "0.5"}, tTags);
-    ASSERT_STREQ("0.5", tTags.find("lower bound")->second.first.second.c_str());
+    ASSERT_STREQ("0.5", tTags.find("lower_bound")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"upper", "bound", "2"}, tTags);
-    ASSERT_STREQ("2", tTags.find("upper bound")->second.first.second.c_str());
+    ASSERT_STREQ("2", tTags.find("upper_bound")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"category", "load"}, tTags);
     ASSERT_STREQ("load", tTags.find("category")->second.first.second.c_str());
     XMLGen::parse_tag_values(std::vector<std::string>{"standard", "deviation", "0.2"}, tTags);
-    ASSERT_STREQ("0.2", tTags.find("standard deviation")->second.first.second.c_str());
+    ASSERT_STREQ("0.2", tTags.find("standard_deviation")->second.first.second.c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
@@ -150,14 +150,14 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
         "begin uncertainty\n"
         "    category load\n"
         "    tag angle variation\n"
-        "    load id 10\n"
+        "    load_id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean -50.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
+        "    upper_bound 45.0\n"
+        "    lower_bound -45.0\n"
+        "    standard_deviation 22.5\n"
+        "    number_samples 2\n"
         "end uncertainty\n";
 
     std::istringstream tInputs;
@@ -172,14 +172,14 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBou
         "begin uncertainty\n"
         "    category load\n"
         "    tag angle variation\n"
-        "    load id 10\n"
+        "    load_id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean -20.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 30\n"
-        "    num samples 2\n"
+        "    upper_bound 45.0\n"
+        "    lower_bound -45.0\n"
+        "    standard_deviation 30\n"
+        "    number_samples 2\n"
         "end uncertainty\n";
 
     std::istringstream tInputs;
@@ -194,14 +194,14 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBou
         "begin uncertainty\n"
         "    category load\n"
         "    tag angle variation\n"
-        "    load id 10\n"
+        "    load_id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 20.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 30\n"
-        "    num samples 2\n"
+        "    upper_bound 45.0\n"
+        "    lower_bound -45.0\n"
+        "    standard_deviation 30\n"
+        "    number_samples 2\n"
         "end uncertainty\n";
 
     std::istringstream tInputs;
@@ -215,7 +215,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
     std::string tStringInput =
         "begin objective\n"
         "   type maximize stiffness\n"
-        "   load ids 10\n"
+        "   load_ids 10\n"
         "   boundary condition ids 11\n"
         "   code plato_analyze\n"
         "   number processors 1\n"
@@ -240,14 +240,14 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
         "begin uncertainty\n"
         "    category load\n"
         "    tag angle variation\n"
-        "    load id 10\n"
+        "    load_id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 0.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
+        "    upper_bound 45.0\n"
+        "    lower_bound -45.0\n"
+        "    standard_deviation 22.5\n"
+        "    number_samples 2\n"
         "end uncertainty\n"
         "begin optimization parameters\n"
         "end optimization parameters\n";
@@ -298,27 +298,27 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
         "end block\n"
         "begin uncertainty\n"
         "    category load\n"
-        "    load id 10\n"
+        "    load_id 10\n"
         "    tag angle variation\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 0.0\n"
-        "    upper bound 45.0\n"
-        "    lower bound -45.0\n"
-        "    standard deviation 22.5\n"
-        "    num samples 2\n"
+        "    upper_bound 45.0\n"
+        "    lower_bound -45.0\n"
+        "    standard_deviation 22.5\n"
+        "    number_samples 2\n"
         "end uncertainty\n"
         "begin uncertainty\n"
         "    category material\n"
-        "    material id 1\n"
+        "    material_id 1\n"
         "    tag poissons_ratio\n"
         "    attribute homogeneous\n"
         "    distribution beta\n"
         "    mean 0.28\n"
-        "    upper bound 0.4\n"
-        "    lower bound 0.2\n"
-        "    standard deviation 0.05\n"
-        "    num samples 3\n"
+        "    upper_bound 0.4\n"
+        "    lower_bound 0.2\n"
+        "    standard_deviation 0.05\n"
+        "    number_samples 3\n"
         "end uncertainty\n"
         "begin optimization parameters\n"
         "end optimization parameters\n";
@@ -2137,14 +2137,14 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
   "begin uncertainty\n"
   "    category load\n"
   "    tag angle variation\n"
-  "    load id 10\n"
+  "    load_id 10\n"
   "    attribute X\n"
   "    distribution beta\n"
   "    mean 0.0\n"
-  "    upper bound 45.0\n"
-  "    lower bound -45.0\n"
-  "    standard deviation 22.5\n"
-  "    num samples 2\n"
+  "    upper_bound 45.0\n"
+  "    lower_bound -45.0\n"
+  "    standard_deviation 22.5\n"
+  "    number_samples 2\n"
   "end uncertainty\n";
   // do parse
   iss.str(stringInput);
@@ -2236,14 +2236,14 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     "begin uncertainty\n"
     "    category load\n"
     "    tag angle variation\n"
-    "    load id 10\n"
+    "    load_id 10\n"
     "    attribute X\n"
     "    distribution beta\n"
     "    mean 0.0\n"
-    "    upper bound 45.0\n"
-    "    lower bound -45.0\n"
-    "    standard deviation 22.5\n"
-    "    num samples 10\n"
+    "    upper_bound 45.0\n"
+    "    lower_bound -45.0\n"
+    "    standard_deviation 22.5\n"
+    "    number_samples 10\n"
     "end uncertainty\n";
     // do parse
     tInputSS.str(tStringInput);

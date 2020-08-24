@@ -4,6 +4,7 @@
  *  Created on: Jul 26, 2020
  */
 
+#include <iostream>
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 
 namespace XMLGen
@@ -44,7 +45,7 @@ void Uncertainty::append(const std::string& aTag, const std::string& aValue)
 {
     if (aTag.empty())
     {
-        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is empty.")
+        THROWERR(std::string("XML Generator Service Metadata: Input tag '") + aTag + "' is empty.")
     }
     auto tTag = XMLGen::to_lower(aTag);
     mMetaData[aTag] = aValue;
