@@ -72,6 +72,7 @@ struct Statistics
     std::string mMean;              /*!< probability distribution mean */
     std::string mUpperBound;        /*!< probability distribution upper bound */
     std::string mLowerBound;        /*!< probability distribution lower bound */
+    std::string mInitialGuess;      /*!< method used to compute samples' initial guess, options: random, uniform */
     std::string mStandardDeviation; /*!< probability distribution standard deviation */
 
     /******************************************************************************//**
@@ -186,7 +187,7 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn file
+     * \fn attribute
      * \brief Set random variable attribute.
      * \param [in] aAttribute random variable attribute
     **********************************************************************************/
@@ -203,6 +204,16 @@ public:
     void samples(const std::string& aNumSamples)
     {
         mStatistics.mNumSamples = aNumSamples;
+    }
+
+    /******************************************************************************//**
+     * \fn guess
+     * \brief Set method used to compute samples vector initial guess.
+     * \param [in] aMethod method used to compute samples vector initial guess
+    **********************************************************************************/
+    void guess(const std::string& aMethod)
+    {
+        mStatistics.mInitialGuess = aMethod;
     }
 
     /******************************************************************************//**
@@ -323,6 +334,16 @@ public:
     std::string samples() const
     {
         return mStatistics.mNumSamples;
+    }
+
+    /******************************************************************************//**
+     * \fn guess
+     * \brief Return method used to compute the initial guess for the vector of samples.
+     * \return method's name
+    **********************************************************************************/
+    std::string guess() const
+    {
+        return mStatistics.mInitialGuess;
     }
 
     /******************************************************************************//**

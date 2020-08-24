@@ -300,6 +300,7 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
     tNewVariable.tag(aRandomVariable.tag());
     tNewVariable.attribute(aRandomVariable.attribute());
     tNewVariable.mean(aRandomVariable.mean());
+    tNewVariable.guess(aRandomVariable.guess());
     tNewVariable.lower(aRandomVariable.lower());
     tNewVariable.upper(aRandomVariable.upper());
     tNewVariable.samples(aRandomVariable.samples());

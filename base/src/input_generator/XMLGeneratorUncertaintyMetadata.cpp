@@ -141,6 +141,16 @@ void Uncertainty::mean(const std::string& aInput)
     mMetaData["mean"] = aInput;
 }
 
+std::string Uncertainty::guess() const
+{
+    return (this->getValue("initial_guess"));
+}
+
+void Uncertainty::guess(const std::string& aInput)
+{
+    mMetaData["initial_guess"] = aInput;
+}
+
 std::string Uncertainty::lower() const
 {
     return (this->getValue("lower_bound"));

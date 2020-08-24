@@ -86,6 +86,7 @@ inline void append_material_properties
                 tStats.mUpperBound = tIterator->second.upper();
                 tStats.mLowerBound = tIterator->second.lower();
                 tStats.mNumSamples = tIterator->second.samples();
+                tStats.mInitialGuess = tIterator->second.guess();
                 tStats.mDistribution = tIterator->second.distribution();
                 tStats.mStandardDeviation = tIterator->second.std();
                 aSromMaterial.append(tTag, aMaterial.attribute(tTag), tStats);

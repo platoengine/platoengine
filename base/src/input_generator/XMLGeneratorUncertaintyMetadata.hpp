@@ -182,6 +182,20 @@ public:
     void mean(const std::string& aInput);
 
     /******************************************************************************//**
+     * \fn guess
+     * \brief Return string value for keyword 'initial_guess'.
+     * \return mean
+    **********************************************************************************/
+    std::string guess() const;
+
+    /******************************************************************************//**
+     * \fn guess
+     * \brief Set string value for keyword 'initial_guess'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void guess(const std::string& aInput);
+
+    /******************************************************************************//**
      * \fn lower
      * \brief Return string value for keyword 'lower_bound'.
      * \return lower bound
