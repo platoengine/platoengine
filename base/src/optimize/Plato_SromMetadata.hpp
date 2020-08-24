@@ -72,6 +72,7 @@ struct Statistics
     std::string mMean;                      /*!< probability distribution mean */
     std::string mUpperBound;                /*!< probability distribution upper bound */
     std::string mLowerBound;                /*!< probability distribution lower bound */
+    std::string mRandomSeed = "2";          /*!< random seed used to initialize samples (apply only in random initial guess use cases) */
     std::string mInitialGuess = "uniform";  /*!< method used to compute samples' initial guess, options: random, uniform */
     std::string mStandardDeviation;         /*!< probability distribution standard deviation */
 
@@ -223,6 +224,16 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn seed
+     * \brief Set random seed.
+     * \param [in] aRandomSeed random seed
+    **********************************************************************************/
+    void seed(const std::string& aRandomSeed)
+    {
+        mStatistics.mRandomSeed = aRandomSeed;
+    }
+
+    /******************************************************************************//**
      * \fn mean
      * \brief Set random variable mean.
      * \param [in] aDistribution random variable mean
@@ -310,6 +321,16 @@ public:
     std::string attribute() const
     {
         return mAttribute;
+    }
+
+    /******************************************************************************//**
+     * \fn seed
+     * \brief Return random seed.
+     * \return random seed
+    **********************************************************************************/
+    std::string seed() const
+    {
+        return mStatistics.mRandomSeed;
     }
 
     /******************************************************************************//**

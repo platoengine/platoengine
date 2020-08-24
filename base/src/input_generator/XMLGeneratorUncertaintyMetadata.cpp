@@ -51,6 +51,16 @@ void Uncertainty::append(const std::string& aTag, const std::string& aValue)
     mMetaData[aTag] = aValue;
 }
 
+std::string Uncertainty::seed() const
+{
+    return (this->getValue("random_seed"));
+}
+
+void Uncertainty::seed(const std::string& aInput)
+{
+    mMetaData["random_seed"] = aInput;
+}
+
 std::string Uncertainty::category() const
 {
     return (this->getValue("category"));

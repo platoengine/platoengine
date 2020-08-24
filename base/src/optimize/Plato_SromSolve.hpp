@@ -167,6 +167,7 @@ inline void define_random_samples_initial_guess_method
 {
     if(aMyRandomVar.guess() == "random")
     {
+        std::srand(aInput.mRandomSeed);
         aInput.mInitialGuess = Plato::SromInitialGuess::random;
     }
     else if(aMyRandomVar.guess() == "uniform")
@@ -273,13 +274,13 @@ inline void define_input_statistics
  Plato::SromInputs<double> & aInput)
 {
     Plato::srom::check_input_statistics(aMyRandomVar);
-    aInput.mMean = std::stod(aMyRandomVar.mean().c_str());
-    aInput.mLowerBound = std::stod(aMyRandomVar.lower().c_str());
-    aInput.mUpperBound = std::stod(aMyRandomVar.upper().c_str());
-    const auto tStdDev = std::stod(aMyRandomVar.deviation().c_str());
+    aInput.mMean = std::stod(aMyRandomVar.mean());
+    aInput.mLowerBound = std::stod(aMyRandomVar.lower());
+    aInput.mUpperBound = std::stod(aMyRandomVar.upper());
+    const auto tStdDev = std::stod(aMyRandomVar.deviation());
     aInput.mVariance = tStdDev * tStdDev;
-    const auto tNumSamples = std::stoi(aMyRandomVar.samples().c_str());
-    aInput.mNumSamples = tNumSamples;
+    aInput.mRandomSeed = std::stoi(aMyRandomVar.seed());
+    aInput.mNumSamples = std::stoi(aMyRandomVar.samples());
 }
 // function define_input_statistics
 

@@ -71,6 +71,7 @@ void ParseUncertainty::allocate()
     mTags.insert({ "lower_bound", { { {"lower_bound"}, ""}, "" } });
     mTags.insert({ "upper_bound", { { {"upper_bound"}, ""}, "" } });
     mTags.insert({ "material_id", { { {"material_id"}, ""}, "" } });
+    mTags.insert({ "random_seed", { { {"random_seed"}, ""}, "2" } });
     mTags.insert({ "distribution", { { {"distribution"}, ""}, "" } });
     mTags.insert({ "number_samples", { { {"number_samples"}, ""}, "" } });
     mTags.insert({ "initial_guess", { { {"initial_guess"}, ""}, "random" } });

@@ -56,6 +56,20 @@ public:
     void append(const std::string& aTag, const std::string& aValue);
 
     /******************************************************************************//**
+     * \fn seed
+     * \brief Return string value for keyword 'seed'.
+     * \return random seed
+    **********************************************************************************/
+    std::string seed() const;
+
+    /******************************************************************************//**
+     * \fn seed
+     * \brief Set string value for keyword 'seed'.
+     * \param [in] aInput random seed
+    **********************************************************************************/
+    void seed(const std::string& aInput);
+
+    /******************************************************************************//**
      * \fn category
      * \brief Return string value for keyword 'category'.
      * \return non-deterministic parameter category, e.g. load, material
