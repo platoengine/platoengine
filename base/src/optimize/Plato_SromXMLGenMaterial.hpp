@@ -81,11 +81,13 @@ inline void append_material_properties
             if(tIsMaterialPropertyRandom)
             {
                 Plato::srom::Statistics tStats;
-                tStats.mFile = tIterator->second.filename();
                 tStats.mMean = tIterator->second.mean();
+                tStats.mFile = tIterator->second.filename();
+                tStats.mRandomSeed = tIterator->second.seed();
                 tStats.mUpperBound = tIterator->second.upper();
                 tStats.mLowerBound = tIterator->second.lower();
                 tStats.mNumSamples = tIterator->second.samples();
+                tStats.mInitialGuess = tIterator->second.guess();
                 tStats.mDistribution = tIterator->second.distribution();
                 tStats.mStandardDeviation = tIterator->second.std();
                 aSromMaterial.append(tTag, aMaterial.attribute(tTag), tStats);

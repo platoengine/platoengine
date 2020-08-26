@@ -66,13 +66,15 @@ namespace srom
 **********************************************************************************/
 struct Statistics
 {
-    std::string mFile;              /*!< filename: contains sample-probability pairs */
-    std::string mNumSamples;        /*!< number of samples */
-    std::string mDistribution;      /*!< probability distribution */
-    std::string mMean;              /*!< probability distribution mean */
-    std::string mUpperBound;        /*!< probability distribution upper bound */
-    std::string mLowerBound;        /*!< probability distribution lower bound */
-    std::string mStandardDeviation; /*!< probability distribution standard deviation */
+    std::string mFile;                      /*!< filename: contains sample-probability pairs */
+    std::string mNumSamples;                /*!< number of samples */
+    std::string mDistribution;              /*!< probability distribution */
+    std::string mMean;                      /*!< probability distribution mean */
+    std::string mUpperBound;                /*!< probability distribution upper bound */
+    std::string mLowerBound;                /*!< probability distribution lower bound */
+    std::string mRandomSeed = "2";          /*!< random seed used to initialize samples (apply only in random initial guess use cases) */
+    std::string mInitialGuess = "uniform";  /*!< method used to compute samples' initial guess, options: random, uniform */
+    std::string mStandardDeviation;         /*!< probability distribution standard deviation */
 
     /******************************************************************************//**
      * \fn check
@@ -129,14 +131,10 @@ public:
     void check() const
     {
         if(mTag.empty())
-        {
-            THROWERR("Random Variable: Random variable tag is not defined.")
-        }
+            { THROWERR("Random Variable: Random variable tag is not defined.") }
 
         if(mAttribute.empty())
-        {
-            THROWERR("Random Variable: Random variable attribute is not defined.")
-        }
+            { THROWERR("Random Variable: Random variable attribute is not defined.") }
 
         if(mStatistics.mFile.empty())
         {
@@ -186,7 +184,7 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn file
+     * \fn attribute
      * \brief Set random variable attribute.
      * \param [in] aAttribute random variable attribute
     **********************************************************************************/
@@ -206,6 +204,16 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn guess
+     * \brief Set method used to compute samples vector initial guess.
+     * \param [in] aMethod method used to compute samples vector initial guess
+    **********************************************************************************/
+    void guess(const std::string& aMethod)
+    {
+        mStatistics.mInitialGuess = aMethod;
+    }
+
+    /******************************************************************************//**
      * \fn distribution
      * \brief Set random variable distribution.
      * \param [in] aDistribution random variable distribution
@@ -213,6 +221,16 @@ public:
     void distribution(const std::string& aDistribution)
     {
         mStatistics.mDistribution = aDistribution;
+    }
+
+    /******************************************************************************//**
+     * \fn seed
+     * \brief Set random seed.
+     * \param [in] aRandomSeed random seed
+    **********************************************************************************/
+    void seed(const std::string& aRandomSeed)
+    {
+        mStatistics.mRandomSeed = aRandomSeed;
     }
 
     /******************************************************************************//**
@@ -306,6 +324,16 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn seed
+     * \brief Return random seed.
+     * \return random seed
+    **********************************************************************************/
+    std::string seed() const
+    {
+        return mStatistics.mRandomSeed;
+    }
+
+    /******************************************************************************//**
      * \fn mean
      * \brief Return random variable mean.
      * \return mean
@@ -323,6 +351,16 @@ public:
     std::string samples() const
     {
         return mStatistics.mNumSamples;
+    }
+
+    /******************************************************************************//**
+     * \fn guess
+     * \brief Return method used to compute the initial guess for the vector of samples.
+     * \return method's name
+    **********************************************************************************/
+    std::string guess() const
+    {
+        return mStatistics.mInitialGuess;
     }
 
     /******************************************************************************//**

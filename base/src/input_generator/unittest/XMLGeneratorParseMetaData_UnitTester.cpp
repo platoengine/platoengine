@@ -267,7 +267,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidParameterForCriteria)
     std::string tStringInput =
         "begin criterion 1\n"
         "type volume\n"
-        "p 3\n"
+        "stress_p_norm_exponent 3\n"
         "end criterion\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -329,7 +329,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
     std::string tStringInput =
         "begin criterion 1\n"
         "type stress_p-norm\n"
-        "p 3\n"
+        "stress_p_norm_exponent 3\n"
         "end criterion\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -344,7 +344,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
 
     auto tParameters = tCriterionMetaData[0].parameters();
     ASSERT_EQ(1u, tParameters.size());
-    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("stress_p_norm_exponent").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
@@ -352,7 +352,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
     std::string tStringInput =
         "begin criterion 1\n"
         "type stress_p-norm\n"
-        "p 3\n"
+        "stress_p_norm_exponent 3\n"
         "end criterion\n"
         "begin criterion 2\n"
         "type compliance\n"
@@ -377,7 +377,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
 
     auto tParameters = tCriterionMetaData[0].parameters();
     ASSERT_EQ(1u, tParameters.size());
-    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("p").c_str());
+    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("stress_p_norm_exponent").c_str());
 
     tParameters = tCriterionMetaData[1].parameters();
     ASSERT_EQ(0u, tParameters.size());

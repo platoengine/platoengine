@@ -32,12 +32,12 @@ struct ValidCriterionParameterKeyMap
         mMap.insert({"compliance", {}});
         mMap.insert({"volume", {}});
         mMap.insert({"mass", {}});
-        mMap.insert({"stress_p-norm", {"p"}});
+        mMap.insert({"stress_p-norm", {"stress_p_norm_exponent"}});
         mMap.insert({"total_work", {}});
         mMap.insert({"surface_area", {}});
         mMap.insert({"thermoelastic_energy", {}});
         mMap.insert({"heat_conduction", {}});
-        mMap.insert({"flux_p-norm", {"p"}});
+        mMap.insert({"flux_p-norm", {"flux_p_norm_exponent"}});
         mMap.insert({"effective_energy", {}});
         mMap.insert({"stress", {}});
         mMap.insert({"flux", {}});
@@ -138,7 +138,7 @@ struct ValidRandomIdentificationKeys
      * \brief Valid plato input deck identification keywords.
      * Map from random 'category' keyword to identification keyword, i.e. map<category_key, identification_key>.
      **/
-    std::unordered_map<std::string, std::string> mKeys = { { "load", "load id" }, { "material", "material id" } };
+    std::unordered_map<std::string, std::string> mKeys = { { "load", "load_id" }, { "material", "material_id" } };
 };
 // struct ValidStatisticalDistributionKeys
 

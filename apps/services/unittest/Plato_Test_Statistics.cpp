@@ -892,7 +892,7 @@ TEST(PlatoTest, PlotBetaCDF)
 
     // POSE SROM PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tStatsInputs.mDistribution = Plato::DistributionName::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -1241,7 +1241,7 @@ TEST(PlatoTest, solve_srom_problem_beta)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::beta;
+    tStatsInputs.mDistribution = Plato::DistributionName::beta;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 135.;
     tStatsInputs.mLowerBound = 67.5;
@@ -1279,7 +1279,7 @@ TEST(PlatoTest, solve_srom_problem_uniform)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::uniform;
+    tStatsInputs.mDistribution = Plato::DistributionName::uniform;
     tStatsInputs.mMean = 0.;
     tStatsInputs.mUpperBound = 75.;
     tStatsInputs.mLowerBound = 25.;
@@ -1316,7 +1316,7 @@ TEST(PlatoTest, solve_srom_problem_normal)
 
     // POSE PROBLEM WITH KNOWN SOLUTION
     Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistrubtionName::type_t::normal;
+    tStatsInputs.mDistribution = Plato::DistributionName::normal;
     tStatsInputs.mMean = 90.;
     tStatsInputs.mUpperBound = 0.;
     tStatsInputs.mLowerBound = 0.;
@@ -1341,6 +1341,33 @@ TEST(PlatoTest, solve_srom_problem_normal)
     const double tTotalProbability =
             tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight + tOutput[3].mSampleWeight;
     EXPECT_NEAR(tTotalProbability, 0.99992125876824889, tTol);
+}
+
+TEST(PlatoTest, SetSampleProbabilityPairsInitialGuess_UniformSampleInitialGuess)
+{
+    Plato::SromInputs<double> tSromInputs;
+    tSromInputs.mNumSamples = 2;
+    tSromInputs.mNumSamples = 2;
+    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
+    Plato::set_sample_probability_pairs_bounds(tSromInputs, tInputsKSAL);
+    Plato::set_sample_probability_pairs_initial_guess(tSromInputs, tInputsKSAL);
+    // TEST SAMPLES INITIAL GUESS
+    const double tTol = 1e-6;
+    EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[0][0], 1.0 / 3.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[0][1], 2.0 / 3.0, tTol);
+    // TEST PROBABILITIES INITIAL GUESS
+    EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[1][0], 0.5, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mInitialGuess)[1][1], 0.5, tTol);
+    // TEST LOWER BOUNDS
+    EXPECT_NEAR((*tInputsKSAL.mLowerBounds)[0][0], 0.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mLowerBounds)[0][1], 0.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mLowerBounds)[1][0], 0.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mLowerBounds)[1][1], 0.0, tTol);
+    // TEST UPPER BOUNDS
+    EXPECT_NEAR((*tInputsKSAL.mUpperBounds)[0][0], 1.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mUpperBounds)[0][1], 1.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mUpperBounds)[1][0], 1.0, tTol);
+    EXPECT_NEAR((*tInputsKSAL.mUpperBounds)[1][1], 1.0, tTol);
 }
 
 TEST(PlatoTest, OutputSromDiagnostics)

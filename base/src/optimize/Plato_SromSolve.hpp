@@ -156,38 +156,61 @@ inline bool check_input_upper_bound(const Plato::srom::RandomVariable & aMyRando
 // function check_input_upper_bound
 
 /******************************************************************************//**
+ * \fn define_random_samples_initial_guess_method
+ * \brief Define method used to compute random samples initial guess.
+ * \param [in]  aMyRandomVar random variable metadata
+ * \param [out] aInput       Stochastic Reduced Order Model (SROM) problem metadata
+**********************************************************************************/
+inline void define_random_samples_initial_guess_method
+(const Plato::srom::RandomVariable & aMyRandomVar,
+ Plato::SromInputs<double> & aInput)
+{
+    if(aMyRandomVar.guess() == "random")
+    {
+        std::srand(aInput.mRandomSeed);
+        aInput.mInitialGuess = Plato::SromInitialGuess::random;
+    }
+    else if(aMyRandomVar.guess() == "uniform")
+    {
+        aInput.mInitialGuess = Plato::SromInitialGuess::uniform;
+    }
+    else
+    {
+        THROWERR(std::string("Define Random Samples Initial Guess Method: Initial Guess Method '")
+            + aMyRandomVar.guess() + "' is not supported. Options are: 'random' or 'uniform'.");
+    }
+}
+// function define_random_samples_initial_guess_method
+
+/******************************************************************************//**
  * \fn define_distribution
  * \brief Define the distribution associated with the input random variable
  * \param [in] aMyRandomVar random variable metadata
  * \param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool define_distribution
+inline void define_distribution
 (const Plato::srom::RandomVariable & aMyRandomVar,
  Plato::SromInputs<double> & aInput)
 {
     if(aMyRandomVar.distribution() == "normal")
     {
-        aInput.mDistribution = Plato::DistrubtionName::normal;
+        aInput.mDistribution = Plato::DistributionName::normal;
     }
     else if(aMyRandomVar.distribution() == "uniform")
     {
-        aInput.mDistribution = Plato::DistrubtionName::uniform;
+        aInput.mDistribution = Plato::DistributionName::uniform;
     }
     else if(aMyRandomVar.distribution() == "beta")
     {
-        aInput.mDistribution = Plato::DistrubtionName::beta;
+        aInput.mDistribution = Plato::DistributionName::beta;
     }
     else
     {
         std::ostringstream tMsg;
         tMsg << "Define Distribution: DISTRIBUTION = " << aMyRandomVar.distribution()
              << " IS NOT DEFINED. OPTIONS ARE NORMAL, UNIFORM AND BETA.\n";
-        PRINTERR(tMsg.str().c_str());
-        return (false);
+        THROWERR(tMsg.str().c_str());
     }
-
-    return (true);
 }
 // function define_distribution
 
@@ -195,9 +218,8 @@ inline bool define_distribution
  * \fn check_input_statistics
  * \brief Check random variable statistics
  * \param [in] aMyRandomVar random variable metadata
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandomVar)
+inline void check_input_statistics(const Plato::srom::RandomVariable & aMyRandomVar)
 {
     std::locale tLocale;
     std::stringstream tOutput;
@@ -221,8 +243,7 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
             std::ostringstream tMsg;
             tMsg << "Check Input Statistics: Input statistics metadata for distribution '" << tOutput.str().c_str()
                  << "' are not completely defined.\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
+            THROWERR(tMsg.str().c_str());
         }
     }
     else if(aMyRandomVar.distribution() == "uniform")
@@ -236,12 +257,9 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
             std::ostringstream tMsg;
             tMsg << "Check Input Statistics: Input statistics metadata for distribution '" << tOutput.str().c_str()
                  << "' are not completely defined.\n";
-            PRINTERR(tMsg.str().c_str());
-            return (false);
+            THROWERR(tMsg.str().c_str());
         }
     }
-
-    return (true);
 }
 // function check_input_statistics
 
@@ -250,26 +268,19 @@ inline bool check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
  * \brief Define random variable's statistics
  * \param [in] aMyRandomVar random variable metadata
  * \param [out] aInput Stochastic Reduced Order Model (SROM) problem metadata
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool define_input_statistics
+inline void define_input_statistics
 (const Plato::srom::RandomVariable & aMyRandomVar,
  Plato::SromInputs<double> & aInput)
 {
-    if(Plato::srom::check_input_statistics(aMyRandomVar) == false)
-    {
-        return (false);
-    }
-
-    aInput.mMean = std::atof(aMyRandomVar.mean().c_str());
-    aInput.mLowerBound = std::atof(aMyRandomVar.lower().c_str());
-    aInput.mUpperBound = std::atof(aMyRandomVar.upper().c_str());
-    const double tStdDev = std::atof(aMyRandomVar.deviation().c_str());
+    Plato::srom::check_input_statistics(aMyRandomVar);
+    aInput.mMean = std::stod(aMyRandomVar.mean());
+    aInput.mLowerBound = std::stod(aMyRandomVar.lower());
+    aInput.mUpperBound = std::stod(aMyRandomVar.upper());
+    const auto tStdDev = std::stod(aMyRandomVar.deviation());
     aInput.mVariance = tStdDev * tStdDev;
-    const int tNumSamples = std::atoi(aMyRandomVar.samples().c_str());
-    aInput.mNumSamples = tNumSamples;
-
-    return (true);
+    aInput.mRandomSeed = std::stoi(aMyRandomVar.seed());
+    aInput.mNumSamples = std::stoi(aMyRandomVar.samples());
 }
 // function define_input_statistics
 
@@ -300,44 +311,40 @@ inline bool compute_uniform_random_variable_statistics
 // function compute_uniform_random_variable_statistics
 
 /******************************************************************************//**
- * \fn compute_random_variable_statistics
+ * \fn compute_sample_probability_pairs
  * \brief Compute random variable's statistics
  * \param [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
  * \param [out] aOutputMetaData output metadata for the SROM problem
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool compute_random_variable_statistics
+inline void compute_sample_probability_pairs
 (const Plato::SromInputs<double> & aInputMetaData,
  std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
 {
     switch(aInputMetaData.mDistribution)
     {
-        case Plato::DistrubtionName::beta:
-        case Plato::DistrubtionName::normal:
+        case Plato::DistributionName::beta:
+        case Plato::DistributionName::normal:
         {
-            // solve stochastic reduced order model sub-problem
+            // solve stochastic reduced order model problem
             const bool tEnableOutput = true;
             Plato::AlgorithmInputsKSAL<double> tAlgoInputs;
             Plato::SromDiagnostics<double> tSromDiagnostics;
             Plato::solve_srom_problem(aInputMetaData, tAlgoInputs, tSromDiagnostics, aOutputMetaData, tEnableOutput);
             break;
         }
-        case Plato::DistrubtionName::uniform:
+        case Plato::DistributionName::uniform:
         {
             Plato::srom::compute_uniform_random_variable_statistics(aInputMetaData, aOutputMetaData);
             break;
         }
         default:
-        case Plato::DistrubtionName::undefined:
+        case Plato::DistributionName::undefined:
         {
-            PRINTERR("Compute Random Variable Statistics: INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n");
-            return (false);
+            THROWERR("Compute Random Variable Statistics: INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n");
         }
     }
-
-    return (true);
 }
-// function compute_random_variable_statistics
+// function compute_sample_probability_pairs
 
 /******************************************************************************//**
  * \fn post_process_sample_probability_pairs
@@ -346,17 +353,15 @@ inline bool compute_random_variable_statistics
  *  computed by solving the Stochastic Reduced Order Model (SROM) problem
  * \param [in] aMyVariable input variable
  * \param [out] aMyRandomVariable random variable
- * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool post_process_sample_probability_pairs
+inline void post_process_sample_probability_pairs
 (const std::vector<Plato::SromOutputs<double>> aMySromSolution,
  const Plato::srom::RandomVariable & aMyVariable,
  Plato::srom::SromVariable & aMyRandomVariable)
 {
     if(aMySromSolution.size() <= 0)
     {
-        PRINTERR("SROM SOLUTION IS EMPTY.\n");
-        return (false);
+        THROWERR("Post Process Sample-Probability Pairs: SROM solution is empty, i.e. Solution.size() <= 0.\n");
     }
 
     aMyRandomVariable.mSampleProbPairs.mSamples.clear();
@@ -372,68 +377,39 @@ inline bool post_process_sample_probability_pairs
 
     for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
+        std::cout << std::setprecision(64) << "sample[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleValue << "\n";
+        std::cout << std::setprecision(64) << "probability[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleWeight << "\n";
         aMyRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
         aMyRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
     }
-
-    return (true);
 }
 // function post_process_sample_probability_pairs
 
-
 /******************************************************************************//**
- * \fn solve_srom_problem
+ * \fn compute_stochastic_reduced_order_model
  * \brief Compute sample-probability pairs by solving the Stochastic Reduced Order \n
  *    Model (SROM) problem.
  * \param [in] tRandomVar random variable metadata
- * \return SROM variable metadata
+ * \return SROM random variable metadata
 **********************************************************************************/
 inline Plato::srom::SromVariable
-solve_srom_problem
+compute_stochastic_reduced_order_model
 (const Plato::srom::RandomVariable& tRandomVar)
 {
     Plato::SromInputs<double> tSromInputs;
-    if(Plato::srom::define_distribution(tRandomVar, tSromInputs) == false)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Solve SROM Problem: Probability distribution is not defined for random variable with tag '"
-            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
-            << "'.\n";
-        THROWERR(tMsg.str().c_str());
-    }
-
-    if(Plato::srom::define_input_statistics(tRandomVar, tSromInputs) == false)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Solve SROM Problem: Input statistics metadata is corrupted for random variable with tag '"
-            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
-            << "'.\n";
-        THROWERR(tMsg.str().c_str());
-    }
+    Plato::srom::define_distribution(tRandomVar, tSromInputs);
+    Plato::srom::define_input_statistics(tRandomVar, tSromInputs);
+    Plato::srom::define_random_samples_initial_guess_method(tRandomVar, tSromInputs);
 
     std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    if(Plato::srom::compute_random_variable_statistics(tSromInputs, tSromOutputs) == false)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Solve SROM Problem: Sample probability pairs were not computed for random variable with tag '"
-            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
-            << "'.\n";
-        THROWERR(tMsg.str().c_str());
-    }
+    Plato::srom::compute_sample_probability_pairs(tSromInputs, tSromOutputs);
 
     Plato::srom::SromVariable tSampleProbPair;
-    if(Plato::srom::post_process_sample_probability_pairs(tSromOutputs, tRandomVar, tSampleProbPair) == false)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Solve SROM Problem: Post-processing of sample probability pairs failed for random variable with tag '"
-            << tRandomVar.tag() << "', attribute '" << tRandomVar.attribute() << "', and identification number '" << tRandomVar.id()
-            << "'.\n";
-        THROWERR(tMsg.str().c_str());
-    }
+    Plato::srom::post_process_sample_probability_pairs(tSromOutputs, tRandomVar, tSampleProbPair);
 
     return tSampleProbPair;
 }
-// function solve_srom_problem
+// function compute_stochastic_reduced_order_model
 
 /******************************************************************************//**
  * \fn set_random_variables_id
@@ -513,12 +489,12 @@ inline bool compute_sample_probability_pairs
             if (tRandomVar.file().empty())
             {
                 // solve srom problem: sample-probability pairs must be computed by plato
-                auto tSampleProbPairs = Plato::srom::solve_srom_problem(tRandomVar);
+                auto tSampleProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tRandomVar);
                 aMySampleProbPairs.push_back(tSampleProbPairs);
             }
             else
             {
-                // read sample-probability pairs from an user-provided file
+                // read sample-probability pairs from the user-provided file
                 auto tFilename = tRandomVar.file();
                 auto tSampleProbPairsFromFile = Plato::srom::read_sample_probability_pairs(tFilename);
                 auto tSampleProbPairs = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairsFromFile);

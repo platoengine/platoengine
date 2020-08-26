@@ -312,6 +312,7 @@ std::string gInterfaceXMLCompMinTOPAGoldString =
 "<?xml version=\"1.0\"?>\n"
 "<Console>\n"
   "<Verbose>true</Verbose>\n"
+  "<Enabled>true</Enabled>\n"
 "</Console>\n"
 "<Performer>\n"
   "<Name>PlatoMain</Name>\n"

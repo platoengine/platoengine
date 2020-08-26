@@ -741,6 +741,7 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
   string meshformat = Plato::Parse::getString(meshspec,"format");
 
   bool ignore_node_map = Plato::Parse::getBool(meshspec,"ignore_node_map");
+  bool ignore_elem_map = Plato::Parse::getBool(meshspec,"ignore_element_map");
 
   if( meshformat == "exodus") {
     if( WorldComm.GetSize() == 1 ) {
@@ -782,6 +783,7 @@ UnsMesh::parseMesh(pugi::xml_node& meshspec)
     }
     myMeshInput->setName(filename.c_str());
     myMeshInput->setIgnoreNodeMap(ignore_node_map);
+    myMeshInput->setIgnoreElemMap(ignore_elem_map);
     myMeshInput->setMode(MeshIO::READ);
   } else {
     stringstream msg;

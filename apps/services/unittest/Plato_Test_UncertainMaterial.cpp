@@ -158,6 +158,50 @@ TEST(PlatoTest, SROM_PostProcessSampleProbabilityPairs)
     }
 }
 
+TEST(PlatoTest, TestProcessToPostProcessSampleProbPairsFromInputFile)
+{
+    // WRITE SAMPLE-PROBABILITY PAIRS TO FILE
+    int tPrecision = 64;
+    std::string tFilename("test.csv");
+    std::vector<Plato::srom::DataPairs> tGoldDataSet;
+    tGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
+    tGoldDataSet[0].second =
+        {-18.124227441680492489695097901858389377593994140625, 15.69452170045176586654633865691721439361572265625};
+    tGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
+    tGoldDataSet[1].second =
+        {0.361124680672662068392497758395620621740818023681640625, 0.638872868975587149265038533485494554042816162109375};
+    Plato::srom::write_data(tFilename, tGoldDataSet, tPrecision);
+
+    // READ SAMPLE-PROBABILITY PAIRS FROM FILE
+    auto tSampleProbPairsFromFile = Plato::srom::read_sample_probability_pairs(tFilename);
+
+    // POST PROCESS SAMPLE-PROBABILITY PAIRS
+    Plato::srom::RandomVariable tRandomVar;
+    tRandomVar.tag("angle variation");
+    tRandomVar.attribute("X");
+    auto tSromVariable = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairsFromFile);
+
+    // TEST RESULTS
+    ASSERT_EQ(2, tSromVariable.mSampleProbPairs.mNumSamples);
+    ASSERT_STREQ("angle variation", tSromVariable.mTag.c_str());
+    ASSERT_STREQ("X", tSromVariable.mAttribute.c_str());
+
+    const double tTolerance = 1e-6;
+    for(auto& tSample : tSromVariable.mSampleProbPairs.mSamples)
+    {
+        auto tIndex = &tSample - &tSromVariable.mSampleProbPairs.mSamples[0];
+        ASSERT_NEAR(tSampleProbPairsFromFile[0].second[tIndex], tSample, tTolerance);
+    }
+
+    for(auto& tProb : tSromVariable.mSampleProbPairs.mProbabilities)
+    {
+        auto tIndex = &tProb - &tSromVariable.mSampleProbPairs.mProbabilities[0];
+        ASSERT_NEAR(tSampleProbPairsFromFile[1].second[tIndex], tProb, tTolerance);
+    }
+
+    Plato::system("rm -f test.csv");
+}
+
 TEST(PlatoTest, SROM_SolveSromProblem)
 {
     // DEFINE INPUTS
@@ -171,7 +215,7 @@ TEST(PlatoTest, SROM_SolveSromProblem)
     tMyRandomVar.deviation("2e8");
     tMyRandomVar.samples("3");
 
-    auto tSamplerProbPairs = Plato::srom::solve_srom_problem(tMyRandomVar);
+    auto tSamplerProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tMyRandomVar);
 
     double tSum = 0;
     double tTolerance = 1e-4;

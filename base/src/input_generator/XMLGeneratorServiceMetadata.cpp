@@ -57,7 +57,7 @@ void Service::append(const std::string& aTag, const std::string& aValue)
 {
     if (aTag.empty())
     {
-        THROWERR(std::string("XML Generator Service Metadata: Parameter with tag '") + aTag + "' is empty.")
+        THROWERR(std::string("XML Generator Service Metadata: Input tag '") + aTag + "' is empty.")
     }
     auto tTag = Plato::tolower(aTag);
     mMetaData[aTag] = aValue;

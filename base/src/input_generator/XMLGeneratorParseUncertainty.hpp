@@ -31,25 +31,11 @@ private:
     void allocate();
 
     /******************************************************************************//**
-     * \fn parseMetadata
-     * \brief Parse uncertainty blocks.
-     * \param [in] aInputFile input file metadata
-    **********************************************************************************/
-    void parseMetadata(std::istream& aInputFile);
-
-    /******************************************************************************//**
-     * \fn setCategory
-     * \brief Set non-deterministic variable's category.
-     * \param [in] aMetadata uncertainty metadata
-    **********************************************************************************/
-    void setCategory(XMLGen::Uncertainty& aMetadata);
-
-    /******************************************************************************//**
      * \fn setIdentificationNumber
      * \brief Set non-deterministic variable's identification number.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
-    void setIdentificationNumber(XMLGen::Uncertainty& aMetadata);
+    void setID(XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
      * \fn setMetaData
@@ -73,12 +59,12 @@ private:
     void checkTag(const XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
-     * \fn isAttributeEmpty
+     * \fn setAttribute
      * \brief If random variable is set to material and its empty, set attribute to \n
      * homogeneous. If random variable is set to load and its empty, throw error.
      * \param [in] aMetadata uncertainty metadata
     **********************************************************************************/
-    void isAttributeEmpty(XMLGen::Uncertainty& aMetadata);
+    void setAttribute(XMLGen::Uncertainty& aMetadata);
 
     /******************************************************************************//**
      * \fn checkAttribute

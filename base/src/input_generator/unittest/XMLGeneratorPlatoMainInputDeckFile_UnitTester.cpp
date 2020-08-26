@@ -94,8 +94,8 @@ TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck)
     auto tMesh = tDocument.child("mesh");
     ASSERT_FALSE(tMesh.empty());
     ASSERT_STREQ("mesh", tMesh.name());
-    std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "mesh"};
-    std::vector<std::string> tValues = {"unstructured", "exodus", "true", "dummy.exo"};
+    std::vector<std::string> tKeys = {"type", "format", "ignore_node_map", "ignore_element_map", "mesh"};
+    std::vector<std::string> tValues = {"unstructured", "exodus", "true", "true", "dummy.exo"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMesh);
 }
 
@@ -131,9 +131,9 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainInputDeck)
     auto tReadData = XMLGen::read_data_from_file("plato_main_input_deck.xml");
     auto tGold =
       std::string("<?xmlversion=\"1.0\"?><mesh><type>unstructured</type><format>exodus</format>") + 
-      std::string("<ignore_node_map>true</ignore_node_map><mesh>dummy.exo</mesh><block><index>1</index>") +
-      std::string("<material>11</material><integration><type>gauss</type><order>2</order></integration></block></mesh>") + 
-      std::string("<output><file>platomain</file><format>exodus</format></output>");
+        "<ignore_node_map>true</ignore_node_map><ignore_element_map>true</ignore_element_map><mesh>dummy.exo</mesh><block><index>1</index>" +
+        "<material>11</material><integration><type>gauss</type><order>2</order></integration></block></mesh>" +
+        "<output><file>platomain</file><format>exodus</format></output>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_input_deck.xml");
 }

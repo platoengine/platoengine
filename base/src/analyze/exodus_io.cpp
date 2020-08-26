@@ -215,10 +215,6 @@ ExodusIO::readHeader()
   myMesh->nodeGlobalIds = new int[Nnp];
   this->GetExodusNodeIds(myMesh->nodeGlobalIds, myFileID);
 
-  // get element ids
-  myMesh->elemGlobalIds = new int [Nel];
-  this->GetExodusElementIds(myMesh->elemGlobalIds, myFileID);
-
 
 
   if( num_node_sets > 0 ) {
@@ -434,6 +430,10 @@ ExodusIO::readHeader()
     }
 
   }
+
+  // get element ids
+  myMesh->elemGlobalIds = new int [Nel];
+  this->GetExodusElementIds(myMesh->elemGlobalIds, myFileID);
 
   delete [] ids;
 
@@ -1118,17 +1118,55 @@ void ExodusIO::GetParallelNodeIds(int * a_NodeIds, int a_MyFileId)
    }
 }
 // ----------------------------------------------------------------------------------------------------------
-void ExodusIO::GetExodusElementIds(int * a_ElemIds, int a_MyField)
+void ExodusIO::GetExodusElementIds(int * a_ElemIds, int a_MyFileId)
 {
+   bool tIsParallel = (WorldComm.GetSize() > 1);
 
-    int map_count = ex_inquire_int(a_MyField, EX_INQ_ELEM_MAP);
-    if(map_count == 1)
-    {
-        ex_get_num_map(a_MyField, EX_ELEM_MAP, 1, a_ElemIds);
-    }
-    else
-    {
-        ex_get_id_map(a_MyField, EX_ELEM_MAP, a_ElemIds);
-    }
+   if(tIsParallel)
+   {
+      GetParallelElementIds(a_ElemIds, a_MyFileId);
+   }
+   else
+   {
+      GetSerialElementIds(a_ElemIds, a_MyFileId);
+   }
+}
 
+void ExodusIO::GetSerialElementIds(int * a_ElemIds, int a_MyFileId)
+{
+    if(myIgnoreElemMap)
+    {
+        int Nne = myMesh->getNumElems();
+        for( int iElem=0; iElem<Nne; iElem++ ){
+            a_ElemIds[iElem] = iElem+1;
+        }
+    } else {
+        int map_count = ex_inquire_int(a_MyFileId, EX_INQ_ELEM_MAP);
+        if(map_count == 1)
+        {
+            ex_get_num_map(a_MyFileId, EX_ELEM_MAP, 1, a_ElemIds);
+        }
+        else
+        {
+            ex_get_id_map(a_MyFileId, EX_ELEM_MAP, a_ElemIds);
+        }
+    }
+}
+
+void ExodusIO::GetParallelElementIds(int * a_ElemIds, int a_MyFileId)
+{
+   int map_count = 0;
+   if(!myIgnoreElemMap)
+   {
+      map_count = ex_inquire_int(a_MyFileId, EX_INQ_ELEM_MAP);
+   }
+
+   if(map_count == 1)
+   {
+       ex_get_num_map(a_MyFileId, EX_ELEM_MAP, 1, a_ElemIds);
+   }
+   else
+   {
+       ex_get_id_map(a_MyFileId, EX_ELEM_MAP, a_ElemIds);
+   }
 }
