@@ -141,6 +141,132 @@ public:
      * \return value
     **********************************************************************************/
     std::string minErsatzMaterialConstant() const;
+
+    /******************************************************************************//**
+     * \fn timeStep
+     * \brief Set string value for keyword 'time_step'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void timeStep(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn timeStep
+     * \brief Return string value for keyword 'time_step'.
+     * \return value
+    **********************************************************************************/
+    std::string timeStep() const;
+
+    /******************************************************************************//**
+     * \fn numTimeSteps
+     * \brief Set string value for keyword 'number_time_steps'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void numTimeSteps(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn numTimeSteps
+     * \brief Return string value for keyword 'number_time_steps'.
+     * \return value
+    **********************************************************************************/
+    std::string numTimeSteps() const;
+
+    /******************************************************************************//**
+     * \fn maxNumTimeSteps
+     * \brief Set string value for keyword 'max_number_time_steps'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void maxNumTimeSteps(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn maxNumTimeSteps
+     * \brief Return string value for keyword 'max_number_time_steps'.
+     * \return value
+    **********************************************************************************/
+    std::string maxNumTimeSteps() const;
+
+    /******************************************************************************//**
+     * \fn timeStepExpansion
+     * \brief Set string value for keyword 'time_step_expansion_multiplier'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void timeStepExpansion(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn timeStepExpansion
+     * \brief Return string value for keyword 'time_step_expansion_multiplier'.
+     * \return value
+    **********************************************************************************/
+    std::string timeStepExpansion() const;
+
+    /******************************************************************************//**
+     * \fn newmarkBeta
+     * \brief Set string value for keyword 'newmark_beta'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newmarkBeta(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newmarkBeta
+     * \brief Return string value for keyword 'newmark_beta'.
+     * \return value
+    **********************************************************************************/
+    std::string newmarkBeta() const;
+
+    /******************************************************************************//**
+     * \fn newmarkGamma
+     * \brief Set string value for keyword 'newmark_gamma'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newmarkGamma(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newmarkGamma
+     * \brief Return string value for keyword 'newmark_gamma'.
+     * \return value
+    **********************************************************************************/
+    std::string newmarkGamma() const;
+
+    /******************************************************************************//**
+     * \fn solverTolerance
+     * \brief Set string value for keyword 'tolerance'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void solverTolerance(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn solverTolerance
+     * \brief Return string value for keyword 'tolerance'.
+     * \return value
+    **********************************************************************************/
+    std::string solverTolerance() const;
+
+    /******************************************************************************//**
+     * \fn solverConvergenceCriterion
+     * \brief Set string value for keyword 'convergence_criterion'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void solverConvergenceCriterion(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn solverConvergenceCriterion
+     * \brief Return string value for keyword 'convergence_criterion'.
+     * \return value
+    **********************************************************************************/
+    std::string solverConvergenceCriterion() const;
+
+    /******************************************************************************//**
+     * \fn solverMaxNumIterations
+     * \brief Set string value for keyword 'max_number_iterations'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void solverMaxNumIterations(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn solverMaxNumIterations
+     * \brief Return string value for keyword 'max_number_iterations'.
+     * \return value
+    **********************************************************************************/
+    std::string solverMaxNumIterations() const;
 };
 // struct Scenario
 

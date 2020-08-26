@@ -726,6 +726,54 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     }
 }
 
+TEST(PlatoTestXMLGenerator, ParseScenario_WithTimeAndSolverBlocks)
+{
+    // NOTE: examples for support of scenario ids are:
+    // 1. begin scenario 1  GOOD!
+    // 2. begin scenario name1_name2_name3  GOOD!
+    // 3. begin scenario name1 name2 name3  BAD!
+    std::string tStringInput =
+        "begin scenario air_force_one\n"
+        "   physics thermal\n"
+        "   dimensions 2\n"
+        "   material_penalty_exponent 1.0\n"
+        "   minimum_ersatz_material_value 1e-6\n"
+        "   begin time\n"
+        "     time_step 0.1\n"
+        "     number_time_steps 80\n"
+        "     max_number_time_steps 160\n"
+        "     time_step_expansion_multiplier 1.2\n"
+        "     newmark_beta 0.5\n"
+        "     newmark_gamma 0.25\n"
+        "   end time\n"
+        "   begin solver\n"
+        "     tolerance 1e-10\n"
+        "     max_number_iterations 20\n"
+        "     convergence_criterion residual\n"
+        "   end solver\n"
+        "end scenario\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseScenario tScenarioParser;
+    tScenarioParser.parse(tInputSS);
+    auto tScenarios = tScenarioParser.data();
+    for (auto &tScenario : tScenarios)
+    {
+        ASSERT_STREQ("thermal", tScenario.value("physics").c_str());
+        ASSERT_STREQ("air_force_one", tScenario.value("id").c_str());
+        ASSERT_STREQ("2", tScenario.value("dimensions").c_str());
+        ASSERT_STREQ("1.0", tScenario.value("material_penalty_exponent").c_str());
+        ASSERT_STREQ("1e-6", tScenario.value("minimum_ersatz_material_value").c_str());
+        ASSERT_STREQ("80", tScenario.value("number_time_steps").c_str());
+        ASSERT_STREQ("160", tScenario.value("max_number_time_steps").c_str());
+        ASSERT_STREQ("1.2", tScenario.value("time_step_expansion_multiplier").c_str());
+        ASSERT_STREQ("1e-10", tScenario.value("tolerance").c_str());
+        ASSERT_STREQ("20", tScenario.value("max_number_iterations").c_str());
+        ASSERT_STREQ("residual", tScenario.value("convergence_criterion").c_str());
+    }
+}
+
 TEST(PlatoTestXMLGenerator, ParseService_ErrorInvalidCode)
 {
     std::string tStringInput =
@@ -751,29 +799,16 @@ TEST(PlatoTestXMLGenerator, ParseService_NoCode)
     ASSERT_THROW(tServiceParser.parse(tInputSS), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
+TEST(PlatoTestXMLGenerator, ParseService)
 {
     std::string tStringInput =
         "begin service 1\n"
         "code plato_analyze\n"
         "cache_state false\n"
-        "update_problem false\n"
-        "additive_continuation false\n"
-        "number_processors 1\n"
+        "update_problem true\n"
+        "additive_continuation true\n"
+        "number_processors 10\n"
         "number_ranks 1\n"
-        "   begin time\n"
-        "     time_step 0.1\n"
-        "     number_time_steps 80\n"
-        "     max_number_time_steps 160\n"
-        "     time_step_expansion_multiplier 1.2\n"
-        "     newmark_beta 0.5\n"
-        "     newmark_gamma 0.25\n"
-        "   end time\n"
-        "   begin solver\n"
-        "     tolerance 1e-10\n"
-        "     max_number_iterations 20\n"
-        "     convergence_criterion residual\n"
-        "   end solver\n"
         "end service\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -783,14 +818,37 @@ TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
     auto tServices = tServiceParser.data();
     for (auto &tService : tServices)
     {
-        ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
         ASSERT_STREQ("1", tService.value("id").c_str());
-        ASSERT_STREQ("80", tService.value("number_time_steps").c_str());
-        ASSERT_STREQ("160", tService.value("max_number_time_steps").c_str());
-        ASSERT_STREQ("1.2", tService.value("time_step_expansion_multiplier").c_str());
-        ASSERT_STREQ("1e-10", tService.value("tolerance").c_str());
-        ASSERT_STREQ("20", tService.value("max_number_iterations").c_str());
-        ASSERT_STREQ("residual", tService.value("convergence_criterion").c_str());
+        ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
+        ASSERT_STREQ("false", tService.value("cache_state").c_str());
+        ASSERT_STREQ("true", tService.value("update_problem").c_str());
+        ASSERT_STREQ("true", tService.value("additive_continuation").c_str());
+        ASSERT_STREQ("10", tService.value("number_processors").c_str());
+        ASSERT_STREQ("1", tService.value("number_ranks").c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, ParseService_Defaults)
+{
+    std::string tStringInput =
+        "begin service 1\n"
+        "code plato_analyze\n"
+        "end service\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseService tServiceParser;
+    ASSERT_NO_THROW(tServiceParser.parse(tInputSS));
+    auto tServices = tServiceParser.data();
+    for (auto &tService : tServices)
+    {
+        ASSERT_STREQ("1", tService.value("id").c_str());
+        ASSERT_STREQ("plato_analyze", tService.value("code").c_str());
+        ASSERT_STREQ("false", tService.value("cache_state").c_str());
+        ASSERT_STREQ("false", tService.value("update_problem").c_str());
+        ASSERT_STREQ("false", tService.value("additive_continuation").c_str());
+        ASSERT_STREQ("1", tService.value("number_processors").c_str());
+        ASSERT_STREQ("1", tService.value("number_ranks").c_str());
     }
 }
 

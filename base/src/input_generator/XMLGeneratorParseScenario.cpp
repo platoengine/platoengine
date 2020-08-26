@@ -82,11 +82,21 @@ void ParseScenario::allocate()
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
 
+    mTags.insert({ "time_step", { { {"time_step"}, ""}, "1.0" } });
+    mTags.insert({ "newmark_beta", { { {"newmark_beta"}, ""}, "0.25" } });
+    mTags.insert({ "newmark_gamma", { { {"newmark_gamma"}, ""}, "0.5" } });
+    mTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
+    mTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
+    mTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
+
+    mTags.insert({ "tolerance", { { {"tolerance"}, ""}, "1e-8" } });
+    mTags.insert({ "max_number_iterations", { { {"max_number_iterations"}, ""}, "25" } });
+    mTags.insert({ "convergence_criterion", { { {"convergence_criterion"}, ""}, "residual" } });
+
     mTags.insert({ "loads", { { {"loads"}, ""}, "" } });
     mTags.insert({ "boundary_conditions", { { {"boundary_conditions"}, ""}, "" } });
 
     //frf matching, some of these probably should belong as criterion parameters instead
-    //
     // mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
     // mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
     // mTags.insert({ "frf_match_nodesets", { { {"frf_match_nodesets"}, ""}, "" } });

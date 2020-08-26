@@ -44,17 +44,6 @@ void ParseService::allocate()
     mTags.insert({ "update_problem", { { {"update_problem"}, ""}, "false" } });
     mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "false" } }); //this should be in the optimizer block
 
-    mTags.insert({ "time_step", { { {"time_step"}, ""}, "1.0" } });
-    mTags.insert({ "newmark_beta", { { {"newmark_beta"}, ""}, "0.25" } });
-    mTags.insert({ "newmark_gamma", { { {"newmark_gamma"}, ""}, "0.5" } });
-    mTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
-    mTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
-    mTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
-
-    mTags.insert({ "tolerance", { { {"tolerance"}, ""}, "1e-8" } });
-    mTags.insert({ "max_number_iterations", { { {"max_number_iterations"}, ""}, "25" } });
-    mTags.insert({ "convergence_criterion", { { {"convergence_criterion"}, ""}, "residual" } });
-
     mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "1" } });
     mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "1" } });
 }
