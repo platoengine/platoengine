@@ -221,7 +221,7 @@ inline void read_column_names
         // Extract each column name
         while(std::getline(tStringStream, tColumnName, ','))
         {
-            // Initialize and add <colname, int vector> pairs to result
+            // Initialize and add <colname, std::vector> pairs to result
             auto tLowerCaseName = Plato::srom::tolower(tColumnName);
             aResult.push_back( { tLowerCaseName, std::vector<double>{} } );
         }

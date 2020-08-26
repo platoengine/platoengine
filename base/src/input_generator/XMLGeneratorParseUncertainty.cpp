@@ -337,7 +337,10 @@ void ParseUncertainty::checkMetaData(const XMLGen::Uncertainty& aMetadata)
     this->checkTag(aMetadata);
     this->checkCategory(aMetadata);
     this->checkAttribute(aMetadata);
-    this->checkStatistics(aMetadata);
+    if (aMetadata.filename().empty())
+    {
+        this->checkStatistics(aMetadata);
+    }
 }
 
 std::vector<XMLGen::Uncertainty> ParseUncertainty::data() const

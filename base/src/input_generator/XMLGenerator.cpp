@@ -191,10 +191,18 @@ void XMLGenerator::setNumPerformers()
 {
     if (m_InputData.service(0u).useNewAnalyzeUQWorkflow())
     {
+        if(m_InputData.objectives[0].num_ranks.empty())
+        {
+            THROWERR("Number of ranks is empty.")
+        }
         m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].num_ranks);
     }
     else
     {
+        if(m_InputData.objectives[0].atmost_total_num_processors.empty())
+        {
+            THROWERR("Keyword 'atmost_total_num_processors' is empty.")
+        }
         m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.objectives[0].atmost_total_num_processors);
     }
 

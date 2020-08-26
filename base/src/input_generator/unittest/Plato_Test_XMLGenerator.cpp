@@ -2108,6 +2108,111 @@ TEST(PlatoTestXMLGenerator,parseForceLoad_valid_input_name_and_id_specified)
     EXPECT_EQ(new_load.load_id,"1");
 }
 
+TEST(PlatoTestXMLGenerator, SROM_SolveSromProblem_ReadSampleProbPairsFromFile)
+{
+    // POSE PROBLEM
+  XMLGenerator_UnitTester tTester;
+  std::istringstream iss;
+  std::string stringInput =
+  "begin service\n"
+  "   physics mechanical\n"
+  "   dimensions 3\n"
+  "   use_new_analyze_uq_workflow true\n"
+  "end service\n"
+  "begin objective\n"
+  "   type maximize stiffness\n"
+  "   load ids 10\n"
+  "   boundary condition ids 11\n"
+  "   code plato_analyze\n"
+  "   number processors 1\n"
+  "   weight 1\n"
+  "   number ranks 1\n"
+  "end objective\n"
+  "begin boundary conditions\n"
+  "   fixed displacement nodeset name 1 bc id 11\n"
+  "end boundary conditions\n"
+  "begin loads\n"
+  "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
+  "end loads\n"
+  "begin uncertainty\n"
+  "    category load\n"
+  "    tag angle variation\n"
+  "    load_id 10\n"
+  "    attribute X\n"
+  "    filename test.csv\n"
+  "end uncertainty\n";
+
+  // WRITE SAMPLE-PROBABILITY PAIRS TO FILE
+  int tPrecision = 64;
+  std::string tFilename("test.csv");
+  std::vector<Plato::srom::DataPairs> tGoldDataSet;
+  tGoldDataSet.push_back( { "Samples", std::vector<double>{} } );
+  tGoldDataSet[0].second =
+      {-18.124227441680492489695097901858389377593994140625, 15.69452170045176586654633865691721439361572265625};
+  tGoldDataSet.push_back( { "Probabilities", std::vector<double>{} } );
+  tGoldDataSet[1].second =
+      {0.361124680672662068392497758395620621740818023681640625, 0.638872868975587149265038533485494554042816162109375};
+  Plato::srom::write_data(tFilename, tGoldDataSet, tPrecision);
+
+  // PARSE INPUTS AND RUN THE PROBLEM
+  iss.str(stringInput);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.publicParseObjectives(iss), true);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.publicParseLoads(iss), true);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.publicParseBCs(iss), true);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.parseService(iss), true);
+
+  iss.clear();
+  iss.seekg(0);
+  EXPECT_EQ(tTester.publicParseUncertainties(iss), true);
+  EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
+
+  auto tXMLGenMetadata = tTester.getInputData();
+  auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
+  size_t numPerformers = tTester.getNumPerformers();
+  EXPECT_EQ(tNumSamples,2u);
+  EXPECT_EQ(numPerformers,1u);
+
+  // TEST SAMPLES
+  std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
+  std::vector<std::vector<std::string>> tGoldValues =
+      {
+        { "0.000000000000000000000e+00", "-4.751921387767659325618e+04", "1.555391630579348566243e+04" },
+        { "0.000000000000000000000e+00", "-4.813588076578034088016e+04", "-1.352541987897522631101e+04"}
+      };
+
+  const double tTolerance = 1e-10;
+  auto tSamples = tXMLGenMetadata.mRandomMetaData.samples();
+  for(auto& tSample : tSamples)
+  {
+      auto tSampleIndex = &tSample - &tSamples[0];
+      ASSERT_NEAR(std::stod(tGoldLoadCaseProbabilities[tSampleIndex]), std::stod(tSample.probability()), tTolerance);
+
+      for(auto& tLoad : tSample.loadcase().loads)
+      {
+          ASSERT_STREQ("traction", tLoad.type.c_str());
+          for(auto& tValue : tLoad.values)
+          {
+              auto tComponent = &tValue - &tLoad.values[0];
+              ASSERT_NEAR(std::stod(tValue), std::stod(tGoldValues[tSampleIndex][tComponent]), tTolerance);
+          }
+      }
+  }
+
+  Plato::system("rm -f test.csv");
+}
+
 TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
 {
     // POSE PROBLEM

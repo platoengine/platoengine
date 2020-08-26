@@ -298,15 +298,16 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
 {
     Plato::srom::RandomVariable tNewVariable;
     tNewVariable.tag(aRandomVariable.tag());
-    tNewVariable.attribute(aRandomVariable.attribute());
     tNewVariable.seed(aRandomVariable.seed());
     tNewVariable.mean(aRandomVariable.mean());
     tNewVariable.guess(aRandomVariable.guess());
     tNewVariable.lower(aRandomVariable.lower());
     tNewVariable.upper(aRandomVariable.upper());
-    tNewVariable.samples(aRandomVariable.samples());
-    tNewVariable.distribution(aRandomVariable.distribution());
     tNewVariable.deviation(aRandomVariable.std());
+    tNewVariable.file(aRandomVariable.filename());
+    tNewVariable.samples(aRandomVariable.samples());
+    tNewVariable.attribute(aRandomVariable.attribute());
+    tNewVariable.distribution(aRandomVariable.distribution());
     aRandomLoad.mRandomVars.push_back(tNewVariable);
 }
 // function add_random_variable_to_random_load
@@ -325,14 +326,23 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
                                                  std::set<int> &aRandomLoadIDs,
                                                  std::vector<Plato::srom::Load> &aRandomLoads)
 {
-    const int tRandomVarLoadID = std::stoi(aRandomVariable.id().c_str());
+    if(aRandomVariable.id().empty())
+    {
+        THROWERR("Input random load identification number (id) is empty.")
+    }
+    const auto tRandomVarLoadID = std::stoi(aRandomVariable.id());
+
     for(size_t tIndexJ = 0; tIndexJ < aOriginalToNewLoadCaseMap[tRandomVarLoadID].size(); tIndexJ++)
     {
-        const int tIndexIntoNewLoadCaseList = aOriginalToNewLoadCaseMap[tRandomVarLoadID][tIndexJ];
-        std::string tCurLoadCaseIDString = aNewLoadCases[tIndexIntoNewLoadCaseList].id;
-        const int tCurLoadCaseID = std::stoi(tCurLoadCaseIDString);
+        const auto tIndexIntoNewLoadCaseList = aOriginalToNewLoadCaseMap[tRandomVarLoadID][tIndexJ];
+        auto tCurLoadCaseIDString = aNewLoadCases[tIndexIntoNewLoadCaseList].id;
+        if(tCurLoadCaseIDString.empty())
+        {
+            THROWERR("Load case identification number (id) is empty.")
+        }
+        const auto tCurLoadCaseID = std::stoi(tCurLoadCaseIDString);
         aRandomLoadIDs.insert(tCurLoadCaseID);
-        const int tIndexOfRandomLoad = Plato::srom::create_random_load(aNewLoadCases[tIndexIntoNewLoadCaseList], aRandomLoads);
+        const auto tIndexOfRandomLoad = Plato::srom::create_random_load(aNewLoadCases[tIndexIntoNewLoadCaseList], aRandomLoads);
         Plato::srom::add_random_variable_to_random_load(aRandomLoads[tIndexOfRandomLoad], aRandomVariable);
     }
 }
@@ -376,6 +386,10 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
 {
     for(auto& tNewLoadCase : aNewLoadCases)
     {
+        if(tNewLoadCase.id.empty())
+        {
+            THROWERR("Load case identification number (id) is empty.")
+        }
         auto tCurLoadCaseID = std::stoi(tNewLoadCase.id);
         if(aRandomLoadIDs.find(tCurLoadCaseID) == aRandomLoadIDs.end())
         {

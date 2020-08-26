@@ -377,6 +377,8 @@ inline void post_process_sample_probability_pairs
 
     for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
     {
+        std::cout << std::setprecision(64) << "sample[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleValue << "\n";
+        std::cout << std::setprecision(64) << "probability[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleWeight << "\n";
         aMyRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
         aMyRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
     }
