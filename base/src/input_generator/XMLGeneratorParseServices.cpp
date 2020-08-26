@@ -39,7 +39,7 @@ void ParseService::allocate()
 {
     mTags.clear();
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
-    mTags.insert({ "code", { { {"code"}, ""}, "code" } });
+    mTags.insert({ "code", { { {"code"}, ""}, "" } });
     mTags.insert({ "cache_state", { { {"cache_state"}, ""}, "false" } });
     mTags.insert({ "update_problem", { { {"update_problem"}, ""}, "false" } });
     mTags.insert({ "additive_continuation", { { {"additive_continuation"}, ""}, "false" } }); //this should be in the optimizer block

@@ -59,7 +59,6 @@ private:
      * \param [in] aCriterion criterion metadata
     **********************************************************************************/
     void setTags(XMLGen::Criterion& aCriterion);
-
 public:
     /******************************************************************************//**
      * \fn data

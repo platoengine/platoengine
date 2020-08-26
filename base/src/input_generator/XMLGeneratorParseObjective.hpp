@@ -109,11 +109,11 @@ private:
     void checkServiceIDs(const XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn checkScenanarioIDs
+     * \fn checkScenarioIDs
      * \brief Throw error if values are not valid.
      * \param [in] aMetadata objective metadata
     **********************************************************************************/
-    void checkScenanarioIDs(const XMLGen::Objective& aMetadata);
+    void checkScenarioIDs(const XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
      * \fn checkWeights

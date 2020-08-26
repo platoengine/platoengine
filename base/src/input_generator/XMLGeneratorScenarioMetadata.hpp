@@ -19,13 +19,11 @@ namespace XMLGen
 **********************************************************************************/
 struct Scenario
 {
-public:
-    std::vector<std::string> LoadIDs;
-    std::vector<std::string> BCIDs;
-
 // private member data
 private:
     std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
+    std::vector<std::string> mLoadIDs;
+    std::vector<std::string> mBCIDs;
 
 // private member functions
 private:
@@ -48,6 +46,34 @@ private:
     bool getBool(const std::string& aTag) const;
 
 public:
+    /******************************************************************************//**
+     * \fn loadIDs
+     * \brief Return scenario loadIDs
+     * \return scenario loadIDs
+    **********************************************************************************/
+    std::vector<std::string> loadIDs() const {return mLoadIDs;};
+
+    /******************************************************************************//**
+     * \fn setLoadIDs
+     * \brief Set scenario loadIDs
+     * \param [in] input load IDs 
+    **********************************************************************************/
+    void setLoadIDs(std::vector<std::string>& aLoadIDs) {mLoadIDs = aLoadIDs;};
+
+    /******************************************************************************//**
+     * \fn bcIDs
+     * \brief Return scenario boudary condition IDs
+     * \return scenario boudary condition IDs
+    **********************************************************************************/
+    std::vector<std::string> bcIDs() const {return mBCIDs;};
+
+    /******************************************************************************//**
+     * \fn setBCIDs
+     * \brief Set scenario boundary condition IDs
+     * \param [in] input boundary condition IDs 
+    **********************************************************************************/
+    void setBCIDs(std::vector<std::string>& aBCIDs) {mBCIDs = aBCIDs;};
+
     /******************************************************************************//**
      * \fn value
      * \brief Return value for property with input tag; else, throw an error if \n

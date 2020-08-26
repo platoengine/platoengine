@@ -48,8 +48,8 @@ void ParseCriteria::allocate()
 
     // core properties
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
-    mTags.insert({ "normalize", { { {"normalize"}, ""}, "true" } });
-    mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "" } });
+    mTags.insert({ "normalize", { { {"normalize"}, ""}, "false" } });
+    mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "1.0" } });
 
     // stress/flux p-norm parameter
     mTags.insert({ "p", { { {"p"}, ""}, "" } });
@@ -97,6 +97,23 @@ void ParseCriteria::setCriterionParameters(XMLGen::Criterion& aMetadata)
         if(!tItr->second.first.second.empty())
         {
             aMetadata.parameter(tKeyword, tItr->second.first.second);
+        }
+        else
+            THROWERR("Parse Criteria: " + tKeyword + " parameter required for " + tCriterionType + " criterion type" )
+    }
+
+    for(auto& tTag : mTags)
+    {
+        if(!tTag.second.first.second.empty() && tTag.first != "type" && tTag.first != "normalize" && tTag.first != "normalization_value")
+        {
+            bool found_invalid_parameter = true;
+            for(auto& tKeyword : tValidKeys.mKeys)
+            {
+                if(tTag.first == tKeyword)
+                    found_invalid_parameter = false;
+            }
+            if(found_invalid_parameter)
+                THROWERR("Parse Criterion: " + tTag.first + " is an invalid parameter for " + tCriterionType + " criterion type")
         }
     }
 }

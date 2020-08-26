@@ -75,6 +75,13 @@ private:
     void checkSpatialDimensions(XMLGen::Scenario& aScenario);
 
     /******************************************************************************//**
+     * \fn checkIDs
+     * \brief If load or boundary condition IDs are not defined, throw error.
+     * \param [in] aScenario Scenario metadata
+    **********************************************************************************/
+    void checkIDs(XMLGen::Scenario& aScenario);
+
+    /******************************************************************************//**
      * \fn checkScenarioID
      * \brief If scenario 'id' keyword is empty, set 'id' to default = 'physics_keyword' 
      * + '0', where 'physics_keyword' denotes the value set for 'physics' keyword.

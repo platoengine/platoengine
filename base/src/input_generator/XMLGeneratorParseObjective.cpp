@@ -140,7 +140,7 @@ void ParseObjective::checkMetaData(const XMLGen::Objective &aMetadata)
     this->checkType(aMetadata);
     this->checkCriteriaIDs(aMetadata);
     this->checkServiceIDs(aMetadata);
-    this->checkScenanarioIDs(aMetadata);
+    this->checkScenarioIDs(aMetadata);
     this->checkWeights(aMetadata);
 }
 
@@ -166,7 +166,7 @@ void ParseObjective::checkServiceIDs(const XMLGen::Objective &aMetadata)
         THROWERR("All objective parameters must have the same number of entries")
 }
 
-void ParseObjective::checkScenanarioIDs(const XMLGen::Objective &aMetadata)
+void ParseObjective::checkScenarioIDs(const XMLGen::Objective &aMetadata)
 {
     if(aMetadata.type == "single_criterion")
     {

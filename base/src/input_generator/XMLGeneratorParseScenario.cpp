@@ -40,11 +40,11 @@ void ParseScenario::setLoadIDs(XMLGen::Scenario &aMetadata)
         char tValuesBuffer[10000];
         strcpy(tValuesBuffer, tValues.c_str());
         XMLGen::parse_tokens(tValuesBuffer, tLoadIDs);
-        aMetadata.LoadIDs = tLoadIDs;
+        aMetadata.setLoadIDs(tLoadIDs);
     }
     else
     {
-        THROWERR("Objective criteria are not defined");
+        THROWERR("Parse Scenario: loads are not defined");
     }
 }
 
@@ -53,16 +53,17 @@ void ParseScenario::setBCIDs(XMLGen::Scenario &aMetadata)
     auto tItr = mTags.find("boundary_conditions");
     std::string tValues = tItr->second.first.second;
     if (tItr != mTags.end() && !tValues.empty())
+
     {
         std::vector<std::string> tBCIDs;
         char tValuesBuffer[10000];
         strcpy(tValuesBuffer, tValues.c_str());
         XMLGen::parse_tokens(tValuesBuffer, tBCIDs);
-        aMetadata.LoadIDs = tBCIDs;
+        aMetadata.setBCIDs(tBCIDs);
     }
     else
     {
-        THROWERR("Objective criteria are not defined");
+        THROWERR("Parse Scenario: boundary_conditions are not defined");
     }
 }
 
@@ -70,6 +71,7 @@ void ParseScenario::checkTags(XMLGen::Scenario& aScenario)
 {
     this->checkPhysics(aScenario);
     this->checkSpatialDimensions(aScenario);
+    this->checkIDs(aScenario);
 }
 
 void ParseScenario::allocate()
@@ -78,6 +80,7 @@ void ParseScenario::allocate()
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
     mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
     mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "" } });
+
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
@@ -122,6 +125,20 @@ void ParseScenario::checkSpatialDimensions(XMLGen::Scenario& aScenario)
     if (tItr == tValidKeys.mKeys.end())
     {
         THROWERR("Parse Scenario: Problems with " + tDim + "-D spatial dimensions are not supported.")
+    }
+}
+
+void ParseScenario::checkIDs(XMLGen::Scenario& aScenario)
+{
+    auto tLoadIDs = aScenario.loadIDs();
+    if (tLoadIDs.empty())
+    {
+        THROWERR("Parse Scenario: No load IDs are defined")
+    }
+    auto tBCIDs = aScenario.bcIDs();
+    if (tBCIDs.empty())
+    {
+        THROWERR("Parse Scenario: No boundary condition IDs are defined")
     }
 }
 
@@ -181,6 +198,8 @@ void ParseScenario::parse(std::istream &aInputFile)
             XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "scenario" }, aInputFile, mTags);
             this->setTags(tScenario);
+            this->setLoadIDs(tScenario);
+            this->setBCIDs(tScenario);
             tScenario.id(tScenarioBlockID);
             this->checkTags(tScenario);
             mData.push_back(tScenario);
