@@ -22,6 +22,7 @@ void ParseObjective::allocate()
     mTags.insert({ "criteria", { { {"criteria"}, ""}, "" } });
     mTags.insert({ "services", { { {"services"}, ""}, "" } });
     mTags.insert({ "scenarios", { { {"scenarios"}, ""}, "" } });
+    //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
 void ParseObjective::setType(XMLGen::Objective &aMetadata)

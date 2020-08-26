@@ -49,6 +49,7 @@ void ParseConstraint::allocate()
     mTags.insert({ "service", { { {"service"}, ""}, "" } });
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
     mTags.insert({ "target", { { {"target"}, ""}, "0.0" } });
+    //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 
 }
 

@@ -51,18 +51,10 @@ void ParseCriteria::allocate()
     mTags.insert({ "normalize", { { {"normalize"}, ""}, "false" } });
     mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "1.0" } });
 
-    // stress/flux p-norm parameter
-    mTags.insert({ "p", { { {"p"}, ""}, "" } });
-
-
-    // // These keywords came from the constraint block but should eventually belong to the criterion block
-    // mTags.insert({ "surface_area_sideset_id", { { {"surface_area_sideset_id"}, ""}, "" } });
-    // mTags.insert({ "surface_area", { { {"surface_area"}, ""}, "" } });
-    // mTags.insert({ "minimum ersatz material value", { { {"minimum", "ersatz", "material", "value"}, ""}, "1e-9" } });
-    
-    // // Not sure where these ones should go..
-    // mTags.insert({ "penalty power", { { {"penalty", "power"}, ""}, "3.0" } });
-    // mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
+    mTags.insert({ "stress_p_norm_exponent", { { {"stress_p_norm_exponent"}, ""}, "6.0" } });
+    mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
+    mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
+    mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
 }
 
 void ParseCriteria::setCriterionType(XMLGen::Criterion& aMetadata)
