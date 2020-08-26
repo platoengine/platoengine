@@ -50,12 +50,6 @@ void ParseConstraint::allocate()
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
     mTags.insert({ "target", { { {"target"}, ""}, "0.0" } });
 
-    // // I'm not sure if it makes sense to keep these keywords with constraint
-    // mTags.insert({ "penalty power", { { {"penalty", "power"}, ""}, "3.0" } });
-    // mTags.insert({ "surface_area_sideset_id", { { {"surface_area_sideset_id"}, ""}, "" } });
-    // mTags.insert({ "minimum ersatz material value", { { {"minimum", "ersatz", "material", "value"}, ""}, "1e-9" } });
-    // mTags.insert({ "surface_area", { { {"surface_area"}, ""}, "" } });
-    // mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
 std::vector<XMLGen::Constraint> ParseConstraint::data() const

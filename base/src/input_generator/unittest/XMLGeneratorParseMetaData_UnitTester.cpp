@@ -281,6 +281,8 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
     std::string tStringInput =
         "begin criterion 1\n"
         "type compliance\n"
+        "normalize true\n"
+        "normalization_value 10\n"
         "end criterion\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -292,6 +294,8 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
     ASSERT_EQ(1u, tCriterionMetaData.size());
     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
     ASSERT_STREQ("compliance", tCriterionMetaData[0].type().c_str());
+    ASSERT_STREQ("true", tCriterionMetaData[0].value("normalize").c_str());
+    ASSERT_STREQ("10", tCriterionMetaData[0].value("normalization_value").c_str());
 
     auto tParameters = tCriterionMetaData[0].parameters();
     ASSERT_EQ(0u, tParameters.size());

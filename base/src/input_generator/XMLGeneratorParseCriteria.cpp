@@ -12,6 +12,23 @@
 namespace XMLGen
 {
 
+void ParseCriteria::setTags(XMLGen::Criterion& aCriterion)
+{
+    for(auto& tTag : mTags)
+    {
+        if(tTag.second.first.second.empty())
+        {
+            auto tDefaultValue = tTag.second.second;
+            aCriterion.append(tTag.first, tDefaultValue);
+        }
+        else
+        {
+            auto tInputValue = tTag.second.first.second;
+            aCriterion.append(tTag.first, tInputValue);
+        }
+    }
+}
+
 std::string check_criterion_type_key
 (const std::string& aKeyword)
 {
@@ -32,9 +49,20 @@ void ParseCriteria::allocate()
     // core properties
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
     mTags.insert({ "normalize", { { {"normalize"}, ""}, "true" } });
+    mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "" } });
 
     // stress/flux p-norm parameter
     mTags.insert({ "p", { { {"p"}, ""}, "" } });
+
+
+    // // These keywords came from the constraint block but should eventually belong to the criterion block
+    // mTags.insert({ "surface_area_sideset_id", { { {"surface_area_sideset_id"}, ""}, "" } });
+    // mTags.insert({ "surface_area", { { {"surface_area"}, ""}, "" } });
+    // mTags.insert({ "minimum ersatz material value", { { {"minimum", "ersatz", "material", "value"}, ""}, "1e-9" } });
+    
+    // // Not sure where these ones should go..
+    // mTags.insert({ "penalty power", { { {"penalty", "power"}, ""}, "3.0" } });
+    // mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
 void ParseCriteria::setCriterionType(XMLGen::Criterion& aMetadata)
@@ -76,6 +104,7 @@ void ParseCriteria::setCriterionParameters(XMLGen::Criterion& aMetadata)
 void ParseCriteria::setMetadata(XMLGen::Criterion& aMetadata)
 {
     this->setCriterionType(aMetadata);
+    this->setTags(aMetadata);
     this->setCriterionParameters(aMetadata);
 }
 

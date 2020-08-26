@@ -25,6 +25,7 @@ struct Criterion
 private:
     std::string mID; /*!< criterion identification number */
     std::string mType;  /*!< criterion type */
+    std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
     std::unordered_map<std::string, std::string> mParameters; /*!< list of criterion parameters, map< tag, value> */
 
 public:
@@ -70,16 +71,32 @@ public:
 
     /******************************************************************************//**
      * \fn value
-     * \brief If criterion parameter is defined, return its value; else, return an empty string.
-     * \param [in]  aTag    criterion parameter
-     * \return criterion parameter value
+     * \brief If criterion metadata is defined, return its value; else, return an empty string.
+     * \param [in]  aTag    criterion metadata
+     * \return criterion metadata value
     **********************************************************************************/
     std::string value(const std::string& aTag) const
     {
         auto tTag = Plato::tolower(aTag);
-        auto tItr = mParameters.find(tTag);
-        auto tOutput = tItr == mParameters.end() ? "" : tItr->second;
+        auto tItr = mMetaData.find(tTag);
+        auto tOutput = tItr == mMetaData.end() ? "" : tItr->second;
         return tOutput;
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append parameter to metadata.
+     * \param [in] aTag   parameter tag
+     * \param [in] aValue parameter value
+    **********************************************************************************/
+    void append(const std::string& aTag, const std::string& aValue)
+    {
+        if (aTag.empty())
+        {
+            THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is empty.")
+        }
+        auto tTag = Plato::tolower(aTag);
+        mMetaData[aTag] = aValue;
     }
 
     /******************************************************************************//**
