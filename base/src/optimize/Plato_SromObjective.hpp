@@ -70,10 +70,10 @@ public:
     explicit SromObjective(const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
                            const OrdinalType & aMaxNumMoments,
                            const OrdinalType & aNumSamples,
-                           OrdinalType aNumRandomVecDim = 1) :
+                           OrdinalType aRandomVecDim = 1) :
             mNumSamples(aNumSamples),
             mMaxNumMoments(aMaxNumMoments),
-            mNumRandomVecDim(aNumRandomVecDim),
+            mRandomVectorDim(aRandomVecDim),
             mSromSigma(1e-3),
             mSqrtConstant(0),
             mWeightCdfMisfit(1),
@@ -82,10 +82,10 @@ public:
             mCumulativeDistributionFunctionError(0),
             mSromMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
             mTrueMoments(std::make_shared<Plato::StandardVector<ScalarType, OrdinalType>>(mMaxNumMoments)),
-            mSromCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
-            mTrueCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mNumSamples)),
-            mMomentsError(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
-            mMomentsMisfit(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mNumRandomVecDim, mMaxNumMoments)),
+            mSromCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mRandomVectorDim, mNumSamples)),
+            mTrueCDF(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mRandomVectorDim, mNumSamples)),
+            mMomentsError(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mRandomVectorDim, mMaxNumMoments)),
+            mMomentsMisfit(std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(mRandomVectorDim, mMaxNumMoments)),
             mDistribution(aDistribution)
     {
         this->setConstants();
@@ -272,13 +272,13 @@ public:
         assert(aControl.getNumVectors() == aOutput.getNumVectors());
         assert(aControl.getNumVectors() >= static_cast<OrdinalType>(2));
 
-        const OrdinalType tNumRandomVecDim = aOutput.getNumVectors() - static_cast<OrdinalType>(1);
-        assert(tNumRandomVecDim == mNumRandomVecDim);
-        const Plato::Vector<ScalarType, OrdinalType> & tProbabilities = aControl[tNumRandomVecDim];
-        Plato::Vector<ScalarType, OrdinalType> & tGradientProbabilities = aOutput[tNumRandomVecDim];
+        const OrdinalType tRandomVectorDim = aOutput.getNumVectors() - static_cast<OrdinalType>(1);
+        assert(tRandomVectorDim == mRandomVectorDim);
+        const Plato::Vector<ScalarType, OrdinalType> & tProbabilities = aControl[tRandomVectorDim];
+        Plato::Vector<ScalarType, OrdinalType> & tGradientProbabilities = aOutput[tRandomVectorDim];
 
         const OrdinalType tNumProbabilities = tProbabilities.size();
-        for(OrdinalType tIndexI = 0; tIndexI < tNumRandomVecDim; tIndexI++)
+        for(OrdinalType tIndexI = 0; tIndexI < tRandomVectorDim; tIndexI++)
         {
             const Plato::Vector<ScalarType, OrdinalType> & tMySamples = aControl[tIndexI];
             Plato::Vector<ScalarType, OrdinalType> & tMySamplesGradient = aOutput[tIndexI];
@@ -437,9 +437,11 @@ private:
      * @param [in] aSamples trial samples
      * @param [in] aSamples trial probabilities
     **********************************************************************************/
-    ScalarType partialCumulativeDistributionFunctionWrtProbabilities(const ScalarType & aSampleIJ,
-                                                                     const Plato::Vector<ScalarType, OrdinalType> & aSamples,
-                                                                     const Plato::Vector<ScalarType, OrdinalType> & aProbabilities)
+    ScalarType
+    partialCumulativeDistributionFunctionWrtProbabilities
+    (const ScalarType & aSampleIJ,
+     const Plato::Vector<ScalarType, OrdinalType> & aSamples,
+     const Plato::Vector<ScalarType, OrdinalType> & aProbabilities)
     {
         ScalarType tSum = 0;
         const OrdinalType tNumProbabilities = aProbabilities.size();
@@ -475,7 +477,7 @@ private:
         assert(mMaxNumMoments == mTrueMoments->size());
         assert(aControl.getNumVectors() >= static_cast<OrdinalType>(2));
         const OrdinalType tNumRandomVecDim = aControl.getNumVectors() - static_cast<OrdinalType>(1);
-        assert(tNumRandomVecDim == mNumRandomVecDim);
+        assert(tNumRandomVecDim == mRandomVectorDim);
         const Plato::Vector<ScalarType, OrdinalType> & tProbabilities = aControl[tNumRandomVecDim];
 
         ScalarType tTotalSum = 0;
@@ -512,28 +514,27 @@ private:
     ScalarType computeCumulativeDistributionFunctionMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
         assert(aControl.getNumVectors() >= static_cast<OrdinalType>(2));
-        const OrdinalType tNumRandomVecDim = aControl.getNumVectors() - static_cast<OrdinalType>(1);
-        assert(tNumRandomVecDim == mNumRandomVecDim);
-        const Plato::Vector<ScalarType, OrdinalType> & tProbabilities = aControl[tNumRandomVecDim];
+        const OrdinalType tRandomVectorDim = aControl.getNumVectors() - static_cast<OrdinalType>(1);
+        assert(tRandomVectorDim == mRandomVectorDim);
+        const Plato::Vector<ScalarType, OrdinalType> & tProbabilities = aControl[tRandomVectorDim];
 
         ScalarType tTotalSum = 0;
-        const OrdinalType tNumProbabilities = tProbabilities.size();
-        for(OrdinalType tDimIndex = 0; tDimIndex < tNumRandomVecDim; tDimIndex++)
+        for(OrdinalType tDimIndex = 0; tDimIndex < tRandomVectorDim; tDimIndex++)
         {
             Plato::Vector<ScalarType, OrdinalType> & tMySromCDF = mSromCDF->operator[](tDimIndex);
             Plato::Vector<ScalarType, OrdinalType> & tMyTrueCDF = mTrueCDF->operator[](tDimIndex);
             const Plato::Vector<ScalarType, OrdinalType> & tMySamples = aControl[tDimIndex];
 
-            ScalarType tMySampleSum = 0;
-            for(OrdinalType tProbIndex = 0; tProbIndex < tNumProbabilities; tProbIndex++)
+            ScalarType tMyRandomDimError = 0;
+            for(OrdinalType tSampleIndex = 0; tSampleIndex < mNumSamples; tSampleIndex++)
             {
-                ScalarType tSample_ij = tMySamples[tProbIndex];
-                tMyTrueCDF[tProbIndex] = mDistribution->cdf(tSample_ij);
-                tMySromCDF[tProbIndex] = Plato::compute_srom_cdf<ScalarType, OrdinalType>(tSample_ij, mSromSigma, tMySamples, tProbabilities);
-                ScalarType tMisfit = tMySromCDF[tProbIndex] - tMyTrueCDF[tProbIndex];
-                tMySampleSum = tMySampleSum + (tMisfit * tMisfit);
+                ScalarType tSample_ij = tMySamples[tSampleIndex];
+                tMyTrueCDF[tSampleIndex] = mDistribution->cdf(tSample_ij);
+                tMySromCDF[tSampleIndex] = Plato::compute_srom_cdf<ScalarType, OrdinalType>(tSample_ij, mSromSigma, tMySamples, tProbabilities);
+                ScalarType tMisfit = tMySromCDF[tSampleIndex] - tMyTrueCDF[tSampleIndex];
+                tMyRandomDimError = tMyRandomDimError + (tMisfit * tMisfit);
             }
-            tTotalSum = tTotalSum + tMySampleSum;
+            tTotalSum = tTotalSum + tMyRandomDimError;
         }
         return (tTotalSum);
     }
@@ -541,7 +542,7 @@ private:
 private:
     OrdinalType mNumSamples;
     OrdinalType mMaxNumMoments;
-    OrdinalType mNumRandomVecDim;
+    OrdinalType mRandomVectorDim;
 
     ScalarType mSromSigma;
     ScalarType mSqrtConstant;
