@@ -60,14 +60,54 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Compute inner product: /f$ \alpha = \sum_{i=1}^{N} x_i * y_i /f$
- * @param [in] aVectorOne input multi-vector
- * @param [in] aVectorTwo input multi-vector
- * @return inner product output
+ * \brief Print Plato::MultiVector to terminal.
+ * \param [in] aInput input multi-vector
+ * \param [in] aName  multi-vector name, default = MultiVector
 ***********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-ScalarType dot(const Plato::MultiVector<ScalarType, OrdinalType> & aVectorOne,
-               const Plato::MultiVector<ScalarType, OrdinalType> & aVectorTwo)
+inline void print
+(const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
+ std::string aName = "MultiVector")
+{
+    auto tNumRows = aInput.getNumVectors();
+    for(decltype(tNumRows) tRowIndex = 0; tRowIndex < tNumRows; tRowIndex++)
+    {
+        const auto& tRow = aInput[tRowIndex];
+        auto tNumCols = tRow.size();
+        for(decltype(tNumRows) tColIndex = 0; tColIndex < tNumCols; tColIndex++)
+        {
+            std::cout << aName << "(" << tRowIndex << "," << tColIndex << ") = " << tRow[tColIndex] << "\n";
+        }
+    }
+}
+
+/******************************************************************************//**
+ * \brief Print Plato::Vector to terminal.
+ * \param [in] aInput input vector
+ * \param [in] aName  vector name, default = Vector
+***********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void print
+(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+ std::string aName = "Vector")
+{
+    auto tNumElems = aInput.size();
+    for(decltype(tNumElems) tIndex = 0; tIndex < tNumElems; tIndex++)
+    {
+        std::cout << aName << "(" << tIndex << ") = " << aInput[tIndex] << "\n";
+    }
+}
+
+/******************************************************************************//**
+ * \brief Compute inner product: /f$ \alpha = \sum_{i=1}^{N} x_i * y_i /f$
+ * \param [in] aVectorOne input multi-vector
+ * \param [in] aVectorTwo input multi-vector
+ * \return inner product output
+***********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+ScalarType dot
+(const Plato::MultiVector<ScalarType, OrdinalType> & aVectorOne,
+ const Plato::MultiVector<ScalarType, OrdinalType> & aVectorTwo)
 {
     assert(aVectorOne.getNumVectors() > static_cast<OrdinalType>(0));
     assert(aVectorOne.getNumVectors() == aVectorTwo.getNumVectors());
@@ -86,8 +126,9 @@ ScalarType dot(const Plato::MultiVector<ScalarType, OrdinalType> & aVectorOne,
 }
 
 template<typename ScalarType, typename OrdinalType>
-void entryWiseProduct(const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
-                      Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+void entryWiseProduct
+(const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
+ Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
 {
     assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
     assert(aInput.getNumVectors() == aOutput.getNumVectors());
@@ -104,7 +145,9 @@ void entryWiseProduct(const Plato::MultiVector<ScalarType, OrdinalType> & aInput
 }
 
 template<typename ScalarType, typename OrdinalType>
-void fill(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+void fill
+(const ScalarType & aScalar,
+ Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
 {
     assert(aOutput.getNumVectors() > static_cast<OrdinalType>(0));
 
@@ -118,7 +161,9 @@ void fill(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalType
 }
 
 template<typename ScalarType, typename OrdinalType>
-void scale(const ScalarType & aScalar, Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+void scale
+(const ScalarType & aScalar,
+ Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
 {
     assert(aOutput.getNumVectors() > static_cast<OrdinalType>(0));
 
@@ -151,10 +196,11 @@ ScalarType norm(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
 
 //! Update vector values with scaled values of A, this = beta*this + alpha*A.
 template<typename ScalarType, typename OrdinalType>
-void update(const ScalarType & aAlpha,
-            const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
-            const ScalarType & aBeta,
-            Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
+void update
+(const ScalarType & aAlpha,
+ const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
+ const ScalarType & aBeta,
+ Plato::MultiVector<ScalarType, OrdinalType> & aOutput)
 {
     assert(aInput.getNumVectors() > static_cast<OrdinalType>(0));
     assert(aInput.getNumVectors() == aOutput.getNumVectors());
@@ -171,12 +217,13 @@ void update(const ScalarType & aAlpha,
 }
 
 template<typename ScalarType, typename OrdinalType>
-void gemv(const ScalarType & aAlpha,
-          const Plato::MultiVector<ScalarType, OrdinalType> & aMatrix,
-          const Plato::Vector<ScalarType, OrdinalType> & aVector,
-          const ScalarType & aBeta,
-          Plato::Vector<ScalarType, OrdinalType> & aOutput,
-          bool aTranspose = false)
+void gemv
+(const ScalarType & aAlpha,
+ const Plato::MultiVector<ScalarType, OrdinalType> & aMatrix,
+ const Plato::Vector<ScalarType, OrdinalType> & aVector,
+ const ScalarType & aBeta,
+ Plato::Vector<ScalarType, OrdinalType> & aOutput,
+ bool aTranspose = false)
 {
     const OrdinalType tNumElements = aMatrix[0].size();
     const OrdinalType tNumVectors = aMatrix.getNumVectors();

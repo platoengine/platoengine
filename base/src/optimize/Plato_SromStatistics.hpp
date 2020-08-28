@@ -59,12 +59,85 @@ namespace Plato
 {
 
 /******************************************************************************//**
- * @brief Evaluate cumulative distribution function (CDF) at this sample point
- * @param [in] aMySample input sample point
- * @param [in] aSigma curvature correction
- * @param [in] aSamples set of samples
- * @param [in] aSamplesProbability set of sample probabilities
- * @return CDF value given a sample computed with a stochastic reduced order model
+ * \fn compute_correlation_misfit
+ * \brief Compute misfit between Stochastic Reduced Order Model (SROM) correlation matrix \n
+ * \f$ \hat{r_ij}(x) \f$ and the truth correlation matrix \f$ r_ij(x) \f$,  defined as \n
+ *
+ * \f$ \epsilon = \left( \frac{ \hat{r}_ij(x) - r_ij(x) }{ r_ij(x) } \right)^2\f$
+ *
+ * \param [in] aProbability sample probabilities
+ * \param [in] aSamples     set of samples
+ * \param [in] aCorrelation correlation matrix
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+ScalarType compute_correlation_misfit
+(const Plato::MultiVector<ScalarType, OrdinalType> & aSromCorrelation,
+ const Plato::MultiVector<ScalarType, OrdinalType> & aTruthCorrelation)
+{
+    auto tRandVecDim = aSromCorrelation.getNumVectors();
+    if(tRandVecDim != aTruthCorrelation.getNumVectors())
+    {
+        THROWERR(std::string("Compute Correlation Misfit: Dimension mismatch, SROM and Truth Correlation matrix do not have ")
+            + "the same number of rows, i.e. random vector dimensions. SROM Correlation matrix has '" + std::to_string(tRandVecDim)
+            + "' rows while the Truth Correlation matrix has '" + std::to_string(aTruthCorrelation.getNumVectors()) + "' rows.")
+    }
+
+    // Diagonal entries are variance; thus, these entries are not considered in the misfit/error calculation.
+    // Furthermore, the matrix is symmetric, only the upper triangular part is used to compute the misfit term.
+    ScalarType tMisfit = 0;
+    for(decltype(tRandVecDim) tDimI = 0; tDimI < tRandVecDim - static_cast<OrdinalType>(1); tDimI++)
+    {
+        for(decltype(tRandVecDim) tDimJ = tDimI + static_cast<OrdinalType>(1); tDimJ < tRandVecDim; tDimJ++)
+        {
+            auto tMyMisfit = (aSromCorrelation(tDimI, tDimJ) - aTruthCorrelation(tDimI, tDimJ)) / aTruthCorrelation(tDimI, tDimJ);
+            tMisfit += (tMyMisfit*tMyMisfit);
+        }
+    }
+
+    return tMisfit;
+}
+// function compute_correlation_misfit
+
+/******************************************************************************//**
+ * \fn compute_srom_correlation_matrix
+ * \brief Compute Stochastic Reduced Order Model (SROM) correlation matrix, defined as \n
+ *
+ * \f$ \hat{r}_ij(x) = \sum_{k=1}^{N_{\mbox{samples}}} x_i^k x_j^k\f$
+ *
+ * \param [in] aProbability sample probabilities
+ * \param [in] aSamples     set of samples
+ * \param [in] aCorrelation correlation matrix
+**********************************************************************************/
+template<typename ScalarType, typename OrdinalType = size_t>
+inline void compute_srom_correlation_matrix
+(const Plato::Vector<ScalarType, OrdinalType> & aProbabilities,
+ const Plato::MultiVector<ScalarType, OrdinalType> & aSamples,
+ Plato::MultiVector<ScalarType, OrdinalType> & aCorrelation)
+{
+    Plato::fill(0.0, aCorrelation);
+    auto tNumSamples = aProbabilities.size();
+    auto tRandVecDim = aCorrelation.getNumVectors();
+    for (decltype(tNumSamples) tSampleIndex = 0; tSampleIndex < tNumSamples; tSampleIndex++)
+    {
+        for (decltype(tRandVecDim) tIndexI = 0; tIndexI < tRandVecDim; tIndexI++)
+        {
+            auto tXi = aSamples(tIndexI, tSampleIndex);
+            for (decltype(tRandVecDim) tIndexJ = 0; tIndexJ < tRandVecDim; tIndexJ++)
+            {
+                aCorrelation(tIndexI, tIndexJ) += aProbabilities[tSampleIndex] * aSamples(tIndexI, tSampleIndex) * aSamples(tIndexJ, tSampleIndex);
+            }
+        }
+    }
+}
+// function compute_srom_correlation_matrix
+
+/******************************************************************************//**
+ * \brief Evaluate cumulative distribution function (CDF) at this sample point
+ * \param [in] aMySample input sample point
+ * \param [in] aSigma curvature correction
+ * \param [in] aSamples set of samples
+ * \param [in] aSamplesProbability set of sample probabilities
+ * \return CDF value given a sample computed with a stochastic reduced order model
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline ScalarType compute_srom_cdf(const ScalarType & aMySample,
@@ -85,11 +158,11 @@ inline ScalarType compute_srom_cdf(const ScalarType & aMySample,
 // function compute_srom_cdf
 
 /******************************************************************************//**
- * @brief Evaluate n-th order raw moment
- * @param [in] aOrder raw moment order
- * @param [in] aSamples set of samples
- * @param [in] aSamplesProbability set of sample probabilities
- * @return evaluation of the n-th order raw moment
+ * \brief Evaluate n-th order raw moment
+ * \param [in] aOrder raw moment order
+ * \param [in] aSamples set of samples
+ * \param [in] aSamplesProbability set of sample probabilities
+ * \return evaluation of the n-th order raw moment
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline ScalarType compute_raw_moment(const ScalarType & aOrder,
@@ -110,11 +183,11 @@ inline ScalarType compute_raw_moment(const ScalarType & aOrder,
 // function compute_raw_moment
 
 /******************************************************************************//**
- * @brief Evaluate n-th order central moment
- * @param [in] aOrder raw moment order
- * @param [in] aSamples set of samples
- * @param [in] aSamplesProbability set of sample probabilities
- * @return evaluation of the n-th order raw moment
+ * \brief Evaluate n-th order central moment
+ * \param [in] aOrder raw moment order
+ * \param [in] aSamples set of samples
+ * \param [in] aSamplesProbability set of sample probabilities
+ * \return evaluation of the n-th order raw moment
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType = size_t>
 inline ScalarType compute_central_moment(const ScalarType & aOrder,

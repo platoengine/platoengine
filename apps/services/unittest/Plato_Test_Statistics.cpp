@@ -56,6 +56,7 @@
 #include "Plato_Diagnostics.hpp"
 #include "Plato_SromObjective.hpp"
 #include "Plato_Communication.hpp"
+#include "Plato_LinearAlgebra.hpp"
 #include "Plato_SromConstraint.hpp"
 #include "Plato_SromStatistics.hpp"
 #include "Plato_StandardVector.hpp"
@@ -70,13 +71,6 @@
 #include "Plato_StandardVectorReductionOperations.hpp"
 
 #include "Plato_UnitTestUtils.hpp"
-
-namespace Plato
-{
-
-
-
-} // namespace Plato
 
 namespace PlatoTest
 {
@@ -325,6 +319,56 @@ std::vector<double> get_gold_beta_cdf_values()
 }
 
 // ********************************************** BEGIN UNIT TESTS **********************************************
+
+TEST(PlatoTest, ComputeCorrelationMisfit)
+{
+    size_t tRandVecDim = 2;
+    Plato::StandardMultiVector<double> tSromCorrelation(tRandVecDim, tRandVecDim);
+    tSromCorrelation(0,0) = 0.204886210166187;
+    tSromCorrelation(0,1) = 0.194398490655844;
+    tSromCorrelation(1,0) = 0.194398490655844;
+    tSromCorrelation(1,1) = 0.184790133740104;
+    Plato::StandardMultiVector<double> tTruthCorrelation(tRandVecDim, tRandVecDim);
+    tTruthCorrelation(0,0) = 0.164508509700266;
+    tTruthCorrelation(0,1) = 0.163872409575874;
+    tTruthCorrelation(1,0) = 0.163872409575874;
+    tTruthCorrelation(1,1) = 0.164031222859721;
+    auto tError = Plato::compute_correlation_misfit(tSromCorrelation, tTruthCorrelation);
+
+    double tTol = 1e-6;
+    double tGold = 0.0347000761289629;
+    ASSERT_NEAR(tGold, tError, tTol);
+}
+
+TEST(PlatoTest, SromCorrelation)
+{
+    size_t tRandVecDim = 2;
+    Plato::StandardVector<double> tProbabilities({0.2, 0.2, 0.2, 0.2, 0.2});
+    Plato::StandardMultiVector<double> tCorrelation(tRandVecDim, tRandVecDim);
+    Plato::StandardMultiVector<double> tSamples(tRandVecDim, tProbabilities.size());
+    tSamples(0,0) = 0.459294009098931;
+    tSamples(0,1) = 0.475238872703205;
+    tSamples(0,2) = 0.483445281537777;
+    tSamples(0,3) = 0.370173255796611;
+    tSamples(0,4) = 0.473742039581547;
+    tSamples(1,0) = 0.419721090353485;
+    tSamples(1,1) = 0.460840629149375;
+    tSamples(1,2) = 0.505947416537821;
+    tSamples(1,3) = 0.424073928225453;
+    tSamples(1,4) = 0.474440939750859;
+
+    Plato::compute_srom_correlation_matrix(tProbabilities, tSamples, tCorrelation);
+
+    double tTol = 1e-6;
+    std::vector<std::vector<double>> tGold =  { {0.206396414507494, 0.207625219956856}, {0.207625219956856, 0.209891113875170} };
+    for(decltype(tRandVecDim) tIndexI = 0; tIndexI < tRandVecDim; tIndexI++)
+    {
+        for(decltype(tRandVecDim) tIndexJ = 0; tIndexJ < tRandVecDim; tIndexJ++)
+        {
+            ASSERT_NEAR(tGold[tIndexI][tIndexJ], tCorrelation(tIndexI, tIndexJ), tTol);
+        }
+    }
+}
 
 TEST(PlatoTest, stats_mean)
 {
@@ -1033,7 +1077,7 @@ TEST(PlatoTest, SromObjectiveTestOne)
     PlatoTest::checkMultiVectorData(tGradient, tGradientGold);
 }
 
-TEST(PlatoTest, SromObjectiveTestTwo)
+TEST(PlatoTest, SromObjectiveTestTwo_UncorrelatedTwoDimRandVec)
 {
     // ********* ALLOCATE BETA DISTRIBUTION *********
     const double tMean = 90;
@@ -1066,6 +1110,7 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
+    tObjective.setCorrelationMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
     double tTolerance = 1e-5;
     double tGold = 1.032230626961365;
@@ -1091,6 +1136,74 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     tGradientGold(tVectorIndex, 2) = -1.84853491196106;
     tGradientGold(tVectorIndex, 3) = 0.426963908092988;
     PlatoTest::checkMultiVectorData(tGradient, tGradientGold);
+}
+
+TEST(PlatoTest, SromObjectiveTestTwo_CorrelatedTwoDimRandVec)
+{
+    // ********* ALLOCATE BETA DISTRIBUTION *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
+    const size_t tNumVectors = 3;
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
+    size_t tVectorIndex = 0;
+    tControl(tVectorIndex, 0) = 0.375040433304479;
+    tControl(tVectorIndex, 1) = 0.328111162027339;
+    tControl(tVectorIndex, 2) = 0.274681002534179;
+    tControl(tVectorIndex, 3) = 0.334742519844096;
+    tVectorIndex = 1;
+    tControl(tVectorIndex, 0) = 0.414822395072085;
+    tControl(tVectorIndex, 1) = 0.335056628176354;
+    tControl(tVectorIndex, 2) = 0.272217383599573;
+    tControl(tVectorIndex, 3) = 0.347126327711567;
+    tVectorIndex = 2;
+    tControl[tVectorIndex].fill(0.25);
+
+    const size_t tRandomVecDim = 2;
+    Plato::StandardMultiVector<double> tCorrelation(tRandomVecDim, tRandomVecDim);
+    tCorrelation(0,0) = 0.163734737417027;
+    tCorrelation(0,1) = 0.163286664100536;
+    tCorrelation(1,0) = 0.163286664100536;
+    tCorrelation(1,1) = 0.163653492690528;
+
+    // ********* TEST OBJECTIVE FUNCTION *********
+    const size_t tMaxNumMoments = 4;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+    tObjective.setCdfMisfitTermWeight(1);
+    tObjective.setMomentMisfitTermWeight(1);
+    tObjective.setCorrelationMisfitTermWeight(1);
+    tObjective.setTruthCorrelationMatrix(tCorrelation);
+    auto tValue = tObjective.value(tControl);
+    auto tTolerance = 1e-4;
+    auto tGold = 0.821198901404961;
+    EXPECT_NEAR(tGold, tValue, tTolerance);
+
+    // ********* TEST OBJECTIVE GRADIENT *********
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
+    tObjective.gradient(tControl, tGradient);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
+    tVectorIndex = 0;
+    tGradientGold(tVectorIndex, 0) = -2.64909865388309;
+    tGradientGold(tVectorIndex, 1) = -1.29399447542632;
+    tGradientGold(tVectorIndex, 2) = -0.485916817610198;
+    tGradientGold(tVectorIndex, 3) = -1.85589143576364;
+    tVectorIndex = 1;
+    tGradientGold(tVectorIndex, 0) = -2.51193441109838;
+    tGradientGold(tVectorIndex, 1) = -1.01799124946594;
+    tGradientGold(tVectorIndex, 2) = -0.256417179857072;
+    tGradientGold(tVectorIndex, 3) = -1.58873628951739;
+    tVectorIndex = 2;
+    tGradientGold(tVectorIndex, 0) = -2.02854765068563;
+    tGradientGold(tVectorIndex, 1) = -0.912589079823457;
+    tGradientGold(tVectorIndex, 2) = -0.790014838673253;
+    tGradientGold(tVectorIndex, 3) = -0.937548637470705;
+    PlatoTest::checkMultiVectorData(tGradient, tGradientGold, tTolerance);
 }
 
 TEST(PlatoTest, SromConstraint)
@@ -1183,7 +1296,7 @@ TEST(PlatoTest, NormalDistribution)
     }
 }
 
-TEST(PlatoTest, CheckSromObjectiveGradient)
+TEST(PlatoTest, CheckSromObjectiveGradient_Uncorrelated)
 {
     // ********* ALLOCATE BETA DISTRIBUTION *********
     const double tMean = 90;
@@ -1202,6 +1315,43 @@ TEST(PlatoTest, CheckSromObjectiveGradient)
 
     const size_t tNumVectors = 2;
     Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
+    tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
+    EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
+
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if(tComm.myProcID() == static_cast<int>(0))
+    {
+        std::cout << tOutputMsg.str().c_str();
+    }
+}
+
+TEST(PlatoTest, CheckSromObjectiveGradient_Correlated)
+{
+    // ********* ALLOCATE BETA DISTRIBUTION *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    // ********* CHECK OBJECTIVE GRADIENT *********
+    std::ostringstream tOutputMsg;
+    const size_t tNumSamples = 4;
+    const size_t tRandomVecDim = 2;
+    const size_t tMaxNumMoments = 4;
+    Plato::Diagnostics<double> tDiagnostics;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+
+    Plato::StandardMultiVector<double> tCorrelation(tRandomVecDim, tRandomVecDim);
+    tCorrelation(0,0) = 0.163734737417027;
+    tCorrelation(0,1) = 0.163286664100536;
+    tCorrelation(1,0) = 0.163286664100536;
+    tCorrelation(1,1) = 0.163653492690528;
+    tObjective.setTruthCorrelationMatrix(tCorrelation);
+
+    const size_t tNumControlVectors = tRandomVecDim + 1;
+    Plato::StandardMultiVector<double> tControl(tNumControlVectors, tNumSamples);
     tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
