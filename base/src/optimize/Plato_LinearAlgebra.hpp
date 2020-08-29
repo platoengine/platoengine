@@ -51,8 +51,10 @@
 #define PLATO_LINEARALGEBRA_HPP_
 
 #include <cmath>
+#include <string>
 #include <cassert>
 
+#include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
 
@@ -95,6 +97,40 @@ inline void print
     for(decltype(tNumElems) tIndex = 0; tIndex < tNumElems; tIndex++)
     {
         std::cout << aName << "(" << tIndex << ") = " << aInput[tIndex] << "\n";
+    }
+}
+
+/******************************************************************************//**
+ * \brief Copy data from 2D standard vector to Plato multivector.
+ * \param [in]  aInput   2D standard vector
+ * \param [out] aOutput  Plato multivector
+***********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void copy
+(const std::vector<std::vector<ScalarType>>& aInput,
+ Plato::MultiVector<ScalarType, OrdinalType>& aOutput)
+{
+    if(aInput.size() != aOutput.getNumVectors())
+    {
+        THROWERR(std::string("Dimension mismatch: Number of rows do not match. ") + "Input matrix has '"
+            + std::to_string(aInput.size()) + "' rows and output matrix has '" + std::to_string(aOutput.getNumVectors())
+            + "' rows.")
+    }
+    if(aInput[0].size() != aOutput[0].size())
+    {
+        THROWERR(std::string("Dimension mismatch: Number of columns do not match. ") + "Input matrix has '"
+            + std::to_string(aInput[0].size()) + "' columns and output matrix has '" + std::to_string(aOutput[0].size())
+            + "' columns.")
+    }
+
+    for(auto& tRow : aInput)
+    {
+        auto tRowIndex = &tRow - &aInput[0];
+        for(auto& tColValue : tRow)
+        {
+            auto tColIndex = &tColValue - &tRow[0];
+            aOutput(tRowIndex, tColIndex) = tColValue;
+        }
     }
 }
 

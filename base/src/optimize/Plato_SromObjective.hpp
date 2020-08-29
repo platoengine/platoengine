@@ -257,6 +257,15 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Return trust correlation matrix.
+     * \return trust correlation matrix.
+    **********************************************************************************/
+    const Plato::MultiVector<ScalarType, OrdinalType>& getTruthCorrelationMatrix() const
+    {
+        return (*mTruthCorrelation);
+    }
+
+    /******************************************************************************//**
      * \brief Return true cumulative distribution function evaluations
      * \param [in] aInput random vector dimension
      * \return vector with true cumulative distribution function evaluations at the

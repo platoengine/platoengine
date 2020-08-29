@@ -48,10 +48,7 @@
 
 #include "gtest/gtest.h"
 
-#include <cmath>
-#include <numeric>
-#include <vector>
-
+#include "Plato_SromHelpers.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_Diagnostics.hpp"
 #include "Plato_SromObjective.hpp"
@@ -319,6 +316,86 @@ std::vector<double> get_gold_beta_cdf_values()
 }
 
 // ********************************************** BEGIN UNIT TESTS **********************************************
+
+TEST(PlatoTest, ReadCorrelationMatrixFile)
+{
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::io::write_matrix_to_file(tGold, tFileMetaData);
+    auto tOutput = Plato::io::read_matrix_from_file<double>(tFileMetaData.mFilename);
+
+    auto tTol = 1e-6;
+    for(auto& tRow : tOutput)
+    {
+        auto tRowIndex = &tRow - &tOutput[0];
+        for(auto& tColValue : tRow)
+        {
+            auto tColIndex = &tColValue - &tRow[0];
+            ASSERT_NEAR(tGold[tRowIndex][tColIndex], tColValue, tTol);
+        }
+    }
+}
+
+TEST(PlatoTest, CopyCorrelationMatrix)
+{
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::StandardMultiVector<double> tMatrix(2,2);
+    Plato::copy(tGold, tMatrix);
+
+    auto tTol = 1e-6;
+    for(auto& tRow : tGold)
+    {
+        auto tRowIndex = &tRow - &tGold[0];
+        for(auto& tGoldValue : tRow)
+        {
+            auto tColIndex = &tGoldValue - &tRow[0];
+            ASSERT_NEAR(tGoldValue, tMatrix(tRowIndex,tColIndex), tTol);
+        }
+    }
+}
+
+TEST(PlatoTest, SetCorrelationMatrix)
+{
+    // ********* WRITE CORRELATION MATRIX *********
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::io::write_matrix_to_file(tGold, tFileMetaData);
+
+    // ********* DEFINE STATISTICS *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    const size_t tNumSamples = 4;
+    const size_t tRandomVecDim = 2;
+    const size_t tMaxNumMoments = 4;
+    Plato::SromInputs<double> tSromData;
+    tSromData.mCorrelationMatrixFilename = tFileMetaData.mFilename;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+    Plato::set_correlation_matrix(tSromData, tObjective);
+
+    auto tTol = 1e-6;
+    const auto& tTruthCorrelation = tObjective.getTruthCorrelationMatrix();
+    for(auto& tRow : tGold)
+    {
+        auto tRowIndex = &tRow - &tGold[0];
+        for(auto& tGoldValue : tRow)
+        {
+            auto tColIndex = &tGoldValue - &tRow[0];
+            ASSERT_NEAR(tGoldValue, tTruthCorrelation(tRowIndex,tColIndex), tTol);
+        }
+    }
+}
 
 TEST(PlatoTest, ComputeCorrelationMisfit)
 {

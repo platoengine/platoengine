@@ -49,6 +49,7 @@
 
 #include "Plato_Macros.hpp"
 #include "Plato_SromUtilis.hpp"
+#include "Plato_SromHelpers.hpp"
 #include "Plato_SromObjective.hpp"
 #include "Plato_SromConstraint.hpp"
 #include "Plato_StatisticsUtils.hpp"
@@ -96,28 +97,59 @@ inline void output_cdf_comparison(const Plato::CommWrapper & aCommWrapper,
 }
 
 /******************************************************************************//**
- * \brief Build SROM objective and constraint
- * \param [in] aStatisticInputs data structure with inputs for probability distribution function
- * \param [in,out] aDataFactory data factory for optimizer
- * \param [in,out] aDistribution probability distribution function interface
- * \param [in,out] aSromObjective stochastic reduced order model problem objective
- * \param [in,out] aDataMng optimization algorithm data manager
- * \param [in,out] aStageMng optimization problem stage manager (manages criteria evaluations)
+ * \brief Set correlation matrix.
+ * \param [in]  aMetaData   stochastic reduced order model (SROM) metadata
+ * \param [out] aObjective  objective function interface
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void build_srom_criteria(const Plato::SromInputs<ScalarType, OrdinalType> & aSromInputs,
-                                const std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> & aReductionOps,
-                                const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
-                                std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> & aSromObjective,
-                                std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraintList)
+inline void set_correlation_matrix
+(const Plato::SromInputs<ScalarType, OrdinalType>& aMetaData,
+ Plato::SromObjective<ScalarType, OrdinalType>& aObjective)
 {
-    // ********* ALLOCATE OBJECTIVE AND CONSTRAINT CRITERIA *********
+    if(!aMetaData.mCorrelationMatrixFilename.empty())
+    {
+        auto tInputCorrelationMatrix =
+            Plato::io::read_matrix_from_file<ScalarType>(aMetaData.mCorrelationMatrixFilename);
+        auto tTruthCorrelationMatrix = aObjective.getTruthCorrelationMatrix().create();
+        Plato::copy(tInputCorrelationMatrix, *tTruthCorrelationMatrix);
+        aObjective.setTruthCorrelationMatrix(*tTruthCorrelationMatrix);
+    }
+}
+
+/******************************************************************************//**
+ * \brief Build stochastic reduced order model (SROM) objective function.
+ * \param [in]  aSromInputs    SROM problem metadata
+ * \param [in]  aDistribution  probability distribution function interface
+ * \param [out] aSromObjective objective function interface
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void build_srom_objective_function
+(const Plato::SromInputs<ScalarType, OrdinalType> & aSromInputs,
+ const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
+ std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> & aSromObjective)
+{
+    // TODO ADD SUPPORT FOR CORRELATION MATRIX
+    const OrdinalType tRandVecDim = aSromInputs.mDimension;
     const OrdinalType tNumSamples = aSromInputs.mNumSamples;
     const OrdinalType tMaxNumMoments = aSromInputs.mMaxNumDistributionMoments;
-    aSromObjective = std::make_shared<Plato::SromObjective<ScalarType, OrdinalType> >(aDistribution, tMaxNumMoments, tNumSamples);
+    aSromObjective = std::make_shared< Plato::SromObjective<ScalarType, OrdinalType> >
+                     (aDistribution, tMaxNumMoments, tNumSamples, tRandVecDim);
     aSromObjective->setMomentMisfitTermWeight(aSromInputs.mMomentErrorCriterionWeight);
     aSromObjective->setCdfMisfitTermWeight(aSromInputs.mCumulativeDistributionFuncErrorWeight);
+    aSromObjective->setCorrelationMisfitTermWeight(aSromInputs.mCorrelationErrorCriterionWeight);
+    Plato::set_correlation_matrix(aSromInputs, *aSromObjective);
+}
 
+/******************************************************************************//**
+ * \brief Build stochastic reduced order model (SROM) constraint function.
+ * \param [in]   aReductionOps   reduction operation interface
+ * \param [out]  aConstraintList constraint function interface
+ **********************************************************************************/
+template<typename ScalarType, typename OrdinalType>
+inline void build_srom_constraint_function
+(const std::shared_ptr<Plato::ReductionOperations<ScalarType,OrdinalType>> & aReductionOps,
+ std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> & aConstraintList)
+{
     std::shared_ptr<Plato::SromConstraint<ScalarType, OrdinalType> > tSromConstraint =
             std::make_shared<Plato::SromConstraint<ScalarType, OrdinalType>>(aReductionOps);
     aConstraintList = std::make_shared<Plato::CriterionList<ScalarType, OrdinalType> >();
@@ -276,21 +308,22 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
  * \param [in] aPrintDiagnostics flag use to enable output to file (default = false)
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void solve_srom_problem(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
-                               Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
-                               Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
-                               std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
-                               bool aPrintDiagnostics = false)
+inline void solve_srom_problem
+(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
+ Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
+ Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
+ std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
+ bool aPrintDiagnostics = false)
 {
     // build distribution
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution;
     tDistribution = Plato::build_distrubtion<ScalarType, OrdinalType>(aStatsInputs);
 
     // build srom objective and constraint
-    std::shared_ptr<Plato::DataFactory<ScalarType, OrdinalType>> tDataFactory;
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> tSromObjective;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tSromConstraints;
-    Plato::build_srom_criteria(aStatsInputs, aInputsKSAL.mReductionOperations, tDistribution, tSromObjective, tSromConstraints);
+    Plato::build_srom_objective_function(aStatsInputs, tDistribution, tSromObjective);
+    Plato::build_srom_constraint_function(aInputsKSAL.mReductionOperations, tSromConstraints);
 
     // set initial guess and bounds
     Plato::set_sample_probability_pairs_bounds(aStatsInputs, aInputsKSAL);
