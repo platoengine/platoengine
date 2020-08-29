@@ -1,10 +1,4 @@
 /*
- * Plato_SromObjective.hpp
- *
- *  Created on: Jan 31, 2018
- */
-
-/*
 //@HEADER
 // *************************************************************************
 //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
@@ -45,8 +39,13 @@
 //@HEADER
 */
 
-#ifndef PLATO_SROMOBJECTIVE_HPP_
-#define PLATO_SROMOBJECTIVE_HPP_
+/*
+ * Plato_SromObjective.hpp
+ *
+ *  Created on: Jan 31, 2018
+ */
+
+#pragma once
 
 #include <cmath>
 #include <memory>
@@ -297,11 +296,11 @@ public:
     /******************************************************************************//**
      * \brief Evaluate SROM objective, defined as:
      *
-     * \f$ f(x) = \frac{1}{2}\left( \alpha_{1}\varepsilon_1 + \alpha_{2}\varepsilon_2 + \alpha_{3}\varepsilon_3 \right) \f$, \n
+     * \f$ \frac{1}{2}\left( \alpha_{1}\varepsilon_1 + \alpha_{2}\varepsilon_2 + \alpha_{3}\varepsilon_3 \right) \f$, \n
      * where,
-     * \f$ \varepsilon_1 = \mbox{moment misfit term\f$
-     * \f$ \varepsilon_2 = \mbox{cdf misfit term\f$
-     * \f$ \varepsilon_3 = \mbox{correlation misfit term\f$
+     * \f$ \varepsilon_1 = \mbox{moment misfit term}\f$
+     * \f$ \varepsilon_2 = \mbox{cdf misfit term}\f$
+     * \f$ \varepsilon_3 = \mbox{correlation misfit term}\f$
      *
      * \param [in] aControl optimization variables
      * \return criterion evaluation
@@ -645,11 +644,6 @@ private:
     /******************************************************************************//**
      * \brief Compute misfit in moments, i.e. difference between target and SROM moments.
      * \param [in] aControl sample/probability pairs
-     *
-     * NOTE:
-     * Compute misfit in moments up to order q for ith dimension (i.e. i-th random vector
-     * dimension). Currently, the random vector dimension is always set to one. Hence,
-     * random vector has size one and samples are not correlated.
     **********************************************************************************/
     ScalarType computeCorrelationMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
@@ -668,11 +662,6 @@ private:
     /******************************************************************************//**
      * \brief Compute misfit in moments, i.e. difference between target and SROM moments.
      * \param [in] aControl sample/probability pairs
-     *
-     * NOTE:
-     * Compute misfit in moments up to order q for ith dimension (i.e. i-th random vector
-     * dimension). Currently, the random vector dimension is always set to one. Hence,
-     * random vector has size one and samples are not correlated.
     **********************************************************************************/
     ScalarType computeMomentsMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
@@ -705,11 +694,6 @@ private:
     /******************************************************************************//**
      * \brief Compute misfit in CDF, i.e. difference between target and SROM CDF.
      * \param [in] aControl sample/probability pairs
-     *
-     * NOTE:
-     * Compute misfit in Cumulative Distribution Function (CDF) for i-th dimension (i.e.
-     * i-th random vector dimension). Currently, the random vector dimension is always
-     * set to one. Hence, random vector has size one and samples are not correlated.
     **********************************************************************************/
     ScalarType computeCumulativeDistributionFunctionMisfit(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
@@ -768,7 +752,7 @@ private:
     SromObjective(const Plato::SromObjective<ScalarType, OrdinalType> & aRhs);
     Plato::SromObjective<ScalarType, OrdinalType> & operator=(const Plato::SromObjective<ScalarType, OrdinalType> & aRhs);
 };
+// class SromObjective
 
-} // namespace Plato
-
-#endif /* PLATO_SROMOBJECTIVE_HPP_ */
+}
+// namespace Plato

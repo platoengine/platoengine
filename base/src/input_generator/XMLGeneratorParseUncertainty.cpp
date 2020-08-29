@@ -68,6 +68,7 @@ void ParseUncertainty::allocate()
     mTags.insert({ "filename", { { {"filename"}, ""}, "" } });
     mTags.insert({ "category", { { {"category"}, ""}, "" } });
     mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
+    mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "1" } });
     mTags.insert({ "lower_bound", { { {"lower_bound"}, ""}, "" } });
     mTags.insert({ "upper_bound", { { {"upper_bound"}, ""}, "" } });
     mTags.insert({ "material_id", { { {"material_id"}, ""}, "" } });
@@ -76,6 +77,7 @@ void ParseUncertainty::allocate()
     mTags.insert({ "number_samples", { { {"number_samples"}, ""}, "" } });
     mTags.insert({ "initial_guess", { { {"initial_guess"}, ""}, "random" } });
     mTags.insert({ "standard_deviation", { { {"standard_deviation"}, ""}, "" } });
+    mTags.insert({ "correlation_filename", { { {"correlation_filename"}, ""}, "" } });
 }
 
 void ParseUncertainty::setMetaData(XMLGen::Uncertainty& aMetadata)

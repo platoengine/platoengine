@@ -70,6 +70,20 @@ public:
     void seed(const std::string& aInput);
 
     /******************************************************************************//**
+     * \fn dimensions
+     * \brief Return string value for keyword 'dimensions'.
+     * \return random vector dimensions
+    **********************************************************************************/
+    std::string dimensions() const;
+
+    /******************************************************************************//**
+     * \fn dimensions
+     * \brief Set string value for keyword 'dimensions'.
+     * \param [in] aInput random vector dimensions
+    **********************************************************************************/
+    void dimensions(const std::string& aInput);
+
+    /******************************************************************************//**
      * \fn category
      * \brief Return string value for keyword 'category'.
      * \return non-deterministic parameter category, e.g. load, material
@@ -236,6 +250,20 @@ public:
      * \param [in] aInput string value
     **********************************************************************************/
     void upper(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn correlationFilename
+     * \brief Return string value for keyword 'correlation_filename'.
+     * \return correlation matrix filename
+    **********************************************************************************/
+    std::string correlationFilename() const;
+
+    /******************************************************************************//**
+     * \fn correlationFilename
+     * \brief Set string value for keyword 'correlation_filename'.
+     * \param [in] aInput correlation matrix filename
+    **********************************************************************************/
+    void correlationFilename(const std::string& aInput);
 };
 // struct Uncertainty
 

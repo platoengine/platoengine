@@ -66,15 +66,17 @@ namespace srom
 **********************************************************************************/
 struct Statistics
 {
-    std::string mFile;                      /*!< filename: contains sample-probability pairs */
+    std::string mFilename;                  /*!< filename: contains sample-probability pairs */
     std::string mNumSamples;                /*!< number of samples */
     std::string mDistribution;              /*!< probability distribution */
     std::string mMean;                      /*!< probability distribution mean */
     std::string mUpperBound;                /*!< probability distribution upper bound */
     std::string mLowerBound;                /*!< probability distribution lower bound */
+    std::string mDimensions = "1";          /*!< random vector dimensions */
     std::string mRandomSeed = "2";          /*!< random seed used to initialize samples (apply only in random initial guess use cases) */
     std::string mInitialGuess = "uniform";  /*!< method used to compute samples' initial guess, options: random, uniform */
     std::string mStandardDeviation;         /*!< probability distribution standard deviation */
+    std::string mCorrelationFilename;       /*!< correlation filename: contains input correlation matrix */
 
     /******************************************************************************//**
      * \fn check
@@ -136,7 +138,7 @@ public:
         if(mAttribute.empty())
             { THROWERR("Random Variable: Random variable attribute is not defined.") }
 
-        if(mStatistics.mFile.empty())
+        if(mStatistics.mFilename.empty())
         {
             try
             {
@@ -174,13 +176,13 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn file
+     * \fn filename
      * \brief Set name of file with sample-probability pair information.
      * \param [in] aFile filename
     **********************************************************************************/
-    void file(const std::string& aFile)
+    void filename(const std::string& aFile)
     {
-        mStatistics.mFile = aFile;
+        mStatistics.mFilename = aFile;
     }
 
     /******************************************************************************//**
@@ -224,6 +226,16 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn correlationFilename
+     * \brief Set correlation matrix filename
+     * \param [in] aFilename filename
+    **********************************************************************************/
+    void correlationFilename(const std::string& aFilename)
+    {
+        mStatistics.mCorrelationFilename = aFilename;
+    }
+
+    /******************************************************************************//**
      * \fn seed
      * \brief Set random seed.
      * \param [in] aRandomSeed random seed
@@ -231,6 +243,16 @@ public:
     void seed(const std::string& aRandomSeed)
     {
         mStatistics.mRandomSeed = aRandomSeed;
+    }
+
+    /******************************************************************************//**
+     * \fn dimensions
+     * \brief Set random vector dimensions.
+     * \param [in] aRandomSeed random vector dimensions
+    **********************************************************************************/
+    void dimensions(const std::string& aDimensions)
+    {
+        mStatistics.mDimensions = aDimensions;
     }
 
     /******************************************************************************//**
@@ -304,13 +326,13 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn file
+     * \fn filename
      * \brief Return name of file with sample-probability pair information.
      * \return filename
     **********************************************************************************/
-    std::string file() const
+    std::string filename() const
     {
-        return mStatistics.mFile;
+        return mStatistics.mFilename;
     }
 
     /******************************************************************************//**
@@ -331,6 +353,16 @@ public:
     std::string seed() const
     {
         return mStatistics.mRandomSeed;
+    }
+
+    /******************************************************************************//**
+     * \fn dimensions
+     * \brief Return random vector dimensions.
+     * \return random vector dimensions
+    **********************************************************************************/
+    std::string dimensions() const
+    {
+        return mStatistics.mDimensions;
     }
 
     /******************************************************************************//**
@@ -401,6 +433,16 @@ public:
     std::string distribution() const
     {
         return mStatistics.mDistribution;
+    }
+
+    /******************************************************************************//**
+     * \fn correlationFilename
+     * \brief Return name of file that contains input correlation matrix.
+     * \return filename
+    **********************************************************************************/
+    std::string correlationFilename() const
+    {
+        return mStatistics.mCorrelationFilename;
     }
 
     /******************************************************************************//**

@@ -49,25 +49,25 @@ inline Plato::srom::RandomMatPropMap build_material_id_to_random_material_map
 /******************************************************************************//**
  * \fn append_material_properties
  * \brief Append material properties.
- * \param [in]  aMaterial      input material metadata
- * \param [in]  aRandomMatMap  map from material identification number to map between \n
- *   material tag and list of non-deterministic variables' metadata
- * \param [out] aSromMaterial  Stochastic Reduced Order Model (SROM) material metadata
+ * \param [in]  aMaterial       input material metadata
+ * \param [in]  aRandomMatMap   map from material identification number to map \n
+ *                              from material tag to list of random variable metadata
+ * \param [out] aRandomMaterial random material metadata
 **********************************************************************************/
 inline void append_material_properties
 (const XMLGen::Material& aMaterial,
  const Plato::srom::RandomMatPropMap& aRandomMatMap,
- Plato::srom::Material& aSromMaterial)
+ Plato::srom::Material& aRandomMaterial)
 {
     if(aRandomMatMap.empty())
     {
         THROWERR(std::string("Append Random Material: Map from material identification number ")
-            + "to map from material tag to list of non-deterministic variables' metadata is empty.")
+            + "to map from material tag to list of random variable metadata is empty.")
     }
 
     auto tMatID = aMaterial.id();
-    aSromMaterial.materialID(tMatID);
-    aSromMaterial.category(aMaterial.category());
+    aRandomMaterial.materialID(tMatID);
+    aRandomMaterial.category(aMaterial.category());
     auto tTags = aMaterial.tags();
 
     for (auto &tTag : tTags)
@@ -82,24 +82,26 @@ inline void append_material_properties
             {
                 Plato::srom::Statistics tStats;
                 tStats.mMean = tIterator->second.mean();
-                tStats.mFile = tIterator->second.filename();
                 tStats.mRandomSeed = tIterator->second.seed();
                 tStats.mUpperBound = tIterator->second.upper();
                 tStats.mLowerBound = tIterator->second.lower();
+                tStats.mFilename = tIterator->second.filename();
                 tStats.mNumSamples = tIterator->second.samples();
                 tStats.mInitialGuess = tIterator->second.guess();
-                tStats.mDistribution = tIterator->second.distribution();
                 tStats.mStandardDeviation = tIterator->second.std();
-                aSromMaterial.append(tTag, aMaterial.attribute(tTag), tStats);
+                tStats.mDimensions = tIterator->second.dimensions();
+                tStats.mDistribution = tIterator->second.distribution();
+                tStats.mCorrelationFilename = tIterator->second.correlationFilename();
+                aRandomMaterial.append(tTag, aMaterial.attribute(tTag), tStats);
             }
             else
             {
-                aSromMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
+                aRandomMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
             }
         }
         else
         {
-            aSromMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
+            aRandomMaterial.append(tTag, aMaterial.attribute(tTag), aMaterial.property(tTag));
         }
     }
 }

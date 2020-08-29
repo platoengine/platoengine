@@ -271,16 +271,18 @@ inline void check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
 **********************************************************************************/
 inline void define_input_statistics
 (const Plato::srom::RandomVariable & aMyRandomVar,
- Plato::SromInputs<double> & aInput)
+ Plato::SromInputs<double> & aInputSromMetaData)
 {
     Plato::srom::check_input_statistics(aMyRandomVar);
-    aInput.mMean = std::stod(aMyRandomVar.mean());
-    aInput.mLowerBound = std::stod(aMyRandomVar.lower());
-    aInput.mUpperBound = std::stod(aMyRandomVar.upper());
+    aInputSromMetaData.mMean = std::stod(aMyRandomVar.mean());
+    aInputSromMetaData.mLowerBound = std::stod(aMyRandomVar.lower());
+    aInputSromMetaData.mUpperBound = std::stod(aMyRandomVar.upper());
     const auto tStdDev = std::stod(aMyRandomVar.deviation());
-    aInput.mVariance = tStdDev * tStdDev;
-    aInput.mRandomSeed = std::stoi(aMyRandomVar.seed());
-    aInput.mNumSamples = std::stoi(aMyRandomVar.samples());
+    aInputSromMetaData.mVariance = tStdDev * tStdDev;
+    aInputSromMetaData.mRandomSeed = std::stoi(aMyRandomVar.seed());
+    aInputSromMetaData.mNumSamples = std::stoi(aMyRandomVar.samples());
+    aInputSromMetaData.mDimensions = std::stoi(aMyRandomVar.dimensions());
+    aInputSromMetaData.mCorrelationMatrixFilename = aMyRandomVar.correlationFilename();
 }
 // function define_input_statistics
 
@@ -486,7 +488,7 @@ inline bool compute_sample_probability_pairs
         tRandomVar.check();
         try
         {
-            if (tRandomVar.file().empty())
+            if (tRandomVar.filename().empty())
             {
                 // solve srom problem: sample-probability pairs must be computed by plato
                 auto tSampleProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tRandomVar);
@@ -495,7 +497,7 @@ inline bool compute_sample_probability_pairs
             else
             {
                 // read sample-probability pairs from the user-provided file
-                auto tFilename = tRandomVar.file();
+                auto tFilename = tRandomVar.filename();
                 auto tSampleProbPairsFromFile = Plato::srom::read_sample_probability_pairs(tFilename);
                 auto tSampleProbPairs = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairsFromFile);
                 aMySampleProbPairs.push_back(tSampleProbPairs);

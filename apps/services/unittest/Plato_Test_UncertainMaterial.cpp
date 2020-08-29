@@ -242,7 +242,7 @@ TEST(PlatoTest, SROM_ReadSampleProbabilityPairs)
     tMyRandomVar.id(0);
     tMyRandomVar.tag("traction force");
     tMyRandomVar.attribute("magnitude");
-    tMyRandomVar.file("test.csv");
+    tMyRandomVar.filename("test.csv");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 

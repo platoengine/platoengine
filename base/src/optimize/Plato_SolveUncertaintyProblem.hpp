@@ -128,8 +128,7 @@ inline void build_srom_objective_function
  const std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> & aDistribution,
  std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> & aSromObjective)
 {
-    // TODO ADD SUPPORT FOR CORRELATION MATRIX
-    const OrdinalType tRandVecDim = aSromInputs.mDimension;
+    const OrdinalType tRandVecDim = aSromInputs.mDimensions;
     const OrdinalType tNumSamples = aSromInputs.mNumSamples;
     const OrdinalType tMaxNumMoments = aSromInputs.mMaxNumDistributionMoments;
     aSromObjective = std::make_shared< Plato::SromObjective<ScalarType, OrdinalType> >
@@ -171,14 +170,14 @@ inline void set_sample_probability_pairs_bounds
            + std::to_string(aSromInputs.mNumSamples) + "'.")
     }
 
-    if(aSromInputs.mDimension <= static_cast<OrdinalType>(0))
+    if(aSromInputs.mDimensions <= static_cast<OrdinalType>(0))
     {
         THROWERR(std::string("Set SROM Problem Bounds: Number of random vector dimensions is <= 0. The input number of samples is set to '")
-           + std::to_string(aSromInputs.mDimension) + "'.")
+           + std::to_string(aSromInputs.mDimensions) + "'.")
     }
 
     // NumVectors = Random Vector Dim + Probability Vector
-    const OrdinalType tNumVectors = aSromInputs.mDimension + static_cast<OrdinalType>(1);
+    const OrdinalType tNumVectors = aSromInputs.mDimensions + static_cast<OrdinalType>(1);
     aInputsKSAL.mLowerBounds =
         std::make_shared<Plato::StandardMultiVector<ScalarType, OrdinalType>>(tNumVectors, aSromInputs.mNumSamples);
     ScalarType tScalarValue = 0;

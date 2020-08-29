@@ -304,10 +304,12 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
     tNewVariable.lower(aRandomVariable.lower());
     tNewVariable.upper(aRandomVariable.upper());
     tNewVariable.deviation(aRandomVariable.std());
-    tNewVariable.file(aRandomVariable.filename());
+    tNewVariable.filename(aRandomVariable.filename());
     tNewVariable.samples(aRandomVariable.samples());
     tNewVariable.attribute(aRandomVariable.attribute());
+    tNewVariable.dimensions(aRandomVariable.dimensions());
     tNewVariable.distribution(aRandomVariable.distribution());
+    tNewVariable.correlationFilename(aRandomVariable.correlationFilename());
     aRandomLoad.mRandomVars.push_back(tNewVariable);
 }
 // function add_random_variable_to_random_load

@@ -652,7 +652,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
 
     ASSERT_EQ(1u, tMaterials[1].randomVars().size());
     ASSERT_EQ(0, tMaterials[1].randomVars()[0].id());
-    EXPECT_TRUE(tMaterials[1].randomVars()[0].file().empty());
+    EXPECT_TRUE(tMaterials[1].randomVars()[0].filename().empty());
     ASSERT_STREQ("poissons_ratio", tMaterials[1].randomVars()[0].tag().c_str());
     ASSERT_STREQ("homogeneous", tMaterials[1].randomVars()[0].attribute().c_str());
     ASSERT_STREQ("0.05", tMaterials[1].randomVars()[0].deviation().c_str());
@@ -778,7 +778,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     ASSERT_STREQ("homogeneous", tSromMaterial.deterministicVars()[0].attribute().c_str());
 
     ASSERT_EQ(0, tSromMaterial.randomVars()[0].id());
-    ASSERT_TRUE(tSromMaterial.randomVars()[0].file().empty());
+    ASSERT_TRUE(tSromMaterial.randomVars()[0].filename().empty());
     ASSERT_STREQ("0.2", tSromMaterial.randomVars()[0].mean().c_str());
     ASSERT_STREQ("2", tSromMaterial.randomVars()[0].upper().c_str());
     ASSERT_STREQ("1", tSromMaterial.randomVars()[0].lower().c_str());

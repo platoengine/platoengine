@@ -82,7 +82,7 @@ struct SromInputs
     ScalarType mCorrelationErrorCriterionWeight;       /*!< weight on correlation misfit term in the SROM objective function */
     ScalarType mCumulativeDistributionFuncErrorWeight; /*!< weight on cumulative distribution function misfit term in the SROM objective function */
 
-    OrdinalType mDimension = 1;             /*!< random vector dimensions */
+    OrdinalType mDimensions = 1;            /*!< random vector dimensions */
     OrdinalType mRandomSeed = 2;            /*!< random seed */
     OrdinalType mNumSamples;                /*!< number of SROM samples */
     OrdinalType mNumMonteCarloSamples;      /*!< number of Monte Carlo samples */
