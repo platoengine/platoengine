@@ -299,55 +299,52 @@ inline void output_srom_diagnostics(const Plato::CommWrapper & aCommWrapper,
 }
 
 /******************************************************************************//**
- * \brief Solve optimization problem to construct a stochastic reduced order model (SROM)
- * \param [in] aStatsInputs data structure with inputs for probability distribution function
- * \param [in,out] aInputsKSAL input data structure for KSAL algorithm
- * \param [in,out] aSromDiagnostics diagnostics associated with the SROM optimization problem
- * \param [in,out] aSolution outputs from SROM optimization problem
- * \param [in] aPrintDiagnostics flag use to enable output to file (default = false)
+ * \brief Solve stochastic reduced order model (SROM) problem.
+ * \param [in]  aInputMetaData SROM problem input metadata
+ * \param [in]  aInputsKSAL    input data structure for KSAL algorithm
+ * \param [in]  aDiagnostics   SROM problem diagnostics
+ * \param [out] aSolution      SROM problem output metadata
 **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
 inline void solve_srom_problem
-(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
+(const Plato::SromInputs<ScalarType, OrdinalType>& aInputMetaData,
  Plato::AlgorithmInputsKSAL<ScalarType, OrdinalType>& aInputsKSAL,
- Plato::SromDiagnostics<ScalarType>& aSromDiagnostics,
- std::vector<Plato::SromOutputs<ScalarType>>& aSolution,
- bool aPrintDiagnostics = false)
+ Plato::SromDiagnostics<ScalarType>& aDiagnostics,
+ Plato::SromOutputs<ScalarType>& aOutputMetaData)
 {
     // build distribution
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution;
-    tDistribution = Plato::build_distrubtion<ScalarType, OrdinalType>(aStatsInputs);
+    tDistribution = Plato::build_distrubtion<ScalarType, OrdinalType>(aInputMetaData);
 
     // build srom objective and constraint
     std::shared_ptr<Plato::SromObjective<ScalarType, OrdinalType>> tSromObjective;
     std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tSromConstraints;
-    Plato::build_srom_objective_function(aStatsInputs, tDistribution, tSromObjective);
+    Plato::build_srom_objective_function(aInputMetaData, tDistribution, tSromObjective);
     Plato::build_srom_constraint_function(aInputsKSAL.mReductionOperations, tSromConstraints);
 
     // set initial guess and bounds
-    Plato::set_sample_probability_pairs_bounds(aStatsInputs, aInputsKSAL);
-    Plato::set_sample_probability_pairs_initial_guess(aStatsInputs, aInputsKSAL);
+    Plato::set_sample_probability_pairs_bounds(aInputMetaData, aInputsKSAL);
+    Plato::set_sample_probability_pairs_initial_guess(aInputMetaData, aInputsKSAL);
 
     // solve srom optimization problem
     aInputsKSAL.mMaxTrustRegionRadius = 1.0;
     aInputsKSAL.mDisablePostSmoothing = true;
     aInputsKSAL.mControlStagnationTolerance = 1e-5;
-    aInputsKSAL.mPrintDiagnostics = aPrintDiagnostics;
+    aInputsKSAL.mPrintDiagnostics = aDiagnostics.mOutputDiagnostics;
     aInputsKSAL.mHessianMethod = Plato::Hessian::DISABLED;
     Plato::AlgorithmOutputsKSAL<ScalarType, OrdinalType> tOutputsKSAL;
     Plato::solve_ksal<ScalarType, OrdinalType>(tSromObjective, tSromConstraints, aInputsKSAL, tOutputsKSAL);
 
     // denormalize output
-    aSolution.resize(aStatsInputs.mNumSamples); // set output data
-    Plato::save_srom_solution(aStatsInputs, *tOutputsKSAL.mSolution, aSolution);
-    Plato::save_srom_cdf_diagnostics(*tSromObjective, aSromDiagnostics);
-    Plato::save_srom_moments_diagnostics(*tSromObjective, aSromDiagnostics);
+    Plato::save_srom_solution(aInputMetaData, *tOutputsKSAL.mSolution, aOutputMetaData);
+    Plato::save_srom_cdf_diagnostics(*tSromObjective, aDiagnostics);
+    Plato::save_srom_moments_diagnostics(*tSromObjective, aDiagnostics);
 
-    if(aPrintDiagnostics == true)
+    if(aDiagnostics.mOutputDiagnostics == true)
     {
         // transfer to output data structure
-        Plato::output_cdf_comparison(aInputsKSAL.mCommWrapper, *tOutputsKSAL.mSolution, *tDistribution, aStatsInputs);
-        Plato::output_srom_diagnostics(aInputsKSAL.mCommWrapper, aSromDiagnostics, tOutputsKSAL);
+        Plato::output_cdf_comparison(aInputsKSAL.mCommWrapper, *tOutputsKSAL.mSolution, *tDistribution, aInputMetaData);
+        Plato::output_srom_diagnostics(aInputsKSAL.mCommWrapper, aDiagnostics, tOutputsKSAL);
     }
 }
 // function solve_uncertainty

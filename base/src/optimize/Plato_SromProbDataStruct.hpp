@@ -111,9 +111,8 @@ struct SromInputs
 template<typename ScalarType>
 struct SromOutputs
 {
-    // Primary outputs
-    ScalarType mSampleValue;  /*!< sample value */
-    ScalarType mSampleWeight; /*!< sample probability */
+    std::vector<ScalarType> mProbabilities;         /*!< SROM probabilities */
+    std::vector<std::vector<ScalarType>> mSamples;  /*!< SROM samples */
 };
 // struct UncertaintyOutputStruct
 
@@ -121,11 +120,14 @@ template<typename ScalarType>
 struct SromDiagnostics
 {
     // Diagnostics - secondary outputs
-    std::vector<ScalarType> mSromCDF; /*!< cumulative distribution function estimate */
-    std::vector<ScalarType> mTrueCDF; /*!< true cumulative distribution function */
-    std::vector<ScalarType> mSromMoments; /*!< raw moments estimates */
-    std::vector<ScalarType> mTrueMoments; /*!< true raw moments */
+    bool mOutputDiagnostics = false;       /*!< output diagnostic flag, default = false */
+
+    std::vector<ScalarType> mSromCDF;      /*!< cumulative distribution function estimate */
+    std::vector<ScalarType> mTrueCDF;      /*!< true cumulative distribution function */
+    std::vector<ScalarType> mSromMoments;  /*!< raw moments estimates */
+    std::vector<ScalarType> mTrueMoments;  /*!< true raw moments */
     std::vector<ScalarType> mMomentErrors; /*!< misfit between true and raw moment estimates */
+
     ScalarType mCumulativeDistributionFunctionError; /*!< misfit between true and cumulative distribution function estimate */
 };
 // struct SromProblemOutputStruct

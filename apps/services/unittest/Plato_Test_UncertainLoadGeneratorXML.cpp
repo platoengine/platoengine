@@ -314,19 +314,20 @@ TEST(PlatoTest, compute_uniform_random_variable_statistics)
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistributionName::uniform;
-    std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_TRUE(Plato::srom::compute_uniform_random_variable_statistics(tSromInputs, tSromOutputs));
+    Plato::SromOutputs<double> tSromOutputs;
+    ASSERT_NO_THROW(Plato::srom::compute_uniform_random_variable_statistics(tSromInputs, tSromOutputs));
 
     // TEST RESULTS
     double tSum = 0;
+    size_t tRandVecDim = 0;
     double tTolerance = 1e-4;
     std::vector<double> tGoldSamples = {10, 13.333333333333, 16.666666666667, 20.0};
     std::vector<double> tGoldProbabilities(tSromInputs.mNumSamples, 0.25);
     for(size_t tIndex = 0; tIndex < tSromInputs.mNumSamples; tIndex++)
     {
-        tSum += tSromOutputs[tIndex].mSampleWeight;
-        ASSERT_NEAR(tGoldSamples[tIndex], tSromOutputs[tIndex].mSampleValue, tTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSromOutputs[tIndex].mSampleWeight, tTolerance);
+        tSum += tSromOutputs.mProbabilities[tIndex];
+        ASSERT_NEAR(tGoldSamples[tIndex], tSromOutputs.mSamples[tRandVecDim][tIndex], tTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tSromOutputs.mProbabilities[tIndex], tTolerance);
     }
     ASSERT_NEAR(1.0, tSum, tTolerance);
 }
@@ -338,8 +339,7 @@ TEST(PlatoTest, compute_sample_probability_pairs_error)
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistributionName::undefined;
-    std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_THROW(Plato::srom::compute_sample_probability_pairs(tSromInputs, tSromOutputs), std::runtime_error);
+    ASSERT_THROW(Plato::srom::compute_sample_probability_pairs(tSromInputs), std::runtime_error);
 
     Plato::system("rm -f plato_cdf_output.txt");
     Plato::system("rm -f plato_srom_diagnostics.txt");
@@ -371,19 +371,19 @@ TEST(PlatoTest, compute_sample_probability_pairs)
     tSromInputs.mLowerBound = 10.0;
     tSromInputs.mUpperBound = 20.0;
     tSromInputs.mDistribution = Plato::DistributionName::uniform;
-    std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    ASSERT_NO_THROW(Plato::srom::compute_sample_probability_pairs(tSromInputs, tSromOutputs));
+    auto tSromOutputs = Plato::srom::compute_sample_probability_pairs(tSromInputs);
 
     // TEST RESULTS
     double tSum = 0;
+    size_t tRandVecDim = 0;
     double tTolerance = 1e-4;
     std::vector<double> tGoldSamples = {10, 13.333333333333, 16.666666666667, 20.0};
     std::vector<double> tGoldProbabilities(tSromInputs.mNumSamples, 0.25);
     for(size_t tIndex = 0; tIndex < tSromInputs.mNumSamples; tIndex++)
     {
-        tSum += tSromOutputs[tIndex].mSampleWeight;
-        ASSERT_NEAR(tGoldSamples[tIndex], tSromOutputs[tIndex].mSampleValue, tTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSromOutputs[tIndex].mSampleWeight, tTolerance);
+        tSum += tSromOutputs.mProbabilities[tIndex];
+        ASSERT_NEAR(tGoldSamples[tIndex], tSromOutputs.mSamples[tRandVecDim][tIndex], tTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tSromOutputs.mProbabilities[tIndex], tTolerance);
     }
     ASSERT_NEAR(1.0, tSum, tTolerance);
 
