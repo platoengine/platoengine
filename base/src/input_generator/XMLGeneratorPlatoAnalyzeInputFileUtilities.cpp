@@ -195,38 +195,6 @@ void append_pde_constraint_parameter_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_constraint_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData) == false)
-    {
-        return;
-    }
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Constraint", "string", "My Constraint"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
-}
-// function append_constraint_parameter_to_plato_problem
-/**********************************************************************************/
-
-/**********************************************************************************/
-void append_objective_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    if(XMLGen::is_any_objective_computed_by_plato_analyze(aXMLMetaData) == false)
-    {
-        return;
-    }
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Objective", "string", "My Objective"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
-}
-// function append_objective_parameter_to_plato_problem
-/**********************************************************************************/
-
-/**********************************************************************************/
 void append_self_adjoint_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -267,8 +235,6 @@ void append_plato_problem_description_to_plato_analyze_input_deck
     XMLGen::append_attributes({"name"}, {"Plato Problem"}, tPlatoProblem);
     XMLGen::append_physics_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
     XMLGen::append_pde_constraint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_constraint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_objective_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
     XMLGen::append_self_adjoint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
 }
 // function append_plato_problem_description_to_plato_analyze_input_deck
@@ -289,8 +255,7 @@ void append_plato_problem_to_plato_analyze_input_deck
     {
         THROWERR("Append Plato Problem To Plato Analyze Input Deck: Parameter List with name 'Plato Problem' is empty.")
     }
-    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_criteria_list_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
@@ -298,6 +263,15 @@ void append_plato_problem_to_plato_analyze_input_deck
 }
 // function append_plato_problem_to_plato_analyze_input_deck
 /**********************************************************************************/
+void append_criteria_list_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tCriteriaList = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Criteria"}, tCriteriaList);
+    XMLGen::append_objective_criteria_to_criteria_list(aXMLMetaData, tCriteriaList);
+    XMLGen::append_constraint_criteria_to_criteria_list(aXMLMetaData, tCriteriaList);
+}
 
 /**********************************************************************************/
 void append_weighted_sum_objective_to_plato_problem
@@ -358,7 +332,7 @@ void append_objective_criteria_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_objective_criteria_to_plato_analyze_input_deck
+void append_objective_criteria_to_criteria_list
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -373,7 +347,7 @@ void append_objective_criteria_to_plato_analyze_input_deck
     XMLGen::append_weights_to_weighted_sum_objective(aXMLMetaData, tObjective);
     XMLGen::append_objective_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
-// function append_objective_criteria_to_plato_analyze_input_deck
+// function append_objective_criteria_to_criteria_list
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -432,7 +406,7 @@ void append_weights_to_weighted_sum_constraint
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_constraint_criteria_to_plato_analyze_input_deck
+void append_constraint_criteria_to_criteria_list
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -446,7 +420,7 @@ void append_constraint_criteria_to_plato_analyze_input_deck
     XMLGen::append_weights_to_weighted_sum_constraint(aXMLMetaData, tConstraint);
     XMLGen::append_constraint_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
-// function append_constraint_criteria_to_plato_analyze_input_deck
+// function append_constraint_criteria_to_criteria_list
 /**********************************************************************************/
 
 /**********************************************************************************/
