@@ -1,4 +1,4 @@
-set( testFiles "mapFieldToMLSPoints.py;platoApp.xml;platoMain.xml;square_tet_bc.gen;analyzeApp.xml;amgx.json;square_tet_bc_assoc.txt;square_tet_bc.xml")
+set( testFiles "mapFieldToMLSPoints.py;platoApp.xml;platoMain.xml;square_tet_bc.gen;alexaApp.xml;amgx.json;square_tet_bc_assoc.txt;square_tet_bc.xml")
 Plato_add_test_files( "${testFiles}" )
 
 ## Plato_add_test_files() only works for files.  square_tet_bc.osh is a directory.

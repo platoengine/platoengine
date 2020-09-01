@@ -11,30 +11,31 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"     type="string"  value="Elliptic"/>
+    <Parameter name="Constraint"  type="string"  value="My Volume"/>
+    <Parameter name="Objective"          type="string"  value="My Internal Elastic Energy"/>
+
     <Parameter name="Self-Adjoint"       type="bool"    value="true"/>
 
-    <ParameterList name="Criteria">
-      <ParameterList name="Volume">
-        <Parameter name='Linear' type='bool' value='true'/>
-        <Parameter name='Type' type='string' value='Scalar Function'/> 
-        <Parameter name='Scalar Function Type' type='string' value='Volume'/>
-        <ParameterList name="Penalty Function">
-          <Parameter name="Type" type="string" value="Heaviside"/>
-          <Parameter name="Exponent" type="double" value="1.0"/>
-          <Parameter name="Regularization Length" type="double" value="0.2"/>
-          <Parameter name="Minimum Value" type="double" value="0.0"/>
-        </ParameterList>
-      </ParameterList>
 
-      <ParameterList name="Internal Elastic Energy">
-        <Parameter name='Type' type='string' value='Scalar Function'/> 
-        <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
-        <ParameterList name="Penalty Function">
-          <Parameter name="Type" type="string" value="Heaviside"/>
-          <Parameter name="Exponent" type="double" value="4.0"/>
-          <Parameter name="Regularization Length" type="double" value="0.2"/>
-          <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
-        </ParameterList>
+    <ParameterList name="My Volume">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Volume'/>
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="Heaviside"/>
+        <Parameter name="Exponent" type="double" value="1.0"/>
+        <Parameter name="Regularization Length" type="double" value="0.2"/>
+        <Parameter name="Minimum Value" type="double" value="0.0"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="My Internal Elastic Energy">
+      <Parameter name='Type' type='string' value='Scalar Function'/> 
+      <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="Heaviside"/>
+        <Parameter name="Exponent" type="double" value="4.0"/>
+        <Parameter name="Regularization Length" type="double" value="0.2"/>
+        <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
       </ParameterList>
     </ParameterList>
 

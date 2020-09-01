@@ -9,7 +9,7 @@ import random
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-analyze = PlatoPython.Analyze("square_tet_bc.xml", "analyzeApp.xml", "3D square")
+analyze = PlatoPython.Analyze("square_tet_bc.xml", "alexaApp.xml", "3D square")
 analyze.initialize();
 
 # create global PlatoServices instance

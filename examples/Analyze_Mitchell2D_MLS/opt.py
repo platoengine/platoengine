@@ -9,7 +9,7 @@ from numpy import *
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-appFileName = "analyzeApp.xml"
+appFileName = "alexaApp.xml"
 defaultInputFile = "mitchell_tri.xml"
 analyze = PlatoPython.Analyze(defaultInputFile, appFileName, "2D mitchell")
 analyze.initialize();

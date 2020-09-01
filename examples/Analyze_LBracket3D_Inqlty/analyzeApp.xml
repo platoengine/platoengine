@@ -1,39 +1,35 @@
 <?xml version="1.0"?>
 <Operation>
-  <Name>Compute Displacement Solution</Name>
   <Function>ComputeSolution</Function>
+  <Name>Compute Displacement Solution</Name>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
 </Operation>
 
 <Operation>
-  <Name>Update Problem</Name>
   <Function>UpdateProblem</Function>
+  <Name>Update Problem</Name>
 </Operation>
 
 <Operation>
+  <Function>ComputeObjectiveValue</Function>
   <Name>Compute Objective Value</Name>
-  <Function>ComputeCriterionValue</Function>
-  <Criterion>Stress Constraint</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
-    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
+  <Function>ComputeObjectiveGradient</Function>
   <Name>Compute Objective Gradient</Name>
-  <Function>ComputeCriterionGradient</Function>
-  <Criterion>Stress Constraint</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
-    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>

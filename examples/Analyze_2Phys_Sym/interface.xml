@@ -38,7 +38,7 @@
   <Name>Displacement X</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_2</OwnerName>
+  <OwnerName>Alexa_1</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
@@ -46,7 +46,7 @@
   <Name>Displacement Y</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_2</OwnerName>
+  <OwnerName>Alexa_1</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
@@ -54,7 +54,7 @@
   <Name>Displacement Z</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_2</OwnerName>
+  <OwnerName>Alexa_1</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
