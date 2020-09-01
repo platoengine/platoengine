@@ -27,7 +27,7 @@ void append_compute_objective_value_to_plato_analyze_operation
     if(tAppendComputeObjectiveValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionValue", "Compute Objective Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionValue", "Compute Objective Value", "My Objective" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
@@ -55,7 +55,7 @@ void append_compute_objective_gradient_to_plato_analyze_operation
     if(tAppendComputeObjectiveGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionGradient", "Compute Objective Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionGradient", "Compute Objective Gradient", "My Objective"}, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
@@ -82,7 +82,7 @@ void append_compute_constraint_value_to_plato_analyze_operation
     if(tAppendComputeConstraintValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionValue", "Compute Constraint Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionValue", "Compute Constraint Value", "My Constraint" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
@@ -110,7 +110,7 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
     if(tAppendComputeConstraintGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionGradient", "Compute Constraint Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionGradient", "Compute Constraint Gradient", "My Constraint" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
