@@ -1494,7 +1494,7 @@ TEST(PlatoTest, SolveSromProblem_CorrelatedVars_BetaDistribution)
     tInputsKSAL.mLimitedMemorySize = 6;
     Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
-    const double tTol = 1e-4;
+    double tTol = 1e-2;
     std::vector<std::vector<double>> tGoldSamples =
         {{22.48753391885498,24.89758085232308,30.34886999333217,29.41033100339423,33.93022475922718},
          {22.75754703660045,29.70576425719733,29.25288508886058,31.13667083109212,31.43091708700306}};
@@ -1512,6 +1512,7 @@ TEST(PlatoTest, SolveSromProblem_CorrelatedVars_BetaDistribution)
     auto tSum = 0.0;
     std::vector<double> tGoldProbabilities =
         {0.3229842278588252,0.1621807059028493,0.1842816217593431,0.1876962703469281,0.1428344864216799};
+    tTol = 1e-4;
     for(auto& tProb : tOutput.mProbabilities)
     {
         tSum += tProb;
