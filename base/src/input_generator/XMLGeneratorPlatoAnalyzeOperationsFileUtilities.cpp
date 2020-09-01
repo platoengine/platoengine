@@ -27,11 +27,10 @@ void append_compute_objective_value_to_plato_analyze_operation
     if(tAppendComputeObjectiveValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionValue", "Compute Objective Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveValue", "Compute Objective Value" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -55,11 +54,10 @@ void append_compute_objective_gradient_to_plato_analyze_operation
     if(tAppendComputeObjectiveGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionGradient", "Compute Objective Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveGradient", "Compute Objective Gradient" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -82,11 +80,10 @@ void append_compute_constraint_value_to_plato_analyze_operation
     if(tAppendComputeConstraintValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionValue", "Compute Constraint Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintValue", "Compute Constraint Value" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
@@ -110,11 +107,10 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
     if(tAppendComputeConstraintGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeCriterionGradient", "Compute Constraint Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintGradient", "Compute Constraint Gradient" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
-        XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))

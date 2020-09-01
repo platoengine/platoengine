@@ -28,6 +28,44 @@ TEST(PlatoTestXMLGenerator, AppendWriteOutputPlatoAnalyzeOperation)
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 }
 
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
+{
+    XMLGen::InputData tMetaData;
+    tMetaData.max_iterations = "10";
+    tMetaData.discretization = "density";
+    tMetaData.optimization_algorithm = "oc";
+    tMetaData.optimization_type = "topology";
+    tMetaData.mProblemUpdateFrequency = "5";
+    XMLGen::Objective tObjective;
+    tObjective.name = "1";
+    tObjective.type = "compliance";
+    tObjective.code_name = "plato_analyze";
+    tObjective.mPerformerName = "plato_analyze_1";
+    tMetaData.objectives.push_back(tObjective);
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.performer("plato_analyze_1");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+    tMetaData.mOutputMetaData.disableOutput();
+
+    XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
+
+    auto tReadData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>ComputeObjectiveValue</Function><Name>ComputeObjectiveValue</Name>")
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveValue</ArgumentName></Output></Operation><Operation><Function>ComputeObjectiveGradient</Function><Name>ComputeObjectiveGradient</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ObjectiveGradient</ArgumentName></Output></Operation><Operation><Function>ComputeConstraintValue</Function><Name>ComputeConstraintValue</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintValue</ArgumentName></Output></Operation><Operation><Function>ComputeConstraintGradient</Function><Name>ComputeConstraintGradient</Name>"
+        +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>ConstraintGradient</ArgumentName></Output></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
+    Plato::system("rm -f plato_analyze_operations.xml");
+}
+
 TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
 {
     XMLGen::InputData tMetaData;
@@ -67,6 +105,98 @@ TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
     tValues = {"vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}",
                "vonmises {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.optimization_type = "topology";
+    tMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeConstraintGradient", "Compute Constraint Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Constraint tConstraint;
+    tConstraint.code("plato_analyze");
+    tMetaData.constraints.push_back(tConstraint);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeConstraintValue", "Compute Constraint Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Constraint Value"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeObjectiveGradient", "Compute Objective Gradient", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.code_name = "plato_analyze";
+    tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimization_type = "topology";
+
+    pugi::xml_document tDocument;
+    XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Input", "Output"};
+    std::vector<std::string> tValues = {"ComputeObjectiveValue", "Compute Objective Value", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Objective Value"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
