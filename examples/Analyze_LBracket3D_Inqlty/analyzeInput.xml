@@ -7,7 +7,6 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"  type="string"  value="Elliptic"/>
-    <Parameter name="Objective"       type="string"  value="My Stress Constraint"/>
 
     <ParameterList name="Elliptic">
       <ParameterList name="Penalty Function">
@@ -17,13 +16,15 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="My Stress Constraint">
-      <Parameter name='Type' type='string' value='Scalar Function'/> 
-      <Parameter name='Scalar Function Type' type='string' value='Stress Constraint'/>
-      <Parameter name="Stress Limit" type="double" value="3e6"/>
-      <Parameter name="Initial Penalty" type="double" value="1000"/>
-      <Parameter name="Penalty Upper Bound" type="double" value="100000"/>
-      <Parameter name="Penalty Expansion Multiplier" type="double" value="1.05"/>
+    <ParameterList name="Criteria">
+      <ParameterList name="Stress Constraint">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Stress Constraint'/>
+        <Parameter name="Stress Limit" type="double" value="3e6"/>
+        <Parameter name="Initial Penalty" type="double" value="1000"/>
+        <Parameter name="Penalty Upper Bound" type="double" value="100000"/>
+        <Parameter name="Penalty Expansion Multiplier" type="double" value="1.05"/>
+      </ParameterList>
     </ParameterList>
 
     <ParameterList name="Material Model">
