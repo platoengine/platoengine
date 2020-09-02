@@ -110,6 +110,7 @@ struct ValidEssentialBoundaryConditionsKeys
 
 struct ValidOutputToLayoutKeys
 {
+private:
     /*!<
      * \brief Valid plato main output keywords. \n
      *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
@@ -124,22 +125,77 @@ struct ValidOutputToLayoutKeys
           {"plastic_strain","element field"}, {"backstress","element field"}, {"principal_stresses","element field"},
           {"stress","element field"}, {"strain","element field"}
         };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported output quantity of interest (QoI) data layout keyword.
+     * \param [in] aKey input file keyword
+     * \return supported output data layout keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = mKeys.find(tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
+
+    /******************************************************************************//**
+     * \fn key
+     * \brief Return supported output quantity of interest (QoI) key.
+     * \param [in] aKey input file keyword
+     * \return supported output data layout key. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string key(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = mKeys.find(tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->first;
+    }
 };
 // struct ValidOutputToLayoutKeys
 
 struct ValidPhysicsKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck physics keywords.
      **/
     std::vector<std::string> mKeys =
         { "mechanical", "transient mechanics", "plasticity", "stabilized mechanics", "thermal", "heat conduction",
             "electromechanical", "stabilized thermomechanical", "thermomechanical", "coupled heat conduction and mechanics" };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported physics keyword.
+     * \param [in] aKey input file keyword
+     * \return supported physics keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidPhysicsKeys
 
 struct ValidMaterialPropertyKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck material property keywords \n
      **/
@@ -147,55 +203,165 @@ struct ValidMaterialPropertyKeys
         "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz", "shear_modulus_yz",
         "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
         "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity" };
+
+public:
+    /******************************************************************************//**
+     * \fn keys
+     * \brief Return list of valid keys.
+     * \return list of valid keys
+    **********************************************************************************/
+    const std::vector<std::string> keys() const
+    {
+        return mKeys;
+    }
 };
 // struct ValidMaterialPropertyKeys
 
 struct ValidMaterialModelKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck material model keywords \n
      **/
     std::vector<std::string> mKeys = { "isotropic linear elastic", "orthotropic linear elastic", "isotropic linear electroelastic", "isotropic linear thermal",
         "isotropic linear thermoelastic" };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported material model keyword.
+     * \param [in] aKey input file keyword
+     * \return supported material model keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidMaterialModelKeys
 
 struct ValidConstraintTargetAbsoluteKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck constraint absolute target keywords.
      **/
     std::vector<std::string> mKeys = {"volume absolute", "target absolute", "surface_area"};
+
+public:
+    /******************************************************************************//**
+     * \fn keys
+     * \brief Return list of valid keys.
+     * \return list of valid keys
+    **********************************************************************************/
+    const std::vector<std::string> keys() const
+    {
+        return mKeys;
+    }
 };
 // struct ValidConstraintTargetAbsoluteKeys
 
 struct ValidConstraintTargetNormalizedKeys
 {
+private:
     /*!<
      * \brief Valid plato deck constraint normalized target keywords.
      **/
     std::vector<std::string> mKeys = {"volume fraction", "target normalized"};
+
+public:
+    /******************************************************************************//**
+     * \fn keys
+     * \brief Return list of valid keys.
+     * \return list of valid keys
+    **********************************************************************************/
+    const std::vector<std::string> keys() const
+    {
+        return mKeys;
+    }
 };
 // struct ValidConstraintTargetNormalizedKeys
 
 struct ValidAxesKeys
 {
+private:
     /*!< map from dimension to axis, i.e. map<dimension, axis> */
-    std::unordered_map<size_t, std::string> mKeys = { {0, "x"}, {1, "y"}, {2, "z"} };
+    std::unordered_map<size_t, std::string> mKeys = { {0u, "x"}, {1u, "y"}, {2u, "z"} };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported dimension axis keyword.
+     * \param [in] aKey input file keyword
+     * \return supported dimension axis keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const size_t aKey) const
+    {
+        auto tItr = mKeys.find(aKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
 };
 // struct ValidAxesKeys
 
 struct ValidCodeKeys
 {
+private:
     /*!< valid plato input deck code keywords supported in plato */
     std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "platomain"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return code keyword supported by Plato Engine.
+     * \param [in] aKey input file keyword
+     * \return supported code keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidCodeKeys
 
 struct ValidDiscretizationKeys
 {
+private:
     /*!< valid abstract design variables supported in plato, i.e. control variables discretization */
     std::vector<std::string> mKeys = {"density", "levelset"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return topology discretization keyword supported by Plato Engine.
+     * \param [in] aKey input file keyword
+     * \return supported topology discretization keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidLevelSetInitKeys
 
@@ -208,28 +374,66 @@ struct ValidLevelSetInitKeys
 
 struct ValidLayoutKeys
 {
+private:
     /*!<
      * valid operation field layouts \n
      * \brief map from light-input file key to Plato layout, i.e. map<light_input_file_key, plato_layout_key>
      **/
     std::unordered_map<std::string, std::string> mKeys =
         { {"element field", "Element Field"}, {"nodal field", "Nodal Field"}, {"global", "Global"} };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return data layout keyword supported by Plato Engine.
+     * \param [in] aKey input file keyword
+     * \return supported data layout keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = mKeys.find(tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
 };
 // struct ValidLayoutKeys
 
 struct ValidFilterKeys
 {
+private:
     /*!<
      * valid filters \n
      * \brief map from light-input file key to Plato main operation XML file key, i.e. map<light_input_file_key,plato_main_operation_file_key>
      **/
     std::unordered_map<std::string, std::string> mKeys = { {"identity", "Identity"},
         {"kernel", "Kernel"}, {"kernel then heaviside", "KernelThenHeaviside"}, {"kernel then tanh", "KernelThenTANH"} };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return filter keyword supported by Plato Engine.
+     * \param [in] aKey input file keyword
+     * \return supported filter keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tItr = mKeys.find(aKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
 };
 // struct ValidFilterKeys
 
 struct ValidAnalyzeOutputKeys
 {
+private:
     /*!<
      * \brief Map from Plato Main input file output keywords to Plato Analyze plottable option output keywords. \n
      * The plottable feature is used by Plato Analyze to write output data into its global metadata map. Metadata \n
@@ -244,6 +448,23 @@ struct ValidAnalyzeOutputKeys
           {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
           {"backstress", "backstress"}, {"stress", "stress"}, {"strain", "strain"}
         };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return output quantity of interest (QoI) keyword supported by Plato Analyze.
+     * \param [in] aKey input file keyword
+     * \return supported output QoI keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tItr = mKeys.find(aKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
 };
 // struct ValidAnalyzeOutputKeys
 

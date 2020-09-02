@@ -420,7 +420,7 @@ void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
 void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
 {
     XMLGen::ValidCodeKeys tValidKeys;
-    if (std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.code_name) == tValidKeys.mKeys.end())
+    if (tValidKeys.value(aMetadata.code_name).empty())
     {
         THROWERR(std::string("Parse Objective: 'code' keyword '") + aMetadata.code_name + "' is not supported. ")
     }
@@ -478,11 +478,10 @@ void ParseObjective::checkOutputForPlotting(const XMLGen::Objective &ValidOutput
     XMLGen::ValidOutputToLayoutKeys tValidKeys;
     for (auto &tKeyword : ValidOutputToLayoutKeys.output_for_plotting)
     {
-        auto tLowerKey = Plato::tolower(tKeyword);
-        auto tItr =  tValidKeys.mKeys.find(tLowerKey);
-        if (tItr == tValidKeys.mKeys.end())
+        auto tValue = tValidKeys.value(tKeyword);
+        if (tValue.empty())
         {
-            THROWERR(std::string("Parse Objective: 'output' keyword '") + tLowerKey + "' is not supported. ")
+            THROWERR(std::string("Parse Objective: 'output' keyword '") + tKeyword + "' is not supported. ")
         }
     }
 }

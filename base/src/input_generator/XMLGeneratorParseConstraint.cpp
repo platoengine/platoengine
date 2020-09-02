@@ -64,7 +64,7 @@ std::string ParseConstraint::returnConstraintTargetAbsoluteKeywordSet(XMLGen::Co
 {
     std::string tOutput;
     XMLGen::ValidConstraintTargetAbsoluteKeys tValidKeys;
-    for(auto& tKeyword : tValidKeys.mKeys)
+    for(auto& tKeyword : tValidKeys.keys())
     {
         if(!aMetaData.value(tKeyword).empty())
         {
@@ -79,7 +79,7 @@ std::string ParseConstraint::returnConstraintTargetNormalizedKeywordSet(XMLGen::
 {
     std::string tOutput;
     XMLGen::ValidConstraintTargetNormalizedKeys tValidKeys;
-    for(auto& tKeyword : tValidKeys.mKeys)
+    for(auto& tKeyword : tValidKeys.keys())
     {
         if(!aMetaData.value(tKeyword).empty())
         {

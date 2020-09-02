@@ -255,66 +255,60 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
 std::string check_data_layout_keyword(const std::string& aInput)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Data Layout Keyword: data layout keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Data Layout Keyword: data layout keyword '" + aInput + "' is not supported.")
     }
-    return tItr->second;
+    return tValue;
 }
 // check_data_layout_keyword
 
 std::string check_output_keyword(const std::string& aInput)
 {
     XMLGen::ValidOutputToLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.key(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Output Keyword: output keyword '" + aInput + "' is not supported.")
     }
-    return tItr->first;
+    return tValue;
 }
 // check_output_keyword
 
 std::string return_output_qoi_data_layout(const std::string& aInput)
 {
     XMLGen::ValidOutputToLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Output Keyword: output keyword '" + aInput + "' is not supported.")
     }
-    return tItr->second;
+    return tValue;
 }
 // return_output_qoi_data_layout
 
 std::string check_data_layout(const std::string& aInput)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tValidLayoutItr == tValidKeys.mKeys.end())
+    auto tValidLayout = tValidKeys.value(aInput);
+    if(tValidLayout.empty())
     {
-        THROWERR("Is Data Layout Supported: data layout '" + tLowerKey + "' is not supported.")
+        THROWERR("Data layout '" + aInput + "' is not supported by Plato Engine.")
     }
-    return tValidLayoutItr->second;
+    return tValidLayout;
 }
 // function check_data_layout
 
 std::string check_code_keyword(const std::string& aInput)
 {
-    auto tLowerInput = aInput;
-    XMLGen::to_lower(tLowerInput);
     XMLGen::ValidCodeKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Code Keyword: keyword 'code' with tag '") + tLowerInput + "' is not supported.")
+        THROWERR(std::string("Keyword 'code' with tag '") + tValue + "' is not supported by Plato Engine.")
     }
-    return (tItr.operator*());
+    return (tValue);
 }
 // function check_code_keyword
 
@@ -349,14 +343,13 @@ bool transform_boolean_key(const std::string& aInput)
 
 std::string check_physics_keyword(const std::string& aInput)
 {
-    auto tLowerInput = XMLGen::to_lower(aInput);
     XMLGen::ValidPhysicsKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + tLowerInput + "' is not supported.")
+        THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + aInput + "' is not supported.")
     }
-    return (tItr.operator*());
+    return tValue;
 }
 // function check_physics_keyword
 

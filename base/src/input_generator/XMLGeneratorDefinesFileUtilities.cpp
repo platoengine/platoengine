@@ -82,13 +82,13 @@ return_random_tractions_tags_for_define_xml_file
             for (auto &tValue : tLoad.values)
             {
                 auto tDimIndex = &tValue - &tLoad.values[0];
-                auto tItr = tValidDofs.mKeys.find(tDimIndex);
-                if(tItr == tValidDofs.mKeys.end())
+                auto tDimension = tValidDofs.value(tDimIndex);
+                if(tDimension.empty())
                 {
                     THROWERR(std::string("Return Random Tractions Tags for Define XML File: Invalid dimension key '")
                         + std::to_string(tDimIndex) + "'. Valid dimensions are: 1D, 2D, and 3D.")
                 }
-                auto tTag = tLoadTagLower + "_load_id_" + tLoad.load_id + "_" + tItr->second + "_axis";
+                auto tTag = tLoadTagLower + "_load_id_" + tLoad.load_id + "_" + tDimension + "_axis";
                 tOutput[tLoadIdentifier].push_back(tTag);
             }
         }
