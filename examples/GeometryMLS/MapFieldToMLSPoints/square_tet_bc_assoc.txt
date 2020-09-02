@@ -1,4 +1,0 @@
-side set ss_1 1
-2 1
-node set ns_2 1
-2 3

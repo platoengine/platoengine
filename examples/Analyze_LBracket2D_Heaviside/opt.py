@@ -20,7 +20,7 @@ services.initialize();
 
 # initialize control
 targetFraction = 0.5
-inputMeshName    = "lbracket_2d.gen"
+inputMeshName    = "lbracket_2d.exo"
 inMesh = exodus.ExodusDB()
 inMesh.read(inputMeshName)
 numOptDofs = inMesh.numNodes

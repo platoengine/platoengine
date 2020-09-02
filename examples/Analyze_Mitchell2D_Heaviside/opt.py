@@ -20,7 +20,7 @@ services.initialize();
 
 # initialize control
 targetFraction = 0.5
-inputMeshName    = "mitchell_tri.gen"
+inputMeshName    = "mitchell_tri.exo"
 inMesh = exodus.ExodusDB()
 inMesh.read(inputMeshName)
 numOptDofs = inMesh.numNodes

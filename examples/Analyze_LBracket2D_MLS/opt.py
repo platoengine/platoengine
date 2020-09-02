@@ -39,7 +39,7 @@ analyze.compute("Compute Constraint Value")
 refValue = analyze.exportData("Constraint Value", "SCALAR")
 
 # open exodus file for output and configure
-inputMeshName = "lbracket_2d.gen"
+inputMeshName = "lbracket_2d.exo"
 outMesh = exodus.ExodusDB()
 outMesh.read(inputMeshName)
 outMesh.nodeVarNames = ["topology"]

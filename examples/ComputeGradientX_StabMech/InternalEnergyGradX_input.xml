@@ -40,6 +40,15 @@
       </ParameterList>
     </ParameterList>
 
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
     <ParameterList name="Time Stepping">
       <Parameter name="Number Time Steps" type="int" value="4"/>
       <Parameter name="Time Step" type="double" value="1.0"/>
@@ -49,10 +58,12 @@
       <Parameter name="Number Iterations" type="int" value="3"/>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <ParameterList name="Isotropic Linear Elastic">
-        <Parameter  name="Poissons Ratio" type="double" value="0.35"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1.0e11"/>
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.35"/>
+          <Parameter  name="Youngs Modulus" type="double" value="1.0e11"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
   

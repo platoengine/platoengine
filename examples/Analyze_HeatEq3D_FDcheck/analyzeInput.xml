@@ -2,12 +2,8 @@
   <Parameter name="Physics" type="string" value="Plato Driver"/>
   <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
 
-  <Parameter name="Input Mesh" type="string" value="./bolted_bracket.osh"/>
+  <Parameter name="Input Mesh" type="string" value="bolted_bracket.exo"/>
 
-  <ParameterList  name="Associations">
-    <Parameter name="File" type="string" value="./bolted_bracket_assoc.txt"/>
-  </ParameterList>
-  
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"            type="string"  value="Thermal"/>
     <Parameter name="PDE Constraint"     type="string"  value="Parabolic"/>
@@ -49,6 +45,15 @@
       </ParameterList>
     </ParameterList>
 
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
     <ParameterList  name="Computed Fields">
       <ParameterList  name="Initial Temperature">
         <Parameter  name="Function" type="string"   value="1.0"/>
@@ -59,13 +64,15 @@
       <Parameter  name="Computed Field" type="string" value="Initial Temperature"/>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <ParameterList name="Thermal Mass">
-        <Parameter  name="Mass Density" type="double" value="2703.0"/>
-        <Parameter  name="Specific Heat" type="double" value="900.0"/>
-      </ParameterList>
-      <ParameterList name="Thermal Conduction">
-        <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Thermal Mass">
+          <Parameter  name="Mass Density" type="double" value="2703.0"/>
+          <Parameter  name="Specific Heat" type="double" value="900.0"/>
+        </ParameterList>
+        <ParameterList name="Thermal Conduction">
+          <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
   

@@ -1,8 +1,0 @@
-side set ss_2 1
-2 2
-side set ss_20 1
-2 20
-node set ns_1 1
-2 21
-node set ns_10 1
-2 30
