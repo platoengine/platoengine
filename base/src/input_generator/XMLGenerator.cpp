@@ -797,11 +797,10 @@ bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
     }
 
     XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(tokens[0]);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if (tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(tokens[0]);
+    if (tValue.empty())
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" << tLowerKey << "' is not supported.";
+        std::cout << "ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" << tokens[0] << "' is not supported.";
         return false;
     }
     new_bc.type = tokens[1];

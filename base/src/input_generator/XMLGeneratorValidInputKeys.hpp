@@ -101,10 +101,29 @@ struct ValidStatisticalDistributionKeys
 
 struct ValidEssentialBoundaryConditionsKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
     std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed value", "insulated"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported physics keyword.
+     * \param [in] aKey input file keyword
+     * \return supported physics keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidCriterionKeys
 
