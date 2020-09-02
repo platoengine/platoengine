@@ -19,10 +19,29 @@ namespace XMLGen
 
 struct ValidBoolKeys
 {
+private:
     /*!<
      * \brief Valid plato xml generator parser boolean keys.
      **/
     std::vector<std::string> mKeys = {"true", "false"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported criterion keyword.
+     * \param [in] aKey input file keyword
+     * \return supported criterion keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidCriterionKeys
 

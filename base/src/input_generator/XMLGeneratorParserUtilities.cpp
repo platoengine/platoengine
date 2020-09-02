@@ -326,15 +326,14 @@ std::string check_criterion_category_keyword(const std::string& aInput)
 
 bool transform_boolean_key(const std::string& aInput)
 {
-    auto tLowerInput = XMLGen::to_lower(aInput);
     XMLGen::ValidBoolKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
         THROWERR(std::string("Check Boolean Keyword: boolean keyword with value '")
-            + tLowerInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
+            + aInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
     }
-    auto tFlag = tLowerInput.compare("true") == 0 ? true : false;
+    auto tFlag = tValue.compare("true") == 0 ? true : false;
     return tFlag;
 }
 // function transform_boolean_key
