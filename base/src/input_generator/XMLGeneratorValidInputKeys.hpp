@@ -82,20 +82,58 @@ struct ValidRandomAttributeKeys
 
 struct ValidRandomIdentificationKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck identification keywords.
      * Map from random 'category' keyword to identification keyword, i.e. map<category_key, identification_key>.
      **/
     std::unordered_map<std::string, std::string> mKeys = { { "load", "load_id" }, { "material", "material_id" } };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported random category keyword.
+     * \param [in] aKey input file keyword
+     * \return supported random category keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = mKeys.find(tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
+    }
 };
 // struct ValidStatisticalDistributionKeys
 
 struct ValidStatisticalDistributionKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck statistical distribution keywords.
      **/
     std::vector<std::string> mKeys = {"normal", "beta", "uniform"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported probability distribution function keyword.
+     * \param [in] aKey input file keyword
+     * \return supported probability distribution function keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidStatisticalDistributionKeys
 
@@ -110,9 +148,9 @@ private:
 public:
     /******************************************************************************//**
      * \fn value
-     * \brief Return supported physics keyword.
+     * \brief Return supported essential boundary condition keyword.
      * \param [in] aKey input file keyword
-     * \return supported physics keyword. If key is not supported, return an empty string.
+     * \return supported essential boundary condition keyword. If key is not supported, return an empty string.
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
