@@ -314,15 +314,13 @@ std::string check_code_keyword(const std::string& aInput)
 
 std::string check_criterion_category_keyword(const std::string& aInput)
 {
-    auto tLowerInput = aInput;
-    XMLGen::to_lower(tLowerInput);
     XMLGen::ValidCriterionKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + tLowerInput + "' is not supported.")
+        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + aInput + "' is not supported.")
     }
-    return (tItr.operator*());
+    return tValue;
 }
 // function check_criterion_category_keyword
 

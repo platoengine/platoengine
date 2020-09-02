@@ -144,13 +144,10 @@ void ParseUncertainty::setAttribute(XMLGen::Uncertainty& aMetadata)
 void ParseUncertainty::checkCategory(const XMLGen::Uncertainty& aMetadata)
 {
     XMLGen::ValidRandomCategoryKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.category());
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if (tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aMetadata.category());
+    if (tValue.empty())
     {
-        std::ostringstream tMsg;
-        tMsg << "Parse Uncertainty: 'category' keyword '" << tLowerKey << "' is not supported. ";
-        THROWERR(tMsg.str().c_str())
+        THROWERR(std::string("Parse Uncertainty: 'category' keyword '") + aMetadata.category() + "' is not supported.")
     }
 }
 

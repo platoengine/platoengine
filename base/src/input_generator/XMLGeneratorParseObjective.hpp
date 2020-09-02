@@ -192,13 +192,6 @@ private:
     void setMetaData(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
-     * \fn checkType
-     * \brief Throw error if input objective function category is not supported.
-     * \param [in] aMetadata objective metadata
-    **********************************************************************************/
-    void checkType(const XMLGen::Objective& aMetadata);
-
-    /******************************************************************************//**
      * \fn checkCode
      * \brief Throw error if simulation code is not supported.
      * \param [in] aMetadata objective metadata

@@ -38,23 +38,61 @@ struct ValidPlatoInputFileMetaDataBlockKeys
 
 struct ValidCriterionKeys
 {
+private:
     /*!<
-     * \brief Valid plato input deck criterion keywords.
+     * \brief Supported criterion keywords.
      **/
     std::vector<std::string> mKeys =
         {"maximize total work", "stress constrained mass minimization", "maximize stiffness", "compliance",
          "volume", "surface area", "minimize thermoelastic energy", "thermoelastic energy", "maximize heat conduction",
          "stress p-norm", "flux p-norm", "effective energy", "minimize effective energy", "minimize stress",
          "minimize flux", "electroelastic energy", "minimize electroelastic energy", "thermal energy"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported criterion keyword.
+     * \param [in] aKey input file keyword
+     * \return supported criterion keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidCriterionKeys
 
 struct ValidRandomCategoryKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck random categories keywords.
      **/
     std::vector<std::string> mKeys = {"load", "material"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported categories for random variables/vectors.
+     * \param [in] aKey input file keyword
+     * \return supported categories for random variables/vectors keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidRandomCategoryKeys
 
@@ -62,7 +100,7 @@ struct ValidRandomPropertyKeys
 {
 private:
     /*!<
-     * \brief Valid plato input deck random properties keywords.
+     * \brief Valid random tags for random variables/vectors.
      **/
     std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y",
         "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz",
@@ -73,9 +111,9 @@ private:
 public:
     /******************************************************************************//**
      * \fn value
-     * \brief Return supported attributes for random variables/vectors.
+     * \brief Return supported tags for random variables/vectors.
      * \param [in] aKey input file keyword
-     * \return supported attributes for random variables/vectors keyword. If key is not supported, return an empty string.
+     * \return supported tags for random variables/vectors keyword. If key is not supported, return an empty string.
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {

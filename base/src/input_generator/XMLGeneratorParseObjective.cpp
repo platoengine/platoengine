@@ -407,16 +407,6 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setFrequencyResponseFunctionMatchNodesets(aMetadata);
 }
 
-void ParseObjective::checkType(const XMLGen::Objective &aMetadata)
-{
-    XMLGen::ValidCriterionKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aMetadata.type);
-    if (tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Parse Objective: 'type' keyword '") + aMetadata.type + "' is not supported. ")
-    }
-}
-
 void ParseObjective::checkCode(const XMLGen::Objective &aMetadata)
 {
     XMLGen::ValidCodeKeys tValidKeys;
@@ -499,13 +489,13 @@ void ParseObjective::checkDistributeObjective(const XMLGen::Objective &aMetadata
 
 void ParseObjective::checkMetaData(XMLGen::Objective &aMetadata)
 {
-    this->checkType(aMetadata);
     this->checkCode(aMetadata);
     this->checkLoadCases(aMetadata);
     this->checkMultiLoadCaseFlag(aMetadata);
     this->checkOutputForPlotting(aMetadata);
     this->checkDistributeObjective(aMetadata);
     this->checkEssentialBoundaryConditionIDs(aMetadata);
+    XMLGen::check_criterion_category_keyword(aMetadata.type);
 }
 
 void ParseObjective::setIdentification()
