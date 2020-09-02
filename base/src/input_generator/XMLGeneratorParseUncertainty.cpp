@@ -162,26 +162,20 @@ void ParseUncertainty::checkTag(const XMLGen::Uncertainty& aMetadata)
     }
 
     XMLGen::ValidRandomPropertyKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.tag());
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if (tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aMetadata.tag());
+    if (tValue.empty())
     {
-        std::ostringstream tMsg;
-        tMsg << "Parse Uncertainty: 'tag' keyword '" << tLowerKey << "' is not supported. ";
-        THROWERR(tMsg.str().c_str())
+        THROWERR(std::string("Parse Uncertainty: 'tag' keyword '") + aMetadata.tag() + "' is not supported.")
     }
 }
 
 void ParseUncertainty::checkAttribute(const XMLGen::Uncertainty& aMetadata)
 {
     XMLGen::ValidRandomAttributeKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aMetadata.attribute());
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if (tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aMetadata.attribute());
+    if (tValue.empty())
     {
-        std::ostringstream tMsg;
-        tMsg << "Parse Uncertainty: 'attribute' keyword '" << tLowerKey << "' is not supported. ";
-        THROWERR(tMsg.str().c_str())
+        THROWERR(std::string("Parse Uncertainty: 'attribute' keyword '") + aMetadata.attribute() + "' is not supported.")
     }
 }
 
@@ -197,7 +191,7 @@ void ParseUncertainty::checkDistribution(const XMLGen::Uncertainty& aMetadata)
     if (tValue.empty())
     {
         std::ostringstream tMsg;
-        tMsg << "Parse Uncertainty: 'distribution' keyword '" << aMetadata.distribution() << "' is not supported. ";
+        tMsg << "Parse Uncertainty: 'distribution' keyword '" << aMetadata.distribution() << "' is not supported.";
         THROWERR(tMsg.str().c_str())
     }
 }

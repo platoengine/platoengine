@@ -60,6 +60,7 @@ struct ValidRandomCategoryKeys
 
 struct ValidRandomPropertyKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck random properties keywords.
      **/
@@ -68,15 +69,52 @@ struct ValidRandomPropertyKeys
         "shear_modulus_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
         "piezoelectric_coupling_31", "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity",
         "yield_stress" };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported attributes for random variables/vectors.
+     * \param [in] aKey input file keyword
+     * \return supported attributes for random variables/vectors keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidRandomPropertyKeys
 
 struct ValidRandomAttributeKeys
 {
+private:
     /*!<
      * \brief Valid plato input deck random attributes keywords.
      **/
     std::vector<std::string> mKeys = {"x", "y", "z", "homogeneous"};
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported attributes for random variables/vectors.
+     * \param [in] aKey input file keyword
+     * \return supported attributes for random variables/vectors keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        auto tLowerKey = XMLGen::to_lower(aKey);
+        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr.operator*();
+    }
 };
 // struct ValidRandomAttributeKeys
 
