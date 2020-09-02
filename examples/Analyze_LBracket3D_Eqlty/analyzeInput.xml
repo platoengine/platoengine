@@ -16,6 +16,15 @@
       </ParameterList>
     </ParameterList>
 
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
     <ParameterList name="Criteria">
       <ParameterList name="Stress Constraint General">
         <Parameter name='Type' type='string' value='Scalar Function'/> 
@@ -27,11 +36,13 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <Parameter  name="Density" type="double" value="1e3"/>
-      <ParameterList name="Isotropic Linear Elastic">
-        <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1e9"/>
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <Parameter  name="Density" type="double" value="1e3"/>
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
+          <Parameter  name="Youngs Modulus" type="double" value="1e9"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
   

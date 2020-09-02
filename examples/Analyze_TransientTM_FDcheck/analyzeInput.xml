@@ -44,18 +44,29 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <ParameterList name="Thermal Mass">
-        <Parameter name="Specific Heat" type="double" value="900.0"/>
-        <Parameter name="Mass Density" type="double" value="2703.0"/>
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
       </ParameterList>
-      <ParameterList name="Thermoelastic">
-        <Parameter name="Reference Temperature" type="double" value="10.0"/>
-        <Parameter name="Thermal Conductivity" type="double" value="910.0"/>
-        <Parameter name="Thermal Expansivity" type="double" value="1.0e-5"/>
-        <ParameterList name="Elastic Stiffness">
-          <Parameter name="Youngs Modulus" type="double" value="1.0e11"/>
-          <Parameter name="Poissons Ratio" type="double" value="0.3"/>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Thermal Mass">
+          <Parameter name="Specific Heat" type="double" value="900.0"/>
+          <Parameter name="Mass Density" type="double" value="2703.0"/>
+        </ParameterList>
+        <ParameterList name="Thermoelastic">
+          <Parameter name="Reference Temperature" type="double" value="10.0"/>
+          <Parameter name="Thermal Conductivity" type="double" value="910.0"/>
+          <Parameter name="Thermal Expansivity" type="double" value="1.0e-5"/>
+          <ParameterList name="Elastic Stiffness">
+            <Parameter name="Youngs Modulus" type="double" value="1.0e11"/>
+            <Parameter name="Poissons Ratio" type="double" value="0.3"/>
+          </ParameterList>
         </ParameterList>
       </ParameterList>
     </ParameterList>
