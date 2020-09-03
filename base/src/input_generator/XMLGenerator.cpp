@@ -59,6 +59,7 @@
 #include <map>
 
 #include "XMLGenerator.hpp"
+#include "DefaultInputGenerator.hpp"
 
 #include "Plato_SromXML.hpp"
 #include "Plato_SromXMLGenTools.hpp"
@@ -126,6 +127,11 @@ XMLGenerator::~XMLGenerator()
 **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
+    if(m_InputData.input_generator_version == "new")
+    {
+        DefaultInputGenerator tGenerator(m_InputData);
+        tGenerator.generateInputFiles();
+    }
     XMLGen::Analyze::write_optimization_problem(m_InputData);
 }
 

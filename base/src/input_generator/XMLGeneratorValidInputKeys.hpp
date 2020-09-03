@@ -188,7 +188,7 @@ struct ValidAxesKeys
 struct ValidCodeKeys
 {
     /*!< valid plato input deck code keywords supported in plato */
-    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "platomain"};
+    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "lightmp", "platomain"};
 };
 // struct ValidCodeKeys
 
