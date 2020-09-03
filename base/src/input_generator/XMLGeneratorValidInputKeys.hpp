@@ -353,7 +353,7 @@ private:
      * \brief Valid plato input deck material model keywords \n
      **/
     std::vector<std::string> mKeys = { "isotropic linear elastic", "orthotropic linear elastic", "isotropic linear electroelastic", "isotropic linear thermal",
-        "isotropic linear thermoelastic" };
+        "isotropic linear thermoelastic", "j2 plasticity" };
 
 public:
     /******************************************************************************//**
