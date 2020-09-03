@@ -17,6 +17,42 @@
 namespace XMLGen
 {
 
+/******************************************************************************//**
+ * \fn return_supported_value
+ * \brief Return supported keyword.
+ * \param [in] aKey input file keyword
+ * \return supported value/keyword.
+**********************************************************************************/
+inline std::string return_supported_value(const std::string& aKey, const std::vector<std::string>& aKeys)
+{
+    auto tLowerKey = XMLGen::to_lower(aKey);
+    auto tItr = std::find(aKeys.begin(), aKeys.end(), tLowerKey);
+    if(tItr == aKeys.end())
+    {
+        return ("");
+    }
+    return tItr.operator*();
+}
+// function return_supported_value
+
+/******************************************************************************//**
+ * \fn return_supported_value
+ * \brief Return supported random category keyword.
+ * \param [in] aKey input file keyword
+ * \return supported random category keyword. If key is not supported, return an empty string.
+**********************************************************************************/
+inline std::string return_supported_value(const std::string& aKey, const std::unordered_map<std::string, std::string>& aKeys)
+{
+    auto tLowerKey = XMLGen::to_lower(aKey);
+    auto tItr = aKeys.find(tLowerKey);
+    if(tItr == aKeys.end())
+    {
+        return ("");
+    }
+    return tItr->second;
+}
+// function return_supported_value
+
 struct ValidBoolKeys
 {
 private:
@@ -28,19 +64,13 @@ private:
 public:
     /******************************************************************************//**
      * \fn value
-     * \brief Return supported criterion keyword.
+     * \brief Return supported boolean keyword.
      * \param [in] aKey input file keyword
      * \return supported criterion keyword. If key is not supported, return an empty string.
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidCriterionKeys
@@ -76,13 +106,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidCriterionKeys
@@ -104,13 +128,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidRandomCategoryKeys
@@ -136,13 +154,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidRandomPropertyKeys
@@ -164,13 +176,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidRandomAttributeKeys
@@ -193,13 +199,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = mKeys.find(tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr->second;
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidStatisticalDistributionKeys
@@ -221,13 +221,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidStatisticalDistributionKeys
@@ -249,13 +243,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidCriterionKeys
@@ -287,13 +275,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = mKeys.find(tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr->second;
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 
     /******************************************************************************//**
@@ -334,13 +316,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidPhysicsKeys
@@ -387,13 +363,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidMaterialModelKeys
@@ -480,13 +450,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidCodeKeys
@@ -506,13 +470,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = std::find(mKeys.begin(), mKeys.end(), tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr.operator*();
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidLevelSetInitKeys
@@ -543,13 +501,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tLowerKey = XMLGen::to_lower(aKey);
-        auto tItr = mKeys.find(tLowerKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr->second;
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidLayoutKeys
@@ -573,12 +525,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tItr = mKeys.find(aKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr->second;
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidFilterKeys
@@ -610,12 +557,7 @@ public:
     **********************************************************************************/
     std::string value(const std::string& aKey) const
     {
-        auto tItr = mKeys.find(aKey);
-        if(tItr == mKeys.end())
-        {
-            return ("");
-        }
-        return tItr->second;
+        return (XMLGen::return_supported_value(aKey, mKeys));
     }
 };
 // struct ValidAnalyzeOutputKeys
