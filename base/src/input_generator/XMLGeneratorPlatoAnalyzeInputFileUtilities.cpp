@@ -257,7 +257,10 @@ void append_plato_problem_to_plato_analyze_input_deck
     }
     XMLGen::append_criteria_list_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+
+    XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_material_models_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
 }
@@ -435,7 +438,7 @@ void append_physics_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_material_model_to_plato_problem
+void append_material_models_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
  pugi::xml_node& aParentNode)
 {
@@ -444,48 +447,79 @@ void append_material_model_to_plato_problem
         THROWERR("Append Material Model to Plato Problem: Material container is empty.")
     }
 
+    auto tMaterialModels = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Material Models"}, tMaterialModels);
+
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
-        tMaterialInterface.call(tMaterial, aParentNode);
+        tMaterialInterface.call(tMaterial, tMaterialModels);
     }
 }
 // function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_random_material_to_plato_analyze_input_deck
+void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
-    {
-        auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
-        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
-    }
-    else
-    {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-    }
+    XMLGen::append_material_models_to_plato_problem(aXMLMetaData.materials, aParentNode);
 }
-// function append_random_material_to_plato_analyze_input_deck
+// function append_material_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_material_model_to_plato_analyze_input_deck
+void append_spatial_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mRandomMetaData.samplesDrawn())
+    auto tBlocks = aXMLMetaData.blocks;
+    if(tBlocks.empty())
     {
-        XMLGen::append_random_material_to_plato_analyze_input_deck(aXMLMetaData, aParentNode);
+        THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block container is empty.")
     }
-    else
+
+    auto tSpatialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
+    auto tDomains = tSpatialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
+
+    for(auto& tBlock : tBlocks)
     {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
+        auto tDomain = tDomains.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Volume " + tBlock.name}, tDomain);
+
+        std::vector<std::string> tKeys = {"name", "type", "value"};
+        std::vector<std::string> tValues = {"Element Block", "string", tBlock.name};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tDomain);
+
+        auto tMaterials = aXMLMetaData.materials;
+        std::vector<std::string> tMaterialIDs;
+        bool tMaterialFound = false;
+        XMLGen::Material tMaterial;
+
+        for(auto tMat : tMaterials)
+        {
+            if(tMat.id() == tBlock.material_id)
+            {
+                tMaterial = tMat;
+                tMaterialFound = true;
+                break;
+            }
+
+        }
+        if(!tMaterialFound)
+        {
+            THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block " + tBlock.block_id + 
+                    " lists material with material_id " + tBlock.material_id + " but no material with ID " + tBlock.material_id + " exists")
+        }
+
+        tValues = {"Material Model", "string", tMaterial.name()};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tDomain);
     }
 }
-// function append_material_model_to_plato_analyze_input_deck
+// function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/

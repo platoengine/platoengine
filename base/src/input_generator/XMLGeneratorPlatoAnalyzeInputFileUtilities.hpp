@@ -266,22 +266,22 @@ void append_material_model_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_random_material_to_plato_analyze_input_deck
- * \brief Append random material model to problem parameter list.
+ * \fn append_material_models_to_plato_analyze_input_deck
+ * \brief Append material models to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_random_material_to_plato_analyze_input_deck
+void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_material_model_to_plato_analyze_input_deck
- * \brief Append material model to problem parameter list.
+ * \fn append_spatial_model_to_plato_analyze_input_deck
+ * \brief Append spatial model to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_material_model_to_plato_analyze_input_deck
+void append_spatial_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 

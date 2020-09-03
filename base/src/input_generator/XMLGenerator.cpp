@@ -2331,6 +2331,10 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
               }
               new_block.element_type = tStringValue;
             }
+            else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
+            {
+                new_block.name = tStringValue;
+            }
             else
             {
               PrintUnrecognizedTokens(tokens);
@@ -2339,6 +2343,8 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
             }
           }
         }
+        if(new_block.name.empty())
+            new_block.name = "block_" + new_block.block_id;
         m_InputData.blocks.push_back(new_block);
       }
     }

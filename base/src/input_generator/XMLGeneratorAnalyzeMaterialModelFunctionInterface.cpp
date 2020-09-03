@@ -69,7 +69,7 @@ void append_isotropic_linear_elastic_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tElasticModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tElasticModel);
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tElasticModel);
     auto tIsotropicLinearElasticModel = tElasticModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsotropicLinearElasticModel);
     XMLGen::Private::append_material_property("poissons_ratio", aMaterial, tIsotropicLinearElasticModel);
@@ -82,7 +82,7 @@ void append_isotropic_linear_thermal_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tMaterialModel);
 
     // append thermal conduction property
     auto tThermalConduction = tMaterialModel.append_child("ParameterList");
@@ -102,7 +102,7 @@ void append_isotropic_linear_thermoelastic_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tMaterialModel);
 
     // append thermal properties
     auto tThermalProperties = tMaterialModel.append_child("ParameterList");
@@ -124,7 +124,7 @@ void append_isotropic_linear_electroelastic_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tMaterialModel);
     auto tIsotropicLinearElasticMaterial = tMaterialModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Isotropic Linear Electroelastic"}, tIsotropicLinearElasticMaterial);
     XMLGen::Private::append_material_properties_to_plato_analyze_material_model(aMaterial, tIsotropicLinearElasticMaterial);
@@ -136,7 +136,7 @@ void append_orthotropic_linear_elastic_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tMaterialModel);
     auto tIsotropicLinearElasticMaterial = tMaterialModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Orthotropic Linear Elastic"}, tIsotropicLinearElasticMaterial);
     XMLGen::Private::append_material_properties_to_plato_analyze_material_model(aMaterial, tIsotropicLinearElasticMaterial);

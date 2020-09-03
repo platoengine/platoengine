@@ -26,6 +26,7 @@ private:
     std::string mID; /*!< material identification number */
     std::string mCode = "plato_analyze";  /*!< performer/owner of material model, default: plato_analyze */
     std::string mCategory = "isotropic linear elastic";  /*!< material category, default: isotropic linear elastic */
+    std::string mName;  /*!< material name, default: material_mID */
     std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:
@@ -102,6 +103,26 @@ public:
     void category(const std::string& aCategory)
     {
         mCategory = aCategory;
+    }
+
+    /******************************************************************************//**
+     * \fn name
+     * \brief Return material name.
+     * \return name
+    **********************************************************************************/
+    std::string name() const
+    {
+        return mName;
+    }
+
+    /******************************************************************************//**
+     * \fn name
+     * \brief Set material name.
+     * \param [in] aName name
+    **********************************************************************************/
+    void name(const std::string& aName)
+    {
+        mName = aName;
     }
 
     /******************************************************************************//**
