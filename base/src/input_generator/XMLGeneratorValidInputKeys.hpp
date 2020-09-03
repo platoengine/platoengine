@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <unordered_map>
 
 #include "XMLG_Macros.hpp"
