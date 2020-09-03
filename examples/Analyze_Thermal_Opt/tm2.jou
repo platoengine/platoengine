@@ -46,7 +46,9 @@ volume all size 0.2
 volume all scheme tetmesh
 mesh volume all
 block 1 volume 1
+block 1 name "block_1"
 block 2 volume 8 9 13
+block 2 name "block_2"
 sideset 1 surface 71
 sideset 1 name "ss_1"
 nodeset 1 surface 42

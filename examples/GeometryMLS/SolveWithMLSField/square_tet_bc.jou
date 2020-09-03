@@ -21,6 +21,9 @@ volume all size 0.1
 volume all scheme tetmesh
 mesh volume all
 block 1 volume all
+block 1 name "block_1"
 sideset 1 surface 11
+sideset 1 name "ss_1"
 nodeset 2 surface 13 15
-export mesh "square_tet_bc.gen" overwrite
+nodeset 2 name "ns_2"
+export mesh "square_tet_bc.exo" overwrite

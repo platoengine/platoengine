@@ -39,18 +39,29 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <ParameterList name='Orthotropic Linear Elastic'>                   
-        <Parameter  name='Poissons Ratio XY' type='double' value='0.28'/>
-        <Parameter  name='Poissons Ratio XZ' type='double' value='0.28'/>
-        <Parameter  name='Poissons Ratio YZ' type='double' value='0.40'/>
-        <Parameter  name='Shear Modulus XY' type='double' value='6.60e9'/>
-        <Parameter  name='Shear Modulus XZ' type='double' value='6.60e9'/>
-        <Parameter  name='Shear Modulus YZ' type='double' value='3.928e9'/>
-        <Parameter  name='Youngs Modulus X' type='double' value='126e9'/>
-        <Parameter  name='Youngs Modulus Y' type='double' value='11e9'/>
-        <Parameter  name='Youngs Modulus Z' type='double' value='11e9'/>
-      </ParameterList> 
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name='Orthotropic Linear Elastic'>                   
+          <Parameter  name='Poissons Ratio XY' type='double' value='0.28'/>
+          <Parameter  name='Poissons Ratio XZ' type='double' value='0.28'/>
+          <Parameter  name='Poissons Ratio YZ' type='double' value='0.40'/>
+          <Parameter  name='Shear Modulus XY' type='double' value='6.60e9'/>
+          <Parameter  name='Shear Modulus XZ' type='double' value='6.60e9'/>
+          <Parameter  name='Shear Modulus YZ' type='double' value='3.928e9'/>
+          <Parameter  name='Youngs Modulus X' type='double' value='126e9'/>
+          <Parameter  name='Youngs Modulus Y' type='double' value='11e9'/>
+          <Parameter  name='Youngs Modulus Z' type='double' value='11e9'/>
+        </ParameterList> 
+      </ParameterList>
     </ParameterList>
   
     <ParameterList  name="Natural Boundary Conditions">

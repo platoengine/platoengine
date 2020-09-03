@@ -5,11 +5,8 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "interface.xml;analyzeInput.xml;analyzeApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.gen;bolted_bracket_assoc.txt;initialguess.exo")
+set( testFiles "interface.xml;analyzeInput.xml;analyzeApp.xml;platoApp.xml;platoMain.xml;amgx.json;bolted_bracket.exo;initialguess.exo")
 Plato_add_test_files("${testFiles}")
-
-## Plato_add_test_files() only works for files.  *.osh is a directory.
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/bolted_bracket.osh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 
 # Set number of processors for PlatoMain comm
@@ -39,7 +36,7 @@ set(INPUT_FILE --input-config=analyzeInput.xml)
 Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
 
 # Add the test
-set(INPUT_MESH bolted_bracket.gen)
+set(INPUT_MESH bolted_bracket.exo)
 set(OUTPUT_MESH platomain.exo)
 set(RESTART_MESH initialguess.exo)
 Plato_add_test(${PLATO_NEW_TEST} ${TEST_NAME} ${NUM_PROCS} ${IO_COMM_INDEX} ${INPUT_MESH} ${OUTPUT_MESH} ${RESTART_MESH})

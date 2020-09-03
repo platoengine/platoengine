@@ -10,7 +10,7 @@ analyze = PlatoPython.Analyze("InternalEnergyGradX_input.xml", "InternalEnergyGr
 analyze.initialize();
 
 outMesh = exodus.ExodusDB()
-outMesh.read("InternalEnergyGradX.gen");
+outMesh.read("InternalEnergyGradX.exo");
 numNodes = outMesh.numNodes;
 
 # compute gradientX
@@ -33,4 +33,4 @@ outMesh.nodeVarNames = ["solution_x", "solution_y", "solution_z", "adjoint_x", "
 outMesh.numNodeVars = len(outMesh.nodeVarNames)
 outMesh.nodeVars = [[solx,soly,solz,adjx,adjy,adjz,gradx,grady,gradz]]
 outMesh.varTimes = [1.0]
-outMesh.write("InternalEnergyGradX.exo")
+outMesh.write("InternalEnergyGradX_out.exo")
