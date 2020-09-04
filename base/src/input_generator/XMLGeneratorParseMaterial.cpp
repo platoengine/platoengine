@@ -125,8 +125,10 @@ void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 
 void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 {
-    XMLGen::ValidMaterialPropertyKeys tValidKeys;
-    for(auto& tKeyword : tValidKeys.keys())
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
+    auto tMaterialModel = aMetadata.category();
+    auto tPropertyTags = tValidKeys.properties(tMaterialModel);
+    for(auto& tKeyword : tPropertyTags)
     {
         auto tItr = mTags.find(tKeyword);
         if(tItr == mTags.end())
@@ -200,7 +202,7 @@ void ParseMaterial::checkMaterialProperties(XMLGen::Material& aMetadata)
     if(aMetadata.tags().empty())
     {
         auto tID = aMetadata.id().empty() ? std::string("UNDEFINED") : aMetadata.id();
-        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty, i.e. not defined.")
+        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty.")
     }
 }
 

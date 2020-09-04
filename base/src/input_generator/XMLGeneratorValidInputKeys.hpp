@@ -322,30 +322,6 @@ public:
 };
 // struct ValidPhysicsKeys
 
-struct ValidMaterialPropertyKeys
-{
-private:
-    /*!<
-     * \brief Valid plato input deck material property keywords \n
-     **/
-    std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
-        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz", "shear_modulus_yz",
-        "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
-        "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity" };
-
-public:
-    /******************************************************************************//**
-     * \fn keys
-     * \brief Return list of valid keys.
-     * \return list of valid keys
-    **********************************************************************************/
-    const std::vector<std::string> keys() const
-    {
-        return mKeys;
-    }
-};
-// struct ValidMaterialPropertyKeys
-
 struct ValidMaterialModelKeys
 {
 private:
@@ -756,6 +732,29 @@ public:
         }
 
         return tItr->second;
+    }
+
+    /******************************************************************************//**
+     * \fn properties
+     * \brief Return supported material property tags for this material model.
+     * \param [in] aMaterialModelTag material model tag
+     * \return supported material properties
+    **********************************************************************************/
+    std::vector<std::string> properties(const std::string& aMaterialModelTag) const
+    {
+        auto tLowerMaterialModelTag = XMLGen::to_lower(aMaterialModelTag);
+        auto tMaterialModelItr = mKeys.find(tLowerMaterialModelTag);
+        if (tMaterialModelItr == mKeys.end())
+        {
+            THROWERR("Valid Analyze Material Property Keys: Material model '" + tLowerMaterialModelTag + "' is not supported in Plato Analyze.")
+        }
+
+        std::vector<std::string> tOutput;
+        for(auto& tPair : tMaterialModelItr->second)
+        {
+            tOutput.push_back(tPair.first);
+        }
+        return tOutput;
     }
 };
 // struct ValidAnalyzeMaterialPropertyKeys
