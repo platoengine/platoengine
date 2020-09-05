@@ -34,7 +34,7 @@ void append_material_property
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModelTag = aMaterial.category();
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
+    XMLGen::ValidMaterialPropertyKeys tValidKeys;
     auto tValueType = tValidKeys.type(tMaterialModelTag, aMaterialPropertyTag);
     auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
     std::vector<std::string> tKeys = {"name", "type", "value"};
@@ -52,7 +52,7 @@ void append_material_properties_to_plato_analyze_material_model
 
     auto tTags = aMaterial.tags();
     auto tMaterialModelTag = aMaterial.category();
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
+    XMLGen::ValidMaterialPropertyKeys tValidKeys;
     std::vector<std::string> tKeys = {"name", "type", "value"};
     for(auto& tMaterialPropTag : tTags)
     {

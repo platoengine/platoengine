@@ -144,7 +144,7 @@ private:
         "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz",
         "shear_modulus_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
         "piezoelectric_coupling_31", "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity",
-        "yield_stress" };
+        "pressure_scaling", "initial_yield_stress", "hardening_modulus_isotropic", "hardening_modulus_kinematic" };
 
 public:
     /******************************************************************************//**
@@ -593,7 +593,7 @@ public:
     }
 };
 
-struct ValidAnalyzeMaterialPropertyKeys
+struct ValidMaterialPropertyKeys
 {
 private:
     /*!<
@@ -757,7 +757,7 @@ public:
         return tOutput;
     }
 };
-// struct ValidAnalyzeMaterialPropertyKeys
+// struct ValidMaterialPropertyKeys
 
 struct ValidAnalyzePhysicsKeys
 {

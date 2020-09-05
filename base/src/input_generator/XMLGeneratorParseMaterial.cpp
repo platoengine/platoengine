@@ -125,7 +125,7 @@ void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 
 void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 {
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidKeys;
+    XMLGen::ValidMaterialPropertyKeys tValidKeys;
     auto tMaterialModel = aMetadata.category();
     auto tPropertyTags = tValidKeys.properties(tMaterialModel);
     for(auto& tKeyword : tPropertyTags)

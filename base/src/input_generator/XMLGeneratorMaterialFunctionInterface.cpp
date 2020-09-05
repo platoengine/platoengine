@@ -34,7 +34,7 @@ void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_oper
         THROWERR("Append Orthotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
+    XMLGen::ValidMaterialPropertyKeys tValidMaterialModels;
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
@@ -63,7 +63,7 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
         THROWERR("Append Isotropic Thermo-elastic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
+    XMLGen::ValidMaterialPropertyKeys tValidMaterialModels;
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
@@ -92,7 +92,7 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
         THROWERR("Append Isotropic Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
+    XMLGen::ValidMaterialPropertyKeys tValidMaterialModels;
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
