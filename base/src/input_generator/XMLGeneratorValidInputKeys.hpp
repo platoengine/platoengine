@@ -233,7 +233,7 @@ private:
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
-    std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed value", "insulated"};
+    std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed_value", "insulated"};
 
 public:
     /******************************************************************************//**

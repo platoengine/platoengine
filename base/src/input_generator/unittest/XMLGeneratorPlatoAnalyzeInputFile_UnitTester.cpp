@@ -803,7 +803,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.bc_id = "1";
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
-    tBC.mCategory = "fixed value";
+    tBC.mCategory = "fixed_value";
     tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
@@ -817,7 +817,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.bc_id = "1";
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
-    tBC.mCategory = "fixed value";
+    tBC.mCategory = "fixed_value";
     tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
@@ -832,7 +832,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.dof = "dispx";
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
-    tBC.mCategory = "fixed value";
+    tBC.mCategory = "fixed_value";
     tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
@@ -847,7 +847,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.dof = "temp";
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
-    tBC.mCategory = "fixed value";
+    tBC.mCategory = "fixed_value";
     tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
@@ -863,7 +863,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
     tBC.value = "10.0";
     tBC.app_name = "ss_2";
     tBC.mPhysics = "thermal";
-    tBC.mCategory = "fixed value";
+    tBC.mCategory = "fixed_value";
     tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 

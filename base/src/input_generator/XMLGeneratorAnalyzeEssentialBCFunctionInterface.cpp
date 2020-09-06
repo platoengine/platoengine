@@ -171,9 +171,9 @@ void AppendEssentialBoundaryCondition::insert()
     mMap.insert(std::make_pair("zero value",
       std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
-    // fixed value
+    // fixed_value
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_fixed_value_essential_boundary_condition_to_plato_problem));
-    mMap.insert(std::make_pair("fixed value",
+    mMap.insert(std::make_pair("fixed_value",
       std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_fixed_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
     // insulated
