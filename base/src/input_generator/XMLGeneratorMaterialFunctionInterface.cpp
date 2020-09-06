@@ -121,7 +121,7 @@ inline void append_j2_plasticity_material_properties_to_plato_analyze_operation
         THROWERR("Append J2 Plasticity Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
     }
 
-    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
+    XMLGen::ValidMaterialPropertyKeys tValidMaterialModels;
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
