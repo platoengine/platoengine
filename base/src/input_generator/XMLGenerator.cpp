@@ -792,28 +792,29 @@ bool XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
 
     if(tokens.size() < 7)
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n")
     }
 
     XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
     auto tValue = tValidKeys.value(tokens[0]);
     if (tValue.empty())
     {
-        std::cout << "ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" << tokens[0] << "' is not supported.";
-        return false;
+        THROWERR(std::string("ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '") + tokens[0] + "' is not supported.")
     }
     new_bc.type = tokens[1];
 
     if(!new_bc.type.compare("displacement"))
+    {
       return_status = parseDisplacementBC(tokens,new_bc);
+    }
     else if(!new_bc.type.compare("temperature"))
+    {
       return_status = parseTemperatureBC(tokens,new_bc);
+    }
     else
     {
         PrintUnrecognizedTokens(tokens);
-        std::cout << "ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n";
-        return false;
+        THROWERR("ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n")
     }
 
     m_InputData.bcs.push_back(new_bc);
@@ -2426,6 +2427,12 @@ bool XMLGenerator::parseFile()
   tInputFile.open(m_InputFilename.c_str()); // open a file
   this->parseService(tInputFile);
   tInputFile.close();
+
+  // **** NOTE:HACK, IT WILL GO AWAY WITH THE XML GENERATOR OVERHAUL ****
+  for(auto& tBC : m_InputData.bcs)
+  {
+      tBC.mPhysics = m_InputData.service(0).physics();
+  }
 
   // If we will need to run the prune_and_refine executable for any
   // reason we need to have our "run" mesh name not be the same

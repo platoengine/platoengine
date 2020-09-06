@@ -856,6 +856,7 @@ struct ValidSpatialDimsKeys
 
 struct ValidDofsKeys
 {
+private:
     /*!< map from physics to map from degree of freedom name to degree of freedom index, i.e. \n
      *
      * map<physics, map<dof_name, dof_index>>
@@ -863,10 +864,62 @@ struct ValidDofsKeys
     std::unordered_map<std::string, std::unordered_map<std::string,std::string>> mKeys =
         {
             {"mechanical", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
+            {"plasticity", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"press", "3"} } },
             {"thermal", { {"temp", "0"} } }, {"electrostatics", { {"potential", "0"} } },
             {"thermalmechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
             {"electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
         };
+
+public:
+    /******************************************************************************//**
+     * \fn dof
+     * \brief Return degree of freedom integer.
+     * \param [in] aPhysics physics name
+     * \param [in] aDofName degree of freedom name
+     * \return degree of freedom integer
+    **********************************************************************************/
+    std::string dof(const std::string& aPhysics, const std::string& aDofName) const
+    {
+        auto tLowerPhysics = XMLGen::to_lower(aPhysics);
+        auto tDofsKeysItr = mKeys.find(tLowerPhysics);
+        if(tDofsKeysItr == mKeys.end())
+        {
+            THROWERR(std::string("Valid Dofs Keys: ") + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
+        }
+
+        auto tLowerDof = XMLGen::to_lower(aDofName);
+        auto tDofNameItr = tDofsKeysItr->second.find(tLowerDof);
+        if(tDofNameItr == tDofsKeysItr->second.end())
+        {
+            THROWERR(std::string("Valid Dofs Keys: ") + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
+        }
+
+        return tDofNameItr->second;
+    }
+
+    /******************************************************************************//**
+     * \fn names
+     * \brief Return list of supported degrees of freedom names.
+     * \param [in] aPhysics physics name
+     * \return degree of freedom names
+    **********************************************************************************/
+    std::vector<std::string> names(const std::string& aPhysics) const
+    {
+        auto tLowerPhysics = XMLGen::to_lower(aPhysics);
+        auto tDofsKeysItr = mKeys.find(tLowerPhysics);
+        if(tDofsKeysItr == mKeys.end())
+        {
+            THROWERR(std::string("Valid Dofs Keys: ") + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
+        }
+
+        std::vector<std::string> tOutput;
+        for(auto& tPair : tDofsKeysItr->second)
+        {
+            tOutput.push_back(tPair.first);
+        }
+
+        return tOutput;
+    }
 };
 // struct ValidDofsKeys
 
