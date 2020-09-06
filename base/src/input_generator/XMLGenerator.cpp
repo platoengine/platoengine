@@ -872,11 +872,11 @@ bool XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
   new_bc.value = "";
   if(tokens[++tTokenIndex] != "bc")
   {
-    if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
+    /*if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
     {
         std::cout << "ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n";
         return false;
-    }
+    }*/
     new_bc.dof = tokens[tTokenIndex];
     if(tokens[++tTokenIndex] != "bc")
     {
