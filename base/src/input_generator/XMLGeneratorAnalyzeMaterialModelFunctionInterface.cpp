@@ -168,8 +168,8 @@ void append_j2_plasticity_material_to_plato_problem
 {
     // elastic properties
     XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem(aMaterial, aParentNode);
-    auto tElasticModel = aParentNode.child("ParameterList");
-    XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tElasticModel);
+    auto tMaterialModel = aParentNode.child("ParameterList");
+    XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tMaterialModel);
     // plastic properties
     XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, aParentNode);
 }

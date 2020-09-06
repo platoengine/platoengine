@@ -25,7 +25,7 @@ namespace Private
  *     vector<pair<material_property_argument_name_tag, material_property_tag>>
  * \param [in/out] aParentNode   pugi::xml_node
 **********************************************************************************/
-void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
+inline void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
  pugi::xml_node& aParentNode)
 {
@@ -54,7 +54,7 @@ void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_oper
  *      vector<pair<material_property_argument_name_tag, material_property_tag>>
  * \param [in/out] aParentNode   pugi::xml_node
 **********************************************************************************/
-void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
+inline void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
  pugi::xml_node& aParentNode)
 {
@@ -83,7 +83,7 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
  *     vector<pair<material_property_argument_name_tag, material_property_tag>>
  * \param [in/out] aParentNode    pugi::xml_node
 **********************************************************************************/
-void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
+inline void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation
 (const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
  pugi::xml_node& aParentNode)
 {
@@ -98,6 +98,35 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
     {
         auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic linear elastic", tPair.second);
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tValidAnalyzeMaterialPropertyTag;
+        std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
+        auto tParameter = aParentNode.append_child("Parameter");
+        XMLGen::append_children(tKeys, tValues, tParameter);
+    }
+}
+
+/******************************************************************************//**
+ * \fn append_j2_plasticity_material_properties_to_plato_analyze_operation
+ * \brief Append J2 plasticity material model and respective material properties \n
+ *   to the plato analyze operation xml file.
+ * \param [in]     aMaterialTags list of material tags, i.e. \n
+ *     vector<pair<material_property_argument_name_tag, material_property_tag>>
+ * \param [in/out] aParentNode    pugi::xml_node
+**********************************************************************************/
+inline void append_j2_plasticity_material_properties_to_plato_analyze_operation
+(const std::vector<std::pair<std::string, std::string>>& aMaterialTags,
+ pugi::xml_node& aParentNode)
+{
+    if(aMaterialTags.empty())
+    {
+        THROWERR("Append J2 Plasticity Material Properties to Plato Analyze Operation: Input vector of material property tags is empty.")
+    }
+
+    XMLGen::ValidAnalyzeMaterialPropertyKeys tValidMaterialModels;
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
+    for(auto& tPair : aMaterialTags)
+    {
+        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("j2 plasticity", tPair.second);
+        auto tTarget = std::string("[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:") + tValidAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
         XMLGen::append_children(tKeys, tValues, tParameter);
@@ -125,6 +154,10 @@ void MaterialFunctionInterface::insert()
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation));
     mMap.insert(std::make_pair("orthotropic linear elastic",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
+
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_j2_plasticity_material_properties_to_plato_analyze_operation));
+    mMap.insert(std::make_pair("j2 plasticity",
+      std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_j2_plasticity_material_properties_to_plato_analyze_operation, tFuncIndex)));
 }
 
 void MaterialFunctionInterface::call
