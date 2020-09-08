@@ -2108,6 +2108,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeOperationsXML()
               addChild(tmp_node1, "ArgumentName", "Solution Z");
             else if(tCurObjective.output_for_plotting[j] == "temperature")
               addChild(tmp_node1, "ArgumentName", "Solution");
+            else if(tCurObjective.output_for_plotting[j] == "vonmises")
+                addChild(tmp_node1, "ArgumentName", "Vonmises");
           }
 
           char buf[200];
@@ -6333,32 +6335,33 @@ void DefaultInputGenerator::outputOutputToFileStage(pugi::xml_document &doc,
         // We can't have it in hear because other performers won't
         // know how to execute this Alexa-specific operation.
         // *********************************************************
-        bool tFirstTime = true;
         for(size_t i=0; i<m_InputData.objectives.size(); ++i)
         {
             XMLGen::Objective cur_obj = m_InputData.objectives[i];
             if(cur_obj.code_name == "plato_analyze")
             {
-                for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
+                if(cur_obj.output_for_plotting.size() > 0)
                 {
-                    if(tFirstTime)
+                    op_node = stage_node.append_child("Operation");
+                    addChild(op_node, "Name", "Write Output");
+                    addChild(op_node, "PerformerName", cur_obj.performer_name);
+        
+                    for(size_t j=0; j<cur_obj.output_for_plotting.size(); ++j)
                     {
-                        op_node = stage_node.append_child("Operation");
-                        addChild(op_node, "Name", "Write Output");
-                        addChild(op_node, "PerformerName", cur_obj.performer_name);
-                        tFirstTime = false;
+                        sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
+                        output_node = op_node.append_child("Output");
+                        addChild(output_node, "SharedDataName", tmp_buf);
+                        if(cur_obj.output_for_plotting[j] == "dispx")
+                            addChild(output_node, "ArgumentName", "Solution X");
+                        else if(cur_obj.output_for_plotting[j] == "dispy")
+                            addChild(output_node, "ArgumentName", "Solution Y");
+                        else if(cur_obj.output_for_plotting[j] == "dispz")
+                            addChild(output_node, "ArgumentName", "Solution Z");
+                        else if(cur_obj.output_for_plotting[j] == "temperature")
+                            addChild(output_node, "ArgumentName", "Solution");
+                        else if(cur_obj.output_for_plotting[j] == "vonmises")
+                            addChild(output_node, "ArgumentName", "Vonmises");
                     }
-                    sprintf(tmp_buf, "%s_%s", cur_obj.performer_name.c_str(), cur_obj.output_for_plotting[j].c_str());
-                    output_node = op_node.append_child("Output");
-                    addChild(output_node, "SharedDataName", tmp_buf);
-                    if(cur_obj.output_for_plotting[j] == "dispx")
-                        addChild(output_node, "ArgumentName", "Solution X");
-                    else if(cur_obj.output_for_plotting[j] == "dispy")
-                        addChild(output_node, "ArgumentName", "Solution Y");
-                    else if(cur_obj.output_for_plotting[j] == "dispz")
-                        addChild(output_node, "ArgumentName", "Solution Z");
-                    else if(cur_obj.output_for_plotting[j] == "temperature")
-                        addChild(output_node, "ArgumentName", "Solution");
                 }
             }
         }

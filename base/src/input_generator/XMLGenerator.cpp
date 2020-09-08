@@ -573,7 +573,7 @@ void XMLGenerator::lookForPlatoAnalyzePerformers()
             m_InputData.mPlatoAnalyzePerformerExists = true;
             tNumPlatoAnalyzePerformers++;
         }
-        if(m_InputData.objectives[i].code_name == "plato_analyze")
+        if(m_InputData.objectives[i].type == "maximize stiffness")
         {
             tNumComplianceMinimizationObjectives++;
         }
