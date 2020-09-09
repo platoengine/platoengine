@@ -127,12 +127,15 @@ XMLGenerator::~XMLGenerator()
 **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
-    if(m_InputData.input_generator_version == "new")
+    if(m_InputData.input_generator_version == "old")
     {
         DefaultInputGenerator tGenerator(m_InputData);
         tGenerator.generateInputFiles();
     }
-    XMLGen::Analyze::write_optimization_problem(m_InputData);
+    else
+    {
+        XMLGen::Analyze::write_optimization_problem(m_InputData);
+    }
 }
 
 /******************************************************************************/

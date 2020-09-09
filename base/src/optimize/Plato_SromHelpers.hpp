@@ -92,7 +92,7 @@ inline void write_matrix_to_file
         for(auto& tCol : tRow)
         {
             tMyFile << tCol;
-            auto tColIndex = &tCol - &tRow[0];
+            size_t tColIndex = &tCol - &tRow[0]; // pointer arithmetic
             if (tColIndex != tRow.size() - 1u)  // No comma at end of line
             {
                 tMyFile << aMetaData.mDelimiter;
