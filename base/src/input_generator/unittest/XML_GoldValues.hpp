@@ -244,7 +244,7 @@ std::string gThermomechanicalGoldString =
         "<ParameterList name=\"Thermoelastic\">\n"
         "<Parameter name=\"Reference Temperature\" type=\"double\" value=\"1e-2\" />\n"
         "<Parameter name=\"Thermal Conductivity\" type=\"double\" value=\"910.0\" />\n"
-        "<Parameter name=\"Thermal Expansion\" type=\"double\" value=\"1e-5\" />\n"
+        "<Parameter name=\"Thermal Expansivity\" type=\"double\" value=\"1e-5\" />\n"
         "<ParameterList name=\"Elastic Stiffness\">\n"
         "<Parameter name=\"Youngs Modulus\" type=\"double\" value=\"1e11\" />\n"
         "<Parameter name=\"Poissons Ratio\" type=\"double\" value=\"0.3\" />\n"

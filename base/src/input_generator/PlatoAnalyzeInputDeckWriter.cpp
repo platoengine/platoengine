@@ -440,7 +440,7 @@ void PlatoAnalyzeInputDeckWriter::addPAMaterialModelBlock(pugi::xml_node aNode, 
             tPugiNode2.append_attribute("name") = "Thermoelastic";
             addNTVParameter(tPugiNode2, "Reference Temperature", "double", mInputData.materials[0].reference_temperature);
             addNTVParameter(tPugiNode2, "Thermal Conductivity", "double", mInputData.materials[0].thermal_conductivity);
-            addNTVParameter(tPugiNode2, "Thermal Expansion", "double", mInputData.materials[0].thermal_expansion);
+            addNTVParameter(tPugiNode2, "Thermal Expansivity", "double", mInputData.materials[0].thermal_expansion);
             tPugiNode3 = tPugiNode2.append_child("ParameterList");
             tPugiNode3.append_attribute("name") = "Elastic Stiffness";
             addNTVParameter(tPugiNode3, "Youngs Modulus", "double", mInputData.materials[0].youngs_modulus);
