@@ -1277,13 +1277,13 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInterfaceXML(std::
             m_InputData.optimization_algorithm == "rol ksal" ||
             m_InputData.optimization_algorithm == "rol ksbc")
     {
-        pugi::xml_node for_node = doc.append_child("For");
+        for_node = doc.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
         for_node = for_node.append_child("For");
         for_node.append_attribute("var") = "PerformerSampleIndex";
         for_node.append_attribute("in") = "PerformerSamples";
-        std::string tSharedDataName = "HessianTimesVector {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+        tSharedDataName = "HessianTimesVector {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         createSingleUserNodalSharedData(doc, tSharedDataName.c_str(), "Scalar", "plato_analyze_{performerIndex}", "PlatoMain");
     }
 
@@ -1301,7 +1301,7 @@ bool ComplianceMinTOPlatoAnalyzeUncertInputGenerator::generateInterfaceXML(std::
     {
         createSingleUserNodalSharedData(doc, "Internal Energy Hessian", "Scalar", "PlatoMain", "PlatoMain");
         sd_node = createSingleUserNodalSharedData(doc, "Descent Direction", "Scalar", "PlatoMain", "PlatoMain");
-        pugi::xml_node for_node = sd_node.append_child("For");
+        for_node = sd_node.append_child("For");
         for_node.append_attribute("var") = "performerIndex";
         for_node.append_attribute("in") = "Performers";
         addChild(for_node, "UserName", "plato_analyze_{performerIndex}");

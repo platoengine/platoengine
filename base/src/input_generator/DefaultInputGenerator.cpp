@@ -4544,7 +4544,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
       for_node.append_attribute("var") = "PerformerSampleIndex";
       for_node.append_attribute("in") = "PerformerSamples";
 
-      pugi::xml_node input_node = for_node.append_child("Input");
+      input_node = for_node.append_child("Input");
       addChild(input_node, "ArgumentName", "Field {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
       addChild(input_node, "SharedDataName", "Objective {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex} Gradient");
       
@@ -4624,7 +4624,7 @@ bool DefaultInputGenerator::outputObjectiveGradientStage(pugi::xml_document &doc
           for_node.append_attribute("var") = "PerformerSampleIndex";
           for_node.append_attribute("in") = "PerformerSamples";
 
-          pugi::xml_node input_node = for_node.append_child("Input");
+          input_node = for_node.append_child("Input");
           addChild(input_node, "ArgumentName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
           addChild(input_node, "SharedDataName", "Objective Value {performerIndex*NumSamplesPerPerformer+PerformerSampleIndex}");
           input_node = for_node.append_child("Input");
