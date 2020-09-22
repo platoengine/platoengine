@@ -294,6 +294,9 @@ void PlatoAnalyzeInputDeckWriter::buildMinimizeThermoelasticEnergyParamsForPlato
     // Thermoelastostatics
     addPAPDEConstraintBlock(aNode, "Elliptic", aObjective);
 
+    // Add Newton Iteration Block for solving for the initial temperature.
+    addNewtonIterationBlock(aNode);
+
     // Material Model
     addPAMaterialModelBlock(aNode, ISOTROPIC_LINEAR_THERMO_ELASTIC);
 
@@ -404,6 +407,13 @@ void PlatoAnalyzeInputDeckWriter::addPAPDEConstraintBlock(pugi::xml_node aNode,
     addNTVParameter(tPugiNode2, "Type", "string", "SIMP");
     addNTVParameter(tPugiNode2, "Exponent", "double", "3.0");
     addNTVParameter(tPugiNode2, "Minimum Value", "double", "1e-3");
+}
+
+void PlatoAnalyzeInputDeckWriter::addNewtonIterationBlock(pugi::xml_node aNode)
+{
+    pugi::xml_node tPugiNode1 = aNode.append_child("ParameterList");
+    tPugiNode1.append_attribute("name") = "Newton Iteration";
+    addNTVParameter(tPugiNode1, "Maximum Iterations", "int", "2");
 }
 
 void PlatoAnalyzeInputDeckWriter::addPAMaterialModelBlock(pugi::xml_node aNode, PA_MATERIAL_TYPE aMaterialType)

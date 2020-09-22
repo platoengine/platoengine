@@ -78,6 +78,7 @@ private:
     void buildMinimizeThermoelasticEnergyParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
     void buildMaximizeStiffnessParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
     void buildMaximizeHeatConductionParamsForPlatoAnalyze(const XMLGen::Objective& cur_obj, pugi::xml_node aNode);
+    void addNewtonIterationBlock(pugi::xml_node aNode);
     void addVolumeConstraintForPlatoAnalyze(pugi::xml_node aNode);
     void addPAObjectiveBlock(pugi::xml_node aNode, const char* aObjectiveName);
     void addPAPDEConstraintBlock(pugi::xml_node aNode, 
