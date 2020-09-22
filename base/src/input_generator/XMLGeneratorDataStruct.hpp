@@ -87,6 +87,7 @@ struct Objective
     std::string distribute_objective_type;
     std::string atmost_total_num_processors;
     std::string num_ranks;
+    std::string mDeviceNumber;
 
     // type: "match frf data"
     std::string complex_error_measure;

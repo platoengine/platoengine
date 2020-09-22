@@ -1050,6 +1050,15 @@ bool XMLGenerator::parseObjectives(std::istream &fin)
                             }
                             new_objective.volume_penalty_bias = tokens[3];
                         }
+                        else if(parseSingleValue(tokens, tInputStringList = {"device","number"}, tStringValue))
+                        {
+                            if(tokens.size() < 3)
+                            {
+                                std::cout << "ERROR:XMLGenerator:parseObjectives: No value specified after \"device number\" keywords.\n";
+                                return false;
+                            }
+                            new_objective.mDeviceNumber = tokens[2];
+                        }
                         else if(parseSingleValue(tokens, tInputStringList = {"load","ids"}, tStringValue))
                         {
                             if(tokens.size() < 3)

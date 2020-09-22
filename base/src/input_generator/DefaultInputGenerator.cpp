@@ -360,10 +360,22 @@ bool DefaultInputGenerator::generateLaunchScript()
           fprintf(fp, ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n", tNumProcsString.c_str(), Plato::to_string(m_InputData.m_UncertaintyMetaData.numPeformers).c_str(), envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
           fprintf(fp, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", envString.c_str(),separationString.c_str());
+        std::string tPAString;
+        // executable name
         if(m_InputData.plato_analyze_path.length() != 0)
-          fprintf(fp, "%s --input-config=plato_analyze_input_deck.xml \\\n", m_InputData.plato_analyze_path.c_str());
+            tPAString = m_InputData.plato_analyze_path;
         else
-          fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck.xml \\\n");
+            tPAString = "analyze_MPMD";
+
+        // device number
+        if(m_InputData.objectives[0].mDeviceNumber.length() != 0)
+        {
+            tPAString += " --kokkos-device=";
+            tPAString += m_InputData.objectives[0].mDeviceNumber;
+        }
+        
+        tPAString += " --input-config=plato_analyze_input_deck.xml";
+        fprintf(fp, "%s \\\n", tPAString.c_str());
       }
       else
       {
@@ -400,10 +412,24 @@ bool DefaultInputGenerator::generateLaunchScript()
           }
           else if(!cur_obj.code_name.compare("plato_analyze"))
           {
-            if(m_InputData.plato_analyze_path.length() != 0)
-              fprintf(fp, "%s --input-config=plato_analyze_input_deck_%s.xml \\\n", m_InputData.plato_analyze_path.c_str(), cur_obj.name.c_str());
-            else
-              fprintf(fp, "analyze_MPMD --input-config=plato_analyze_input_deck_%s.xml \\\n", cur_obj.name.c_str());
+              std::string tPAString;
+              // executable name
+              if(m_InputData.plato_analyze_path.length() != 0)
+                  tPAString = m_InputData.plato_analyze_path;
+              else
+                  tPAString = "analyze_MPMD";
+
+              // device number
+              if(cur_obj.mDeviceNumber.length() != 0)
+              {
+                  tPAString += " --kokkos-device=";
+                  tPAString += cur_obj.mDeviceNumber;
+              }
+        
+              tPAString += " --input-config=plato_analyze_input_deck_";
+              tPAString += cur_obj.name;
+              tPAString += ".xml";
+              fprintf(fp, "%s \\\n", tPAString.c_str());
           }
         }
       }
