@@ -1,10 +1,23 @@
+begin service 1
+    code plato_analyze
+    physics mechanical
+    dimensions 3
+    minimum_ersatz_material_value 1e-3
+    tolerance 5e-8
+end service
+
+begin output
+    service 1
+    output_data_to_file true
+end output
+
 begin objective
    type maximize stiffness 
    load ids 1 
    boundary condition ids 1  
    code plato_analyze
    number processors 1
-//   output for plotting dispx dispy vonmises
+   minimum ersatz material value 1e-3
 end objective
 
 begin boundary conditions
@@ -16,6 +29,7 @@ begin loads
 end loads
       
 begin constraint 
+   code PlatoMain
    type volume
    volume fraction .25
 end constraint
@@ -23,13 +37,11 @@ end constraint
 begin block 1
    material 1
 end block
-begin block 2
-   material 1
-end block
 
 begin material 1
-   poissons ratio .3
-   youngs modulus 1e8
+   material_model isotropic linear elastic 
+   poissons_ratio .3
+   youngs_modulus 1e8
 end material
 
 begin optimization parameters
@@ -46,3 +58,11 @@ begin mesh
    name bolted_bracket.exo
 end mesh
 
+begin paths
+code PlatoMain /ascldap/users/rvierte/plato/src/platoengine/build/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
+begin paths
+code PlatoMain /ascldap/users/rvierte/plato/src/platoengine/build/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
