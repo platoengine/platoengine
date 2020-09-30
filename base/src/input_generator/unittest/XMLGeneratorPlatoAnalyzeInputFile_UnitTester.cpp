@@ -457,7 +457,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
     tService.numTimeSteps("20");
     tService.maxNumTimeSteps("40");
     tService.timeStepExpansion("1.1");
-    tService.solverTolerance("1e-5");
+    tService.newtonSolverTolerance("1e-5");
     tService.solverMaxNumIterations("10");
     tService.materialPenaltyExponent("3.0");
     tService.minErsatzMaterialConstant("1e-9");

@@ -314,7 +314,7 @@ void write_amgx_input_file(const XMLGen::Service& aService)
         fprintf(tFilePointer, "\"monitor_residual\": 1,\n");
         fprintf(tFilePointer, "\"convergence\": \"ABSOLUTE\",\n");
         fprintf(tFilePointer, "\"scope\": \"main\",\n");
-        fprintf(tFilePointer, "\"tolerance\": %s,\n",aService.solverTolerance().c_str());
+        fprintf(tFilePointer, "\"tolerance\": %s,\n",aService.linearSolverTolerance().c_str());
         fprintf(tFilePointer, "\"norm\": \"L2\"\n");
         fprintf(tFilePointer, "}\n");
         fprintf(tFilePointer, "}\n");
