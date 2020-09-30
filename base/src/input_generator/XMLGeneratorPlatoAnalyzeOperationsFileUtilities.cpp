@@ -271,7 +271,7 @@ void write_plato_analyze_operation_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
-void write_amgx_input_file()
+void write_amgx_input_file(const XMLGen::Service& aService)
 {
     FILE *tFilePointer = fopen("amgx.json", "w");
     if(tFilePointer)
@@ -314,7 +314,7 @@ void write_amgx_input_file()
         fprintf(tFilePointer, "\"monitor_residual\": 1,\n");
         fprintf(tFilePointer, "\"convergence\": \"ABSOLUTE\",\n");
         fprintf(tFilePointer, "\"scope\": \"main\",\n");
-        fprintf(tFilePointer, "\"tolerance\": 1e-12,\n");
+        fprintf(tFilePointer, "\"tolerance\": %s,\n",aService.solverTolerance().c_str());
         fprintf(tFilePointer, "\"norm\": \"L2\"\n");
         fprintf(tFilePointer, "}\n");
         fprintf(tFilePointer, "}\n");

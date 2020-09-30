@@ -825,7 +825,9 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
 
 TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
 {
-    XMLGen::write_amgx_input_file();
+    XMLGen::Service tService;
+    tService.solverTolerance("1e-12");
+    XMLGen::write_amgx_input_file(tService);
     auto tData = XMLGen::read_data_from_file("amgx.json");
     auto tGold = std::string("{\"config_version\":2,\"solver\":{\"preconditioner\":{\"print_grid_stats\":1,\"algorithm\":\"AGGREGATION\",\"print_vis_data\":0,\"max_matching_iterations\":50,")
         +"\"max_unassigned_percentage\":0.01,\"solver\":\"AMG\",\"smoother\":{\"relaxation_factor\":0.78,\"scope\":\"jacobi\",\"solver\":\"BLOCK_JACOBI\",\"monitor_residual\":0,\"print_solve_stats\":0}"

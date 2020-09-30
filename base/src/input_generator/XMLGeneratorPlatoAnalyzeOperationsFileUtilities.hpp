@@ -143,7 +143,7 @@ void write_plato_analyze_operation_xml_file
  * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void write_amgx_input_file();
+void write_amgx_input_file(const XMLGen::Service& aService);
 
 }
 // namespace XMLGen
