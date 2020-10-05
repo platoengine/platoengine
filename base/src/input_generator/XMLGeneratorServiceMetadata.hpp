@@ -265,18 +265,32 @@ public:
     std::string newmarkGamma() const;
 
     /******************************************************************************//**
-     * \fn solverTolerance
-     * \brief Set string value for keyword 'tolerance'.
+     * \fn newtonSolverTolerance
+     * \brief Set string value for keyword 'newton_solver_tolerance'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void solverTolerance(const std::string& aInput);
+    void newtonSolverTolerance(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn solverTolerance
-     * \brief Return string value for keyword 'tolerance'.
+     * \fn newtonSolverTolerance
+     * \brief Return string value for keyword 'newton_solver_tolerance'.
      * \return value
     **********************************************************************************/
-    std::string solverTolerance() const;
+    std::string newtonSolverTolerance() const;
+
+    /******************************************************************************//**
+     * \fn linearSolverTolerance
+     * \brief Set string value for keyword 'linear_solver_tolerance'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void linearSolverTolerance(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn linearSolverTolerance
+     * \brief Return string value for keyword 'linear_solver_tolerance'.
+     * \return value
+    **********************************************************************************/
+    std::string linearSolverTolerance() const;
 
     /******************************************************************************//**
      * \fn solverConvergenceCriterion

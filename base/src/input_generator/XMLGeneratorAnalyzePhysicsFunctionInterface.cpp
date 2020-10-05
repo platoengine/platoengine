@@ -172,7 +172,7 @@ inline void append_newton_raphson_solver_option
     auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverConvergenceCriterion());
     std::vector<std::string> tValues = { "Stop Measure", "string", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
-    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverTolerance());
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.newtonSolverTolerance());
     tValues = { "Stopping Tolerance", "double", tPropertyValue };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeStepping);
     tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.solverMaxNumIterations());

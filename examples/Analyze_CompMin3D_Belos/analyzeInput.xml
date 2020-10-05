@@ -1,0 +1,122 @@
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver"/>
+  <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
+
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics"            type="string"  value="Mechanical"/>
+    <Parameter name="PDE Constraint"     type="string"  value="Elliptic"/>
+
+    <Parameter name="Self-Adjoint"       type="bool"    value="true"/>
+
+    <ParameterList name='Linear Solver'>
+      <Parameter name='Solver Stack' type='string' value='Tpetra' />
+      <Parameter name='Solver Package' type='string' value='Belos' />
+      <Parameter name='Solver' type='string' value='Pseudoblock CG' /> <!--string passed as first argument to Belos::SolverFactory--> 
+      <ParameterList name='Solver Options'>
+        <!-- Belos input parameter list goes here. See https://docs.trilinos.org/dev/packages/belos/doc/html/index.html -->
+        <Parameter name='Maximum Iterations' type='int' value='500' />
+        <Parameter name='Convergence Tolerance' type='double' value='1e-14' />
+        <!--  -->
+      </ParameterList>
+
+      <!-- Here we use IFpack2 as a preconditioner for Belos -->
+
+      <Parameter name='Preconditioner Package' type='string' value='IFpack2' />
+      <Parameter name='Preconditioner Type' type='string' value='ILUT' />
+      <ParameterList name='Preconditioner Options'>
+        <!-- IFpack2 input parameter list goes. here See https://trilinos.github.io/pdfs/ifpack2guide.pdf-->
+        <Parameter name='fact: ilut level-of-fill' type='double' value='1.0' />
+        <Parameter name='fact: drop tolerance' type='double' value='0.0' />
+        <Parameter name='fact: absolute threshold' type='double' value='0.0' />
+        <!--  -->
+      </ParameterList>
+
+      <!-- Alternatively, MueLu can be used as a preconditioner for Belos -->
+
+      <!-- <Parameter name='Preconditioner Package' type='string' value='MueLu' /> -->
+      <!-- <ParameterList name='Preconditioner Options'> -->
+        <!-- MueLu input parameter list goes. here. See https://trilinos.github.io/pdfs/mueluguide.pdf-->
+        <!-- <Parameter name='verbosity' type='string' value='low' /> -->
+        <!-- <Parameter name='coarse: type' type='string' value='KLU2' /> -->
+        <!--  -->
+      <!-- </ParameterList> -->
+
+    </ParameterList>
+
+    <ParameterList name="Criteria">
+      <ParameterList name="Volume">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Volume'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="1.0"/>
+          <Parameter name="Minimum Value" type="double" value="0.0"/>
+        </ParameterList>
+      </ParameterList>
+
+      <ParameterList name="Internal Elastic Energy">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="3.0"/>
+          <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Elliptic">
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="SIMP"/>
+        <Parameter name="Exponent" type="double" value="3.0"/>
+        <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
+          <Parameter  name="Youngs Modulus" type="double" value="1.0e8"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+  
+    <ParameterList  name="Natural Boundary Conditions">
+      <ParameterList  name="Traction Vector Boundary Condition">
+        <Parameter  name="Type"     type="string"        value="Uniform"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, -3.0e3, 0.0}"/>
+        <Parameter  name="Sides"    type="string"        value="ss_2"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList  name="Essential Boundary Conditions">
+      <ParameterList  name="X Fixed Displacement Boundary Condition">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="0"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Y Fixed Displacement Boundary Condition">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="1"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Z Fixed Displacement Boundary Condition">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="2"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+    </ParameterList>
+  </ParameterList>
+
+</ParameterList>
+

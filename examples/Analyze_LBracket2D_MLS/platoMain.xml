@@ -1,7 +1,8 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>lbracket_2d.gen</mesh>
+  <ignore_node_map>true</ignore_node_map>
+  <mesh>lbracket_2d.exo</mesh>
   <block>
     <index>1</index>
     <integration>

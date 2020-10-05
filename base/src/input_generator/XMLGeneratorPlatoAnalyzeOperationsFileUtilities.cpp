@@ -27,10 +27,11 @@ void append_compute_objective_value_to_plato_analyze_operation
     if(tAppendComputeObjectiveValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveValue", "Compute Objective Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionValue", "Compute Objective Value", "My Objective" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -54,10 +55,11 @@ void append_compute_objective_gradient_to_plato_analyze_operation
     if(tAppendComputeObjectiveGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeObjectiveGradient", "Compute Objective Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionGradient", "Compute Objective Gradient", "My Objective"}, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -80,10 +82,11 @@ void append_compute_constraint_value_to_plato_analyze_operation
     if(tAppendComputeConstraintValueOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintValue", "Compute Constraint Value" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionValue", "Compute Constraint Value", "My Constraint" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
@@ -107,10 +110,11 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
     if(tAppendComputeConstraintGradientOperation)
     {
         auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children( { "Function", "Name" }, { "ComputeConstraintGradient", "Compute Constraint Gradient" }, tOperation);
+        XMLGen::append_children( { "Function", "Name", "Criterion" }, { "ComputeCriterionGradient", "Compute Constraint Gradient", "My Constraint" }, tOperation);
         auto tInput = tOperation.append_child("Input");
         XMLGen::append_children( { "ArgumentName" }, { "Topology" }, tInput);
         auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
 
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
@@ -267,7 +271,7 @@ void write_plato_analyze_operation_xml_file
 /******************************************************************************/
 
 /******************************************************************************/
-void write_amgx_input_file()
+void write_amgx_input_file(const XMLGen::Service& aService)
 {
     FILE *tFilePointer = fopen("amgx.json", "w");
     if(tFilePointer)
@@ -310,7 +314,7 @@ void write_amgx_input_file()
         fprintf(tFilePointer, "\"monitor_residual\": 1,\n");
         fprintf(tFilePointer, "\"convergence\": \"ABSOLUTE\",\n");
         fprintf(tFilePointer, "\"scope\": \"main\",\n");
-        fprintf(tFilePointer, "\"tolerance\": 1e-12,\n");
+        fprintf(tFilePointer, "\"tolerance\": %s,\n",aService.linearSolverTolerance().c_str());
         fprintf(tFilePointer, "\"norm\": \"L2\"\n");
         fprintf(tFilePointer, "}\n");
         fprintf(tFilePointer, "}\n");

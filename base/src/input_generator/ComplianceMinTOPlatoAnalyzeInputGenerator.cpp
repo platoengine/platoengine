@@ -1022,6 +1022,7 @@ bool ComplianceMinTOPlatoAnalyzeInputGenerator::generateInterfaceXML(std::ostrin
     this->setOptimizerMethod(tMiscNode);
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
+    this->setGCMMAoptions(tTmpNode);
     this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);

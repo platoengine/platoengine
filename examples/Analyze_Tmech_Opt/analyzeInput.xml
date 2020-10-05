@@ -1,0 +1,133 @@
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver"/>
+  <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
+
+  <Parameter name="Input Mesh" type="string" value="tm2.exo"/>
+
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics"            type="string"  value="Thermomechanical"/>
+    <Parameter name="PDE Constraint"     type="string"  value="Elliptic"/>
+
+    <Parameter name="Self-Adjoint"       type="bool"    value="false"/>
+
+    <ParameterList name="Criteria">
+      <ParameterList name="My Volume">
+        <Parameter name='Linear' type='bool' value='true'/>
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Volume'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="1.0"/>
+          <Parameter name="Minimum Value" type="double" value="0.0"/>
+        </ParameterList>
+      </ParameterList>
+
+      <ParameterList name="Internal Thermoelastic Energy">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Internal Thermoelastic Energy'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="3.0"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Elliptic">
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="SIMP"/>
+        <Parameter name="Exponent" type="double" value="3.0"/>
+        <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+        <ParameterList name="Mounts">
+          <Parameter name="Element Block" type="string" value="block_2"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Thermoelastic">
+          <Parameter name="Reference Temperature" type="double" value="1e-2"/>
+          <Parameter name="Thermal Conductivity" type="double" value="910.0"/>
+          <Parameter name="Thermal Expansivity" type="double" value="1.0e-5"/>
+          <ParameterList name="Elastic Stiffness">
+            <Parameter name="Youngs Modulus" type="double" value="1.0e11"/>
+            <Parameter name="Poissons Ratio" type="double" value="0.3"/>
+          </ParameterList>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+  
+    <ParameterList  name="Mechanical Natural Boundary Conditions">
+      <ParameterList  name="Traction Vector Boundary Condition">
+        <Parameter  name="Type"     type="string"        value="Uniform"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, 1.0e5, 0.0}"/>
+        <Parameter  name="Sides"    type="string"        value="ss_1"/>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList  name="Thermal Natural Boundary Conditions">
+      <ParameterList  name="Surface Flux Boundary Condition">
+        <Parameter  name="Type"     type="string"   value="Uniform"/>
+        <Parameter  name="Value"    type="double"   value="-0.0e2"/>
+        <Parameter  name="Sides"    type="string"   value="ss_1"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList  name="Essential Boundary Conditions">
+      <ParameterList  name="Y Fixed Displacement Top Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="1"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Z Fixed Displacement Top Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="2"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Fixed Temperature Top Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="3"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+
+      <ParameterList  name="X Fixed Displacement Top Bolt Mount Face">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="0"/>
+        <Parameter  name="Sides"    type="string" value="ns_11"/>
+      </ParameterList>
+
+      <ParameterList  name="Y Fixed Displacement Bottom Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="1"/>
+        <Parameter  name="Sides"    type="string" value="ns_2"/>
+      </ParameterList>
+      <ParameterList  name="Z Fixed Displacement Bottom Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="2"/>
+        <Parameter  name="Sides"    type="string" value="ns_2"/>
+      </ParameterList>
+      <ParameterList  name="Fixed Temperature Bottom Bolt Shaft">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="3"/>
+        <Parameter  name="Sides"    type="string" value="ns_2"/>
+      </ParameterList>
+
+      <ParameterList  name="X Fixed Displacement Boundary Condition">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="0"/>
+        <Parameter  name="Sides"    type="string" value="ns_21"/>
+      </ParameterList>
+    </ParameterList>
+
+  </ParameterList>
+
+</ParameterList>

@@ -228,7 +228,7 @@ void ParseUncertainty::checkNumSamples(const XMLGen::Uncertainty& aMetadata)
 {
     if(aMetadata.samples().empty())
     {
-        THROWERR("Parse Uncertainty: 'num samples' keyword is empty.")
+        THROWERR("Parse Uncertainty: 'number_samples' keyword is empty.")
     }
 }
 
@@ -236,7 +236,7 @@ void ParseUncertainty::checkLowerBound(const XMLGen::Uncertainty& aMetadata)
 {
     if(aMetadata.lower().empty())
     {
-        THROWERR("Parse Uncertainty: 'lower bound' keyword is empty.")
+        THROWERR("Parse Uncertainty: 'lower_bound' keyword is empty.")
     }
 
     auto tLower = std::stod(aMetadata.lower());
@@ -254,7 +254,7 @@ void ParseUncertainty::checkUpperBound(const XMLGen::Uncertainty& aMetadata)
 {
     if(aMetadata.upper().empty())
     {
-        THROWERR("Parse Uncertainty: 'upper bound' keyword is empty.")
+        THROWERR("Parse Uncertainty: 'upper_bound' keyword is empty.")
     }
 
     auto tLower = std::stod(aMetadata.lower());
@@ -272,7 +272,7 @@ void ParseUncertainty::checkStandardDeviation(const XMLGen::Uncertainty& aMetada
 {
     if(aMetadata.std().empty())
     {
-        THROWERR("Parse Uncertainty: 'standard deviation' keyword is empty.")
+        THROWERR("Parse Uncertainty: 'standard_deviation' keyword is empty.")
     }
 
     XMLGen::Private::is_mean_plus_std_dev_greater_than_upper_bound(aMetadata);

@@ -9,7 +9,7 @@ from numpy import *
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-appFileName = "alexaApp.xml"
+appFileName = "analyzeApp.xml"
 defaultInputFile = "lbracket_2d.xml"
 analyze = PlatoPython.Analyze(defaultInputFile, appFileName, "2D Lbracket")
 analyze.initialize();
@@ -39,7 +39,7 @@ analyze.compute("Compute Constraint Value")
 refValue = analyze.exportData("Constraint Value", "SCALAR")
 
 # open exodus file for output and configure
-inputMeshName = "lbracket_2d.gen"
+inputMeshName = "lbracket_2d.exo"
 outMesh = exodus.ExodusDB()
 outMesh.read(inputMeshName)
 outMesh.nodeVarNames = ["topology"]

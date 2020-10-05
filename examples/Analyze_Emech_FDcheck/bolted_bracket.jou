@@ -55,6 +55,7 @@ volume all scheme tetmesh geometry approximation angle 30
 volume all size {mesh_size}
 mesh volume all
 block 1 volume all
+block 1 name "block_1"
 sideset 2 surface 120 125
 sideset 2 name "ss_2"
 sideset 20 surface 133 144

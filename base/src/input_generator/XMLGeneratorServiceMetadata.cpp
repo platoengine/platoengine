@@ -203,14 +203,24 @@ std::string Service::newmarkGamma() const
     return (this->getValue("newmark_gamma"));
 }
 
-void Service::solverTolerance(const std::string& aInput)
+void Service::newtonSolverTolerance(const std::string& aInput)
 {
-    mMetaData["tolerance"] = aInput;
+    mMetaData["newton_solver_tolerance"] = aInput;
 }
 
-std::string Service::solverTolerance() const
+std::string Service::newtonSolverTolerance() const
 {
-    return (this->getValue("tolerance"));
+    return (this->getValue("newton_solver_tolerance"));
+}
+
+void Service::linearSolverTolerance(const std::string& aInput)
+{
+    mMetaData["linear_solver_tolerance"] = aInput;
+}
+
+std::string Service::linearSolverTolerance() const
+{
+    return (this->getValue("linear_solver_tolerance"));
 }
 
 void Service::solverConvergenceCriterion(const std::string& aInput)

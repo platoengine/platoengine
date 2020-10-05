@@ -1,20 +1,17 @@
 <?xml version="1.0"?>
 <Operation>
-  <Function>ComputeObjectiveX</Function>
   <Name>Compute ObjectiveX</Name>
+  <Function>ComputeCriterionX</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
   <Output>
-    <ArgumentName>GradientX X</ArgumentName>
-  </Output>
-  <Output>
-    <ArgumentName>GradientX Y</ArgumentName>
-  </Output>
-  <Output>
-    <ArgumentName>GradientX Z</ArgumentName>
+    <Argument>Gradient</Argument>
+    <ArgumentName>GradientX</ArgumentName>
   </Output>
 </Operation>

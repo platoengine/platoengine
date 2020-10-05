@@ -28,6 +28,7 @@ void ParseMaterial::insertCoreProperties()
 {
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
     mTags.insert({ "code", { { {"code"}, ""}, "" } });
+    mTags.insert({ "name", { { {"name"}, ""}, "" } });
     mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
     mTags.insert({ "material_model", { { {"material_model"}, ""}, "" } });
     mTags.insert({ "penalty_exponent", { { {"penalty_exponent"}, ""}, "" } });
@@ -109,6 +110,12 @@ void ParseMaterial::setCode(XMLGen::Material& aMetadata)
     }
 }
 
+void ParseMaterial::setName(XMLGen::Material& aMetadata)
+{
+    auto tItr = mTags.find("name");
+    aMetadata.name(tItr->second.first.second);
+}
+
 void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 {
     auto tItr = mTags.find("material_model");
@@ -177,6 +184,7 @@ void ParseMaterial::setPenaltyExponent(XMLGen::Material& aMetadata)
 void ParseMaterial::setMetadata(XMLGen::Material& aMetadata)
 {
     this->setCode(aMetadata);
+    this->setName(aMetadata);
     this->setMaterialModel(aMetadata);
     this->setPenaltyExponent(aMetadata);
     this->setMaterialProperties(aMetadata);
@@ -194,6 +202,30 @@ void ParseMaterial::checkUniqueIDs()
     if(!XMLGen::unique(tIDs))
     {
         THROWERR("Parse Material: Material block identification numbers, i.e. IDs, are not unique.  Material block IDs must be unique.")
+    }
+}
+
+void ParseMaterial::checkNames()
+{
+    for(auto& tMaterial : mData)
+    {
+        if (tMaterial.name().empty())
+        {
+            auto tIndex = &tMaterial - &mData[0] + 1u;
+            auto tName = "material_" + tMaterial.id();
+            tMaterial.name(tName);
+        }
+    }
+
+    std::vector<std::string> tNames;
+    for(auto& tMaterial : mData)
+    {
+        tNames.push_back(tMaterial.name());
+    }
+
+    if(!XMLGen::unique(tNames))
+    {
+        THROWERR("Parse Material: Material block names are not unique.  Material block names must be unique.")
     }
 }
 
@@ -237,6 +269,7 @@ void ParseMaterial::parse(std::istream &aInputFile)
         }
     }
     this->checkUniqueIDs();
+    this->checkNames();
 }
 
 }

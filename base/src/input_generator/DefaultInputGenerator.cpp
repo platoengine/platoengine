@@ -628,15 +628,7 @@ void DefaultInputGenerator::generateBatchScript()
   batchFile << "#BSUB -P <PROJECT>\n";
   batchFile << "#BSUB -W 0:00\n";
 
-  size_t tNumGPUsNeeded;
-  if(m_InputData.service(0u).useNewAnalyzeUQWorkflow() && m_InputData.m_HasUncertainties)
-    tNumGPUsNeeded = m_InputData.m_UncertaintyMetaData.numPerformers;
-  else
-    tNumGPUsNeeded = m_InputData.objectives.size();
-  size_t tNumGPUsPerNode = 6;
-  size_t tNumNodesNeeded = tNumGPUsNeeded/tNumGPUsPerNode;
-  if(tNumGPUsNeeded % tNumGPUsPerNode != 0)
-    ++tNumNodesNeeded;
+  size_t tNumNodesNeeded = computeNumberOfNodesNeeded();
 
   batchFile << "#BSUB -nnodes " << tNumNodesNeeded << "\n";
   batchFile << "#BSUB -J plato\n";
@@ -2115,6 +2107,8 @@ bool DefaultInputGenerator::generatePlatoAnalyzeOperationsXML()
               addChild(tmp_node1, "ArgumentName", "Solution Z");
             else if(tCurObjective.output_for_plotting[j] == "temperature")
               addChild(tmp_node1, "ArgumentName", "Solution");
+            else if(tCurObjective.output_for_plotting[j] == "vonmises")
+                addChild(tmp_node1, "ArgumentName", "Vonmises");
           }
 
           char buf[200];
@@ -5010,6 +5004,12 @@ bool DefaultInputGenerator::addDefinesToDoc(pugi::xml_document& doc)
     for(size_t tLoadCaseIndex = 0; tLoadCaseIndex < tLoadCases.size(); ++tLoadCaseIndex)
     {
       XMLGen::LoadCase load_case = tLoadCases[tLoadCaseIndex];
+      if(load_case.loads.size() != m_InputData.m_UncertaintyMetaData.randomVariableIndices.size() + m_InputData.m_UncertaintyMetaData.deterministicVariableIndices.size())
+      {
+        std::cerr << "Error: Load case size does not match number of loads in uncertainty metadata" << std::endl;
+        return false;
+      }
+
       XMLGen::Load tRandomLoad = load_case.loads[tRandomLoadIndex];
       tXValuesForRandomLoadIndex.push_back(tRandomLoad.values[0]);
       tYValuesForRandomLoadIndex.push_back(tRandomLoad.values[1]);
@@ -5576,6 +5576,7 @@ bool DefaultInputGenerator::generateInterfaceXML(std::ostringstream *aStringStre
     this->setOptimizerMethod(tMiscNode);
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
+    this->setGCMMAoptions(tTmpNode);
     this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
@@ -5927,6 +5928,7 @@ bool DefaultInputGenerator::generatePlatoAnalyzeShapeInterfaceXML()
     this->setOptimizerMethod(tMiscNode);
     this->setOptimalityCriteriaOptions(tMiscNode);
     tTmpNode = tMiscNode.append_child("Options");
+    this->setGCMMAoptions(tTmpNode);
     this->setMMAoptions(tTmpNode);
     this->setAugmentedLagrangianOptions(tTmpNode);
     this->setTrustRegionAlgorithmOptions(tTmpNode);
@@ -6712,6 +6714,46 @@ bool DefaultInputGenerator::setKelleySachsAlgorithmOptions(const pugi::xml_node 
 }
 
 /**********************************************************************************/
+bool DefaultInputGenerator::setGCMMAoptions(const pugi::xml_node & aXMLnode)
+/**********************************************************************************/
+{
+    if(m_InputData.mInnerKKTtoleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAInnerKKTTolerance", m_InputData.mInnerKKTtoleranceGCMMA);
+    }
+    if(m_InputData.mOuterKKTtoleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAOuterKKTTolerance", m_InputData.mOuterKKTtoleranceGCMMA);
+    }
+    if(m_InputData.mInnerControlStagnationToleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAInnerControlStagnationTolerance", m_InputData.mInnerControlStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mOuterControlStagnationToleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAOuterControlStagnationTolerance", m_InputData.mOuterControlStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mOuterObjectiveStagnationToleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAOuterObjectiveStagnationTolerance", m_InputData.mOuterObjectiveStagnationToleranceGCMMA);
+    }
+    if(m_InputData.mMaxInnerIterationsGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAMaxInnerIterations", m_InputData.mMaxInnerIterationsGCMMA);
+    }
+    if(m_InputData.mOuterStationarityToleranceGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAOuterStationarityTolerance", m_InputData.mOuterStationarityToleranceGCMMA);
+    }
+    if(m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA.size() > 0)
+    {
+        addChild(aXMLnode, "GCMMAInitialMovingAsymptoteScaleFactor", m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA);
+    }
+
+    return (true);
+}
+
+/**********************************************************************************/
 bool DefaultInputGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
 /**********************************************************************************/
 {
@@ -6734,6 +6776,10 @@ bool DefaultInputGenerator::setMMAoptions(const pugi::xml_node & aXMLnode)
     if(m_InputData.mMMAMaxNumSubProblemIterations.size() > 0)
     {
         addChild(aXMLnode, "MaxNumSubProblemIter", m_InputData.mMMAMaxNumSubProblemIterations);
+    }
+    if(m_InputData.mMMAMaxTrustRegionIterations.size() > 0)
+    {
+        addChild(aXMLnode, "MaxNumTrustRegionIter", m_InputData.mMMAMaxTrustRegionIterations);
     }
     if(m_InputData.mMMAControlStagnationTolerance.size() > 0)
     {

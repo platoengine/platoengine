@@ -106,6 +106,7 @@ struct Objective
 struct Block
 {
     std::string block_id;
+    std::string name;
     std::string material_id;
     std::string element_type;
 };

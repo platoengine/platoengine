@@ -9,7 +9,7 @@ import random
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-analyze = PlatoPython.Analyze("square_tet_bc.xml", "alexaApp.xml", "3D square")
+analyze = PlatoPython.Analyze("square_tet_bc.xml", "analyzeApp.xml", "3D square")
 analyze.initialize();
 
 # create global PlatoServices instance
@@ -68,7 +68,7 @@ re_vals = services.exportData("MLS Field Values", "SCALAR_FIELD")
 
 # open exodus file for output and configure
 outMesh = exodus.ExodusDB()
-outMesh.read("square_tet_bc.gen");
+outMesh.read("square_tet_bc.exo");
 numTimes = 1
 outMesh.nodeVarNames = ["MLS_Field", "obj_grad", "mapped_obj_grad", "solution_x", "solution_y", "solution_z"]
 outMesh.numNodeVars = len(outMesh.nodeVarNames)

@@ -446,7 +446,7 @@ TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
         "     time_step_expansion_multiplier 1.2\n"
         "   end time\n"
         "   begin solver\n"
-        "     tolerance 1e-10\n"
+        "     newton_solver_tolerance 1e-10\n"
         "     max_number_iterations 20\n"
         "   end solver\n"
         "end service\n";
@@ -469,7 +469,7 @@ TEST(PlatoTestXMLGenerator, ParseServiceWithTimeAndSolverBlocks)
         ASSERT_STREQ("80", tService.value("number_time_steps").c_str());
         ASSERT_STREQ("160", tService.value("max_number_time_steps").c_str());
         ASSERT_STREQ("1.2", tService.value("time_step_expansion_multiplier").c_str());
-        ASSERT_STREQ("1e-10", tService.value("tolerance").c_str());
+        ASSERT_STREQ("1e-10", tService.value("newton_solver_tolerance").c_str());
         ASSERT_STREQ("20", tService.value("max_number_iterations").c_str());
         ASSERT_STREQ("residual", tService.value("convergence_criterion").c_str());
     }

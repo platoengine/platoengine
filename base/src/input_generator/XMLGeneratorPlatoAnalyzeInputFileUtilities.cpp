@@ -195,38 +195,6 @@ void append_pde_constraint_parameter_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_constraint_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData) == false)
-    {
-        return;
-    }
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Constraint", "string", "My Constraint"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
-}
-// function append_constraint_parameter_to_plato_problem
-/**********************************************************************************/
-
-/**********************************************************************************/
-void append_objective_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    if(XMLGen::is_any_objective_computed_by_plato_analyze(aXMLMetaData) == false)
-    {
-        return;
-    }
-    std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Objective", "string", "My Objective"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
-}
-// function append_objective_parameter_to_plato_problem
-/**********************************************************************************/
-
-/**********************************************************************************/
 void append_self_adjoint_parameter_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -267,8 +235,6 @@ void append_plato_problem_description_to_plato_analyze_input_deck
     XMLGen::append_attributes({"name"}, {"Plato Problem"}, tPlatoProblem);
     XMLGen::append_physics_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
     XMLGen::append_pde_constraint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_constraint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_objective_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
     XMLGen::append_self_adjoint_parameter_to_plato_problem(aXMLMetaData, tPlatoProblem);
 }
 // function append_plato_problem_description_to_plato_analyze_input_deck
@@ -289,15 +255,26 @@ void append_plato_problem_to_plato_analyze_input_deck
     {
         THROWERR("Append Plato Problem To Plato Analyze Input Deck: Parameter List with name 'Plato Problem' is empty.")
     }
-    XMLGen::append_objective_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_constraint_criteria_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_criteria_list_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+
+    XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_material_models_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
 }
 // function append_plato_problem_to_plato_analyze_input_deck
 /**********************************************************************************/
+void append_criteria_list_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tCriteriaList = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Criteria"}, tCriteriaList);
+    XMLGen::append_objective_criteria_to_criteria_list(aXMLMetaData, tCriteriaList);
+    XMLGen::append_constraint_criteria_to_criteria_list(aXMLMetaData, tCriteriaList);
+}
 
 /**********************************************************************************/
 void append_weighted_sum_objective_to_plato_problem
@@ -358,7 +335,7 @@ void append_objective_criteria_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_objective_criteria_to_plato_analyze_input_deck
+void append_objective_criteria_to_criteria_list
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -373,7 +350,7 @@ void append_objective_criteria_to_plato_analyze_input_deck
     XMLGen::append_weights_to_weighted_sum_objective(aXMLMetaData, tObjective);
     XMLGen::append_objective_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
-// function append_objective_criteria_to_plato_analyze_input_deck
+// function append_objective_criteria_to_criteria_list
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -432,7 +409,7 @@ void append_weights_to_weighted_sum_constraint
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_constraint_criteria_to_plato_analyze_input_deck
+void append_constraint_criteria_to_criteria_list
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -446,7 +423,7 @@ void append_constraint_criteria_to_plato_analyze_input_deck
     XMLGen::append_weights_to_weighted_sum_constraint(aXMLMetaData, tConstraint);
     XMLGen::append_constraint_criteria_to_plato_problem(aXMLMetaData, aParentNode);
 }
-// function append_constraint_criteria_to_plato_analyze_input_deck
+// function append_constraint_criteria_to_criteria_list
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -461,7 +438,7 @@ void append_physics_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_material_model_to_plato_problem
+void append_material_models_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
  pugi::xml_node& aParentNode)
 {
@@ -470,48 +447,79 @@ void append_material_model_to_plato_problem
         THROWERR("Append Material Model to Plato Problem: Material container is empty.")
     }
 
+    auto tMaterialModels = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Material Models"}, tMaterialModels);
+
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
-        tMaterialInterface.call(tMaterial, aParentNode);
+        tMaterialInterface.call(tMaterial, tMaterialModels);
     }
 }
 // function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_random_material_to_plato_analyze_input_deck
+void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
-    {
-        auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
-        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
-    }
-    else
-    {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-    }
+    XMLGen::append_material_models_to_plato_problem(aXMLMetaData.materials, aParentNode);
 }
-// function append_random_material_to_plato_analyze_input_deck
+// function append_material_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_material_model_to_plato_analyze_input_deck
+void append_spatial_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mRandomMetaData.samplesDrawn())
+    auto tBlocks = aXMLMetaData.blocks;
+    if(tBlocks.empty())
     {
-        XMLGen::append_random_material_to_plato_analyze_input_deck(aXMLMetaData, aParentNode);
+        THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block container is empty.")
     }
-    else
+
+    auto tSpatialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
+    auto tDomains = tSpatialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
+
+    for(auto& tBlock : tBlocks)
     {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
+        auto tDomain = tDomains.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Volume " + tBlock.name}, tDomain);
+
+        std::vector<std::string> tKeys = {"name", "type", "value"};
+        std::vector<std::string> tValues = {"Element Block", "string", tBlock.name};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tDomain);
+
+        auto tMaterials = aXMLMetaData.materials;
+        std::vector<std::string> tMaterialIDs;
+        bool tMaterialFound = false;
+        XMLGen::Material tMaterial;
+
+        for(auto tMat : tMaterials)
+        {
+            if(tMat.id() == tBlock.material_id)
+            {
+                tMaterial = tMat;
+                tMaterialFound = true;
+                break;
+            }
+
+        }
+        if(!tMaterialFound)
+        {
+            THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block " + tBlock.block_id + 
+                    " lists material with material_id " + tBlock.material_id + " but no material with ID " + tBlock.material_id + " exists")
+        }
+
+        tValues = {"Material Model", "string", tMaterial.name()};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tDomain);
     }
 }
-// function append_material_model_to_plato_analyze_input_deck
+// function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
