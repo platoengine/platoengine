@@ -1,7 +1,8 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>mitchell_tri.gen</mesh>
+  <ignore_node_map>true</ignore_node_map>
+  <mesh>mitchell_tri.exo</mesh>
   <block>
     <index>1</index>
     <integration>

@@ -122,26 +122,6 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_constraint_parameter_to_plato_problem
- * \brief Append plato analyze's constraint function parameter to plato problem parameter list.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aParentNode  pugi::xml_node
-**********************************************************************************/
-void append_constraint_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
- * \fn append_objective_parameter_to_plato_problem
- * \brief Append plato analyze's objective function parameter to plato problem parameter list.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aParentNode  pugi::xml_node
-**********************************************************************************/
-void append_objective_parameter_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
  * \fn append_self_adjoint_parameter_to_plato_problem
  * \brief Append plato analyze's self adjoint parameter to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -194,12 +174,22 @@ void append_objective_criteria_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_objective_criteria_to_plato_analyze_input_deck
- * \brief Append objective criteria to problem parameter list.
+ * \fn append_objective_criteria_to_criteria_list
+ * \brief Append objective criteria to criteria parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_objective_criteria_to_plato_analyze_input_deck
+void append_objective_criteria_to_criteria_list
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_criteria_list_to_plato_analyze_input_deck
+ * \brief Append criteria to problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_criteria_list_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -246,12 +236,12 @@ void append_weights_to_weighted_sum_constraint
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_constraint_criteria_to_plato_analyze_input_deck
- * \brief Append constraint criteria to problem parameter list.
+ * \fn append_constraint_criteria_to_criteria_list
+ * \brief Append constraint criteria to criteria parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_constraint_criteria_to_plato_analyze_input_deck
+void append_constraint_criteria_to_criteria_list
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -276,22 +266,22 @@ void append_material_model_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_random_material_to_plato_analyze_input_deck
- * \brief Append random material model to problem parameter list.
+ * \fn append_material_models_to_plato_analyze_input_deck
+ * \brief Append material models to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_random_material_to_plato_analyze_input_deck
+void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_material_model_to_plato_analyze_input_deck
- * \brief Append material model to problem parameter list.
+ * \fn append_spatial_model_to_plato_analyze_input_deck
+ * \brief Append spatial model to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_material_model_to_plato_analyze_input_deck
+void append_spatial_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 

@@ -5,14 +5,15 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"  type="string"  value="Elliptic"/>
-    <Parameter name="Objective"       type="string"  value="My Internal Elastic Energy"/>
     <Parameter name="Self-Adjoint"    type="bool"    value="false"/>
-    <ParameterList name="My Internal Elastic Energy">
-      <Parameter name='Type' type='string' value='Scalar Function'/> 
-      <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
-      <ParameterList name="Penalty Function">
-        <Parameter name="Type" type="string" value="SIMP"/>
-        <Parameter name="Exponent" type="double" value="1.0"/>
+    <ParameterList name="Criteria">
+      <ParameterList name="Internal Elastic Energy">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="1.0"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
     <ParameterList name="Elliptic">
@@ -21,10 +22,20 @@
         <Parameter name="Exponent" type="double" value="1.0"/>
       </ParameterList>
     </ParameterList>
-    <ParameterList name="Material Model">
-      <ParameterList name="Isotropic Linear Elastic">
-        <Parameter  name="Poissons Ratio" type="double" value="0.0"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1.0"/>
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.0"/>
+          <Parameter  name="Youngs Modulus" type="double" value="1.0"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
     <ParameterList  name="Natural Boundary Conditions">

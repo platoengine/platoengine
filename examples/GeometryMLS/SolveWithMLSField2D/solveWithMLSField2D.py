@@ -51,7 +51,7 @@ soly = analyze.exportData("Solution Y", "SCALAR_FIELD")
 
 # open exodus file for output and configure
 outMesh = exodus.ExodusDB()
-outMesh.read("square_tri_bc.gen");
+outMesh.read("square_tri_bc.exo");
 numTimes = 1
 outMesh.nodeVarNames = ["MLS_Field", "solution_x", "solution_y"]
 outMesh.numNodeVars = len(outMesh.nodeVarNames)

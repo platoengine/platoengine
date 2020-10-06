@@ -509,23 +509,3 @@
     <MaxIterations>10</MaxIterations>
   </Convergence>
 </Optimizer>
-
-
-<mesh>
-  <type>unstructured</type>
-  <format>exodus</format>
-  <mesh>mitchell_tri.gen</mesh>
-  <block>
-    <index>1</index>
-    <integration>
-      <type>gauss</type>
-      <order>2</order>
-    </integration>
-    <materialID>1</materialID>
-  </block>
-</mesh>
-
-<output>
-  <file>plato</file>
-  <format>exodus</format>
-</output>

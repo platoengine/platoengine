@@ -59,6 +59,7 @@
 #include <map>
 
 #include "XMLGenerator.hpp"
+#include "DefaultInputGenerator.hpp"
 
 #include "Plato_SromXML.hpp"
 #include "Plato_SromXMLGenTools.hpp"
@@ -126,7 +127,15 @@ XMLGenerator::~XMLGenerator()
 **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
-    XMLGen::Analyze::write_optimization_problem(m_InputData);
+    if(m_InputData.input_generator_version == "old")
+    {
+        DefaultInputGenerator tGenerator(m_InputData);
+        tGenerator.generateInputFiles();
+    }
+    else
+    {
+        XMLGen::Analyze::write_optimization_problem(m_InputData);
+    }
 }
 
 /******************************************************************************/
@@ -227,7 +236,7 @@ void XMLGenerator::lookForPlatoAnalyzePerformers()
             m_InputData.mPlatoAnalyzePerformerExists = true;
             tNumPlatoAnalyzePerformers++;
         }
-        if(m_InputData.objectives[i].code_name == "plato_analyze")
+        if(m_InputData.objectives[i].type == "maximize stiffness")
         {
             tNumObjectiveCriteria++;
         }
@@ -2331,6 +2340,10 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
               }
               new_block.element_type = tStringValue;
             }
+            else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
+            {
+                new_block.name = tStringValue;
+            }
             else
             {
               PrintUnrecognizedTokens(tokens);
@@ -2339,6 +2352,8 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
             }
           }
         }
+        if(new_block.name.empty())
+            new_block.name = "block_" + new_block.block_id;
         m_InputData.blocks.push_back(new_block);
       }
     }

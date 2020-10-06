@@ -55,7 +55,7 @@ inline void write_optimization_problem
     XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
     XMLGen::write_plato_main_input_deck_file(aMetaData);
     XMLGen::write_plato_analyze_input_deck_file(aMetaData);
-    XMLGen::write_amgx_input_file();
+    XMLGen::write_amgx_input_file(aMetaData.service(0u));
     XMLGen::generate_launch_script(aMetaData);
 }
 

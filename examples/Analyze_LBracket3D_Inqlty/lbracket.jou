@@ -13,9 +13,10 @@ webcut volume all with plane yplane offset -0.16
 imprint all
 merge all
 volume all scheme tetmesh
-volume all size 0.0275
+volume all size 0.025
 mesh volume all
 block 1 volume all
+block 1 name "block_1"
 nodeset 1 surface 13
 nodeset 1 name "ns_1"
 sideset 1 surface 13

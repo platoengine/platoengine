@@ -194,6 +194,7 @@ protected:
      * @param [in] aXMLnode data structure with information parsed from XML input file.
      **********************************************************************************/
     bool setMMAoptions(const pugi::xml_node & aXMLnode);
+    bool setGCMMAoptions(const pugi::xml_node & aXMLnode);
 
 private:
     void addVersionEntryToDoc(pugi::xml_document& doc);

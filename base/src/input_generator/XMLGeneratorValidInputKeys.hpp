@@ -416,7 +416,6 @@ struct ValidCodeKeys
 {
 private:
     /*!< valid plato input deck code keywords supported in plato */
-    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "platomain"};
 
 public:
     /******************************************************************************//**
@@ -429,6 +428,7 @@ public:
     {
         return (XMLGen::return_supported_value(aKey, mKeys));
     }
+    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "lightmp", "platomain"};
 };
 // struct ValidCodeKeys
 

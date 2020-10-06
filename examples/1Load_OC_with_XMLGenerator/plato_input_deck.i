@@ -1,3 +1,8 @@
+begin service
+  physics mechanical
+  dimensions 3
+end service
+
 begin objective
    type maximize stiffness
    load ids 10
@@ -18,6 +23,7 @@ end loads
       
 begin constraint 
    type volume
+   code platomain
    volume fraction .5
 end constraint
 
@@ -26,8 +32,10 @@ begin block 1
 end block
 
 begin material 1
-   poissons ratio .33
-   youngs modulus 1e9
+   material_model isotropic linear elastic 
+   poissons_ratio .33
+   youngs_modulus 1e9
+   penalty_exponent 3
 end material
 
 begin optimization parameters
@@ -39,6 +47,7 @@ begin optimization parameters
    // algorithm mma 
    discretization density 
    initial density value .5
+   input generator version old
 end optimization parameters
 
 begin mesh

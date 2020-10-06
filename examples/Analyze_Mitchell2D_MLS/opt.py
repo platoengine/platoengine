@@ -9,7 +9,7 @@ from numpy import *
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-appFileName = "alexaApp.xml"
+appFileName = "analyzeApp.xml"
 defaultInputFile = "mitchell_tri.xml"
 analyze = PlatoPython.Analyze(defaultInputFile, appFileName, "2D mitchell")
 analyze.initialize();
@@ -39,7 +39,7 @@ analyze.compute("Compute Constraint Value")
 refValue = analyze.exportData("Constraint Value", "SCALAR")
 
 # open exodus file for output and configure
-inputMeshName = "mitchell_tri.gen"
+inputMeshName = "mitchell_tri.exo"
 outMesh = exodus.ExodusDB()
 outMesh.read(inputMeshName)
 outMesh.nodeVarNames = ["topology"]

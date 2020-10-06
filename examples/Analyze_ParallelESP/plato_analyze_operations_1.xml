@@ -5,6 +5,10 @@
 <Operation>
   <Name>Compute Constraint Sensitivity</Name>
   <Function>MapConstraintGradientX</Function>
+  <Input>
+    <Argument>Gradient</ArgumentName>
+    <ArgumentName>Criterion Gradient</ArgumentName>
+  </Input>
   <For var="I" in="Parameters">
   <Input>
     <ArgumentName>Parameter Sensitivity {I}</ArgumentName>
