@@ -105,7 +105,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     XMLGen::InputData tMetaData;
     XMLGen::Objective tObjective;
     tObjective.name = "1";
-    tObjective.type = "compliance";
+    // tObjective.type = "compliance";
     tObjective.mPerformerName = "plato_analyze_1";
     tMetaData.objectives.push_back(tObjective);
 
@@ -117,9 +117,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     ASSERT_FALSE(tStage.empty());
     ASSERT_STREQ("Stage", tStage.name());
     auto tName = tStage.child("Name");
-    ASSERT_STREQ("Compute Objective Gradient ID-1", tName.child_value());
-    auto tType = tStage.child("Type");
-    ASSERT_STREQ("compliance", tType.child_value());
+    ASSERT_STREQ("Compute Objective Gradient", tName.child_value());
+    // auto tType = tStage.child("Type");
+    // ASSERT_STREQ("compliance", tType.child_value());
     auto tInput = tStage.child("Input");
     ASSERT_STREQ("Input", tInput.name());
     PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Control"}, tInput);
@@ -153,12 +153,12 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tOpInputs = tOpInputs.next_sibling("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Gradient", "Objective Gradient ID-1"}, tOpInputs);
     tOpOutputs = tOperation.child("Output");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Gradient", "Objective Gradient ID-1"}, tOpOutputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Gradient", "Objective Gradient"}, tOpOutputs);
 
     // STAGE OUTPUT
     auto tOutput = tStage.child("Output");
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Gradient ID-1"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Gradient"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
@@ -166,7 +166,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     XMLGen::InputData tMetaData;
     XMLGen::Objective tObjective;
     tObjective.name = "1";
-    tObjective.type = "compliance";
+    // tObjective.type = "compliance";
     tObjective.mPerformerName = "plato_analyze_1";
     tMetaData.objectives.push_back(tObjective);
 
@@ -178,9 +178,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     ASSERT_FALSE(tStage.empty());
     ASSERT_STREQ("Stage", tStage.name());
     auto tName = tStage.child("Name");
-    ASSERT_STREQ("Compute Objective Value ID-1", tName.child_value());
-    auto tType = tStage.child("Type");
-    ASSERT_STREQ("compliance", tType.child_value());
+    ASSERT_STREQ("Compute Objective Value", tName.child_value());
+    // auto tType = tStage.child("Type");
+    // ASSERT_STREQ("compliance", tType.child_value());
     auto tInput = tStage.child("Input");
     ASSERT_STREQ("Input", tInput.name());
     PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Control"}, tInput);
@@ -324,6 +324,13 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tValues = {"Objective Gradient ID-1", "Scalar", "Nodal Field", "plato_analyze_1", "platomain"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
+
+    tSharedData = tSharedData.next_sibling("SharedData");
+    ASSERT_FALSE(tSharedData.empty());
+    ASSERT_STREQ("SharedData", tSharedData.name());
+    tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tValues = {"Objective Gradient", "Scalar", "Nodal Field", "platomain", "platomain"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 
     tSharedData = tSharedData.next_sibling("SharedData");

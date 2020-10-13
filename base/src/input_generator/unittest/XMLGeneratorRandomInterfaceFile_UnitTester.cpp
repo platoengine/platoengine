@@ -873,14 +873,19 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveSharedData)
     // TEST RESULTS AGAINST GOLD VALUES
     std::vector<std::string> tTemp = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataKeys;
-    tGoldSharedDataKeys.push_back(std::make_pair("Objective Value", tTemp));
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Value ID-0", tTemp));
+    tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
+    tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient ID-0", tTemp));
     tTemp = {"Name", "Type", "Layout", "OwnerName", "UserName"};
     tGoldSharedDataKeys.push_back(std::make_pair("Objective Gradient", tTemp));
 
     tTemp = {"Objective Value ID-0", "Scalar", "Global", "1", "plato analyze", "platomain"};
     std::vector<std::pair<std::string, std::vector<std::string>>> tGoldSharedDataValues;
-    tGoldSharedDataValues.push_back(std::make_pair("Objective Value", tTemp));
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Value ID-0", tTemp));
     tTemp = {"Objective Gradient ID-0", "Scalar", "Nodal Field", "plato analyze", "platomain"};
+    tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient ID-0", tTemp));
+
+    tTemp = {"Objective Gradient", "Scalar", "Nodal Field", "plato analyze", "platomain"};
     tGoldSharedDataValues.push_back(std::make_pair("Objective Gradient", tTemp));
 
     auto tKeys = tGoldSharedDataKeys.begin();
@@ -1119,7 +1124,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientSamplesOperation)
 TEST(PlatoTestXMLGenerator, AppendFilterCriterionGradientOperation)
 {
     pugi::xml_document tDocument;
-    XMLGen::append_filter_criterion_gradient_operation("Objective Gradient", tDocument);
+    XMLGen::append_filter_criterion_gradient_operation("Objective Gradient", "Objective Gradient", tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1921,8 +1926,8 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     // ****** 1) TEST RESULTS AGAINST STAGE GOLD VALUES ******
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
-    std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Compute Objective Value ID-0", "maximize stiffness", "", "", "", "", ""};
+    std::vector<std::string> tGoldKeys = {"Name", "Input", "Operation", "For", "Operation", "Output"};
+    std::vector<std::string> tGoldValues = {"Compute Objective Value", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -1934,7 +1939,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tStageOutput= tStage.child("Output");
     ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Objective Value ID-0"};
+    tGoldValues = {"Objective Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
@@ -2058,7 +2063,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tRandomObjectiveOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tRandomObjectiveOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 1 StdDev", "Objective Value ID-0"};
+    tGoldValues = {"Objective Mean Plus 1 StdDev", "Objective Value"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tRandomObjectiveOutput);
 }
 
@@ -2351,7 +2356,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tStage = tDocument.child("Stage");
     ASSERT_FALSE(tStage.empty());
     std::vector<std::string> tGoldKeys = {"Name", "Type", "Input", "Operation", "For", "For", "Operation", "Output"};
-    std::vector<std::string> tGoldValues = {"Compute Objective Gradient ID-0", "maximize stiffness", "", "", "", "", "", ""};
+    std::vector<std::string> tGoldValues = {"Compute Objective Gradient", "maximize stiffness", "", "", "", "", "", ""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStage);
 
     auto tStageInput= tStage.child("Input");
@@ -2363,7 +2368,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     auto tStageOutput= tStage.child("Output");
     ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Objective Gradient ID-0"};
+    tGoldValues = {"Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     // ****** 2) TEST RESULTS AGAINST FILTER OPERATION GOLD VALUES ******
@@ -2492,7 +2497,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tOperationOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tOperationOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 3 StdDev Gradient", "Objective Gradient ID-0"};
+    tGoldValues = {"Objective Mean Plus 3 StdDev Gradient", "Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOperationOutput);
 
     // ****** 5) TEST RESULTS AGAINST FILTER GRADIENT OPERATION GOLD VALUES ******
@@ -2511,13 +2516,13 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Gradient", "Objective Gradient ID-0"};
+    tGoldValues = {"Gradient", "Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
     
     auto tOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tOutput.empty());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Filtered Gradient", "Objective Gradient ID-0"};
+    tGoldValues = {"Filtered Gradient", "Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 }
 
@@ -2818,8 +2823,8 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationObjectiveOptions)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tObjectiveNode = tOptimizerNode.child("Objective");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName"};
-    tGoldValues = {"Objective Value ID-0", "Compute Objective Value ID-0", "Objective Gradient ID-0",
-        "Compute Objective Gradient ID-0"};
+    tGoldValues = {"Objective Value ID-0", "Compute Objective Value", "Objective Gradient",
+        "Compute Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tObjectiveNode);
 }
 
