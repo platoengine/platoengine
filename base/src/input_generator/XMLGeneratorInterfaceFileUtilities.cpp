@@ -162,10 +162,10 @@ void append_shared_data
     XMLGen::append_upper_bounds_shared_data(aDocument);
     XMLGen::append_design_volume_shared_data(aDocument);
     XMLGen::append_constraint_shared_data(aMetaData, aDocument);
+    XMLGen::append_objective_shared_data(aMetaData, aDocument);
 
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
     {
-        XMLGen::append_objective_shared_data(aMetaData, aDocument, "platomain");
         XMLGen::append_qoi_statistics_shared_data(aMetaData, aDocument);
         XMLGen::append_multiperformer_qoi_shared_data(aMetaData, aDocument);
         XMLGen::append_multiperformer_topology_shared_data(aMetaData, aDocument);
@@ -173,7 +173,6 @@ void append_shared_data
     }
     else
     {
-        XMLGen::append_objective_shared_data(aMetaData, aDocument);
         XMLGen::append_qoi_shared_data(aMetaData, aDocument);
         XMLGen::append_topology_shared_data(aMetaData, aDocument);
     }
@@ -265,32 +264,66 @@ void append_objective_value_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_aggregate_operation
+(const std::string& aArgumentName,
+ const std::string& aSharedDataName,
+ const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"AggregateEnergy", "platomain"}, tOperationNode);
+
+    for(auto& tObjective : aXMLMetaData.objectives)
+    {
+        auto tOperationInput = tOperationNode.append_child("Input");
+        auto tArgumentName = aArgumentName + " " + tObjective.name;
+        auto tSharedDataName = aSharedDataName + " ID-" + tObjective.name;
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOperationInput);
+    }
+
+    auto tOperationOutput = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {aArgumentName, aSharedDataName}, tOperationOutput);
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_objective_value_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for(auto& tObjective : aXMLMetaData.objectives)
+    // append objective value stage metadata
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children( { "Name"}, { "Compute Objective Value" }, tStageNode);
+    auto tStageInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+
+    //append criteria evaluations
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_sample_objective_value_operation(aXMLMetaData.objectives[0].mPerformerName, aXMLMetaData, tStageNode);
+    else
     {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tName = std::string("Compute Objective Value ID-") + tObjective.name;
-        XMLGen::append_children( { "Name", "Type" }, { tName, tObjective.category() }, tStageNode);
-        auto tStageInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
-        XMLGen::append_filter_control_operation(tStageNode);
-
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
-        else
+        for(auto& tObjective : aXMLMetaData.objectives)
             XMLGen::append_objective_value_operation(tObjective, tStageNode);
-
-        auto tSharedDataName = std::string("Objective Value ID-") + tObjective.name;
-
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
-
-        auto tStageOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children( { "SharedDataName" }, { tSharedDataName }, tStageOutputNode);
+        
+        if(aXMLMetaData.objectives.size() > 1)
+            XMLGen::append_aggregate_operation("Value", "Objective Value", aXMLMetaData, tStageNode);
     }
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_evaluate_nondeterministic_objective_value_operation("Objective Value", aXMLMetaData, tStageNode);
+
+    // append objective value stage output metadata
+    //
+    std::string tSharedDataName;
+    if(aXMLMetaData.objectives.size() > 1 || XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        tSharedDataName = std::string("Objective Value");
+    else
+        tSharedDataName = std::string("Objective Value ID-") + aXMLMetaData.objectives[0].name;
+
+    auto tStageOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children( { "SharedDataName" }, { tSharedDataName }, tStageOutputNode);
 }
 /******************************************************************************/
 
@@ -314,29 +347,41 @@ void append_objective_gradient_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for(auto& tObjective : aXMLMetaData.objectives)
+    // append objective gradient stage metadata
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children({"Name"}, {"Compute Objective Gradient"}, tStageNode);
+    auto tStageInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageInputNode);
+
+    XMLGen::append_filter_control_operation(tStageNode);
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
+    else
     {
-        auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Compute Objective Gradient ID-") + tObjective.name;
-        XMLGen::append_children({"Name", "Type"}, {tStageName, tObjective.category()}, tStageNode);
-        auto tStageInputNode = tStageNode.append_child("Input");
-        XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageInputNode);
-        XMLGen::append_filter_control_operation(tStageNode);
-
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
-        else
+        for(auto& tObjective : aXMLMetaData.objectives)
             XMLGen::append_objective_gradient_operation(tObjective, tStageNode);
-
-        auto tSharedDataName = std::string("Objective Gradient ID-") + tObjective.name;
-
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
-
-        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
-        auto tStageOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tStageOutputNode);
+        if(aXMLMetaData.objectives.size() > 1)
+            XMLGen::append_aggregate_operation("Field", "Objective Gradient", aXMLMetaData, tStageNode);
     }
+
+    auto tSharedDataName = std::string("Objective Gradient");
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
+
+    // append filter gradient operation
+    if(aXMLMetaData.objectives.size() > 1 || XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tSharedDataName, tStageNode);
+    else
+    {
+        auto tInputSharedDataName = std::string("Objective Gradient ID-") + aXMLMetaData.objectives[0].name;
+        XMLGen::append_filter_criterion_gradient_operation(tInputSharedDataName, tSharedDataName, tStageNode);
+    }
+
+    // append objective value stage output metadata
+    auto tStageOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tStageOutputNode);
 }
 /******************************************************************************/
 
@@ -641,22 +686,39 @@ void append_objective_shared_data
             + "Plato optimization problems must have at least one objective function defined.")
     }
 
-    for(auto& tObjective : aXMLMetaData.objectives)
+    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
     {
-        // shared data - deterministic criterion value
-        auto tTag = std::string("Objective Value ID-") + tObjective.name;
-        auto tOwnerName = aOwnerName.empty() ? tObjective.mPerformerName : aOwnerName;
+        for(auto& tObjective : aXMLMetaData.objectives)
+        {
+            // shared data - deterministic criterion value
+            auto tTag = std::string("Objective Value ID-") + tObjective.name;
+            auto tOwnerName = aOwnerName.empty() ? tObjective.mPerformerName : aOwnerName;
+            std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
+            std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
+            auto tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+
+            // shared data - deterministic criterion gradient
+            tTag = std::string("Objective Gradient ID-") + tObjective.name;
+            tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
+            tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
+    }
+
+    // shared data for aggregated/filtered values and gradients
+    if(aXMLMetaData.objectives.size() > 1 || XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
         std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
-        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
+        std::vector<std::string> tValues = {"Objective Value", "Scalar", "Global", "1", "platomain", "platomain" };
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
-
-        // shared data - deterministic criterion gradient
-        tTag = std::string("Objective Gradient ID-") + tObjective.name;
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
-        tSharedDataNode = aDocument.append_child("SharedData");
-        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
     }
+
+    std::vector<std::string> tKeys = { "Name", "Type", "Layout", "OwnerName", "UserName" };
+    std::vector<std::string> tValues = { "Objective Gradient", "Scalar", "Nodal Field", "platomain", "platomain" };
+    auto tSharedDataNode = aDocument.append_child("SharedData");
+    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 }
 // function append_objective_shared_data
 /******************************************************************************/
@@ -725,7 +787,8 @@ void append_filter_control_operation
 
 /******************************************************************************/
 void append_filter_criterion_gradient_operation
-(const std::string& aSharedDataName,
+(const std::string& aInputSharedDataName,
+ const std::string& aOutputSharedDataName,
  pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
@@ -733,9 +796,9 @@ void append_filter_criterion_gradient_operation
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
     tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", aSharedDataName}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", aInputSharedDataName}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aSharedDataName}, tOutputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aOutputSharedDataName}, tOutputNode);
 }
 // function append_filter_criterion_gradient_operation
 /******************************************************************************/
@@ -900,7 +963,7 @@ void append_constraint_gradient_stage
         XMLGen::append_filter_control_operation(tStageNode);
         tGradOperationInterface.call(tConstraint, tStageNode);
         auto tSharedDataName = std::string("Constraint Gradient ID-") + tConstraint.name();
-        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tStageNode);
+        XMLGen::append_filter_criterion_gradient_operation(tSharedDataName, tSharedDataName, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
         XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
@@ -1103,18 +1166,21 @@ void append_optimization_objective_options
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""} };
 
-    for (auto &tObjective : aXMLMetaData.objectives)
+    if(aXMLMetaData.objectives.size() > 1 || XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        tKeyToValueMap.find("ValueName")->second = std::string("Objective Value");
+    else
     {
-        tKeyToValueMap.find("ValueName")->second = std::string("Objective Value ID-") + tObjective.name;
-        tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Objective Value ID-") + tObjective.name;
-        tKeyToValueMap.find("GradientName")->second = std::string("Objective Gradient ID-") + tObjective.name;
-        tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Objective Gradient ID-") + tObjective.name;
-
-        auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
-        auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
-        auto tNode = aParentNode.append_child("Objective");
-        XMLGen::append_children(tKeys, tValues, tNode);
+        auto tValueName = std::string("Objective Value ID-") + aXMLMetaData.objectives[0].name;
+        tKeyToValueMap.find("ValueName")->second = tValueName;
     }
+    tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Objective Value");
+    tKeyToValueMap.find("GradientName")->second = std::string("Objective Gradient");
+    tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Objective Gradient");
+
+    auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
+    auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
+    auto tNode = aParentNode.append_child("Objective");
+    XMLGen::append_children(tKeys, tValues, tNode);
 }
 // function append_optimization_objective_options
 /******************************************************************************/

@@ -27,6 +27,7 @@ void write_plato_main_operations_xml_file
 
     XMLGen::append_filter_options_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_aggregator_operation(aMetaData, tDocument);
     XMLGen::append_initialize_field_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_set_lower_bounds_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_set_upper_bounds_to_plato_main_operation(aMetaData, tDocument);
@@ -290,6 +291,49 @@ void append_output_to_plato_main_operation
     XMLGen::append_stochastic_qoi_to_output_operation(aXMLMetaData, tOperation);
     XMLGen::append_deterministic_qoi_to_output_operation(aXMLMetaData, tOperation);
     XMLGen::append_surface_extraction_to_output_operation(aXMLMetaData, tOperation);
+}
+// function append_output_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_aggregator_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument)
+{
+    if(aXMLMetaData.objectives.size() > 1)
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name"}, {"Aggregator", "AggregateEnergy"}, tOperation);
+        auto tAggregateNode = tOperation.append_child("Aggregate");
+        XMLGen::append_children({"Layout"}, {"Value"}, tAggregateNode);
+
+        for(auto tObjective : aXMLMetaData.objectives)
+        {
+            auto tInputNode = tAggregateNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName"}, {"Value " + tObjective.name}, tInputNode);
+        }
+
+        auto tOutputNode = tAggregateNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Value"}, tOutputNode);
+
+        tAggregateNode = tOperation.append_child("Aggregate");
+        XMLGen::append_children({"Layout"}, {"Nodal Field"}, tAggregateNode);
+        for(auto tObjective : aXMLMetaData.objectives)
+        {
+            auto tInputNode = tAggregateNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName"}, {"Field " + tObjective.name}, tInputNode);
+        }
+
+        tOutputNode = tAggregateNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Field"}, tOutputNode);
+
+        tOperation.append_child("Weighting");
+        for(auto tObjective : aXMLMetaData.objectives)
+        {
+            auto tInputNode = tAggregateNode.append_child("Weight");
+            XMLGen::append_children({"Value"}, {tObjective.weight}, tInputNode);
+        }
+    }
 }
 // function append_output_to_plato_main_operation
 /******************************************************************************/

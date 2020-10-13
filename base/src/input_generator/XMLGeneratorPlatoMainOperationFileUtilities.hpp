@@ -151,6 +151,17 @@ void append_output_to_plato_main_operation
  pugi::xml_document &aDocument);
 
 /******************************************************************************//**
+ * \fn append_aggregator_operation
+ * \brief Append Plato main aggregator operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_aggregator_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument);
+
+
+/******************************************************************************//**
  * \fn append_stochastic_objective_value_to_plato_main_operation
  * \brief Append stochastic objective value operation to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data

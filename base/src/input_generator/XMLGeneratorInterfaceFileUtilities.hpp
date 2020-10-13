@@ -222,7 +222,8 @@ void append_filter_control_operation
  * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_filter_criterion_gradient_operation
-(const std::string& aSharedDataName,
+(const std::string& aInputSharedDataName,
+ const std::string& aOutputSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
