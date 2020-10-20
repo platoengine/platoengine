@@ -263,3 +263,4 @@ if( XTK_ENABLED )
     set(XTK_Libs ${XTK_COM_Libs} ${XTK_MTK_Libs} CACHE FILEPATH "List of library paths." )
 endif()
 
+add_subdirectory(share)
