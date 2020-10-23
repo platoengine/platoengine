@@ -41,40 +41,64 @@
  */
 
 /*
- * Plato_Operations_incl.hpp
+ * Plato_CSMParameterOutput.cpp
  *
- *  Created on: Jun 27, 2019
+ *  Created on: October 10, 2020
  */
 
-#pragma once
+#include <string>
+#include <cstdio>
+#include <cstdlib>
 
-#include "Plato_Filter.hpp"
-#include "Plato_Roughness.hpp"
-#include "Plato_SystemCall.hpp"
-#include "Plato_Aggregator.hpp"
-#include "Plato_DesignVolume.hpp"
-#include "Plato_EnforceBounds.hpp"
-#include "Plato_UpdateProblem.hpp"
-#include "Plato_ComputeVolume.hpp"
-#include "Plato_CSMMeshOutput.hpp"
-#include "Plato_SetUpperBounds.hpp"
-#include "Plato_SetLowerBounds.hpp"
-#include "Plato_PlatoMainOutput.hpp"
-#include "Plato_InitializeField.hpp"
-#include "Plato_InitializeValues.hpp"
-#include "Plato_WriteGlobalValue.hpp"
+#include "PlatoApp.hpp"
 #include "Plato_CSMParameterOutput.hpp"
 #include "Plato_OperationsUtilities.hpp"
-#include "Plato_NormalizeObjectiveValue.hpp"
-#include "Plato_MeanPlusVarianceMeasure.hpp"
-#include "Plato_MeanPlusVarianceGradient.hpp"
-#include "Plato_ReciprocateObjectiveValue.hpp"
-#include "Plato_NormalizeObjectiveGradient.hpp"
-#include "Plato_ReciprocateObjectiveGradient.hpp"
 
-#ifdef GEOMETRY
-#include "Plato_MapMLSField.hpp"
-#include "Plato_MetaDataMLS.hpp"
-#include "Plato_ComputeMLSField.hpp"
-#include "Plato_InitializeMLSPoints.hpp"
-#endif
+namespace Plato
+{
+
+CSMParameterOutput::CSMParameterOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
+        Plato::LocalOp(aPlatoApp)
+{
+    for(Plato::InputData tInputNode : aNode.getByName<Plato::InputData>("Input"))
+    {
+        mInputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
+    }
+}
+
+CSMParameterOutput::~CSMParameterOutput()
+{
+}
+
+void CSMParameterOutput::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
+{
+    for(auto& tInputName : mInputNames) {
+        aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, tInputName));
+    }
+}
+
+void CSMParameterOutput::operator()()
+{
+    int tMyRank = 0;
+    MPI_Comm_rank(mPlatoApp->getComm(), &tMyRank);
+    if(tMyRank == 0)
+    {
+        FILE *fp=fopen("CSMParams.txt", "a");
+        if(fp)
+        {
+            for(size_t j=0; j<mInputNames.size(); ++j)
+            {
+                auto tInputArgument = mPlatoApp->getValue(mInputNames[j]);
+                for(size_t i=0; i<tInputArgument->size(); ++i)
+                {
+                    double tCurValue = tInputArgument->data()[i];
+                    fprintf(fp, "%lf ", tCurValue);
+                }
+            }
+            fprintf(fp, "\n");
+            fclose(fp);
+        }
+    }
+}
+
+}

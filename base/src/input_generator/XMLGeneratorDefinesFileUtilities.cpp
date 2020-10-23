@@ -239,7 +239,7 @@ allocate_map_from_random_load_identifier_to_load_samples
         if(tLoad.mIsRandom)
         {
             auto tIdentifier = tIdentifierInterface.call(tLoad);
-            for (auto &tValue : tLoad.values)
+            for (size_t i=0; i<tLoad.values.size(); ++i)
             {
                 tOutput[tIdentifier].push_back({});
             }

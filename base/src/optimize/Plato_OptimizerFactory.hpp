@@ -55,6 +55,7 @@
 #include "Plato_DiagnosticsInterface.hpp"
 #include "Plato_ParticleSwarmEngineBCPSO.hpp"
 #include "Plato_ParticleSwarmEngineALPSO.hpp"
+#include "Plato_SOParameterStudiesInterface.hpp"
 #include "Plato_OptimalityCriteriaInterface.hpp"
 #include "Plato_MethodMovingAsymptotesEngine.hpp"
 #include "Plato_KelleySachsBoundConstrainedInterface.hpp"
@@ -184,6 +185,12 @@ public:
            tOptimizer = new Plato::DiagnosticsInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
+       else if( tOptPackage == "SOParameterStudies" )
+       {
+         try {
+           tOptimizer = new Plato::SOParameterStudiesInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+         } catch(...){aInterface->Catch();}
+       }
        else
        {
            std::stringstream tStringStream;
@@ -198,6 +205,7 @@ public:
            << "\t BCPSO ... Bound Constrained Particle Swarm Optimization\n"
            << "\t ALPSO ... Augmented Lagrangian Particle Swarm Optimization\n"
            << "\t DerivativeChecker ... Derivative Checker Toolkit\n"
+           << "\t SOParameterStudies ... Shape Optimization Parameter Study Toolkit\n"
 #ifdef ENABLE_ROL
            << "\t ROL KSAL... Rapid Optimization Library Kelley Sachs Augmented Lagrangian\n"
            << "\t ROL KSBC... Rapid Optimization Library Kelley Sachs Bound Constrained\n"
