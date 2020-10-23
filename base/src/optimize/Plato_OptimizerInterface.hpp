@@ -69,6 +69,7 @@ struct optimizer
         STOCHASTIC_REDUCED_ORDER_MODEL = 10,
         PARTICLE_SWARM_OPTMIZATION_ALPSO = 11,
         PARTICLE_SWARM_OPTMIZATION_BCPSO = 12,
+        SO_PARAMETER_STUDIES = 13,
     }; // enum algorithm_t
 
 };

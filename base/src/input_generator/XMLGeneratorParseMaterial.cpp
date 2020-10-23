@@ -211,7 +211,6 @@ void ParseMaterial::checkNames()
     {
         if (tMaterial.name().empty())
         {
-            auto tIndex = &tMaterial - &mData[0] + 1u;
             auto tName = "material_" + tMaterial.id();
             tMaterial.name(tName);
         }

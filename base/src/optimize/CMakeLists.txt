@@ -139,7 +139,8 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_Vector.hpp
                         Plato_Diagnostics.hpp
                         Plato_DiagnosticsInterface.hpp
-                        Plato_PlotObjective.hpp
+                        Plato_SOParameterStudies.hpp
+                        Plato_SOParameterStudiesInterface.hpp
                         Plato_DistributedVector.hpp
                         Plato_OptimizerInterface.hpp
                         Plato_EpetraSerialDenseVector.hpp
