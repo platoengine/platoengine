@@ -1,0 +1,10 @@
+#!python
+cubit.cmd('import mesh "/home/bwclark/spack2/platoengine/examples/PruneAndRefine3/prune2.exo" no_geom')
+cubit.cmd('list totals')
+cubit.cmd('reset')
+cubit.cmd('import mesh "/home/bwclark/spack2/platoengine/examples/PruneAndRefine3/PruneAndRefine3.ref.exo" no_geom')
+cubit.cmd('reset')
+cubit.cmd('import mesh "/home/bwclark/spack2/platoengine/RELEASE/examples/PruneAndRefine3/prune2_pruned.exo" no_geom')
+cubit.cmd('list totals')
+cubit.cmd('reset')
+cubit.cmd('import mesh "/home/bwclark/spack2/platoengine/examples/PruneAndRefine3/PruneAndRefine3.ref.exo" no_geom')

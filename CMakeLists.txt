@@ -150,6 +150,11 @@ if( ENABLE_ISO )
   add_definitions(-DENABLE_ISO)
 endif()
 
+if( ENABLE_PRUNE )
+  message( "-- Compiling Plato prune and refine " )
+  add_definitions(-DENABLE_PRUNE)
+endif()
+
 if( XTK_ENABLED )
     message( "\n-- Including XTK \n" )
     add_definitions( -DXTK_ENABLED )
@@ -199,6 +204,11 @@ endif()
 
 if( ENABLE_ISO )
   add_subdirectory(base/src/iso/main)
+endif()
+
+if( ENABLE_PRUNE )
+  add_subdirectory(base/src/prune/main)
+  add_subdirectory(base/src/prune)
 endif()
 
 if( ESP_ENABLED )

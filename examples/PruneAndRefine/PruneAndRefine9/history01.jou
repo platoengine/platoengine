@@ -1,0 +1,2 @@
+#!python
+cubit.cmd('import mesh "/home/bwclark/spack2/platoengine/examples/PruneAndRefine9/PruneAndRefine9.ref.exo" no_geom')
