@@ -2044,6 +2044,12 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
       m_InputData.restart_iteration = "1";
       m_InputData.initial_guess_field_name = "optimizationdofs";
     }
+    else if(m_InputData.initial_guess_filename == "" &&
+            m_InputData.initial_guess_field_name != "")
+    {
+      m_InputData.initial_guess_filename = "restart_" + m_InputData.restart_iteration + ".exo";
+      m_InputData.restart_iteration = "1";
+    }
     else
     {
       // This block indicates that the user is manually setting up the
