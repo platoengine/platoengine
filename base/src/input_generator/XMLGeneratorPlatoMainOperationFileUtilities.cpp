@@ -225,9 +225,9 @@ void append_children_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations"};
+    std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations", "RestartFieldName"};
     std::vector<std::string> tValues = {"PlatoMainOutput", "PlatoMainOutput", aXMLMetaData.write_restart_file,
-        aXMLMetaData.output_frequency, aXMLMetaData.max_iterations};
+        aXMLMetaData.output_frequency, aXMLMetaData.max_iterations, aXMLMetaData.initial_guess_field_name};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
 }

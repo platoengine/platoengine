@@ -152,6 +152,7 @@ IF( ENABLE_PRUNE )
 # this is not working using the percept in trilinos (it does work using the percept in Sierra). 
 # I have asked Brian Carnes about it. 
 #  add_subdirectory(PruneAndRefine/PruneAndRefine21)
+  add_subdirectory(PruneAndRefine/PruneAndRefine22)
 ENDIF()
 
 IF( PLATO_ENABLE_SERVICES_PYTHON AND EXPY AND GEOMETRY )

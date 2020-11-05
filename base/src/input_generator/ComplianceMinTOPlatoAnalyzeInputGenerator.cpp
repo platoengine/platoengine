@@ -647,6 +647,11 @@ void ComplianceMinTOPlatoAnalyzeInputGenerator::addPlatoMainOutputOperation(pugi
         }
     }
 
+    if(m_InputData.write_restart_file == "True")
+    {
+        if(m_InputData.initial_guess_field_name.size() > 0)
+            addChild(tmp_node, "RestartFieldName", m_InputData.initial_guess_field_name);
+    }
     addChild(tmp_node, "WriteRestart", m_InputData.write_restart_file);
     addChild(tmp_node, "OutputFrequency", m_InputData.output_frequency);
     addChild(tmp_node, "MaxIterations", m_InputData.max_iterations);
