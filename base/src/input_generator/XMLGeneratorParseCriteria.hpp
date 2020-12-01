@@ -34,13 +34,6 @@ private:
     void setCriterionType(XMLGen::Criterion& aMetadata);
 
     /******************************************************************************//**
-     * \fn setCriterionParameters
-     * \brief Set criterion parameter, throw error if not defined.
-     * \param [in/out] aInputFile parsed input metadata
-    **********************************************************************************/
-    void setCriterionParameters(XMLGen::Criterion& aMetadata);
-
-    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set XMLGen::Criterion metadata.
      * \param [in/out] aInputFile parsed input metadata

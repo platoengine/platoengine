@@ -17,14 +17,14 @@ void append_mesh_metadata_to_plato_main_input_deck
 (const XMLGen::InputData &aInputData,
  pugi::xml_node &aDocument)
 {
-    if (aInputData.run_mesh_name.empty())
+    if (aInputData.mesh.run_name.empty())
     {
         THROWERR("Append Mesh Metadata To Plato Main Input Deck: Run mesh name in XMLGen::InputData is empty.");
     }
 
     auto tMesh = aDocument.append_child("mesh");
     std::vector<std::string> tKeys = { "type", "format", "ignore_node_map", "ignore_element_map", "mesh" };
-    std::vector<std::string> tValues = { "unstructured", "exodus", "true", "true", aInputData.run_mesh_name };
+    std::vector<std::string> tValues = { "unstructured", "exodus", "true", "true", aInputData.mesh.run_name };
     XMLGen::append_children(tKeys, tValues, tMesh);
     XMLGen::append_block_metadata_to_mesh_node(aInputData, tMesh);
 }

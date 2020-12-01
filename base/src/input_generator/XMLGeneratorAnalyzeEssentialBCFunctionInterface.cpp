@@ -187,12 +187,6 @@ void AppendEssentialBoundaryCondition::call
  const XMLGen::BC& aBC,
  pugi::xml_node& aParentNode) const
 {
-    auto tLowerPerformer = Plato::tolower(aBC.mCode);
-    if(tLowerPerformer.compare("plato_analyze") != 0)
-    {
-        return;
-    }
-
     auto tCategory = Plato::tolower(aBC.mCategory);
     auto tMapItr = mMap.find(tCategory);
     if(tMapItr == mMap.end())

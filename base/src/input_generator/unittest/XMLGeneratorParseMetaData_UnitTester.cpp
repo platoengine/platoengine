@@ -249,33 +249,6 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_NoCriterionType)
     ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, ParseCriteria_MissingRequiredParameter)
-{
-    std::string tStringInput =
-        "begin criterion 1\n"
-        "type stress_p-norm\n"
-        "end criterion\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseCriteria tCriteriaParser;
-    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-}
-
-TEST(PlatoTestXMLGenerator, ParseCriteria_InvalidParameterForCriteria)
-{
-    std::string tStringInput =
-        "begin criterion 1\n"
-        "type volume\n"
-        "stress_p_norm_exponent 3\n"
-        "end criterion\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseCriteria tCriteriaParser;
-    ASSERT_THROW(tCriteriaParser.parse(tInputSS), std::runtime_error);
-}
-
 TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
 {
     std::string tStringInput =
@@ -297,8 +270,6 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
     ASSERT_STREQ("true", tCriterionMetaData[0].value("normalize").c_str());
     ASSERT_STREQ("10", tCriterionMetaData[0].value("normalization_value").c_str());
 
-    auto tParameters = tCriterionMetaData[0].parameters();
-    ASSERT_EQ(0u, tParameters.size());
 }
 
 TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
@@ -320,8 +291,6 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
     ASSERT_STREQ("false", tCriterionMetaData[0].value("normalize").c_str());
     ASSERT_STREQ("1.0", tCriterionMetaData[0].value("normalization_value").c_str());
 
-    auto tParameters = tCriterionMetaData[0].parameters();
-    ASSERT_EQ(0u, tParameters.size());
 }
 
 TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
@@ -342,9 +311,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_StressPNorm)
     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
     ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
 
-    auto tParameters = tCriterionMetaData[0].parameters();
-    ASSERT_EQ(1u, tParameters.size());
-    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("stress_p_norm_exponent").c_str());
+    ASSERT_STREQ("3", tCriterionMetaData[0].value("stress_p_norm_exponent").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
@@ -375,15 +342,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
     ASSERT_STREQ("compliance", tCriterionMetaData[1].type().c_str());
     ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
 
-    auto tParameters = tCriterionMetaData[0].parameters();
-    ASSERT_EQ(1u, tParameters.size());
-    ASSERT_STREQ("3", tCriterionMetaData[0].parameter("stress_p_norm_exponent").c_str());
-
-    tParameters = tCriterionMetaData[1].parameters();
-    ASSERT_EQ(0u, tParameters.size());
-
-    tParameters = tCriterionMetaData[2].parameters();
-    ASSERT_EQ(0u, tParameters.size());
+    ASSERT_STREQ("3", tCriterionMetaData[0].value("stress_p_norm_exponent").c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseMaterial_ErrorEmptyMaterialBlock)
@@ -530,7 +489,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyCriterion)
         "begin constraint\n"
         "   service 1\n"
         "   scenario 1\n"
-        "   target 0.5\n"
+        "   relative_target 0.5\n"
         "end constraint\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -545,7 +504,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyService)
         "begin constraint\n"
         "   criterion 1\n"
         "   scenario 1\n"
-        "   target 0.5\n"
+        "   relative_target 0.5\n"
         "end constraint\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -554,13 +513,14 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyService)
     ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
 }
 
+/* commenting out because we may not always need a scenario in a constraint
 TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyScenario)
 {
     std::string tStringInput =
         "begin constraint\n"
         "   criterion 1\n"
         "   service 1\n"
-        "   target 0.5\n"
+        "   relative_target 0.5\n"
         "end constraint\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -568,6 +528,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyScenario)
     XMLGen::ParseConstraint tConstraintParser;
     ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
 }
+*/
 
 TEST(PlatoTestXMLGenerator, ParseConstraint_EmptyTarget)
 {
@@ -589,7 +550,8 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_EmptyTarget)
         ASSERT_STREQ("1", tConstraint.criterion().c_str());
         ASSERT_STREQ("1", tConstraint.service().c_str());
         ASSERT_STREQ("1", tConstraint.scenario().c_str());
-        ASSERT_STREQ("0.0", tConstraint.target().c_str());
+        ASSERT_STREQ("", tConstraint.relativeTarget().c_str());
+        ASSERT_STREQ("", tConstraint.absoluteTarget().c_str());
     }
 }
 
@@ -600,7 +562,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
         "   criterion 1\n"
         "   service 1\n"
         "   scenario 1\n"
-        "   target 0.5\n"
+        "   relative_target 0.5\n"
         "end constraint\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -614,7 +576,7 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_Default)
         ASSERT_STREQ("1", tConstraint.criterion().c_str());
         ASSERT_STREQ("1", tConstraint.service().c_str());
         ASSERT_STREQ("1", tConstraint.scenario().c_str());
-        ASSERT_STREQ("0.5", tConstraint.target().c_str());
+        ASSERT_STREQ("0.5", tConstraint.relativeTarget().c_str());
     }
 }
 

@@ -26,7 +26,6 @@ private:
     std::string mID; /*!< criterion identification number */
     std::string mType;  /*!< criterion type */
     std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
-    std::unordered_map<std::string, std::string> mParameters; /*!< list of criterion parameters, map< tag, value> */
 
 public:
     /******************************************************************************//**
@@ -100,51 +99,66 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn parameter
-     * \brief If criterion parameter is defined, return its value; else, throw an error.
-     * \param [in] aTag criterion parameter
-     * \return criterion parameter value
-    **********************************************************************************/
-    std::string parameter(const std::string& aTag) const
+     * \fn materialPenaltyExponent
+     * \brief Set string value for keyword 'material_penalty_exponent'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void materialPenaltyExponent(const std::string& aInput)
     {
-        auto tTag = Plato::tolower(aTag);
-        auto tItr = mParameters.find(tTag);
-        if(tItr == mParameters.end())
-        {
-            THROWERR(std::string("XML Generator Criterion: Criterion parameter '") + aTag + "' is not defined.")
-        }
-        return (tItr->second);
+        this->append("material_penalty_exponent", aInput);
     }
 
     /******************************************************************************//**
-     * \fn parameter
-     * \brief Set criterion parameter value.
-     * \param [in] aTag       criterion parameter
-     * \param [in] aValue     criterion parameter value
-     * \param [in] aAttribute criterion attribute 
-    **********************************************************************************/
-    void parameter(const std::string& aTag, const std::string& aValue)
+     * \fn materialPenaltyExponent
+     * \brief Return string value for keyword 'material_penalty_exponent'.
+     * \return value
+     **********************************************************************************/
+    std::string materialPenaltyExponent() const
     {
-        if(aTag.empty()) { THROWERR("XML Generator Criterion: Criterion parameter tag is empty.") }
-        if(aValue.empty()) { THROWERR("XML Generator Criterion: Criterion parameter value is empty.") }
-        auto tTag = Plato::tolower(aTag);
-        mParameters[aTag] = aValue;
+        return (this->value("material_penalty_exponent"));
     }
 
     /******************************************************************************//**
-     * \fn parameters
-     * \brief Return list of criterion parameters
-     * \return criterion parameters
-    **********************************************************************************/
-    std::vector<std::string> parameters() const
+     * \fn minErsatzMaterialConstant
+     * \brief Set string value for keyword 'minimum_ersatz_material_value'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void minErsatzMaterialConstant(const std::string& aInput)
     {
-        std::vector<std::string> tTags;
-        for(auto& tParameter : mParameters)
-        {
-            tTags.push_back(tParameter.first);
-        }
-        return tTags;
+        this->append("minimum_ersatz_material_value", aInput);
     }
+
+    /******************************************************************************//**
+     * \fn minErsatzMaterialConstant
+     * \brief Return string value for keyword 'minimum_ersatz_material_value'.
+     * \return value
+     **********************************************************************************/
+    std::string minErsatzMaterialConstant() const
+    {
+        return (this->value("minimum_ersatz_material_value"));
+    }
+
+    /******************************************************************************//**
+     * \fn pnormExponent
+     * \brief Set string value for keyword 'pnorm_exponent'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void pnormExponent(const std::string& aInput)
+    {
+        this->append("stress_p_norm_exponent", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn pnormExponent
+     * \brief Return string value for keyword 'pnorm_exponent'.
+     * \return value
+     **********************************************************************************/
+    std::string pnormExponent() const
+    {
+        return (this->value("stress_p_norm_exponent"));
+    }
+
+
 };
 // struct Criterion
 

@@ -116,18 +116,60 @@ public:
     **********************************************************************************/
     std::string scenario() const;
     /******************************************************************************//**
-     * \fn target
-     * \brief Set string value for keyword 'target'.
+     * \fn relativeTarget
+     * \brief Set string value for keyword 'relative_target'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void target(const std::string& aInput);
+    void relativeTarget(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn target
-     * \brief Return string value for keyword 'target'.
+     * \fn relativeTarget
+     * \brief Return string value for keyword 'relative_target'.
      * \return output string
     **********************************************************************************/
-    std::string target() const;
+    std::string relativeTarget() const;
+
+    /******************************************************************************//**
+     * \fn absoluteTarget
+     * \brief Set string value for keyword 'absolute_target'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void absoluteTarget(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn absoluteTarget
+     * \brief Return string value for keyword 'absolute_target'.
+     * \return output string
+    **********************************************************************************/
+    std::string absoluteTarget() const;
+
+    /******************************************************************************//**
+     * \fn name
+     * \brief Set string value for keyword 'name'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void name(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn name
+     * \brief Return string value for keyword 'name'.
+     * \return output string
+    **********************************************************************************/
+    std::string name() const;
+
+    /******************************************************************************//**
+     * \fn weight
+     * \brief Set string value for keyword 'weight'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void weight(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn weight
+     * \brief Return string value for keyword 'weight'.
+     * \return value
+     **********************************************************************************/
+    std::string weight() const;
 };
 // struct Constraint
 

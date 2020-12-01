@@ -12,7 +12,7 @@ namespace XMLGen
     void append_analyze_mpirun_lines(const XMLGen::InputData& aInputData, FILE*& fp);
     void generate_mpirun_launch_script(const XMLGen::InputData& aInputData);
 
-    void append_analyze_mpirun_commands_robust_optimization_problems
-    (const XMLGen::InputData& aInputData,
-     FILE*& aFile);
+//    void append_analyze_mpirun_commands_robust_optimization_problems
+//    (const XMLGen::InputData& aInputData,
+//     FILE*& aFile);
 }

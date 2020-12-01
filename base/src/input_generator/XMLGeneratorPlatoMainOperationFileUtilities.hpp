@@ -385,5 +385,15 @@ void append_set_upper_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_aggregate_data_to_plato_main_operation
+ * \brief Append aggregate data operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_aggregate_data_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen

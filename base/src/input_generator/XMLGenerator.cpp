@@ -70,7 +70,8 @@
 // #include "Plato_FreeFunctions.hpp"
 #include "XMLG_Macros.hpp"
 
-// #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
+//#include "XMLGeneratorProblem.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
@@ -104,8 +105,8 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
         m_InputData()
 /******************************************************************************/
 {
-  // m_InputData.m_UseLaunch = use_launch;
-  // m_InputData.m_Arch = arch;
+  m_InputData.m_UseLaunch = use_launch;
+  m_InputData.m_Arch = arch;
   m_InputData.optimizer.m_filterType_identity_generatorName = "identity";
   m_InputData.optimizer.m_filterType_kernel_generatorName = "kernel";
   m_InputData.optimizer.m_filterType_kernelThenHeaviside_generatorName = "kernel then heaviside";
@@ -128,16 +129,19 @@ XMLGenerator::~XMLGenerator()
 //  * \fn writeInputFiles
 //  * \brief Write input files, i.e. write all the XML files needed by Plato.
 // **********************************************************************************/
-// void XMLGenerator::writeInputFiles()
-// {
-//     XMLGen::Analyze::write_optimization_problem(m_InputData);
-// }
+void XMLGenerator::writeInputFiles()
+{
+    XMLGen::Analyze::write_optimization_problem(m_InputData);
+    //XMLGen::Problem::write_optimization_problem(m_InputData);
+}
 
 /******************************************************************************/
 void XMLGenerator::generate()
 /******************************************************************************/
 {
     this->parseInputFile();
+
+    m_InputData.generateMeaningfulNames();
 
     // this->getUncertaintyFlags();
 
@@ -147,7 +151,7 @@ void XMLGenerator::generate()
     //     return false;
     // }
 
-    // this->writeInputFiles();
+    this->writeInputFiles();
 }
 
 // /******************************************************************************/
@@ -233,7 +237,7 @@ void XMLGenerator::parseServices(std::istream &aInputFile)
     XMLGen::ParseService tParseService;
     tParseService.parse(aInputFile);
     auto tServices = tParseService.data();
-    m_InputData.services = tServices;
+    m_InputData.set(tServices);
 }
 
 /******************************************************************************/
@@ -331,7 +335,7 @@ bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
       return_status = parsePressureLoad(tokens,new_load);
     else if(!new_load.type.compare("acceleration"))
       return_status = parseAccelerationLoad(tokens,new_load);
-    else if(!new_load.type.compare("heat"))
+    else if(!new_load.type.compare("heat_flux"))
       return_status = parseHeatFluxLoad(tokens,new_load);
     else if(!new_load.type.compare("force"))
       return_status = parseForceLoad(tokens,new_load);
@@ -487,53 +491,45 @@ bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGe
 bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
 /******************************************************************************/
 {
-  size_t tMin_parameters = 9;
-  if(tokens.size() < tMin_parameters)
-  {
-    std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"traction\" load.\n";
-    return false;
-  }
-  size_t tTokenIndex = 0;
-  if(!tokens[++tTokenIndex].compare("flux"))
-  {
-      new_load.app_type = tokens[++tTokenIndex];
-      if(new_load.app_type != "sideset")
-      {
-          std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
-          return false;
-      }
+    size_t tMin_parameters = 8;
+    if(tokens.size() < tMin_parameters)
+    {
+        std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"heat_flux\" load.\n";
+        return false;
+    }
+    size_t tTokenIndex = 0;
+    new_load.app_type = tokens[++tTokenIndex];
+    if(new_load.app_type != "sideset")
+    {
+        std::cout << "ERROR:XMLGenerator:parseLoads: Heat flux can only be specified on sidesets currently.\n";
+        return false;
+    }
 
-      if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-      {
+    if(parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
+    {
         if(!parseMeshSetNameOrID(tTokenIndex,tokens,new_load))
-          --tTokenIndex;
-      }
-      else
-      {
+            --tTokenIndex;
+    }
+    else
+    {
         new_load.app_name = "";
         new_load.app_id = tokens[tTokenIndex];
-      }
+    }
 
-      if(tokens[++tTokenIndex] != "value")
-      {
-          std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
-          return false;
-      }
-      new_load.values.push_back(tokens[++tTokenIndex]);
-      if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
-      {
-          std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
-          return false;
-      }
-      new_load.load_id = tokens[++tTokenIndex];
-  }
-  else
-  {
-      std::cout << "ERROR:XMLGenerator:parseLoads: \"flux\" keyword must follow \"heat\" keyword.\n";
-      return false;
-  }
+    if(tokens[++tTokenIndex] != "value")
+    {
+        std::cout << "ERROR:XMLGenerator:parseLoads: 'value' keyword not specified after sideset id\n";
+        return false;
+    }
+    new_load.values.push_back(tokens[++tTokenIndex]);
+    if(tokens[++tTokenIndex] != "load" || tokens[++tTokenIndex] != "id")
+    {
+        std::cout << "ERROR:XMLGenerator:parseLoads: \"load id\" keywords not specified after value components.\n";
+        return false;
+    }
+    new_load.load_id = tokens[++tTokenIndex];
 
-  return true;
+    return true;
 }
 
 /******************************************************************************/
@@ -1561,15 +1557,6 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                 m_InputData.optimizer.fixed_nodeset_ids.push_back(tokens[j]);
               }
             }
-            else if(parseSingleValue(tokens, tInputStringList = {"number","processors"}, tStringValue))
-            {
-              if(tStringValue == "")
-              {
-                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"number processors\" keyword(s).\n";
-                return false;
-              }
-              m_InputData.optimizer.num_opt_processors = tStringValue;
-            }
             else if(parseSingleValue(tokens, tInputStringList = {"filter","type"}, tStringValue))
             {
               // retrieve input
@@ -2190,7 +2177,7 @@ void XMLGenerator::parseCriteria(std::istream &aInput)
 {
     XMLGen::ParseCriteria tParseCriteria;
     tParseCriteria.parse(aInput);
-    m_InputData.criteria = tParseCriteria.data();
+    m_InputData.set(tParseCriteria.data());
 }
 
 /******************************************************************************/
@@ -2269,25 +2256,25 @@ void XMLGenerator::parseInputFile()
   this->parseScenarios(tInputFile);
   tInputFile.close();
 
-  // // If we will need to run the prune_and_refine executable for any
-  // // reason we need to have our "run" mesh name not be the same
-  // // as the input mesh name.
-  // int tNumRefines = 0;
-  // if(m_InputData.number_refines != "")
-  //   tNumRefines = std::atoi(m_InputData.number_refines.c_str());
-  // if(tNumRefines > 0 ||
-  //     (m_InputData.initial_guess_filename != "" && m_InputData.initial_guess_field_name != ""))
-  // {
-  //   m_InputData.run_mesh_name_without_extension = m_InputData.mesh_name_without_extension + "_mod";
-  //   m_InputData.run_mesh_name = m_InputData.run_mesh_name_without_extension;
-  //   if(m_InputData.mesh_extension != "")
-  //     m_InputData.run_mesh_name += m_InputData.mesh_extension;
-  // }
-  // else
-  // {
-  //   m_InputData.run_mesh_name = m_InputData.mesh_name;
-  //   m_InputData.run_mesh_name_without_extension = m_InputData.mesh_name_without_extension;
-  // }
+    // If we will need to run the prune_and_refine executable for any
+    // reason we need to have our "run" mesh name not be the same
+    // as the input mesh name.
+    int tNumRefines = 0;
+    if(m_InputData.optimizer.number_refines != "")
+        tNumRefines = std::atoi(m_InputData.optimizer.number_refines.c_str());
+    if(tNumRefines > 0 ||
+        (m_InputData.optimizer.initial_guess_filename != "" && m_InputData.optimizer.initial_guess_field_name != ""))
+    {
+        m_InputData.mesh.run_name_without_extension = m_InputData.mesh.name_without_extension + "_mod";
+        m_InputData.mesh.run_name = m_InputData.mesh.run_name_without_extension;
+        if(m_InputData.mesh.file_extension != "")
+            m_InputData.mesh.run_name += m_InputData.mesh.file_extension;
+    }
+    else
+    {
+        m_InputData.mesh.run_name = m_InputData.mesh.name;
+        m_InputData.mesh.run_name_without_extension = m_InputData.mesh.name_without_extension;
+    }
 }
 
 /******************************************************************************/

@@ -96,7 +96,7 @@ void AppendNaturalBoundaryCondition::insert()
 
     // uniform surface flux
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_uniform_single_valued_load_to_plato_problem));
-    mMap.insert(std::make_pair("uniform surface flux",
+    mMap.insert(std::make_pair("heat_flux",
       std::make_pair((XMLGen::Analyze::NaturalBCFunc)XMLGen::Private::append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 }
 

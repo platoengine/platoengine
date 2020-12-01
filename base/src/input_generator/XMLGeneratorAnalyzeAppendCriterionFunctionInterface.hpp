@@ -46,9 +46,11 @@ private:
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // stress constrained mass minimization
+         /*
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stress_constrained_mass_minimization_criterion));
         mMap.insert(std::make_pair("stress constrained mass minimization",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_stress_constrained_mass_minimization_criterion, tFuncIndex)));
+*/
 
         // stress p-norm
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_pnorm_criterion<CriterionType>));
@@ -71,7 +73,7 @@ private:
         mMap.insert(std::make_pair("maximize heat conduction",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
-        mMap.insert(std::make_pair("thermal energy",
+        mMap.insert(std::make_pair("thermal_energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
 
         // thermo-elastic energy
@@ -118,13 +120,16 @@ public:
     **********************************************************************************/
     void call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {
+/* Code is not a member of Criterion and we should never get in here except for plato_analyze if
+ * things are being called correctly
         auto tLowerPerformer = Plato::tolower(aCriterion.code());
         if(tLowerPerformer.compare("plato_analyze") != 0)
         {
             return;
         }
+*/
 
-        auto tLowerCategory = Plato::tolower(aCriterion.category());
+        auto tLowerCategory = Plato::tolower(aCriterion.type());
         auto tMapItr = mMap.find(tLowerCategory);
         if(tMapItr == mMap.end())
         {

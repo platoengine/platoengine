@@ -175,7 +175,6 @@ void XMLGenerator_UnitTester::clearInputData()
     m_InputData.optimizer.filter_heaviside_min="";
     m_InputData.optimizer.filter_heaviside_max="";
     m_InputData.optimizer.filter_heaviside_update="";
-    m_InputData.optimizer.num_opt_processors="";
     m_InputData.optimizer.max_iterations="";
     m_InputData.optimizer.discretization="";
     m_InputData.codepaths.plato_main_path="";
@@ -249,4 +248,19 @@ std::string XMLGenerator_UnitTester::getBCApplicationDOF(const std::string &aBCI
         }
     }
     return "";
+}
+
+std::string XMLGenerator_UnitTester::getNumberProcessors()
+{
+    std::string tReturn = "";
+    for(auto tService : m_InputData.services())
+    {
+        // find the first platomain service
+        if(tService.code() == "platomain")
+        {
+            tReturn = tService.numberProcessors();
+            break;
+        }
+    }
+    return tReturn;
 }

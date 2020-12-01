@@ -1100,25 +1100,6 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.getFixedNodeset(1), "7");
     EXPECT_EQ(tester.getFixedNodeset(2), "33");
 
-    // number processors
-    stringInput = "begin optimization parameters\n"
-            "number processors\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), false);
-    stringInput = "begin optimization parameters\n"
-            "number processors 16\n"
-            "end optimization parameters\n";
-    iss.str(stringInput);
-    iss.clear();
-    iss.seekg (0);
-    tester.clearInputData();
-    EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getNumberProcessors(), "16");
-
     // filter scale
     stringInput = "begin optimization parameters\n"
             "filter radius scale\n"

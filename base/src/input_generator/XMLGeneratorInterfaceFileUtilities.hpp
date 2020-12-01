@@ -34,6 +34,16 @@ void append_physics_performers
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_performers
+ * \brief Append all performers to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_performers
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_qoi_shared_data
  * \brief Append quantities of interest shared data to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input metadata
@@ -139,7 +149,8 @@ void append_plato_main_output_stage
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_lower_bounds_shared_data
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_upper_bounds_shared_data
@@ -147,7 +158,8 @@ void append_lower_bounds_shared_data
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_upper_bounds_shared_data
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_design_volume_shared_data
@@ -155,7 +167,8 @@ void append_upper_bounds_shared_data
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_design_volume_shared_data
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_objective_shared_data
@@ -184,10 +197,12 @@ void append_constraint_shared_data
 /******************************************************************************//**
  * \fn append_control_shared_data
  * \brief Append control shared data to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_control_shared_data
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_plato_main_performer
@@ -213,7 +228,8 @@ void append_compute_qoi_statistics_operation
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_filter_control_operation
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_filter_criterion_gradient_operation
@@ -222,7 +238,8 @@ void append_filter_control_operation
  * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_filter_criterion_gradient_operation
-(const std::string& aSharedDataName,
+(const XMLGen::InputData& aXMLMetaData,
+ const std::string& aSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -231,7 +248,8 @@ void append_filter_criterion_gradient_operation
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_initial_field_operation
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_initial_guess_stage
@@ -239,7 +257,8 @@ void append_initial_field_operation
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_initial_guess_stage
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_lower_bound_operation
@@ -247,7 +266,8 @@ void append_initial_guess_stage
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_lower_bound_operation
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_lower_bound_stage
@@ -266,7 +286,8 @@ void append_lower_bound_stage
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_upper_bound_operation
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_upper_bound_stage
@@ -284,7 +305,8 @@ void append_upper_bound_stage
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_design_volume_operation
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_design_volume_stage
@@ -292,7 +314,28 @@ void append_design_volume_operation
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_design_volume_stage
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_aggregate_objective_value_operation
+ * \brief Append aggregate objective value operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_aggregate_objective_value_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_aggregate_objective_gradient_operation
+ * \brief Append aggregate objective gradient operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_aggregate_objective_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_constraint_value_stage

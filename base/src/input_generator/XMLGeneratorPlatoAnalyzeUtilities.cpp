@@ -59,7 +59,26 @@ bool is_any_constraint_computed_by_plato_analyze
     auto tAtLeastOnePerformerIsPlatoAnalyze = false;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if(XMLGen::is_plato_analyze_code(tConstraint.code()))
+        auto tService = aXMLMetaData.service(tConstraint.service());
+        if(XMLGen::is_plato_analyze_code(tService.code()))
+        {
+            tAtLeastOnePerformerIsPlatoAnalyze = true;
+            break;
+        }
+    }
+    return (tAtLeastOnePerformerIsPlatoAnalyze);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+bool is_any_objective_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData)
+{
+    auto tAtLeastOnePerformerIsPlatoAnalyze = false;
+    for(size_t i=0; i<aXMLMetaData.objective.serviceIDs.size(); i++)
+    {
+        auto tService = aXMLMetaData.service(aXMLMetaData.objective.serviceIDs[i]);
+        if(XMLGen::is_plato_analyze_code(tService.code()))
         {
             tAtLeastOnePerformerIsPlatoAnalyze = true;
             break;
@@ -77,9 +96,11 @@ return_constraints_computed_by_plato_analyze
     std::vector<std::string> tCategories;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if(tConstraint.code().compare("plato_analyze") == 0)
+        auto tService = aXMLMetaData.service(tConstraint.service());
+        if(tService.code().compare("plato_analyze") == 0)
         {
-            tCategories.push_back(tConstraint.category());
+            auto tCriterion = aXMLMetaData.criterion(tConstraint.criterion());
+            tCategories.push_back(tCriterion.type());
         }
     }
     return tCategories;
@@ -87,20 +108,22 @@ return_constraints_computed_by_plato_analyze
 /******************************************************************************/
 
 /******************************************************************************/
-// std::vector<std::string>
-// return_objectives_computed_by_plato_analyze
-// (const XMLGen::InputData& aXMLMetaData)
-// {
-//     std::vector<std::string> tCategories;
-//     for(auto& tObjective : aXMLMetaData.objectives)
-//     {
-//         if(tObjective.code().compare("plato_analyze") == 0)
-//         {
-//             tCategories.push_back(tObjective.category());
-//         }
-//     }
-//     return tCategories;
-// }
+std::vector<std::string>
+return_objectives_computed_by_plato_analyze
+(const XMLGen::InputData& aXMLMetaData)
+{
+    std::vector<std::string> tCategories;
+    for(size_t i=0; i<aXMLMetaData.objective.serviceIDs.size(); ++i)
+    {
+        auto &tService = aXMLMetaData.service(aXMLMetaData.objective.serviceIDs[i]);
+        if(tService.code().compare("plato_analyze") == 0)
+        {
+            auto &tCriterion = aXMLMetaData.criterion(aXMLMetaData.objective.criteriaIDs[i]);
+            tCategories.push_back(tCriterion.type());
+        }
+    }
+    return tCategories;
+}
 /******************************************************************************/
 
 }

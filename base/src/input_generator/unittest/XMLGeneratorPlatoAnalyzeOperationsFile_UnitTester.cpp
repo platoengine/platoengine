@@ -19,28 +19,44 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.max_iterations = "10";
-    tMetaData.discretization = "density";
-    tMetaData.optimization_algorithm = "oc";
-    tMetaData.optimization_type = "topology";
-    tMetaData.mProblemUpdateFrequency = "5";
+    tMetaData.optimizer.max_iterations = "10";
+    tMetaData.optimizer.discretization = "density";
+    tMetaData.optimizer.optimization_algorithm = "oc";
+    tMetaData.optimizer.optimization_type = "topology";
+    tMetaData.optimizer.mProblemUpdateFrequency = "5";
+
     XMLGen::Objective tObjective;
-    tObjective.name = "1";
-    tObjective.type = "compliance";
-    tObjective.code_name = "plato_analyze";
-    tObjective.mPerformerName = "plato_analyze_1";
-    tMetaData.objectives.push_back(tObjective);
+    tObjective.criteriaIDs.push_back("1");
+    tObjective.serviceIDs.push_back("1");
+    tObjective.scenarioIDs.push_back("1");
+    tMetaData.objective = tObjective;
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tMetaData.append(tScenario);
+
     XMLGen::Constraint tConstraint;
-    tConstraint.code("plato_analyze");
+    tConstraint.service("1");
+    tConstraint.criterion("2");
     tMetaData.constraints.push_back(tConstraint);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tCriterion.type("compliance");
+    tMetaData.append(tCriterion);
+    tCriterion.id("2");
+    tCriterion.type("volume");
+    tMetaData.append(tCriterion);
+
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
-    tService.performer("plato_analyze_1");
     tService.cacheState("false");
     tService.updateProblem("true");
     tMetaData.append(tService);
+
     tMetaData.mOutputMetaData.disableOutput();
+    tMetaData.generateMeaningfulNames();
 
     XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
 
@@ -58,12 +74,13 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     Plato::system("rm -f plato_analyze_operations.xml");
 }
 
+/*
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministicUsecase)
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mProblemUpdateFrequency = "5";
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.mProblemUpdateFrequency = "5";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Service tService;
     tService.id("1");
     tService.updateProblem("true");
@@ -328,7 +345,7 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
@@ -581,6 +598,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
+*/
 
 TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_ErrorInvalidCategory)
 {
@@ -737,12 +755,15 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_OrthotropicLinearElastic)
     ASSERT_TRUE(tParameter.empty());
 }
 
+/*
 TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXmlFile_ErrorNoSamples)
 {
     XMLGen::RandomMetaData tRandomMetaData;
     ASSERT_THROW(XMLGen::return_random_material_metadata_for_plato_analyze_operation_xml_file(tRandomMetaData), std::runtime_error);
 }
+*/
 
+/*
 TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXmlFile)
 {
     // POSE MATERIAL SET 1
@@ -822,10 +843,16 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
         }
     }
 }
+*/
 
 TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
 {
-    XMLGen::write_amgx_input_file();
+    XMLGen::InputData tInputData;
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tInputData.append(tScenario);
+    tInputData.objective.scenarioIDs.push_back("1");
+    XMLGen::write_amgx_input_file(tInputData);
     auto tData = XMLGen::read_data_from_file("amgx.json");
     auto tGold = std::string("{\"config_version\":2,\"solver\":{\"preconditioner\":{\"print_grid_stats\":1,\"algorithm\":\"AGGREGATION\",\"print_vis_data\":0,\"max_matching_iterations\":50,")
         +"\"max_unassigned_percentage\":0.01,\"solver\":\"AMG\",\"smoother\":{\"relaxation_factor\":0.78,\"scope\":\"jacobi\",\"solver\":\"BLOCK_JACOBI\",\"monitor_residual\":0,\"print_solve_stats\":0}"
@@ -871,7 +898,7 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mProblemUpdateFrequency = "5";
+    tInputData.optimizer.mProblemUpdateFrequency = "5";
     XMLGen::Service tService;
     tService.updateProblem("true");
     tInputData.append(tService);
@@ -885,10 +912,32 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
 TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
+
     XMLGen::Objective tObjective;
-    tObjective.code_name = "plato_analyze";
-    tMetaData.objectives.push_back(tObjective);
-    tMetaData.optimization_type = "topology";
+    tObjective.criteriaIDs.push_back("1");
+    tObjective.serviceIDs.push_back("1");
+    tObjective.scenarioIDs.push_back("1");
+    tMetaData.objective = tObjective;
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tMetaData.append(tScenario);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tCriterion.type("compliance");
+    tMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+
+    tMetaData.generateMeaningfulNames();
+
+    tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
@@ -908,10 +957,32 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
 TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
+
     XMLGen::Objective tObjective;
-    tObjective.code_name = "plato_analyze";
-    tMetaData.objectives.push_back(tObjective);
-    tMetaData.optimization_type = "topology";
+    tObjective.criteriaIDs.push_back("1");
+    tObjective.serviceIDs.push_back("1");
+    tObjective.scenarioIDs.push_back("1");
+    tMetaData.objective = tObjective;
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tMetaData.append(tScenario);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tCriterion.type("compliance");
+    tMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+
+    tMetaData.generateMeaningfulNames();
+
+    tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
@@ -931,10 +1002,28 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperatio
 TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tCriterion.type("volume");
+    tMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+
     XMLGen::Constraint tConstraint;
-    tConstraint.code("plato_analyze");
+    tConstraint.id("1");
+    tConstraint.service("1");
+    tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
-    tMetaData.optimization_type = "topology";
+
+    tMetaData.generateMeaningfulNames();
+
+    tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
@@ -954,10 +1043,28 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
 TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tCriterion.type("volume");
+    tMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tService.cacheState("false");
+    tService.updateProblem("true");
+    tMetaData.append(tService);
+
     XMLGen::Constraint tConstraint;
-    tConstraint.code("plato_analyze");
-    tMetaData.optimization_type = "topology";
+    tConstraint.id("1");
+    tConstraint.service("1");
+    tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
+
+    tMetaData.generateMeaningfulNames();
+
+    tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tMetaData, tDocument);
@@ -990,6 +1097,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeSolutionToPlatoAnalyzeOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Topology"}, tInput);
 }
 
+/*
 TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOperation_EmptyOptimizationType)
 {
     pugi::xml_document tDocument;
@@ -1003,7 +1111,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1013,7 +1121,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
     tConstraint.code("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
@@ -1027,7 +1135,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
@@ -1158,7 +1266,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1168,7 +1276,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
     tConstraint.code("sierra_sd");
     tInputData.constraints.push_back(tConstraint);
@@ -1182,7 +1290,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Constraint tConstraint;
     tConstraint.code("plato_analyze");
     tXMLMetaData.constraints.push_back(tConstraint);
@@ -1311,7 +1419,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     ASSERT_NO_THROW(XMLGen::append_compute_objective_value_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1321,7 +1429,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::Objective tObjective;
     tObjective.code_name = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
@@ -1335,7 +1443,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
@@ -1464,7 +1572,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     ASSERT_NO_THROW(XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1474,7 +1582,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimization_type = "topology";
+    tInputData.optimizer.optimization_type = "topology";
     XMLGen::Objective tObjective;
     tObjective.code_name = "sierra_sd";
     tInputData.objectives.push_back(tObjective);
@@ -1488,7 +1596,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Objective tObjective;
     tObjective.code_name = "plato_analyze";
     tXMLMetaData.objectives.push_back(tObjective);
@@ -1605,6 +1713,7 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     tValues = {"youngs_modulus_block_id_2", "[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:Youngs Modulus", "0.0"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
 }
+*/
 
 TEST(PlatoTestXMLGenerator, IsAnyObjectiveComputedByPlatoAnalyze)
 {
@@ -1612,24 +1721,32 @@ TEST(PlatoTestXMLGenerator, IsAnyObjectiveComputedByPlatoAnalyze)
     XMLGen::InputData tInputData;
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    XMLGen::Objective tObjective1;
-    tObjective1.code_name = "sierra_sd";
-    tInputData.objectives.push_back(tObjective1);
+    tInputData.objective.serviceIDs.push_back("1");
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("sierra_sd");
+    tInputData.append(tService);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    XMLGen::Objective tObjective2;
-    tObjective2.code_name = "plato_analyze";
-    tInputData.objectives.push_back(tObjective2);
+    XMLGen::Service tService2;
+    tService2.id("2");
+    tService2.code("plato_analyze");
+    tInputData.append(tService2);
+    tInputData.objective.serviceIDs.push_back("2");
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.code_name = "sierra_sd";
-    tInputData.objectives.pop_back();
-    tInputData.objectives.push_back(tObjective2);
+    std::vector<XMLGen::Service> tEmptyServiceVector;
+
+    tInputData.set(tEmptyServiceVector);
+    tService2.code("sierra_sd");
+    tInputData.append(tService);
+    tInputData.append(tService2);
     ASSERT_FALSE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 
-    tObjective2.code_name = "PLATO_Analyze";
-    tInputData.objectives.pop_back();
-    tInputData.objectives.push_back(tObjective2);
+    tInputData.set(tEmptyServiceVector);
+    tService2.code("PLATO_Analyze");
+    tInputData.append(tService);
+    tInputData.append(tService2);
     ASSERT_TRUE(XMLGen::is_any_objective_computed_by_plato_analyze(tInputData));
 }
 

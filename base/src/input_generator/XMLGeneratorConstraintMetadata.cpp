@@ -83,6 +83,25 @@ std::string Constraint::service() const
     return (this->getValue("service"));
 }
 
+void Constraint::weight(const std::string& aInput)
+{
+    mMetaData["weight"] = aInput;
+}
+
+std::string Constraint::weight() const
+{
+    return (this->getValue("weight"));
+}
+
+void Constraint::name(const std::string& aInput)
+{
+    mMetaData["name"] = aInput;
+}
+
+std::string Constraint::name() const
+{
+    return (this->getValue("name"));
+}
 
 void Constraint::scenario(const std::string& aInput)
 {
@@ -93,14 +112,23 @@ std::string Constraint::scenario() const
 {
     return (this->getValue("scenario"));
 }
-void Constraint::target(const std::string& aInput)
+void Constraint::absoluteTarget(const std::string& aInput)
 {
-    mMetaData["target"] = aInput;
+    mMetaData["absolute_target"] = aInput;
 }
 
-std::string Constraint::target() const
+std::string Constraint::absoluteTarget() const
 {
-    return (this->getValue("target"));
+    return (this->getValue("absolute_target"));
+}
+void Constraint::relativeTarget(const std::string& aInput)
+{
+    mMetaData["relative_target"] = aInput;
+}
+
+std::string Constraint::relativeTarget() const
+{
+    return (this->getValue("relative_target"));
 }
 
 }

@@ -99,20 +99,6 @@ public:
     std::string code() const;
 
     /******************************************************************************//**
-     * \fn additiveContinuation
-     * \brief Set string value for keyword 'additive_continuation'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void additiveContinuation(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn additiveContinuation
-     * \brief Return string value for keyword 'additive_continuation'.
-     * \return value
-    **********************************************************************************/
-    std::string additiveContinuation() const;
-
-    /******************************************************************************//**
      * \fn numberRanks
      * \brief Set string value for keyword 'number_ranks'.
      * \param [in] aInput string value

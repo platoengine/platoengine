@@ -26,15 +26,14 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
     XMLGen::Output tOutput;
     tOutput.appendDeterminsiticQoI("stress", "element field");
     tOutput.appendDeterminsiticQoI("vonmises", "element field");
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("mechanical");
-    tService.additiveContinuation("");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -76,15 +75,14 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
     XMLGen::Output tOutput;
     tOutput.appendDeterminsiticQoI("vonmises", "element field");
     tOutput.appendDeterminsiticQoI("temperature", "nodal field");
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("thermal");
-    tService.additiveContinuation("");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("thermal");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -124,15 +122,14 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
 TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("thermomechanical");
-    tService.additiveContinuation("");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("thermomechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -166,15 +163,14 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsThermoMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("electromechanical");
-    tService.additiveContinuation("");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("electromechanical");
+    tScenario.additiveContinuation("");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -208,16 +204,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsElectroMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("heat conduction");
-    tService.timeStep("1.0");
-    tService.numTimeSteps("10");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("heat conduction");
+    tScenario.timeStep("1.0");
+    tScenario.numTimeSteps("10");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -266,16 +261,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsHeatConduction)
 TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("transient thermomechanics");
-    tService.timeStep("2.0");
-    tService.numTimeSteps("20");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("transient thermomechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -324,18 +318,17 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientThermoMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("transient mechanics");
-    tService.timeStep("2.0");
-    tService.numTimeSteps("20");
-    tService.newmarkBeta("0.25");
-    tService.newmarkGamma("0.5");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("transient mechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.newmarkBeta("0.25");
+    tScenario.newmarkGamma("0.5");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tParabolic = tDocument.child("ParameterList");
@@ -392,16 +385,15 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsTransientMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("stabilized mechanics");
-    tService.timeStep("2.0");
-    tService.numTimeSteps("20");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("stabilized mechanics");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     auto tElliptic = tDocument.child("ParameterList");
@@ -450,20 +442,19 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsStabilizedMechanics)
 TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
 {
     XMLGen::Output tOutput;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("plasticity");
-    tService.timeStep("2.0");
-    tService.numTimeSteps("20");
-    tService.maxNumTimeSteps("40");
-    tService.timeStepExpansion("1.1");
-    tService.solverTolerance("1e-5");
-    tService.solverMaxNumIterations("10");
-    tService.materialPenaltyExponent("3.0");
-    tService.minErsatzMaterialConstant("1e-9");
+    XMLGen::Scenario tScenario;
+    tScenario.physics("plasticity");
+    tScenario.timeStep("2.0");
+    tScenario.numTimeSteps("20");
+    tScenario.maxNumTimeSteps("40");
+    tScenario.timeStepExpansion("1.1");
+    tScenario.solverTolerance("1e-5");
+    tScenario.solverMaxNumIterations("10");
+    tScenario.materialPenaltyExponent("3.0");
+    tScenario.minErsatzMaterialConstant("1e-9");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
-    tPhysics.call(tService, tOutput, tDocument);
+    tPhysics.call(tScenario, tOutput, tDocument);
 
     // TEST RESULTS
     // global residual
@@ -555,16 +546,38 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
 
 TEST(PlatoTestXMLGenerator, ReturnObjectivesComputedByPlatoAnalyze)
 {
-    XMLGen::Objective tObjective1;
-    tObjective1.code_name = "plato_analyze";
-    tObjective1.type = "internal elastic energy";
-    XMLGen::Objective tObjective2;
-    tObjective2.code_name = "aria";
-    tObjective2.type = "internal thermal energy";
-
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.objectives.push_back(tObjective1);
-    tXMLMetaData.objectives.push_back(tObjective2);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("internal elastic energy");
+    tCriterion.id("1");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.type("internal thermal energy");
+    tCriterion.id("2");
+    tXMLMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.id("1");
+    tXMLMetaData.append(tService);
+    tService.code("aria");
+    tService.id("2");
+    tXMLMetaData.append(tService);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+    tScenario.physics("thermal");
+    tScenario.id("2");
+    tXMLMetaData.append(tScenario);
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+    tXMLMetaData.objective.scenarioIDs.push_back("2");
+    tXMLMetaData.objective.criteriaIDs.push_back("1");
+    tXMLMetaData.objective.criteriaIDs.push_back("2");
+    tXMLMetaData.objective.serviceIDs.push_back("1");
+    tXMLMetaData.objective.serviceIDs.push_back("2");
 
     auto tCategories = XMLGen::return_objectives_computed_by_plato_analyze(tXMLMetaData);
     ASSERT_EQ(1u, tCategories.size());
@@ -573,16 +586,41 @@ TEST(PlatoTestXMLGenerator, ReturnObjectivesComputedByPlatoAnalyze)
 
 TEST(PlatoTestXMLGenerator, ReturnConstraintsComputedByPlatoAnalyze)
 {
-    XMLGen::Constraint tConstraint1;
-    tConstraint1.code("plato_analyze");
-    tConstraint1.category("internal elastic energy");
-    XMLGen::Constraint tConstraint2;
-    tConstraint2.code("aria");
-    tConstraint2.category("internal thermal energy");
-
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.constraints.push_back(tConstraint1);
-    tXMLMetaData.constraints.push_back(tConstraint2);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("internal elastic energy");
+    tCriterion.id("1");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.type("internal thermal energy");
+    tCriterion.id("2");
+    tXMLMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.id("1");
+    tXMLMetaData.append(tService);
+    tService.code("aria");
+    tService.id("2");
+    tXMLMetaData.append(tService);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+    tScenario.physics("thermal");
+    tScenario.id("2");
+    tXMLMetaData.append(tScenario);
+
+    XMLGen::Constraint tConstraint;
+    tConstraint.scenario("1"); 
+    tConstraint.service("1"); 
+    tConstraint.criterion("1"); 
+    tXMLMetaData.constraints.push_back(tConstraint);
+    tConstraint.scenario("2"); 
+    tConstraint.service("2"); 
+    tConstraint.criterion("2"); 
+    tXMLMetaData.constraints.push_back(tConstraint);
 
     auto tCategories = XMLGen::return_constraints_computed_by_plato_analyze(tXMLMetaData);
     ASSERT_EQ(1u, tCategories.size());
@@ -594,7 +632,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
     XMLGen::BC tBC;
     tBC.bc_id = "1";
     tBC.mPhysics = "mechanical";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -606,7 +643,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidPhysics
     XMLGen::BC tBC;
     tBC.bc_id = "1";
     tBC.mPhysics = "cfd";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -620,7 +656,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidCategor
     tBC.app_name = "ss_1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "pin";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -634,7 +669,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "zero value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -648,7 +682,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -663,7 +696,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -677,7 +709,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
     tBC.app_name = "ss_1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "rigid";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -723,7 +754,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
     tBC.app_id = "1";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "fixed";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -770,7 +800,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
     tBC.app_name = "ss_2";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "zero value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -804,7 +833,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "fixed value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -818,7 +846,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -833,7 +860,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -848,7 +874,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -864,7 +889,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
     tBC.app_name = "ss_2";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "fixed value";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -899,7 +923,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "cfd";
     tBC.mCategory = "insulated";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -913,7 +936,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -928,7 +950,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     tBC.app_name = "ss_1";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -943,7 +964,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
     tBC.app_name = "ss_11";
     tBC.mPhysics = "thermal";
     tBC.mCategory = "insulated";
-    tBC.mCode = "plato_analyze";
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
@@ -970,20 +990,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
     }
 }
 
-TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_PerformerNotAnalyze_DoNothing)
-{
-    XMLGen::BC tBC;
-    tBC.type = "displacement";
-    tBC.bc_id = "1";
-    tBC.mCode = "sierra";
-    pugi::xml_document tDocument;
-
-    XMLGen::AppendEssentialBoundaryCondition tInterface;
-    tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument);
-    auto tEssentialBCParamList = tDocument.child("ParameterList");
-    ASSERT_TRUE(tEssentialBCParamList.empty());
-}
-
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInputDeck)
 {
     // POSE PROBLEM
@@ -993,7 +999,6 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
     tBC.type = "displacement";
     tBC.mPhysics = "mechanical";
     tBC.mCategory = "rigid";
-    tBC.mCode = "plato_analyze";
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.bcs.push_back(tBC);
 
@@ -1078,37 +1083,22 @@ TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag)
     ASSERT_STREQ("Velocity Boundary Condition with ID 1", tName.c_str());
 }
 
-TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_DoNotAppend_PerformerIsNotAnalyze)
-{
-    XMLGen::Load tLoad;
-    tLoad.type = "traction";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0", "2.0", "3.0"};
-    XMLGen::LoadCase tLoadCase;
-    tLoadCase.mCode = "sierra";
-    tLoadCase.loads.push_back(tLoad);
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.load_cases.push_back(tLoadCase);
-
-    pugi::xml_document tDocument;
-    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
-    auto tLoadParamList = tDocument.child("ParameterList");
-    ASSERT_TRUE(tLoadParamList.empty());
-}
-
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck)
 {
+    XMLGen::InputData tXMLMetaData;
+
     XMLGen::Load tLoad;
     tLoad.type = "traction";
     tLoad.load_id = "1";
     tLoad.app_name = "ss_1";
     tLoad.values = {"1.0", "2.0", "3.0"};
-    XMLGen::LoadCase tLoadCase;
-    tLoadCase.mCode = "plato_analyze";
-    tLoadCase.loads.push_back(tLoad);
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.load_cases.push_back(tLoadCase);
+    tXMLMetaData.loads.push_back(tLoad);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    std::vector<std::string> tLoadIDs = {"1"};
+    tScenario.setLoadIDs(tLoadIDs);
+    tXMLMetaData.append(tScenario);
 
     pugi::xml_document tDocument;
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
@@ -1138,6 +1128,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     }
 }
 
+/*
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_RandomUseCase)
 {
     // POSE LOAD SET 1
@@ -1203,6 +1194,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
         std::advance(tGoldValuesItr, 1);
     }
 }
+*/
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_ErrorInvalidType)
 {
@@ -1407,7 +1399,11 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Empty_Mat
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
     auto tParamList = tDocument.child("ParameterList");
-    ASSERT_TRUE(tParamList.empty());
+    std::vector<std::string> tKeys = {"Name"};
+    std::vector<std::string> tValues = {"Material Models"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParamList);
+    auto tMaterials = tParamList.child("ParameterList");
+    ASSERT_TRUE(tMaterials.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInvalidMatModel)
@@ -1447,8 +1443,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
-    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
+    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tMyMaterialModel = tFirstMaterial.child("Isotropic Linear Elastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tMyMaterialModel);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
@@ -1482,9 +1479,10 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
 
-    auto tThermalConduction = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tThermalConduction = tFirstMaterial.child("ParameterList");
     ASSERT_FALSE(tThermalConduction.empty());
     ASSERT_STREQ("ParameterList", tThermalConduction.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Conduction"}, tThermalConduction);
@@ -1524,8 +1522,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
-    auto tMyMaterialModel = tMaterialModelParamList.child("Orthotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
+    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tMyMaterialModel = tFirstMaterial.child("Orthotropic Linear Elastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Orthotropic Linear Elastic"}, tMyMaterialModel);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
@@ -1563,9 +1562,10 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
 
-    auto tThermalModel = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tThermalModel = tFirstMaterial.child("ParameterList");
     ASSERT_FALSE(tThermalModel.empty());
     ASSERT_STREQ("ParameterList", tThermalModel.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermoelastic"}, tThermalModel);
@@ -1606,9 +1606,10 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     auto tElasticityParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tElasticityParamList.empty());
     ASSERT_STREQ("ParameterList", tElasticityParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tElasticityParamList);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tElasticityParamList);
 
-    auto tElasticModel = tElasticityParamList.child("ParameterList");
+    auto tFirstMaterial = tElasticityParamList.child("ParameterList");
+    auto tElasticModel = tFirstMaterial.child("ParameterList");
     ASSERT_FALSE(tElasticModel.empty());
     ASSERT_STREQ("ParameterList", tElasticModel.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tElasticModel);
@@ -1626,7 +1627,8 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     ASSERT_TRUE(tParameter.empty());
 
     // plasticity model
-    auto tPlasticityParamList = tElasticityParamList.next_sibling("ParameterList");
+    auto tPlasticityParamList = tFirstMaterial.next_sibling("ParameterList");
+    //auto tPlasticityParamList = tElasticityParamList.next_sibling("ParameterList");
     ASSERT_FALSE(tPlasticityParamList.empty());
     ASSERT_STREQ("ParameterList", tPlasticityParamList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Plasticity Model"}, tPlasticityParamList);
@@ -1666,8 +1668,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     auto tMaterialModelParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelParamList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Model"}, tMaterialModelParamList);
-    auto tMyMaterialModel = tMaterialModelParamList.child("Isotropic Linear Electroelastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
+    auto tMaterialNode = tMaterialModelParamList.child("ParameterList");
+    auto tMyMaterialModel = tMaterialNode.child("Isotropic Linear Electroelastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Electroelastic"}, tMyMaterialModel);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
@@ -1687,6 +1690,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     }
 }
 
+/*
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIsotropicLinearElasticMatModel)
 {
     // POSE INPUTS
@@ -1746,15 +1750,15 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
         std::advance(tGoldValuesItr, 1);
     }
 }
+*/
 
 TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.physics("mechanical");
-    tService.code("plato_analyze");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tXMLMetaData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tPDE = tDocument.child("ParameterList");
@@ -1782,10 +1786,9 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck_ErrorInvalidPhy
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.code("plato_analyze");
-    tService.physics("computational fluid dynamics");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.physics("computational fluid dynamics");
+    tXMLMetaData.append(tScenario);
     ASSERT_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -1799,9 +1802,11 @@ TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorEmptyO
 TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorInvalidCriterion)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Objective tObjective;
-    tObjective.type = "maximize thrust";
-    tXMLMetaData.objectives.push_back(tObjective);
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("maximize thrust");
+    tCriterion.id("1");
+    tXMLMetaData.append(tCriterion);
+    tXMLMetaData.objective.criteriaIDs.push_back("1");
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_self_adjoint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1809,9 +1814,9 @@ TEST(PlatoTestXMLGenerator, AppendSelfAdjointParameterToPlatoProblem_ErrorInvali
 TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.physics("computational fluid dynamics");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.physics("computational fluid dynamics");
+    tXMLMetaData.append(tScenario);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_pde_constraint_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1819,9 +1824,9 @@ TEST(PlatoTestXMLGenerator, AppendPDEConstraintParameterToPlatoProblem_ErrorInva
 TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhysics)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.physics("computational fluid dynamics");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.physics("computational fluid dynamics");
+    tXMLMetaData.append(tScenario);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_physics_parameter_to_plato_problem(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1829,9 +1834,9 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsParameterToPlatoProblem_ErrorInvalidPhy
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorInvalidSpatialDim)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.dimensions("1");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("1");
+    tXMLMetaData.append(tScenario);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1839,13 +1844,14 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
 TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_ErrorEmptyMeshFile)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Service tService;
-    tService.dimensions("2");
-    tXMLMetaData.append(tService);
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("2");
+    tXMLMetaData.append(tScenario);
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
+/*
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstraintGeneral)
 {
     XMLGen::Objective tObjective;
@@ -1885,20 +1891,48 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstrai
         std::advance(tValuesItr, 1);
     }
 }
+*/
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 {
     XMLGen::InputData tXMLMetaData;
-    XMLGen::Objective tObjective1;
-    tObjective1.type = "maximize stiffness";
-    tObjective1.code_name = "plato_analyze";
-    tXMLMetaData.objectives.push_back(tObjective1);
-    XMLGen::Objective tObjective2;
-    tObjective2.type = "volume";
-    tObjective2.mPenaltyParam = "1.0";
-    tObjective2.mMinimumErsatzValue = "0.0";
-    tObjective2.code_name = "plato_analyze";
-    tXMLMetaData.objectives.push_back(tObjective2);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("maximize stiffness");
+    tCriterion.id("1");
+    tCriterion.materialPenaltyExponent("1.0");
+    tCriterion.minErsatzMaterialConstant("0.0");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.type("volume");
+    tCriterion.id("2");
+    tCriterion.materialPenaltyExponent("1.0");
+    tCriterion.minErsatzMaterialConstant("0.0");
+    tXMLMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.id("1");
+    tXMLMetaData.append(tService);
+    tService.code("plato_analyze");
+    tService.id("2");
+    tXMLMetaData.append(tService);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+    tScenario.physics("thermal");
+    tScenario.id("2");
+    tXMLMetaData.append(tScenario);
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+    tXMLMetaData.objective.scenarioIDs.push_back("2");
+    tXMLMetaData.objective.criteriaIDs.push_back("1");
+    tXMLMetaData.objective.criteriaIDs.push_back("2");
+    tXMLMetaData.objective.serviceIDs.push_back("1");
+    tXMLMetaData.objective.serviceIDs.push_back("2");
+    tXMLMetaData.objective.weights.push_back("1.0");
+    tXMLMetaData.objective.weights.push_back("1.0");
 
     pugi::xml_document tDocument;
     auto tCriteriaList = tDocument.append_child("ParameterList");
@@ -2004,13 +2038,30 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToCriteriaList)
 {
     XMLGen::InputData tXMLMetaData;
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("stress p-norm");
+    tCriterion.id("1");
+    tCriterion.pnormExponent("6");
+    tCriterion.materialPenaltyExponent("3.0");
+    tCriterion.minErsatzMaterialConstant("1e-9");
+    tXMLMetaData.append(tCriterion);
+
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.id("1");
+    tXMLMetaData.append(tService);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+
     XMLGen::Constraint tConstraint;
-    tConstraint.category("stress p-norm");
-    tConstraint.weight("0.5");
-    tConstraint.code("plato_analyze");
-    tConstraint.pnormExponent("6");
-    tConstraint.materialPenaltyExponent("3.0");
-    tConstraint.minErsatzMaterialConstant("1e-9");
+    tConstraint.scenario("1"); 
+    tConstraint.service("1"); 
+    tConstraint.criterion("1"); 
+    tConstraint.weight("0.5"); 
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;
@@ -2082,10 +2133,10 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "lbracket.exo";
-    XMLGen::Service tService;
-    tService.dimensions("2");
-    tXMLMetaData.append(tService);
+    tXMLMetaData.mesh.run_name = "lbracket.exo";
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("2");
+    tXMLMetaData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tProblem = tDocument.child("ParameterList");
@@ -2112,18 +2163,29 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck)
 TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "lbracket.exo";
+    tXMLMetaData.mesh.run_name = "lbracket.exo";
+    XMLGen::Scenario tScenario;
+    tScenario.physics("mechanical");
+    tScenario.dimensions("2");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("maximize stiffness");
+    tCriterion.id("1");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.type("volume");
+    tCriterion.id("2");
+    tXMLMetaData.append(tCriterion);
     XMLGen::Service tService;
-    tService.physics("mechanical");
-    tService.dimensions("2");
+    tService.id("1");
+    tService.code("plato_analyze");
     tXMLMetaData.append(tService);
-    XMLGen::Objective tObjective;
-    tObjective.type = "maximize stiffness";
-    tObjective.code_name = "plato_analyze";
-    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.objective.serviceIDs.push_back("1");
+    tXMLMetaData.objective.criteriaIDs.push_back("1");
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
     XMLGen::Constraint tConstraint;
-    tConstraint.category("volume");
-    tConstraint.code("plato_analyze");
+    tConstraint.service("1");
+    tConstraint.criterion("2");
     tXMLMetaData.constraints.push_back(tConstraint);
 
     pugi::xml_document tDocument;

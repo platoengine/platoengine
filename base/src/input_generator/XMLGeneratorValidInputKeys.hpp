@@ -22,44 +22,11 @@ struct ValidKeys
     std::vector<std::string> mKeys;
 };
 
-struct ValidCriterionParameterKeyMap
+struct ValidCriterionParameterKeys
 {
-    std::unordered_map<std::string, std::vector<std::string>> mMap;
-    
-    ValidCriterionParameterKeyMap()
-    {
-
-        mMap.insert({"compliance", {}});
-        mMap.insert({"volume", {}});
-        mMap.insert({"mass", {}});
-        mMap.insert({"stress_p-norm", {"stress_p_norm_exponent"}});
-        mMap.insert({"total_work", {}});
-        mMap.insert({"surface_area", {}});
-        mMap.insert({"thermoelastic_energy", {}});
-        mMap.insert({"heat_conduction", {}});
-        mMap.insert({"flux_p-norm", {"flux_p_norm_exponent"}});
-        mMap.insert({"effective_energy", {}});
-        mMap.insert({"stress", {}});
-        mMap.insert({"flux", {}});
-        mMap.insert({"electroelastic_energy", {}});
-        mMap.insert({"thermal_energy", {}});
-
-        // most of these probably belong in the contraint block..
-        // mMap.insert({"stress", {"stress_limit", "relative_stress_limit", "stress_ramp_factor", "limit_power_min", "limit_power_max",
-        //                         "limit_power_feasible_bias", "limit_power_feasible_slope", "limit_power_infeasible_bias", "limit_power_infeasible_slope",
-        //                         "limit_reset_subfrequency", "limit_reset_count", "inequality_allowable_feasiblity_lower", "inequality_allowable_feasiblity_upper",
-        //                         "inequality_feasibility_scale", "inequality_infeasibility_scale", "stress_favor_final", "stress_favor_updates",
-        //                         "stress_inequality_power", "volume_penalty_power", "volume_penalty_divisor", "volume_penalty_bias",
-        //                         "mass_to_stress_constraint_ratio", "initial_penalty", "penalty_upper_bound", "penalty_expansion_factor",
-        //                         "constraint_exponent", "constraint_exponent", "initial_mass_weight_factor",
-        //                         "control_stagnation_tolerance", "write_debug_output_files"}});
-        //
-    }
-
-    std::vector<std::string> getValidKeysForCriterion(std::string& aCriterion)
-    {
-        return mMap.find(aCriterion)->second;
-    }
+    std::vector<std::string> mKeys = {"type", "normalize", "normalization_value",
+                                      "stress_p_norm_exponent", "material_penalty_model", 
+                                      "material_penalty_exponent", "minimum_ersatz_material_value"};
 };
 
 struct ValidBoolKeys
@@ -561,8 +528,8 @@ struct ValidAnalyzeCriteriaKeys
         { "effective energy", { "Effective Energy", true } },
         { "minimize effective energy", { "Effective Energy", true } },
         { "stress constrained mass minimization", { "Stress Constraint General", false } },
-        { "thermal energy", { "Internal Thermal Energy", false } },
-        { "maximize heat conduction", { "Internal Thermal Energy", false } },
+        { "thermal_energy", { "Internal Thermal Energy", false } },
+        { "maximize_heat_conduction", { "Internal Thermal Energy", false } },
         { "flux p-norm", { "Flux P-Norm", false } },
         { "minimize flux", { "Flux P-Norm", false } },
         { "thermoelastic energy", { "Internal Thermoelastic Energy", false } },

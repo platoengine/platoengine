@@ -10,6 +10,12 @@ begin service 2
   number ranks 1
 end service
 
+begin service 3
+  code plato_analyze
+  number processors 1
+  number ranks 1
+end service
+
 begin criterion 1
   type compliance
   minimum_ersatz_material_value 1e-3
@@ -29,12 +35,22 @@ begin scenario 1
   tolerance 5e-8
 end scenario
 
+begin scenario 2
+  physics mechanical
+  dimensions 3
+  loads 2
+  boundary_conditions 1
+  material 1
+  minimum_ersatz_material_value 1e-3
+  tolerance 5e-8
+end scenario
+
 begin objective
   type weighted_sum
-  criteria 1
-  services 2
-  scenarios 1
-  weights 1
+  criteria 1 1
+  services 2 3
+  scenarios 1 2
+  weights 1 1
 end objective
 
 begin output
@@ -49,6 +65,7 @@ end boundary conditions
 
 begin loads
     traction sideset name ss_2 value 0 -3e3 0 load id 1
+    traction sideset name ss_2 value 0 0 3e3 load id 2
 end loads
       
 begin constraint

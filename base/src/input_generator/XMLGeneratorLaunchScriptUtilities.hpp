@@ -30,7 +30,6 @@ namespace XMLGen
     int get_number_of_refines(const XMLGen::InputData& aInputData);
     int get_max_number_of_objective_procs(const XMLGen::InputData& aInputData);
     int get_number_of_prune_and_refine_procs(const XMLGen::InputData& aInputData);
-    std::string get_num_procs(const XMLGen::Objective& aObjective);
     std::string get_num_opt_processors(const XMLGen::InputData& aInputData);
     std::string get_num_buffer_layers(const XMLGen::InputData& aInputData);
     std::string get_prune_string(const XMLGen::InputData& aInputData);

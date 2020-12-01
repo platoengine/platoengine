@@ -293,6 +293,21 @@ public:
      * \return value
     **********************************************************************************/
     std::string solverMaxNumIterations() const;
+
+    /******************************************************************************//**
+     * \fn additiveContinuation
+     * \brief Set string value for keyword 'additive_continuation'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void additiveContinuation(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn additiveContinuation
+     * \brief Return string value for keyword 'additive_continuation'.
+     * \return value
+    **********************************************************************************/
+    std::string additiveContinuation() const;
+
 };
 // struct Scenario
 

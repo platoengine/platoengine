@@ -4,6 +4,7 @@
 #include "XMLGeneratorDataStruct.hpp"
 #include "XMLGeneratorLaunchScriptUtilities.hpp"
 #include <iostream>
+#include <fstream>
 
 namespace XMLGen
 {
@@ -59,8 +60,8 @@ namespace XMLGen
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
 
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.initial_guess_filename != ""
-                                                          && aInputData.initial_guess_field_name != "");
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimizer.initial_guess_filename != ""
+                                                          && aInputData.optimizer.initial_guess_field_name != "");
     if(need_to_transfer_prune_or_refine)
     {
       XMLGen::append_prune_and_refine_command(aInputData, fp);
@@ -70,9 +71,9 @@ namespace XMLGen
 
   void append_prune_and_refine_command(const XMLGen::InputData& aInputData, FILE*& fp)
   {
-    if(aInputData.mesh_name.empty())
+    if(aInputData.mesh.name.empty())
       THROWERR("No mesh name provided");
-    if(aInputData.run_mesh_name.empty())
+    if(aInputData.mesh.run_name.empty())
       THROWERR("No output mesh name provided");
 
     std::string tPruneString = XMLGen::Internal::get_prune_string(aInputData);
@@ -86,12 +87,12 @@ namespace XMLGen
       tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
     else
       tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-    if(aInputData.initial_guess_filename != "")
-      tCommand += (" --mesh_with_variable=" + aInputData.initial_guess_filename);
-    tCommand += (" --mesh_to_be_pruned=" + aInputData.mesh_name);
-    tCommand += (" --result_mesh=" + aInputData.run_mesh_name);
-    if(aInputData.initial_guess_field_name != "")
-      tCommand += (" --field_name=" + aInputData.initial_guess_field_name);
+    if(aInputData.optimizer.initial_guess_filename != "")
+      tCommand += (" --mesh_with_variable=" + aInputData.optimizer.initial_guess_filename);
+    tCommand += (" --mesh_to_be_pruned=" + aInputData.mesh.name);
+    tCommand += (" --result_mesh=" + aInputData.mesh.run_name);
+    if(aInputData.optimizer.initial_guess_field_name != "")
+      tCommand += (" --field_name=" + aInputData.optimizer.initial_guess_field_name);
     tCommand += (" --number_of_refines=" + tNumRefinesString);
     tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
     tCommand += (" --prune_mesh=" + tPruneString);
@@ -106,29 +107,29 @@ namespace XMLGen
 
     if(tNumberPruneAndRefineProcs > 1)
     {
-      if(aInputData.run_mesh_name == "")
-        THROWERR("run_mesh_name not set")
+      if(aInputData.mesh.run_name == "")
+        THROWERR("mesh run_name not set")
 
           std::string tExtensionString = XMLGen::Internal::get_extension_string(tNumberPruneAndRefineProcsString);
-      fprintf(fp, "epu -auto %s%s\n", aInputData.run_mesh_name.c_str(), tExtensionString.c_str());
+      fprintf(fp, "epu -auto %s%s\n", aInputData.mesh.run_name.c_str(), tExtensionString.c_str());
     }
   }
 
   void append_decomp_lines_for_prune_and_refine(const XMLGen::InputData& aInputData, FILE*& fp)
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.initial_guess_filename != ""
-                                                          && aInputData.initial_guess_field_name != "");
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimizer.initial_guess_filename != ""
+                                                          && aInputData.optimizer.initial_guess_field_name != "");
     if(need_to_transfer_prune_or_refine)
     {
       int tNumberPruneAndRefineProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(aInputData);
       if(tNumberPruneAndRefineProcs > 1)
       {
-        if(aInputData.mesh_name.empty())
+        if(aInputData.mesh.name.empty())
           THROWERR("Missing input mesh name\n")
-        XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.mesh_name);
-        if(aInputData.initial_guess_filename != "")
-          XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.initial_guess_filename);
+        XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.mesh.name);
+        if(aInputData.optimizer.initial_guess_filename != "")
+          XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.optimizer.initial_guess_filename);
       }
     }
   }
@@ -146,7 +147,7 @@ namespace XMLGen
                                               FILE*& fp,
                                               std::map<std::string,int>& hasBeenDecompedForThisNumberOfProcessors)
   {
-    if(aInputData.run_mesh_name.empty())
+    if(aInputData.mesh.run_name.empty())
       THROWERR("Cannot add decomp line: Mesh name not provided\n")
 
     std::string num_opt_procs = XMLGen::Internal::get_num_opt_processors(aInputData);
@@ -156,21 +157,22 @@ namespace XMLGen
     if(need_to_decompose)
     {
       if(hasBeenDecompedForThisNumberOfProcessors[num_opt_procs]++ == 0)
-        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.run_mesh_name);
-      if(aInputData.initial_guess_filename != "")
-        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.initial_guess_filename);
+        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.mesh.run_name);
+      if(aInputData.optimizer.initial_guess_filename != "")
+        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.optimizer.initial_guess_filename);
     }
   }
 
   void append_decomp_lines_for_performers(const XMLGen::InputData& aInputData, FILE*& fp,
                                           std::map<std::string,int>& hasBeenDecompedForThisNumberOfProcessors)
   {
-    if(aInputData.run_mesh_name.empty())
+    if(aInputData.mesh.run_name.empty())
       THROWERR("Cannot add decomp line: Mesh name not provided\n")
 
-    for(size_t i=0; i<aInputData.objectives.size(); ++i)
+    for(size_t i=0; i<aInputData.objective.serviceIDs.size(); ++i)
     {
-        std::string num_procs = XMLGen::Internal::get_num_procs(aInputData.objectives[i]);
+        XMLGen::Service tService = aInputData.service(aInputData.objective.serviceIDs[i]);
+        std::string num_procs = tService.numberProcessors();
 
         XMLGen::assert_is_positive_integer(num_procs);
 
@@ -178,9 +180,11 @@ namespace XMLGen
         if(need_to_decompose)
         {
             if(hasBeenDecompedForThisNumberOfProcessors[num_procs]++ == 0)
-              XMLGen::append_decomp_line(fp, num_procs, aInputData.run_mesh_name);
+              XMLGen::append_decomp_line(fp, num_procs, aInputData.mesh.run_name);
+/*
             if(aInputData.objectives[i].ref_frf_file.length() > 0)
               XMLGen::append_decomp_line(fp, num_procs, aInputData.objectives[i].ref_frf_file);
+*/
         }
     }
   }
@@ -211,8 +215,8 @@ namespace XMLGen
                                 envString.c_str(),separationString.c_str());
     fprintf(fp, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", envString.c_str(),separationString.c_str());
     fprintf(fp, "%s PLATO_APP_FILE%splato_main_operations.xml \\\n", envString.c_str(),separationString.c_str());
-    if(aInputData.plato_main_path.length() != 0)
-      fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.plato_main_path.c_str());
+    if(aInputData.codepaths.plato_main_path.length() != 0)
+      fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.codepaths.plato_main_path.c_str());
     else
       fprintf(fp, "PlatoMain plato_main_input_deck.xml \\\n");
   }
@@ -247,38 +251,40 @@ namespace XMLGen
     int get_number_of_refines(const XMLGen::InputData& aInputData)
     {
       int tNumRefines = 0;
-      if(aInputData.number_refines != "" && aInputData.number_refines != "0")
+      if(aInputData.optimizer.number_refines != "" && aInputData.optimizer.number_refines != "0")
       {
-        XMLGen::assert_is_positive_integer(aInputData.number_refines);
-        tNumRefines = std::atoi(aInputData.number_refines.c_str());
+        XMLGen::assert_is_positive_integer(aInputData.optimizer.number_refines);
+        tNumRefines = std::atoi(aInputData.optimizer.number_refines.c_str());
       }
       return tNumRefines;
     }
 
     int get_max_number_of_objective_procs(const XMLGen::InputData& aInputData)
     {
-      int tNumberPruneAndRefineProcs = 1;
-      for(size_t i=0; i<aInputData.objectives.size(); ++i)
+      int tMaxNumObjProcs = 0;
+      for(size_t i=0; i<aInputData.objective.serviceIDs.size(); ++i)
       {
-          if(!aInputData.objectives[i].num_procs.empty())
+          XMLGen::Service tService = aInputData.service(aInputData.objective.serviceIDs[i]);
+          std::string num_procs = tService.numberProcessors();
+          if(!num_procs.empty())
           {
-              XMLGen::assert_is_positive_integer(aInputData.objectives[i].num_procs);
-              int tNumProcs = std::atoi(aInputData.objectives[i].num_procs.c_str());
-              if(tNumProcs > tNumberPruneAndRefineProcs)
-                tNumberPruneAndRefineProcs = tNumProcs;
+              XMLGen::assert_is_positive_integer(num_procs);
+              int tNumProcs = std::atoi(num_procs.c_str());
+              if(tNumProcs > tMaxNumObjProcs)
+                tMaxNumObjProcs = tNumProcs;
           }
       }
 
-      return tNumberPruneAndRefineProcs;
+      return tMaxNumObjProcs;
     }
 
     int get_number_of_prune_and_refine_procs(const XMLGen::InputData& aInputData)
     {
       int tNumberPruneAndRefineProcs = 1;
-      if(aInputData.number_prune_and_refine_processors != "" &&
-              aInputData.number_prune_and_refine_processors != "0")
+      if(aInputData.optimizer.number_prune_and_refine_processors != "" &&
+              aInputData.optimizer.number_prune_and_refine_processors != "0")
       {
-          std::string tNumberPruneAndRefineProcsString = aInputData.number_prune_and_refine_processors;
+          std::string tNumberPruneAndRefineProcsString = aInputData.optimizer.number_prune_and_refine_processors;
           XMLGen::assert_is_positive_integer(tNumberPruneAndRefineProcsString);
           tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
       }
@@ -288,27 +294,26 @@ namespace XMLGen
       return tNumberPruneAndRefineProcs;
     }
 
-    std::string get_num_procs(const XMLGen::Objective& aObjective)
-    {
-      std::string num_procs = "4";
-      if(!aObjective.num_procs.empty())
-          num_procs = aObjective.num_procs;
-      return num_procs;
-    }
-
     std::string get_num_opt_processors(const XMLGen::InputData& aInputData)
     {
-      std::string num_opt_procs = "1";
-      if(!aInputData.num_opt_processors.empty())
-          num_opt_procs = aInputData.num_opt_processors;
-      return num_opt_procs;
+        std::string num_opt_procs = "1";
+        for(auto tService : aInputData.services())
+        {
+            // Find the first platomain service
+            if(tService.code() == "platomain")
+            {
+                num_opt_procs = tService.numberProcessors();
+                break;
+            } 
+        }
+        return num_opt_procs;
     }
 
     std::string get_num_buffer_layers(const XMLGen::InputData& aInputData)
     {
       std::string tNumBufferLayersString = "2";
-      if(aInputData.number_buffer_layers != "")
-        tNumBufferLayersString = aInputData.number_buffer_layers;
+      if(aInputData.optimizer.number_buffer_layers != "")
+        tNumBufferLayersString = aInputData.optimizer.number_buffer_layers;
       if(tNumBufferLayersString != "0")
         XMLGen::assert_is_positive_integer(tNumBufferLayersString);
       return tNumBufferLayersString;
@@ -317,7 +322,7 @@ namespace XMLGen
     std::string get_prune_string(const XMLGen::InputData& aInputData)
     {
       std::string tPruneString = "0";
-      if(aInputData.prune_mesh == "true")
+      if(aInputData.optimizer.prune_mesh == "true")
         tPruneString = "1";
       return tPruneString;
     }
@@ -333,8 +338,8 @@ namespace XMLGen
     std::string get_prune_and_refine_executable_path(const XMLGen::InputData& aInputData)
     {
       std::string tPruneAndRefineExe = "prune_and_refine";
-      if(aInputData.prune_and_refine_path.length() > 0)
-        tPruneAndRefineExe = aInputData.prune_and_refine_path;
+      if(aInputData.codepaths.prune_and_refine_path.length() > 0)
+        tPruneAndRefineExe = aInputData.codepaths.prune_and_refine_path;
       return tPruneAndRefineExe;
     }
 

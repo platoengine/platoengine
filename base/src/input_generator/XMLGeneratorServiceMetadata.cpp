@@ -83,16 +83,6 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
-void Service::additiveContinuation(const std::string& aInput)
-{
-    mMetaData["additive_continuation"] = aInput;
-}
-
-std::string Service::additiveContinuation() const
-{
-    return (this->getValue("additive_continuation"));
-}
-
 void Service::numberRanks(const std::string& aInput)
 {
     mMetaData["number_ranks"] = aInput;

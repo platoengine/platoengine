@@ -36,8 +36,8 @@ void ParseConstraint::check(XMLGen::Constraint& aMetaData)
         THROWERR("Criterion not defined for constraint " + aMetaData.id())
     if(aMetaData.service().empty())
         THROWERR("Service not defined for constraint " + aMetaData.id())
-    if(aMetaData.scenario().empty())
-        THROWERR("Scenario not defined for constraint " + aMetaData.id())
+//    if(aMetaData.scenario().empty())
+//        THROWERR("Scenario not defined for constraint " + aMetaData.id())
 }
 
 void ParseConstraint::allocate()
@@ -48,7 +48,10 @@ void ParseConstraint::allocate()
     mTags.insert({ "criterion", { { {"criterion"}, ""}, "" } });
     mTags.insert({ "service", { { {"service"}, ""}, "" } });
     mTags.insert({ "scenario", { { {"scenario"}, ""}, "" } });
-    mTags.insert({ "target", { { {"target"}, ""}, "0.0" } });
+    mTags.insert({ "relative_target", { { {"relative_target"}, ""}, "" } });
+    mTags.insert({ "absolute_target", { { {"absolute_target"}, ""}, "" } });
+    mTags.insert({ "weight", { { {"weight"}, ""}, "1.0" } });
+
     //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 
 }

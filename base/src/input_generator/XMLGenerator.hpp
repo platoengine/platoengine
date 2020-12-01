@@ -124,7 +124,7 @@ private:
     //  **********************************************************************************/
     void initializePlatoProblemOptions();
 
-    // void writeInputFiles();
+    void writeInputFiles();
 };
 
 }

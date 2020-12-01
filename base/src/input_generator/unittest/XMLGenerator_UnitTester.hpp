@@ -115,8 +115,8 @@ public:
     std::string getFixedBlock(const int &aIndex) {return m_InputData.optimizer.fixed_block_ids[aIndex];}
     std::string getFixedSideset(const int &aIndex) {return m_InputData.optimizer.fixed_sideset_ids[aIndex];}
     std::string getFixedNodeset(const int &aIndex) {return m_InputData.optimizer.fixed_nodeset_ids[aIndex];}
-    std::string getNumberProcessors() {return m_InputData.optimizer.num_opt_processors;}
     std::string getFilterPower() {return m_InputData.optimizer.filter_power;}
+    std::string getNumberProcessors();
     std::string getFilterScale() {return m_InputData.optimizer.filter_radius_scale;}
     std::string getFilterAbsolute() {return m_InputData.optimizer.filter_radius_absolute;}
     std::string getAlgorithm() {return m_InputData.optimizer.optimization_algorithm;}

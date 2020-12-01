@@ -203,5 +203,16 @@ std::string Scenario::solverMaxNumIterations() const
     return (this->getValue("max_number_iterations"));
 }
 
+void Scenario::additiveContinuation(const std::string& aInput)
+{
+    mMetaData["additive_continuation"] = aInput;
+}
+
+std::string Scenario::additiveContinuation() const
+{
+    return (this->getValue("additive_continuation"));
+}
+
+
 }
 // namespace XMLGen

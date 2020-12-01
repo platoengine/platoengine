@@ -132,6 +132,18 @@ void append_self_adjoint_parameter_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn get_load_vector_for_scenario
+ * \brief Utility function to retrieve the loads used in a scenario
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aScenario The scenario of interest
+ * \param [out]    aLoadVector  Load vector to populate
+**********************************************************************************/
+void get_load_vector_for_scenario
+(const XMLGen::InputData& aXMLMetaData,
+ const XMLGen::Scenario &aScenario,
+ std::vector<XMLGen::Load> &aLoadVector);
+
+/******************************************************************************//**
  * \fn append_weighted_sum_objective_to_plato_problem
  * \brief Append weighted sum objective function to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -256,6 +268,16 @@ void append_physics_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_spatial_model_to_plato_problem
+ * \brief Append spatial model to plato problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_spatial_model_to_plato_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_material_model_to_plato_problem
  * \brief Append material model to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -276,6 +298,16 @@ void append_random_material_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_spatial_model_to_plato_analyze_input_deck
+ * \brief Append spatial model to problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_spatial_model_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_material_model_to_plato_analyze_input_deck
  * \brief Append material model to problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -292,7 +324,7 @@ void append_material_model_to_plato_analyze_input_deck
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
-(const XMLGen::LoadCase& aLoadCase,
+(const std::vector<XMLGen::Load> &aLoads,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**

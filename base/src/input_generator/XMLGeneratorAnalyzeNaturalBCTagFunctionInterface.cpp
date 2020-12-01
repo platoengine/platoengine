@@ -105,7 +105,7 @@ void NaturalBoundaryConditionTag::insert()
 
     // uniform surface flux
     tFuncIndex = std::type_index(typeid(XMLGen::Private::return_surface_flux_load_name));
-    mMap.insert(std::make_pair("uniform surface flux",
+    mMap.insert(std::make_pair("heat_flux",
       std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)XMLGen::Private::return_surface_flux_load_name, tFuncIndex)));
 }
 

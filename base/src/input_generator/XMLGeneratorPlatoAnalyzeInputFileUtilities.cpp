@@ -23,7 +23,7 @@ namespace XMLGen
 void check_input_mesh_file_keyword
 (const XMLGen::InputData& aXMLMetaData)
 {
-    if (aXMLMetaData.run_mesh_name.empty())
+    if (aXMLMetaData.mesh.run_name.empty())
     {
         THROWERR("Check Input Mesh File Keyword: Input mesh filename is empty.")
     }
@@ -35,7 +35,7 @@ void check_input_mesh_file_keyword
 void is_objective_container_empty
 (const XMLGen::InputData& aXMLMetaData)
 {
-    if(aXMLMetaData.objectives.empty())
+    if(aXMLMetaData.objective.serviceIDs.size() == 0)
     {
         THROWERR("Check Objective is Defined: Objective container is empty.")
     }
@@ -48,13 +48,11 @@ std::vector<std::string> return_list_of_objective_functions
 (const XMLGen::InputData& aXMLMetaData)
 {
     std::vector<std::string> tTokens;
-    for(auto& tObjective : aXMLMetaData.objectives)
+    for(size_t i=0; i<aXMLMetaData.objective.criteriaIDs.size(); ++i)
     {
-        if (tObjective.code().compare("plato_analyze") == 0)
-        {
-            auto tToken = std::string("my ") + Plato::tolower(tObjective.category());
-            tTokens.push_back(tToken);
-        }
+        auto tCriterion = aXMLMetaData.criterion(aXMLMetaData.objective.criteriaIDs[i]);
+        auto tToken = std::string("my ") + Plato::tolower(tCriterion.type());
+        tTokens.push_back(tToken);
     }
     return tTokens;
 }
@@ -66,13 +64,10 @@ std::vector<std::string> return_list_of_objective_weights
 (const XMLGen::InputData& aXMLMetaData)
 {
     std::vector<std::string> tTokens;
-    for(auto& tObjective : aXMLMetaData.objectives)
+    for(auto& tWeight : aXMLMetaData.objective.weights)
     {
-        if (tObjective.code().compare("plato_analyze") == 0)
-        {
-            auto tWeight = tObjective.weight.empty() ? "1.0" : tObjective.weight;
-            tTokens.push_back(tWeight);
-        }
+        auto tReturnWeight = tWeight.empty() ? "1.0" : tWeight;
+        tTokens.push_back(tReturnWeight);
     }
     return tTokens;
 }
@@ -86,11 +81,9 @@ std::vector<std::string> return_list_of_constraint_functions
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if (tConstraint.code().compare("plato_analyze") == 0)
-        {
-            auto tToken = std::string("my ") + Plato::tolower(tConstraint.category());
-            tTokens.push_back(tToken);
-        }
+        auto &tCriterion = aXMLMetaData.criterion(tConstraint.criterion());
+        auto tToken = std::string("my ") + Plato::tolower(tCriterion.type());
+        tTokens.push_back(tToken);
     }
     return tTokens;
 }
@@ -104,7 +97,8 @@ std::vector<std::string> return_list_of_constraint_weights
     std::vector<std::string> tTokens;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        if (tConstraint.code().compare("plato_analyze") == 0)
+        auto &tService = aXMLMetaData.service(tConstraint.service());
+        if (tService.code().compare("plato_analyze") == 0)
         {
             auto tCurrentWeight = tConstraint.weight();
             auto tProposedWeight = tCurrentWeight.empty() ? "1.0" : tCurrentWeight;
@@ -145,11 +139,11 @@ void append_problem_description_to_plato_analyze_input_deck
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidSpatialDimsKeys tValidKeys;
-    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.service(0u).dimensions());
+    auto tSpatialDim = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), aXMLMetaData.scenario(0u).dimensions());
     if (tSpatialDim == tValidKeys.mKeys.end())
     {
         THROWERR(std::string("Append Problem Description to Plato Analyze Input Deck: Invalid spatial dimensions '")
-            + aXMLMetaData.service(0u).dimensions() + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
+            + aXMLMetaData.scenario(0u).dimensions() + "'.  Only three and two dimensional problems are supported in Plato Analyze.")
     }
     XMLGen::check_input_mesh_file_keyword(aXMLMetaData);
 
@@ -160,7 +154,7 @@ void append_problem_description_to_plato_analyze_input_deck
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
     tValues = {"Spatial Dimension", "int", tSpatialDim->c_str()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
-    tValues = {"Input Mesh", "string", aXMLMetaData.run_mesh_name};
+    tValues = {"Input Mesh", "string", aXMLMetaData.mesh.run_name};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tProblem);
 }
 // function append_problem_description_to_plato_analyze_input_deck
@@ -172,7 +166,7 @@ void append_physics_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPhysicsTag = tValidKeys.physics(aXMLMetaData.service(0u).physics());
+    auto tPhysicsTag = tValidKeys.physics(aXMLMetaData.scenario(0u).physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Physics", "string", tPhysicsTag};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
@@ -186,7 +180,7 @@ void append_pde_constraint_parameter_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
-    auto tPDE = tValidKeys.pde(aXMLMetaData.service(0u).physics());
+    auto tPDE = tValidKeys.pde(aXMLMetaData.scenario(0u).physics());
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"PDE Constraint", "string", tPDE};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
@@ -202,10 +196,11 @@ void append_self_adjoint_parameter_to_plato_problem
     XMLGen::is_objective_container_empty(aXMLMetaData);
 
     std::string tIsSelfAdjoint = "false";
-    if(aXMLMetaData.objectives.size() == 1u)
+    if(aXMLMetaData.objective.criteriaIDs.size() == 1u)
     {
         XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-        auto tLowerCriterion = Plato::tolower(aXMLMetaData.objectives.begin()->type);
+        auto &tCriterion = aXMLMetaData.criterion(aXMLMetaData.objective.criteriaIDs[0]);
+        auto tLowerCriterion = Plato::tolower(tCriterion.type());
         auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
         if (tItr == tValidKeys.mKeys.end())
         {
@@ -257,6 +252,7 @@ void append_plato_problem_to_plato_analyze_input_deck
     }
     XMLGen::append_criteria_list_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
@@ -319,13 +315,11 @@ void append_objective_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::AppendCriterionParameters<XMLGen::Objective> tFunctionInterface;
-    for(auto& tObjective : aXMLMetaData.objectives)
+    XMLGen::AppendCriterionParameters<XMLGen::Criterion> tFunctionInterface;
+    for(auto& tCriteriaID : aXMLMetaData.objective.criteriaIDs)
     {
-        if(tObjective.code().compare("plato_analyze") == 0)
-        {
-            tFunctionInterface.call(tObjective, aParentNode);
-        }
+        auto &tCriterion = aXMLMetaData.criterion(tCriteriaID);
+        tFunctionInterface.call(tCriterion, aParentNode);
     }
 }
 // function append_objective_criteria_to_plato_problem
@@ -355,10 +349,11 @@ void append_constraint_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::AppendCriterionParameters<XMLGen::Constraint> tFunctionInterface;
+    XMLGen::AppendCriterionParameters<XMLGen::Criterion> tFunctionInterface;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        tFunctionInterface.call(tConstraint, aParentNode);
+        auto &tCriterion = aXMLMetaData.criterion(tConstraint.criterion());
+        tFunctionInterface.call(tCriterion, aParentNode);
     }
 }
 // function append_constraint_criteria_to_plato_problem
@@ -429,11 +424,38 @@ void append_physics_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode)
 {
     XMLGen::AnalyzePhysicsFunctionInterface tPhysicsInterface;
-    tPhysicsInterface.call(aXMLMetaData.service(0u), aXMLMetaData.mOutputMetaData, aParentNode);
+    tPhysicsInterface.call(aXMLMetaData.scenario(0u), aXMLMetaData.mOutputMetaData, aParentNode);
 }
 // function append_physics_to_plato_analyze_input_deck
 /**********************************************************************************/
 
+/**********************************************************************************/
+void append_spatial_model_to_plato_problem
+(const std::vector<XMLGen::Block>& aBlocks,
+ pugi::xml_node& aParentNode)
+{
+    if(aBlocks.empty())
+    {
+        THROWERR("Append Spatial Model to Plato Problem: Block container is empty.")
+    }
+
+    auto tSpatialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
+    auto tDomains = tSpatialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
+    for(auto& tBlock : aBlocks)
+    {
+        auto tCurDomain = tDomains.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {std::string("Block ") + tBlock.block_id}, tCurDomain);
+        std::vector<std::string> tKeys = {"name", "type", "value"};
+        std::vector<std::string> tValues = {"Element Block", "string", std::string("block_") + tBlock.block_id};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCurDomain);
+        tValues = {"Material Model", "string", std::string("Material ") + tBlock.material_id};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCurDomain);
+    }
+}
+// function append_spatial_model_to_plato_problem
+/**********************************************************************************/
 /**********************************************************************************/
 void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
@@ -444,10 +466,12 @@ void append_material_model_to_plato_problem
         THROWERR("Append Material Model to Plato Problem: Material container is empty.")
     }
 
+    auto tMaterialModels = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Material Models"}, tMaterialModels);
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
-        tMaterialInterface.call(tMaterial, aParentNode);
+        tMaterialInterface.call(tMaterial, tMaterialModels);
     }
 }
 // function append_material_model_to_plato_problem
@@ -458,6 +482,7 @@ void append_random_material_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+/*
     if(aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
     {
         auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
@@ -467,8 +492,19 @@ void append_random_material_to_plato_analyze_input_deck
     {
         XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
     }
+*/
 }
 // function append_random_material_to_plato_analyze_input_deck
+/**********************************************************************************/
+
+/**********************************************************************************/
+void append_spatial_model_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    XMLGen::append_spatial_model_to_plato_problem(aXMLMetaData.blocks, aParentNode);
+}
+// function append_spatial_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -476,35 +512,31 @@ void append_material_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+/*
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
         XMLGen::append_random_material_to_plato_analyze_input_deck(aXMLMetaData, aParentNode);
     }
     else
     {
+*/
         XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-    }
+//    }
 }
 // function append_material_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
-(const XMLGen::LoadCase& aLoadCase,
+(const std::vector<XMLGen::Load> &aLoads,
  pugi::xml_node& aParentNode)
 {
-    auto tLowerPerformer = Plato::tolower(aLoadCase.mCode);
-    if (tLowerPerformer.compare("plato_analyze") != 0)
-    {
-        return;
-    }
-
     auto tNaturalBC = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Natural Boundary Conditions"}, tNaturalBC);
 
     XMLGen::AppendNaturalBoundaryCondition tNaturalBCFuncInterface;
     XMLGen::NaturalBoundaryConditionTag tNaturalBCNameFuncInterface;
-    for(auto& tLoad : aLoadCase.loads)
+    for(auto& tLoad : aLoads)
     {
         auto tName = tNaturalBCNameFuncInterface.call(tLoad);
         tNaturalBCFuncInterface.call(tName, tLoad, tNaturalBC);
@@ -518,12 +550,34 @@ void append_deterministic_natural_boundary_conditions_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for (auto &tLoadCase : aXMLMetaData.load_cases)
+    for (auto &tScenario : aXMLMetaData.scenarios())
     {
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadCase, aParentNode);
+        std::vector<XMLGen::Load> tLoadVector;
+        get_load_vector_for_scenario(aXMLMetaData, tScenario, tLoadVector);
+        XMLGen::append_natural_boundary_conditions_to_plato_problem(tLoadVector, aParentNode);
     }
 }
 // function append_deterministic_natural_boundary_conditions_to_plato_problem
+/**********************************************************************************/
+
+/**********************************************************************************/
+void get_load_vector_for_scenario
+(const XMLGen::InputData& aXMLMetaData,
+ const XMLGen::Scenario &aScenario,
+ std::vector<XMLGen::Load> &aLoadVector)
+{
+    for(auto &tLoadID : aScenario.loadIDs())
+    {
+        for(size_t i=0; i<aXMLMetaData.loads.size(); ++i)
+        {
+            if(aXMLMetaData.loads[i].load_id.compare(tLoadID) == 0)
+            {
+                aLoadVector.push_back(aXMLMetaData.loads[i]);
+                break;
+            }
+        }
+    }
+}
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -531,6 +585,7 @@ void append_random_natural_boundary_conditions_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+/*
     if(aXMLMetaData.mRandomMetaData.loadSamplesDrawn())
     {
         auto tRandomLoads = aXMLMetaData.mRandomMetaData.loadcase();
@@ -538,8 +593,9 @@ void append_random_natural_boundary_conditions_to_plato_problem
     }
     else
     {
+*/
         XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
-    }
+ //   }
 }
 // function append_random_natural_boundary_conditions_to_plato_problem
 /**********************************************************************************/
@@ -549,14 +605,16 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+/*
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
         XMLGen::append_random_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
     }
     else
     {
+*/
         XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
-    }
+ //   }
 }
 // function append_natural_boundary_conditions_to_plato_analyze_input_deck
 /**********************************************************************************/

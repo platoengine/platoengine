@@ -14,8 +14,16 @@ namespace XMLGen
 
 void ParseCriteria::setTags(XMLGen::Criterion& aCriterion)
 {
+    XMLGen::ValidCriterionParameterKeys tValidKeys;
     for(auto& tTag : mTags)
     {
+        auto tLowerKey = XMLGen::to_lower(tTag.first);
+        auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
+        if(tItr == tValidKeys.mKeys.end())
+        {
+            THROWERR(std::string("Check Keyword: keyword '") + tTag.first + std::string("' is not supported"))
+        }
+
         if(tTag.second.first.second.empty())
         {
             auto tDefaultValue = tTag.second.second;
@@ -71,50 +79,10 @@ void ParseCriteria::setCriterionType(XMLGen::Criterion& aMetadata)
     }
 }
 
-void ParseCriteria::setCriterionParameters(XMLGen::Criterion& aMetadata)
-{
-    XMLGen::ValidCriterionParameterKeyMap tValidMap;
-    XMLGen::ValidKeys tValidKeys;
-    std::string tCriterionType = mTags.find("type")->second.first.second;
-    tValidKeys.mKeys = tValidMap.getValidKeysForCriterion(tCriterionType);
-
-    for(auto& tKeyword : tValidKeys.mKeys)
-    {
-        auto tItr = mTags.find(tKeyword);
-        if(tItr == mTags.end())
-        {
-            THROWERR(std::string("Parse Criteria: Criterion parameter '") + tKeyword + "' is not a valid keyword.")
-        }
-
-        if(!tItr->second.first.second.empty())
-        {
-            aMetadata.parameter(tKeyword, tItr->second.first.second);
-        }
-        else
-            THROWERR("Parse Criteria: " + tKeyword + " parameter required for " + tCriterionType + " criterion type" )
-    }
-
-    for(auto& tTag : mTags)
-    {
-        if(!tTag.second.first.second.empty() && tTag.first != "type" && tTag.first != "normalize" && tTag.first != "normalization_value")
-        {
-            bool found_invalid_parameter = true;
-            for(auto& tKeyword : tValidKeys.mKeys)
-            {
-                if(tTag.first == tKeyword)
-                    found_invalid_parameter = false;
-            }
-            if(found_invalid_parameter)
-                THROWERR("Parse Criterion: " + tTag.first + " is an invalid parameter for " + tCriterionType + " criterion type")
-        }
-    }
-}
-
 void ParseCriteria::setMetadata(XMLGen::Criterion& aMetadata)
 {
     this->setCriterionType(aMetadata);
     this->setTags(aMetadata);
-    this->setCriterionParameters(aMetadata);
 }
 
 void ParseCriteria::checkUniqueIDs()

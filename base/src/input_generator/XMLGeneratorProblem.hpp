@@ -1,7 +1,7 @@
 /*
- * XMLGeneratorPlatoAnalyzeProblem.hpp
+ * XMLGeneratorProblem.hpp
  *
- *  Created on: Jun 15, 2020
+ *  Created on: Nov 20, 2020
  */
 
 #pragma once
@@ -21,7 +21,7 @@
 namespace XMLGen
 {
 
-namespace Analyze
+namespace Problem
 {
 
 /******************************************************************************//**
@@ -56,16 +56,31 @@ inline void write_optimization_problem
 //        XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
 
     XMLGen::write_interface_xml_file(aMetaData);
-    XMLGen::write_plato_main_operations_xml_file(aMetaData);
-    XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
-    XMLGen::write_plato_main_input_deck_file(aMetaData);
-    XMLGen::write_plato_analyze_input_deck_file(aMetaData);
-    XMLGen::write_amgx_input_file(aMetaData);
+    for(auto tService : aMetaData.services())
+    {
+        XMLGen::write_service_operation_files(aMetaData, tService);
+        XMLGen::write_service_input_files(aMetaData, tService);
+        XMLGen::write_service_auxilliary_files(aMetaData, tService);
+    }
     XMLGen::generate_launch_script(aMetaData);
 }
 
+inline void write_service_operation_files
+(const XMLGen::InputData& aMetaData,
+ const XMLGen::Service &aService)
+{
+    if(aService.code() == "platomain")
+    {
+        XMLGen::write_plato_main_operations_xml_file(aMetaData, aService);
+
+    }
+    else if(aService.code() == "plato_analyze")
+    {
+    }
 }
-// namespace Analyze
+
+}
+// namespace Problem
 
 }
 // namespace XMLGen

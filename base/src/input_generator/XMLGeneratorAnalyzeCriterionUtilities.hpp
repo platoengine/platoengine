@@ -26,7 +26,8 @@ std::string is_criterion_supported_in_plato_analyze
 (const Criterion& aCriterion)
 {
     XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-    auto tLowerCriterion = Plato::tolower(aCriterion.category());
+    //auto tLowerCriterion = Plato::tolower(aCriterion.category());
+    auto tLowerCriterion = Plato::tolower(aCriterion.type());
     auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
     if (tItr == tValidKeys.mKeys.end())
     {
@@ -74,7 +75,8 @@ void append_scalar_function_criterion
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
 
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
+    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
+    //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
     auto tObjective = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
@@ -118,6 +120,7 @@ void append_pnorm_criterion
  * \param [in] aCriterion criterion metadata
  * \param [in/out] aParentNode  pugi::xml_node
  **********************************************************************************/
+/*
 inline void append_stress_constrained_mass_minimization_criterion_parameters
 (const XMLGen::Objective& aCriterion,
  pugi::xml_node& aParentNode)
@@ -152,6 +155,7 @@ inline void append_stress_constrained_mass_minimization_criterion_parameters
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
+*/
 
 /******************************************************************************//**
  * \fn append_stress_constrained_mass_minimization_criterion
@@ -159,6 +163,7 @@ inline void append_stress_constrained_mass_minimization_criterion_parameters
  * \param [in] aCriterion criterion metadata
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
+/*
 inline void append_stress_constrained_mass_minimization_criterion
 (const XMLGen::Objective& aCriterion,
  pugi::xml_node& aParentNode)
@@ -178,6 +183,7 @@ inline void append_stress_constrained_mass_minimization_criterion
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
     XMLGen::Private::append_stress_constrained_mass_minimization_criterion_parameters(aCriterion, tObjective);
 }
+*/
 
 }
 // namespace Private

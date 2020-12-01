@@ -69,7 +69,7 @@ void append_isotropic_linear_elastic_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tElasticModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tElasticModel);
+    XMLGen::append_attributes({"name"}, {std::string("Material ") + aMaterial.id()}, tElasticModel);
     auto tIsotropicLinearElasticModel = tElasticModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Isotropic Linear Elastic"}, tIsotropicLinearElasticModel);
     XMLGen::Private::append_material_property("poissons_ratio", aMaterial, tIsotropicLinearElasticModel);
@@ -82,7 +82,7 @@ void append_isotropic_linear_thermal_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     auto tMaterialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Material Model"}, tMaterialModel);
+    XMLGen::append_attributes({"name"}, {std::string("Material ") + aMaterial.id()}, tMaterialModel);
 
     // append thermal conduction property
     auto tThermalConduction = tMaterialModel.append_child("ParameterList");

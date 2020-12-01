@@ -24,6 +24,17 @@
 namespace XMLGen
 {
 
+/******************************************************************************//**
+* \enum \struct High-Performance Platform
+* \brief Denotes the High-Performance Platform use to run stochastic use cases.
+**********************************************************************************/
+enum struct Arch
+{
+    CEE,
+    SUMMIT
+};
+// enum struct Arch
+    
 struct Objective
 {
     std::string type;
@@ -31,10 +42,12 @@ struct Objective
     std::vector<std::string> serviceIDs;
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
+    std::vector<std::string> subobjective_names;
 };
 
 struct Load
 {
+    bool mIsRandom = false;
     std::string type; // traction, heat flux, force, pressure ...
     std::string app_type; // nodeset or sideset
     std::string app_id; // nodeset/sideset id
@@ -46,6 +59,8 @@ struct Load
 
 struct BC
 {
+    bool mIsRandom = false;
+    std::string mPhysics = "mechanical";
     std::string mCategory = "rigid";
     std::string type;     // temperature, displacement
     std::string app_type; // nodeset or sideset
@@ -128,7 +143,6 @@ struct Optimizer
     std::vector<std::string> fixed_block_ids;
     std::vector<std::string> fixed_sideset_ids;
     std::vector<std::string> fixed_nodeset_ids;
-    std::string num_opt_processors;
     std::string filter_type;
     std::string m_filterType_identity_generatorName;
     std::string m_filterType_kernel_generatorName;
@@ -155,13 +169,20 @@ struct Optimizer
     std::string mAugLagPenaltyParamScale;
     std::string mMaxNumAugLagSubProbIter;
     std::string mMaxTrustRegionRadius;
+    std::string mDerivativeCheckerFinalSuperscript = "8";
+    std::string mDerivativeCheckerInitialSuperscript = "1";
     std::string mMinTrustRegionRadius;
+    std::string output_frequency;
+    std::string output_method;
+    std::string objective_number_standard_deviations;
 };
 
 struct Mesh
 {
     std::string name;
     std::string name_without_extension;
+    std::string run_name;
+    std::string run_name_without_extension;
     std::string file_extension;
 };
 
@@ -169,8 +190,64 @@ struct InputData
 {
 private:
     std::vector<XMLGen::Scenario> mScenarios;
+    std::vector<XMLGen::Service> mServices;
+    std::vector<XMLGen::Criterion> mCriteria;
 
 public:
+
+    std::string getFirstPlatoMainPerformer() const
+    {
+        std::string tReturnValue = "";
+        for(auto& tService : mServices)
+        {
+            if(tService.code() == "platomain")
+            {
+                tReturnValue = tService.performer();
+                break;
+            }
+        }
+        return tReturnValue;
+    }
+
+    void generateMeaningfulNames()
+    {
+        // Build names for constraints
+        for(auto& tConstraint : constraints)
+        {
+            std::string tCriterionID = tConstraint.criterion();
+            auto tCriterion = criterion(tCriterionID);
+            std::string tCriterionType = tCriterion.type();
+            std::string tName = tCriterionType;
+            if(tConstraint.scenario().length() > 0)
+            {
+                tName += "_scenario_";
+                tName += tConstraint.scenario();
+            }
+            tConstraint.name(tName);
+        }
+
+        // Build names for subobjectives
+        objective.subobjective_names.clear();
+        for(size_t i=0; i<objective.criteriaIDs.size(); ++i)
+        {
+            auto tCriterion = criterion(objective.criteriaIDs[i]);
+            std::string tCriterionType = tCriterion.type(); 
+            std::string tName = tCriterionType;
+            tName += "_scenario_";
+            tName += objective.scenarioIDs[i];
+            objective.subobjective_names.push_back(tName);
+        }
+
+        // Build names for services
+        for(auto& tService : mServices)
+        {
+            // Only set if someone has not already set it.
+            if(tService.performer().length() == 0)
+                tService.performer(tService.code() + "_" + tService.id());
+        }
+    }
+
+    // Scenario access functions
     const XMLGen::Scenario& scenario(const size_t& aIndex) const
     {
         if(mScenarios.empty())
@@ -226,10 +303,102 @@ public:
         mScenarios.push_back(aScenario);
     }
 
+    // Service access functions
+    const XMLGen::Service& service(const size_t& aIndex) const
+    {
+        if(mServices.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'service' list is empty.")
+        }
+        else if(aIndex >= mServices.size())
+        {
+            THROWERR("XML Generator Input Metadata: index is out-of-bounds, 'service' size is '"
+                + std::to_string(mServices.size()) + "'.")
+        }
+        return mServices[aIndex];
+    }
+    const XMLGen::Service& service(const std::string& aID) const
+    {
+        if(mServices.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'service' list member data is empty.")
+        }
+        else if(aID.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'service' identification (id) input argument is empty.")
+        }
+        size_t tIndex = 0u;
+        auto tFoundMatch = false;
+        for(auto& tService : mServices)
+        {
+            tIndex = &tService - &mServices[0];
+            if(tService.id().compare(aID) == 0)
+            {
+                tFoundMatch = true;
+                break;
+            }
+        }
+
+        if(!tFoundMatch)
+        {
+            THROWERR("XML Generator Input Metadata: Did not find 'service' with identification (id) '" + aID + "' in service list.")
+        }
+
+        return mServices[tIndex];
+    }
+    const std::vector<XMLGen::Service>& services() const
+    {
+        return mServices;
+    }
+    void set(const std::vector<XMLGen::Service>& aServices)
+    {
+        mServices = aServices;
+    }
+    void append(const XMLGen::Service& aService)
+    {
+        mServices.push_back(aService);
+    }
+    // Criteria access
+    const XMLGen::Criterion& criterion(const std::string& aID) const
+    {
+        if(mCriteria.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'criterion' list member data is empty.")
+        }
+        else if(aID.empty())
+        {
+            THROWERR("XML Generator Input Metadata: 'criterion' identification (id) input argument is empty.")
+        }
+        size_t tIndex = 0u;
+        auto tFoundMatch = false;
+        for(auto& tCriterion : mCriteria)
+        {
+            tIndex = &tCriterion - &mCriteria[0];
+            if(tCriterion.id().compare(aID) == 0)
+            {
+                tFoundMatch = true;
+                break;
+            }
+        }
+
+        if(!tFoundMatch)
+        {
+            THROWERR("XML Generator Input Metadata: Did not find 'criterion' with identification (id) '" + aID + "' in criteria list.")
+        }
+
+        return mCriteria[tIndex];
+    }
+    void set(const std::vector<XMLGen::Criterion>& aCriteria)
+    {
+        mCriteria = aCriteria;
+    }
+    void append(const XMLGen::Criterion& aCriterion)
+    {
+        mCriteria.push_back(aCriterion);
+    }
+
     XMLGen::Objective objective;
     std::vector<XMLGen::Constraint> constraints;
-    std::vector<XMLGen::Service> services;
-    std::vector<XMLGen::Criterion> criteria;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
@@ -239,19 +408,17 @@ public:
     std::vector<XMLGen::Uncertainty> uncertainties;
     XMLGen::Output mOutputMetaData;
     XMLGen::Optimizer optimizer;
+    XMLGen::Arch m_Arch;
+    bool m_UseLaunch;
 
     // // miscelaneous data that may be unused
     // int num_shape_design_variables;
     // std::string csm_tesselation_filename;
     // std::string csm_exodus_filename;
     // std::string volume_fraction;
-    // std::string mDerivativeCheckerFinalSuperscript = "8";
-    // std::string mDerivativeCheckerInitialSuperscript = "1";
     // std::vector<std::string> mShapeDesignVariableValues;
-    // bool m_UseLaunch;
     // bool m_HasUncertainties;
     // bool m_RequestedVonMisesOutput;
-    // Arch m_Arch;
     // std::string m_filterType_identity_XMLName;
     // std::string m_filterType_kernel_XMLName;
     // std::string m_filterType_kernelThenHeaviside_XMLName;
@@ -260,11 +427,8 @@ public:
     // XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     
     // // I think these are going to be handled somewhere other than the optimizer
-    // std::string objective_number_standard_deviations;
     // std::vector<std::string> mStandardDeviations;
     // std::string mUseNormalizationInAggregator;
-    // std::string output_frequency;
-    // std::string output_method;
 };
 
 

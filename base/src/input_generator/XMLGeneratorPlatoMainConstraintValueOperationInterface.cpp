@@ -15,11 +15,11 @@ namespace Private
 
 void append_compute_constraint_value_operation_platomain
 (const XMLGen::Constraint& aConstraint,
+ const std::string &aPerformer,
  pugi::xml_node& aParentNode)
 {
-    auto tPerformer = aConstraint.performer();
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", aPerformer}, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
@@ -35,11 +35,11 @@ void append_compute_constraint_value_operation_platomain
 
 void append_compute_constraint_value_operation_platoanalyze
 (const XMLGen::Constraint& aConstraint,
+ const std::string &aPerformer,
  pugi::xml_node& aParentNode)
 {
-    auto tPerformer = aConstraint.performer();
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", tPerformer}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", aPerformer}, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
@@ -67,22 +67,24 @@ void ConstraintValueOperation::insert()
 
 void ConstraintValueOperation::call
 (const XMLGen::Constraint& aConstraint,
+ const std::string &aPerformer,
+ const std::string &aCode,
  pugi::xml_node& aParentNode) const
 {
-    auto tLowerCode = Plato::tolower(aConstraint.code());
+    auto tLowerCode = Plato::tolower(aCode);
     auto tMapItr = mMap.find(tLowerCode);
     if(tMapItr == mMap.end())
     {
         THROWERR(std::string("Constraint Value Operation Interface: Did not find 'code' keyword with tag '")
             + tLowerCode + "', 'code' keyword '" + tLowerCode + "' is not supported.")
     }
-    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Constraint&, pugi::xml_node&)>(tMapItr->second.first);
+    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Constraint&, const std::string &aPerformer, pugi::xml_node&)>(tMapItr->second.first);
     if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
     {
         THROWERR(std::string("Constraint Value Operation Interface: Reinterpret cast of constraint value operation ")
             + "for code with tag '" + tLowerCode + "' failed.")
     }
-    tTypeCastedFunc(aConstraint, aParentNode);
+    tTypeCastedFunc(aConstraint, aPerformer, aParentNode);
 }
 
 }
