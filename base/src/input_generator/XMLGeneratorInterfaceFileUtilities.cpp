@@ -401,10 +401,24 @@ void append_objective_value_stage
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
 */
-    XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
+    std::string tOutputSharedData;
+    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    {
+        tOutputSharedData = "Objective Value";
+        XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
+    }
+    else
+    {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        tOutputSharedData = "Criterion Value - " + tIdentifierString;
+    }
 
     auto tStageOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children( { "SharedDataName" }, { "Objective Value" }, tStageOutputNode);
+    XMLGen::append_children( { "SharedDataName" }, { tOutputSharedData }, tStageOutputNode);
 }
 /******************************************************************************/
 
@@ -1071,7 +1085,7 @@ void append_constraint_value_stage
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Compute Criterion Value - ") + tIdentifierString;
+        auto tStageName = std::string("Compute Constraint Value ") + tConstraint.id();
         XMLGen::append_children({"Name"}, {tStageName}, tStageNode);
         auto tInputNode = tStageNode.append_child("Input");
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
@@ -1103,7 +1117,7 @@ void append_constraint_gradient_stage
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         auto tStageNode = aDocument.append_child("Stage");
-        auto tStageName = std::string("Compute Criterion Gradient - ") + tIdentifierString;
+        auto tStageName = std::string("Compute Constraint Gradient ") + tConstraint.id();
         XMLGen::append_children({"Name"}, {tStageName}, tStageNode);
         auto tInputNode = tStageNode.append_child("Input");
         XMLGen::append_children({"SharedDataName"}, {"Control"}, tInputNode);
@@ -1112,10 +1126,11 @@ void append_constraint_gradient_stage
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
         tGradOperationInterface.call(tConstraint, tService.performer(), tService.code(), tStageNode);
         auto tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
-        XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tSharedDataName, tSharedDataName, tStageNode);
+        std::string tOutputSharedData = "Constraint Gradient " + tConstraint.id();
+        XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tSharedDataName, tOutputSharedData, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
+        XMLGen::append_children({"SharedDataName"}, {tOutputSharedData}, tOutputNode);
     }
 }
 // function append_constraint_gradient_stage
@@ -1311,7 +1326,22 @@ void append_optimization_objective_options
     std::unordered_map<std::string, std::string> tKeyToValueMap =
         { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""} };
 
-    tKeyToValueMap.find("ValueName")->second = std::string("Objective Value");
+    std::string tValueNameString;
+    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    {
+        tValueNameString = "Objective Value";
+    }
+    else
+    {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        tValueNameString = "Criterion Value - " + tIdentifierString;
+    }
+
+    tKeyToValueMap.find("ValueName")->second = tValueNameString;
     tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Objective Value");
     tKeyToValueMap.find("GradientName")->second = std::string("Objective Gradient");
     tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Objective Gradient");
@@ -1356,9 +1386,9 @@ void append_optimization_constraint_options
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         tKeyToValueMap.find("ValueName")->second = std::string("Criterion Value - ") + tIdentifierString;
-        tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Criterion Value - ") + tIdentifierString;
-        tKeyToValueMap.find("GradientName")->second = std::string("Criterion Gradient - ") + tIdentifierString;
-        tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Criterion Gradient - ") + tIdentifierString;
+        tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Constraint Value ") + tConstraint.id();
+        tKeyToValueMap.find("GradientName")->second = std::string("Constraint Gradient ") + tConstraint.id();
+        tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Constraint Gradient ") + tConstraint.id();
         if(tConstraint.absoluteTarget().length() > 0)
             tKeyToValueMap["AbsoluteTargetValue"] = tConstraint.absoluteTarget();
         else if(tConstraint.relativeTarget().length() > 0)
