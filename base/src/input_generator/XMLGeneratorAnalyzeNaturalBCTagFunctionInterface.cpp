@@ -95,17 +95,17 @@ void NaturalBoundaryConditionTag::insert()
 
     // uniform pressure load
     tFuncIndex = std::type_index(typeid(XMLGen::Private::return_pressure_load_name));
-    mMap.insert(std::make_pair("uniform pressure",
+    mMap.insert(std::make_pair("uniform_pressure",
       std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)XMLGen::Private::return_pressure_load_name, tFuncIndex)));
 
     // uniform surface potential
     tFuncIndex = std::type_index(typeid(XMLGen::Private::return_surface_potential_load_name));
-    mMap.insert(std::make_pair("uniform surface potential",
+    mMap.insert(std::make_pair("uniform_surface_potential",
       std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)XMLGen::Private::return_surface_potential_load_name, tFuncIndex)));
 
     // uniform surface flux
     tFuncIndex = std::type_index(typeid(XMLGen::Private::return_surface_flux_load_name));
-    mMap.insert(std::make_pair("heat_flux",
+    mMap.insert(std::make_pair("uniform_surface_flux",
       std::make_pair((XMLGen::Analyze::NaturalBCTagFunc)XMLGen::Private::return_surface_flux_load_name, tFuncIndex)));
 }
 

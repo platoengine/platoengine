@@ -18,7 +18,7 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element_field");
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_statistics_to_output_operation(tXMLMetaData, tDocument);
@@ -1001,7 +1001,7 @@ TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element_field");
     ASSERT_NO_THROW(XMLGen::append_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1339,9 +1339,9 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mOutputMetaData.outputSamples("true");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy_Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("dispX", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element_field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy_Stress", "element_field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("dispX", "nodal_field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_stochastic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1372,9 +1372,9 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("VonMises", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("VonMises", "element_field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element_field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal_field");
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1452,7 +1452,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
 {
     pugi::xml_document tDocument1;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.filter_type = "kernel then tanh";
+    tXMLMetaData.optimizer.filter_type = "kernel_then_tanh";
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument1);
     ASSERT_FALSE(tDocument1.empty());
 
@@ -1463,7 +1463,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
 
     // CASE 2: DEFAULT FILTER
     pugi::xml_document tDocument2;
-    tXMLMetaData.optimizer.filter_type = "pde filter";
+    tXMLMetaData.optimizer.filter_type = "pde_filter";
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument2);
     ASSERT_FALSE(tDocument2.empty());
     tFilterNode = tDocument2.child("Filter");

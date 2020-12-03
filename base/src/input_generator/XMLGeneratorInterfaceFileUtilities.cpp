@@ -1221,6 +1221,10 @@ void append_optimization_algorithm_parameters_options
     {
         XMLGen::append_trust_region_kelley_sachs_options(aXMLMetaData, aParentNode);
     }
+    else if(tLower.compare("ksal") == 0)
+    {
+        XMLGen::append_trust_region_kelley_sachs_options(aXMLMetaData, aParentNode);
+    }
     else if(tLower.compare("derivativechecker") == 0)
     {
         XMLGen::append_derivative_checker_options(aXMLMetaData, aParentNode);

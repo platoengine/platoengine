@@ -253,7 +253,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
 {
     std::string tStringInput =
         "begin criterion 1\n"
-        "type compliance\n"
+        "type mechanical_compliance\n"
         "normalize true\n"
         "normalization_value 10\n"
         "end criterion\n";
@@ -266,7 +266,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Compliance)
     auto tCriterionMetaData = tCriteriaParser.data();
     ASSERT_EQ(1u, tCriterionMetaData.size());
     ASSERT_STREQ("1", tCriterionMetaData[0].id().c_str());
-    ASSERT_STREQ("compliance", tCriterionMetaData[0].type().c_str());
+    ASSERT_STREQ("mechanical_compliance", tCriterionMetaData[0].type().c_str());
     ASSERT_STREQ("true", tCriterionMetaData[0].value("normalize").c_str());
     ASSERT_STREQ("10", tCriterionMetaData[0].value("normalization_value").c_str());
 
@@ -322,7 +322,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
         "stress_p_norm_exponent 3\n"
         "end criterion\n"
         "begin criterion 2\n"
-        "type compliance\n"
+        "type mechanical_compliance\n"
         "end criterion\n"
         "begin criterion 3\n"
         "type volume\n"
@@ -339,7 +339,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
     ASSERT_STREQ("2", tCriterionMetaData[1].id().c_str());
     ASSERT_STREQ("3", tCriterionMetaData[2].id().c_str());
     ASSERT_STREQ("stress_p-norm", tCriterionMetaData[0].type().c_str());
-    ASSERT_STREQ("compliance", tCriterionMetaData[1].type().c_str());
+    ASSERT_STREQ("mechanical_compliance", tCriterionMetaData[1].type().c_str());
     ASSERT_STREQ("volume", tCriterionMetaData[2].type().c_str());
 
     ASSERT_STREQ("3", tCriterionMetaData[0].value("stress_p_norm_exponent").c_str());
@@ -374,7 +374,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_ErrorEmptyMaterialProperties)
 {
     std::string tStringInput =
         "begin material\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "end material\n";
     std::istringstream tInputSS;
     tInputSS.str(tStringInput);
@@ -387,12 +387,12 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_NonUniqueIDs)
 {
     std::string tStringInput =
         "begin material 1\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "   youngs_modulus 200e9\n"
         "   poissons_ratio 0.33\n"
         "end material\n"
         "begin material 1\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "   youngs_modulus 200e9\n"
         "   poissons_ratio 0.33\n"
         "end material\n";
@@ -407,7 +407,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_OneMaterial)
 {
     std::string tStringInput =
         "begin material 1\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "   youngs_modulus 200e9\n"
         "   poissons_ratio 0.33\n"
         "end material\n";
@@ -425,21 +425,21 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_OneMaterial)
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
     ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
     ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].category().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
 {
     std::string tStringInput =
         "begin material 1\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "   youngs_modulus 200e9\n"
         "   poissons_ratio 0.33\n"
         "end material\n"
         "begin material\n"
         "   id 2\n"
         "   code sierra_sd\n"
-        "   material_model isotropic linear elastic\n"
+        "   material_model isotropic_linear_elastic\n"
         "   youngs_modulus 100e9\n"
         "   poissons_ratio 0.35\n"
         "end material\n";
@@ -460,7 +460,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
     ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
     ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].category().c_str());
 
     tTags = tMaterialMetaData[1].tags();
     ASSERT_EQ(3u, tTags.size());
@@ -468,7 +468,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     ASSERT_STREQ("0.35", tMaterialMetaData[1].property("poissons_ratio").c_str());
     ASSERT_STREQ("100e9", tMaterialMetaData[1].property("youngs_modulus").c_str());
     ASSERT_STREQ("3.0", tMaterialMetaData[1].property("penalty_exponent").c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterialMetaData[1].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[1].category().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyConstraintMetadata)
@@ -600,7 +600,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidDimensions)
 {
     std::string tStringInput =
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   dimensions 1\n"
         "   loads 1\n"
         "   boundary_conditions 1\n"
@@ -631,7 +631,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorNoDimensions)
 {
     std::string tStringInput =
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   loads 1\n"
         "   boundary_conditions 1\n"
         "end scenario\n";
@@ -646,7 +646,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorNoLoads)
 {
     std::string tStringInput =
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   dimensions 3\n"
         "   boundary_conditions 1\n"
         "end scenario\n";
@@ -661,7 +661,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorNoBoundaryConditions)
 {
     std::string tStringInput =
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   dimensions 3\n"
         "   loads 1\n"
         "end scenario\n";
@@ -680,7 +680,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorInvalidScenarioBlockID)
     // 3. begin scenario name1 name2 name3  BAD!
     std::string tStringInput =
         "begin scenario air_force one\n"
-        "   physics thermal\n"
+        "   physics steady_state_thermal\n"
         "   dimensions 2\n"
         "   material_penalty_exponent 1.0\n"
         "   minimum_ersatz_material_value 1e-6\n"
@@ -702,7 +702,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     // 3. begin scenario name1 name2 name3  BAD!
     std::string tStringInput =
         "begin scenario air_force_one\n"
-        "   physics thermal\n"
+        "   physics steady_state_thermal\n"
         "   dimensions 2\n"
         "   material_penalty_exponent 1.0\n"
         "   minimum_ersatz_material_value 1e-6\n"
@@ -717,7 +717,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario)
     auto tScenarios = tScenarioParser.data();
     for (auto &tScenario : tScenarios)
     {
-        ASSERT_STREQ("thermal", tScenario.value("physics").c_str());
+        ASSERT_STREQ("steady_state_thermal", tScenario.value("physics").c_str());
         ASSERT_STREQ("air_force_one", tScenario.value("id").c_str());
         ASSERT_STREQ("2", tScenario.value("dimensions").c_str());
         ASSERT_STREQ("1.0", tScenario.value("material_penalty_exponent").c_str());
@@ -739,7 +739,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_WithTimeAndSolverBlocks)
     // 3. begin scenario name1 name2 name3  BAD!
     std::string tStringInput =
         "begin scenario air_force_one\n"
-        "   physics thermal\n"
+        "   physics steady_state_thermal\n"
         "   dimensions 2\n"
         "   loads 1\n"
         "   boundary_conditions 1\n"
@@ -768,7 +768,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_WithTimeAndSolverBlocks)
     for (auto &tScenario : tScenarios)
     {
         ASSERT_STREQ("air_force_one", tScenario.value("id").c_str());
-        ASSERT_STREQ("thermal", tScenario.value("physics").c_str());
+        ASSERT_STREQ("steady_state_thermal", tScenario.value("physics").c_str());
         ASSERT_STREQ("2", tScenario.value("dimensions").c_str());
         ASSERT_STREQ("1", tScenario.loadIDs()[0].c_str());
         ASSERT_STREQ("1", tScenario.bcIDs()[0].c_str());
@@ -787,13 +787,13 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
 {
     std::string tStringInput =
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   dimensions 3\n"
         "   loads 1\n"
         "   boundary_conditions 1\n"
         "end scenario\n"
         "begin scenario\n"
-        "   physics mechanical\n"
+        "   physics steady_state_mechanics\n"
         "   dimensions 3\n"
         "   loads 1\n"
         "   boundary_conditions 1\n"
@@ -807,8 +807,8 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
     int id_counter = 1;
     for (auto& tScenario : tScenarios)
     {
-        ASSERT_STREQ(std::string("mechanical_" + std::to_string(id_counter++)).c_str(), tScenario.id().c_str());
-        ASSERT_STREQ("mechanical", tScenario.value("physics").c_str());
+        ASSERT_STREQ(std::string("steady_state_mechanics_" + std::to_string(id_counter++)).c_str(), tScenario.id().c_str());
+        ASSERT_STREQ("steady_state_mechanics", tScenario.value("physics").c_str());
         ASSERT_STREQ("3", tScenario.value("dimensions").c_str());
         ASSERT_STREQ("1", tScenario.loadIDs()[0].c_str());
         ASSERT_STREQ("1", tScenario.bcIDs()[0].c_str());

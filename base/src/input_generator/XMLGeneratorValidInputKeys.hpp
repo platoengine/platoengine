@@ -24,9 +24,16 @@ struct ValidKeys
 
 struct ValidCriterionParameterKeys
 {
-    std::vector<std::string> mKeys = {"type", "normalize", "normalization_value",
-                                      "stress_p_norm_exponent", "material_penalty_model", 
-                                      "material_penalty_exponent", "minimum_ersatz_material_value"};
+    std::vector<std::string> mKeys = 
+    {
+        "type", 
+        "normalize", 
+        "normalization_value",
+        "stress_p_norm_exponent", 
+        "material_penalty_model", 
+        "material_penalty_exponent", 
+        "minimum_ersatz_material_value"
+    };
 };
 
 struct ValidBoolKeys
@@ -44,7 +51,16 @@ struct ValidPlatoInputFileMetaDataBlockKeys
      * \brief plato input file metadata block names
      **/
     std::vector<std::string> mKeys =
-        {"service", "objective", "constraint", "material", "block", "uncertainty", "mesh", "output"};
+    {
+        "service", 
+        "objective", 
+        "constraint", 
+        "material", 
+        "block", 
+        "uncertainty", 
+        "mesh", 
+        "output"
+    };
 };
 // struct ValidPlatoInputFileMetaDataBlockKeys
 
@@ -63,8 +79,35 @@ struct ValidCriterionTypeKeys
      * \brief Valid plato input deck criterion keywords.
      **/
     std::vector<std::string> mKeys =
-        {"compliance", "volume", "mass", "stress_p-norm", "total_work", "surface_area", "thermoelastic_energy", "heat_conduction",
-        "flux_p-norm", "effective_energy", "stress", "flux", "electroelastic_energy", "thermal_energy"};
+    {
+        "mechanical_compliance", 
+        "thermal_compliance",
+        "electrical_compliance",
+        "thermomechanical_compliance", 
+        "electromechanical_compliance", 
+        "total_work", 
+        "elastic_work",
+        "plastic_work",
+        "volume", 
+        "stress_p-norm", 
+        "mass", 
+        "CG_x", 
+        "CG_y", 
+        "CG_z", 
+        "Ixx", 
+        "Iyy", 
+        "Izz", 
+        "Ixz", 
+        "Iyz", 
+        "Ixy", 
+        "effective_energy", 
+        "surface_area", 
+        "flux_p-norm", 
+        "stress", 
+        "average_temperature", 
+        "stress_constraint_quadratic",  
+        "flux" 
+    };
 };
 // struct ValidCriterionTypeKeys
 
@@ -82,11 +125,32 @@ struct ValidRandomPropertyKeys
     /*!<
      * \brief Valid plato input deck random properties keywords.
      **/
-    std::vector<std::string> mKeys = { "angle variation", "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y",
-        "youngs_modulus_z", "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz",
-        "shear_modulus_yz", "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33",
-        "piezoelectric_coupling_31", "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity",
-        "yield_stress" };
+    std::vector<std::string> mKeys = 
+    { 
+        "angle variation", 
+        "youngs_modulus", 
+        "poissons_ratio", 
+        "mass_density", 
+        "youngs_modulus_x", 
+        "youngs_modulus_y",
+        "youngs_modulus_z", 
+        "poissons_ratio_xy", 
+        "poissons_ratio_xz", 
+        "poissons_ratio_yz", 
+        "shear_modulus_xy", 
+        "shear_modulus_xz",
+        "shear_modulus_yz", 
+        "dielectric_permittivity_11", 
+        "dielectric_permittivity_33", 
+        "piezoelectric_coupling_15", 
+        "piezoelectric_coupling_33",
+        "piezoelectric_coupling_31", 
+        "thermal_conductivity", 
+        "specific_heat", 
+        "reference_temperature", 
+        "thermal_expansivity",
+        "yield_stress" 
+    };
 };
 // struct ValidRandomPropertyKeys
 
@@ -123,7 +187,7 @@ struct ValidLoadKeys
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
-    std::vector<std::string> mKeys = {"traction", "heat_flux", "force", "pressure"};
+    std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure"};
 };
 // struct ValidEssentialBoundaryConditionsKeys
 
@@ -132,7 +196,7 @@ struct ValidEssentialBoundaryConditionsKeys
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
-    std::vector<std::string> mKeys = {"rigid", "fixed", "zero value", "fixed value", "insulated"};
+    std::vector<std::string> mKeys = {"rigid", "fixed", "zero_value", "fixed_value", "insulated"};
 };
 // struct ValidEssentialBoundaryConditionsKeys
 
@@ -143,15 +207,28 @@ struct ValidOutputToLayoutKeys
      *  Map from output keyword to data layout, i.e. map<output_key,data_layout>.
      **/
     std::unordered_map<std::string, std::string> mKeys =
-        {
-          {"vonmises","element field"}, {"dispx","nodal field"}, {"dispy","nodal field"}, {"dispz","nodal field"},
-          {"temperature","nodal field"}, {"accumulated_plastic_strain","element field"}, {"potential","nodal field"},
-          {"objective_gradient","nodal field"}, {"constraint_gradient","nodal field"}, {"topology","nodal field"},
-          {"control","nodal field"}, {"cauchy_stress","element field"}, {"deviatoric_stress","element field"},
-          {"plastic_multiplier_increment","element field"}, {"elastic_strain","element field"},
-          {"plastic_strain","element field"}, {"backstress","element field"}, {"principal_stresses","element field"},
-          {"stress","element field"}, {"strain","element field"}
-        };
+    {
+        {"vonmises","element_field"}, 
+        {"dispx","nodal_field"}, 
+        {"dispy","nodal_field"}, 
+        {"dispz","nodal_field"},
+        {"temperature","nodal_field"}, 
+        {"accumulated_plastic_strain","element_field"}, 
+        {"potential","nodal_field"},
+        {"objective_gradient","nodal_field"}, 
+        {"constraint_gradient","nodal_field"}, 
+        {"topology","nodal_field"},
+        {"control","nodal_field"}, 
+        {"cauchy_stress","element_field"}, 
+        {"deviatoric_stress","element_field"},
+        {"plastic_multiplier_increment","element_field"}, 
+        {"elastic_strain","element_field"},
+        {"plastic_strain","element_field"}, 
+        {"backstress","element_field"}, 
+        {"principal_stresses","element_field"},
+        {"stress","element_field"}, 
+        {"strain","element_field"}
+    };
 };
 // struct ValidOutputToLayoutKeys
 
@@ -161,8 +238,18 @@ struct ValidPhysicsKeys
      * \brief Valid plato input deck physics keywords.
      **/
     std::vector<std::string> mKeys =
-        { "mechanical", "transient mechanics", "plasticity", "stabilized mechanics", "thermal", "heat conduction",
-            "electromechanical", "stabilized thermomechanical", "thermomechanical", "coupled heat conduction and mechanics" };
+    { 
+        "steady_state_mechanics", 
+        "transient_mechanics", 
+        "steady_state_thermal", 
+        "transient_thermal", 
+        "steady_state_electrical", 
+        "steady_state_thermomechanics",
+        "transient_thermomechanics",
+        "steady_state_electromechanics",
+        "plasticity", 
+        "thermoplasticity"
+    };
 };
 // struct ValidPhysicsKeys
 
@@ -171,10 +258,30 @@ struct ValidMaterialPropertyKeys
     /*!<
      * \brief Valid plato input deck material property keywords \n
      **/
-    std::vector<std::string> mKeys = { "youngs_modulus", "poissons_ratio", "mass_density", "youngs_modulus_x", "youngs_modulus_y", "youngs_modulus_z",
-        "poissons_ratio_xy", "poissons_ratio_xz", "poissons_ratio_yz", "shear_modulus_xy", "shear_modulus_xz", "shear_modulus_yz",
-        "dielectric_permittivity_11", "dielectric_permittivity_33", "piezoelectric_coupling_15", "piezoelectric_coupling_33", "piezoelectric_coupling_31",
-        "thermal_conductivity", "specific_heat", "reference_temperature", "thermal_expansivity" };
+    std::vector<std::string> mKeys = 
+    { 
+        "youngs_modulus", 
+        "poissons_ratio", 
+        "mass_density", 
+        "youngs_modulus_x", 
+        "youngs_modulus_y", 
+        "youngs_modulus_z",
+        "poissons_ratio_xy", 
+        "poissons_ratio_xz", 
+        "poissons_ratio_yz", 
+        "shear_modulus_xy", 
+        "shear_modulus_xz", 
+        "shear_modulus_yz",
+        "dielectric_permittivity_11", 
+        "dielectric_permittivity_33", 
+        "piezoelectric_coupling_15", 
+        "piezoelectric_coupling_33", 
+        "piezoelectric_coupling_31",
+        "thermal_conductivity", 
+        "specific_heat", 
+        "reference_temperature", 
+        "thermal_expansivity" 
+    };
 };
 // struct ValidMaterialPropertyKeys
 
@@ -183,8 +290,13 @@ struct ValidMaterialModelKeys
     /*!<
      * \brief Valid plato input deck material model keywords \n
      **/
-    std::vector<std::string> mKeys = { "isotropic linear elastic", "orthotropic linear elastic", "isotropic linear electroelastic", "isotropic linear thermal",
-        "isotropic linear thermoelastic" };
+    std::vector<std::string> mKeys = 
+    { 
+        "isotropic_linear_elastic", 
+        "orthotropic_linear_elastic", 
+        "isotropic_linear_electroelastic", 
+        "isotropic_linear_thermal",
+        "isotropic_linear_thermoelastic" };
 };
 // struct ValidMaterialModelKeys
 
@@ -223,7 +335,18 @@ struct ValidLayoutKeys
      * \brief map from light-input file key to Plato layout, i.e. map<light_input_file_key, plato_layout_key>
      **/
     std::unordered_map<std::string, std::string> mKeys =
-        { {"element field", "Element Field"}, {"nodal field", "Nodal Field"}, {"global", "Global"} };
+        { {"element_field", "Element Field"}, {"nodal_field", "Nodal Field"}, {"global", "Global"} };
+};
+// struct ValidLayoutKeys
+//
+struct ValidLayouts
+{
+    /*!<
+     * valid operation field layouts \n
+     * \brief list of valid Plato layouts
+     **/
+    std::vector<std::string> mKeys =
+        { "Element Field", "Nodal Field", "Global" };
 };
 // struct ValidLayoutKeys
 
@@ -233,8 +356,13 @@ struct ValidFilterKeys
      * valid filters \n
      * \brief map from light-input file key to Plato main operation XML file key, i.e. map<light_input_file_key,plato_main_operation_file_key>
      **/
-    std::unordered_map<std::string, std::string> mKeys = { {"identity", "Identity"},
-        {"kernel", "Kernel"}, {"kernel then heaviside", "KernelThenHeaviside"}, {"kernel then tanh", "KernelThenTANH"} };
+    std::unordered_map<std::string, std::string> mKeys = 
+    { 
+        {"identity", "Identity"},
+        {"kernel", "Kernel"}, 
+        {"kernel_then_heaviside", "KernelThenHeaviside"}, 
+        {"kernel_then_tanh", "KernelThenTANH"} 
+    };
 };
 // struct ValidFilterKeys
 
@@ -249,11 +377,18 @@ struct ValidAnalyzeOutputKeys
      * in Plato Analyze.
      **/
     std::unordered_map<std::string, std::string> mKeys =
-        {
-          {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"}, {"accumulated_plastic_strain", "accumulated plastic strain"},
-          {"deviatoric_stress", "deviatoric stress"}, {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
-          {"backstress", "backstress"}, {"stress", "stress"}, {"strain", "strain"}
-        };
+    {
+        {"vonmises", "Vonmises"}, 
+        {"plastic_multiplier_increment", "plastic multiplier increment"}, 
+        {"accumulated_plastic_strain", "accumulated plastic strain"},
+        {"deviatoric_stress", "deviatoric stress"}, 
+        {"elastic_strain", "elastic_strain"}, 
+        {"plastic_strain", "plastic strain"}, 
+        {"cauchy_stress", "cauchy stress"},
+        {"backstress", "backstress"}, 
+        {"stress", "stress"}, 
+        {"strain", "strain"}
+    };
 };
 // struct ValidAnalyzeOutputKeys
 
@@ -270,14 +405,25 @@ private:
      *      i.e. map<code_keyword, pair<plato_main_output_keyword, code_output_keyword>. \n
      **/
     std::unordered_map<std::string, std::unordered_map<std::string, std::string> > mKeys =
-      {
-        { "plato_analyze", { {"vonmises", "Vonmises"}, {"plastic_multiplier_increment", "plastic multiplier increment"},
-          {"accumulated_plastic_strain", "accumulated plastic strain"}, {"deviatoric_stress", "deviatoric stress"},
-          {"elastic_strain", "elastic_strain"}, {"plastic_strain", "plastic strain"}, {"cauchy_stress", "cauchy stress"},
-          {"backstress", "backstress"}, {"dispx", "Solution X"}, {"dispy", "Solution Y"}, {"dispz", "Solution Z"},
-          {"principal_stresses", "principal stresses"}, {"temperature", "Solution"} }
+    {
+        { "plato_analyze", 
+            { 
+                {"vonmises", "Vonmises"}, 
+                {"plastic_multiplier_increment", "plastic multiplier increment"},
+                {"accumulated_plastic_strain", "accumulated plastic strain"},       
+                {"deviatoric_stress", "deviatoric stress"},
+                {"elastic_strain", "elastic_strain"}, 
+                {"plastic_strain", "plastic strain"}, 
+                {"cauchy_stress", "cauchy stress"},
+                {"backstress", "backstress"}, 
+                {"dispx", "Solution X"}, 
+                {"dispy", "Solution Y"}, 
+                {"dispz", "Solution Z"},
+                {"principal_stresses", "principal stresses"}, 
+                {"temperature", "Solution"} 
+            }
         }
-      };
+    };
 
 public:
     /******************************************************************************//**
@@ -323,38 +469,64 @@ private:
      *
      **/
     std::unordered_map<std::string, std::unordered_map<std::string, std::pair<std::string, std::string>>> mKeys =
-        {
-            { "isotropic linear elastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
-                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "mass_density", {"Mass Density", "double"} } }
-            },
+    {
+        { "isotropic_linear_elastic", 
+            { 
+                { "youngs_modulus", {"Youngs Modulus", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, 
+                { "mass_density", {"Mass Density", "double"} } 
+            }
+        },
 
-            { "orthotropic linear elastic", { { "youngs_modulus_x", {"Youngs Modulus X", "double"} },
-                { "youngs_modulus_y", {"Youngs Modulus Y", "double"} }, { "youngs_modulus_z", {"Youngs Modulus Z", "double"} },
-                { "poissons_ratio_xy", {"Poissons Ratio XY", "double"} }, { "poissons_ratio_xz", {"Poissons Ratio XZ", "double"} },
-                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, { "shear_modulus_xy", {"Shear Modulus XY", "double"} },
-                { "shear_modulus_xz", {"Shear Modulus XZ", "double"} }, { "shear_modulus_yz", {"Shear Modulus YZ", "double"} },
-                { "mass_density", {"Mass Density", "double"} } }
-            },
+        { "orthotropic_linear_elastic", 
+            { 
+                { "youngs_modulus_x", {"Youngs Modulus X", "double"} },
+                { "youngs_modulus_y", {"Youngs Modulus Y", "double"} }, 
+                { "youngs_modulus_z", {"Youngs Modulus Z", "double"} },
+                { "poissons_ratio_xy", {"Poissons Ratio XY", "double"} }, 
+                { "poissons_ratio_xz", {"Poissons Ratio XZ", "double"} },
+                { "poissons_ratio_yz", {"Poissons Ratio YZ", "double"} }, 
+                { "shear_modulus_xy", {"Shear Modulus XY", "double"} },
+                { "shear_modulus_xz", {"Shear Modulus XZ", "double"} }, 
+                { "shear_modulus_yz", {"Shear Modulus YZ", "double"} },
+                { "mass_density", {"Mass Density", "double"} } 
+            }
+        },
 
-            { "isotropic linear electroelastic", { { "youngs_modulus", {"Youngs Modulus", "double"} },
-                { "poissons_ratio", {"Poissons Ratio", "double"} }, { "dielectric_permittivity_11", {"p11", "double"} },
-                { "dielectric_permittivity_33", {"p33", "double"} }, { "piezoelectric_coupling_15", {"e15", "double"} },
-                { "piezoelectric_coupling_33", {"e33", "double"} }, { "piezoelectric_coupling_31", {"e31", "double"} },
-                { "thermal_expansivity", {"Alpha", "double"} } }
-            },
+        { "isotropic_linear_electroelastic", 
+            { 
+                { "youngs_modulus", {"Youngs Modulus", "double"} },
+                { "poissons_ratio", {"Poissons Ratio", "double"} }, 
+                { "dielectric_permittivity_11", {"p11", "double"} },
+                { "dielectric_permittivity_33", {"p33", "double"} }, 
+                { "piezoelectric_coupling_15", {"e15", "double"} },
+                { "piezoelectric_coupling_33", {"e33", "double"} }, 
+                { "piezoelectric_coupling_31", {"e31", "double"} },
+                { "thermal_expansivity", {"Alpha", "double"} } 
+            }
+        },
 
-            { "isotropic linear thermal", { { "thermal_conductivity", { "Thermal Conductivity", "double" } },
-                { "mass_density", {"Mass Density", "double"} }, { "specific_heat", {"Specific Heat", "double"} } }
-            },
+        { "isotropic_linear_thermal", 
+            { 
+                { "thermal_conductivity", { "Thermal Conductivity", "double" } },
+                { "mass_density", {"Mass Density", "double"} }, 
+                { "specific_heat", {"Specific Heat", "double"} } 
+            }
+        },
 
-            { "isotropic linear thermoelastic", { { "thermal_conductivity", { "Thermal Conductivity", "double" } },
-                { "youngs_modulus", {"Youngs Modulus", "double"} }, { "poissons_ratio", {"Poissons Ratio", "double"} },
-                { "thermal_expansivity", { "Thermal Expansivity", "double" } }, { "reference_temperature", { "Reference Temperature", "double" } },
-                { "mass_density", {"Mass Density", "double"} } }
-            },
+        { "isotropic_linear_thermoelastic", 
+            { 
+                { "thermal_conductivity", { "Thermal Conductivity", "double" } },
+                { "youngs_modulus", {"Youngs Modulus", "double"} }, 
+                { "poissons_ratio", {"Poissons Ratio", "double"} },
+                { "thermal_expansivity", { "Thermal Expansivity", "double" } }, 
+                { "reference_temperature", { "Reference Temperature", "double" } },
+                { "mass_density", {"Mass Density", "double"} } 
+            }
+        },
 
-            { "j2 plasticity",
-              {
+        { "j2_plasticity",
+            {
                 { "youngs_modulus", {"Youngs Modulus", "double"} },
                 { "poissons_ratio", {"Poissons Ratio", "double"} },
                 { "pressure_scaling", { "Pressure Scaling", "double" } },
@@ -365,9 +537,9 @@ private:
                 { "elastic_properties_minimum_ersatz", {"Elastic Properties Minimum Ersatz", "double"} },
                 { "plastic_properties_penalty_exponent", {"Plastic Properties Penalty Exponent", "double"} },
                 { "plastic_properties_minimum_ersatz", {"Plastic Properties Minimum Ersatz", "double"} }
-              }
             }
-        };
+        }
+    };
 
 public:
     /******************************************************************************//**
@@ -467,17 +639,17 @@ private:
      **/
     std::unordered_map<std::string, std::pair<std::string,std::string>> mKeys =
         {
-            { "mechanical", {"Mechanical", "Elliptic"} },
+            { "steady_state_mechanics", {"Mechanical", "Elliptic"} },
+            { "transient_mechanics", {"Mechanical", "Hyperbolic"} },
+            { "steady_state_thermal", {"Thermal", "Elliptic"} },
+            { "transient_thermal", {"Thermal", "Parabolic"} },
+            { "steady_state_electrical", {"Electrical", "Elliptic"} },
+            { "steady_state_thermomechanics", {"Thermomechanical", "Elliptic"} },
+            { "transient_thermomechanics", {"Thermomechanical", "Parabolic"} },
+            { "steady_state_electromechanics", {"Electromechanical", "Elliptic"} },
             { "plasticity", {"Plasticity", "Elliptic"} },
-            { "transient mechanics", {"Mechanical", "Hyperbolic"} },
-            { "transient thermomechanics", {"Thermomechanical", "Parabolic"} },
-            { "stabilized mechanics", {"Stabilized Mechanical", "Elliptic"} },
-            { "thermal", {"Thermal", "Elliptic"} },
-            { "heat conduction", {"Thermal", "Parabolic"} },
-            { "electromechanical", {"Electromechanical", "Elliptic"} },
-            { "stabilized thermomechanical", {"Stabilized Thermomechanical", "Elliptic"} },
-            { "thermomechanical", {"Thermomechanical", "Elliptic"} },
-            { "coupled heat conduction and mechanics", {"Thermomechanical", "Parabolic"} }
+            { "thermoplasticity", {"Thermoplasticity", "Elliptic"} },
+            { "stabilized_mechanics", {"Stabilized Mechanics", "Elliptic"} }
         };
 
 public:
@@ -518,24 +690,17 @@ struct ValidAnalyzeCriteriaKeys
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
         { "volume", { "Volume", false } },
-        { "elastic work", { "Elastic Work", true } },
-        { "plastic work", { "Plastic Work", false } },
-        { "compliance", { "Internal Elastic Energy", true } },
-        { "maximize stiffness", { "Internal Elastic Energy", true } },
-        { "local stress", { "Stress Constraint Quadratic", false } },
-        { "stress p-norm", { "Stress P-Norm", false } },
-        { "minimize stress", { "Stress P-Norm", false } },
-        { "effective energy", { "Effective Energy", true } },
-        { "minimize effective energy", { "Effective Energy", true } },
-        { "stress constrained mass minimization", { "Stress Constraint General", false } },
-        { "thermal_energy", { "Internal Thermal Energy", false } },
-        { "maximize_heat_conduction", { "Internal Thermal Energy", false } },
-        { "flux p-norm", { "Flux P-Norm", false } },
-        { "minimize flux", { "Flux P-Norm", false } },
-        { "thermoelastic energy", { "Internal Thermoelastic Energy", false } },
-        { "minimize thermoelastic energy", { "Internal Thermoelastic Energy", false } },
-        { "electroelastic energy", { "Internal Electroelastic Energy", false } },
-        { "minimize electroelastic energy", { "Internal Electroelastic Energy", false } }
+        { "elastic_work", { "Elastic Work", true } },
+        { "plastic_work", { "Plastic Work", false } },
+        { "mechanical_compliance", { "Internal Elastic Energy", true } },
+        { "local_stress", { "Stress Constraint Quadratic", false } },
+        { "stress_p-norm", { "Stress P-Norm", false } },
+        { "effective_energy", { "Effective Energy", true } },
+        //{ "stress constrained mass minimization", { "Stress Constraint General", false } },
+        { "thermal_compliance", { "Internal Thermal Energy", false } },
+        { "flux_p-norm", { "Flux P-Norm", false } },
+        { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
+        { "electrical_compliance", { "Internal Electroelastic Energy", false } },
     };
 };
 // ValidAnalyzeCriteriaKeys
@@ -557,10 +722,16 @@ struct ValidDofsKeys
      * */
     std::unordered_map<std::string, std::unordered_map<std::string,std::string>> mKeys =
         {
-            {"mechanical", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
-            {"thermal", { {"temp", "0"} } }, {"electrostatics", { {"potential", "0"} } },
-            {"thermalmechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
-            {"electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
+            {"steady_state_mechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
+            {"transient_mechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } },
+            {"steady_state_thermal", { {"temp", "0"} } }, 
+            {"transient_thermal", { {"temp", "0"} } }, 
+            {"steady_state_electrical", { {"potential", "0"} } },
+            {"steady_state_thermomechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
+            {"transient_thermomechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
+            {"steady_state_electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
+            // not sure of DOFs {"plasticity", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } }
+            // not sure of DOFs {"thermoplasticity", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } }
         };
 };
 // struct ValidDofsKeys

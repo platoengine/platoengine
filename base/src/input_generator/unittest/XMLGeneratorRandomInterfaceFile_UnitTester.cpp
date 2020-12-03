@@ -26,7 +26,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetFalse)
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
     tMetaData.mOutputMetaData.disableOutput();
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal_field");
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -58,7 +58,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Random)
     tService.performer("plato_analyze_1");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal_field");
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -98,7 +98,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     tService.performer("plato_analyze_1");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element_field");
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -161,7 +161,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     tXMLMetaData.append(tService);
 
     tXMLMetaData.mOutputMetaData.serviceID("1");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element_field");
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -248,7 +248,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
 
     tXMLMetaData.mOutputMetaData.serviceID("1");
     tXMLMetaData.mOutputMetaData.outputSamples("true");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element_field");
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -607,7 +607,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiStatisticsSharedData)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    tInputData.mOutputMetaData.appendRandomQoI("vonmises", "element_field");
     XMLGen::append_qoi_statistics_shared_data(tInputData, tDocument);
 
     auto tSharedData = tDocument.child("SharedData");
@@ -732,7 +732,7 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     tServiceTwo.id("2");
     tServiceTwo.performer("sierra");
     tInputData.append(tServiceTwo);
-    tInputData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tInputData.mOutputMetaData.appendRandomQoI("VonMises", "element_field");
     tInputData.mOutputMetaData.serviceID("1");
 
     ASSERT_NO_THROW(XMLGen::append_multiperformer_qoi_shared_data(tInputData, tDocument));

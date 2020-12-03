@@ -333,7 +333,7 @@ bool XMLGenerator::parseLoadLine(std::vector<std::string>& tokens)
       return_status = parsePressureLoad(tokens,new_load);
     else if(!new_load.type.compare("acceleration"))
       return_status = parseAccelerationLoad(tokens,new_load);
-    else if(!new_load.type.compare("heat_flux"))
+    else if(!new_load.type.compare("uniform_surface_flux"))
       return_status = parseHeatFluxLoad(tokens,new_load);
     else if(!new_load.type.compare("force"))
       return_status = parseForceLoad(tokens,new_load);
@@ -489,10 +489,10 @@ bool XMLGenerator::parseAccelerationLoad(std::vector<std::string>& tokens, XMLGe
 bool XMLGenerator::parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
 /******************************************************************************/
 {
-    size_t tMin_parameters = 8;
+    size_t tMin_parameters = 9;
     if(tokens.size() < tMin_parameters)
     {
-        std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"heat_flux\" load.\n";
+        std::cout << "ERROR:XMLGenerator:parseLoads: Wrong number of parameters specified for \"uniform_surface_flux\" load.\n";
         return false;
     }
     size_t tTokenIndex = 0;
@@ -749,6 +749,7 @@ void XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen:
 void XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
 /******************************************************************************/
 {
+  new_bc.mCategory = tokens[0];
   // Potential syntax:
   // fixed temperature nodeset 1 bc id 1
   // fixed temperature nodeset 1 value 25.0 bc id 1

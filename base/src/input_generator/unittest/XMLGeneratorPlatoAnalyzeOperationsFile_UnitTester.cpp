@@ -616,7 +616,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_Elastic)
     { {"youngs_modulus_block_id_1", "youngs_modulus"}, {"poissons_ratio_block_id_1", "poissons_ratio"} };
 
     XMLGen::MaterialFunctionInterface tInterface;
-    ASSERT_NO_THROW(tInterface.call("isotropic linear elastic", tTags, tDocument));
+    ASSERT_NO_THROW(tInterface.call("isotropic_linear_elastic", tTags, tDocument));
 
     auto tParameter = tDocument.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
@@ -643,7 +643,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_ThermoElastic)
       {"reference_temperature_block_id_1", "reference_temperature"} };
 
     XMLGen::MaterialFunctionInterface tInterface;
-    ASSERT_NO_THROW(tInterface.call("isotropic linear thermoelastic", tTags, tDocument));
+    ASSERT_NO_THROW(tInterface.call("isotropic_linear_thermoelastic", tTags, tDocument));
 
     auto tParameter = tDocument.child("Parameter");
     ASSERT_FALSE(tParameter.empty());
@@ -691,7 +691,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_OrthotropicLinearElastic)
     };
 
     XMLGen::MaterialFunctionInterface tInterface;
-    ASSERT_NO_THROW(tInterface.call("orthotropic linear elastic", tTags, tDocument));
+    ASSERT_NO_THROW(tInterface.call("orthotropic_linear_elastic", tTags, tDocument));
 
     // TEST RESULTS
     auto tParameter = tDocument.child("Parameter");

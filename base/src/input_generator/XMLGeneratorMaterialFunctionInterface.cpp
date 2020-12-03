@@ -38,7 +38,7 @@ void append_orthotropic_linear_elastic_material_properties_to_plato_analyze_oper
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("orthotropic linear elastic", tPair.second);
+        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("orthotropic_linear_elastic", tPair.second);
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Orthotropic Linear Elastic]:") + tValidAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
@@ -67,7 +67,7 @@ void append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic linear thermoelastic", tPair.second);
+        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic_linear_thermoelastic", tPair.second);
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Thermoelastic]:") + tValidAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
@@ -96,7 +96,7 @@ void append_isotropic_linear_elastic_material_properties_to_plato_analyze_operat
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic linear elastic", tPair.second);
+        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("isotropic_linear_elastic", tPair.second);
         auto tTarget = std::string("[Plato Problem]:[Material Model]:[Isotropic Linear Elastic]:") + tValidAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
@@ -115,15 +115,15 @@ MaterialFunctionInterface::MaterialFunctionInterface()
 void MaterialFunctionInterface::insert()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation));
-    mMap.insert(std::make_pair("isotropic linear elastic",
+    mMap.insert(std::make_pair("isotropic_linear_elastic",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_isotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation));
-    mMap.insert(std::make_pair("isotropic linear thermoelastic",
+    mMap.insert(std::make_pair("isotropic_linear_thermoelastic",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_isotropic_linear_thermoelastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation));
-    mMap.insert(std::make_pair("orthotropic linear elastic",
+    mMap.insert(std::make_pair("orthotropic_linear_elastic",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 }
 

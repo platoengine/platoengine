@@ -86,17 +86,17 @@ void AppendNaturalBoundaryCondition::insert()
 
     // uniform pressure load
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_uniform_single_valued_load_to_plato_problem));
-    mMap.insert(std::make_pair("uniform pressure",
+    mMap.insert(std::make_pair("uniform_pressure",
       std::make_pair((XMLGen::Analyze::NaturalBCFunc)XMLGen::Private::append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
     // uniform surface potential
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_uniform_single_valued_load_to_plato_problem));
-    mMap.insert(std::make_pair("uniform surface potential",
+    mMap.insert(std::make_pair("uniform_surface_potential",
       std::make_pair((XMLGen::Analyze::NaturalBCFunc)XMLGen::Private::append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 
     // uniform surface flux
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_uniform_single_valued_load_to_plato_problem));
-    mMap.insert(std::make_pair("heat_flux",
+    mMap.insert(std::make_pair("uniform_surface_flux",
       std::make_pair((XMLGen::Analyze::NaturalBCFunc)XMLGen::Private::append_uniform_single_valued_load_to_plato_problem, tFuncIndex)));
 }
 

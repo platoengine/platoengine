@@ -1820,7 +1820,7 @@ TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
     std::istringstream iss;
 
     std::string stringInput =
-    "heat flux sideset id 2 value -3e3 load id 1\n";
+    "uniform_surface_flux sideset id 2 value -3e3 load id 1\n";
 
     iss.str(stringInput);
     iss.clear();
@@ -1835,7 +1835,7 @@ TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_id_specified)
     new_load.type = tokens[0];
 
     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"heat");
+    EXPECT_EQ(new_load.type,"uniform_surface_flux");
     EXPECT_EQ(new_load.app_type,"sideset");
     EXPECT_EQ(new_load.app_id,"2");
     EXPECT_EQ(new_load.app_name,"");
@@ -1852,7 +1852,7 @@ TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
     std::istringstream iss;
 
     std::string stringInput =
-    "heat flux sideset id 2 name ss_2 value -3e3 load id 1\n";
+    "uniform_surface_flux sideset id 2 name ss_2 value -3e3 load id 1\n";
 
     iss.str(stringInput);
     iss.clear();
@@ -1867,7 +1867,7 @@ TEST(PlatoTestXMLGenerator,parseHeatFluxLoad_valid_input_name_and_id_specified)
     new_load.type = tokens[0];
 
     EXPECT_EQ(tester.publicParseHeatFluxLoad(tokens,new_load),true);
-    EXPECT_EQ(new_load.type,"heat");
+    EXPECT_EQ(new_load.type,"uniform_surface_flux");
     EXPECT_EQ(new_load.app_type,"sideset");
     EXPECT_EQ(new_load.app_id,"2");
     EXPECT_EQ(new_load.app_name,"ss_2");

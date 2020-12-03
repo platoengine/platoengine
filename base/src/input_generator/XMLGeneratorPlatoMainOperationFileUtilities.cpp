@@ -197,7 +197,7 @@ void append_qoi_statistics_to_output_operation
     for(auto& tOutputQoI : tOutputQoIs)
     {
         auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputQoI);
-        auto tValidLayout = XMLGen::check_data_layout_keyword(tLayout);
+        auto tValidLayout = XMLGen::check_data_layout(tLayout);
         auto tArgumentName = tOutputQoI + " mean";
         auto tInput= aParentNode.append_child("Input");
         XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);

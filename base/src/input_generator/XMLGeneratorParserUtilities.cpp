@@ -305,14 +305,13 @@ std::string return_output_qoi_data_layout(const std::string& aInput)
 
 std::string check_data_layout(const std::string& aInput)
 {
-    XMLGen::ValidLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tValidLayoutItr == tValidKeys.mKeys.end())
+    XMLGen::ValidLayouts tValidLayouts;
+    auto tValidLayoutItr = std::find(tValidLayouts.mKeys.begin(), tValidLayouts.mKeys.end(), aInput);
+    if(tValidLayoutItr == tValidLayouts.mKeys.end())
     {
-        THROWERR("Is Data Layout Supported: data layout '" + tLowerKey + "' is not supported.")
+        THROWERR("Is Data Layout Supported: data layout '" + aInput + "' is not supported.")
     }
-    return tValidLayoutItr->second;
+    return *tValidLayoutItr;
 }
 // function check_data_layout
 
