@@ -124,7 +124,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     // Create a scenario
     XMLGen::Scenario tScenario;
     tScenario.id("14");
-    tScenario.physics("mechanical");
+    tScenario.physics("steady_state_mechanics");
     tMetaData.append(tScenario);
     
     // Create an objective
@@ -168,11 +168,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tOpOutputs = tOperation.child("Output");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", "Criterion Gradient - criterion_3_service_2_scenario_14"}, tOpOutputs);
 
-    // Aggregate OPERATION
-    tOperation = tOperation.next_sibling("Operation");
-    tValues = {"Aggregate Data", "platomain_1", "", ""};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
-
     // FILTER GRADIENT OPERATION
     tOperation = tOperation.next_sibling("Operation");
     tKeys = {"Name", "PerformerName", "Input", "Input", "Output"};
@@ -181,7 +176,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tOpInputs = tOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Field", "Control"}, tOpInputs);
     tOpInputs = tOpInputs.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Gradient", "Objective Gradient"}, tOpInputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Gradient", "Criterion Gradient - criterion_3_service_2_scenario_14"}, tOpInputs);
     tOpOutputs = tOperation.child("Output");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Filtered Gradient", "Objective Gradient"}, tOpOutputs);
 
@@ -213,7 +208,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     // Create a scenario
     XMLGen::Scenario tScenario;
     tScenario.id("14");
-    tScenario.physics("mechanical");
+    tScenario.physics("steady_state_mechanics");
     tMetaData.append(tScenario);
     
     // Create an objective
@@ -260,7 +255,8 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     // STAGE OUTPUT
     auto tOutput = tStage.child("Output");
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Value"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Criterion Value - criterion_3_service_2_scenario_14"}, tOutput);
+    //PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Value"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)

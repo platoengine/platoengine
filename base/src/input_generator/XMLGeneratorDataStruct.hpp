@@ -60,7 +60,7 @@ struct Load
 struct BC
 {
     bool mIsRandom = false;
-    std::string mPhysics = "mechanical";
+    std::string mPhysics = "steady_state_mechanics";
     std::string mCategory = "rigid";
     std::string type;     // temperature, displacement
     std::string app_type; // nodeset or sideset
