@@ -128,14 +128,7 @@ public:
 
     /******************************************************************************//**
      * \fn performer
-     * \brief Set string value for keyword 'performer'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void performer(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn performer
-     * \brief Return string value for keyword 'performer'.
+     * \brief Return derived string value for performer.
      * \return value
     **********************************************************************************/
     std::string performer() const;

@@ -103,14 +103,9 @@ std::string Service::numberProcessors() const
     return (this->getValue("number_processors"));
 }
 
-void Service::performer(const std::string& aInput)
-{
-    mMetaData["performer"] = aInput;
-}
-
 std::string Service::performer() const
 {
-    return (this->getValue("performer"));
+    return (code() + "_" + id());
 }
 
 void Service::cacheState(const std::string& aInput)

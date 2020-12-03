@@ -140,8 +140,14 @@ void append_constraint_gradient_to_output_operation
 {
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
+        std::string tCriterionID = tConstraint.criterion();
+        std::string tServiceID = tConstraint.service();
+        std::string tScenarioID = tConstraint.scenario();
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
         auto tInput = aParentNode.append_child("Input");
-        auto tName = std::string("Constraint Gradient ID-") + tConstraint.name();
+        auto tName = std::string("Criterion Gradient - ") + tIdentifierString;
         auto tArgumentName = XMLGen::to_lower(tName);
         XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
@@ -158,12 +164,22 @@ void append_objective_gradient_to_output_operation
 
     for(size_t i=0; i<aXMLMetaData.objective.criteriaIDs.size(); ++i)
     {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[i];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[i];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[i];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
         auto tInput = aParentNode.append_child("Input");
-        auto tName = std::string("Objective Gradient");
+        std::string tName;
         if(tMultiObjective)
         {
-            tName += " ID-";
-            tName += aXMLMetaData.objective.subobjective_names[i];
+            tName = std::string("Criterion Gradient - ");
+            tName += tIdentifierString;
+        }
+        else
+        {
+            tName = std::string("Objective Gradient");
         }
         auto tArgumentName = XMLGen::to_lower(tName);
         XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);

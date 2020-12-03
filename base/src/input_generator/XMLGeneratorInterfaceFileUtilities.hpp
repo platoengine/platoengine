@@ -179,20 +179,27 @@ void append_design_volume_shared_data
 **********************************************************************************/
 void append_objective_shared_data
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument,
- std::string aOwnerName = "");
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_criteria_shared_data
+ * \brief Append shared data for criteria values and gradients to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_criteria_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_constraint_shared_data
- * \brief Append constraint value and gradient shared data to PUGI XML document.
+ * \brief Append shared data for criteria values and gradients to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
- * \param [in]     aOwnerName   name of the application that owns the data (default = "")
 **********************************************************************************/
 void append_constraint_shared_data
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument,
- std::string aOwnerName = "");
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_control_shared_data

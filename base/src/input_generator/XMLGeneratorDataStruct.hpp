@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 // #include "Plato_SromHelpers.hpp"
 #include "XMLGeneratorOutputMetadata.hpp"
@@ -42,7 +43,6 @@ struct Objective
     std::vector<std::string> serviceIDs;
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
-    std::vector<std::string> subobjective_names;
 };
 
 struct Load
@@ -194,6 +194,30 @@ private:
     std::vector<XMLGen::Criterion> mCriteria;
 
 public:
+    
+    std::set<ConcretizedCriterion> getConcretizedCriteria() const
+    {
+        std::set<ConcretizedCriterion> tConcretizedCriteria;
+
+        for(auto& tConstraint: constraints)
+        {
+            std::string tCriterionID = tConstraint.criterion();
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tConstraint.service(),tConstraint.scenario());
+            tConcretizedCriteria.insert(tConcretizedCriterion);
+        }
+
+        for(size_t i=0; i<objective.criteriaIDs.size(); ++i)
+        {
+            std::string tCriterionID = objective.criteriaIDs[i];
+            std::string tServiceID = objective.serviceIDs[i];
+            std::string tScenarioID = objective.scenarioIDs[i];
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            tConcretizedCriteria.insert(tConcretizedCriterion);
+        }
+
+
+        return tConcretizedCriteria;
+    }
 
     std::string getFirstPlatoMainPerformer() const
     {
@@ -207,44 +231,6 @@ public:
             }
         }
         return tReturnValue;
-    }
-
-    void generateMeaningfulNames()
-    {
-        // Build names for constraints
-        for(auto& tConstraint : constraints)
-        {
-            std::string tCriterionID = tConstraint.criterion();
-            auto tCriterion = criterion(tCriterionID);
-            std::string tCriterionType = tCriterion.type();
-            std::string tName = tCriterionType;
-            if(tConstraint.scenario().length() > 0)
-            {
-                tName += "_scenario_";
-                tName += tConstraint.scenario();
-            }
-            tConstraint.name(tName);
-        }
-
-        // Build names for subobjectives
-        objective.subobjective_names.clear();
-        for(size_t i=0; i<objective.criteriaIDs.size(); ++i)
-        {
-            auto tCriterion = criterion(objective.criteriaIDs[i]);
-            std::string tCriterionType = tCriterion.type(); 
-            std::string tName = tCriterionType;
-            tName += "_scenario_";
-            tName += objective.scenarioIDs[i];
-            objective.subobjective_names.push_back(tName);
-        }
-
-        // Build names for services
-        for(auto& tService : mServices)
-        {
-            // Only set if someone has not already set it.
-            if(tService.performer().length() == 0)
-                tService.performer(tService.code() + "_" + tService.id());
-        }
     }
 
     // Scenario access functions

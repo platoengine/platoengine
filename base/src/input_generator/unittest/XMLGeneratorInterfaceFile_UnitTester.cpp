@@ -136,8 +136,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
 
-    tMetaData.generateMeaningfulNames();
-
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_gradient_stage(tMetaData, tDocument));
 
@@ -168,7 +166,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tOpInputs = tOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
     tOpOutputs = tOperation.child("Output");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", "Objective Gradient ID-mass_scenario_14"}, tOpOutputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", "Criterion Gradient - criterion_3_service_2_scenario_14"}, tOpOutputs);
 
     // Aggregate OPERATION
     tOperation = tOperation.next_sibling("Operation");
@@ -227,8 +225,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
 
-    tMetaData.generateMeaningfulNames();
-
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
 
@@ -259,7 +255,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     tOpInputs = tOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
     tOpOutputs = tOperation.child("Output");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Objective Value ID-mass_scenario_14"}, tOpOutputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Criterion Value - criterion_3_service_2_scenario_14"}, tOpOutputs);
 
     // STAGE OUTPUT
     auto tOutput = tStage.child("Output");
@@ -275,11 +271,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)
     XMLGen::Service tService;
     tService.id("2");
     tService.code("plato_analyze");
-    tService.performer("service_2");
     tMetaData.append(tService);
     tService.id("5");
     tService.code("plato_analyze");
-    tService.performer("service_5");
     tMetaData.append(tService);
 
     // Create 2 criteria
@@ -313,8 +307,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
 
-    tMetaData.generateMeaningfulNames();
-
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
 
@@ -341,20 +333,20 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)
     // OBJECTIVE VALUE OPERATION
     tOperation = tOperation.next_sibling("Operation");
     auto tSubOperation = tOperation.child("Operation");
-    tValues = {"Compute Objective Value", "service_2", "", ""};
+    tValues = {"Compute Objective Value", "plato_analyze_2", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSubOperation);
     tOpInputs = tSubOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
     tOpOutputs = tSubOperation.child("Output");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Objective Value ID-mass_scenario_14"}, tOpOutputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Criterion Value - criterion_3_service_2_scenario_14"}, tOpOutputs);
 
     tSubOperation = tSubOperation.next_sibling("Operation");
-    tValues = {"Compute Objective Value", "service_5", "", ""};
+    tValues = {"Compute Objective Value", "plato_analyze_5", "", ""};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSubOperation);
     tOpInputs = tSubOperation.child("Input");
     PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tOpInputs);
     tOpOutputs = tSubOperation.child("Output");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Objective Value ID-heat_conduction_scenario_15"}, tOpOutputs);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "SharedDataName"}, {"Objective Value", "Criterion Value - criterion_7_service_5_scenario_15"}, tOpOutputs);
 
     // STAGE OUTPUT
     auto tOutput = tStage.child("Output");
@@ -366,7 +358,8 @@ TEST(PlatoTestXMLGenerator, AppendCacheStateStage)
 {
     XMLGen::InputData tMetaData;
     XMLGen::Service tService;
-    tService.performer("plato_analyze_1");
+    tService.code("plato_analyze");
+    tService.id("1");
     tService.cacheState("true");
     tMetaData.append(tService);
 
@@ -387,7 +380,8 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemStage)
 {
     XMLGen::InputData tMetaData;
     XMLGen::Service tService;
-    tService.performer("plato_analyze_1");
+    tService.code("plato_analyze");
+    tService.id("1");
     tService.updateProblem("true");
     tMetaData.append(tService);
 
@@ -440,8 +434,6 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
 
-    tMetaData.generateMeaningfulNames();
-
     pugi::xml_document tDocument;
     XMLGen::append_shared_data(tMetaData, tDocument);
 
@@ -492,14 +484,14 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     ASSERT_FALSE(tSharedData.empty());
     ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    tValues = {"Objective Value ID-mass_scenario_14", "Scalar", "Global", "1", "plato_analyze_1", "platomain_2"};
+    tValues = {"Criterion Value - criterion_3_service_1_scenario_14", "Scalar", "Global", "1", "plato_analyze_1", "platomain_2"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 
     tSharedData = tSharedData.next_sibling("SharedData");
     ASSERT_FALSE(tSharedData.empty());
     ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
-    tValues = {"Objective Gradient ID-mass_scenario_14", "Scalar", "Nodal Field", "plato_analyze_1", "platomain_2"};
+    tValues = {"Criterion Gradient - criterion_3_service_1_scenario_14", "Scalar", "Nodal Field", "plato_analyze_1", "platomain_2"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 
     tSharedData = tSharedData.next_sibling("SharedData");
@@ -549,7 +541,6 @@ TEST(PlatoTestXMLGenerator, AppendTopologySharedData)
     tService.code("plato_analyze");
     tMetaData.append(tService);
 
-    tMetaData.generateMeaningfulNames();
     pugi::xml_document tDocument;
 
     ASSERT_NO_THROW(XMLGen::append_topology_shared_data(tMetaData, tDocument));
@@ -575,8 +566,8 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_EmptySharedData)
 {
     XMLGen::InputData tMetaData;
     XMLGen::Service tService;
+    tService.code("plato_analyze");
     tService.id("1");
-    tService.performer("plato_analyze_1");
     tMetaData.append(tService);
 
     pugi::xml_document tDocument;
@@ -590,8 +581,8 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputServiceID)
 {
     XMLGen::InputData tMetaData;
     XMLGen::Service tService;
+    tService.code("plato_analyze");
     tService.id("1");
-    tService.performer("plato_analyze_1");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("2");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
@@ -612,8 +603,6 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData)
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
     tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
-
-    tMetaData.generateMeaningfulNames();
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_shared_data(tMetaData, tDocument);
@@ -641,7 +630,6 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
-    tService.performer("plato_analyze_1");
     tMetaData.append(tService);
 
     pugi::xml_document tDocument;

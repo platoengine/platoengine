@@ -93,16 +93,6 @@ std::string Constraint::weight() const
     return (this->getValue("weight"));
 }
 
-void Constraint::name(const std::string& aInput)
-{
-    mMetaData["name"] = aInput;
-}
-
-std::string Constraint::name() const
-{
-    return (this->getValue("name"));
-}
-
 void Constraint::scenario(const std::string& aInput)
 {
     mMetaData["scenario"] = aInput;

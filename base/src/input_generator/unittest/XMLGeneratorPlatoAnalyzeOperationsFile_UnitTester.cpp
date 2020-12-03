@@ -56,7 +56,6 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     tMetaData.append(tService);
 
     tMetaData.mOutputMetaData.disableOutput();
-    tMetaData.generateMeaningfulNames();
 
     XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
 
@@ -935,8 +934,6 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
     tService.updateProblem("true");
     tMetaData.append(tService);
 
-    tMetaData.generateMeaningfulNames();
-
     tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
@@ -980,8 +977,6 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperatio
     tService.updateProblem("true");
     tMetaData.append(tService);
 
-    tMetaData.generateMeaningfulNames();
-
     tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
@@ -1021,8 +1016,6 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
     tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
 
-    tMetaData.generateMeaningfulNames();
-
     tMetaData.optimizer.optimization_type = "topology";
 
     pugi::xml_document tDocument;
@@ -1061,8 +1054,6 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperati
     tConstraint.service("1");
     tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
-
-    tMetaData.generateMeaningfulNames();
 
     tMetaData.optimizer.optimization_type = "topology";
 

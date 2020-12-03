@@ -141,8 +141,6 @@ void XMLGenerator::generate()
 {
     this->parseInputFile();
 
-    m_InputData.generateMeaningfulNames();
-
     // this->getUncertaintyFlags();
 
     // if(!runSROMForUncertainVariables())

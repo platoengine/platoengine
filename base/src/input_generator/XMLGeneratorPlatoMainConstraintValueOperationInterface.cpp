@@ -24,11 +24,17 @@ void append_compute_constraint_value_operation_platomain
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
 
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    std::string tCriterionID = aConstraint.criterion();
+    std::string tServiceID = aConstraint.service();
+    std::string tScenarioID = aConstraint.scenario();
+    ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+    auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
+    auto tSharedDataName = std::string("Criterion Value - ") + tIdentifierString;
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume", tSharedDataName}, tOutputNode);
 
-    tSharedDataName = std::string("Constraint Gradient ID-") + aConstraint.name();
+    tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
     tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Volume Gradient", tSharedDataName}, tOutputNode);
 }
@@ -44,7 +50,13 @@ void append_compute_constraint_value_operation_platoanalyze
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
 
-    auto tSharedDataName = std::string("Constraint Value ID-") + aConstraint.name();
+    std::string tCriterionID = aConstraint.criterion();
+    std::string tServiceID = aConstraint.service();
+    std::string tScenarioID = aConstraint.scenario();
+    ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+    auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
+    auto tSharedDataName = std::string("Criterion Value - ") + tIdentifierString;
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Constraint Value", tSharedDataName}, tOutputNode);
 }

@@ -18,6 +18,18 @@
 namespace XMLGen
 {
 
+std::string get_concretized_criterion_identifier_string(ConcretizedCriterion aConcretizedCriterion)
+{
+    std::string tCriterionID = std::get<0>(aConcretizedCriterion);
+    std::string tServiceID = std::get<1>(aConcretizedCriterion);
+    std::string tScenarioID = std::get<2>(aConcretizedCriterion);
+
+    std::string tIdentifierString = "";
+    tIdentifierString += "criterion_" + tCriterionID + "_service_" + tServiceID + "_scenario_" + tScenarioID;
+
+    return tIdentifierString;
+}
+
 bool unique(const std::vector<std::string>& aInput)
 {
     auto tCopy = aInput;

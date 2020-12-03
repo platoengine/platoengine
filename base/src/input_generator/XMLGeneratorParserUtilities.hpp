@@ -18,6 +18,20 @@ namespace XMLGen
  * i.e. map< input_keyword_string, pair< pair<tokens,input_keyword_value>, input_keyword_default_value > > */
 using MetaDataTags = std::unordered_map<std::string, std::pair<std::pair<std::vector<std::string>,std::string>, std::string>>;
 
+// a "concretized criterion" is a criterion paired with a service and a scenario.
+// each concretized criterion will require a shared data, and can be used in
+// stage operations
+// order is criterionID, serviceID, scenarioID
+using ConcretizedCriterion = std::tuple<std::string,std::string,std::string>;
+
+/******************************************************************************//**
+ * \fn get_concretized_criterion_identifier_string
+ * \brief Returns the identifier for a concretized criterion.
+ * \param [in] aConcretizedCriterion input concretized criterion 
+ * \return identifier string
+**********************************************************************************/
+std::string get_concretized_criterion_identifier_string(ConcretizedCriterion aConcretizedCriterion);
+
 /******************************************************************************//**
  * \fn unique
  * \brief Returns true if each string element is unique.

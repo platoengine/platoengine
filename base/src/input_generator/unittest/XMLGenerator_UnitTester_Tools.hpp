@@ -63,7 +63,7 @@ inline void test_children
         auto tItr = std::find(aKeys.begin(), aKeys.end(), tChild.name());
         if(tItr == aKeys.end())
         {
-            std::cout << "Did not fine child name: Child Name = " << tChild.name() << "\n";
+            std::cout << "Did not find child name: Child Name = " << tChild.name() << "\n";
             std::cout << "Gold children keys are:\n";
             PlatoTestXMLGenerator::print_elements(aKeys);
             ASSERT_TRUE(tItr != aKeys.end());
@@ -73,7 +73,7 @@ inline void test_children
         tItr = std::find(aValues.begin(), aValues.end(), tChild.child_value());
         if(tItr == aValues.end())
         {
-            std::cout << "Did not fine child value: Child Value = " << tChild.child_value() << "\n";
+            std::cout << "Did not find child value: Child Value = " << tChild.child_value() << "\n";
             std::cout << "Gold children values are:\n";
             PlatoTestXMLGenerator::print_elements(aValues);
             ASSERT_TRUE(tItr != aValues.end());
@@ -101,7 +101,7 @@ inline void test_attributes
         auto tItr = std::find(aKeys.begin(), aKeys.end(), tAttribute.name());
         if(tItr == aKeys.end())
         {
-            std::cout << "Did not fine attribute name: Attribute Name = " << tAttribute.name() << "\n";
+            std::cout << "Did not find attribute name: Attribute Name = " << tAttribute.name() << "\n";
             std::cout << "Gold attributes keys are:\n";
             PlatoTestXMLGenerator::print_elements(aKeys);
             ASSERT_TRUE(tItr != aKeys.end());
@@ -111,7 +111,7 @@ inline void test_attributes
         tItr = std::find(aValues.begin(), aValues.end(), tAttribute.value());
         if(tItr == aValues.end())
         {
-            std::cout << "Did not fine attribute value: Attribute Value = " << tAttribute.value() << "\n";
+            std::cout << "Did not find attribute value: Attribute Value = " << tAttribute.value() << "\n";
             std::cout << "Gold attributes values are:\n";
             PlatoTestXMLGenerator::print_elements(aValues);
             ASSERT_TRUE(tItr != aValues.end());
