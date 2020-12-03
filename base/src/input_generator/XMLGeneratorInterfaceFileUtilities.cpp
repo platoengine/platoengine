@@ -1112,7 +1112,7 @@ void append_constraint_gradient_stage
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
         tGradOperationInterface.call(tConstraint, tService.performer(), tService.code(), tStageNode);
         auto tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
-        XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tSharedDataName, tStageNode);
+        XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tSharedDataName, tSharedDataName, tStageNode);
 
         auto tOutputNode = tStageNode.append_child("Output");
         XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
