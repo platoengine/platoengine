@@ -467,9 +467,23 @@ void append_objective_gradient_stage
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
             XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
 */
-    XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
+    std::string tInputMetaDataTag;
+    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    {
+        tInputMetaDataTag = "Objective Gradient";
+        XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
+    }
+    else
+    {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        tInputMetaDataTag = "Criterion Gradient - " + tIdentifierString;
+    }
 
-    XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, "Objective Gradient", tStageNode);
+    XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tInputMetaDataTag, "Objective Gradient", tStageNode);
     auto tStageOutputNode = tStageNode.append_child("Output");
     XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tStageOutputNode);
 }
@@ -897,7 +911,8 @@ void append_filter_control_operation
 /******************************************************************************/
 void append_filter_criterion_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
- const std::string& aSharedDataName,
+ const std::string& aInputSharedDataName,
+ const std::string& aOutputSharedDataName,
  pugi::xml_node& aParentNode)
 {
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
@@ -906,9 +921,9 @@ void append_filter_criterion_gradient_operation
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
     tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", aSharedDataName}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", aInputSharedDataName}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aSharedDataName}, tOutputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", aOutputSharedDataName}, tOutputNode);
 }
 // function append_filter_criterion_gradient_operation
 /******************************************************************************/

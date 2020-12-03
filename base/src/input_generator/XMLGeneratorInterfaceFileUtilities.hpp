@@ -246,7 +246,8 @@ void append_filter_control_operation
 **********************************************************************************/
 void append_filter_criterion_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
- const std::string& aSharedDataName,
+ const std::string& aInputSharedDataName,
+ const std::string& aOutputSharedDataName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
