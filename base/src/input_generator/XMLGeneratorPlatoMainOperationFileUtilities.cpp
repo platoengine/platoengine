@@ -124,8 +124,8 @@ void append_filter_options_to_plato_main_operation
  pugi::xml_document &aDocument)
 {
     XMLGen::ValidFilterKeys tValidKeys;
-    auto tItr = tValidKeys.mKeys.find(aXMLMetaData.optimizer.filter_type);
-    auto tFilterName = tItr != tValidKeys.mKeys.end() ? tItr->second : "Kernel";
+    auto tValue = tValidKeys.value(aXMLMetaData.optimizer.filter_type);
+    auto tFilterName = tValue.empty() ? "Kernel" : tValue;
     auto tFilterNode = aDocument.append_child("Filter");
     XMLGen::append_children({"Name"}, {tFilterName}, tFilterNode);
     XMLGen::append_filter_options_to_operation(aXMLMetaData, tFilterNode);
@@ -256,9 +256,9 @@ void append_children_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations"};
+    std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations", "RestartFieldName"};
     std::vector<std::string> tValues = {"PlatoMainOutput", "PlatoMainOutput", aXMLMetaData.optimizer.write_restart_file,
-        aXMLMetaData.optimizer.output_frequency, aXMLMetaData.optimizer.max_iterations};
+        aXMLMetaData.optimizer.output_frequency, aXMLMetaData.optimizer.max_iterations, aXMLMetaData.optimizer.initial_guess_field_name};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
 }
@@ -728,19 +728,17 @@ void append_initialize_field_operation
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidDiscretizationKeys tValidKeys;
-    auto tLowerKey = Plato::tolower(aXMLMetaData.optimizer.discretization);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aXMLMetaData.optimizer.discretization);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Append Initialize Field to Plato Main Operation: ") + "Discretization method '"
-            + tLowerKey + "' is not supported.")
+        THROWERR(std::string("Append Initialize Field to Plato Main Operation: ") + "Discretization method '" + tValue + "' is not supported.")
     }
 
-    if(tItr->compare("density") == 0)
+    if(tValue.compare("density") == 0)
     {
         XMLGen::append_initialize_density_field_operation(aXMLMetaData, aDocument);
     }
-    else if(tItr->compare("levelset") == 0)
+    else if(tValue.compare("levelset") == 0)
     {
         XMLGen::append_initialize_levelset_operation(aXMLMetaData, aDocument);
     }

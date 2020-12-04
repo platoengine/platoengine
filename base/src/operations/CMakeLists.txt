@@ -17,6 +17,7 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         Plato_InitializeField.cpp
                         Plato_InitializeValues.cpp
                         Plato_WriteGlobalValue.cpp
+                        Plato_CSMParameterOutput.cpp
                         Plato_OperationsUtilities.cpp
                         Plato_NormalizeObjectiveValue.cpp
                         Plato_MeanPlusVarianceMeasure.cpp
@@ -43,6 +44,7 @@ set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_InitializeField.hpp
                         Plato_InitializeValues.hpp
                         Plato_WriteGlobalValue.hpp
+                        Plato_CSMParameterOutput.hpp
                         Plato_OperationsUtilities.hpp
                         Plato_NormalizeObjectiveValue.hpp
                         Plato_MeanPlusVarianceMeasure.hpp

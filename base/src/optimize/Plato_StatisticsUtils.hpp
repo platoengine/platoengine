@@ -190,7 +190,7 @@ inline void uniform_samples_initial_guess
         auto tValue = (static_cast<ScalarType>(1.0) / static_cast<ScalarType>(tNumSample + 1u));
         for(decltype(tNumSample) tSample = 0; tSample < tNumSample; tSample++)
         {
-            aInput(tDim, tSample) = static_cast<ScalarType>(tSample + 1u) * tValue;
+            aInput(tDim, tSample) = static_cast<ScalarType>(tSample + 1u + tDim) * tValue;
         }
     }
 }

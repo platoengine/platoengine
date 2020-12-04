@@ -52,9 +52,39 @@ void ParseConstraint::allocate()
     mTags.insert({ "absolute_target", { { {"absolute_target"}, ""}, "" } });
     mTags.insert({ "weight", { { {"weight"}, ""}, "1.0" } });
 
-    //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
+//    mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 
 }
+
+// std::string ParseConstraint::returnConstraintTargetAbsoluteKeywordSet(XMLGen::Constraint& aMetaData) const
+// {
+//     std::string tOutput;
+//     XMLGen::ValidConstraintTargetAbsoluteKeys tValidKeys;
+//     for(auto& tKeyword : tValidKeys.mKeys)
+//     {
+//         if(!aMetaData.value(tKeyword).empty())
+//         {
+//             tOutput = tKeyword;
+//             break;
+//         }
+//     }
+//     return tOutput;
+// }
+
+// std::string ParseConstraint::returnConstraintTargetNormalizedKeywordSet(XMLGen::Constraint& aMetaData) const
+// {
+//     std::string tOutput;
+//     XMLGen::ValidConstraintTargetNormalizedKeys tValidKeys;
+//     for(auto& tKeyword : tValidKeys.mKeys)
+//     {
+//         if(!aMetaData.value(tKeyword).empty())
+//         {
+//             tOutput = tKeyword;
+//             break;
+//         }
+//     }
+//     return tOutput;
+// }
 
 std::vector<XMLGen::Constraint> ParseConstraint::data() const
 {

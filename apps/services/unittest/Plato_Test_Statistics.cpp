@@ -48,14 +48,12 @@
 
 #include "gtest/gtest.h"
 
-#include <cmath>
-#include <numeric>
-#include <vector>
-
+#include "Plato_SromHelpers.hpp"
 #include "Plato_DataFactory.hpp"
 #include "Plato_Diagnostics.hpp"
 #include "Plato_SromObjective.hpp"
 #include "Plato_Communication.hpp"
+#include "Plato_LinearAlgebra.hpp"
 #include "Plato_SromConstraint.hpp"
 #include "Plato_SromStatistics.hpp"
 #include "Plato_StandardVector.hpp"
@@ -70,13 +68,6 @@
 #include "Plato_StandardVectorReductionOperations.hpp"
 
 #include "Plato_UnitTestUtils.hpp"
-
-namespace Plato
-{
-
-
-
-} // namespace Plato
 
 namespace PlatoTest
 {
@@ -325,6 +316,140 @@ std::vector<double> get_gold_beta_cdf_values()
 }
 
 // ********************************************** BEGIN UNIT TESTS **********************************************
+
+TEST(PlatoTest, ReadCorrelationMatrixFile)
+{
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::io::write_matrix_to_file(tGold, tFileMetaData);
+    auto tOutput = Plato::io::read_matrix_from_file<double>(tFileMetaData.mFilename);
+
+    auto tTol = 1e-6;
+    for(auto& tRow : tOutput)
+    {
+        auto tRowIndex = &tRow - &tOutput[0];
+        for(auto& tColValue : tRow)
+        {
+            auto tColIndex = &tColValue - &tRow[0];
+            ASSERT_NEAR(tGold[tRowIndex][tColIndex], tColValue, tTol);
+        }
+    }
+
+    Plato::system("rm -f correlation_matrix.txt");
+}
+
+TEST(PlatoTest, CopyCorrelationMatrix)
+{
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::StandardMultiVector<double> tMatrix(2,2);
+    Plato::copy(tGold, tMatrix);
+
+    auto tTol = 1e-6;
+    for(auto& tRow : tGold)
+    {
+        auto tRowIndex = &tRow - &tGold[0];
+        for(auto& tGoldValue : tRow)
+        {
+            auto tColIndex = &tGoldValue - &tRow[0];
+            ASSERT_NEAR(tGoldValue, tMatrix(tRowIndex,tColIndex), tTol);
+        }
+    }
+}
+
+TEST(PlatoTest, SetCorrelationMatrix)
+{
+    // ********* WRITE CORRELATION MATRIX *********
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::io::write_matrix_to_file(tGold, tFileMetaData);
+
+    // ********* DEFINE STATISTICS *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    const size_t tNumSamples = 4;
+    const size_t tRandomVecDim = 2;
+    const size_t tMaxNumMoments = 4;
+    Plato::SromInputs<double> tSromData;
+    tSromData.mCorrelationMatrixFilename = tFileMetaData.mFilename;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+    Plato::set_correlation_matrix(tSromData, tObjective);
+
+    auto tTol = 1e-6;
+    const auto& tTruthCorrelation = tObjective.getTruthCorrelationMatrix();
+    for(auto& tRow : tGold)
+    {
+        auto tRowIndex = &tRow - &tGold[0];
+        for(auto& tGoldValue : tRow)
+        {
+            auto tColIndex = &tGoldValue - &tRow[0];
+            ASSERT_NEAR(tGoldValue, tTruthCorrelation(tRowIndex,tColIndex), tTol);
+        }
+    }
+
+    Plato::system("rm -f correlation_matrix.txt");
+}
+
+TEST(PlatoTest, ComputeCorrelationMisfit)
+{
+    size_t tRandVecDim = 2;
+    Plato::StandardMultiVector<double> tSromCorrelation(tRandVecDim, tRandVecDim);
+    tSromCorrelation(0,0) = 0.204886210166187;
+    tSromCorrelation(0,1) = 0.194398490655844;
+    tSromCorrelation(1,0) = 0.194398490655844;
+    tSromCorrelation(1,1) = 0.184790133740104;
+    Plato::StandardMultiVector<double> tTruthCorrelation(tRandVecDim, tRandVecDim);
+    tTruthCorrelation(0,0) = 0.164508509700266;
+    tTruthCorrelation(0,1) = 0.163872409575874;
+    tTruthCorrelation(1,0) = 0.163872409575874;
+    tTruthCorrelation(1,1) = 0.164031222859721;
+    auto tError = Plato::compute_correlation_misfit(tSromCorrelation, tTruthCorrelation);
+
+    double tTol = 1e-6;
+    double tGold = 0.0347000761289629;
+    ASSERT_NEAR(tGold, tError, tTol);
+}
+
+TEST(PlatoTest, SromCorrelation)
+{
+    size_t tRandVecDim = 2;
+    Plato::StandardVector<double> tProbabilities({0.2, 0.2, 0.2, 0.2, 0.2});
+    Plato::StandardMultiVector<double> tCorrelation(tRandVecDim, tRandVecDim);
+    Plato::StandardMultiVector<double> tSamples(tRandVecDim, tProbabilities.size());
+    tSamples(0,0) = 0.459294009098931;
+    tSamples(0,1) = 0.475238872703205;
+    tSamples(0,2) = 0.483445281537777;
+    tSamples(0,3) = 0.370173255796611;
+    tSamples(0,4) = 0.473742039581547;
+    tSamples(1,0) = 0.419721090353485;
+    tSamples(1,1) = 0.460840629149375;
+    tSamples(1,2) = 0.505947416537821;
+    tSamples(1,3) = 0.424073928225453;
+    tSamples(1,4) = 0.474440939750859;
+
+    Plato::compute_srom_correlation_matrix(tProbabilities, tSamples, tCorrelation);
+
+    double tTol = 1e-6;
+    std::vector<std::vector<double>> tGold =  { {0.206396414507494, 0.207625219956856}, {0.207625219956856, 0.209891113875170} };
+    for(decltype(tRandVecDim) tIndexI = 0; tIndexI < tRandVecDim; tIndexI++)
+    {
+        for(decltype(tRandVecDim) tIndexJ = 0; tIndexJ < tRandVecDim; tIndexJ++)
+        {
+            ASSERT_NEAR(tGold[tIndexI][tIndexJ], tCorrelation(tIndexI, tIndexJ), tTol);
+        }
+    }
+}
 
 TEST(PlatoTest, stats_mean)
 {
@@ -903,7 +1028,7 @@ TEST(PlatoTest, PlotBetaCDF)
     // SOLVE SROM PROBLEM
     Plato::SromDiagnostics<double> tDiagnostics;
     Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::SromOutputs<double> tOutput;
     Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // GATHER OUTPUT FROM SROM PROBLEM
@@ -912,8 +1037,8 @@ TEST(PlatoTest, PlotBetaCDF)
     Plato::StandardVector<double> tSamplesSROM(tStatsInputs.mNumSamples);
     for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
     {
-        tProbsSROM[tIndex] = tOutput[tIndex].mSampleWeight;
-        tSamplesSROM[tIndex] = tOutput[tIndex].mSampleValue;
+        tSamplesSROM[tIndex] = tOutput.mSamples[0][tIndex];
+        tProbsSROM[tIndex] = tOutput.mProbabilities[tIndex];
     }
 
     // NORMALIZED SROM OUTPUT
@@ -1033,7 +1158,7 @@ TEST(PlatoTest, SromObjectiveTestOne)
     PlatoTest::checkMultiVectorData(tGradient, tGradientGold);
 }
 
-TEST(PlatoTest, SromObjectiveTestTwo)
+TEST(PlatoTest, SromObjectiveTestTwo_UncorrelatedTwoDimRandVec)
 {
     // ********* ALLOCATE BETA DISTRIBUTION *********
     const double tMean = 90;
@@ -1066,6 +1191,7 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
     tObjective.setCdfMisfitTermWeight(1);
     tObjective.setMomentMisfitTermWeight(1);
+    tObjective.setCorrelationMisfitTermWeight(1);
     double tValue = tObjective.value(tControl);
     double tTolerance = 1e-5;
     double tGold = 1.032230626961365;
@@ -1091,6 +1217,74 @@ TEST(PlatoTest, SromObjectiveTestTwo)
     tGradientGold(tVectorIndex, 2) = -1.84853491196106;
     tGradientGold(tVectorIndex, 3) = 0.426963908092988;
     PlatoTest::checkMultiVectorData(tGradient, tGradientGold);
+}
+
+TEST(PlatoTest, SromObjectiveTestTwo_CorrelatedTwoDimRandVec)
+{
+    // ********* ALLOCATE BETA DISTRIBUTION *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    // ********* SET TEST DATA: SAMPLES AND PROBABILITIES *********
+    const size_t tNumVectors = 3;
+    const size_t tNumSamples = 4;
+    Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
+    size_t tVectorIndex = 0;
+    tControl(tVectorIndex, 0) = 0.375040433304479;
+    tControl(tVectorIndex, 1) = 0.328111162027339;
+    tControl(tVectorIndex, 2) = 0.274681002534179;
+    tControl(tVectorIndex, 3) = 0.334742519844096;
+    tVectorIndex = 1;
+    tControl(tVectorIndex, 0) = 0.414822395072085;
+    tControl(tVectorIndex, 1) = 0.335056628176354;
+    tControl(tVectorIndex, 2) = 0.272217383599573;
+    tControl(tVectorIndex, 3) = 0.347126327711567;
+    tVectorIndex = 2;
+    tControl[tVectorIndex].fill(0.25);
+
+    const size_t tRandomVecDim = 2;
+    Plato::StandardMultiVector<double> tCorrelation(tRandomVecDim, tRandomVecDim);
+    tCorrelation(0,0) = 0.163734737417027;
+    tCorrelation(0,1) = 0.163286664100536;
+    tCorrelation(1,0) = 0.163286664100536;
+    tCorrelation(1,1) = 0.163653492690528;
+
+    // ********* TEST OBJECTIVE FUNCTION *********
+    const size_t tMaxNumMoments = 4;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+    tObjective.setCdfMisfitTermWeight(1);
+    tObjective.setMomentMisfitTermWeight(1);
+    tObjective.setCorrelationMisfitTermWeight(1);
+    tObjective.setTruthCorrelationMatrix(tCorrelation);
+    auto tValue = tObjective.value(tControl);
+    auto tTolerance = 1e-4;
+    auto tGold = 0.821198901404961;
+    EXPECT_NEAR(tGold, tValue, tTolerance);
+
+    // ********* TEST OBJECTIVE GRADIENT *********
+    Plato::StandardMultiVector<double> tGradient(tNumVectors, tNumSamples);
+    tObjective.gradient(tControl, tGradient);
+    Plato::StandardMultiVector<double> tGradientGold(tNumVectors, tNumSamples);
+    tVectorIndex = 0;
+    tGradientGold(tVectorIndex, 0) = -2.64909865388309;
+    tGradientGold(tVectorIndex, 1) = -1.29399447542632;
+    tGradientGold(tVectorIndex, 2) = -0.485916817610198;
+    tGradientGold(tVectorIndex, 3) = -1.85589143576364;
+    tVectorIndex = 1;
+    tGradientGold(tVectorIndex, 0) = -2.51193441109838;
+    tGradientGold(tVectorIndex, 1) = -1.01799124946594;
+    tGradientGold(tVectorIndex, 2) = -0.256417179857072;
+    tGradientGold(tVectorIndex, 3) = -1.58873628951739;
+    tVectorIndex = 2;
+    tGradientGold(tVectorIndex, 0) = -2.02854765068563;
+    tGradientGold(tVectorIndex, 1) = -0.912589079823457;
+    tGradientGold(tVectorIndex, 2) = -0.790014838673253;
+    tGradientGold(tVectorIndex, 3) = -0.937548637470705;
+    PlatoTest::checkMultiVectorData(tGradient, tGradientGold, tTolerance);
 }
 
 TEST(PlatoTest, SromConstraint)
@@ -1183,7 +1377,7 @@ TEST(PlatoTest, NormalDistribution)
     }
 }
 
-TEST(PlatoTest, CheckSromObjectiveGradient)
+TEST(PlatoTest, CheckSromObjectiveGradient_Uncorrelated)
 {
     // ********* ALLOCATE BETA DISTRIBUTION *********
     const double tMean = 90;
@@ -1202,6 +1396,43 @@ TEST(PlatoTest, CheckSromObjectiveGradient)
 
     const size_t tNumVectors = 2;
     Plato::StandardMultiVector<double> tControl(tNumVectors, tNumSamples);
+    tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
+    EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
+
+    Plato::CommWrapper tComm(MPI_COMM_WORLD);
+    if(tComm.myProcID() == static_cast<int>(0))
+    {
+        std::cout << tOutputMsg.str().c_str();
+    }
+}
+
+TEST(PlatoTest, CheckSromObjectiveGradient_Correlated)
+{
+    // ********* ALLOCATE BETA DISTRIBUTION *********
+    const double tMean = 90;
+    const double tMax = 135;
+    const double tMin = 67.5;
+    const double tVariance = 135;
+    std::shared_ptr<Plato::BetaDistribution<double>> tDistribution =
+            std::make_shared<Plato::BetaDistribution<double>>(tMin, tMax, tMean, tVariance);
+
+    // ********* CHECK OBJECTIVE GRADIENT *********
+    std::ostringstream tOutputMsg;
+    const size_t tNumSamples = 4;
+    const size_t tRandomVecDim = 2;
+    const size_t tMaxNumMoments = 4;
+    Plato::Diagnostics<double> tDiagnostics;
+    Plato::SromObjective<double> tObjective(tDistribution, tMaxNumMoments, tNumSamples, tRandomVecDim);
+
+    Plato::StandardMultiVector<double> tCorrelation(tRandomVecDim, tRandomVecDim);
+    tCorrelation(0,0) = 0.163734737417027;
+    tCorrelation(0,1) = 0.163286664100536;
+    tCorrelation(1,0) = 0.163286664100536;
+    tCorrelation(1,1) = 0.163653492690528;
+    tObjective.setTruthCorrelationMatrix(tCorrelation);
+
+    const size_t tNumControlVectors = tRandomVecDim + 1;
+    Plato::StandardMultiVector<double> tControl(tNumControlVectors, tNumSamples);
     tDiagnostics.checkCriterionGradient(tObjective, tControl, tOutputMsg);
     EXPECT_TRUE(tDiagnostics.didGradientTestPassed());
 
@@ -1235,6 +1466,66 @@ TEST(PlatoTest, CheckSromConstraintGradient)
     }
 }
 
+TEST(PlatoTest, SolveSromProblem_CorrelatedVars_BetaDistribution)
+{
+    // POSE CORRELATION MATRIX
+    Plato::io::MetaData tFileMetaData;
+    tFileMetaData.mFilename = "correlation_matrix.txt";
+    std::vector<std::vector<double>> tGold =
+        { {0.142166323166496, 0.138671023863737}, {0.138671023863737, 0.141194790885173} };
+    Plato::io::write_matrix_to_file(tGold, tFileMetaData);
+
+    // POSE PROBLEM WITH KNOWN SOLUTION
+    Plato::SromInputs<double, size_t> tStatsInputs;
+    tStatsInputs.mDimensions = 2;
+    tStatsInputs.mDistribution = Plato::DistributionName::beta;
+    tStatsInputs.mMean = 30.;
+    tStatsInputs.mUpperBound = 35.;
+    tStatsInputs.mLowerBound = 20.;
+    tStatsInputs.mVariance = 4.;
+    tStatsInputs.mNumSamples = 5;
+    tStatsInputs.mMaxNumDistributionMoments = 4;
+    tStatsInputs.mCorrelationMatrixFilename = tFileMetaData.mFilename;
+
+    // SOLVE SROM PROBLEM
+    Plato::SromOutputs<double> tOutput;
+    Plato::SromDiagnostics<double> tDiagnostics;
+    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
+    tInputsKSAL.mLimitedMemorySize = 6;
+    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
+
+    double tTol = 1e-2;
+    std::vector<std::vector<double>> tGoldSamples =
+        {{22.48753391885498,24.89758085232308,30.34886999333217,29.41033100339423,33.93022475922718},
+         {22.75754703660045,29.70576425719733,29.25288508886058,31.13667083109212,31.43091708700306}};
+    for(auto& tRow : tOutput.mSamples)
+    {
+        auto tRowIndex = &tRow - &tOutput.mSamples[0];
+        for(auto& tCol : tRow)
+        {
+            auto tColIndex = &tCol - &tRow[0];
+            //std::cout << tCol << "\n";
+            ASSERT_NEAR(tGoldSamples[tRowIndex][tColIndex], tCol, tTol);
+        }
+    }
+
+    auto tSum = 0.0;
+    std::vector<double> tGoldProbabilities =
+        {0.3229842278588252,0.1621807059028493,0.1842816217593431,0.1876962703469281,0.1428344864216799};
+    tTol = 1e-4;
+    for(auto& tProb : tOutput.mProbabilities)
+    {
+        tSum += tProb;
+        auto tIndex = &tProb - &tOutput.mProbabilities[0];
+        //std::cout << tProb << "\n";
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tProb, tTol);
+    }
+    auto tGoldSum = std::accumulate(tGoldProbabilities.begin(), tGoldProbabilities.end(), 0.0);
+    EXPECT_NEAR(tGoldSum, tSum, tTol);
+
+    Plato::system("rm -f correlation_matrix.txt");
+}
+
 TEST(PlatoTest, solve_srom_problem_beta)
 {
     const double tTol = 1e-6;
@@ -1250,26 +1541,27 @@ TEST(PlatoTest, solve_srom_problem_beta)
     tStatsInputs.mMaxNumDistributionMoments = 4;
 
     // SOLVE
-    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
+    Plato::SromOutputs<double> tOutput;
     Plato::SromDiagnostics<double> tDiagnostics;
-    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
-    ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
+    size_t tRandVecDim = 0;
+    ASSERT_EQ(tOutput.mProbabilities.size(), tStatsInputs.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 78.648223523346431, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 87.571021455893685, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 99.32086371389596, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 110.99183323634628, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 78.648223523346431, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 87.571021455893685, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 99.32086371389596, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 110.99183323634628, tTol);
     // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.33023002965991671, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.30856864775148274, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.22787120519226264, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.13333298643496919, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[0], 0.33023002965991671, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[1], 0.30856864775148274, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[2], 0.22787120519226264, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[3], 0.13333298643496919, tTol);
     // expect total probability of unity
-    const double tTotalProbability = tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight
-                                     + tOutput[3].mSampleWeight;
+    const double tTotalProbability =
+        tOutput.mProbabilities[0] + tOutput.mProbabilities[1] + tOutput.mProbabilities[2] + tOutput.mProbabilities[3];
     EXPECT_NEAR(tTotalProbability, 1.0000028690386313, tTol);
 }
 
@@ -1288,59 +1580,27 @@ TEST(PlatoTest, solve_srom_problem_uniform)
     tStatsInputs.mMaxNumDistributionMoments = 4;
 
     // SOLVE
-    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
+    Plato::SromOutputs<double> tOutput;
     Plato::SromDiagnostics<double> tDiagnostics;
-    std::vector<Plato::SromOutputs<double>> tOutput;
+    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
     Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
 
     // CHECK
-    ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
+    size_t tRandVecDim = 0;
+    ASSERT_EQ(tOutput.mProbabilities.size(), tStatsInputs.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput[0].mSampleValue, 33.56115301177298, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleValue, 41.869329138220166, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleValue, 50.230344395017241, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleValue, 58.605115000685984, tTol);
-    EXPECT_NEAR(tOutput[4].mSampleValue, 66.974948215613182, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 33.56115301177298, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 41.869329138220166, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 50.230344395017241, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 58.605115000685984, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][4], 66.974948215613182, tTol);
     // expect total probability of unity
     double tTotalProbability = 0;
     for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
     {
-        tTotalProbability += tOutput[tIndex].mSampleWeight;
+        tTotalProbability += tOutput.mProbabilities[tIndex];
     }
     EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
-}
-
-TEST(PlatoTest, solve_srom_problem_normal)
-{
-    const double tTol = 1e-6;
-
-    // POSE PROBLEM WITH KNOWN SOLUTION
-    Plato::SromInputs<double, size_t> tStatsInputs;
-    tStatsInputs.mDistribution = Plato::DistributionName::normal;
-    tStatsInputs.mMean = 90.;
-    tStatsInputs.mUpperBound = 0.;
-    tStatsInputs.mLowerBound = 0.;
-    tStatsInputs.mVariance = 45. * 45.;
-    tStatsInputs.mNumSamples = 4;
-    tStatsInputs.mMaxNumDistributionMoments = 5;
-
-    // SOLVE
-    Plato::AlgorithmInputsKSAL<double> tInputsKSAL;
-    Plato::SromDiagnostics<double> tDiagnostics;
-    std::vector<Plato::SromOutputs<double>> tOutput;
-    Plato::solve_srom_problem(tStatsInputs, tInputsKSAL, tDiagnostics, tOutput);
-
-    // CHECK
-    ASSERT_EQ(tOutput.size(), tStatsInputs.mNumSamples);
-    // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput[0].mSampleWeight, 0.2070922921937452, tTol);
-    EXPECT_NEAR(tOutput[1].mSampleWeight, 0.21609792097247313, tTol);
-    EXPECT_NEAR(tOutput[2].mSampleWeight, 0.2229937967681867, tTol);
-    EXPECT_NEAR(tOutput[3].mSampleWeight, 0.353737248833844, tTol);
-    // expect total probability of unity
-    const double tTotalProbability =
-            tOutput[0].mSampleWeight + tOutput[1].mSampleWeight + tOutput[2].mSampleWeight + tOutput[3].mSampleWeight;
-    EXPECT_NEAR(tTotalProbability, 0.99992125876824889, tTol);
 }
 
 TEST(PlatoTest, SetSampleProbabilityPairsInitialGuess_UniformSampleInitialGuess)

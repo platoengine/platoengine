@@ -16,19 +16,19 @@ std::string check_material_model_key
 (const std::string& aKeyword)
 {
     XMLGen::ValidMaterialModelKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aKeyword);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aKeyword);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Material Model Key: Material model keyword '") + tLowerKey + "' is not supported.")
+        THROWERR(std::string("Check Material Model Key: Material model keyword '") + aKeyword + "' is not supported.")
     }
-    return tLowerKey;
+    return tValue;
 }
 
 void ParseMaterial::insertCoreProperties()
 {
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
     mTags.insert({ "code", { { {"code"}, ""}, "" } });
+    mTags.insert({ "name", { { {"name"}, ""}, "" } });
     mTags.insert({ "attribute", { { {"attribute"}, ""}, "" } });
     mTags.insert({ "material_model", { { {"material_model"}, ""}, "" } });
     mTags.insert({ "penalty_exponent", { { {"penalty_exponent"}, ""}, "" } });
@@ -110,6 +110,12 @@ void ParseMaterial::setCode(XMLGen::Material& aMetadata)
     }
 }
 
+void ParseMaterial::setName(XMLGen::Material& aMetadata)
+{
+    auto tItr = mTags.find("name");
+    aMetadata.name(tItr->second.first.second);
+}
+
 void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 {
     auto tItr = mTags.find("material_model");
@@ -127,7 +133,9 @@ void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 {
     XMLGen::ValidMaterialPropertyKeys tValidKeys;
-    for(auto& tKeyword : tValidKeys.mKeys)
+    auto tMaterialModel = aMetadata.category();
+    auto tPropertyTags = tValidKeys.properties(tMaterialModel);
+    for(auto& tKeyword : tPropertyTags)
     {
         auto tItr = mTags.find(tKeyword);
         if(tItr == mTags.end())
@@ -176,6 +184,7 @@ void ParseMaterial::setPenaltyExponent(XMLGen::Material& aMetadata)
 void ParseMaterial::setMetadata(XMLGen::Material& aMetadata)
 {
     this->setCode(aMetadata);
+    this->setName(aMetadata);
     this->setMaterialModel(aMetadata);
     this->setPenaltyExponent(aMetadata);
     this->setMaterialProperties(aMetadata);
@@ -196,12 +205,35 @@ void ParseMaterial::checkUniqueIDs()
     }
 }
 
+void ParseMaterial::checkNames()
+{
+    for(auto& tMaterial : mData)
+    {
+        if (tMaterial.name().empty())
+        {
+            auto tName = "material_" + tMaterial.id();
+            tMaterial.name(tName);
+        }
+    }
+
+    std::vector<std::string> tNames;
+    for(auto& tMaterial : mData)
+    {
+        tNames.push_back(tMaterial.name());
+    }
+
+    if(!XMLGen::unique(tNames))
+    {
+        THROWERR("Parse Material: Material block names are not unique.  Material block names must be unique.")
+    }
+}
+
 void ParseMaterial::checkMaterialProperties(XMLGen::Material& aMetadata)
 {
     if(aMetadata.tags().empty())
     {
         auto tID = aMetadata.id().empty() ? std::string("UNDEFINED") : aMetadata.id();
-        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty, i.e. not defined.")
+        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty.")
     }
 }
 
@@ -236,6 +268,7 @@ void ParseMaterial::parse(std::istream &aInputFile)
         }
     }
     this->checkUniqueIDs();
+    this->checkNames();
 }
 
 }

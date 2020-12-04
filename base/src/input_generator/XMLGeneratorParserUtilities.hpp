@@ -190,14 +190,6 @@ std::string check_data_layout(const std::string& aInput);
 std::string check_code_keyword(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn check_criterion_category_keyword
- * \brief Throw error if criterion 'category' keyword value is not supported.
- * \param [in] aInput 'category' keyword
- * \return valid 'category' keyword value
-**********************************************************************************/
-std::string check_criterion_category_keyword(const std::string& aInput);
-
-/******************************************************************************//**
  * \fn transform_boolean_key
  * \brief Throw error if conversion from string to boolean fails.
  * \param [in] aInput input string

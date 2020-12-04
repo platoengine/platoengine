@@ -51,6 +51,8 @@ subtract volume 13 from volume 1
 volume all scheme tetmesh
 volume all size {mesh_size}
 mesh volume all
+block 1 vol all
+block 1 name "block_1"
 sideset 2 surface 79
 sideset 2 name "ss_2"
 sideset 1 surface 56 53 47 41

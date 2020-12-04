@@ -1468,20 +1468,6 @@ void append_optimization_objective_options
     auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
     auto tNode = aParentNode.append_child("Objective");
     XMLGen::append_children(tKeys, tValues, tNode);
-/*
-    for (auto &tObjective : aXMLMetaData.objectives)
-    {
-        tKeyToValueMap.find("ValueName")->second = std::string("Objective Value ID-") + tObjective.name;
-        tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Objective Value ID-") + tObjective.name;
-        tKeyToValueMap.find("GradientName")->second = std::string("Objective Gradient ID-") + tObjective.name;
-        tKeyToValueMap.find("GradientStageName")->second = std::string("Compute Objective Gradient ID-") + tObjective.name;
-
-        auto tKeys = XMLGen::transform_key_tokens(tKeyToValueMap);
-        auto tValues = XMLGen::transform_value_tokens(tKeyToValueMap);
-        auto tNode = aParentNode.append_child("Objective");
-        XMLGen::append_children(tKeys, tValues, tNode);
-    }
-*/
 }
 // function append_optimization_objective_options
 /******************************************************************************/

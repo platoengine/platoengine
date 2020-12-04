@@ -183,6 +183,16 @@ std::string Scenario::solverTolerance() const
     return (this->getValue("tolerance"));
 }
 
+void Scenario::newtonSolverTolerance(const std::string& aInput)
+{
+    mMetaData["newton_solver_tolerance"] = aInput;
+}
+
+std::string Scenario::newtonSolverTolerance() const
+{
+    return (this->getValue("newton_solver_tolerance"));
+}
+
 void Scenario::solverConvergenceCriterion(const std::string& aInput)
 {
     mMetaData["convergence_criterion"] = aInput;

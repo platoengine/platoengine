@@ -62,6 +62,91 @@
 namespace Plato
 {
 
+namespace io
+{
+
+struct MetaData
+{
+    std::string mFilename;         /*!< input/output filename */
+    std::string mDelimiter = ",";  /*!< delimiter for input/output file */
+    std::string mPrecision = "16"; /*!< precision for input/output file */
+};
+// struct MetaData
+
+/******************************************************************************//**
+ * \fn write_matrix_to_file
+ * \brief Write matrix to file.
+ * \param [in] aData     output data
+ * \param [in] aMetaData input/output metadata
+**********************************************************************************/
+template<typename ScalarType>
+inline void write_matrix_to_file
+(const std::vector<std::vector<ScalarType>>& aData,
+ const Plato::io::MetaData& aMetaData)
+{
+    std::ofstream tMyFile(aMetaData.mFilename);
+    tMyFile << std::fixed;
+    tMyFile << std::setprecision(std::stoi(aMetaData.mPrecision));
+    for(auto& tRow : aData)
+    {
+        for(auto& tCol : tRow)
+        {
+            tMyFile << tCol;
+            auto tColIndex = &tCol - &tRow[0];
+            if (tColIndex != static_cast<int>(tRow.size() - 1u))
+            {
+                // No comma at end of line
+                tMyFile << aMetaData.mDelimiter;
+            }
+        }
+        tMyFile << "\n"; // write new line
+    }
+    tMyFile.close(); // close file
+}
+// function write_matrix_to_file
+
+/******************************************************************************//**
+ * \fn read_matrix_from_file
+ * \brief Read matrix from file.
+ * \param [in] aFilename filename
+ * \return read matrix
+**********************************************************************************/
+template<typename ScalarType>
+inline std::vector<std::vector<ScalarType>>
+read_matrix_from_file(const std::string &aFilename)
+{
+    std::ifstream tMyFile(aFilename);
+
+    if(tMyFile.good())
+    {
+        ScalarType tValue = 0;
+        std::string tLine;
+        std::vector<std::vector<ScalarType>> tOutput;
+        while(std::getline(tMyFile, tLine))
+        {
+            tOutput.push_back(std::vector<ScalarType>());
+            std::stringstream tStringStream(tLine);
+            while (tStringStream >> tValue)
+            {
+                tOutput.rbegin()->push_back(tValue);
+                if (tStringStream.peek() == ',' || tStringStream.peek() == ' ')
+                {
+                    tStringStream.ignore();
+                }
+            }
+        }
+        return tOutput;
+    }
+    else
+    {
+        THROWERR("Input filename stream is corrupted.")
+    }
+}
+// function read_matrix_from_file
+
+}
+// namespace io
+
 namespace srom
 {
 
@@ -179,7 +264,7 @@ inline void write_data
     for (size_t tColumn = 0; tColumn < aDataset.size(); ++tColumn)
     {
         tMyFile << aDataset.at(tColumn).first;
-        if (tColumn != aDataset.size() - 1) { tMyFile << ","; } // No comma at end of line
+        if (tColumn != aDataset.size() - 1u) { tMyFile << ","; } // No comma at end of line
     }
     tMyFile << "\n";
 
@@ -189,7 +274,7 @@ inline void write_data
         for (size_t tColumn = 0; tColumn < aDataset.size(); ++tColumn)
         {
             tMyFile << aDataset.at(tColumn).second.at(tRow);
-            if (tColumn != aDataset.size() - 1) { tMyFile << ","; } // No comma at end of line
+            if (tColumn != aDataset.size() - 1u) { tMyFile << ","; } // No comma at end of line
         }
         tMyFile << "\n";
     }

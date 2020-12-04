@@ -478,7 +478,7 @@ void append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_random_material_to_plato_analyze_input_deck
+void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -494,7 +494,7 @@ void append_random_material_to_plato_analyze_input_deck
     }
 */
 }
-// function append_random_material_to_plato_analyze_input_deck
+// function append_material_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -515,15 +515,21 @@ void append_material_model_to_plato_analyze_input_deck
 /*
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
-        XMLGen::append_random_material_to_plato_analyze_input_deck(aXMLMetaData, aParentNode);
+        THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block container is empty.")
     }
-    else
+
+    auto tSpatialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
+    auto tDomains = tSpatialModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
+
+    for(auto& tBlock : tBlocks)
     {
 */
         XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
 //    }
 }
-// function append_material_model_to_plato_analyze_input_deck
+// function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/

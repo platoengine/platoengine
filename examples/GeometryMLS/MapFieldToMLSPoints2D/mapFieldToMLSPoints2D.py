@@ -62,7 +62,7 @@ re_vals = services.exportData("MLS Field Values", "SCALAR_FIELD")
 
 # open exodus file for output and configure
 outMesh = exodus.ExodusDB()
-outMesh.read("square_tri_bc.gen");
+outMesh.read("square_tri_bc.exo");
 numTimes = 1
 outMesh.nodeVarNames = ["MLS_Field", "obj_grad", "mapped_obj_grad", "solution_x", "solution_y"]
 outMesh.numNodeVars = len(outMesh.nodeVarNames)

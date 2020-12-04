@@ -267,6 +267,20 @@ public:
     std::string solverTolerance() const;
 
     /******************************************************************************//**
+     * \fn newtonSolverTolerance
+     * \brief Set string value for keyword 'newton_solver_tolerance'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newtonSolverTolerance(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newtonSolverTolerance
+     * \brief Return string value for keyword 'newton_solver_tolerance'.
+     * \return value
+    **********************************************************************************/
+    std::string newtonSolverTolerance() const;
+
+    /******************************************************************************//**
      * \fn solverConvergenceCriterion
      * \brief Set string value for keyword 'convergence_criterion'.
      * \param [in] aInput string value

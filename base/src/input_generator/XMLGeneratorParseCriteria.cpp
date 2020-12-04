@@ -41,13 +41,12 @@ std::string check_criterion_type_key
 (const std::string& aKeyword)
 {
     XMLGen::ValidCriterionTypeKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aKeyword);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aKeyword);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Criterion type Key: Criterion type '") + tLowerKey + "' is not supported.")
+        THROWERR(std::string("Check Criterion type Key: Criterion type '") + tValue + "' is not supported.")
     }
-    return tLowerKey;
+    return tValue;
 }
 
 void ParseCriteria::allocate()

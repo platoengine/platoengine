@@ -45,24 +45,18 @@ void append_rigid_essential_boundary_condition_to_plato_problem
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidDofsKeys tValidDofs;
-    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
-    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
-    if(tDofsKeysItr == tValidDofs.mKeys.end())
-    {
-        THROWERR(std::string("Append Rigid Essential Boundary Condition to Plato Problem: ")
-            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
-    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
-
+    auto tDofNames = tValidDofs.names(aBC.mPhysics);
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    for(auto& tDofNameItr : tDofsKeysItr->second)
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
+    for(auto& tDofName : tDofNames)
     {
-        auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr.first);
+        auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofName);
         auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
         XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
         std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-        tValues = {"Index", "int", tDofNameItr.second};
+        auto tDof = tValidDofs.dof(aBC.mPhysics, tDofName);
+        tValues = {"Index", "int", tDof};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
         tValues = {"Sides", "string", tSetName};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
@@ -75,32 +69,20 @@ void append_zero_value_essential_boundary_condition_to_plato_problem
  const XMLGen::BC& aBC,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidDofsKeys tValidDofs;
-    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
-    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
-    if(tDofsKeysItr == tValidDofs.mKeys.end())
-    {
-        THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
-            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
-
-    auto tLowerDof = Plato::tolower(aBC.dof);
-    auto tDofNameItr = tDofsKeysItr->second.find(tLowerDof);
-    if(tDofNameItr == tDofsKeysItr->second.end())
-    {
-        THROWERR(std::string("Append Zero Value Essential Boundary Condition to Plato Problem: ")
-            + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
-    }
-    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
-
-    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
+    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(aBC.dof);
     auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
+
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "Zero Value"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-    tValues = {"Index", "int", tDofNameItr->second};
+
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tDofInteger = tValidDofs.dof(aBC.mPhysics, aBC.dof);
+    tValues = {"Index", "int", tDofInteger};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
     tValues = {"Sides", "string", tSetName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
 }
@@ -111,35 +93,24 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
  const XMLGen::BC& aBC,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidDofsKeys tValidDofs;
-    auto tLowerPhysics = Plato::tolower(aBC.mPhysics);
-    auto tDofsKeysItr = tValidDofs.mKeys.find(tLowerPhysics);
-    if(tDofsKeysItr == tValidDofs.mKeys.end())
-    {
-        THROWERR(std::string("Append Fixed Value Essential Boundary Condition to Plato Problem: ")
-            + "Physics '" + tLowerPhysics + "' is not supported in Plato Analyze.")
-    }
-
-    auto tLowerDof = Plato::tolower(aBC.dof);
-    auto tDofNameItr = tDofsKeysItr->second.find(tLowerDof);
-    if(tDofNameItr == tDofsKeysItr->second.end())
-    {
-        THROWERR(std::string("Append Fixed Value Essential Boundary Condition to Plato Problem: ")
-            + "Degree of Freedom tag/key '" + tLowerDof + "' is not supported for physics '" + tLowerPhysics + "'.")
-    }
-    XMLGen::Private::check_essential_boundary_condition_value_keyword(aBC);
-    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
-
-    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(tDofNameItr->first);
+    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(aBC.dof);
     auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
+
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Type", "string", "Fixed Value"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
-    tValues = {"Index", "int", tDofNameItr->second};
+
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tDofInteger = tValidDofs.dof(aBC.mPhysics, aBC.dof);
+    tValues = {"Index", "int", tDofInteger};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
     tValues = {"Sides", "string", tSetName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    XMLGen::Private::check_essential_boundary_condition_value_keyword(aBC);
     tValues = {"Value", "double", aBC.value};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
 }
@@ -171,9 +142,9 @@ void AppendEssentialBoundaryCondition::insert()
     mMap.insert(std::make_pair("zero value",
       std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
-    // fixed value
+    // fixed_value
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_fixed_value_essential_boundary_condition_to_plato_problem));
-    mMap.insert(std::make_pair("fixed value",
+    mMap.insert(std::make_pair("fixed_value",
       std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_fixed_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 
     // insulated

@@ -271,70 +271,76 @@ inline void check_input_statistics(const Plato::srom::RandomVariable & aMyRandom
 **********************************************************************************/
 inline void define_input_statistics
 (const Plato::srom::RandomVariable & aMyRandomVar,
- Plato::SromInputs<double> & aInput)
+ Plato::SromInputs<double> & aInputSromMetaData)
 {
     Plato::srom::check_input_statistics(aMyRandomVar);
-    aInput.mMean = std::stod(aMyRandomVar.mean());
-    aInput.mLowerBound = std::stod(aMyRandomVar.lower());
-    aInput.mUpperBound = std::stod(aMyRandomVar.upper());
+    aInputSromMetaData.mMean = std::stod(aMyRandomVar.mean());
+    aInputSromMetaData.mLowerBound = std::stod(aMyRandomVar.lower());
+    aInputSromMetaData.mUpperBound = std::stod(aMyRandomVar.upper());
     const auto tStdDev = std::stod(aMyRandomVar.deviation());
-    aInput.mVariance = tStdDev * tStdDev;
-    aInput.mRandomSeed = std::stoi(aMyRandomVar.seed());
-    aInput.mNumSamples = std::stoi(aMyRandomVar.samples());
+    aInputSromMetaData.mVariance = tStdDev * tStdDev;
+    aInputSromMetaData.mRandomSeed = std::stoi(aMyRandomVar.seed());
+    aInputSromMetaData.mNumSamples = std::stoi(aMyRandomVar.samples());
+    aInputSromMetaData.mDimensions = std::stoi(aMyRandomVar.dimensions());
+    aInputSromMetaData.mCorrelationMatrixFilename = aMyRandomVar.correlationFilename();
 }
 // function define_input_statistics
 
 /******************************************************************************//**
  * \fn compute_uniform_random_variable_statistics
- * \brief Compute sample probability pairs for an uniform random variable
- * \param [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
- * \param [out] aOutputMetaData output metadata for the SROM problem
- * \return error flag - function call was successful, true = no error, false = error
+ * \brief Given a uniform distribution, solve stochastic reduced order model \n
+ *   (SROM) problem and compute sample probability pairs.
+ * \param [in]   aInputMetaData  SROM problem input metadata
+ * \param [out]  aOutputMetaData SROM problem output metadata
 **********************************************************************************/
-inline bool compute_uniform_random_variable_statistics
+inline void compute_uniform_random_variable_statistics
 (const Plato::SromInputs<double> & aInputMetaData,
- std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
+ Plato::SromOutputs<double>& aOutputMetaData)
 {
-    aOutputMetaData.clear();
+    const auto tDelta = (aInputMetaData.mUpperBound - aInputMetaData.mLowerBound)
+        / static_cast<double>(aInputMetaData.mNumSamples - 1);
 
-    const double tSampleProbability = static_cast<double>(1.0 / aInputMetaData.mNumSamples);
-    const double tDelta = (aInputMetaData.mUpperBound - aInputMetaData.mLowerBound) / static_cast<double>(aInputMetaData.mNumSamples - 1);
-    for(size_t tIndex = 0; tIndex < aInputMetaData.mNumSamples; tIndex++)
+    for (decltype(aInputMetaData.mDimensions) tDimIndex = 0; tDimIndex < aInputMetaData.mDimensions; tDimIndex++)
     {
-        Plato::SromOutputs<double> tSromOutputs;
-        tSromOutputs.mSampleWeight = tSampleProbability;
-        tSromOutputs.mSampleValue = aInputMetaData.mLowerBound + (static_cast<double>(tIndex) * tDelta);
-        aOutputMetaData.push_back(tSromOutputs);
+        aOutputMetaData.mSamples.push_back(std::vector<double>());
+        for (decltype(aInputMetaData.mNumSamples) tSampleIndex = 0; tSampleIndex < aInputMetaData.mNumSamples; tSampleIndex++)
+        {
+            auto tSample = aInputMetaData.mLowerBound + (static_cast<double>(tSampleIndex) * tDelta);
+            aOutputMetaData.mSamples.rbegin()->push_back(tSample);
+        }
     }
-    return (true);
+
+    aOutputMetaData.mProbabilities.resize(aInputMetaData.mNumSamples);
+    const auto tProbability = static_cast<double>(1.0 / aInputMetaData.mNumSamples);
+    std::fill(aOutputMetaData.mProbabilities.begin(), aOutputMetaData.mProbabilities.end(), tProbability);
 }
 // function compute_uniform_random_variable_statistics
 
 /******************************************************************************//**
  * \fn compute_sample_probability_pairs
  * \brief Compute random variable's statistics
- * \param [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
- * \param [out] aOutputMetaData output metadata for the SROM problem
+ * \param  [in] aInputMetaData input metadata for the Stochastic Reduced Order Model (SROM) problem
+ * \return SROM problem output metadata
 **********************************************************************************/
-inline void compute_sample_probability_pairs
-(const Plato::SromInputs<double> & aInputMetaData,
- std::vector<Plato::SromOutputs<double>> & aOutputMetaData)
+inline Plato::SromOutputs<double>
+compute_sample_probability_pairs
+(const Plato::SromInputs<double> & aInputMetaData)
 {
+    Plato::SromOutputs<double> tOutputMetaData;
     switch(aInputMetaData.mDistribution)
     {
         case Plato::DistributionName::beta:
         case Plato::DistributionName::normal:
         {
-            // solve stochastic reduced order model problem
-            const bool tEnableOutput = true;
             Plato::AlgorithmInputsKSAL<double> tAlgoInputs;
             Plato::SromDiagnostics<double> tSromDiagnostics;
-            Plato::solve_srom_problem(aInputMetaData, tAlgoInputs, tSromDiagnostics, aOutputMetaData, tEnableOutput);
+            tSromDiagnostics.mOutputDiagnostics = true;
+            Plato::solve_srom_problem(aInputMetaData, tAlgoInputs, tSromDiagnostics, tOutputMetaData);
             break;
         }
         case Plato::DistributionName::uniform:
         {
-            Plato::srom::compute_uniform_random_variable_statistics(aInputMetaData, aOutputMetaData);
+            Plato::srom::compute_uniform_random_variable_statistics(aInputMetaData, tOutputMetaData);
             break;
         }
         default:
@@ -343,6 +349,7 @@ inline void compute_sample_probability_pairs
             THROWERR("Compute Random Variable Statistics: INPUT DISTRIBUTION IS NOT SUPPORTED. OPTIONS ARE BETA, NORMAL AND UNIFORM.\n");
         }
     }
+    return tOutputMetaData;
 }
 // function compute_sample_probability_pairs
 
@@ -355,32 +362,36 @@ inline void compute_sample_probability_pairs
  * \param [out] aMyRandomVariable random variable
 **********************************************************************************/
 inline void post_process_sample_probability_pairs
-(const std::vector<Plato::SromOutputs<double>> aMySromSolution,
+(const Plato::SromOutputs<double> aMySromSolution,
  const Plato::srom::RandomVariable & aMyVariable,
  Plato::srom::SromVariable & aMyRandomVariable)
 {
-    if(aMySromSolution.size() <= 0)
+    if(aMySromSolution.mSamples.empty())
     {
-        THROWERR("Post Process Sample-Probability Pairs: SROM solution is empty, i.e. Solution.size() <= 0.\n");
+        THROWERR("SROM output samples metadata is empty.");
+    }
+    if(aMySromSolution.mProbabilities.empty())
+    {
+        THROWERR("SROM output probability metadata is empty.");
     }
 
     aMyRandomVariable.mSampleProbPairs.mSamples.clear();
     aMyRandomVariable.mSampleProbPairs.mProbabilities.clear();
+    aMyRandomVariable.mSampleProbPairs.mNumSamples = aMySromSolution.mProbabilities.size();
 
     aMyRandomVariable.mTag = aMyVariable.tag();
     aMyRandomVariable.mAttribute = aMyVariable.attribute();
-
-    const size_t tNumSamples = aMySromSolution.size();
-    aMyRandomVariable.mSampleProbPairs.mNumSamples = tNumSamples;
-    aMyRandomVariable.mSampleProbPairs.mSamples.resize(tNumSamples);
-    aMyRandomVariable.mSampleProbPairs.mProbabilities.resize(tNumSamples);
-
-    for(size_t tIndex = 0; tIndex < tNumSamples; tIndex++)
+    for(auto& tProb : aMySromSolution.mProbabilities)
     {
-        std::cout << std::setprecision(64) << "sample[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleValue << "\n";
-        std::cout << std::setprecision(64) << "probability[ = " << tIndex << "] = " << aMySromSolution[tIndex].mSampleWeight << "\n";
-        aMyRandomVariable.mSampleProbPairs.mSamples[tIndex] = aMySromSolution[tIndex].mSampleValue;
-        aMyRandomVariable.mSampleProbPairs.mProbabilities[tIndex] = aMySromSolution[tIndex].mSampleWeight;
+        aMyRandomVariable.mSampleProbPairs.mProbabilities.push_back(tProb);
+    }
+
+    for(auto& tDim : aMySromSolution.mSamples)
+    {
+        for(auto& tSample : tDim)
+        {
+            aMyRandomVariable.mSampleProbPairs.mSamples.push_back(tSample);
+        }
     }
 }
 // function post_process_sample_probability_pairs
@@ -401,8 +412,7 @@ compute_stochastic_reduced_order_model
     Plato::srom::define_input_statistics(tRandomVar, tSromInputs);
     Plato::srom::define_random_samples_initial_guess_method(tRandomVar, tSromInputs);
 
-    std::vector<Plato::SromOutputs<double>> tSromOutputs;
-    Plato::srom::compute_sample_probability_pairs(tSromInputs, tSromOutputs);
+    auto tSromOutputs = Plato::srom::compute_sample_probability_pairs(tSromInputs);
 
     Plato::srom::SromVariable tSampleProbPair;
     Plato::srom::post_process_sample_probability_pairs(tSromOutputs, tRandomVar, tSampleProbPair);
@@ -486,7 +496,7 @@ inline bool compute_sample_probability_pairs
         tRandomVar.check();
         try
         {
-            if (tRandomVar.file().empty())
+            if (tRandomVar.filename().empty())
             {
                 // solve srom problem: sample-probability pairs must be computed by plato
                 auto tSampleProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tRandomVar);
@@ -495,7 +505,7 @@ inline bool compute_sample_probability_pairs
             else
             {
                 // read sample-probability pairs from the user-provided file
-                auto tFilename = tRandomVar.file();
+                auto tFilename = tRandomVar.filename();
                 auto tSampleProbPairsFromFile = Plato::srom::read_sample_probability_pairs(tFilename);
                 auto tSampleProbPairs = Plato::srom::post_process_sample_probability_pairs(tRandomVar, tSampleProbPairsFromFile);
                 aMySampleProbPairs.push_back(tSampleProbPairs);

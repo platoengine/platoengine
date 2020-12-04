@@ -651,11 +651,10 @@ void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
     }
 
     XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(tokens[0]);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if (tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(tokens[0]);
+    if (tValue.empty())
     {
-        THROWERR("ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '" + tLowerKey + "' is not supported.")
+        THROWERR(std::string("ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '") + tokens[0] + "' is not supported.")
     }
     new_bc.type = tokens[1];
 
@@ -1855,6 +1854,12 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
       m_InputData.optimizer.restart_iteration = "1";
       m_InputData.optimizer.initial_guess_field_name = "optimizationdofs";
     }
+    else if(m_InputData.optimizer.initial_guess_filename == "" &&
+            m_InputData.optimizer.initial_guess_field_name != "")
+    {
+      m_InputData.optimizer.initial_guess_filename = "restart_" + m_InputData.optimizer.restart_iteration + ".exo";
+      m_InputData.optimizer.restart_iteration = "1";
+    }
     else
     {
       // This block indicates that the user is manually setting up the
@@ -2152,6 +2157,10 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
               }
               new_block.element_type = tStringValue;
             }
+            else if(parseSingleValue(tokens, tInputStringList = {"name"}, tStringValue))
+            {
+                new_block.name = tStringValue;
+            }
             else
             {
               PrintUnrecognizedTokens(tokens);
@@ -2160,6 +2169,8 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
             }
           }
         }
+        if(new_block.name.empty())
+            new_block.name = "block_" + new_block.block_id;
         m_InputData.blocks.push_back(new_block);
       }
     }

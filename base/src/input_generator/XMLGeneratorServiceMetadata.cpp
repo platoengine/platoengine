@@ -103,6 +103,146 @@ std::string Service::numberProcessors() const
     return (this->getValue("number_processors"));
 }
 
+void Service::dimensions(const std::string& aInput)
+{
+    mMetaData["dimensions"] = aInput;
+}
+
+std::string Service::dimensions() const
+{
+    return (this->getValue("dimensions"));
+}
+
+void Service::materialPenaltyExponent(const std::string& aInput)
+{
+    mMetaData["material_penalty_exponent"] = aInput;
+}
+
+std::string Service::materialPenaltyExponent() const
+{
+    return (this->getValue("material_penalty_exponent"));
+}
+
+void Service::minErsatzMaterialConstant(const std::string& aInput)
+{
+    mMetaData["minimum_ersatz_material_value"] = aInput;
+}
+
+std::string Service::minErsatzMaterialConstant() const
+{
+    return (this->getValue("minimum_ersatz_material_value"));
+}
+
+void Service::additiveContinuation(const std::string& aInput)
+{
+    mMetaData["additive_continuation"] = aInput;
+}
+
+std::string Service::additiveContinuation() const
+{
+    return (this->getValue("additive_continuation"));
+}
+
+void Service::timeStep(const std::string& aInput)
+{
+    mMetaData["time_step"] = aInput;
+}
+
+std::string Service::timeStep() const
+{
+    return (this->getValue("time_step"));
+}
+
+void Service::numTimeSteps(const std::string& aInput)
+{
+    mMetaData["number_time_steps"] = aInput;
+}
+
+std::string Service::numTimeSteps() const
+{
+    return (this->getValue("number_time_steps"));
+}
+
+void Service::maxNumTimeSteps(const std::string& aInput)
+{
+    mMetaData["max_number_time_steps"] = aInput;
+}
+
+std::string Service::maxNumTimeSteps() const
+{
+    return (this->getValue("max_number_time_steps"));
+}
+
+void Service::timeStepExpansion(const std::string& aInput)
+{
+    mMetaData["time_step_expansion_multiplier"] = aInput;
+}
+
+std::string Service::timeStepExpansion() const
+{
+    return (this->getValue("time_step_expansion_multiplier"));
+}
+
+void Service::newmarkBeta(const std::string& aInput)
+{
+    mMetaData["newmark_beta"] = aInput;
+}
+
+std::string Service::newmarkBeta() const
+{
+    return (this->getValue("newmark_beta"));
+}
+
+void Service::newmarkGamma(const std::string& aInput)
+{
+    mMetaData["newmark_gamma"] = aInput;
+}
+
+std::string Service::newmarkGamma() const
+{
+    return (this->getValue("newmark_gamma"));
+}
+
+void Service::newtonSolverTolerance(const std::string& aInput)
+{
+    mMetaData["newton_solver_tolerance"] = aInput;
+}
+
+std::string Service::newtonSolverTolerance() const
+{
+    return (this->getValue("newton_solver_tolerance"));
+}
+
+void Service::linearSolverTolerance(const std::string& aInput)
+{
+    mMetaData["linear_solver_tolerance"] = aInput;
+}
+
+std::string Service::linearSolverTolerance() const
+{
+    return (this->getValue("linear_solver_tolerance"));
+}
+
+void Service::solverConvergenceCriterion(const std::string& aInput)
+{
+    mMetaData["convergence_criterion"] = aInput;
+}
+
+std::string Service::solverConvergenceCriterion() const
+{
+    return (this->getValue("convergence_criterion"));
+}
+
+void Service::solverMaxNumIterations(const std::string& aInput)
+{
+    mMetaData["max_number_iterations"] = aInput;
+}
+
+std::string Service::solverMaxNumIterations() const
+{
+    return (this->getValue("max_number_iterations"));
+}
+
 std::string Service::performer() const
 {
     return (code() + "_" + id());

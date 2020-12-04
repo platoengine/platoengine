@@ -218,17 +218,18 @@ TEST(PlatoTest, SROM_SolveSromProblem)
     auto tSamplerProbPairs = Plato::srom::compute_stochastic_reduced_order_model(tMyRandomVar);
 
     double tSum = 0;
-    double tTolerance = 1e-4;
+    double tProbTolerance = 1e-4;
+    double tSampleTolerance = 1e-1;
     std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
     std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
     for (int tIndex = 0; tIndex < tSamplerProbPairs.mSampleProbPairs.mNumSamples; tIndex++)
     {
         tSum += tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex];
-        ASSERT_NEAR(tGoldSamples[tIndex], tSamplerProbPairs.mSampleProbPairs.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tGoldSamples[tIndex], tSamplerProbPairs.mSampleProbPairs.mSamples[tIndex], tSampleTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex], tProbTolerance);
     }
-    tTolerance = 1e-2;
-    ASSERT_NEAR(1.0, tSum, tTolerance);
+    tProbTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tProbTolerance);
 
     Plato::system("rm -f plato_cdf_output.txt");
     Plato::system("rm -f plato_srom_diagnostics.txt");
@@ -242,7 +243,7 @@ TEST(PlatoTest, SROM_ReadSampleProbabilityPairs)
     tMyRandomVar.id(0);
     tMyRandomVar.tag("traction force");
     tMyRandomVar.attribute("magnitude");
-    tMyRandomVar.file("test.csv");
+    tMyRandomVar.filename("test.csv");
     std::vector<Plato::srom::RandomVariable> tRandomVarsSet;
     tRandomVarsSet.push_back(tMyRandomVar);
 
@@ -314,18 +315,19 @@ TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Bet
 
     // TEST RESULTS
     double tSum = 0;
-    double tTolerance = 1e-4;
+    double tProbTolerance = 1e-4;
+    double tSampleTolerance = 1e-1;
     const Plato::srom::SampleProbabilityPairs &tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
     std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
     std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
     for (int tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairs.mProbabilities[tIndex];
-        ASSERT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tTolerance);
+        ASSERT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tSampleTolerance);
+        ASSERT_NEAR(tGoldProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tProbTolerance);
     }
-    tTolerance = 1e-2;
-    ASSERT_NEAR(1.0, tSum, tTolerance);
+    tProbTolerance = 1e-2;
+    ASSERT_NEAR(1.0, tSum, tProbTolerance);
 
     Plato::system("rm -f plato_cdf_output.txt");
     Plato::system("rm -f plato_srom_diagnostics.txt");

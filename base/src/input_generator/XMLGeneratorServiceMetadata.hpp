@@ -127,6 +127,202 @@ public:
     std::string numberProcessors() const;
 
     /******************************************************************************//**
+     * \fn dimensions
+     * \brief Set string value for keyword 'dimensions'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void dimensions(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn dimensions
+     * \brief Return string value for keyword 'dimensions'.
+     * \return value
+    **********************************************************************************/
+    std::string dimensions() const;
+
+    /******************************************************************************//**
+     * \fn materialPenaltyExponent
+     * \brief Set string value for keyword 'material_penalty_exponent'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void materialPenaltyExponent(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn materialPenaltyExponent
+     * \brief Return string value for keyword 'material_penalty_exponent'.
+     * \return value
+    **********************************************************************************/
+    std::string materialPenaltyExponent() const;
+
+    /******************************************************************************//**
+     * \fn minErsatzMaterialConstant
+     * \brief Set string value for keyword 'minimum_ersatz_material_value'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void minErsatzMaterialConstant(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn minErsatzMaterialConstant
+     * \brief Return string value for keyword 'minimum_ersatz_material_value'.
+     * \return value
+    **********************************************************************************/
+    std::string minErsatzMaterialConstant() const;
+
+    /******************************************************************************//**
+     * \fn additiveContinuation
+     * \brief Set string value for keyword 'additive_continuation'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void additiveContinuation(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn additiveContinuation
+     * \brief Return string value for keyword 'additive_continuation'.
+     * \return value
+    **********************************************************************************/
+    std::string additiveContinuation() const;
+
+    /******************************************************************************//**
+     * \fn timeStep
+     * \brief Set string value for keyword 'time_step'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void timeStep(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn timeStep
+     * \brief Return string value for keyword 'time_step'.
+     * \return value
+    **********************************************************************************/
+    std::string timeStep() const;
+
+    /******************************************************************************//**
+     * \fn numTimeSteps
+     * \brief Set string value for keyword 'number_time_steps'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void numTimeSteps(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn numTimeSteps
+     * \brief Return string value for keyword 'number_time_steps'.
+     * \return value
+    **********************************************************************************/
+    std::string numTimeSteps() const;
+
+    /******************************************************************************//**
+     * \fn maxNumTimeSteps
+     * \brief Set string value for keyword 'max_number_time_steps'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void maxNumTimeSteps(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn maxNumTimeSteps
+     * \brief Return string value for keyword 'max_number_time_steps'.
+     * \return value
+    **********************************************************************************/
+    std::string maxNumTimeSteps() const;
+
+    /******************************************************************************//**
+     * \fn timeStepExpansion
+     * \brief Set string value for keyword 'time_step_expansion_multiplier'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void timeStepExpansion(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn timeStepExpansion
+     * \brief Return string value for keyword 'time_step_expansion_multiplier'.
+     * \return value
+    **********************************************************************************/
+    std::string timeStepExpansion() const;
+
+    /******************************************************************************//**
+     * \fn newmarkBeta
+     * \brief Set string value for keyword 'newmark_beta'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newmarkBeta(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newmarkBeta
+     * \brief Return string value for keyword 'newmark_beta'.
+     * \return value
+    **********************************************************************************/
+    std::string newmarkBeta() const;
+
+    /******************************************************************************//**
+     * \fn newmarkGamma
+     * \brief Set string value for keyword 'newmark_gamma'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newmarkGamma(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newmarkGamma
+     * \brief Return string value for keyword 'newmark_gamma'.
+     * \return value
+    **********************************************************************************/
+    std::string newmarkGamma() const;
+
+    /******************************************************************************//**
+     * \fn newtonSolverTolerance
+     * \brief Set string value for keyword 'newton_solver_tolerance'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void newtonSolverTolerance(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn newtonSolverTolerance
+     * \brief Return string value for keyword 'newton_solver_tolerance'.
+     * \return value
+    **********************************************************************************/
+    std::string newtonSolverTolerance() const;
+
+    /******************************************************************************//**
+     * \fn linearSolverTolerance
+     * \brief Set string value for keyword 'linear_solver_tolerance'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void linearSolverTolerance(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn linearSolverTolerance
+     * \brief Return string value for keyword 'linear_solver_tolerance'.
+     * \return value
+    **********************************************************************************/
+    std::string linearSolverTolerance() const;
+
+    /******************************************************************************//**
+     * \fn solverConvergenceCriterion
+     * \brief Set string value for keyword 'convergence_criterion'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void solverConvergenceCriterion(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn solverConvergenceCriterion
+     * \brief Return string value for keyword 'convergence_criterion'.
+     * \return value
+    **********************************************************************************/
+    std::string solverConvergenceCriterion() const;
+
+    /******************************************************************************//**
+     * \fn solverMaxNumIterations
+     * \brief Set string value for keyword 'max_number_iterations'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void solverMaxNumIterations(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn solverMaxNumIterations
+     * \brief Return string value for keyword 'max_number_iterations'.
+     * \return value
+    **********************************************************************************/
+    std::string solverMaxNumIterations() const;
+
+    /******************************************************************************//**
      * \fn performer
      * \brief Return derived string value for performer.
      * \return value

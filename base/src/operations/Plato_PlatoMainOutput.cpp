@@ -82,6 +82,9 @@ PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     mOutputMethod = 2;
     mWriteRestart = Plato::Get::Bool(aNode, "WriteRestart");
     Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
+    mRestartFieldName = "optimizationdofs";
+    if(aNode.size<std::string>("RestartFieldName"))
+        mRestartFieldName = Plato::Get::String(aNode, "RestartFieldName");
     if(aNode.size<std::string>("OutputFrequency"))
         mOutputFrequency = Plato::Get::Int(aNode, "OutputFrequency");
     if(aNode.size<std::string>("MaxIterations"))
@@ -244,7 +247,7 @@ void PlatoMainOutput::operator()()
                     tInputFilename = "platomain.exo";
                 }
                 tTheCommand << "echo times " << tIntegerTime << " > commands.txt;";
-                tTheCommand << "echo save optimizationdofs >> commands.txt;";
+                tTheCommand << "echo save " << mRestartFieldName << " >> commands.txt;";
                 tTheCommand << "echo end >> commands.txt;";
                 tTheCommand << "algebra " << tInputFilename << " restart_" << tIntegerTime << ".exo < commands.txt > algebra.txt";
                 std::cout << "\nExecuting system call: " << tTheCommand.str() << "\n";

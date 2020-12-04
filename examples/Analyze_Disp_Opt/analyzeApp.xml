@@ -8,37 +8,44 @@
 </Operation>
 
 <Operation>
-  <Function>ComputeObjectiveValue</Function>
+  <Function>ComputeCriterionValue</Function>
   <Name>Compute Objective Value</Name>
+  <Criterion>Displacement</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
-  <Function>ComputeObjectiveGradient</Function>
+  <Function>ComputeCriterionGradient</Function>
   <Name>Compute Objective Gradient</Name>
+  <Criterion>Displacement</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
-  <Function>ComputeObjective</Function>
+  <Function>ComputeCriterion</Function>
   <Name>Compute Objective</Name>
+  <Criterion>Displacement</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>

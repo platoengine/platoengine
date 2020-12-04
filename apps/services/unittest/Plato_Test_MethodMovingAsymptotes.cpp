@@ -57,6 +57,7 @@
 #include "Plato_CcsaTestObjective.hpp"
 #include "Plato_CcsaTestInequality.hpp"
 
+#include "Plato_DataFactory.hpp"
 #include "Plato_ProxyVolume.hpp"
 #include "Plato_ProxyCompliance.hpp"
 #include "Plato_EpetraSerialDenseVector.hpp"

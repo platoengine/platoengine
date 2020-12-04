@@ -71,18 +71,17 @@ void ParseOutput::setRandomQoI()
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputToLayoutKeys tValidKeys;
-        std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.first.second, tTokens);
-        for (auto &tToken : tTokens)
+        std::vector<std::string> tOutputQoIs;
+        XMLGen::split(tItr->second.first.second, tOutputQoIs);
+        for (auto& tOutputQoI : tOutputQoIs)
         {
-            auto tLowerToken = Plato::tolower(tToken);
-            auto tItr = tValidKeys.mKeys.find(tLowerToken);
-            if(tItr == tValidKeys.mKeys.end())
+            auto tLayout = tValidKeys.value(tOutputQoI);
+            if(tLayout.empty())
             {
-                THROWERR(std::string("Parse Output: Output random quantity of interest with tag '")
-                    + tLowerToken + "' is not supported.")
+                THROWERR(std::string("Parse Output: Output random quantity of interest with tag '") + tOutputQoI + "' is not supported.")
             }
-            mData.appendRandomQoI(tItr->first, tItr->second);
+            auto tLowertOutputQoI = Plato::tolower(tOutputQoI);
+            mData.appendRandomQoI(tLowertOutputQoI, tLayout);
         }
     }
 }
@@ -93,18 +92,17 @@ void ParseOutput::setDeterministicQoI()
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputToLayoutKeys tValidKeys;
-        std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.first.second, tTokens);
-        for (auto &tToken : tTokens)
+        std::vector<std::string> tOutputQoIs;
+        XMLGen::split(tItr->second.first.second, tOutputQoIs);
+        for (auto& tOutputQoI : tOutputQoIs)
         {
-            auto tLowerToken = Plato::tolower(tToken);
-            auto tItr = tValidKeys.mKeys.find(tLowerToken);
-            if(tItr == tValidKeys.mKeys.end())
+            auto tLayout = tValidKeys.value(tOutputQoI);
+            if(tLayout.empty())
             {
-                THROWERR(std::string("Parse Output: Output quantity of interest with tag '")
-                    + tLowerToken + "' is not supported.")
+                THROWERR(std::string("Parse Output: Output quantity of interest with tag '") + tOutputQoI + "' is not supported.")
             }
-            mData.appendDeterminsiticQoI(tItr->first, tItr->second);
+            auto tLowerToken = Plato::tolower(tOutputQoI);
+            mData.appendDeterminsiticQoI(tLowerToken, tLayout);
         }
     }
 }

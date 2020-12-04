@@ -76,6 +76,13 @@ private:
     void setCode(XMLGen::Material& aMetadata);
 
     /******************************************************************************//**
+     * \fn setName
+     * \brief Set 'name' keyword, 
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setName(XMLGen::Material& aMetadata);
+
+    /******************************************************************************//**
      * \fn setMaterialModel
      * \brief Set 'material model' keyword, throw error if it is not defined.
      * \param [in/out] aInputFile parsed input metadata
@@ -122,6 +129,13 @@ private:
      * \brief Throw error if material block identification numbers are not unique.
     **********************************************************************************/
     void checkUniqueIDs();
+
+    /******************************************************************************//**
+     * \fn checkNames
+     * \brief Set material name to material_mID if name is empty. \
+     * throw error if names are not unique
+    **********************************************************************************/
+    void checkNames();
 
 public:
     /******************************************************************************//**

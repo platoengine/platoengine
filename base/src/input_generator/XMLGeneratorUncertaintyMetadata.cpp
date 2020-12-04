@@ -61,6 +61,16 @@ void Uncertainty::seed(const std::string& aInput)
     mMetaData["random_seed"] = aInput;
 }
 
+std::string Uncertainty::dimensions() const
+{
+    return (this->getValue("dimensions"));
+}
+
+void Uncertainty::dimensions(const std::string& aInput)
+{
+    mMetaData["dimensions"] = aInput;
+}
+
 std::string Uncertainty::category() const
 {
     return (this->getValue("category"));
@@ -179,6 +189,16 @@ std::string Uncertainty::upper() const
 void Uncertainty::upper(const std::string& aInput)
 {
     mMetaData["upper_bound"] = aInput;
+}
+
+std::string Uncertainty::correlationFilename() const
+{
+    return (this->getValue("correlation_filename"));
+}
+
+void Uncertainty::correlationFilename(const std::string& aInput)
+{
+    mMetaData["correlation_filename"] = aInput;
 }
 
 }

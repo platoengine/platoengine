@@ -83,10 +83,6 @@ begin mesh
 end mesh
 
 begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code PlatoMain PlatoMain
 code plato_analyze analyze_MPMD
 end paths

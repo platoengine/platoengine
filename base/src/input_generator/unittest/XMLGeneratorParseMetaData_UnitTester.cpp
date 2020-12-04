@@ -754,7 +754,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_WithTimeAndSolverBlocks)
         "     newmark_gamma 0.25\n"
         "   end time\n"
         "   begin solver\n"
-        "     tolerance 1e-10\n"
+        "     newton_solver_tolerance 1e-10\n"
         "     max_number_iterations 20\n"
         "     convergence_criterion residual\n"
         "   end solver\n"

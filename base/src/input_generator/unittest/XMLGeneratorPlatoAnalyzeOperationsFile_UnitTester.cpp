@@ -13,8 +13,64 @@
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 
+
+#include "XMLGeneratorValidInputKeys.hpp"
+
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_J2Plasticity)
+{
+    pugi::xml_document tDocument;
+    std::vector<std::pair<std::string,std::string>> tTags =
+    {
+      {"youngs_modulus_block_id_1", "youngs_modulus"},
+      {"poissons_ratio_block_id_1", "poissons_ratio"},
+      {"pressure_scaling_block_id_1", "pressure_scaling"},
+      {"hardening_modulus_isotropic_block_id_1", "hardening_modulus_isotropic"},
+      {"hardening_modulus_kinematic_block_id_1", "hardening_modulus_kinematic"},
+      {"initial_yield_stress_yz_block_id_1", "initial_yield_stress"},
+      {"elastic_properties_penalty_exponent_block_id_1", "elastic_properties_penalty_exponent"},
+      {"elastic_properties_minimum_ersatz_block_id_1", "elastic_properties_minimum_ersatz"},
+      {"plastic_properties_penalty_exponent_block_id_1", "plastic_properties_penalty_exponent"},
+      {"plastic_properties_minimum_ersatz_block_id_1", "plastic_properties_minimum_ersatz"}
+    };
+
+    XMLGen::MaterialFunctionInterface tInterface;
+    ASSERT_NO_THROW(tInterface.call("j2 plasticity", tTags, tDocument));
+
+    // TEST RESULTS
+    auto tParameter = tDocument.child("Parameter");
+    std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
+    std::vector<std::string> tValues =
+        {"youngs_modulus_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Youngs Modulus", "0.0"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tParameter);
+
+    std::vector<std::vector<std::string>> tGold =
+        {
+          {"youngs_modulus_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Youngs Modulus", "0.0"},
+          {"poissons_ratio_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Poissons Ratio", "0.0"},
+          {"pressure_scaling_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Pressure Scaling", "0.0"},
+          {"hardening_modulus_isotropic_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Hardening Modulus Isotropic", "0.0"},
+          {"hardening_modulus_kinematic_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Hardening Modulus Kinematic", "0.0"},
+          {"initial_yield_stress_yz_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Initial Yield Stress", "0.0"},
+          {"elastic_properties_penalty_exponent_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Elastic Properties Penalty Exponent", "0.0"},
+          {"elastic_properties_minimum_ersatz_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Elastic Properties Minimum Ersatz", "0.0"},
+          {"plastic_properties_penalty_exponent_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Plastic Properties Penalty Exponent", "0.0"},
+          {"plastic_properties_minimum_ersatz_block_id_1", "[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:Plastic Properties Minimum Ersatz", "0.0"}
+        };
+
+    size_t tIndex = 0;
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_children(tKeys, tGold[tIndex], tParameter);
+        tParameter = tParameter.next_sibling();
+        tIndex++;
+    }
+    ASSERT_EQ(tGold.size(), tIndex);
+}
 
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
 {
