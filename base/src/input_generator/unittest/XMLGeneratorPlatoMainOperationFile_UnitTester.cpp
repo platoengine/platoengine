@@ -1427,25 +1427,28 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_2"}, tInput);
 }
 
-TEST(PlatoTestXMLGenerator, DISABLED_AppendConstraintGradientInputToOutputOperation)
+TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
 {
-    // pugi::xml_document tDocument;
-    // XMLGen::InputData tXMLMetaData;
-    // XMLGen::Constraint tConstraint1;
-    // tConstraint1.name("0");
-    // XMLGen::Constraint tConstraint2;
-    // tConstraint2.name("1");
-    // tXMLMetaData.constraints.push_back(tConstraint1);
-    // tXMLMetaData.constraints.push_back(tConstraint2);
-    // auto tOperation = tDocument.append_child("Operation");
-    // XMLGen::append_constraint_gradient_to_output_operation(tXMLMetaData, tOperation);
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Constraint tConstraint1;
+    tConstraint1.criterion("1");
+    tConstraint1.service("1");
+    tConstraint1.scenario("1");
+    XMLGen::Constraint tConstraint2;
+    tConstraint2.criterion("2");
+    tConstraint2.service("2");
+    tConstraint2.scenario("2");
+    tXMLMetaData.constraints.push_back(tConstraint1);
+    tXMLMetaData.constraints.push_back(tConstraint2);
+    auto tOperation = tDocument.append_child("Operation");
+    XMLGen::append_constraint_gradient_to_output_operation(tXMLMetaData, tOperation);
 
-    // ASSERT_FALSE(tOperation.empty());
-    // auto tInput = tOperation.child("Input");
-    // PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient id-0"}, tInput);
-    // tInput = tInput.next_sibling("Input");
-    // PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient id-1"}, tInput);
-
+    ASSERT_FALSE(tOperation.empty());
+    auto tInput = tOperation.child("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_1"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_2_service_2_scenario_2"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
