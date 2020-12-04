@@ -11,8 +11,8 @@ begin service 2
 end service
 
 begin criterion 1
-  type heat_conduction
-  minimum_ersatz_material_value 1e-3
+  type thermal_compliance
+  minimum_ersatz_material_value 1e-9
 end criterion
 
 begin criterion 2
@@ -20,7 +20,7 @@ begin criterion 2
 end criterion
 
 begin scenario 1
-  physics thermal
+  physics steady_state_thermal
   dimensions 3
   loads 1
   boundary_conditions 1 2
@@ -43,7 +43,7 @@ begin boundary conditions
 end boundary conditions
 
 begin loads
-    heat flux sideset name ss_1 value -1e2 load id 1
+    uniform_surface_flux sideset name ss_1 value -1e2 load id 1
 end loads
       
 begin constraint
@@ -62,14 +62,14 @@ begin block 2
 end block
 
 begin material 1
-   material_model isotropic linear elastic 
+   material_model isotropic_linear_thermal 
    thermal_conductivity 210
    mass_density 2703
    specific_heat 900 
 end material
 
 begin output
-    service 2
+   service 2
    output_data true
    data temperature
 end output
@@ -78,7 +78,7 @@ begin optimization parameters
    filter radius scale 2.48
    max iterations 30 
 //   output frequency 1000 
-   algorithm mma
+   algorithm ksal
    discretization density 
    initial density value .2
    fixed blocks 2
@@ -91,3 +91,7 @@ begin mesh
 end mesh
 
 
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths

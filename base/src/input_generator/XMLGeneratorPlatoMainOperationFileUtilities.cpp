@@ -497,12 +497,22 @@ void append_aggregate_data_to_plato_main_operation
     tOutput = tAggregateNode.append_child("Output");
     XMLGen::append_children({"ArgumentName"}, {"Field"}, tOutput);
 
-    // Aggregate fields
+    // Weighting and normalization
     auto tWeightingNode = tOperation.append_child("Weighting");
     for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
     {
         auto tWeight = tWeightingNode.append_child("Weight");
         XMLGen::append_children({"Value"}, {tObjective.weights[i]}, tWeight);
+    }
+    if(aXMLMetaData.normalizeInAggregator())
+    {
+        auto tNormals = tWeightingNode.append_child("Normals");
+        for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+        {
+            auto tInput = tNormals.append_child("Input");
+            auto tArgName = std::string("Normal ") + std::to_string(i+1);
+            XMLGen::append_children({"ArgumentName"}, {tArgName}, tInput);
+        }
     }
 }
 // function append_aggregate_data_to_plato_main_operation

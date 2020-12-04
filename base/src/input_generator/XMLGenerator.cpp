@@ -660,9 +660,15 @@ void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
     new_bc.type = tokens[1];
 
     if(!new_bc.type.compare("displacement"))
+    {
+      new_bc.mPhysics = "steady_state_mechanics";
       parseDisplacementBC(tokens,new_bc);
+    }
     else if(!new_bc.type.compare("temperature"))
+    {
+      new_bc.mPhysics = "steady_state_thermal";
       parseTemperatureBC(tokens,new_bc);
+    }
     else
     {
         PrintUnrecognizedTokens(tokens);
@@ -908,13 +914,13 @@ void XMLGenerator::initializePlatoProblemOptions()
     m_InputData.optimizer.mAugLagPenaltyParamScale = "";
     m_InputData.optimizer.mMaxNumAugLagSubProbIter = "";
 
-    m_InputData.optimizer.mHessianType = "disabled";
+    m_InputData.optimizer.mHessianType = "";
     if(m_InputData.optimizer.mHessianType.compare("lbfgs") == 0)
     {
         m_InputData.optimizer.mLimitedMemoryStorage = "8";
     }
-    m_InputData.optimizer.mDisablePostSmoothingKS = "true";
-    m_InputData.optimizer.mProblemUpdateFrequency = "5";
+    m_InputData.optimizer.mDisablePostSmoothingKS = "";
+    m_InputData.optimizer.mProblemUpdateFrequency = "";
     m_InputData.optimizer.mOuterGradientToleranceKS = "";
     m_InputData.optimizer.mOuterStationarityToleranceKS = "";
     m_InputData.optimizer.mOuterStagnationToleranceKS = "";
@@ -1079,15 +1085,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
               }
               m_InputData.optimizer.csm_filename = tStringValue;
             }
-            // else if(parseSingleValue(tokens, tInputStringList = {"use","normalization","in","aggregator"}, tStringValue))
-            // {
-            //   if(tStringValue == "")
-            //   {
-            //     std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"use normalization in aggregator\" keyword(s).\n";
-            //     return false;
-            //   }
-            //   m_InputData.mUseNormalizationInAggregator = tStringValue;
-            // }
+            else if(parseSingleValue(tokens, tInputStringList = {"normalize_in_aggregator"}, tStringValue))
+            {
+              if(tStringValue == "")
+              {
+                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"normalize_in_aggregator\" keyword.\n";
+                return false;
+              }
+              m_InputData.optimizer.mNormalizeInAggregator = tStringValue;
+            }
             else if(parseSingleValue(tokens, tInputStringList = {"create","levelset","spheres"}, tStringValue))
             {
               if(tStringValue == "")

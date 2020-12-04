@@ -108,6 +108,7 @@ struct Optimizer
     std::string number_refines;
     std::string mVerbose = "false";
     std::string mMMAMoveLimit;
+    std::string mNormalizeInAggregator = "";
     std::string mMMAControlStagnationTolerance;
     std::string mMMAObjectiveStagnationTolerance;
     std::string mMMAAsymptoteExpansion;
@@ -217,6 +218,33 @@ public:
 
 
         return tConcretizedCriteria;
+    }
+
+    bool normalizeInAggregator() const
+    {
+        bool tReturnValue = false;
+
+        // First try to determine based off of algorithm
+        if(optimizer.optimization_algorithm == "ksal" ||
+           optimizer.optimization_algorithm == "ksbc" ||
+           optimizer.optimization_algorithm == "oc")
+        {
+            tReturnValue = true;
+        }   
+
+        // User-set flag trumps everything else
+        if(optimizer.mNormalizeInAggregator != "")
+        {
+            tReturnValue = (XMLGen::to_lower(optimizer.mNormalizeInAggregator) == "true");
+        }
+
+        return tReturnValue;
+    }
+
+    bool needToAggregate() const
+    {
+        bool tReturnValue = normalizeInAggregator() || objective.criteriaIDs.size() > 1;
+        return tReturnValue;
     }
 
     std::string getFirstPlatoMainPerformer() const

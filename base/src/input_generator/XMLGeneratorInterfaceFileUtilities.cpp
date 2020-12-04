@@ -190,6 +190,7 @@ void append_shared_data
     XMLGen::append_criteria_shared_data(aMetaData, aDocument);
     XMLGen::append_constraint_shared_data(aMetaData, aDocument);
     XMLGen::append_objective_shared_data(aMetaData, aDocument);
+    XMLGen::append_normalization_shared_data(aMetaData, aDocument);
 
 /*
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
@@ -284,7 +285,8 @@ void append_update_problem_stage
 /******************************************************************************/
 void append_objective_value_operation
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node &aParentNode)
+ pugi::xml_node &aParentNode,
+ bool aCalculatingNormalizationFactor)
 {
     pugi::xml_node tParentNode = aParentNode;
     XMLGen::Objective tObjective = aXMLMetaData.objective;
@@ -313,6 +315,10 @@ void append_objective_value_operation
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
         auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
+        if(aCalculatingNormalizationFactor)
+        {
+            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
+        }
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Value", tOutputSharedData}, tOperationOutput);
     }
 }
@@ -342,6 +348,13 @@ void append_aggregate_objective_value_operation
         auto tArgName = std::string("Value ") + std::to_string(i+1);
         auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        if(aXMLMetaData.normalizeInAggregator())
+        {
+            tOperationInput = tOperationNode.append_child("Input");
+            tArgName = std::string("Normal ") + std::to_string(i+1);
+            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        }
     }
 
     auto tOperationOutput = tOperationNode.append_child("Output");
@@ -373,6 +386,13 @@ void append_aggregate_objective_gradient_operation
         auto tArgName = std::string("Field ") + std::to_string(i+1);
         auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        if(aXMLMetaData.normalizeInAggregator())
+        {
+            tOperationInput = tOperationNode.append_child("Input");
+            tArgName = std::string("Normal ") + std::to_string(i+1);
+            tOutputSharedData = std::string("Initial Criterion Value - ") + tIdentifierString;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        }
     }
 
     auto tOperationOutput = tOperationNode.append_child("Output");
@@ -395,14 +415,14 @@ void append_objective_value_stage
 //    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
 //        XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
 //    else
-        XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode);
+        XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
 
 /*
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
 */
     std::string tOutputSharedData;
-    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    if(aXMLMetaData.needToAggregate())
     {
         tOutputSharedData = "Objective Value";
         XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
@@ -482,7 +502,7 @@ void append_objective_gradient_stage
             XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
 */
     std::string tInputMetaDataTag;
-    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    if(aXMLMetaData.needToAggregate())
     {
         tInputMetaDataTag = "Objective Gradient";
         XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
@@ -883,6 +903,37 @@ void append_objective_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
+void append_normalization_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    bool tNormalizeInAggregator = aXMLMetaData.normalizeInAggregator();
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+
+    if(tNormalizeInAggregator)
+    {
+        for(size_t i=0; i<aXMLMetaData.objective.criteriaIDs.size(); ++i)
+        {
+            std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[i];
+            std::string tServiceID = aXMLMetaData.objective.serviceIDs[i];
+            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[i];
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+            auto tValueNameString = "Initial Criterion Value - " + tIdentifierString;
+            auto &tService = aXMLMetaData.service(tServiceID);
+            auto tOwnerName = tService.performer();
+
+            std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
+            std::vector<std::string> tValues = {tValueNameString, "Scalar", "Global", "1", tOwnerName, tFirstPlatoMainPerformer };
+            auto tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
+    }
+}
+// function append_normalization_shared_data
+/******************************************************************************/
+
+/******************************************************************************/
 void append_control_shared_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
@@ -957,6 +1008,20 @@ void append_initial_field_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_compute_normalization_factor_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    if(aXMLMetaData.normalizeInAggregator())
+    {
+        XMLGen::append_filter_control_operation(aXMLMetaData, aParentNode);
+        XMLGen::append_objective_value_operation(aXMLMetaData, aParentNode, true);
+    }
+}
+// function append_compute_normalization_factor_operation
+/******************************************************************************/
+
+/******************************************************************************/
 void append_initial_guess_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -964,6 +1029,7 @@ void append_initial_guess_stage
     auto tStageNode = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"},{"Initial Guess"}, tStageNode);
     XMLGen::append_initial_field_operation(aXMLMetaData, tStageNode);
+    XMLGen::append_compute_normalization_factor_operation(aXMLMetaData, tStageNode);
     auto tOutputNode = tStageNode.append_child("Output");
     XMLGen::append_children({"SharedDataName"},{"Control"}, tOutputNode);
 }
@@ -1187,20 +1253,67 @@ void append_trust_region_kelley_sachs_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    std::vector<std::string> tKeys = {"KSTrustRegionExpansionFactor", "KSTrustRegionContractionFactor", "KSMaxTrustRegionIterations", "KSInitialRadiusScale",
-         "KSMaxRadiusScale", "HessianType", "MinTrustRegionRadius", "LimitedMemoryStorage", "KSOuterGradientTolerance", "KSOuterStationarityTolerance",
-         "KSOuterStagnationTolerance", "KSOuterControlStagnationTolerance", "KSOuterActualReductionTolerance", "ProblemUpdateFrequency", "DisablePostSmoothing",
-         "KSTrustRegionRatioLow", "KSTrustRegionRatioMid", "KSTrustRegionRatioUpper"};
-    std::vector<std::string> tValues = {aXMLMetaData.optimizer.mTrustRegionExpansionFactor, aXMLMetaData.optimizer.mTrustRegionContractionFactor, aXMLMetaData.optimizer.mMaxTrustRegionIterations,
-        aXMLMetaData.optimizer.mInitialRadiusScale, aXMLMetaData.optimizer.mMaxRadiusScale, aXMLMetaData.optimizer.mHessianType, aXMLMetaData.optimizer.mMinTrustRegionRadius, aXMLMetaData.optimizer.mLimitedMemoryStorage,
-        aXMLMetaData.optimizer.mOuterGradientToleranceKS, aXMLMetaData.optimizer.mOuterStationarityToleranceKS, aXMLMetaData.optimizer.mOuterStagnationToleranceKS, aXMLMetaData.optimizer.mOuterControlStagnationToleranceKS,
-        aXMLMetaData.optimizer.mOuterActualReductionToleranceKS, aXMLMetaData.optimizer.mProblemUpdateFrequency, aXMLMetaData.optimizer.mDisablePostSmoothingKS, aXMLMetaData.optimizer.mTrustRegionRatioLowKS,
-        aXMLMetaData.optimizer.mTrustRegionRatioMidKS, aXMLMetaData.optimizer.mTrustRegionRatioUpperKS};
+    std::vector<std::string> tKeys = {"KSTrustRegionExpansionFactor", 
+                                      "KSTrustRegionContractionFactor", 
+                                      "KSMaxTrustRegionIterations", 
+                                      "KSInitialRadiusScale",
+                                      "KSMaxRadiusScale", 
+                                      "HessianType", 
+                                      "MinTrustRegionRadius", 
+                                      "LimitedMemoryStorage", 
+                                      "KSOuterGradientTolerance", 
+                                      "KSOuterStationarityTolerance",
+                                      "KSOuterStagnationTolerance", 
+                                      "KSOuterControlStagnationTolerance", 
+                                      "KSOuterActualReductionTolerance", 
+                                      "ProblemUpdateFrequency", 
+                                      "DisablePostSmoothing",
+                                      "KSTrustRegionRatioLow",       
+                                      "KSTrustRegionRatioMid", 
+                                      "KSTrustRegionRatioUpper"};
+    std::vector<std::string> tValues = {aXMLMetaData.optimizer.mTrustRegionExpansionFactor, 
+                                        aXMLMetaData.optimizer.mTrustRegionContractionFactor, 
+                                        aXMLMetaData.optimizer.mMaxTrustRegionIterations,
+                                        aXMLMetaData.optimizer.mInitialRadiusScale, 
+                                        aXMLMetaData.optimizer.mMaxRadiusScale, 
+                                        aXMLMetaData.optimizer.mHessianType, 
+                                        aXMLMetaData.optimizer.mMinTrustRegionRadius, 
+                                        aXMLMetaData.optimizer.mLimitedMemoryStorage,
+                                        aXMLMetaData.optimizer.mOuterGradientToleranceKS, 
+                                        aXMLMetaData.optimizer.mOuterStationarityToleranceKS, 
+                                        aXMLMetaData.optimizer.mOuterStagnationToleranceKS, 
+                                        aXMLMetaData.optimizer.mOuterControlStagnationToleranceKS,
+                                        aXMLMetaData.optimizer.mOuterActualReductionToleranceKS, 
+                                        aXMLMetaData.optimizer.mProblemUpdateFrequency, 
+                                        aXMLMetaData.optimizer.mDisablePostSmoothingKS, 
+                                        aXMLMetaData.optimizer.mTrustRegionRatioLowKS,
+                                        aXMLMetaData.optimizer.mTrustRegionRatioMidKS, 
+                                        aXMLMetaData.optimizer.mTrustRegionRatioUpperKS};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
 // function append_trust_region_kelley_sachs_options
+/******************************************************************************/
+
+/******************************************************************************/
+void append_augmented_lagrangian_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = {"AugLagPenaltyParam", 
+                                      "AugLagPenaltyParamScaleFactor"};
+    std::vector<std::string> tValues = {aXMLMetaData.optimizer.mAugLagPenaltyParam, 
+                                        aXMLMetaData.optimizer.mAugLagPenaltyParamScale};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.child("Options");
+    if(tOptionsNode.empty())
+    {
+        tOptionsNode = aParentNode.append_child("Options");
+    }
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+}
+// function append_augmented_lagrangian_options
 /******************************************************************************/
 
 /******************************************************************************/
@@ -1224,6 +1337,7 @@ void append_optimization_algorithm_parameters_options
     else if(tLower.compare("ksal") == 0)
     {
         XMLGen::append_trust_region_kelley_sachs_options(aXMLMetaData, aParentNode);
+        XMLGen::append_augmented_lagrangian_options(aXMLMetaData, aParentNode);
     }
     else if(tLower.compare("derivativechecker") == 0)
     {
@@ -1331,7 +1445,7 @@ void append_optimization_objective_options
         { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""} };
 
     std::string tValueNameString;
-    if(aXMLMetaData.objective.criteriaIDs.size() > 1)
+    if(aXMLMetaData.needToAggregate())
     {
         tValueNameString = "Objective Value";
     }

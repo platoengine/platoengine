@@ -182,6 +182,17 @@ void append_objective_shared_data
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_normalization_shared_data
+ * \brief Append normalization variable shared data to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+ * \param [in]     aOwnerName   name of the application that owns the data (default = "")
+**********************************************************************************/
+void append_normalization_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_criteria_shared_data
  * \brief Append shared data for criteria values and gradients to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -406,6 +417,16 @@ void append_trust_region_kelley_sachs_options
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_augmented_lagrangian_options
+ * \brief Append options for augmented lagrangian algorithm.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_augmented_lagrangian_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_optimization_algorithm_parameters_options
  * \brief Append optimization algorithm's options to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -500,6 +521,16 @@ void append_optimization_bound_constraints_options
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_optimizer_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_compute_normalization_factor_operation
+ * \brief Append operation for calculating normalization factor to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_compute_normalization_factor_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
