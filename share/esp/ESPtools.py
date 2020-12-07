@@ -152,19 +152,19 @@ def getInitialValues(modelName):
 ##############################################################################
 ## define function that converts su2 mesh to exo mesh
 ##############################################################################
-def toExo(modelName, meshName):
+def toExo(meshName, groupAttrs):
   tokens = meshName.split('.')
   tokens.pop()
   meshBaseName = ".".join(tokens)
 
-  strVal = subprocess.check_output(['awk', '/named_face/{print $2, $3, $4, $5}', modelName])
-  tokens = strVal.split('\n')
-  tokens = list(filter(None, tokens)) ## filter out empty strings
-
   callArgs = ['Su2ToExodus', meshBaseName+'.su2', meshBaseName+'.exo']
 
-  for token in tokens:
-    callArgs += token.split(' ')
+  for entry in groupAttrs:
+    if entry["name"] != "solid_group":
+      callArgs.append("mark")
+      callArgs.append(entry["index"])
+      callArgs.append("sideset")
+      callArgs.append(entry["name"])
 
   subprocess.call(callArgs)
 
@@ -173,8 +173,25 @@ def toExo(modelName, meshName):
 ##############################################################################
 def updateModel(modelName, paramVals):
 
-  response = subprocess.check_output(['awk', '/attribute/{if ($2~/capsMeshLength/) print $3}', modelName])
-  capsMeshLength = str(response)
+
+  #
+  # Add requisite body and face attributes for meshing
+  #
+
+  # find mesh size attribute 'MeshLength'
+  #
+  response = subprocess.check_output(['awk', '/set/{if ($2=="MeshLength") print $3}', modelName])
+
+  ## is 'MeshLength' in the csm file?
+  if response == "":
+    raise Exception("Error reading CSM file: required variable, 'MeshLength', not found..")
+
+  ## is 'MeshLength' in the csm file only once?
+  tokens = response.rstrip().split("\n")
+  if len(tokens) > 1:
+    raise Exception("Error reading CSM file: multiple 'MeshLength' keywords found. 'MeshLength' variable should appear once.")
+
+  MeshLength = str(response)
 
   modedName = modelName + ".tmp"
 
@@ -186,16 +203,20 @@ def updateModel(modelName, paramVals):
       f_out.write("select body\n")
       f_out.write("attribute capsAIM $aflr4AIM;aflr3AIM\n")
       f_out.write("attribute capsGroup $solid_group\n")
-      f_out.write("attribute capsMeshLength " + capsMeshLength + "\n")
+      f_out.write("attribute capsMeshLength " + MeshLength + "\n")
 
       f_out.write("select face\n")
       f_out.write("attribute capsGroup $solid_group\n")
-      f_out.write("attribute capsMeshLength " + capsMeshLength + "\n")
+      f_out.write("attribute capsMeshLength " + MeshLength + "\n")
 
     f_out.write(line)
 
   f_out.close()
 
+
+  #
+  # If paramVals were provided, set them in the model file
+  #
 
   for ip in range(len(paramVals)):
     p = paramVals[ip]
@@ -208,6 +229,44 @@ def updateModel(modelName, paramVals):
 
   subprocess.call(['mv', modedName, modelName])
 
+  #
+  # find any face attribute assignments and copy them to the end of the file
+  #
+
+  f_in = open(modelName)
+  f_out = open(modedName, 'w')
+
+  faceAttrs = []
+
+  bodyLine = ""
+  faceLine = ""
+  for line in f_in:
+    if line.strip().lower() == 'end':
+      for faceAttr in faceAttrs:
+        for attrLine in faceAttr:
+          f_out.write(attrLine)
+    else:
+      tokens = line.split(' ')
+      tokens = list(filter(None, tokens)) ## filter out empty strings
+      if bodyLine != "" and faceLine != "":
+        if tokens[0] == "attribute" and tokens[1] == "capsGroup":
+          faceAttrs.append([bodyLine, faceLine, line])
+          bodyLine = ""
+          faceLine = ""
+      elif bodyLine != "":
+        if tokens[0] == "select" and tokens[1] == "face":
+          faceLine = line
+        else:
+          bodyLine = ""
+      else:
+        if tokens[0] == "select" and tokens[1] == "body":
+          bodyLine = line
+
+    f_out.write(line)
+
+  f_out.close()
+
+  subprocess.call(['mv', modedName, modelName])
 
 ##############################################################################
 ## define function that generates exodus mesh from csm file
@@ -231,12 +290,38 @@ def mesh(modelName, meshName=None, minScale=0.2, maxScale=1.0, meshLengthFactor=
 
   paramVals = getInitialValues(modelName)
 
+  workModelName = "work" + modelName
+  subprocess.call(['cp', modelName, workModelName])
+
   with redirected('csm.console'):
-    updateModel(modelName, paramVals)
+    updateModel(workModelName, paramVals)
 
   with redirected('aflr.console'):
-    aflr(modelName, meshName, minScale, maxScale, meshLengthFactor, etoName)
+    aflr(workModelName, meshName, minScale, maxScale, meshLengthFactor, etoName)
+
+  ## get capsGroup map
+  groupAttrs = []
+  f_in = open('aflr.console')
+  for line in f_in:
+    tokens = line.split(' ')
+    tokens = list(filter(None, tokens)) ## filter out empty strings
+    if tokens[0] == "Mapping" and tokens[1] == "capsGroup" and tokens[2] == "attributes":
+      numberLine = f_in.next()
+      tokens = numberLine.split(' = ')
+      tokens = list(filter(None, tokens)) ## filter out empty strings
+      if tokens[0].strip() == "Number of unique capsGroup attributes":
+        numLines = int(tokens[1].strip())
+        for iEntry in range(numLines):
+          nextLine = f_in.next()
+          defs = nextLine.split(', ')
+          defs = list(filter(None, defs)) ## filter out empty strings
+          groupName = defs[0].split(' = ')[1].strip()
+          groupIndex = defs[1].split(' = ')[1].strip()
+          groupAttrs.append({"name": groupName, "index": groupIndex})
+      
 
   with redirected('toExo.console'):
-    toExo(modelName, meshName)
+    toExo(meshName, groupAttrs)
 
+#  subprocess.call(['rm', workModelName])
+  

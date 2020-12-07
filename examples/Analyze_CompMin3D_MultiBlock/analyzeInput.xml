@@ -1,0 +1,119 @@
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver"/>
+  <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
+
+  <Parameter name="Input Mesh" type="string" value="bb_2block.exo"/>
+
+  <ParameterList name="Visualization">
+    <Parameter name="Index Viz By Time" type="bool" value="false"/>
+    <ParameterList name="Tags">
+      <Parameter name="Node" type="Array(string)" value="{coordinates,displacement}"/>
+      <Parameter name="Element" type="Array(string)" value="{}"/>
+    </ParameterList>
+  </ParameterList>
+
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics"            type="string"  value="Mechanical"/>
+    <Parameter name="PDE Constraint"     type="string"  value="Elliptic"/>
+    <Parameter name="Self-Adjoint"       type="bool"    value="true"/>
+
+    <ParameterList name="Criteria">
+      <ParameterList name="My Volume">
+        <Parameter name='Linear' type='bool' value='true'/>
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Volume'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="1.0"/>
+          <Parameter name="Minimum Value" type="double" value="0.0"/>
+        </ParameterList>
+      </ParameterList>
+      <ParameterList name="Internal Elastic Energy">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="3.0"/>
+          <Parameter name="Minimum Value" type="double" value="1.0e-9"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Aluminum"/>
+        </ParameterList>
+        <ParameterList name="Fixed Mounts">
+          <Parameter name="Element Block" type="string" value="block_2"/>
+          <Parameter name="Material Model" type="string" value="Steel"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Elliptic">
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="SIMP"/>
+        <Parameter name="Exponent" type="double" value="3.0"/>
+        <Parameter name="Minimum Value" type="double" value="1.0e-9"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Steel">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.27"/>
+          <Parameter  name="Youngs Modulus" type="double" value="193.0e9"/>
+        </ParameterList>
+      </ParameterList>
+      <ParameterList name="Aluminum">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.33"/>
+          <Parameter  name="Youngs Modulus" type="double" value="68.0e9"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList  name="Natural Boundary Conditions">
+      <ParameterList  name="Traction Vector Boundary Condition 1">
+        <Parameter  name="Type"     type="string"        value="Uniform"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, -3.0e3, 0.0}"/>
+        <Parameter  name="Sides"    type="string"        value="ss_1"/>
+      </ParameterList>
+      <ParameterList  name="Traction Vector Boundary Condition 2">
+        <Parameter  name="Type"     type="string"        value="Uniform"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, -3.0e3, 0.0}"/>
+        <Parameter  name="Sides"    type="string"        value="ss_2"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList  name="Essential Boundary Conditions">
+      <ParameterList  name="X Fixed Displacement Boundary Condition 1">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="0"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Y Fixed Displacement Boundary Condition 1">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="1"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+      <ParameterList  name="Z Fixed Displacement Boundary Condition 1">
+        <Parameter  name="Type"     type="string" value="Zero Value"/>
+        <Parameter  name="Index"    type="int"    value="2"/>
+        <Parameter  name="Sides"    type="string" value="ns_1"/>
+      </ParameterList>
+    </ParameterList>
+<!--
+    <ParameterList name="Linear Solver">
+      <Parameter name="Solver Stack" type="string" value="Epetra"/>
+      <Parameter name="Solver" type="string" value="AztecOO"/>
+      <Parameter name="Display Iterations" type="int" value="10"/>
+      <Parameter name="Iterations" type="int" value="100"/>
+      <Parameter name="Tolerance" type="double" value="1e-14"/>
+    </ParameterList>
+-->
+  </ParameterList>
+</ParameterList>
+
