@@ -24,14 +24,14 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendWriteOutputPlatoAnalyzeOperation)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal_field");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element_field");
+    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
 }
 
 TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element_field");
+    tMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_qoi_statistics_operation(tMetaData, tDocument);
@@ -404,7 +404,7 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tService.code("plato_analyze");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal_field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
     tService.id("2");
     tService.code("platomain");
     tMetaData.append(tService);
@@ -581,7 +581,7 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputServiceID)
     tService.id("1");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("2");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal_field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
 
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_qoi_shared_data(tMetaData, tDocument), std::runtime_error);
@@ -598,7 +598,7 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData)
     tService.code("platomain");
     tMetaData.append(tService);
     tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal_field");
+    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_shared_data(tMetaData, tDocument);

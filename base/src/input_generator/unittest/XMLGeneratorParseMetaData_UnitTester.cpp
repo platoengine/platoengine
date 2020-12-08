@@ -777,7 +777,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_WithTimeAndSolverBlocks)
         ASSERT_STREQ("80", tScenario.value("number_time_steps").c_str());
         ASSERT_STREQ("160", tScenario.value("max_number_time_steps").c_str());
         ASSERT_STREQ("1.2", tScenario.value("time_step_expansion_multiplier").c_str());
-        ASSERT_STREQ("1e-10", tScenario.value("tolerance").c_str());
+        ASSERT_STREQ("1e-10", tScenario.value("newton_solver_tolerance").c_str());
         ASSERT_STREQ("20", tScenario.value("max_number_iterations").c_str());
         ASSERT_STREQ("residual", tScenario.value("convergence_criterion").c_str());
     }

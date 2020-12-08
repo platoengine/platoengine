@@ -125,7 +125,7 @@ inline void append_j2_plasticity_material_properties_to_plato_analyze_operation
     std::vector<std::string> tKeys = {"ArgumentName", "Target", "InitialValue"};
     for(auto& tPair : aMaterialTags)
     {
-        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("j2 plasticity", tPair.second);
+        auto tValidAnalyzeMaterialPropertyTag = tValidMaterialModels.tag("j2_plasticity", tPair.second);
         auto tTarget = std::string("[Plato Problem]:[Plasticity Model]:[J2 Plasticity]:") + tValidAnalyzeMaterialPropertyTag;
         std::vector<std::string> tValues = {tPair.first, tTarget, "0.0"};
         auto tParameter = aParentNode.append_child("Parameter");
@@ -156,7 +156,7 @@ void MaterialFunctionInterface::insert()
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_orthotropic_linear_elastic_material_properties_to_plato_analyze_operation, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_j2_plasticity_material_properties_to_plato_analyze_operation));
-    mMap.insert(std::make_pair("j2 plasticity",
+    mMap.insert(std::make_pair("j2_plasticity",
       std::make_pair((XMLGen::Analyze::MaterialOperationFunc)XMLGen::Private::append_j2_plasticity_material_properties_to_plato_analyze_operation, tFuncIndex)));
 }
 

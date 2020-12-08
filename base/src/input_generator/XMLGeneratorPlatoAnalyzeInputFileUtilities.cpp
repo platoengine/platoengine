@@ -431,10 +431,10 @@ void append_physics_to_plato_analyze_input_deck
 
 /**********************************************************************************/
 void append_spatial_model_to_plato_problem
-(const std::vector<XMLGen::Block>& aBlocks,
+(const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aBlocks.empty())
+    if(aXMLMetaData.blocks.empty())
     {
         THROWERR("Append Spatial Model to Plato Problem: Block container is empty.")
     }
@@ -443,14 +443,36 @@ void append_spatial_model_to_plato_problem
     XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
     auto tDomains = tSpatialModel.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
-    for(auto& tBlock : aBlocks)
+    for(auto& tBlock : aXMLMetaData.blocks)
     {
         auto tCurDomain = tDomains.append_child("ParameterList");
         XMLGen::append_attributes({"name"}, {std::string("Block ") + tBlock.block_id}, tCurDomain);
         std::vector<std::string> tKeys = {"name", "type", "value"};
         std::vector<std::string> tValues = {"Element Block", "string", std::string("block_") + tBlock.block_id};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCurDomain);
-        tValues = {"Material Model", "string", std::string("Material ") + tBlock.material_id};
+
+        auto tMaterials = aXMLMetaData.materials;
+        std::vector<std::string> tMaterialIDs;
+        bool tMaterialFound = false;
+        XMLGen::Material tMaterial;
+
+        for(auto tMat : tMaterials)
+        {
+            if(tMat.id() == tBlock.material_id)
+            {
+                tMaterial = tMat;
+                tMaterialFound = true;
+                break;
+            }
+
+        }
+        if(!tMaterialFound)
+        {
+            THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block " + tBlock.block_id +
+                    " lists material with material_id " + tBlock.material_id + " but no material with ID " + tBlock.material_id + " exists")
+        }
+
+        tValues = {"Material Model", "string", tMaterial.name()};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCurDomain);
     }
 }
@@ -490,9 +512,9 @@ void append_material_models_to_plato_analyze_input_deck
     }
     else
     {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-    }
 */
+        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
+//    }
 }
 // function append_material_model_to_plato_analyze_input_deck
 /**********************************************************************************/
@@ -502,7 +524,7 @@ void append_spatial_model_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::append_spatial_model_to_plato_problem(aXMLMetaData.blocks, aParentNode);
+    XMLGen::append_spatial_model_to_plato_problem(aXMLMetaData, aParentNode);
 }
 // function append_spatial_model_to_plato_analyze_input_deck
 /**********************************************************************************/

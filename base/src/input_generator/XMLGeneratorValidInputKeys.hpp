@@ -350,26 +350,26 @@ private:
      **/
     std::unordered_map<std::string, std::string> mKeys =
     {
-        {"vonmises","element_field"}, 
-        {"dispx","nodal_field"}, 
-        {"dispy","nodal_field"}, 
-        {"dispz","nodal_field"},
-        {"temperature","nodal_field"}, 
-        {"accumulated_plastic_strain","element_field"}, 
-        {"potential","nodal_field"},
-        {"objective_gradient","nodal_field"}, 
-        {"constraint_gradient","nodal_field"}, 
-        {"topology","nodal_field"},
-        {"control","nodal_field"}, 
-        {"cauchy_stress","element_field"}, 
-        {"deviatoric_stress","element_field"},
-        {"plastic_multiplier_increment","element_field"}, 
-        {"elastic_strain","element_field"},
-        {"plastic_strain","element_field"}, 
-        {"backstress","element_field"}, 
-        {"principal_stresses","element_field"},
-        {"stress","element_field"}, 
-        {"strain","element_field"}
+        {"vonmises","element field"}, 
+        {"dispx","nodal field"}, 
+        {"dispy","nodal field"}, 
+        {"dispz","nodal field"},
+        {"temperature","nodal field"}, 
+        {"accumulated_plastic_strain","element field"}, 
+        {"potential","nodal field"},
+        {"objective_gradient","nodal field"}, 
+        {"constraint_gradient","nodal field"}, 
+        {"topology","nodal field"},
+        {"control","nodal field"}, 
+        {"cauchy_stress","element field"}, 
+        {"deviatoric_stress","element field"},
+        {"plastic_multiplier_increment","element field"}, 
+        {"elastic_strain","element field"},
+        {"plastic_strain","element field"}, 
+        {"backstress","element field"}, 
+        {"principal_stresses","element field"},
+        {"stress","element field"}, 
+        {"strain","element field"}
     };
 
 public:

@@ -24,8 +24,8 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
 {
     XMLGen::Output tOutput;
-    tOutput.appendDeterminsiticQoI("stress", "element_field");
-    tOutput.appendDeterminsiticQoI("vonmises", "element_field");
+    tOutput.appendDeterminsiticQoI("stress", "element field");
+    tOutput.appendDeterminsiticQoI("vonmises", "element field");
     XMLGen::Scenario tScenario;
     tScenario.physics("steady_state_mechanics");
     tScenario.additiveContinuation("");
@@ -73,8 +73,8 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
 TEST(PlatoTestXMLGenerator, AppendPhysicsThermal)
 {
     XMLGen::Output tOutput;
-    tOutput.appendDeterminsiticQoI("vonmises", "element_field");
-    tOutput.appendDeterminsiticQoI("temperature", "nodal_field");
+    tOutput.appendDeterminsiticQoI("vonmises", "element field");
+    tOutput.appendDeterminsiticQoI("temperature", "nodal field");
     XMLGen::Scenario tScenario;
     tScenario.physics("steady_state_thermal");
     tScenario.additiveContinuation("");
@@ -452,6 +452,8 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
     tScenario.solverMaxNumIterations("10");
     tScenario.materialPenaltyExponent("3.0");
     tScenario.minErsatzMaterialConstant("1e-9");
+    tScenario.solverConvergenceCriterion("residual");
+    tScenario.newtonSolverTolerance("1e-5");
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
@@ -533,6 +535,10 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
     ASSERT_STREQ("ParameterList", tSolver.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Newton-Raphson"}, tSolver);
     tParameter = tSolver.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    tValues = {"Stop Measure", "string", "residual"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
     ASSERT_FALSE(tParameter.empty());
     tValues = {"Stopping Tolerance", "double", "1e-5"};
     PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
@@ -1446,7 +1452,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_OneBlockOn
     auto tSpatialModelParams = tDomainList.child("ParameterList");
     ASSERT_FALSE(tSpatialModelParams.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_1"}, tSpatialModelParams);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 1"}, tSpatialModelParams);
 
     auto tElementBlock = tSpatialModelParams.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_1"}, tElementBlock);
@@ -1500,7 +1506,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_OneBlockTw
     auto tSpatialModelParams = tDomainList.child("ParameterList");
     ASSERT_FALSE(tSpatialModelParams.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_1"}, tSpatialModelParams);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 1"}, tSpatialModelParams);
 
     auto tElementBlock = tSpatialModelParams.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_1"}, tElementBlock);
@@ -1553,7 +1559,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksO
     auto tSpatialModelParams1 = tDomainList.child("ParameterList");
     ASSERT_FALSE(tSpatialModelParams1.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams1.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_1"}, tSpatialModelParams1);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 1"}, tSpatialModelParams1);
 
     auto tElementBlock = tSpatialModelParams1.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_1"}, tElementBlock);
@@ -1564,7 +1570,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksO
     auto tSpatialModelParams2 = tSpatialModelParams1.next_sibling();
     ASSERT_FALSE(tSpatialModelParams2.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams2.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_2"}, tSpatialModelParams2);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 2"}, tSpatialModelParams2);
 
     tElementBlock = tSpatialModelParams2.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_2"}, tElementBlock);
@@ -1597,7 +1603,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     tMaterial1.id("1");
     tMaterial1.code("plato_analyze");
     tMaterial1.name("adamantium");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.category("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1e9");
     tMaterial1.property("poissons_ratio", "0.3");
 
@@ -1605,7 +1611,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     tMaterial2.id("2");
     tMaterial2.code("plato_analyze");
     tMaterial2.name("carbonadium");
-    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.category("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1e91");
     tMaterial2.property("poissons_ratio", "0.29");
 
@@ -1627,7 +1633,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     auto tSpatialModelParams1 = tDomainList.child("ParameterList");
     ASSERT_FALSE(tSpatialModelParams1.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams1.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_1"}, tSpatialModelParams1);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 1"}, tSpatialModelParams1);
 
     auto tElementBlock = tSpatialModelParams1.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_1"}, tElementBlock);
@@ -1638,7 +1644,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     auto tSpatialModelParams2 = tSpatialModelParams1.next_sibling();
     ASSERT_FALSE(tSpatialModelParams2.empty());
     ASSERT_STREQ("ParameterList", tSpatialModelParams2.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Volume block_2"}, tSpatialModelParams2);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Block 2"}, tSpatialModelParams2);
 
     tElementBlock = tSpatialModelParams2.child("Element Block");
     PlatoTestXMLGenerator::test_attributes({"name", "type", "value"}, {"Element Block", "string", "block_2"}, tElementBlock);
@@ -1703,11 +1709,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tMaterialModelParamList.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
-    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelsList.child("ParameterList");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"unobtainium"}, tFirstMaterial);
     auto tMyMaterialModel = tFirstMaterial.child("Isotropic Linear Elastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tMyMaterialModel);
@@ -1746,12 +1748,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tMaterialModelParamList.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
-
-    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelsList.child("ParameterList");
 PlatoTestXMLGenerator::test_attributes({"name"}, {"adamantium"}, tFirstMaterial);
     auto tThermalConduction = tFirstMaterial.child("ParameterList");
     ASSERT_FALSE(tThermalConduction.empty());
@@ -1796,11 +1793,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tMaterialModelParamList.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
-    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelsList.child("ParameterList");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"vibranium"}, tFirstMaterial);
     auto tMyMaterialModel = tFirstMaterial.child("Orthotropic Linear Elastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Orthotropic Linear Elastic"}, tMyMaterialModel);
@@ -1843,12 +1836,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tMaterialModelParamList.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
-
-    auto tFirstMaterial = tMaterialModelParamList.child("ParameterList");
+    auto tFirstMaterial = tMaterialModelsList.child("ParameterList");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"kryptonite"}, tFirstMaterial);
     auto tThermalModel = tFirstMaterial.child("ParameterList");
     ASSERT_FALSE(tThermalModel.empty());
@@ -1888,20 +1876,15 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     tXMLMetaData.materials.push_back(tMaterial);
     XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
 
-    // elasticity model
+    // Material Models list
     auto tMaterialModelsList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelsList.empty());
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tElasticityParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tElasticityParamList.empty());
-    ASSERT_STREQ("ParameterList", tElasticityParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tElasticityParamList);
-
-    auto tFirstMaterial = tElasticityParamList.child("ParameterList");
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"mithril"}, tFirstMaterial);
-    auto tElasticModel = tFirstMaterial.child("ParameterList");
+    auto tCurMaterialModel = tMaterialModelsList.child("ParameterList");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"mithril"}, tCurMaterialModel);
+    auto tElasticModel = tCurMaterialModel.child("ParameterList");
     ASSERT_FALSE(tElasticModel.empty());
     ASSERT_STREQ("ParameterList", tElasticModel.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tElasticModel);
@@ -1912,15 +1895,13 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Youngs Modulus", "double", "2.3"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
-
-    tParameter = tElasticityParamList.child("Parameter");
+    tParameter = tCurMaterialModel.child("Parameter");
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Pressure Scaling", "double", "1.0"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
 
     // plasticity model
-    auto tPlasticityParamList = tFirstMaterial.next_sibling("ParameterList");
-    //auto tPlasticityParamList = tElasticityParamList.next_sibling("ParameterList");
+    auto tPlasticityParamList = tElasticModel.next_sibling("ParameterList");
     ASSERT_FALSE(tPlasticityParamList.empty());
     ASSERT_STREQ("ParameterList", tPlasticityParamList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Plasticity Model"}, tPlasticityParamList);
@@ -1963,11 +1944,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
 
-    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
-    ASSERT_FALSE(tMaterialModelParamList.empty());
-    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelParamList);
-    auto tMaterialNode = tMaterialModelParamList.child("ParameterList");
+    auto tMaterialNode = tMaterialModelsList.child("ParameterList");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"bavarium"}, tMaterialNode);
     auto tMyMaterialModel = tMaterialNode.child("Isotropic Linear Electroelastic");
     PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Electroelastic"}, tMyMaterialModel);

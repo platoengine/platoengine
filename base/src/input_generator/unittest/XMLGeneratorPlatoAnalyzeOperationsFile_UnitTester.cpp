@@ -37,7 +37,7 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_J2Plasticity)
     };
 
     XMLGen::MaterialFunctionInterface tInterface;
-    ASSERT_NO_THROW(tInterface.call("j2 plasticity", tTags, tDocument));
+    ASSERT_NO_THROW(tInterface.call("j2_plasticity", tTags, tDocument));
 
     // TEST RESULTS
     auto tParameter = tDocument.child("Parameter");

@@ -171,7 +171,7 @@ void append_j2_plasticity_material_to_plato_problem
     auto tMaterialModel = aParentNode.child("ParameterList");
     XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tMaterialModel);
     // plastic properties
-    XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, aParentNode);
+    XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, tMaterialModel);
 }
 // function append_j2_plasticity_material_to_plato_problem
 
