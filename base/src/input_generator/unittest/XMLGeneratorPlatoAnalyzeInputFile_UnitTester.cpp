@@ -635,90 +635,83 @@ TEST(PlatoTestXMLGenerator, ReturnConstraintsComputedByPlatoAnalyze)
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorEmptyAppName)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.mPhysics = "steady_state_mechanics";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", "steady_state_mechanics", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidPhysics)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.mPhysics = "cfd";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", "cfd", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_ErrorInvalidCategory)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_mechanics";
-    tBC.mCategory = "pin";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "pin");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Displacement Boundary Condition with ID 1", "steady_state_mechanics", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorInvalidPhysics)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "cfd";
-    tBC.mCategory = "zero value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "cfd", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorEmptyDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "zero value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue_ErrorInvalidDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "dispx";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "zero value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("degree_of_freedom", "dispx");
+    tBC.property("type", "zero_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_mechanics";
-    tBC.mCategory = "rigid";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "rigid");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument));
+    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", "steady_state_mechanics", tBC, tDocument));
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -755,21 +748,20 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryRigid)
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_id = "1";
-    tBC.mPhysics = "steady_state_mechanics";
-    tBC.mCategory = "fixed";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("type", "fixed");
+    tBC.property("location_name", "ns_1");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", tBC, tDocument));
+    ASSERT_NO_THROW(tInterface.call("Displacement Boundary Condition with ID 1", "steady_state_mechanics", tBC, tDocument));
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "1"},
-          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "1"},
-          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "1"} };
+        { {"Type", "string", "Zero Value"}, {"Index", "int", "2"}, {"Sides", "string", "ns_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "1"}, {"Sides", "string", "ns_1"},
+          {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ns_1"} };
     std::vector<std::string> tGoldParameterListNames =
         {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
          "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",
@@ -800,16 +792,15 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixed)
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "temp";
-    tBC.app_name = "ss_2";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "zero value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("location_name", "ss_2");
+    tBC.property("type", "zero_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument));
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -834,71 +825,66 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorInvalidPhysics)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "cfd";
-    tBC.mCategory = "fixed_value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "fixed_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "cfd", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorEmptyDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "fixed_value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "fixed_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorInvalidDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "dispx";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "fixed_value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "dispx");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "fixed_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorEmptyValue)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "temp";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "fixed_value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "fixed_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "temp";
-    tBC.value = "10.0";
-    tBC.app_name = "ss_2";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "fixed_value";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("value", "10.0");
+    tBC.property("location_name", "ss_2");
+    tBC.property("type", "fixed_value");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument));
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -923,57 +909,53 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue)
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorInvalidPhysics)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "temp";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "cfd";
-    tBC.mCategory = "insulated";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "insulated");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "cfd", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorEmptyDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "insulated";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "insulated");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_ErrorInvalidDof)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "dispx";
-    tBC.app_name = "ss_1";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "insulated";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "dispx");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "insulated");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
 {
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.dof = "temp";
-    tBC.app_name = "ss_11";
-    tBC.mPhysics = "steady_state_thermal";
-    tBC.mCategory = "insulated";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("location_name", "ss_11");
+    tBC.property("type", "insulated");
     pugi::xml_document tDocument;
 
     XMLGen::AppendEssentialBoundaryCondition tInterface;
-    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", tBC, tDocument));
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument));
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -999,14 +981,32 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInputDeck)
 {
     // POSE PROBLEM
-    XMLGen::BC tBC;
-    tBC.bc_id = "1";
-    tBC.app_name = "ss_1";
-    tBC.type = "displacement";
-    tBC.mPhysics = "steady_state_mechanics";
-    tBC.mCategory = "rigid";
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.bcs.push_back(tBC);
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "dispz");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    tBC.property("id", "2");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "dispy");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    tBC.property("id", "3");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "dispx");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("steady_state_mechanics");
+    std::vector<std::string> bcIDs = {{"1"},{"2"},{"3"}};
+    tScenario.setBCIDs(bcIDs);
+    tXMLMetaData.append(tScenario);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -1025,8 +1025,8 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
           {"Type", "string", "Zero Value"}, {"Index", "int", "0"}, {"Sides", "string", "ss_1"} };
     std::vector<std::string> tGoldParameterListNames =
         {"Displacement Boundary Condition with ID 1 applied to Dof with tag DISPZ",
-         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPY",
-         "Displacement Boundary Condition with ID 1 applied to Dof with tag DISPX"};
+         "Displacement Boundary Condition with ID 2 applied to Dof with tag DISPY",
+         "Displacement Boundary Condition with ID 3 applied to Dof with tag DISPX"};
 
     auto tParamList = tEssentialBC.child("ParameterList");
     auto tGoldValuesItr = tGoldValues.begin();
@@ -1054,37 +1054,42 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
 TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag_InvalidTag)
 {
     XMLGen::EssentialBoundaryConditionTag tInterface;
-    XMLGen::BC tBC;
-    tBC.type = "fluid velocity";
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("type", "fluid velocity");
     ASSERT_THROW(tInterface.call(tBC), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, EssentialBoundaryConditionTag)
 {
     XMLGen::EssentialBoundaryConditionTag tInterface;
-    XMLGen::BC tBC;
+    XMLGen::EssentialBoundaryCondition tBC;
 
     // TEST 1
-    tBC.type = "displacement";
-    tBC.bc_id = "1";
+    tBC.property("type", "fixed_value");
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "dispx");
     auto tName = tInterface.call(tBC);
     ASSERT_STREQ("Displacement Boundary Condition with ID 1", tName.c_str());
 
     // TEST 2
-    tBC.type = "temperature";
-    tBC.bc_id = "1";
+    tBC.property("type", "fixed_value");
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
     tName = tInterface.call(tBC);
     ASSERT_STREQ("Temperature Boundary Condition with ID 1", tName.c_str());
 
     // TEST 3
-    tBC.type = "potential";
-    tBC.bc_id = "1";
+    tBC.property("type", "fixed_value");
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "potential");
+    tName = tInterface.call(tBC);
     tName = tInterface.call(tBC);
     ASSERT_STREQ("Potential Boundary Condition with ID 1", tName.c_str());
 
     // TEST 4
-    tBC.type = "velocity";
-    tBC.bc_id = "1";
+    tBC.property("type", "fixed_value");
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "velocity");
     tName = tInterface.call(tBC);
     ASSERT_STREQ("Velocity Boundary Condition with ID 1", tName.c_str());
 }

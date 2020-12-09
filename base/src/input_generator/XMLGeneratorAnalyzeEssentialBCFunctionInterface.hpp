@@ -43,10 +43,11 @@ public:
      * \fn call
      * \brief Append essential boundary condition parameters to plato_analyze_input_deck.xml.
      * \param [in]     aName        essential boundary condition name
+     * \param [in]     aPhysics     essential boundary condition physics
      * \param [in]     aBC          essential boundary condition metadata
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
-    void call(const std::string& aName, const XMLGen::BC& aBC, pugi::xml_node& aParentNode) const;
+    void call(const std::string& aName, const std::string& aPhysics, const XMLGen::EssentialBoundaryCondition& aBC, pugi::xml_node& aParentNode) const;
 };
 // struct AppendEssentialBoundaryCondition
 

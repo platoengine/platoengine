@@ -220,5 +220,13 @@ std::string check_spatial_dimensions_keyword(const std::string& aInput);
 **********************************************************************************/
 void is_metadata_block_id_valid(const std::vector<std::string>& aTokens);
 
+/******************************************************************************//**
+ * \fn parseTokens
+ * \brief split a string up into space delimited tokens
+ * \param [in] buffer input string
+ * \param [in] aTokens list of tokens
+**********************************************************************************/
+bool parseTokens(char *buffer, std::vector<std::string> &tokens);
+
 }
 // namespace XMLGen

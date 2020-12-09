@@ -1,13 +1,13 @@
 begin service 1
   code platomain
-  number processors 1
-  number ranks 1
+  number_processors 1
+  number_ranks 1
 end service
 
 begin service 2
   code plato_analyze
-  number processors 1
-  number ranks 1
+  number_processors 1
+  number_ranks 1
 end service
 
 begin criterion 1
@@ -23,7 +23,7 @@ begin scenario 1
   physics steady_state_mechanics
   dimensions 3
   loads 1
-  boundary_conditions 1
+  boundary_conditions 1 2 3
   material 1
   minimum_ersatz_material_value 1e-3
   tolerance 5e-8
@@ -43,9 +43,29 @@ begin output
    data dispx dispy dispz
 end output
 
-begin boundary conditions
-   fixed displacement nodeset name ns_1 bc id 1
-end boundary conditions
+begin boundary_condition 1
+    type fixed_value
+    location_type nodeset
+    location_name ns_1
+    degree_of_freedom dispx
+    value 0 
+end boundary_condition
+
+begin boundary_condition 2
+    type fixed_value
+    location_type nodeset
+    location_name ns_1
+    degree_of_freedom dispy
+    value 0
+end boundary_condition
+
+begin boundary_condition 3
+    type fixed_value
+    location_type nodeset
+    location_name ns_1
+    degree_of_freedom dispz
+    value 0 
+end boundary_condition
 
 begin loads
     traction sideset name ss_2 value 0 -3e3 0 load id 1
@@ -84,5 +104,9 @@ end mesh
 
 begin paths
 code PlatoMain PlatoMain
+code plato_analyze analyze_MPMD
+end paths
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD
 end paths

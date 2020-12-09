@@ -132,6 +132,18 @@ void append_self_adjoint_parameter_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn get_ebc_vector_for_scenario
+ * \brief Utility function to retrieve the ebcs used in a scenario
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aScenario The scenario of interest
+ * \param [out]    aEBCVector  EBC vector to populate
+**********************************************************************************/
+void get_ebc_vector_for_scenario
+(const XMLGen::InputData& aXMLMetaData,
+ const XMLGen::Scenario &aScenario,
+ std::vector<XMLGen::Load> &aEBCVector);
+
+/******************************************************************************//**
  * \fn get_load_vector_for_scenario
  * \brief Utility function to retrieve the loads used in a scenario
  * \param [in]     aXMLMetaData Plato problem input data
@@ -320,11 +332,13 @@ void append_material_model_to_plato_analyze_input_deck
 /******************************************************************************//**
  * \fn append_natural_boundary_conditions_to_plato_problem
  * \brief Append natural boundary condition to plato problem parameter list.
+ * \param [in]     aPhysics     name of the current physics
  * \param [in]     aLoadCase    load case metadata
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
-(const std::vector<XMLGen::Load> &aLoads,
+(const std::string &aPhysics,
+ const std::vector<XMLGen::Load> &aLoads,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -375,5 +389,31 @@ void append_essential_boundary_conditions_to_plato_analyze_input_deck
 void write_plato_analyze_input_deck_file
 (const XMLGen::InputData& aXMLMetaData);
 
+/******************************************************************************//**
+ * \fn get_nbc_parent_node
+ * \brief get the appropiate nbc parent node	
+ * \param [in] aPhysics String indicating the physics
+ * \param [in] aLoad Current load/NBC being added
+ * \param [in] aParentNodes List of potential parent nodes
+**********************************************************************************/
+void get_nbc_parent_node
+(const std::string &aPhysics,
+ const XMLGen::Load &aLoad,
+ const std::vector<pugi::xml_node> &aParentNodes,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn create_natural_boundary_condition_parent_nodes
+ * \brief create the natural boundary condition parent nodes for the current physics
+ * \param [in] tScenario The current scenario
+ * \param [in] aParentNode Parent node that will contain the NBC blocks
+ * \param [in/out] tParentNodes List of parent nodes created by this function
+**********************************************************************************/
+void create_natural_boundary_condition_parent_nodes
+(const XMLGen::Scenario &aScenario,
+ pugi::xml_node &aParentNode,
+ std::vector<pugi::xml_node> &aParentNodes);
+
 }
+
 // namespace XMLGen

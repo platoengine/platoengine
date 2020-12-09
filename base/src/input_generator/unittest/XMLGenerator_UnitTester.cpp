@@ -48,6 +48,7 @@
  */
 
 #include "XMLGenerator_UnitTester.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 
 /******************************************************************************/
 XMLGenerator_UnitTester::XMLGenerator_UnitTester()
@@ -84,7 +85,7 @@ bool XMLGenerator_UnitTester::publicParseSingleUnLoweredValue(const std::vector<
 bool XMLGenerator_UnitTester::publicParseTokens(char *buffer, std::vector<std::string> &tokens)
 /******************************************************************************/
 {
-    return parseTokens(buffer, tokens);
+    return XMLGen::parseTokens(buffer, tokens);
 }
 
 /******************************************************************************/
@@ -161,7 +162,6 @@ bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &si
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
-    m_InputData.bcs.clear();
     m_InputData.mesh.name="";
     m_InputData.mesh.name_without_extension="";
     m_InputData.blocks.clear();
@@ -216,11 +216,11 @@ void XMLGenerator_UnitTester::clearInputData()
 
 std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].app_type;
+            return m_InputData.ebcs[j].value("location_type");
         }
     }
     return "";
@@ -228,11 +228,11 @@ std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBC
 
 std::string XMLGenerator_UnitTester::getBCApplicationID(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].app_id;
+            return m_InputData.ebcs[j].value("location_name");
         }
     }
     return "";
@@ -240,11 +240,11 @@ std::string XMLGenerator_UnitTester::getBCApplicationID(const std::string &aBCID
 
 std::string XMLGenerator_UnitTester::getBCApplicationDOF(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].dof;
+            return m_InputData.ebcs[j].value("degree_of_freedom");
         }
     }
     return "";

@@ -1,13 +1,13 @@
 begin service 1
   code platomain
-  number processors 1
-  number ranks 1
+  number_processors 1
+  number_ranks 1
 end service
 
 begin service 2
   code plato_analyze
-  number processors 1
-  number ranks 1
+  number_processors 1
+  number_ranks 1
 end service
 
 begin criterion 1
@@ -37,10 +37,21 @@ begin objective
   weights 1
 end objective
 
-begin boundary conditions
-   fixed temperature nodeset name ns_1 bc id 1
-   fixed temperature nodeset name ns_2 bc id 2
-end boundary conditions
+begin boundary_condition 1
+   type fixed_value
+   location_type nodeset
+   location_name ns_1
+   degree_of_freedom temp
+   value 0.0
+end boundary_condition
+
+begin boundary_condition 2
+   type fixed_value
+   location_type nodeset
+   location_name ns_2
+   degree_of_freedom temp
+   value 0.0
+end boundary_condition
 
 begin loads
     uniform_surface_flux sideset name ss_1 value -1e2 load id 1
@@ -91,6 +102,10 @@ begin mesh
 end mesh
 
 
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
 begin paths
 code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD

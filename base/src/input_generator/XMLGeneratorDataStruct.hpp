@@ -19,6 +19,7 @@
 #include "XMLGeneratorScenarioMetadata.hpp"
 #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
+#include "XMLGeneratorEssentialBoundaryConditionMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
 
@@ -415,9 +416,10 @@ public:
     XMLGen::Objective objective;
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
+    std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
-    std::vector<XMLGen::BC> bcs;
+  //  std::vector<XMLGen::BC> bcs;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;

@@ -7,6 +7,7 @@
 #pragma once
 
 
+#include <set>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -734,6 +735,59 @@ public:
             THROWERR("Valid Performer Output Keys: output keyword '" + aKey + "' is not supported by code '" + aCode + ".")
         }
         return (tKeyItr->second);
+    }
+};
+struct ValidPhysicsNBCCombinations
+{
+    // Map physics->NBC->parent node name
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> mKeys =
+    {
+        {"steady_state_mechanics", 
+            {
+                {"traction", "Natural Boundary Conditions"}
+            }
+        },
+        {"steady_state_thermal", 
+            {
+                {"uniform_surface_flux", "Natural Boundary Conditions"}
+            }
+        },
+        { "steady_state_thermomechanics", 
+            {
+                {"uniform_surface_flux", "Thermal Natural Boundary Conditions"},
+                {"traction", "Mechanical Natural Boundary Conditions"} 
+            }
+        }
+    };
+public:
+    void get_parent_names(const std::string &aPhysics,
+                          std::set<std::string> &aParentNames)
+    {
+        auto tKeyItr = mKeys.find(aPhysics);
+        if(tKeyItr == mKeys.end())
+        {
+            THROWERR("Valid Physics NBC Combinations: Couldn't find physics: " + aPhysics)
+        }
+        auto tNBCItr = tKeyItr->second.begin();
+        while(tNBCItr != tKeyItr->second.end())
+        {
+            aParentNames.insert(tNBCItr->second);
+            tNBCItr++;
+        }
+    }  
+    std::string get_parent_nbc_node_name(const std::string &aPhysics,
+                                         const std::string &aLoadType)
+    {
+        auto tKeyItr = mKeys.find(aPhysics);
+        if(tKeyItr != mKeys.end())
+        {
+            auto tNBCItr = tKeyItr->second.find(aLoadType);
+            if(tNBCItr != tKeyItr->second.end())
+            {
+                return tNBCItr->second;
+            }
+        }
+        return "";
     }
 };
 

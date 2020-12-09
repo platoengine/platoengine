@@ -82,14 +82,13 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParseEssentialBoundaryCondition.hpp"
 
 namespace XMLGen
 {
 
 
 const int MAX_CHARS_PER_LINE = 10000;
-const int MAX_TOKENS_PER_LINE = 5000;
-const char* const DELIMITER = " \t";
 
 void PrintUnrecognizedTokens(const std::vector<std::string> & unrecognizedTokens)
 {
@@ -176,38 +175,6 @@ void XMLGenerator::generate()
 //         THROWERR("Set Number for Performers: Number of samples must divide evenly into number of ranks.");
 //     }
 // }
-
-/******************************************************************************/
-bool XMLGenerator::parseTokens(char *buffer, std::vector<std::string> &tokens)
-/******************************************************************************/
-{
-    const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
-    int n = 0;
-
-    // parse the line
-    token[0] = strtok(buffer, DELIMITER); // first token
-
-    // If there is a comment...
-    if(token[0] && strlen(token[0]) > 1 && token[0][0] == '/' && token[0][1] == '/')
-    {
-        tokens.clear();
-        return true;
-    }
-
-    if (token[0]) // zero if line is blank
-    {
-        for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
-        {
-            token[n] = strtok(0, DELIMITER); // subsequent tokens
-            if (!token[n])
-                break; // no more tokens
-        }
-    }
-    for(int i=0; i<n; ++i)
-        tokens.push_back(token[i]);
-
-    return true;
-}
 
 /******************************************************************************/
 void XMLGenerator::parseOutput(std::istream &aInputFile)
@@ -316,7 +283,7 @@ void XMLGenerator::getTokensFromLine(std::istream &fin, std::vector<std::string>
     
     tokens.clear();
     fin.getline(buf, MAX_CHARS_PER_LINE);
-    parseTokens(buf, tokens);
+    XMLGen::parseTokens(buf, tokens);
 }
 
 /******************************************************************************/
@@ -643,6 +610,7 @@ void XMLGenerator::parseBCsBlock(std::istream &fin)
 void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
 /******************************************************************************/
 {
+/*
     XMLGen::BC new_bc;
 
     if(tokens.size() < 7)
@@ -675,6 +643,7 @@ void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
     }
 
     m_InputData.bcs.push_back(new_bc);
+*/
 }
 
 /******************************************************************************/
@@ -954,7 +923,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
     char buf[MAX_CHARS_PER_LINE];
     fin.getline(buf, MAX_CHARS_PER_LINE);
     std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
+    XMLGen::parseTokens(buf, tokens);
 
     // process the tokens
     if(tokens.size() > 0)
@@ -969,7 +938,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
         {
           fin.getline(buf, MAX_CHARS_PER_LINE);
           tokens.clear();
-          parseTokens(buf, tokens);
+          XMLGen::parseTokens(buf, tokens);
           // process the tokens
           if(tokens.size() > 0)
           {
@@ -988,7 +957,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
               {
                 fin.getline(buf, MAX_CHARS_PER_LINE);
                 tokens.clear();
-                parseTokens(buf, tokens);
+                XMLGen::parseTokens(buf, tokens);
                 // process the tokens
                 if(tokens.size() > 0)
                 {
@@ -1906,7 +1875,7 @@ bool XMLGenerator::parseMesh(std::istream &fin)
     char buf[MAX_CHARS_PER_LINE];
     fin.getline(buf, MAX_CHARS_PER_LINE);
     std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
+    XMLGen::parseTokens(buf, tokens);
 
     // process the tokens
     if(tokens.size() > 0)
@@ -1921,7 +1890,7 @@ bool XMLGenerator::parseMesh(std::istream &fin)
         {
           fin.getline(buf, MAX_CHARS_PER_LINE);
           tokens.clear();
-          parseTokens(buf, tokens);
+          XMLGen::parseTokens(buf, tokens);
           // process the tokens
           if(tokens.size() > 0)
           {
@@ -1991,7 +1960,7 @@ bool XMLGenerator::parseCodePaths(std::istream &fin)
     char buf[MAX_CHARS_PER_LINE];
     fin.getline(buf, MAX_CHARS_PER_LINE);
     std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
+    XMLGen::parseTokens(buf, tokens);
 
     // process the tokens
     if(tokens.size() > 0)
@@ -2006,7 +1975,7 @@ bool XMLGenerator::parseCodePaths(std::istream &fin)
         {
           fin.getline(buf, MAX_CHARS_PER_LINE);
           tokens.clear();
-          parseTokens(buf, tokens);
+          XMLGen::parseTokens(buf, tokens);
           // process the tokens
           if(tokens.size() > 0)
           {
@@ -2101,7 +2070,7 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
     char buf[MAX_CHARS_PER_LINE];
     fin.getline(buf, MAX_CHARS_PER_LINE);
     std::vector<std::string> tokens;
-    parseTokens(buf, tokens);
+    XMLGen::parseTokens(buf, tokens);
 
     // process the tokens
     if(tokens.size() > 0)
@@ -2123,7 +2092,7 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
         {
           fin.getline(buf, MAX_CHARS_PER_LINE);
           tokens.clear();
-          parseTokens(buf, tokens);
+          XMLGen::parseTokens(buf, tokens);
           // process the tokens
           if(tokens.size() > 0)
           {
@@ -2179,6 +2148,16 @@ bool XMLGenerator::parseBlocks(std::istream &fin)
 }
 
 /******************************************************************************/
+void XMLGenerator::parseBoundaryConditions(std::istream &aInput)
+/******************************************************************************/
+{
+    XMLGen::ParseEssentialBoundaryCondition tParseEssentialBoundaryCondition;
+    tParseEssentialBoundaryCondition.parse(aInput);
+//    tParseEssentialBoundaryCondition.expandDofs();
+    m_InputData.ebcs = tParseEssentialBoundaryCondition.data();
+}
+
+/******************************************************************************/
 void XMLGenerator::parseMaterials(std::istream &aInput)
 /******************************************************************************/
 {
@@ -2217,7 +2196,8 @@ void XMLGenerator::parseInputFile()
       THROWERR("Failed to open " + m_InputFilename + ".")
   }
 
-  parseBCs(tInputFile);
+  parseBoundaryConditions(tInputFile);
+  //parseBCs(tInputFile);
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file

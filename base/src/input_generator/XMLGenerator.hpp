@@ -83,6 +83,7 @@ protected:
     bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
+    void parseBoundaryConditions(std::istream &fin);
     void parseBCs(std::istream &fin);
     void parseBCsBlock(std::istream &fin);
     void parseBCLine(std::vector<std::string>& tokens);
@@ -103,7 +104,6 @@ protected:
     bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);
     void parseUncertainties(std::istream &fin);
-    bool parseTokens(char *buffer, std::vector<std::string> &tokens);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
     bool parseSingleValue(const std::vector<std::string> &aTokens,
