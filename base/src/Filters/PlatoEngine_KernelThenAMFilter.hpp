@@ -42,61 +42,34 @@
 
 #pragma once
 
-#include <mpi.h>
-#include <cstddef>
-#include "PlatoEngine_AbstractFilter.hpp"
-
-namespace PlatoSubproblemLibrary
-{
-class AbstractKernelThenFilter;
-class ParameterData;
-class AbstractAuthority;
-namespace AbstractInterface
-{
-class PointCloud;
-class ParallelExchanger;
-}
-}
-class DataMesh;
+#include "PlatoEngine_AbstractKernelThenFilter.hpp"
+#include "Plato_InputData.hpp"
+// #include "Plato_Parser.hpp"
+// #include "PSL_AbstractAuthority.hpp"
 
 namespace Plato
 {
 
-class AbstractKernelThenFilter : public AbstractFilter
+class KernelThenAMFilter : public AbstractKernelThenFilter
 {
 public:
-    AbstractKernelThenFilter();
-    virtual ~AbstractKernelThenFilter();
+    KernelThenAMFilter(){}
+    virtual ~KernelThenAMFilter(){}
 
-    //Filter functions
     virtual void build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh);
-    virtual void apply_on_field(size_t length, double* field_data);
-    virtual void apply_on_gradient(size_t length, double* base_field_data, double* gradient_data);
-    virtual void advance_continuation();
 
 private:
 
-    virtual void allocateFilter() = 0;
+    virtual void allocateFilter();
+    void extractMeshData(DataMesh* aMesh);
 
-    void build_input_data(InputData interface);
-    void build_points(DataMesh* mesh);
-    void build_parallel_exchanger(DataMesh* mesh);
 
-    MPI_Comm m_comm;
+    const int mDimension = 3;
+    const int mNumNodesPerElement = 4;
 
-    int  mAdvanceContinuationIteration;
-    int  mStartIteration;
-    int  mUpdateInterval;
-    bool mAdditiveContinuation;
-
-protected:
-
-    PlatoSubproblemLibrary::AbstractKernelThenFilter* m_filter;
-    PlatoSubproblemLibrary::AbstractAuthority* m_authority;
-    PlatoSubproblemLibrary::ParameterData* m_input_data;
-    PlatoSubproblemLibrary::AbstractInterface::PointCloud* m_points;
-    PlatoSubproblemLibrary::AbstractInterface::ParallelExchanger* m_parallel_exchanger;
-
+    // const double* mCoordinates[3];
+    std::vector<std::vector<double>> mCoordinates;
+    std::vector<std::vector<int>> mConnectivity;
 };
 
 }

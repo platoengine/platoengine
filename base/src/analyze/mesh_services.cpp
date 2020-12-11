@@ -47,7 +47,7 @@
 #include "communicator.hpp"
 #include "Plato_PenaltyModel.hpp"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 
 /******************************************************************************/
@@ -108,11 +108,13 @@ double MeshServices::getTotalVolume()
       FieldContainer<double> cWeights(cubWeights);
 
       // *** Element loop ***
-      for (int iel=0; iel<numElemsThisBlock; iel++) {
+      for (int iel=0; iel<numElemsThisBlock; iel++) 
+      {
 
         int* elemConnect = elblock.Connect(iel);
 
-        for (int inode=0; inode<numNodesPerElem; inode++) {
+        for (int inode=0; inode<numNodesPerElem; inode++) 
+        {
           for (int idim=0; idim<spaceDim; idim++) {
             Nodes(0,inode,idim) = coords[idim][elemConnect[inode]];
           }

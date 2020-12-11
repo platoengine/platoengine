@@ -7,6 +7,7 @@ set(${LIB_NAME}_SOURCES
     PSL_AxisAlignedBoundingBox.cpp
     PSL_PointCloud.cpp
     PSL_Point.cpp
+    PSL_Vector.cpp
     PSL_Triangle.cpp
     )
 
@@ -14,6 +15,7 @@ set(${LIB_NAME}_HEADERS
     PSL_AxisAlignedBoundingBox.hpp
     PSL_PointCloud.hpp
     PSL_Point.hpp
+    PSL_Vector.hpp
     PSL_Triangle.hpp
     )
 

@@ -14,6 +14,7 @@
 #include <math.h>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 namespace PlatoSubproblemLibrary
 {
@@ -91,6 +92,22 @@ double tanh_apply(const double& aBeta, const double& aInput)
 }
 
 double tanh_gradient(const double& aBeta, const double& aInput)
+{
+  double tEta = 0.5;
+  double tNumerator = aBeta*(1-std::tanh(aBeta*(aInput - tEta))*std::tanh(aBeta*(aInput - tEta)));
+  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
+  return tNumerator/tDenominator;
+}
+
+double AM_apply(const double& aBeta, const double& aInput)
+{
+  double tEta = 0.5;
+  double tNumerator = std::tanh(aBeta*tEta) + tanh(aBeta*(aInput - tEta));
+  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
+  return tNumerator/tDenominator;
+}
+
+double AM_gradient(const double& aBeta, const double& aInput)
 {
   double tEta = 0.5;
   double tNumerator = aBeta*(1-std::tanh(aBeta*(aInput - tEta))*std::tanh(aBeta*(aInput - tEta)));

@@ -136,7 +136,7 @@ void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* field)
 {
     m_kernel->apply(field);
 
-    // apply heaviside
+    // apply post filter
     const size_t dimension = field->get_length();
     for(size_t i = 0u; i < dimension; i++)
     {
@@ -154,7 +154,7 @@ void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* base_fie
     // kernel filtered control
     m_kernel->apply(base_field);
 
-    // scale gradient by heaviside projection contribution
+    // apply post filter gradient 
     const size_t num_controls = base.size();
     for(size_t control_index = 0u; control_index < num_controls; control_index++)
     {
@@ -164,7 +164,7 @@ void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* base_fie
         gradient->set_value(control_index, initial_gradient_value * heaviside_derivative_value);
     }
 
-    // finish projected gradient calculation by applying kernel filter
+    // finish gradient calculation by applying kernel filter
     base_field->set_values(base);
     m_kernel->apply(base_field, gradient);
 }
