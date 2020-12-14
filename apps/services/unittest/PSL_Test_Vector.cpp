@@ -49,6 +49,7 @@
 #include "PSL_Random.hpp"
 
 #include <vector>
+#include <math.h>
 
 namespace PlatoSubproblemLibrary
 {
@@ -143,11 +144,128 @@ PSL_TEST(Vector,normalize)
     EXPECT_EQ(tVec(0), 1.0/std::sqrt(3));
     EXPECT_EQ(tVec(1), 1.0/std::sqrt(3));
     EXPECT_EQ(tVec(2), 1.0/std::sqrt(3));
-    EXPECT_EQ(tVec.euclideanNorm(),1);
+    EXPECT_DOUBLE_EQ(tVec.euclideanNorm(),1);
 
     tVec.set(std::vector<double>({1000,-42.36,.02586}));
     tVec.normalize();
-    EXPECT_EQ(tVec.euclideanNorm(),1);
+    EXPECT_DOUBLE_EQ(tVec.euclideanNorm(),1);
+}
+
+PSL_TEST(Vector,operatorPlus)
+{
+    Vector tVec1({1.0,0,2.3});
+    Vector tVec2({2.3,1.0,1.6});
+
+    Vector tVec3 = tVec1 + tVec2;
+    EXPECT_DOUBLE_EQ(tVec3(0),3.3);
+    EXPECT_DOUBLE_EQ(tVec3(1),1.0);
+    EXPECT_DOUBLE_EQ(tVec3(2),3.9);
+}
+
+PSL_TEST(Vector,operatorMinus)
+{
+    Vector tVec1({1.0,0,2.3});
+    Vector tVec2({2.3,1.0,1.6});
+
+    Vector tVec3 = tVec1 - tVec2;
+    EXPECT_DOUBLE_EQ(tVec3(0),-1.3);
+    EXPECT_DOUBLE_EQ(tVec3(1),-1.0);
+    EXPECT_DOUBLE_EQ(tVec3(2),0.7);
+}
+
+PSL_TEST(Vector,operatorEquals)
+{
+    Vector tVec1({2.3,1.0,1.6});
+
+    Vector tVec2 = tVec1;
+    EXPECT_EQ(tVec2(0),2.3);
+    EXPECT_EQ(tVec2(1),1.0);
+    EXPECT_EQ(tVec2(2),1.6);
+}
+
+PSL_TEST(Vector,operatorMultiply)
+{
+    double tScalar = 2.3;
+    Vector tVec2({0,1.0,1.6});
+
+    Vector tVec3 = tScalar * tVec2;
+    EXPECT_DOUBLE_EQ(tVec3(0),0.0);
+    EXPECT_DOUBLE_EQ(tVec3(1),2.3);
+    EXPECT_DOUBLE_EQ(tVec3(2),3.68);
+    
+    Vector tVec4 = tVec2 * tScalar;
+    EXPECT_DOUBLE_EQ(tVec4(0),0.0);
+    EXPECT_DOUBLE_EQ(tVec4(1),2.3);
+    EXPECT_DOUBLE_EQ(tVec4(2),3.68);
+}
+
+PSL_TEST(Vector,crossProduct)
+{
+    Vector tVec1({1.0,0.0,0.0});
+    Vector tVec2({0.0,1.0,0.0});
+
+    Vector tVec3 = cross_product(tVec1,tVec2);
+    EXPECT_EQ(tVec3(0),0.0);
+    EXPECT_EQ(tVec3(1),0.0);
+    EXPECT_EQ(tVec3(2),1.0);
+
+    Vector tVec4 = cross_product(tVec2,tVec1);
+    EXPECT_EQ(tVec4(0),0.0);
+    EXPECT_EQ(tVec4(1),0.0);
+    EXPECT_EQ(tVec4(2),-1.0);
+
+    Vector tVec5({3.6,2.8,-1.4});
+    Vector tVec6({100,-11.2,3.5});
+
+    Vector tVec7 = cross_product(tVec5,tVec6);
+    EXPECT_DOUBLE_EQ(tVec7(0),-5.88);
+    EXPECT_DOUBLE_EQ(tVec7(1),-152.6);
+    EXPECT_DOUBLE_EQ(tVec7(2),-320.32);
+
+    Vector tVec8 = cross_product(tVec6,tVec6);
+    EXPECT_EQ(tVec8(0),0);
+    EXPECT_EQ(tVec8(1),0);
+    EXPECT_EQ(tVec8(2),0);
+}
+
+PSL_TEST(Vector,dotProduct)
+{
+    Vector tVec1({1.0,0.0,0.0});
+    Vector tVec2({0.0,1.0,0.0});
+
+    double tResult = dot_product(tVec1,tVec2);
+    EXPECT_EQ(tResult,0.0);
+
+    tVec2.set({1.0,0.0,0.0});
+
+    tResult = dot_product(tVec1,tVec2);
+    EXPECT_EQ(tResult,1.0);
+
+    tVec1.set({3.6,2.8,-1.4});
+    tVec2.set({100,-11.2,3.5});
+    tResult = dot_product(tVec1,tVec2);
+    EXPECT_DOUBLE_EQ(tResult,323.74);
+}
+
+PSL_TEST(Vector,angleBetween)
+{
+    Vector tVec1({1.0,0.0,0.0});
+    Vector tVec2({0.0,1.0,0.0});
+
+    double tResult = angle_between(tVec1,tVec2);
+    EXPECT_DOUBLE_EQ(tResult,M_PI/2);
+
+    tResult = angle_between(tVec1,tVec1);
+    EXPECT_EQ(tResult,0.0);
+
+    tVec2.set({-1.0,0.0,0.0});
+    tResult = angle_between(tVec1,tVec2);
+    EXPECT_DOUBLE_EQ(tResult,M_PI);
+
+    tVec1.set({3.6,2.8,-1.4});
+    tVec2.set({100,-11.2,3.5});
+    tResult = angle_between(tVec1,tVec2);
+    EXPECT_DOUBLE_EQ(tResult,0.83122639765689199);
 }
 
 }

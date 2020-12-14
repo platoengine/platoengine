@@ -97,7 +97,7 @@ void Vector::normalize()
 Vector Vector::operator +(const Vector& aInputVector) const
 {
     // add data
-    std::vector<double> combined_data;
+    std::vector<double> combined_data(3);
     for(size_t i = 0u; i < 3; i++)
     {
         combined_data[i] = (*this)(i) + aInputVector(i);
@@ -109,7 +109,7 @@ Vector Vector::operator +(const Vector& aInputVector) const
 Vector Vector::operator -(const Vector& aInputVector) const
 {
     // add data
-    std::vector<double> combined_data;
+    std::vector<double> combined_data(3);
     for(size_t i = 0u; i < 3; i++)
     {
         combined_data[i] = (*this)(i) - aInputVector(i);
@@ -173,6 +173,9 @@ double angle_between(const Vector& aVec1, const Vector& aVec2)
 {
     Vector tVec1Normalized = aVec1;
     Vector tVec2Normalized = aVec2;
+
+    tVec1Normalized.normalize();
+    tVec2Normalized.normalize();
      
     double tCosineOfAngle = dot_product(tVec1Normalized,tVec2Normalized);
 
