@@ -1,6 +1,8 @@
 // PlatoSubproblemLibraryVersion(8): a stand-alone library for the kernel filter for plato.
 #include "PSL_KernelThenAMFilter.hpp"
 #include "PSL_FreeHelpers.hpp"
+#include "PSL_Point.hpp"
+#include "PSL_Vector.hpp"
 
 
 namespace PlatoSubproblemLibrary
@@ -15,36 +17,72 @@ double KernelThenAMFilter::projection_gradient(const double& beta, const double&
   return AM_gradient(beta,input);
 }
 
-std::set<int> KernelThenAMFilter::getNeighbors(const int& aNodeID) const
-{
-    std::set<int> tNeighborIDs;
-
-    for(auto tElement : mConnectivity)
-    {
-        for(size_t i = 0; i < tElement.size(); ++i)
-        {
-            if(tElement[i] == aNodeID)
-            {
-                tNeighborIDs.insert(tElement[(i+1)%4]);
-                tNeighborIDs.insert(tElement[(i+2)%4]);
-                tNeighborIDs.insert(tElement[(i+3)%4]);
-            }
-        }
-    }
-
-    return tNeighborIDs;
-}
-
 void KernelThenAMFilter::buildPseudoLayers()
 {
-    // we assume a positive z build direction for now.
-    
-    auto tNeighbors = getNeighbors(1);
-    for(auto tNeighbor : tNeighbors)
+    if(!mInitialized)
+        throw(std::runtime_error("AM filter not initialized"));
+
+    orderNodesInBuildDirection();
+    setBaseLayerIDToZeroAndOthersToMinusOne();
+    computeNeighborsBelow();
+
+    for(auto tNode : mOrderedNodes)
     {
-        std::cout << "Neighbor ID: " << tNeighbor << std::endl;
+        assignNodeToPseudoLayer(tNode);
     }
 }
 
+void KernelThenAMFilter::orderNodesInBuildDirection()
+{
+    for(int i = 0; i < (int) mCoordinates.size(); ++i)
+    {
+        mOrderedNodes[i] = i;
+    }
+
+    std::sort(mOrderedNodes.begin(), mOrderedNodes.end(), mLessThanFunctor);
+}
+
+void KernelThenAMFilter::setBaseLayerIDToZeroAndOthersToMinusOne()
+{
+    for(int i = 0; i < (int) mCoordinates.size(); ++i)
+    {
+        mPseudoLayers[i] = -1;
+    }
+
+    for(auto tNode : mBaseLayer)
+    {
+        mPseudoLayers[tNode] = 0;
+    }
+
+    ++mNumPseudoLayers;
+}
+
+void KernelThenAMFilter::assignNodeToPseudoLayer(const int& aNode)
+{
+    std::set<int> tNeighborIDs = mNeighborsBelow[aNode];
+
+}
+
+void KernelThenAMFilter::computeNeighborsBelow()
+{
+    for(auto tElement : mConnectivity)
+    {
+        addElementNeighborsBelow(tElement);
+    }
+}
+
+void KernelThenAMFilter::addElementNeighborsBelow(const std::vector<int>& aElement)
+{
+    for(size_t i = 0; i < aElement.size(); ++i)
+    {
+        int tNode = aElement[i];
+        for(size_t j = 0; j < aElement.size()-1; ++j)
+        {
+            int tNeighbor = aElement[(i+j)%aElement.size()];
+            if(mLessThanFunctor(tNeighbor,tNode))
+                mNeighborsBelow[tNode].insert(tNeighbor);
+        }
+    }
+}
 
 }

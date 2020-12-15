@@ -45,6 +45,9 @@
 #include "topological_element.hpp"
 #include "XMLG_Macros.hpp"
 #include "data_mesh.hpp"
+#include "data_container.hpp"
+#include "PSL_Vector.hpp"
+#include <cmath>
 
 namespace Plato
 {
@@ -59,16 +62,22 @@ namespace Plato
 
     void KernelThenAMFilter::build(InputData aInputData, MPI_Comm& aLocalComm, DataMesh* aMesh)
     {
-        printf("executing KernelThenAMFilter");
         AbstractKernelThenFilter::build(aInputData, aLocalComm, aMesh);
         extractMeshData(aMesh);
+
         PlatoSubproblemLibrary::KernelThenAMFilter* tFilter = dynamic_cast<PlatoSubproblemLibrary::KernelThenAMFilter*>(m_filter);
-        tFilter->setCoordinates(mCoordinates);
-        tFilter->setConnectivity(mConnectivity);
+        tFilter->init(mCoordinates,mConnectivity,mBaseLayer,PlatoSubproblemLibrary::Vector({0.0,0.0,1.0}),M_PI/4);
         tFilter->buildPseudoLayers();
     }
 
     void KernelThenAMFilter::extractMeshData(DataMesh* aMesh)
+    {
+        getCoordinates(aMesh);
+        getConnectivity(aMesh);
+        getBaseLayer(aMesh);
+    }
+
+    void KernelThenAMFilter::getCoordinates(DataMesh* aMesh)
     {
         DataMesh& tMesh = *aMesh;
 
@@ -86,7 +95,11 @@ namespace Plato
             mCoordinates[i][1] = tYCoordinates[i];
             mCoordinates[i][2] = tZCoordinates[i];
         }
+    }
 
+    void KernelThenAMFilter::getConnectivity(DataMesh* aMesh)
+    {
+        DataMesh& tMesh = *aMesh;
         int tNumElemBlocks = tMesh.getNumElemBlks();
 
         for(int tBlockIndex = 0; tBlockIndex < tNumElemBlocks; ++tBlockIndex)
@@ -116,6 +129,29 @@ namespace Plato
                     tElementConnectivityVector.push_back(tElementConnectivity[tConnectivityIndex]);
                 }
                 mConnectivity.push_back(tElementConnectivityVector);
+            }
+        }
+    }
+
+    void KernelThenAMFilter::getBaseLayer(DataMesh* aMesh)
+    {
+        DataMesh& tMesh = *aMesh;
+        int tNumSidesets = tMesh.getNumSideSets();
+        for(int ib=0; ib<tNumSidesets; ib++)
+        {
+            DMSideSet *ssi = tMesh.getSideSet(ib);
+            if(ssi->setName == "Side_Set_1")
+            {
+                int num_nodes = ssi->numNodes;
+                if(num_nodes)
+                {
+                    int* nodes;
+                    tMesh.getDataContainer()->getVariable(ssi->FACE_NODE_LIST, nodes);
+                    for (int inode=0; inode<num_nodes; inode++)
+                    {
+                        mBaseLayer.push_back(nodes[inode]);
+                    }
+                }
             }
         }
     }

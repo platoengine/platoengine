@@ -63,13 +63,16 @@ private:
     virtual void allocateFilter();
     void extractMeshData(DataMesh* aMesh);
 
+    void getCoordinates(DataMesh* aMesh);
+    void getConnectivity(DataMesh* aMesh);
+    void getBaseLayer(DataMesh* aMesh);
 
     const int mDimension = 3;
     const int mNumNodesPerElement = 4;
 
-    // const double* mCoordinates[3];
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;
+    std::vector<int> mBaseLayer;
 };
 
 }
