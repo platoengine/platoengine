@@ -117,6 +117,8 @@ void KernelThenAMFilter::assignNodeToPseudoLayerAndPruneSupportSet(const int& aN
     int tSupportingPseudoLayer = determineSupportingPseudoLayer(aNode, tSupportingNeighbors, tConnectedPseudoLayers);
 
     assignNodeToPseudoLayer(aNode, tSupportingPseudoLayer);
+
+    pruneSupportSet(aNode, tSupportingPseudoLayer);
 }
 
 std::set<int> KernelThenAMFilter::getSupportingNeighbors(const int& aNode) const
@@ -196,4 +198,27 @@ void KernelThenAMFilter::assignNodeToPseudoLayer(const int& aNode, const int& aS
     mPseudoLayers[aNode] = aSupportingPseudoLayer + 1;
 }
 
+void KernelThenAMFilter::pruneSupportSet(const int& aNode, const int& aSupportingPseudoLayer)
+{
+    std::set<SupportPointData> tSupportSet = mSupportSet[aNode];
+
+    for (auto tIterator = tSupportSet.begin(); tIterator != tSupportSet.end(); )
+    {
+        std::set<int> tSupportPoint = tIterator->second;
+        for(auto tNeighbor : tSupportPoint)
+        {
+            if(mPseudoLayers[tNeighbor] != aSupportingPseudoLayer)
+            {
+                tIterator = tSupportSet.erase(tIterator);
+                continue;
+            }
+            else
+            {
+                ++tIterator;
+            }
+        }
+    }
 }
+
+}
+

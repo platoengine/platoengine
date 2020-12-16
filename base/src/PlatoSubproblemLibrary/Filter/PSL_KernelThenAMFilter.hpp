@@ -78,6 +78,7 @@ private:
     std::set<int> determineConnectedPseudoLayers(const int& aNode, const std::set<int>& aNeighbors) const;
     int determineSupportingPseudoLayer(const int& aNode, const std::set<int>& aNeighbors, const std::set<int>& aConnectedPseudoLayers) const;
     void assignNodeToPseudoLayer(const int& aNode, const int& aSupportingPseudoLayer);
+    void pruneSupportSet(const int& aNode, const int& aSupportingPseudoLayer);
 
     std::set<int> getSupportSet(const int& aNodeID) const; 
 
