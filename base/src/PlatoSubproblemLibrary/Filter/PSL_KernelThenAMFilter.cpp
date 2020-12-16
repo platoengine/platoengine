@@ -24,11 +24,11 @@ void KernelThenAMFilter::buildPseudoLayers()
 
     orderNodesInBuildDirection();
     setBaseLayerIDToZeroAndOthersToMinusOne();
-    computeNeighborsBelow();
+    computeSupportSet();
 
     for(auto tNode : mOrderedNodes)
     {
-        assignNodeToPseudoLayer(tNode);
+        assignNodeToPseudoLayerAndPruneSupportSet(tNode);
     }
 }
 
@@ -57,32 +57,143 @@ void KernelThenAMFilter::setBaseLayerIDToZeroAndOthersToMinusOne()
     ++mNumPseudoLayers;
 }
 
-void KernelThenAMFilter::assignNodeToPseudoLayer(const int& aNode)
+void KernelThenAMFilter::computeSupportSet()
 {
-    std::set<int> tNeighborIDs = mNeighborsBelow[aNode];
-
-}
-
-void KernelThenAMFilter::computeNeighborsBelow()
-{
-    for(auto tElement : mConnectivity)
+    // we loop over elements for efficiency since we only have element to node connectivity
+    // stored explicitly
+    for(int tElementIndex = 0; tElementIndex < (int) mConnectivity.size(); ++tElementIndex)
     {
-        addElementNeighborsBelow(tElement);
-    }
-}
+        std::vector<int> tElement = mConnectivity[tElementIndex];
+        assert(tElement.size() == 4);
 
-void KernelThenAMFilter::addElementNeighborsBelow(const std::vector<int>& aElement)
-{
-    for(size_t i = 0; i < aElement.size(); ++i)
-    {
-        int tNode = aElement[i];
-        for(size_t j = 0; j < aElement.size()-1; ++j)
+        for(size_t i = 0; i < 4; ++i)
         {
-            int tNeighbor = aElement[(i+j)%aElement.size()];
-            if(mLessThanFunctor(tNeighbor,tNode))
-                mNeighborsBelow[tNode].insert(tNeighbor);
+            int tNode = tElement[i];
+
+            // add support points of tNode on tElement
+            for(size_t j = 1; j < 4; ++j)
+            {
+                int tNeighbor = tElement[(i+j)%4];
+                if(mLessThanFunctor(tNeighbor,tNode))
+                {
+                    if(isNeighborInCriticalWindow(tNode,tNeighbor))
+                    {
+                        mSupportSet[tNode].insert(SupportPointData({tNode, {tNeighbor}}));
+                    }
+                    else
+                    {
+                        for(int k = 1; k < 4; ++k)
+                        {
+                            if((i+j+k)%4 != i)
+                            {
+                                int tOtherNeighbor = tElement[(i+j+k)%4];
+                                if(mLessThanFunctor(tOtherNeighbor,tNode) && isNeighborInCriticalWindow(tNode,tOtherNeighbor))
+                                {
+                                    mSupportSet[tNode].insert(SupportPointData({tNode, {tNeighbor,tOtherNeighbor}}));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
+}
+
+bool KernelThenAMFilter::isNeighborInCriticalWindow(const int& aNode, const int& aNeighbor) const
+{
+    PlatoSubproblemLibrary::Vector tNodeVector(mCoordinates[aNode]);
+    PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[aNeighbor]);
+
+    PlatoSubproblemLibrary::Vector tVec = tNeighborVector - tNodeVector;
+
+    return PlatoSubproblemLibrary::angle_between(tVec,-1*mBuildDirection) < mCriticalPrintAngle;
+}
+
+void KernelThenAMFilter::assignNodeToPseudoLayerAndPruneSupportSet(const int& aNode)
+{
+    std::set<int> tSupportingNeighbors = getSupportingNeighbors(aNode);
+    std::set<int> tConnectedPseudoLayers = determineConnectedPseudoLayers(aNode, tSupportingNeighbors);
+    int tSupportingPseudoLayer = determineSupportingPseudoLayer(aNode, tSupportingNeighbors, tConnectedPseudoLayers);
+
+    assignNodeToPseudoLayer(aNode, tSupportingPseudoLayer);
+}
+
+std::set<int> KernelThenAMFilter::getSupportingNeighbors(const int& aNode) const
+{
+    std::set<int> tSupportingNeighbors;
+
+    std::set<SupportPointData> tSupportSet = mSupportSet[aNode];
+
+    for(auto tSupportPoint : tSupportSet)
+    {
+        std::set<int> tSupportingNeighborsForThisPoint = tSupportPoint.second;
+        for(auto tNeighbor : tSupportingNeighborsForThisPoint)
+        {
+            tSupportingNeighbors.insert(tNeighbor);
+        }
+    }
+
+    return tSupportingNeighbors;
+}
+
+std::set<int> KernelThenAMFilter::determineConnectedPseudoLayers(const int& aNode, const std::set<int>& aNeighbors) const
+{
+    std::set<int> tConnectedPseudoLayers;
+
+    for(auto tNeighbor : aNeighbors)
+    {
+        if(mPseudoLayers[tNeighbor] == -1)
+            throw(std::runtime_error("All nodes below the current node should already be assigned to a pseudo layer"));
+
+        tConnectedPseudoLayers.insert(mPseudoLayers[tNeighbor]);
+    }
+
+    return tConnectedPseudoLayers;
+}
+
+int KernelThenAMFilter::determineSupportingPseudoLayer(const int& aNode, const std::set<int>& aNeighbors, const std::set<int>& aConnectedPseudoLayers) const
+{
+    int tSupportingPseudoLayer;
+    std::vector<double> tSupportScores;
+
+    for(auto tPseudoLayer : aConnectedPseudoLayers)
+    {
+        double tLayerSupportScore = 0;
+        for(auto tNeighbor : aNeighbors)
+        {
+            if(mPseudoLayers[tNeighbor] == tPseudoLayer)
+            {
+                PlatoSubproblemLibrary::Vector tNodeVec(mCoordinates[aNode]);
+                PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[tNeighbor]);
+                PlatoSubproblemLibrary::Vector tVec = tNeighborVector - tNodeVec;
+                double tDistanceBetweeen = tVec.euclideanNorm();
+                double tAngleBetween = PlatoSubproblemLibrary::angle_between(tVec, -1*mBuildDirection);
+                tLayerSupportScore += (1/(1+tDistanceBetweeen))*cos(tAngleBetween);
+            }
+        }
+
+        tSupportScores.push_back(tLayerSupportScore);
+    }
+
+    double tHighestScore = 0;
+    for(int i = 0; i < (int) tSupportScores.size(); ++i)
+    {
+        double tScore = tSupportScores[i];
+        if(tScore > tHighestScore)
+        {
+            tHighestScore = tScore;
+            // set the ith layer as the supporting pseudo layer
+            tSupportingPseudoLayer = *std::next(aConnectedPseudoLayers.begin(), i);
+        }
+    }
+
+    return tSupportingPseudoLayer;
+}
+
+void KernelThenAMFilter::assignNodeToPseudoLayer(const int& aNode, const int& aSupportingPseudoLayer)
+{
+    mPseudoLayers[aNode] = aSupportingPseudoLayer + 1;
 }
 
 }

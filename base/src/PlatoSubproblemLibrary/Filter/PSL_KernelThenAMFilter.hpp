@@ -68,13 +68,18 @@ private:
     double projection_apply(const double& beta, const double& input);
     double projection_gradient(const double& beta, const double& input);
 
+    // pseudo layer algorithm functions
     void orderNodesInBuildDirection();
     void setBaseLayerIDToZeroAndOthersToMinusOne();
-    void computeNeighborsBelow();
-    void addElementNeighborsBelow(const std::vector<int>& aElement);
+    void computeSupportSet();
+    bool isNeighborInCriticalWindow(const int& aNode, const int& aNeighbor) const;
+    void assignNodeToPseudoLayerAndPruneSupportSet(const int& aNode);
+    std::set<int> getSupportingNeighbors(const int& aNode) const;
+    std::set<int> determineConnectedPseudoLayers(const int& aNode, const std::set<int>& aNeighbors) const;
+    int determineSupportingPseudoLayer(const int& aNode, const std::set<int>& aNeighbors, const std::set<int>& aConnectedPseudoLayers) const;
+    void assignNodeToPseudoLayer(const int& aNode, const int& aSupportingPseudoLayer);
 
-    void assignNodeToPseudoLayer(const int& aNode);
-    std::set<int> getNeighborsBelow(const int& aNodeID) const; 
+    std::set<int> getSupportSet(const int& aNodeID) const; 
 
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
     {
@@ -87,7 +92,7 @@ private:
 
         mPseudoLayers.resize(mCoordinates.size());
         mOrderedNodes.resize(mCoordinates.size());
-        mNeighborsBelow.resize(mCoordinates.size());
+        mSupportSet.resize(mCoordinates.size());
     }
 
     void setConnectivity(const std::vector<std::vector<int>>& aConnectivity)
@@ -120,7 +125,11 @@ private:
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;
 
-    std::vector<std::set<int>> mNeighborsBelow;
+    // SupportPointData contains the ID of the supported node, and a set of 
+    // one or two node IDs needed to compute the support point location and density value
+    using SupportPointData = std::pair<int, std::set<int>>; 
+
+    std::vector<std::set<SupportPointData>> mSupportSet;
 
     std::vector<int> mBaseLayer;
 
