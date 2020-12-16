@@ -2149,18 +2149,25 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
     ASSERT_THROW(XMLGen::append_problem_description_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
 
-/*
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstraintGeneral)
 {
+    XMLGen::InputData tXMLMetaData;
+
     XMLGen::Criterion tCriterion;
     tCriterion.id("1");
+    tCriterion.type("stress_constraint_general");
+    tCriterion.append("stress_limit", "2.0");
+    tXMLMetaData.append(tCriterion);
+    
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tXMLMetaData.append(tService);
 
     XMLGen::Objective tObjective;
-    tObjective.type = "stress constrained mass minimization";
-    tObjective.stress_limit = "2.0";
-    tObjective.code_name = "plato_analyze";
-    XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.objectives.push_back(tObjective);
+    tObjective.criteriaIDs.push_back("1");
+    tObjective.serviceIDs.push_back("1");
+    tXMLMetaData.objective = tObjective;
 
     pugi::xml_document tDocument;
     XMLGen::append_objective_criteria_to_plato_problem(tXMLMetaData, tDocument);
@@ -2169,7 +2176,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstrai
     auto tParamList = tDocument.child("ParameterList");
     ASSERT_FALSE(tParamList.empty());
     ASSERT_STREQ("ParameterList", tParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"my stress constrained mass minimization"}, tParamList);
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my stress_constraint_general"}, tParamList);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
@@ -2192,7 +2199,6 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstrai
         std::advance(tValuesItr, 1);
     }
 }
-*/
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 {

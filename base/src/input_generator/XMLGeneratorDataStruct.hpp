@@ -204,34 +204,26 @@ private:
     std::vector<XMLGen::Scenario> mScenarios;
     std::vector<XMLGen::Service> mServices;
     std::vector<XMLGen::Criterion> mCriteria;
-//    std::vector<XMLGen::LoadCase> mLoadCases;
 
 public:
     
-/*
-    void generateLoadCases()
+    std::vector<XMLGen::Load> scenarioLoads(const std::string& aID) const
     {
-        mLoadCases.clear();
-        for(auto &tLoad : loads)
+        std::vector<XMLGen::Load> tScenarioLoads;
+        auto &tScenario = scenario(aID);
+        for(auto &tLoadID : tScenario.loadIDs())
         {
-            XMLGen::LoadCase tLoadCase;
-            tLoadCase.id = tLoad.load_id();
-            tLoadCase.loads.push_back(tLoad);
-            for(auto &tLoadID : tScenario.loadIDs())
+            for(auto &tLoad : loads)
             {
-                for(auto &tLoad : loads)
+                if(tLoad.load_id == tLoadID)
                 {
-                    if(tLoadID == tLoad.load_id)
-                    {
-                        tScenarioLoads.loads.push_back(tLoad);
-                        break;
-                    }
+                    tScenarioLoads.push_back(tLoad);
+                    break;
                 }
-            }     
-            mScenarioLoads.push_back(tScenarioLoads);
+            }
         }
+        return tScenarioLoads;
     }
-*/
 
     std::set<ConcretizedCriterion> getConcretizedCriteria() const
     {
@@ -297,34 +289,6 @@ public:
         }
         return tReturnValue;
     }
-
-    std::vector<XMLGen::Load> scenarioLoads(const std::string& aID) const
-    {
-        std::vector<XMLGen::Load> tScenarioLoads;
-        auto &tScenario = scenario(aID);
-        for(auto &tLoadID : tScenario.loadIDs())
-        {
-            for(auto &tLoad : loads)
-            {
-                if(tLoad.load_id == tLoadID)
-                {
-                    tScenarioLoads.push_back(tLoad);
-                    break;
-                }
-            }
-        }
-        return tScenarioLoads;
-    }
-/*
-    void append(const XMLGen::ScenarioLoads& aScenarioLoads)
-    {
-        mScenarioLoads.push_back(aScenarioLoads);
-    }
-    const std::vector<XMLGen::ScenarioLoads>& scenarioLoads() const
-    {
-        return mScenarioLoads;
-    }
-*/
 
     // Scenario access functions
     const XMLGen::Scenario& scenario(const size_t& aIndex) const
@@ -482,7 +446,6 @@ public:
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
-  //  std::vector<XMLGen::BC> bcs;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;

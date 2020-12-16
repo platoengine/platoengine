@@ -26,7 +26,6 @@ std::string is_criterion_supported_in_plato_analyze
 (const Criterion& aCriterion)
 {
     XMLGen::ValidAnalyzeCriteriaKeys tValidKeys;
-    //auto tLowerCriterion = Plato::tolower(aCriterion.category());
     auto tLowerCriterion = Plato::tolower(aCriterion.type());
     auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
     if (tItr == tValidKeys.mKeys.end())
@@ -120,42 +119,38 @@ void append_pnorm_criterion
  * \param [in] aCriterion criterion metadata
  * \param [in/out] aParentNode  pugi::xml_node
  **********************************************************************************/
-/*
 inline void append_stress_constrained_mass_minimization_criterion_parameters
-(const XMLGen::Objective& aCriterion,
+(const XMLGen::Criterion& aCriterion,
  pugi::xml_node& aParentNode)
 {
     // append stress constrained mass minimization scalar function parameters
     std::vector<std::string> tKeys = {"name", "type", "value"};
-    std::vector<std::string> tValues = {"Stress Limit", "double", aCriterion.stress_limit};
+    std::vector<std::string> tValues = {"Stress Limit", "double", aCriterion.stressLimit()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 
-    auto tItr = aCriterion.scmm_criterion_weights.find("mass");
-    auto tWeight = (tItr == aCriterion.scmm_criterion_weights.end()) ? std::string("1.0") : tItr->second;
+    std::string tWeight = (aCriterion.scmmMassWeight() == "" ? std::string("1.0") : aCriterion.scmmMassWeight());
     tValues = {"Mass Criterion Weight", "double", tWeight};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 
-    tItr = aCriterion.scmm_criterion_weights.find("stress");
-    tWeight = (tItr == aCriterion.scmm_criterion_weights.end()) ? std::string("1.0") : tItr->second;
+    tWeight = (aCriterion.scmmStressWeight() == "" ? std::string("1.0") : aCriterion.scmmStressWeight());
     tValues = {"Stress Criterion Weight", "double", tWeight};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 
-    tValues = {"Initial Penalty", "double", aCriterion.scmm_initial_penalty};
+    tValues = {"Initial Penalty", "double", aCriterion.scmmInitialPenalty()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 
-    tValues = {"Penalty Upper Bound", "double", aCriterion.scmm_penalty_upper_bound};
+    tValues = {"Penalty Upper Bound", "double", aCriterion.scmmPenaltyUpperBound()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 
-    tValues = {"Penalty Expansion Multiplier", "double", aCriterion.scmm_penalty_expansion_factor};
+    tValues = {"Penalty Expansion Multiplier", "double", aCriterion.scmmPenaltyExpansionMultiplier()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
-*/
 
 /******************************************************************************//**
  * \fn append_stress_constrained_mass_minimization_criterion
@@ -163,13 +158,12 @@ inline void append_stress_constrained_mass_minimization_criterion_parameters
  * \param [in] aCriterion criterion metadata
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-/*
 inline void append_stress_constrained_mass_minimization_criterion
-(const XMLGen::Objective& aCriterion,
+(const XMLGen::Criterion& aCriterion,
  pugi::xml_node& aParentNode)
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
+    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
     auto tObjective = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
@@ -183,7 +177,6 @@ inline void append_stress_constrained_mass_minimization_criterion
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
     XMLGen::Private::append_stress_constrained_mass_minimization_criterion_parameters(aCriterion, tObjective);
 }
-*/
 
 }
 // namespace Private

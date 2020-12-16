@@ -158,6 +158,126 @@ public:
         return (this->value("stress_p_norm_exponent"));
     }
 
+    /******************************************************************************//**
+     * \fn scmmPenaltyExpansionMultiplier
+     * \brief Set string value for keyword 'scmm_penalty_expansion_multiplier'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void scmmPenaltyExpansionMultiplier(const std::string& aInput)
+    {
+        this->append("scmm_penalty_expansion_multiplier", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn scmmPenaltyExpansionMultiplier
+     * \brief Return string value for keyword 'scmm_penalty_expansion_multiplier'.
+     * \return value
+     **********************************************************************************/
+    std::string scmmPenaltyExpansionMultiplier() const
+    {
+        return (this->value("scmm_penalty_expansion_multiplier"));
+    }
+
+    /******************************************************************************//**
+     * \fn scmmPenaltyUpperBound
+     * \brief Set string value for keyword 'scmm_penalty_upper_bound'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void scmmPenaltyUpperBound(const std::string& aInput)
+    {
+        this->append("scmm_penalty_upper_bound", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn scmmPenaltyUpperBound
+     * \brief Return string value for keyword 'scmm_penalty_upper_bound'.
+     * \return value
+     **********************************************************************************/
+    std::string scmmPenaltyUpperBound() const
+    {
+        return (this->value("scmm_penalty_upper_bound"));
+    }
+
+    /******************************************************************************//**
+     * \fn scmmInitialPenalty
+     * \brief Set string value for keyword 'scmm_initial_penalty'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void scmmInitialPenalty(const std::string& aInput)
+    {
+        this->append("scmm_initial_penalty", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn scmmInitialPenalty
+     * \brief Return string value for keyword 'scmm_initial_penalty'.
+     * \return value
+     **********************************************************************************/
+    std::string scmmInitialPenalty() const
+    {
+        return (this->value("scmm_initial_penalty"));
+    }
+
+    /******************************************************************************//**
+     * \fn scmmStressWeight
+     * \brief Set string value for keyword 'scmm_stress_weight'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void scmmStressWeight(const std::string& aInput)
+    {
+        this->append("scmm_stress_weight", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn scmmStressWeight
+     * \brief Return string value for keyword 'scmm_stress_weight'.
+     * \return value
+     **********************************************************************************/
+    std::string scmmStressWeight() const
+    {
+        return (this->value("scmm_stress_weight"));
+    }
+
+    /******************************************************************************//**
+     * \fn scmmMassWeight
+     * \brief Set string value for keyword 'scmm_mass_weight'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void scmmMassWeight(const std::string& aInput)
+    {
+        this->append("scmm_mass_weight", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn scmmMassWeight
+     * \brief Return string value for keyword 'scmm_mass_weight'.
+     * \return value
+     **********************************************************************************/
+    std::string scmmMassWeight() const
+    {
+        return (this->value("scmm_mass_weight"));
+    }
+
+    /******************************************************************************//**
+     * \fn stressLimit
+     * \brief Set string value for keyword 'stress_limit'.
+     * \param [in] aInput string value
+     **********************************************************************************/
+    void stressLimit(const std::string& aInput)
+    {
+        this->append("stress_limit", aInput);
+    }
+
+    /******************************************************************************//**
+     * \fn stressLimit
+     * \brief Return string value for keyword 'stress_limit'.
+     * \return value
+     **********************************************************************************/
+    std::string stressLimit() const
+    {
+        return (this->value("stress_limit"));
+    }
+
 
 };
 // struct Criterion

@@ -191,7 +191,6 @@ void XMLGenerator::parseScenarios(std::istream &aInputFile)
     tParseScenario.parse(aInputFile);
     auto tScenarios = tParseScenario.data();
     m_InputData.set(tScenarios);
-    //m_InputData.generateScenarioLoadsObjects();
 }
 
 /******************************************************************************/

@@ -57,6 +57,12 @@ void ParseCriteria::allocate()
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
     mTags.insert({ "normalize", { { {"normalize"}, ""}, "false" } });
     mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "1.0" } });
+    mTags.insert({ "stress_limit", { { {"stress_limit"}, ""}, "" } });
+    mTags.insert({ "scmm_initial_penalty", { { {"sccmm_initial_penalty"}, ""}, "" } });
+    mTags.insert({ "scmm_penalty_expansion_multiplier", { { {"scmm_penalty_expansion_multiplier"}, ""}, "" } });
+    mTags.insert({ "scmm_penalty_upper_bound", { { {"scmm_penalty_upper_bound"}, ""}, "" } });
+    mTags.insert({ "scmm_stress_weight", { { {"scmm_stress_weight"}, ""}, "1.0" } });
+    mTags.insert({ "scmm_mass_weight", { { {"scmm_mass_weight"}, ""}, "1.0" } });
 
     mTags.insert({ "stress_p_norm_exponent", { { {"stress_p_norm_exponent"}, ""}, "6.0" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });

@@ -142,7 +142,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorInvalidMean)
     std::string tStringInput =
         "begin uncertainty\n"
         "    category load\n"
-        "    tag angle variation\n"
+        "    tag angle_variation\n"
         "    load id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
@@ -164,7 +164,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanMinusStdLesserThanLowerBou
     std::string tStringInput =
         "begin uncertainty\n"
         "    category load\n"
-        "    tag angle variation\n"
+        "    tag angle_variation\n"
         "    load id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
@@ -186,7 +186,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_ErrorMeanPlusStdGreaterThanUpperBou
     std::string tStringInput =
         "begin uncertainty\n"
         "    category load\n"
-        "    tag angle variation\n"
+        "    tag angle_variation\n"
         "    load id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
@@ -211,7 +211,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
         "end loads\n"
         "begin uncertainty\n"
         "    category load\n"
-        "    tag angle variation\n"
+        "    tag angle_variation\n"
         "    load_id 10\n"
         "    attribute X\n"
         "    distribution beta\n"
@@ -236,7 +236,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_OneRandomVar)
     ASSERT_STREQ("2", tMetadata[0].samples().c_str());
     ASSERT_STREQ("beta", tMetadata[0].distribution().c_str());
     ASSERT_STREQ("load", tMetadata[0].category().c_str());
-    ASSERT_STREQ("angle variation", tMetadata[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tMetadata[0].tag().c_str());
     ASSERT_STREQ("22.5", tMetadata[0].std().c_str());
 }
 
@@ -254,7 +254,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
         "begin uncertainty\n"
         "    category load\n"
         "    load_id 10\n"
-        "    tag angle variation\n"
+        "    tag angle_variation\n"
         "    attribute X\n"
         "    distribution beta\n"
         "    mean 0.0\n"
@@ -290,7 +290,7 @@ TEST(PlatoTestXMLGenerator, ParseUncertainty_TwoRandomVar)
     std::vector<std::string> tGoldCategory = {"load", "material"};
     std::vector<std::string> tGoldDistribution = {"beta", "beta"};
     std::vector<std::string> tGoldAttribute = {"x", "homogeneous"};
-    std::vector<std::string> tGoldTag = {"angle variation", "poissons_ratio"};
+    std::vector<std::string> tGoldTag = {"angle_variation", "poissons_ratio"};
     auto tMetadata = tUncertainty.data();
     for (auto& tVar : tMetadata)
     {
@@ -1999,7 +1999,7 @@ TEST(PlatoTestXMLGenerator, SROM_SolveSromProblem_ReadSampleProbPairsFromFile)
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  filename test.csv\n"
@@ -2147,7 +2147,7 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -2291,7 +2291,7 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"

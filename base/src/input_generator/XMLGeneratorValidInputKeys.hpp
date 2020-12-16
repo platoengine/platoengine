@@ -70,7 +70,13 @@ struct ValidCriterionParameterKeys
         "stress_p_norm_exponent", 
         "material_penalty_model", 
         "material_penalty_exponent", 
-        "minimum_ersatz_material_value"
+        "minimum_ersatz_material_value",
+        "stress_limit",
+        "scmm_initial_penalty",
+        "scmm_penalty_expansion_multiplier",
+        "scmm_penalty_upper_bound",
+        "scmm_stress_weight",
+        "scmm_mass_weight"
     };
 };
 
@@ -157,6 +163,8 @@ private:
         "flux_p-norm", 
         "stress", 
         "average_temperature", 
+        "stress_constraint",  
+        "stress_constraint_general",  
         "stress_constraint_quadratic",  
         "flux" 
     };
@@ -205,7 +213,7 @@ private:
      **/
     std::vector<std::string> mKeys = 
     { 
-        "angle variation", 
+        "angle_variation", 
         "youngs_modulus", 
         "poissons_ratio", 
         "mass_density", 
@@ -1053,7 +1061,8 @@ struct ValidAnalyzeCriteriaKeys
         { "local_stress", { "Stress Constraint Quadratic", false } },
         { "stress_p-norm", { "Stress P-Norm", false } },
         { "effective_energy", { "Effective Energy", true } },
-        //{ "stress constrained mass minimization", { "Stress Constraint General", false } },
+        { "stress_constraint", { "Stress Constraint", false } },
+        { "stress_constraint_general", { "Stress Constraint General", false } },
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },

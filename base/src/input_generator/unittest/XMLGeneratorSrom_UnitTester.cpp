@@ -507,7 +507,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Material tMaterial;
     tMaterial.id("30");
@@ -537,7 +537,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase2;
     tCase2.category("load");
@@ -549,7 +549,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase3;
     tCase3.category("material");
@@ -800,7 +800,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     std::vector<XMLGen::Uncertainty> tRandomVars;
     tRandomVars.push_back(tCase1);
@@ -907,7 +907,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase2;
     tCase2.category("load");
@@ -919,7 +919,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase3;
     tCase3.category("material");
@@ -945,7 +945,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     auto tLoads = tCategoriesMap.find(Plato::srom::category::LOAD);
     ASSERT_EQ(2u, tLoads->second.size());
     ASSERT_STREQ("load", tLoads->second[0].category().c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads->second[0].tag().c_str());
     ASSERT_STREQ("x", tLoads->second[0].attribute().c_str());
     ASSERT_STREQ("2", tLoads->second[0].id().c_str());
     ASSERT_STREQ("2", tLoads->second[0].upper().c_str());
@@ -956,7 +956,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     ASSERT_STREQ("beta", tLoads->second[0].distribution().c_str());
 
     ASSERT_STREQ("load", tLoads->second[1].category().c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[1].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads->second[1].tag().c_str());
     ASSERT_STREQ("y", tLoads->second[1].attribute().c_str());
     ASSERT_STREQ("20", tLoads->second[1].id().c_str());
     ASSERT_STREQ("20", tLoads->second[1].upper().c_str());
@@ -1142,7 +1142,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -1211,7 +1211,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1286,7 +1286,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -1397,7 +1397,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -1467,7 +1467,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1891,7 +1891,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
       "end uncertainty\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -1992,7 +1992,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -2092,7 +2092,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
       "end uncertainty\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -2215,7 +2215,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -2303,7 +2303,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
       "end material\n"
       "begin uncertainty\n"
       "  category load\n"
-      "  tag angle variation\n"
+      "  tag angle_variation\n"
       "  load_id 10\n"
       "  attribute X\n"
       "  distribution beta\n"
@@ -2379,7 +2379,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
