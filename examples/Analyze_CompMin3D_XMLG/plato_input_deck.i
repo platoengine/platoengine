@@ -71,7 +71,7 @@ begin loads
     traction sideset name ss_2 value 0 -3e3 0 load id 1
 end loads
       
-begin constraint
+begin constraint 1
   criterion 2
   relative_target 0.25
   type less_than
@@ -104,6 +104,10 @@ end mesh
 
 begin paths
 code PlatoMain PlatoMain
+code plato_analyze analyze_MPMD
+end paths
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD
 end paths
 begin paths

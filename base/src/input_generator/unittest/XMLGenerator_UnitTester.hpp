@@ -70,15 +70,22 @@ public:
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
     bool publicParseLoads(std::istream &sin);
+    void publicParseObjective(std::istream &sin);
     bool publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     bool publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
+    void publicParseMaterials(std::istream &sin);
+    void publicParseServices(std::istream &sin);
+    void publicParseScenarios(std::istream &sin);
+    void publicParseCriteria(std::istream &sin);
+    void publicParseUncertainties(std::istream &sin);
     void publicParseBCs(std::istream &sin);
     bool publicParseOptimizationParameters(std::istream &sin);
     bool publicParseMesh(std::istream &sin);
     bool publicParseCodePaths(std::istream &sin);
     bool publicParseBlocks(std::istream &sin);
+    bool publicRunSROMForUncertainVariables();
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
     std::string getBCApplicationType(const std::string &aBCID);
@@ -130,6 +137,8 @@ public:
     std::string getPlatoMainPath() {return m_InputData.codepaths.plato_main_path;}
     void clearInputData();
     XMLGen::InputData* exposeInputData() {return &m_InputData;}
+    size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPerformers;}
+
 
 };
 

@@ -144,18 +144,6 @@ void get_ebc_vector_for_scenario
  std::vector<XMLGen::Load> &aEBCVector);
 
 /******************************************************************************//**
- * \fn get_load_vector_for_scenario
- * \brief Utility function to retrieve the loads used in a scenario
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in]     aScenario The scenario of interest
- * \param [out]    aLoadVector  Load vector to populate
-**********************************************************************************/
-void get_load_vector_for_scenario
-(const XMLGen::InputData& aXMLMetaData,
- const XMLGen::Scenario &aScenario,
- std::vector<XMLGen::Load> &aLoadVector);
-
-/******************************************************************************//**
  * \fn append_weighted_sum_objective_to_plato_problem
  * \brief Append weighted sum objective function to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -292,11 +280,11 @@ void append_spatial_model_to_plato_problem
 /******************************************************************************//**
  * \fn append_material_model_to_plato_problem
  * \brief Append material model to plato problem parameter list.
- * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aMaterials List of materials
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_material_model_to_plato_problem
-(const XMLGen::InputData& aXMLMetaData,
+(const std::vector<XMLGen::Material>& aMaterials,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -333,7 +321,7 @@ void append_material_model_to_plato_analyze_input_deck
  * \fn append_natural_boundary_conditions_to_plato_problem
  * \brief Append natural boundary condition to plato problem parameter list.
  * \param [in]     aPhysics     name of the current physics
- * \param [in]     aLoadCase    load case metadata
+ * \param [in]     aLoadCase    loads relating to the current scenario
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem

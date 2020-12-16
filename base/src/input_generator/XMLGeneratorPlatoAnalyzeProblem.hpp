@@ -8,10 +8,10 @@
 
 #include <iostream>
 
-//#include "XMLGeneratorDefinesFileUtilities.hpp"
-//#include "XMLGeneratorLaunchScriptUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorLaunchScriptUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
-//#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
+#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
@@ -29,7 +29,6 @@ namespace Analyze
  * \brief Write input files needed to solve optimization problems with Plato Analyze.
  * \param [in] aInputData input metadata
 **********************************************************************************/
-/*
 inline bool is_robust_optimization_problem
 (const XMLGen::InputData& aMetaData)
 {
@@ -38,7 +37,6 @@ inline bool is_robust_optimization_problem
     else
         return true;
 }
-*/
 // function is_robust_optimization_problem
 
 /******************************************************************************//**
@@ -49,11 +47,8 @@ inline bool is_robust_optimization_problem
 inline void write_optimization_problem
 (const XMLGen::InputData& aMetaData)
 {
-/* There will be cases other than robust opitimzation where we will need to 
- * write the define_xml file so the logic here needs to be expanded
- */
-//    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
-//        XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
 
     XMLGen::write_interface_xml_file(aMetaData);
     XMLGen::write_plato_main_operations_xml_file(aMetaData);

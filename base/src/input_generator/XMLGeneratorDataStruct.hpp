@@ -12,9 +12,10 @@
 #include <map>
 #include <set>
 
-// #include "Plato_SromHelpers.hpp"
+#include "Plato_SromHelpers.hpp"
 #include "XMLGeneratorOutputMetadata.hpp"
-// #include "XMLGeneratorRandomMetadata.hpp"
+#include "XMLGeneratorRandomMetadata.hpp"
+#include "XMLGeneratorBoundaryMetadata.hpp"
 #include "XMLGeneratorServiceMetadata.hpp"
 #include "XMLGeneratorScenarioMetadata.hpp"
 #include "XMLGeneratorConstraintMetadata.hpp"
@@ -45,7 +46,7 @@ struct Objective
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
 };
-
+/* now in XMLGeneratorBoundaryMetadata.hpp
 struct Load
 {
     bool mIsRandom = false;
@@ -71,6 +72,7 @@ struct BC
     std::string bc_id;
     std::string value;
 };
+*/
 
 struct Block
 {
@@ -189,15 +191,48 @@ struct Mesh
     std::string file_extension;
 };
 
+struct UncertaintyMetaData
+{
+  size_t numPerformers = 0;
+  std::vector<size_t> randomVariableIndices;
+  std::vector<size_t> deterministicVariableIndices;
+};
+
 struct InputData
 {
 private:
     std::vector<XMLGen::Scenario> mScenarios;
     std::vector<XMLGen::Service> mServices;
     std::vector<XMLGen::Criterion> mCriteria;
+//    std::vector<XMLGen::LoadCase> mLoadCases;
 
 public:
     
+/*
+    void generateLoadCases()
+    {
+        mLoadCases.clear();
+        for(auto &tLoad : loads)
+        {
+            XMLGen::LoadCase tLoadCase;
+            tLoadCase.id = tLoad.load_id();
+            tLoadCase.loads.push_back(tLoad);
+            for(auto &tLoadID : tScenario.loadIDs())
+            {
+                for(auto &tLoad : loads)
+                {
+                    if(tLoadID == tLoad.load_id)
+                    {
+                        tScenarioLoads.loads.push_back(tLoad);
+                        break;
+                    }
+                }
+            }     
+            mScenarioLoads.push_back(tScenarioLoads);
+        }
+    }
+*/
+
     std::set<ConcretizedCriterion> getConcretizedCriteria() const
     {
         std::set<ConcretizedCriterion> tConcretizedCriteria;
@@ -262,6 +297,34 @@ public:
         }
         return tReturnValue;
     }
+
+    std::vector<XMLGen::Load> scenarioLoads(const std::string& aID) const
+    {
+        std::vector<XMLGen::Load> tScenarioLoads;
+        auto &tScenario = scenario(aID);
+        for(auto &tLoadID : tScenario.loadIDs())
+        {
+            for(auto &tLoad : loads)
+            {
+                if(tLoad.load_id == tLoadID)
+                {
+                    tScenarioLoads.push_back(tLoad);
+                    break;
+                }
+            }
+        }
+        return tScenarioLoads;
+    }
+/*
+    void append(const XMLGen::ScenarioLoads& aScenarioLoads)
+    {
+        mScenarioLoads.push_back(aScenarioLoads);
+    }
+    const std::vector<XMLGen::ScenarioLoads>& scenarioLoads() const
+    {
+        return mScenarioLoads;
+    }
+*/
 
     // Scenario access functions
     const XMLGen::Scenario& scenario(const size_t& aIndex) const
@@ -427,6 +490,8 @@ public:
     XMLGen::Optimizer optimizer;
     XMLGen::Arch m_Arch;
     bool m_UseLaunch;
+    XMLGen::RandomMetaData mRandomMetaData;
+    XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
 
     // // miscelaneous data that may be unused
     // int num_shape_design_variables;
@@ -440,13 +505,13 @@ public:
     // std::string m_filterType_kernel_XMLName;
     // std::string m_filterType_kernelThenHeaviside_XMLName;
     // std::string m_filterType_kernelThenTANH_XMLName;
-    // XMLGen::RandomMetaData mRandomMetaData;
-    // XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
     
     // // I think these are going to be handled somewhere other than the optimizer
     // std::vector<std::string> mStandardDeviations;
     // std::string mUseNormalizationInAggregator;
 };
+
+
 
 
 

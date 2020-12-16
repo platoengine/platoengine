@@ -60,8 +60,8 @@
 
 #include "XMLGenerator.hpp"
 
-// #include "Plato_SromXML.hpp"
-// #include "Plato_SromXMLGenTools.hpp"
+#include "Plato_SromXML.hpp"
+#include "Plato_SromXMLGenTools.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 // #include "Plato_SolveUncertaintyProblem.hpp"
@@ -140,41 +140,39 @@ void XMLGenerator::generate()
 {
     this->parseInputFile();
 
-    // this->getUncertaintyFlags();
-
-    // if(!runSROMForUncertainVariables())
-    // {
-    //     PRINTERR("Failed to expand uncertainties in file generation.")
-    //     return false;
-    // }
+    if(!runSROMForUncertainVariables())
+    {
+        PRINTERR("Failed to expand uncertainties in file generation.")
+    }
 
     this->writeInputFiles();
 }
 
-// /******************************************************************************/
-// bool XMLGenerator::runSROMForUncertainVariables()
-// /******************************************************************************/
-// {
-//     if(m_InputData.uncertainties.size() > 0)
-//     {
-//         Plato::srom::solve(m_InputData);
-//         this->setNumPerformers();
-//     }
+/******************************************************************************/
+bool XMLGenerator::runSROMForUncertainVariables()
+/******************************************************************************/
+{
+    if(m_InputData.uncertainties.size() > 0)
+    {
+        Plato::srom::solve(m_InputData);
+        this->setNumPerformers();
+    }
 
-//     return true;
-// }
+    return true;
+}
 
-// /******************************************************************************/
-// void XMLGenerator::setNumPerformers()
-// /******************************************************************************/
-// {
-//     m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(m_InputData.scenarios()[0].numberRanks());
+/******************************************************************************/
+void XMLGenerator::setNumPerformers()
+/******************************************************************************/
+{
+    auto &tService = m_InputData.service(m_InputData.objective.serviceIDs[0]); 
+    m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(tService.numberProcessors());
 
-//     if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPerformers != 0)
-//     {
-//         THROWERR("Set Number for Performers: Number of samples must divide evenly into number of ranks.");
-//     }
-// }
+    if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPerformers != 0)
+    {
+        THROWERR("Set Number for Performers: Number of samples must divide evenly into number of ranks.");
+    }
+}
 
 /******************************************************************************/
 void XMLGenerator::parseOutput(std::istream &aInputFile)
@@ -193,6 +191,7 @@ void XMLGenerator::parseScenarios(std::istream &aInputFile)
     tParseScenario.parse(aInputFile);
     auto tScenarios = tParseScenario.data();
     m_InputData.set(tScenarios);
+    //m_InputData.generateScenarioLoadsObjects();
 }
 
 /******************************************************************************/
@@ -551,238 +550,6 @@ void XMLGenerator::parseUncertainties(std::istream &aInputFile)
     XMLGen::ParseUncertainty tParseUncertainty;
     tParseUncertainty.parse(aInputFile);
     m_InputData.uncertainties = tParseUncertainty.data();
-}
-
-/******************************************************************************/
-void XMLGenerator::parseBCs(std::istream &fin)
-/******************************************************************************/
-{
-    std::vector<std::string> tInputStringList;
-    std::vector<std::string> tokens;
-    std::string tStringValue;
-    bool bc_block_found = false;
-
-    // read each line of the file
-    while (!fin.eof())
-    {
-        getTokensFromLine(fin,tokens);
-
-        // process the tokens
-        if(tokens.size() > 0)
-        {
-            if(parseSingleValue(tokens, tInputStringList = {"begin","boundary","conditions"}, tStringValue))
-            {
-              this->parseBCsBlock(fin);
-              bc_block_found = true;
-            }
-        }
-    }
-
-    if(!bc_block_found)
-        THROWERR("ERROR:XMLGenerator:parseBCs: No boundary condition block found \n")
-}
-
-/******************************************************************************/
-void XMLGenerator::parseBCsBlock(std::istream &fin)
-/******************************************************************************/
-{
-  std::vector<std::string> tInputStringList;
-  std::vector<std::string> tokens;
-  std::string tStringValue;
-  
-  while (!fin.eof())
-  {
-    getTokensFromLine(fin,tokens);
-
-    if(tokens.size() > 0)
-    {
-      for(size_t j=0; j<tokens.size(); ++j)
-          tokens[j] = toLower(tokens[j]);
-      if(parseSingleValue(tokens, tInputStringList = {"end","boundary","conditions"}, tStringValue))
-        break;
-      else
-        parseBCLine(tokens);
-    }
-  }
-}
-
-/******************************************************************************/
-void XMLGenerator::parseBCLine(std::vector<std::string>& tokens)
-/******************************************************************************/
-{
-/*
-    XMLGen::BC new_bc;
-
-    if(tokens.size() < 7)
-    {
-        THROWERR("ERROR:XMLGenerator:parseBCs: Not enough parameters were specified for BC in \"boundary conditions\" block.\n")
-    }
-
-    XMLGen::ValidEssentialBoundaryConditionsKeys tValidKeys;
-    auto tValue = tValidKeys.value(tokens[0]);
-    if (tValue.empty())
-    {
-        THROWERR(std::string("ERROR:XMLGenerator:parseBCs: Essential boundary condition with tag '") + tokens[0] + "' is not supported.")
-    }
-    new_bc.type = tokens[1];
-
-    if(!new_bc.type.compare("displacement"))
-    {
-      new_bc.mPhysics = "steady_state_mechanics";
-      parseDisplacementBC(tokens,new_bc);
-    }
-    else if(!new_bc.type.compare("temperature"))
-    {
-      new_bc.mPhysics = "steady_state_thermal";
-      parseTemperatureBC(tokens,new_bc);
-    }
-    else
-    {
-        PrintUnrecognizedTokens(tokens);
-        THROWERR("ERROR:XMLGenerator:parseLoads: Unrecognized boundary condition type.\n")
-    }
-
-    m_InputData.bcs.push_back(new_bc);
-*/
-}
-
-/******************************************************************************/
-void XMLGenerator::parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
-/******************************************************************************/
-{
-  // Potential syntax:
-  // fixed displacement nodeset/sideset 1 bc id 1                 // all dofs have fixed disp of 0.0
-  // fixed displacement nodeset/sideset 1 <x,y,z> bc id 1         // x, y, or z dof has fixed disp of 0.0
-  // fixed displacement nodeset/sideset 1 <x,y,z> 3.0 bc id 1     // x, y, or z dof has fixed disp of 3.0
-
-  size_t tTokenIndex = 1;
-  bool tNameOrIDSpecified = false;
-
-  new_bc.mCategory = tokens[0];
-  if(tokens[++tTokenIndex] != "nodeset" && tokens[tTokenIndex] != "sideset")
-  {
-      THROWERR("ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n")
-  }
-  new_bc.app_type = tokens[tTokenIndex];
-
-  if(tokens[++tTokenIndex] == "id")
-  {
-    new_bc.app_id = tokens[++tTokenIndex];
-    tNameOrIDSpecified = true;
-  }
-  else if(tokens[tTokenIndex] == "name")
-  {
-    new_bc.app_name = tokens[++tTokenIndex];
-    tNameOrIDSpecified = true;
-  }
-  else
-  {
-    new_bc.app_id = tokens[tTokenIndex];
-    new_bc.app_name = "";
-  }
-  
-  if(tNameOrIDSpecified)
-  {
-    if(tokens[++tTokenIndex] == "id")
-      new_bc.app_id = tokens[++tTokenIndex];
-    else if(tokens[tTokenIndex] == "name")
-      new_bc.app_name = tokens[++tTokenIndex];
-    else
-      --tTokenIndex;
-  }
-
-  new_bc.dof = "";
-  new_bc.value = "";
-  if(tokens[++tTokenIndex] != "bc")
-  {
-    if(tokens[tTokenIndex] != "x" && tokens[tTokenIndex] != "y" && tokens[tTokenIndex] != "z")
-    {
-        THROWERR("ERROR:XMLGenerator:parseBCs: Boundary condition degree of freedom must be either \"x\", \"y\", or \"z\".\n")
-    }
-    new_bc.dof = tokens[tTokenIndex];
-    if(tokens[++tTokenIndex] != "bc")
-    {
-        new_bc.value = tokens[tTokenIndex];
-        tTokenIndex += 3;
-        new_bc.bc_id = tokens[tTokenIndex];
-    }
-    else
-    {
-        tTokenIndex += 2;
-        new_bc.bc_id = tokens[tTokenIndex];
-    }
-  }
-  else
-  {
-    tTokenIndex += 2;
-    new_bc.bc_id = tokens[tTokenIndex];
-  }
-}
-
-/******************************************************************************/
-void XMLGenerator::parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc)
-/******************************************************************************/
-{
-  new_bc.mCategory = tokens[0];
-  // Potential syntax:
-  // fixed temperature nodeset 1 bc id 1
-  // fixed temperature nodeset 1 value 25.0 bc id 1
-  if(tokens[2] != "nodeset" && tokens[2] != "sideset")
-  {
-      THROWERR("ERROR:XMLGenerator:parseBCs: Boundary conditions can only be applied to \"nodeset\" or \"sideset\" types.\n")
-  }
-  new_bc.app_type = tokens[2];
-
-  size_t tOffset = 0;
-  bool name_or_id_specified = false;
-  if(tokens[3] == "id")
-  {
-    ++tOffset;
-    new_bc.app_id = tokens[3+tOffset];
-    name_or_id_specified = true;
-  }
-  else if(tokens[3] == "name")
-  {
-    ++tOffset;
-    new_bc.app_name = tokens[3+tOffset];
-    name_or_id_specified = true;
-  }
-  else
-  {
-    new_bc.app_id = tokens[3];
-    new_bc.app_name = "";
-  }
-
-  if(name_or_id_specified)
-  {
-    if(tokens[4+tOffset] == "id")
-    {
-      ++tOffset;
-      new_bc.app_id = tokens[4+tOffset];
-    }
-    else if(tokens[4+tOffset] == "name")
-    {
-      ++tOffset;
-      new_bc.app_name = tokens[4+tOffset];
-    }
-  }
-
-  new_bc.value = "";
-  if(tokens[4+tOffset] != "bc")
-  {
-      if(tokens[4+tOffset] != "value")
-      {
-          THROWERR("ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n")
-      }
-      new_bc.value = tokens[5+tOffset];
-      if(tokens[6+tOffset] != "bc")
-      {
-          THROWERR("ERROR:XMLGenerator:parseBCs: Invalid BC syntax.\n")
-      }
-      new_bc.bc_id = tokens[8+tOffset];
-  }
-  else
-      new_bc.bc_id = tokens[6+tOffset];
 }
 
 /******************************************************************************/
@@ -2197,7 +1964,6 @@ void XMLGenerator::parseInputFile()
   }
 
   parseBoundaryConditions(tInputFile);
-  //parseBCs(tInputFile);
   tInputFile.close();
 
   tInputFile.open(m_InputFilename.c_str()); // open a file

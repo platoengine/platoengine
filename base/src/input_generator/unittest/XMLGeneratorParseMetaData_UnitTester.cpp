@@ -513,23 +513,6 @@ TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyService)
     ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
 }
 
-/* commenting out because we may not always need a scenario in a constraint
-TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyScenario)
-{
-    std::string tStringInput =
-        "begin constraint\n"
-        "   criterion 1\n"
-        "   service 1\n"
-        "   relative_target 0.5\n"
-        "end constraint\n";
-    std::istringstream tInputSS;
-    tInputSS.str(tStringInput);
-
-    XMLGen::ParseConstraint tConstraintParser;
-    ASSERT_THROW(tConstraintParser.parse(tInputSS), std::runtime_error);
-}
-*/
-
 TEST(PlatoTestXMLGenerator, ParseConstraint_EmptyTarget)
 {
     std::string tStringInput =

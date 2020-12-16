@@ -19,13 +19,11 @@ void write_plato_main_operations_xml_file
 {
     pugi::xml_document tDocument;
 
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
     {
         auto tInclude = tDocument.append_child("include");
         XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
     }
-*/
 
     XMLGen::append_filter_options_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aMetaData, tDocument);
@@ -36,19 +34,20 @@ void write_plato_main_operations_xml_file
     XMLGen::append_compute_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aMetaData, tDocument);
 
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
     {
         XMLGen::append_stochastic_objective_value_to_plato_main_operation(aMetaData, tDocument);
         XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aMetaData, tDocument);
         XMLGen::append_qoi_statistics_to_plato_main_operation(aMetaData, tDocument);
     }
-*/
 
     XMLGen::append_update_problem_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
     XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
-    XMLGen::append_aggregate_data_to_plato_main_operation(aMetaData, tDocument);
+    if(!XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        XMLGen::append_aggregate_data_to_plato_main_operation(aMetaData, tDocument);
+    }
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
 /******************************************************************************/
@@ -140,15 +139,8 @@ void append_constraint_gradient_to_output_operation
 {
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        std::string tCriterionID = tConstraint.criterion();
-        std::string tServiceID = tConstraint.service();
-        std::string tScenarioID = tConstraint.scenario();
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
         auto tInput = aParentNode.append_child("Input");
-        auto tName = std::string("Criterion Gradient - ") + tIdentifierString;
-        auto tArgumentName = XMLGen::to_lower(tName);
+        auto tArgumentName = std::string("constraint gradient ") + tConstraint.id();
         XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
     }
 }
@@ -637,8 +629,7 @@ void append_initialize_levelset_primitives_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-/*
-    if(aXMLMetaData.run_mesh_name.empty())
+    if(aXMLMetaData.mesh.run_name.empty())
     {
         THROWERR(std::string("Append Initialize Levelset Primitives Operation: ")
             + "Levelset field was supposed to be initialized by reading it from an user-specified file. "
@@ -651,9 +642,8 @@ void append_initialize_levelset_primitives_operation
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tMethod = tOperation.append_child("PrimitivesLevelSet");
-    XMLGen::append_children({"BackgroundMeshName"}, {aXMLMetaData.run_mesh_name}, tMethod);
+    XMLGen::append_children({"BackgroundMeshName"}, {aXMLMetaData.mesh.run_name}, tMethod);
     XMLGen::append_levelset_material_box(aXMLMetaData, tMethod);
-*/
 }
 // function append_initialize_levelset_primitives_operation
 /******************************************************************************/
@@ -663,8 +653,7 @@ void append_initialize_levelset_swiss_cheese_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-/*
-    if(aXMLMetaData.run_mesh_name.empty())
+    if(aXMLMetaData.mesh.run_name.empty())
     {
         THROWERR(std::string("Append Initialize Levelset Swiss Cheese Operation: ")
             + "Levelset field was supposed to be initialized by writing it into an user-specified file. "
@@ -678,20 +667,19 @@ void append_initialize_levelset_swiss_cheese_operation
 
     auto tMethod = tOperation.append_child("SwissCheeseLevelSet");
     tKeys = {"BackgroundMeshName", "SphereRadius", "SpherePackingFactor"};
-    tValues = {aXMLMetaData.run_mesh_name, aXMLMetaData.levelset_sphere_radius,
-        aXMLMetaData.levelset_sphere_packing_factor};
-    for(auto& tNodeSet : aXMLMetaData.levelset_nodesets)
+    tValues = {aXMLMetaData.mesh.run_name, aXMLMetaData.optimizer.levelset_sphere_radius,
+        aXMLMetaData.optimizer.levelset_sphere_packing_factor};
+    for(auto& tNodeSet : aXMLMetaData.optimizer.levelset_nodesets)
     {
         tKeys.push_back("NodeSet"); tValues.push_back(tNodeSet);
     }
 
     auto tDefineCreateLevelSetSpheresKeyword =
-        aXMLMetaData.levelset_sphere_radius.empty() && aXMLMetaData.levelset_sphere_packing_factor.empty();
+        aXMLMetaData.optimizer.levelset_sphere_radius.empty() && aXMLMetaData.optimizer.levelset_sphere_packing_factor.empty();
     auto tCreateLevelSetSpheres = tDefineCreateLevelSetSpheresKeyword ? "false" : "true";
     tKeys.push_back("CreateSpheres"); tValues.push_back(tCreateLevelSetSpheres);
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, tMethod);
-*/
 }
 // function append_initialize_levelset_swiss_cheese_operation
 /******************************************************************************/

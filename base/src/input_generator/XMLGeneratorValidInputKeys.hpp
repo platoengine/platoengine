@@ -1057,7 +1057,7 @@ struct ValidAnalyzeCriteriaKeys
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
-        { "electrical_compliance", { "Internal Electroelastic Energy", false } },
+
     };
 };
 // ValidAnalyzeCriteriaKeys

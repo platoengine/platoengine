@@ -8,7 +8,7 @@
 
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
-//#include "XMLGeneratorRandomMetadata.hpp"
+#include "XMLGeneratorRandomMetadata.hpp"
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
@@ -548,14 +548,13 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_InvalidKey)
     ASSERT_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
-/*  currently not handling run_mesh_name
 TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_LevelSetKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.optimizer.discretization = "levelset";
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_initialization_method = "primitives";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_initialization_method = "primitives";
     ASSERT_NO_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -572,7 +571,6 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_LevelSetKey)
     tKeys = {"BackgroundMeshName"}; tValues = {"dummy.exo"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
 }
-*/
 
 TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_DensityKey)
 {
@@ -609,13 +607,12 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_InvalidKey)
     ASSERT_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
-/* currently not handling run_mesh_name
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_PrimitivesKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_initialization_method = "primitives";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_initialization_method = "primitives";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -632,15 +629,13 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_PrimitivesKey)
     tKeys = {"BackgroundMeshName"}; tValues = {"dummy.exo"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
 }
-*/
 
-/* currently not handling run_mesh_name
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_SwissCheeseKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_initialization_method = "swiss cheese";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_initialization_method = "swiss cheese";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -657,23 +652,19 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_SwissCheeseKey)
     tKeys = {"BackgroundMeshName", "CreateSpheres"}; tValues = {"dummy.exo", "false"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
 }
-*/
 
-/* not handling levelset yet
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_ErrorEmptyFileName)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     ASSERT_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
-*/
 
-/* currently not handling run_mesh_name
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_NoSphereRadiusAndPackagingAndNodeSetDefinition)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -695,8 +686,8 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_NoSpher
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_sphere_radius = "1.5";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_sphere_radius = "1.5";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -719,9 +710,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_NoNodeS
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_sphere_radius = "1.5";
-    tXMLMetaData.levelset_sphere_packing_factor = "0.5";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_sphere_radius = "1.5";
+    tXMLMetaData.optimizer.levelset_sphere_packing_factor = "0.5";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -744,8 +735,8 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_nodesets = {"nodeset 1", "nodeset 2"};
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_nodesets = {"nodeset 1", "nodeset 2"};
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -763,23 +754,19 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation)
     tValues = {"dummy.exo", "nodeset 1", "nodeset 2", "false"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tMethod);
 }
-*/
 
-/* not handling levelset yet
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation_ErrorEmptyFileName)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     ASSERT_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
-*/
 
-/*
 TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation_NoMaterialBoxOption)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -801,9 +788,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
-    tXMLMetaData.levelset_material_box_max = "10";
-    tXMLMetaData.levelset_material_box_min = "-10";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
+    tXMLMetaData.optimizer.levelset_material_box_max = "10";
+    tXMLMetaData.optimizer.levelset_material_box_min = "-10";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -825,7 +812,6 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation)
     ASSERT_STREQ("MaterialBox", tMaterialBox.name());
     PlatoTestXMLGenerator::test_children({"MinCoords", "MaxCoords"}, {"-10", "10"}, tMaterialBox);
 }
-*/
 
 TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox_DoNotDefine)
 {
@@ -1283,6 +1269,7 @@ TEST(PlatoTestXMLGenerator, AppendDefaultQoiToOutputOperation)
     tXMLMetaData.append(tCriterion);
 
     XMLGen::Constraint tConstraint;
+    tConstraint.id("1");
     tConstraint.criterion("1");
     tConstraint.service("1");
     tConstraint.scenario("1");
@@ -1309,7 +1296,7 @@ TEST(PlatoTestXMLGenerator, AppendDefaultQoiToOutputOperation)
     PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient"}, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_FALSE(tInput.empty());
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_1"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient 1"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendChildrenToOutputOperation)
@@ -1432,10 +1419,12 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     XMLGen::Constraint tConstraint1;
+    tConstraint1.id("1");
     tConstraint1.criterion("1");
     tConstraint1.service("1");
     tConstraint1.scenario("1");
     XMLGen::Constraint tConstraint2;
+    tConstraint2.id("2");
     tConstraint2.criterion("2");
     tConstraint2.service("2");
     tConstraint2.scenario("2");
@@ -1446,9 +1435,9 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
 
     ASSERT_FALSE(tOperation.empty());
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_1"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient 1"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_2_service_2_scenario_2"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"constraint gradient 2"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
@@ -1507,7 +1496,6 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tFilterNode);
 }
 
-/*
 TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tXMLMetaData;
@@ -1528,7 +1516,6 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tLoads.push_back(tLoad);
     tLoadCase.loads = tLoads;
     tLoadCase.id = 1;
-    tLoadCase.mCode = "plato_analyze";
     tRandomLoadCase.first = 1;
     tRandomLoadCase.second = tLoadCase;
     tRandomMetaData.append(tRandomLoadCase);
@@ -1561,7 +1548,6 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_operations.xml");
 }
-*/
 
 }
 // namespace PlatoTestXMLGenerator

@@ -34,16 +34,6 @@ void append_physics_performers
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_performers
- * \brief Append all performers to interface.xml file.
- * \param [in]     aXMLMetaData Plato problem input metadata
- * \param [in/out] aParentNode  parent xml node
-**********************************************************************************/
-void append_performers
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode);
-
-/******************************************************************************//**
  * \fn append_qoi_shared_data
  * \brief Append quantities of interest shared data to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input metadata
@@ -228,7 +218,8 @@ void append_control_shared_data
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_plato_main_performer
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_qoi_statistics_operation
@@ -533,6 +524,24 @@ void append_optimizer_options
 void append_compute_normalization_factor_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn get_filter_objective_criterion_gradient_input_shared_data_name
+ * \brief Get the name for the input shared data for objective gradient filtering
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [out]    Name          Returned name
+**********************************************************************************/
+std::string get_filter_objective_criterion_gradient_input_shared_data_name
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn get_filter_constraint_criterion_gradient_input_shared_data_name
+ * \brief Get the name for the input shared data for constraint gradient filtering
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [out]    Name          Returned name
+**********************************************************************************/
+std::string get_filter_constraint_criterion_gradient_input_shared_data_name
+(const XMLGen::Constraint &aConstraint);
 
 }
 // namespace XMLGen

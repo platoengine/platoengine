@@ -7,13 +7,13 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorUtilities.cpp
                                       ../XMLGeneratorParserUtilities.cpp
                                       Plato_Test_XMLGenerator.cpp
-                                      # XMLGeneratorSrom_UnitTester.cpp
-                                      # XMLGeneratorDefineFile_UnitTester.cpp
+                                      XMLGeneratorSrom_UnitTester.cpp
+                                      XMLGeneratorDefineFile_UnitTester.cpp
                                       XMLGeneratorLaunchScript_UnitTester.cpp
                                       XMLGeneratorAnalyzeUncertaintyLaunchScript_UnitTester.cpp
                                       XMLGeneratorParseMetaData_UnitTester.cpp
                                       XMLGeneratorInterfaceFile_UnitTester.cpp
-                                      # XMLGeneratorRandomInterfaceFile_UnitTester.cpp
+                                      XMLGeneratorRandomInterfaceFile_UnitTester.cpp
                                       XMLGeneratorPlatoMainInputDeckFile_UnitTester.cpp
                                       XMLGeneratorPlatoMainOperationFile_UnitTester.cpp
                                       XMLGeneratorPlatoAnalyzeInputFile_UnitTester.cpp
@@ -32,13 +32,13 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorServiceMetadata.cpp
                                       ../XMLGeneratorConstraintMetadata.cpp
                                       ../XMLGeneratorUncertaintyMetadata.cpp
-                                      # ../XMLGeneratorDefinesFileUtilities.cpp
+                                      ../XMLGeneratorDefinesFileUtilities.cpp
                                       ../XMLGeneratorPlatoAnalyzeUtilities.cpp
                                       ../XMLGeneratorLaunchScriptUtilities.cpp
                                        ../XMLGeneratorInterfaceFileUtilities.cpp
                                       ../XMLGeneratorMaterialFunctionInterface.cpp
                                       ../XMLGeneratorPlatoMainInputFileUtilities.cpp
-                                      # ../XMLGeneratorRandomInterfaceFileUtilities.cpp
+                                      ../XMLGeneratorRandomInterfaceFileUtilities.cpp
                                       ../XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                                       ../XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
                                       ../XMLGeneratorPlatoMainOperationFileUtilities.cpp

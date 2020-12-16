@@ -96,6 +96,13 @@ bool XMLGenerator_UnitTester::publicParseLoads(std::istream &sin)
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicParseObjective(std::istream &sin)
+/******************************************************************************/
+{
+    parseObjective(sin);
+}
+
+/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
 /******************************************************************************/
 {
@@ -124,10 +131,38 @@ bool XMLGenerator_UnitTester::publicParseForceLoad(std::vector<std::string>& tok
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicParseCriteria(std::istream &sin)
+/******************************************************************************/
+{
+    parseCriteria(sin);
+}
+
+/******************************************************************************/
+void XMLGenerator_UnitTester::publicParseServices(std::istream &sin)
+/******************************************************************************/
+{
+    parseServices(sin);
+}
+
+/******************************************************************************/
+void XMLGenerator_UnitTester::publicParseScenarios(std::istream &sin)
+/******************************************************************************/
+{
+    parseScenarios(sin);
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
 /******************************************************************************/
 {
-    parseBCs(sin);
+    parseBoundaryConditions(sin);
+}
+
+/******************************************************************************/
+void XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
+/******************************************************************************/
+{
+    parseUncertainties(sin);
 }
 
 /******************************************************************************/
@@ -135,6 +170,13 @@ bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
 /******************************************************************************/
 {
     return parseBlocks(sin);
+}
+
+/******************************************************************************/
+void XMLGenerator_UnitTester::publicParseMaterials(std::istream &sin)
+/******************************************************************************/
+{
+    parseMaterials(sin);
 }
 
 /******************************************************************************/
@@ -149,6 +191,13 @@ bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
 /******************************************************************************/
 {
     return parseMesh(sin);
+}
+
+/******************************************************************************/
+bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables()
+/******************************************************************************/
+{
+    return runSROMForUncertainVariables();
 }
 
 /******************************************************************************/

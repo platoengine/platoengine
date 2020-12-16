@@ -7,7 +7,7 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
-//#include "XMLGeneratorDefinesFileUtilities.hpp"
+#include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
@@ -34,13 +34,11 @@ void append_compute_objective_value_to_plato_analyze_operation
         XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Value" }, tOutput);
 
-/*
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
         {
             XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
             XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
         }
-*/
     }
 }
 /******************************************************************************/
@@ -64,13 +62,11 @@ void append_compute_objective_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Objective Gradient" }, tOutput);
 
-/*
         if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
         {
             XMLGen::append_random_traction_vector_to_plato_analyze_operation(aMetaData, tOperation);
             XMLGen::append_random_material_properties_to_plato_analyze_operation(aMetaData, tOperation);
         }
-*/
     }
 }
 
@@ -93,13 +89,11 @@ void append_compute_constraint_value_to_plato_analyze_operation
         XMLGen::append_children( { "Argument" }, { "Value" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Value" }, tOutput);
 
-/*
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
         {
             XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
             XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
         }
-*/
     }
 }
 /******************************************************************************/
@@ -123,13 +117,11 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
         XMLGen::append_children( { "Argument" }, { "Gradient" }, tOutput);
         XMLGen::append_children( { "ArgumentName" }, { "Constraint Gradient" }, tOutput);
 
-/*
         if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
         {
             XMLGen::append_random_traction_vector_to_plato_analyze_operation(aXMLMetaData, tOperation);
             XMLGen::append_random_material_properties_to_plato_analyze_operation(aXMLMetaData, tOperation);
         }
-*/
     }
 }
 /******************************************************************************/
@@ -169,7 +161,6 @@ void append_compute_solution_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
-/*
 XMLGen::Analyze::MaterialPropertyMetadata
 return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData)
@@ -199,11 +190,9 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
 
     return tMap;
 }
-*/
 /******************************************************************************/
 
 /******************************************************************************/
-/*
 void append_random_material_properties_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
@@ -216,11 +205,9 @@ void append_random_material_properties_to_plato_analyze_operation
         tMatFuncInterface.call(tMaterial.second.first, tMaterial.second.second, aParentNode);
     }
 }
-*/
 /******************************************************************************/
 
 /******************************************************************************/
-/*
 void append_random_traction_vector_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
@@ -240,7 +227,6 @@ void append_random_traction_vector_to_plato_analyze_operation
         }
     }
 }
-*/
 /******************************************************************************/
 
 /******************************************************************************/

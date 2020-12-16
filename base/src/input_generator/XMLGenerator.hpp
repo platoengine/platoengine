@@ -84,13 +84,8 @@ protected:
     bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     void parseBoundaryConditions(std::istream &fin);
-    void parseBCs(std::istream &fin);
-    void parseBCsBlock(std::istream &fin);
-    void parseBCLine(std::vector<std::string>& tokens);
-    void parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    void parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    // bool runSROMForUncertainVariables();
-    // void setNumPerformers();
+    bool runSROMForUncertainVariables();
+    void setNumPerformers();
     void parseInputFile();
     bool parseMesh(std::istream &fin);
     void parseOutput(std::istream &fin);

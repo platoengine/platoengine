@@ -57,7 +57,7 @@ begin loads
     uniform_surface_flux sideset name ss_1 value -1e2 load id 1
 end loads
       
-begin constraint
+begin constraint 1
   criterion 2
   relative_target .2
   type less_than
@@ -102,6 +102,10 @@ begin mesh
 end mesh
 
 
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
 begin paths
 code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD

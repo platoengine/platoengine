@@ -278,15 +278,25 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_emptyMeshName)
   Plato::system("rm -rf appendDecompLine.txt");
 }
 
-/* not handling frf yet
 TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers)
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
+
+  XMLGen::Service tService;
+  tService.id("1");
+  tService.numberProcessors("10");
+  tInputData.append(tService);
+
+  XMLGen::Scenario tScenario;
+  tScenario.id("1");
+  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tInputData.append(tScenario);
+
   XMLGen::Objective tObjective;
-  tObjective.num_procs = "10";
-  tObjective.ref_frf_file = "dummy_frf_file.exo";
-  tInputData.objectives.push_back(tObjective);
+  tObjective.serviceIDs.push_back("1");
+  tObjective.scenarioIDs.push_back("1");
+  tInputData.objective = tObjective;
   FILE* fp=fopen("appendDecompLine.txt", "w");
   std::map<std::string,int> hasBeenDecompedForThisNumberOfProcessors;
   XMLGen::append_decomp_lines_for_performers(tInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
@@ -298,7 +308,6 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers)
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
   Plato::system("rm -rf appendDecompLine.txt");
 }
-*/
 
 TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_noObjectives)
 {
@@ -316,15 +325,25 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_noObjectives)
   Plato::system("rm -rf appendDecompLine.txt");
 }
 
-/* not handling frf yet
 TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_noNeedToDecompose)
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
+  XMLGen::Service tService;
+  tService.id("1");
+  tService.numberProcessors("1");
+  tInputData.append(tService);
+
+  XMLGen::Scenario tScenario;
+  tScenario.id("1");
+  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tInputData.append(tScenario);
+
   XMLGen::Objective tObjective;
-  tObjective.num_procs = "1";
-  tObjective.ref_frf_file = "dummy_frf_file.exo";
-  tInputData.objectives.push_back(tObjective);
+  tObjective.serviceIDs.push_back("1");
+  tObjective.scenarioIDs.push_back("1");
+  tInputData.objective = tObjective;
+
   FILE* fp=fopen("appendDecompLine.txt", "w");
   std::map<std::string,int> hasBeenDecompedForThisNumberOfProcessors;
   XMLGen::append_decomp_lines_for_performers(tInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
@@ -341,14 +360,34 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_multipleObjectivesSam
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
+
+  XMLGen::Service tService;
+  tService.id("1");
+  tService.numberProcessors("10");
+  tInputData.append(tService);
+
+  XMLGen::Service tService2;
+  tService2.id("2");
+  tService2.numberProcessors("10");
+  tInputData.append(tService2);
+
+  XMLGen::Scenario tScenario;
+  tScenario.id("1");
+  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tInputData.append(tScenario);
+
+  XMLGen::Scenario tScenario2;
+  tScenario2.id("2");
+  tScenario2.append("ref_frf_file", "dummy_frf_file2.exo");
+  tInputData.append(tScenario2);
+
   XMLGen::Objective tObjective;
-  tObjective.num_procs = "10";
-  tObjective.ref_frf_file = "dummy_frf_file.exo";
-  tInputData.objectives.push_back(tObjective);
-  XMLGen::Objective tObjective2;
-  tObjective2.num_procs = "10";
-  tObjective2.ref_frf_file = "dummy_frf_file2.exo";
-  tInputData.objectives.push_back(tObjective2);
+  tObjective.serviceIDs.push_back("1");
+  tObjective.serviceIDs.push_back("2");
+  tObjective.scenarioIDs.push_back("1");
+  tObjective.scenarioIDs.push_back("2");
+  tInputData.objective = tObjective;
+
   FILE* fp=fopen("appendDecompLine.txt", "w");
   std::map<std::string,int> hasBeenDecompedForThisNumberOfProcessors;
   XMLGen::append_decomp_lines_for_performers(tInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
@@ -365,10 +404,22 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_hasBeenDecomposed)
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
+
+  XMLGen::Service tService;
+  tService.id("1");
+  tService.numberProcessors("10");
+  tInputData.append(tService);
+
+  XMLGen::Scenario tScenario;
+  tScenario.id("1");
+  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tInputData.append(tScenario);
+
   XMLGen::Objective tObjective;
-  tObjective.num_procs = "10";
-  tObjective.ref_frf_file = "dummy_frf_file.exo";
-  tInputData.objectives.push_back(tObjective);
+  tObjective.serviceIDs.push_back("1");
+  tObjective.scenarioIDs.push_back("1");
+  tInputData.objective = tObjective;
+
   FILE* fp=fopen("appendDecompLine.txt", "w");
   std::map<std::string,int> hasBeenDecompedForThisNumberOfProcessors;
   hasBeenDecompedForThisNumberOfProcessors["10"] = 1;
@@ -381,23 +432,34 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_hasBeenDecomposed)
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
   Plato::system("rm -rf appendDecompLine.txt");
 }
-*/
 
-/* not handling frf stuff yet
 TEST(PlatoTestXMLGenerator, appendDecompLinesToMPILaunchScript)
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
 
-  XMLGen::Objective tObjective;
-  tObjective.num_procs = "10";
-  tObjective.ref_frf_file = "dummy_frf_file.exo";
-  tInputData.objectives.push_back(tObjective);
-
   XMLGen::Service tService;
-  tService.numberProcessors("5");
+  tService.id("1");
   tService.code("platomain");
+  tService.numberProcessors("5");
   tInputData.append(tService);
+
+  XMLGen::Service tService2;
+  tService2.id("2");
+  tService.code("plato_analyze");
+  tService2.numberProcessors("10");
+  tInputData.append(tService2);
+
+  XMLGen::Scenario tScenario;
+  tScenario.id("1");
+  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tInputData.append(tScenario);
+
+  XMLGen::Objective tObjective;
+  tObjective.serviceIDs.push_back("2");
+  tObjective.scenarioIDs.push_back("1");
+  tInputData.objective = tObjective;
+
   FILE* fp=fopen("appendDecompLine.txt", "w");
   XMLGen::append_decomp_lines_to_mpirun_launch_script(tInputData, fp);
   fclose(fp);
@@ -408,7 +470,6 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesToMPILaunchScript)
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
   Plato::system("rm -rf appendDecompLine.txt");
 }
-*/
 
 TEST(PlatoTestXMLGenerator, appendEngineMPIRunLines)
 {

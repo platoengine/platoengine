@@ -12,7 +12,6 @@
 namespace PlatoTestXMLGenerator
 {
 
-/* not handling summit related stuff yet
 TEST(PlatoTestXMLGenerator, generateSummitLaunchScripts_non_analyze_performer)
 {
   XMLGen::InputData tInputData;
@@ -26,7 +25,6 @@ TEST(PlatoTestXMLGenerator, generateSummitLaunchScripts_non_analyze_performer)
 
   EXPECT_THROW(XMLGen::generate_summit_launch_scripts(tInputData), std::runtime_error);
 }
-*/
 
 TEST(PlatoTestXMLGenerator, generateAnalyzeBashScript)
 {
@@ -41,7 +39,6 @@ TEST(PlatoTestXMLGenerator, generateAnalyzeBashScript)
   Plato::system("rm -rf analyze.sh");
 }
 
-/* not handling uncertainty metadata yet
 TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines)
 {
   XMLGen::InputData tInputData;
@@ -79,6 +76,5 @@ TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines_noPerformers)
   EXPECT_THROW(XMLGen::append_analyze_mpirun_commands_robust_optimization_problems(tInputData, fp),std::runtime_error);
   fclose(fp);
 }
-*/
 
 }

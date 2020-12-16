@@ -93,11 +93,9 @@ void append_compute_solution_to_plato_analyze_operation
  * \return map from element block identification number to material property tags, \n
  * i.e. map< block_id, pair< material_category, vector< pair<material_property_argument_name_tag, material_property_tag> > > >
 **********************************************************************************/
-/*
 XMLGen::Analyze::MaterialPropertyMetadata
 return_random_material_metadata_for_plato_analyze_operation_xml_file
 (const XMLGen::RandomMetaData& aRandomMetaData);
-*/
 
 /******************************************************************************//**
  * \fn append_random_material_properties_to_plato_analyze_operation
@@ -105,11 +103,9 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
  * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-/*
 void append_random_material_properties_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
-*/
 
 /******************************************************************************//**
  * \fn append_random_traction_vector_to_plato_analyze_operation
@@ -117,11 +113,9 @@ void append_random_material_properties_to_plato_analyze_operation
  * \param [in]     aMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-/*
 void append_random_traction_vector_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
-*/
 
 /******************************************************************************//**
  * \fn append_write_output_to_plato_analyze_operation

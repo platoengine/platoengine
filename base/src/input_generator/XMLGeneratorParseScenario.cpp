@@ -99,6 +99,7 @@ void ParseScenario::allocate()
 
     mTags.insert({ "loads", { { {"loads"}, ""}, "" } });
     mTags.insert({ "boundary_conditions", { { {"boundary_conditions"}, ""}, "" } });
+    mTags.insert({ "ref_frf_file", { { {"ref_frf_file"}, ""}, "" } });
 
     //frf matching, some of these probably should belong as criterion parameters instead
     // mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
@@ -107,7 +108,6 @@ void ParseScenario::allocate()
     // mTags.insert({ "freq_min", { { {"freq_min"}, ""}, "" } });
     // mTags.insert({ "freq_max", { { {"freq_max"}, ""}, "" } });
     // mTags.insert({ "freq_step", { { {"freq_step"}, ""}, "" } });
-    // mTags.insert({ "ref_frf_file", { { {"ref_frf_file"}, ""}, "" } });
     // mTags.insert({ "raleigh_damping_alpha", { { {"raleigh_damping_alpha"}, ""}, "" } });
     // mTags.insert({ "raleigh_damping_beta", { { {"raleigh_damping_beta"}, ""}, "" } });
     // mTags.insert({ "wtmass_scale_factor", { { {"wtmass_scale_factor"}, ""}, "" } });

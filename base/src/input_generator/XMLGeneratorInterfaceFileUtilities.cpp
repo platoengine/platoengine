@@ -22,27 +22,19 @@ void write_interface_xml_file
 {
     pugi::xml_document tDocument;
 
-// We need more logic to determine whether to write the include statment. There
-// are other cases other than just robust optimization where it is needed.
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
         XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
-*/
 
     auto tNode = tDocument.append_child("Console");
     XMLGen::append_children({"Verbose"}, {aMetaData.optimizer.mVerbose}, tNode);
 
-    // This is assuming all of the performers will be defined in the input deck
-    // (including the platomain performer)
-//    XMLGen::append_plato_main_performer(tDocument);
-    XMLGen::append_performers(aMetaData, tDocument);
+    XMLGen::append_plato_main_performer(aMetaData, tDocument);
 
     // note: multiperformer use case currently only works with Plato Analyze, and is only used currently with the robust optimization workflow
- //   if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
- //       XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, tDocument);
- //   else
-//        XMLGen::append_physics_performers(aMetaData, tDocument);
- 
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, tDocument);
+    else
+        XMLGen::append_physics_performers(aMetaData, tDocument);
 
     XMLGen::append_shared_data(aMetaData, tDocument);
     XMLGen::append_stages(aMetaData, tDocument);
@@ -86,27 +78,6 @@ void append_compute_qoi_statistics_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_performers
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-    if(aXMLMetaData.services().empty())
-    {
-        THROWERR("Append Performer: Services list is empty.")
-    }
-
-    std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
-    for(auto& tService : aXMLMetaData.services())
-    {
-        const int tID = (&tService - &aXMLMetaData.service(0));
-        auto tPerformerNode = aParentNode.append_child("Performer");
-        std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
-        XMLGen::append_children( tKeywords, tValues, tPerformerNode);
-    }
-}
-/******************************************************************************/
-
-/******************************************************************************/
 void append_physics_performers
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -119,10 +90,15 @@ void append_physics_performers
     std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
     for(auto& tService : aXMLMetaData.services())
     {
-        const int tID = (&tService - &aXMLMetaData.service(0)) + 1;
-        auto tPerformerNode = aParentNode.append_child("Performer");
-        std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
-        XMLGen::append_children( tKeywords, tValues, tPerformerNode);
+        const int tID = (&tService - &aXMLMetaData.service(0));
+        // The platomain optimizer should always be the first service in the list
+        // so skip it.
+        if(tID > 0)
+        {
+            auto tPerformerNode = aParentNode.append_child("Performer");
+            std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
+            XMLGen::append_children( tKeywords, tValues, tPerformerNode);
+        }
     }
 }
 /******************************************************************************/
@@ -192,7 +168,6 @@ void append_shared_data
     XMLGen::append_objective_shared_data(aMetaData, aDocument);
     XMLGen::append_normalization_shared_data(aMetaData, aDocument);
 
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
     {
         XMLGen::append_qoi_statistics_shared_data(aMetaData, aDocument);
@@ -202,10 +177,9 @@ void append_shared_data
     }
     else
     {
-*/
         XMLGen::append_qoi_shared_data(aMetaData, aDocument);
         XMLGen::append_topology_shared_data(aMetaData, aDocument);
-//    }
+    }
 }
 /******************************************************************************/
 
@@ -222,13 +196,11 @@ void append_stages
     XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
 
     // nondeterministic stages
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
     {
         XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
         XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
     }
-*/
 
     // constraint stages
     XMLGen::append_constraint_value_stage(aXMLMetaData, aDocument);
@@ -412,15 +384,15 @@ void append_objective_value_stage
     XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
     XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
 
-//    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-//        XMLGen::append_sample_objective_value_operation(tObjective.mPerformerName, aXMLMetaData, tStageNode);
-//    else
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
+    else
         XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
 
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-        XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
-*/
+        // The develop branch uses "Objective Value" here. If it is not "Objective Value" I am not sure what it should be.
+        //XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
+        XMLGen::append_evaluate_nondeterministic_objective_value_operation("Objective Value", aXMLMetaData, tStageNode);
     std::string tOutputSharedData;
     if(aXMLMetaData.needToAggregate())
     {
@@ -479,6 +451,41 @@ void append_objective_gradient_operation
 /******************************************************************************/
 
 /******************************************************************************/
+std::string get_filter_objective_criterion_gradient_input_shared_data_name
+(const XMLGen::InputData& aXMLMetaData)
+{
+    std::string tReturnString = "Objective Gradient";
+
+    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData) &&
+       !aXMLMetaData.needToAggregate())
+    {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        tReturnString = "Criterion Gradient - " + tIdentifierString;
+    }
+    return tReturnString;
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_filter_constraint_criterion_gradient_input_shared_data_name
+(const XMLGen::Constraint &aConstraint)
+{
+    std::string tCriterionID = aConstraint.criterion();
+    std::string tServiceID = aConstraint.service();
+    std::string tScenarioID = aConstraint.scenario();
+    ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+    auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
+    auto tReturnString = std::string("Criterion Gradient - ") + tIdentifierString;
+    return tReturnString;
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_objective_gradient_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
@@ -490,33 +497,22 @@ void append_objective_gradient_stage
     XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageInputNode);
     XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
 
-/*
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
         XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
+        auto tSharedDataName = std::string("Objective Gradient");
+        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
+    }
     else
-*/
+    {
         XMLGen::append_objective_gradient_operation(aXMLMetaData, tStageNode);
-
-/*
-        if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-            XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
-*/
-    std::string tInputMetaDataTag;
-    if(aXMLMetaData.needToAggregate())
-    {
-        tInputMetaDataTag = "Objective Gradient";
-        XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
-    }
-    else
-    {
-        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
-        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-        tInputMetaDataTag = "Criterion Gradient - " + tIdentifierString;
+        if(aXMLMetaData.needToAggregate())
+        {
+            XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
+        }
     }
 
+    auto tInputMetaDataTag = get_filter_objective_criterion_gradient_input_shared_data_name(aXMLMetaData);
     XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tInputMetaDataTag, "Objective Gradient", tStageNode);
     auto tStageOutputNode = tStageNode.append_child("Output");
     XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tStageOutputNode);
@@ -543,14 +539,8 @@ void append_constraint_gradient_to_plato_main_output_stage
 {
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        std::string tCriterionID = tConstraint.criterion();
-        std::string tServiceID = tConstraint.service();
-        std::string tScenarioID = tConstraint.scenario();
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
         auto tInput = aParentNode.append_child("Input");
-        auto tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
+        auto tSharedDataName = std::string("Constraint Gradient ") + tConstraint.id();
         auto tArgumentName  = XMLGen::to_lower(tSharedDataName);
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
     }
@@ -949,10 +939,13 @@ void append_control_shared_data
 
 /******************************************************************************/
 void append_plato_main_performer
-(pugi::xml_document& aDocument)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
+    // The platomain optimizer should always be the first service in the list.
+    const XMLGen::Service &tService = aXMLMetaData.service(0);
     auto tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {"platomain", "platomain", "0"}, tPerformerNode);
+    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {tService.performer(), tService.code(), "0"}, tPerformerNode);
 }
 // function append_plato_main_performer
 /******************************************************************************/
@@ -1176,12 +1169,6 @@ void append_constraint_gradient_stage
     XMLGen::ConstraintGradientOperation tGradOperationInterface;
     for(auto& tConstraint : aXMLMetaData.constraints)
     {
-        std::string tCriterionID = tConstraint.criterion();
-        std::string tServiceID = tConstraint.service();
-        std::string tScenarioID = tConstraint.scenario();
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
         auto tStageNode = aDocument.append_child("Stage");
         auto tStageName = std::string("Compute Constraint Gradient ") + tConstraint.id();
         XMLGen::append_children({"Name"}, {tStageName}, tStageNode);
@@ -1191,7 +1178,7 @@ void append_constraint_gradient_stage
         auto tService = aXMLMetaData.service(tConstraint.service()); 
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
         tGradOperationInterface.call(tConstraint, tService.performer(), tService.code(), tStageNode);
-        auto tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
+        auto tSharedDataName = get_filter_constraint_criterion_gradient_input_shared_data_name(tConstraint);
         std::string tOutputSharedData = "Constraint Gradient " + tConstraint.id();
         XMLGen::append_filter_criterion_gradient_operation(aXMLMetaData, tSharedDataName, tOutputSharedData, tStageNode);
 

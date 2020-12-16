@@ -18,12 +18,12 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorParseUncertainty.cpp
                       XMLGeneratorConstraintMetadata.cpp
                       XMLGeneratorUncertaintyMetadata.cpp
-                      # XMLGeneratorDefinesFileUtilities.cpp
+                      XMLGeneratorDefinesFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeUtilities.cpp
                       XMLGeneratorInterfaceFileUtilities.cpp
                       XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
-                      # XMLGeneratorMaterialFunctionInterface.cpp
-                      # XMLGeneratorRandomInterfaceFileUtilities.cpp
+                      XMLGeneratorMaterialFunctionInterface.cpp
+                      XMLGeneratorRandomInterfaceFileUtilities.cpp
                       XMLGeneratorPlatoMainInputFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                       XMLGeneratorPlatoMainOperationFileUtilities.cpp
@@ -44,19 +44,20 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
                       XMLGeneratorDataStruct.hpp
-                      # XMLGeneratorValidInputKeys.hpp
-                      # XMLGeneratorRandomMetadata.hpp
+                      XMLGeneratorValidInputKeys.hpp
+                      XMLGeneratorRandomMetadata.hpp
                       XMLGeneratorOutputMetadata.hpp 
                       XMLGeneratorParserUtilities.hpp 
                       XMLGeneratorScenarioMetadata.hpp
                       XMLGeneratorServiceMetadata.hpp
+                      XMLGeneratorBoundaryMetadata.hpp
                       XMLGeneratorMaterialMetadata.hpp 
                       XMLGeneratorCriterionMetadata.hpp 
                       XMLGeneratorConstraintMetadata.hpp
                       XMLGeneratorUncertaintyMetadata.hpp
                       XMLGeneratorPlatoAnalyzeProblem.hpp 
                       XMLGeneratorProblem.hpp 
-                      # XMLGeneratorDefinesFileUtilities.hpp 
+                      XMLGeneratorDefinesFileUtilities.hpp 
                       XMLGeneratorPlatoAnalyzeUtilities.hpp 
                       XMLGeneratorInterfaceFileUtilities.hpp 
                       # XMLGeneratorAnalyzeFunctionMapTypes.hpp

@@ -10,13 +10,13 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
-//#include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
-//#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
-//#include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
-//#include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
-//#include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
-//#include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
+#include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
+#include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
+#include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
+#include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
 {
@@ -71,21 +71,19 @@ TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
 
 TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
 {
-/*
     XMLGen::InputData tMetaData;
-    tMetaData.max_iterations = "10";
-    tMetaData.discretization = "density";
-    tMetaData.optimization_algorithm = "oc";
-    XMLGen::Objective tObjective;
-    tObjective.name = "1";
-    tObjective.type = "compliance";
-    tObjective.mPerformerName = "plato_analyze_1";
-    tMetaData.objectives.push_back(tObjective);
+    tMetaData.optimizer.max_iterations = "10";
+    tMetaData.optimizer.discretization = "density";
+    tMetaData.optimizer.optimization_algorithm = "oc";
     XMLGen::Service tService;
-    tService.performer("plato_analyze_1");
+    tService.id("1");
+    tService.code("plato_analyze");
     tService.cacheState("false");
     tService.updateProblem("true");
     tMetaData.append(tService);
+    XMLGen::Objective tObjective;
+    tObjective.serviceIDs.push_back("1");
+    tMetaData.objective = tObjective;
 
     tMetaData.mOutputMetaData.disableOutput();
     ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
@@ -96,10 +94,9 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     +"</Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization><Input><ArgumentName>UpperBoundValue</ArgumentName>"
     +"</Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name>"
     +"<Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
-    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
+    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation><Operation><Name>AggregateData</Name><Function>Aggregator</Function><Aggregate><Layout>Value</Layout><Output><ArgumentName>Value</ArgumentName></Output></Aggregate><Aggregate><Layout>NodalField</Layout><Output><ArgumentName>Field</ArgumentName></Output></Aggregate><Weighting><Normals/></Weighting></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_operations.xml");
-*/
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
@@ -625,17 +622,23 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     XMLGen::InputData tMetaData;
     XMLGen::Service tService;
     tService.id("1");
+    tService.code("platomain");
+    tMetaData.append(tService);
+    tService.id("2");
     tService.code("plato_analyze");
     tMetaData.append(tService);
 
     pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_plato_main_performer(tMetaData, tDocument));
     ASSERT_NO_THROW(XMLGen::append_physics_performers(tMetaData, tDocument));
 
     auto tPerformer = tDocument.child("Performer");
     ASSERT_FALSE(tPerformer.empty());
+    tPerformer = tPerformer.next_sibling("Performer");
+    ASSERT_FALSE(tPerformer.empty());
     ASSERT_STREQ("Performer", tPerformer.name());
     std::vector<std::string> tKeys = {"Name", "Code", "PerformerID"};
-    std::vector<std::string> tValues = {"plato_analyze_1", "plato_analyze", "1"};
+    std::vector<std::string> tValues = {"plato_analyze_2", "plato_analyze", "1"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tPerformer);
     tPerformer = tPerformer.next_sibling("Performer");
     ASSERT_TRUE(tPerformer.empty());

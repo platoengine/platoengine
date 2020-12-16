@@ -1106,6 +1106,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     tXMLMetaData.loads.push_back(tLoad);
 
     XMLGen::Scenario tScenario;
+    tScenario.id("1");
     tScenario.physics("steady_state_mechanics");
     std::vector<std::string> tLoadIDs = {"1"};
     tScenario.setLoadIDs(tLoadIDs);
@@ -1139,9 +1140,10 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     }
 }
 
-/*
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_RandomUseCase)
 {
+    XMLGen::InputData tXMLMetaData;
+
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
@@ -1170,8 +1172,14 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     tLoadCase2.loads.push_back(tLoad2);
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
+    // Scenario
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("steady_state_mechanics");
+    tXMLMetaData.append(tScenario);
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
     // CONSTRUCT SAMPLES SET
-    XMLGen::InputData tXMLMetaData;
     ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet1));
     ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.append(tLoadSet2));
     ASSERT_NO_THROW(tXMLMetaData.mRandomMetaData.finalize());
@@ -1205,8 +1213,6 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
         std::advance(tGoldValuesItr, 1);
     }
 }
-*/
-
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_ErrorInvalidType)
 {
     XMLGen::Load tLoad;
@@ -1665,7 +1671,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Empty_Mat
     XMLGen::Material tMaterial;
     tMaterial.code("sierra");
     tXMLMetaData.materials.push_back(tMaterial);
-    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
     auto tParamList = tDocument.child("ParameterList");
     std::vector<std::string> tKeys = {"Name"};
     std::vector<std::string> tValues = {"Material Models"};
@@ -1971,21 +1977,19 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     }
 }
 
-/*
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIsotropicLinearElasticMatModel)
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimization_type = "topology";
+    tXMLMetaData.optimizer.optimization_type = "topology";
     XMLGen::Objective tObjective;
-    tObjective.code_name = "plato_analyze";
-    tXMLMetaData.objectives.push_back(tObjective);
+    tXMLMetaData.objective = tObjective;
 
     // CREATE MATERIAL
     XMLGen::Material tMaterial;
     tMaterial.id("1");
     tMaterial.name("carbonadium");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.category("isotropic_linear_elastic");
     tMaterial.property("youngs_modulus", "1");
     tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -1993,7 +1997,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.category("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::MaterialSet tMaterialSetOne;
@@ -2003,7 +2007,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     // POSE MATERIAL SET 2
     XMLGen::Material tMaterial2;
     tMaterial2.id("1");
-    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.category("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1.1");
     tMaterial2.property("poissons_ratio", "0.33");
     XMLGen::MaterialSet tMaterialSetTwo;
@@ -2017,7 +2021,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
 
     // CALL FUNCTION WITH RANDOM MATERIAL
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_problem(tXMLMetaData.materials, tDocument));
 
     auto tMaterialModelsList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelsList.empty());
@@ -2045,7 +2049,6 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
         std::advance(tGoldValuesItr, 1);
     }
 }
-*/
 
 TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck)
 {
@@ -2149,6 +2152,9 @@ TEST(PlatoTestXMLGenerator, AppendProblemDescriptionToPlatoAnalyzeInputDeck_Erro
 /*
 TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToPlatoProblem_StressConstraintGeneral)
 {
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+
     XMLGen::Objective tObjective;
     tObjective.type = "stress constrained mass minimization";
     tObjective.stress_limit = "2.0";

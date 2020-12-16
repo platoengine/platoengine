@@ -253,7 +253,7 @@ void append_plato_problem_to_plato_analyze_input_deck
     XMLGen::append_criteria_list_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_material_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_material_models_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
 }
@@ -504,19 +504,17 @@ void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-/*
-    if(aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
+    if(!aXMLMetaData.mRandomMetaData.empty() && aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
     {
         auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
         XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
     }
     else
     {
-*/
         XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-//    }
+    }
 }
-// function append_material_model_to_plato_analyze_input_deck
+// function append_material_models_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -527,31 +525,6 @@ void append_spatial_model_to_plato_analyze_input_deck
     XMLGen::append_spatial_model_to_plato_problem(aXMLMetaData, aParentNode);
 }
 // function append_spatial_model_to_plato_analyze_input_deck
-/**********************************************************************************/
-
-/**********************************************************************************/
-void append_material_model_to_plato_analyze_input_deck
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
-{
-/*
-    if(aXMLMetaData.mRandomMetaData.samplesDrawn())
-    {
-        THROWERR("Append Spatial Model to Plato Analyze Input Deck: Block container is empty.")
-    }
-
-    auto tSpatialModel = aParentNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Spatial Model"}, tSpatialModel);
-    auto tDomains = tSpatialModel.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Domains"}, tDomains);
-
-    for(auto& tBlock : tBlocks)
-    {
-*/
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
-//    }
-}
-// function append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
@@ -601,13 +574,11 @@ void append_deterministic_natural_boundary_conditions_to_plato_problem
 {
     for (auto &tScenario : aXMLMetaData.scenarios())
     {
-        std::vector<XMLGen::Load> tLoadVector;
-        get_load_vector_for_scenario(aXMLMetaData, tScenario, tLoadVector);
-
         std::vector<pugi::xml_node> tParentNodes;
         XMLGen::create_natural_boundary_condition_parent_nodes(tScenario, aParentNode, tParentNodes);
 
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tLoadVector, tParentNodes);
+        std::vector<XMLGen::Load> tScenarioLoads = aXMLMetaData.scenarioLoads(tScenario.id());
+        XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tScenarioLoads, tParentNodes);
     }
 }
 // function append_deterministic_natural_boundary_conditions_to_plato_problem
@@ -629,26 +600,6 @@ void create_natural_boundary_condition_parent_nodes
         XMLGen::append_attributes({"name"}, {*tItr}, tNaturalBCParent);
         aParentNodes.push_back(tNaturalBCParent);
         tItr++;
-    }
-}
-/**********************************************************************************/
-
-/**********************************************************************************/
-void get_load_vector_for_scenario
-(const XMLGen::InputData& aXMLMetaData,
- const XMLGen::Scenario &aScenario,
- std::vector<XMLGen::Load> &aLoadVector)
-{
-    for(auto &tLoadID : aScenario.loadIDs())
-    {
-        for(size_t i=0; i<aXMLMetaData.loads.size(); ++i)
-        {
-            if(aXMLMetaData.loads[i].load_id.compare(tLoadID) == 0)
-            {
-                aLoadVector.push_back(aXMLMetaData.loads[i]);
-                break;
-            }
-        }
     }
 }
 /**********************************************************************************/
@@ -678,17 +629,18 @@ void append_random_natural_boundary_conditions_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-/*
     if(aXMLMetaData.mRandomMetaData.loadSamplesDrawn())
     {
         auto tRandomLoads = aXMLMetaData.mRandomMetaData.loadcase();
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tRandomLoads, aParentNode);
+        auto &tScenario = aXMLMetaData.scenario(aXMLMetaData.objective.scenarioIDs[0]);
+        std::vector<pugi::xml_node> tParentNodes;
+        XMLGen::create_natural_boundary_condition_parent_nodes(tScenario, aParentNode, tParentNodes);
+        XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tRandomLoads.loads, tParentNodes);
     }
     else
     {
-*/
         XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
- //   }
+    }
 }
 // function append_random_natural_boundary_conditions_to_plato_problem
 /**********************************************************************************/
@@ -698,16 +650,14 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-/*
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
         XMLGen::append_random_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
     }
     else
     {
-*/
         XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
- //   }
+    }
 }
 // function append_natural_boundary_conditions_to_plato_analyze_input_deck
 /**********************************************************************************/

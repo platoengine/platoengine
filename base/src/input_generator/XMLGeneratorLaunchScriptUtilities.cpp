@@ -172,6 +172,7 @@ namespace XMLGen
     for(size_t i=0; i<aInputData.objective.serviceIDs.size(); ++i)
     {
         XMLGen::Service tService = aInputData.service(aInputData.objective.serviceIDs[i]);
+        XMLGen::Scenario tScenario = aInputData.scenario(aInputData.objective.scenarioIDs[i]);
         std::string num_procs = tService.numberProcessors();
 
         XMLGen::assert_is_positive_integer(num_procs);
@@ -181,10 +182,8 @@ namespace XMLGen
         {
             if(hasBeenDecompedForThisNumberOfProcessors[num_procs]++ == 0)
               XMLGen::append_decomp_line(fp, num_procs, aInputData.mesh.run_name);
-/*
-            if(aInputData.objectives[i].ref_frf_file.length() > 0)
-              XMLGen::append_decomp_line(fp, num_procs, aInputData.objectives[i].ref_frf_file);
-*/
+            if(tScenario.value("ref_frf_file").length() > 0)
+              XMLGen::append_decomp_line(fp, num_procs, tScenario.value("ref_frf_file"));
         }
     }
   }
