@@ -205,17 +205,19 @@ void KernelThenAMFilter::pruneSupportSet(const int& aNode, const int& aSupportin
     for (auto tIterator = tSupportSet.begin(); tIterator != tSupportSet.end(); )
     {
         std::set<int> tSupportPoint = tIterator->second;
+        bool tErased = false;
         for(auto tNeighbor : tSupportPoint)
         {
             if(mPseudoLayers[tNeighbor] != aSupportingPseudoLayer)
             {
                 tIterator = tSupportSet.erase(tIterator);
-                continue;
+                tErased = true;
+                break;
             }
-            else
-            {
-                ++tIterator;
-            }
+        }
+        if(!tErased)
+        {
+            ++tIterator;
         }
     }
 }
