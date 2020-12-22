@@ -9,6 +9,7 @@ set(${LIB_NAME}_SOURCES
     PSL_Point.cpp
     PSL_Vector.cpp
     PSL_Triangle.cpp
+    PSL_PseudoLayerBuilder.cpp
     )
 
 set(${LIB_NAME}_HEADERS 
@@ -17,6 +18,7 @@ set(${LIB_NAME}_HEADERS
     PSL_Point.hpp
     PSL_Vector.hpp
     PSL_Triangle.hpp
+    PSL_PseudoLayerBuilder.hpp
     )
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})

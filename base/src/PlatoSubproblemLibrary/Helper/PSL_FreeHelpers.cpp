@@ -4,14 +4,12 @@
 #include "PSL_Random.hpp"
 #include "PSL_Point.hpp"
 
-#include <stdlib.h>
 #include <sys/time.h>
 #include <cstdlib>
 #include <ctime>
 #include <cstddef>
 #include <string>
 #include <cmath>
-#include <math.h>
 #include <cassert>
 #include <iostream>
 #include <stdexcept>

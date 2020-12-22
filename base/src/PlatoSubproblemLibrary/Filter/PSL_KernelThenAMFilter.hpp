@@ -11,9 +11,11 @@
 #include "PSL_ParameterDataEnums.hpp"
 #include "PSL_Vector.hpp"
 #include "PSL_Point.hpp"
+#include "PSL_PseudoLayerBuilder.hpp"
 
 #include <vector>
 #include <set>
+#include <map>
 #include <cstddef>
 #include <cassert>
 #include <iostream>
@@ -38,9 +40,7 @@ public:
                               ParameterData* data,
                               AbstractInterface::PointCloud* points,
                               AbstractInterface::ParallelExchanger* exchanger)
-                            : AbstractKernelThenFilter(authority, data, points, exchanger),
-                              mInitialized(false),
-                              mLessThanFunctor(*this)
+                            : AbstractKernelThenFilter(authority, data, points, exchanger)
 {
 }
 
@@ -57,40 +57,20 @@ public:
         setBaseLayer(aBaseLayer);
         setBuildDirection(aBuildDirection);
         setCriticalPrintAngle(aCriticalAngle);
-
-        mInitialized = true;
+        buildPseudoLayers();
     }
 
-    void buildPseudoLayers();
 
 private:
+
+    void buildPseudoLayers();
 
     double projection_apply(const double& beta, const double& input);
     double projection_gradient(const double& beta, const double& input);
 
-    // pseudo layer algorithm functions
-    void orderNodesInBuildDirection();
-    void setBaseLayerIDToZeroAndOthersToMinusOne();
-    void computeSupportSet();
-    bool isNeighborInCriticalWindow(const int& aNode, const int& aNeighbor) const;
-    void assignNodeToPseudoLayerAndPruneSupportSet(const int& aNode);
-    std::set<int> getSupportingNeighbors(const int& aNode) const;
-    std::set<int> determineConnectedPseudoLayers(const int& aNode, const std::set<int>& aNeighbors) const;
-    int determineSupportingPseudoLayer(const int& aNode, const std::set<int>& aNeighbors, const std::set<int>& aConnectedPseudoLayers) const;
-    void assignNodeToPseudoLayer(const int& aNode, const int& aSupportingPseudoLayer);
-    void pruneSupportSet(const int& aNode, const int& aSupportingPseudoLayer);
-
-    std::set<int> getSupportSet(const int& aNodeID) const; 
-
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
     {
-        mCoordinates.clear();
-
-        for(auto tNode : aCoordinates)
-        {
-            mCoordinates.push_back(tNode);
-        }
-
+        mCoordinates = aCoordinates;
         mPseudoLayers.resize(mCoordinates.size());
         mOrderedNodes.resize(mCoordinates.size());
         mSupportSet.resize(mCoordinates.size());
@@ -98,18 +78,12 @@ private:
 
     void setConnectivity(const std::vector<std::vector<int>>& aConnectivity)
     {
-        mConnectivity.clear();
-
-        for(auto tElement : aConnectivity)
-            mConnectivity.push_back(tElement);
+        mConnectivity = aConnectivity;
     }
 
     void setBaseLayer(const std::vector<int>& aBaseLayer)
     {
-        mBaseLayer.clear();
-
-        for(auto tNode : aBaseLayer)
-            mBaseLayer.push_back(tNode);
+        mBaseLayer = aBaseLayer;
     }
     
     void setBuildDirection(const PlatoSubproblemLibrary::Vector& aVector)
@@ -126,54 +100,16 @@ private:
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;
 
-    // SupportPointData contains the ID of the supported node, and a set of 
-    // one or two node IDs needed to compute the support point location and density value
-    using SupportPointData = std::pair<int, std::set<int>>; 
-
     std::vector<std::set<SupportPointData>> mSupportSet;
+    std::map<SupportPointData,std::vector<double>> mSupportCoefficients;
 
     std::vector<int> mBaseLayer;
 
     std::vector<int> mPseudoLayers; // stores the pseudo layer id for each node
     std::vector<int> mOrderedNodes; // vector of nodes ordered in build direction
 
-    int mNumPseudoLayers = 0;
-
     Vector mBuildDirection;
     double mCriticalPrintAngle;
-
-    bool mInitialized;
-
-    // functor to sort in build direction
-    class LessThanInBuildDirection
-    {
-        public:
-            LessThanInBuildDirection(KernelThenAMFilter& aFilter) :mFilter(aFilter) {};
-            ~LessThanInBuildDirection(){}
-
-            bool operator()(int aIndex1, int aIndex2) const
-            {
-                if(aIndex1 > (int) mFilter.mCoordinates.size() || aIndex2 > (int) mFilter.mCoordinates.size())
-                {
-                    throw(std::out_of_range("Indices must be betweeen zero and number of nodes in mesh to compare distance of node in build direction"));
-                }
-
-                Vector tVec1(mFilter.mCoordinates[aIndex1]);
-                Vector tVec2(mFilter.mCoordinates[aIndex2]);
-
-                double tSignedDistanceFromOrigin1 = PlatoSubproblemLibrary::dot_product(tVec1,mFilter.mBuildDirection);
-                double tSignedDistanceFromOrigin2 = PlatoSubproblemLibrary::dot_product(tVec2,mFilter.mBuildDirection);
-
-                return tSignedDistanceFromOrigin1 < tSignedDistanceFromOrigin2;
-            }
-
-        private:
-
-            KernelThenAMFilter& mFilter;
-    };
-
-    LessThanInBuildDirection mLessThanFunctor;
-
 };
 
 }

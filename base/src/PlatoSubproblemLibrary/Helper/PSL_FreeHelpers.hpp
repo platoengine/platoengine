@@ -7,7 +7,6 @@
 #include <cassert>
 #include <functional>
 #include <cmath>
-#include <math.h>
 #include <string>
 #include <set>
 
@@ -318,5 +317,4 @@ double getTimeInSeconds();
 
 std::string remove_a_filename_prefix(const std::string& full_filename);
 std::string remove_all_filename_prefix(const std::string& full_filename);
-
 }
