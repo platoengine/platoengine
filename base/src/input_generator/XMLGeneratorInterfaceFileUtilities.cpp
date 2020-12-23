@@ -50,7 +50,7 @@ void append_compute_qoi_statistics_operation
  pugi::xml_node& aParentNode)
 {
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
-    auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    auto tQoIIDs = aXMLMetaData.mOutputMetaData[0].randomIDs();
     for (auto &tQoIID : tQoIIDs)
     {
         auto tOperationNode = aParentNode.append_child("Operation");
@@ -82,23 +82,18 @@ void append_physics_performers
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.services().empty())
+    if(aXMLMetaData.mPerformerServices.empty())
     {
         THROWERR("Append Physics Performer: Services list is empty.")
     }
 
     std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
-    for(auto& tService : aXMLMetaData.services())
+    for(auto& tService : aXMLMetaData.mPerformerServices)
     {
-        const int tID = (&tService - &aXMLMetaData.service(0));
-        // The platomain optimizer should always be the first service in the list
-        // so skip it.
-        if(tID > 0)
-        {
-            auto tPerformerNode = aParentNode.append_child("Performer");
-            std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
-            XMLGen::append_children( tKeywords, tValues, tPerformerNode);
-        }
+        const int tID = (&tService - &aXMLMetaData.mPerformerServices[0]) + 1;
+        auto tPerformerNode = aParentNode.append_child("Performer");
+        std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
+        XMLGen::append_children( tKeywords, tValues, tPerformerNode);
     }
 }
 /******************************************************************************/
@@ -114,17 +109,21 @@ void append_qoi_shared_data
     }
 
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
-    auto tOutputIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
-    auto tServiceID = aXMLMetaData.mOutputMetaData.serviceID();
-    for(auto& tID : tOutputIDs)
+    for(auto &tOutputMetaData : aXMLMetaData.mOutputMetaData)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
-        auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
-        auto tOwnerName = aXMLMetaData.service(tServiceID).performer();
-        std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, tFirstPlatoMainPerformer};
-        auto tSharedDataNode = aParentNode.append_child("SharedData");
-        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        auto tOutputIDs = tOutputMetaData.deterministicIDs();
+        auto tServiceID = tOutputMetaData.serviceID();
+        for(auto& tID : tOutputIDs)
+        {
+            auto tLayout = tOutputMetaData.deterministicLayout(tID);
+            auto tSharedDataName = tOutputMetaData.deterministicSharedDataName(tID);
+            auto tOwnerName = aXMLMetaData.service(tServiceID).performer();
+            tSharedDataName += std::string("_") + tOwnerName;
+            std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+            std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, tFirstPlatoMainPerformer};
+            auto tSharedDataNode = aParentNode.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
     }
 }
 /******************************************************************************/
@@ -554,14 +553,15 @@ inline void append_qoi_to_random_write_output_operation
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidPerformerOutputKeys tValidKeys;
-    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    const XMLGen::Output &tOutputMetadata = aMetaData.mOutputMetaData[0];
+    auto tServiceID = tOutputMetadata.serviceID();
     auto tCodeName = aMetaData.service(tServiceID).code();
-    auto tOutputQoIs = aMetaData.mOutputMetaData.randomIDs();
+    auto tOutputQoIs = tOutputMetadata.randomIDs();
     for(auto& tQoI : tOutputQoIs)
     {
         auto tOutput = aParentNode.append_child("Output");
         auto tArgumentName = tValidKeys.argument(tCodeName, tQoI);
-        auto tSharedDataName = aMetaData.mOutputMetaData.randomSharedDataName(tQoI);
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tQoI);
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
     }
 }
@@ -573,7 +573,8 @@ inline void append_random_write_output_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.randomIDs().empty())
+    const XMLGen::Output &tOutputMetadata = aMetaData.mOutputMetaData[0];
+    if(tOutputMetadata.randomIDs().empty())
     {
         return;
     }
@@ -585,7 +586,7 @@ inline void append_random_write_output_operation
     XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
 
     tOperationNode = tForNode.append_child("Operation");
-    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tServiceID = tOutputMetadata.serviceID();
     auto tBasePerformerName = aMetaData.service(tServiceID).performer();
     auto tPerformerName = tBasePerformerName + "_{PerformerIndex}";
     XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
@@ -597,17 +598,20 @@ inline void append_random_write_output_operation
 /******************************************************************************/
 inline void append_qoi_to_deterministic_write_output_operation
 (const XMLGen::InputData& aMetaData,
+ const XMLGen::Output& aOutputMetadata,
  pugi::xml_node& aParentNode)
 {
     XMLGen::ValidPerformerOutputKeys tValidKeys;
-    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tServiceID = aOutputMetadata.serviceID();
     auto tCodeName = aMetaData.service(tServiceID).code();
-    auto tOutputQoIs = aMetaData.mOutputMetaData.deterministicIDs();
+    auto tPerformerName = aMetaData.service(tServiceID).performer();
+    auto tOutputQoIs = aOutputMetadata.deterministicIDs();
     for(auto& tQoI : tOutputQoIs)
     {
         auto tOutput = aParentNode.append_child("Output");
         auto tArgumentName = tValidKeys.argument(tCodeName, tQoI);
-        auto tSharedDataName = aMetaData.mOutputMetaData.deterministicSharedDataName(tQoI);
+        auto tSharedDataName = aOutputMetadata.deterministicSharedDataName(tQoI);
+        tSharedDataName += std::string("_") + tPerformerName;
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tOutput);
     }
 }
@@ -618,16 +622,23 @@ inline void append_deterministic_write_output_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.deterministicIDs().empty())
+    pugi::xml_node tCurParentNode = aParentNode;
+    if(aMetaData.mOutputMetaData.size() > 1)
     {
-        return;
+        tCurParentNode = aParentNode.append_child("Operation");
     }
 
-    auto tOperationNode = aParentNode.append_child("Operation");
-    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
-    auto tPerformerName = aMetaData.service(tServiceID).performer();
-    XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
-    XMLGen::append_qoi_to_deterministic_write_output_operation(aMetaData, tOperationNode);
+    for(auto &tOutputMetadata : aMetaData.mOutputMetaData)
+    {
+        if(!tOutputMetadata.deterministicIDs().empty())
+        {
+            auto tOperationNode = tCurParentNode.append_child("Operation");
+            auto tServiceID = tOutputMetadata.serviceID();
+            auto tPerformerName = aMetaData.service(tServiceID).performer();
+            XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
+            XMLGen::append_qoi_to_deterministic_write_output_operation(aMetaData, tOutputMetadata, tOperationNode);
+        }
+    }
 }
 // function append_random_qoi_outputs
 /******************************************************************************/
@@ -637,7 +648,7 @@ void append_write_ouput_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.isOutputDisabled())
+    if(aMetaData.mOutputMetaData[0].isOutputDisabled())
     {
         return;
     }
@@ -667,12 +678,13 @@ inline void append_random_qoi_samples_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mOutputMetaData.outputSamples() == false)
+    const XMLGen::Output &tOutputMetadata = aXMLMetaData.mOutputMetaData[0];
+    if(tOutputMetadata.outputSamples() == false)
     {
         return;
     }
 
-    auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    auto tQoIIDs = tOutputMetadata.randomIDs();
     for(auto& tID : tQoIIDs)
     {
         auto tOuterFor = aParentNode.append_child("For");
@@ -680,8 +692,8 @@ inline void append_random_qoi_samples_to_plato_main_output_stage
         auto tInnerFor = tOuterFor.append_child("For");
         XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
         auto tInput = tInnerFor.append_child("Input");
-        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tID);
-        auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
+        auto tArgumentName = tOutputMetadata.randomArgumentName(tID);
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
     }
 }
@@ -693,7 +705,7 @@ inline void append_random_qoi_statistics_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tQoIIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    auto tQoIIDs = aXMLMetaData.mOutputMetaData[0].randomIDs();
     for (auto &tID : tQoIIDs)
     {
         auto tMeanName = tID + " mean";
@@ -713,13 +725,19 @@ inline void append_deterministic_qoi_to_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tQoIIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
-    for(auto& tID : tQoIIDs)
+    for(auto &tOutputMetaData : aXMLMetaData.mOutputMetaData)
     {
-        auto tInput = aParentNode.append_child("Input");
-        auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
-        auto tSharedDataName = aXMLMetaData.mOutputMetaData.deterministicSharedDataName(tID);
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+        auto tQoIIDs = tOutputMetaData.deterministicIDs();
+        for(auto& tID : tQoIIDs)
+        {
+            auto tInput = aParentNode.append_child("Input");
+            auto tArgumentName = tOutputMetaData.deterministicArgumentName(tID);
+            auto tSharedDataName = tOutputMetaData.deterministicSharedDataName(tID);
+            auto tOwnerString = std::string("_") + aXMLMetaData.service(tOutputMetaData.serviceID()).performer();
+            tSharedDataName += tOwnerString;
+            tArgumentName += tOwnerString;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgumentName, tSharedDataName}, tInput);
+        }
     }
 }
 // function append_deterministic_qoi_to_plato_main_output_stage
@@ -745,7 +763,7 @@ void append_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
+    if(aXMLMetaData.mOutputMetaData[0].isOutputDisabled())
     {
         return;
     }
@@ -1112,7 +1130,7 @@ void append_design_volume_operation
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Design Volume", "Design Volume"}, tOutputNode);
 }
-// function append_design_volume_stage
+// function append_design_volume_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -1367,7 +1385,8 @@ void append_optimization_output_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
+    if(aXMLMetaData.mOutputMetaData.size() > 0 && 
+       aXMLMetaData.mOutputMetaData[0].isOutputDisabled())
     {
         return;
     }

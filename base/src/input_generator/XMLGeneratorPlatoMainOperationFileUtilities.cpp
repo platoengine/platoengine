@@ -44,7 +44,8 @@ void write_plato_main_operations_xml_file
     XMLGen::append_update_problem_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(tDocument);
     XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
-    if(!XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    //if(!XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    if(aMetaData.needToAggregate())
     {
         XMLGen::append_aggregate_data_to_plato_main_operation(aMetaData, tDocument);
     }
@@ -152,30 +153,36 @@ void append_objective_gradient_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    bool tMultiObjective = (aXMLMetaData.objective.criteriaIDs.size() > 1);
+/*
+    bool tNeedToAggregate = aXMLMetaData.needToAggregate();
 
-    for(size_t i=0; i<aXMLMetaData.objective.criteriaIDs.size(); ++i)
+    if(tNeedToAggregate)
     {
-        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[i];
-        std::string tServiceID = aXMLMetaData.objective.serviceIDs[i];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[i];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
+*/
+ // I think this will always be "objective gradient" but I am leaving the old code
+ // in just in case we run into a situation when that isn't the case.
         auto tInput = aParentNode.append_child("Input");
-        std::string tName;
-        if(tMultiObjective)
-        {
-            tName = std::string("Criterion Gradient - ");
-            tName += tIdentifierString;
-        }
-        else
-        {
-            tName = std::string("Objective Gradient");
-        }
-        auto tArgumentName = XMLGen::to_lower(tName);
-        XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
+        XMLGen::append_children( { "ArgumentName" }, { "objective gradient" }, tInput);
+/*
     }
+    else
+    {
+        for(size_t i=0; i<aXMLMetaData.objective.criteriaIDs.size(); ++i)
+        {
+            std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[i];
+            std::string tServiceID = aXMLMetaData.objective.serviceIDs[i];
+            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[i];
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
+            auto tInput = aParentNode.append_child("Input");
+            std::string tName = std::string("Criterion Gradient - ");
+            tName += tIdentifierString;
+            auto tArgumentName = XMLGen::to_lower(tName);
+            XMLGen::append_children( { "ArgumentName" }, { tArgumentName }, tInput);
+        }
+    }
+*/
 }
 // function append_objective_gradient_to_output_operation
 /******************************************************************************/
@@ -185,18 +192,21 @@ void append_qoi_statistics_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    auto tOutputQoIs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for(auto& tOutputQoI : tOutputQoIs)
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputQoI);
-        auto tValidLayout = XMLGen::check_data_layout(tLayout);
-        auto tArgumentName = tOutputQoI + " mean";
-        auto tInput= aParentNode.append_child("Input");
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
+        auto tOutputQoIs = tOutputMetadata.randomIDs();
+        for(auto& tOutputQoI : tOutputQoIs)
+        {
+            auto tLayout = tOutputMetadata.randomLayout(tOutputQoI);
+            auto tValidLayout = XMLGen::check_data_layout(tLayout);
+            auto tArgumentName = tOutputQoI + " mean";
+            auto tInput= aParentNode.append_child("Input");
+            XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
 
-        tArgumentName = tOutputQoI + " standard deviation";
-        tInput= aParentNode.append_child("Input");
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
+            tArgumentName = tOutputQoI + " standard deviation";
+            tInput= aParentNode.append_child("Input");
+            XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tValidLayout }, tInput);
+        }
     }
 }
 /******************************************************************************/
@@ -206,13 +216,19 @@ void append_deterministic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    auto tIDs = aXMLMetaData.mOutputMetaData.deterministicIDs();
-    for(auto& tID : tIDs)
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
-        auto tInput= aParentNode.append_child("Input");
-        auto tLayout = aXMLMetaData.mOutputMetaData.deterministicLayout(tID);
-        auto tArgumentName = aXMLMetaData.mOutputMetaData.deterministicArgumentName(tID);
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
+        auto tIDs = tOutputMetadata.deterministicIDs();
+        for(auto& tID : tIDs)
+        {
+            auto tInput= aParentNode.append_child("Input");
+            auto tLayout = tOutputMetadata.deterministicLayout(tID);
+            auto tArgumentName = tOutputMetadata.deterministicArgumentName(tID);
+            auto tPerformerString = std::string("_") + 
+                                    aXMLMetaData.service(tOutputMetadata.serviceID()).performer();
+            tArgumentName += tPerformerString;
+            XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
+        }
     }
 }
 // function append_deterministic_qoi_to_output_operation
@@ -223,21 +239,24 @@ void append_stochastic_qoi_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    if(aXMLMetaData.mOutputMetaData.outputSamples() == false)
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
-        return;
-    }
+        if(tOutputMetadata.outputSamples() == false)
+        {
+            return;
+        }
 
-    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for(auto& tID : tIDs)
-    {
-        auto tFor = aParentNode.append_child("For");
-        XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
+        auto tIDs = tOutputMetadata .randomIDs();
+        for(auto& tID : tIDs)
+        {
+            auto tFor = aParentNode.append_child("For");
+            XMLGen::append_attributes({"var", "in"}, {"SampleIndex", "Samples"}, tFor);
 
-        auto tInput= tFor.append_child("Input");
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tArgumentName = tID + " {SampleIndex}";
-        XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
+            auto tInput= tFor.append_child("Input");
+            auto tLayout = tOutputMetadata .randomLayout(tID);
+            auto tArgumentName = tID + " {SampleIndex}";
+            XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
+        }
     }
 }
 // function append_stochastic_qoi_to_output_operation
@@ -303,9 +322,12 @@ void append_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData.isOutputDisabled())
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
-        return;
+        if(tOutputMetadata.isOutputDisabled())
+        {
+            return;
+        }
     }
     auto tOperation = aDocument.append_child("Operation");
     XMLGen::append_children_to_output_operation(aXMLMetaData, tOperation);
@@ -422,33 +444,36 @@ void append_qoi_statistics_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    for(auto& tOutputDataID : tOutputDataIDs)
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
-        auto tDataLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
-        auto tSupportedDataLayout = XMLGen::check_data_layout(tDataLayout);
-        auto tOperationName = "compute " + tOutputDataID + " statistics";
-        std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
-        std::vector<std::string> tValues = { "MeanPlusStdDev", tOperationName, tSupportedDataLayout };
-        auto tOperation = aDocument.append_child("Operation");
-        XMLGen::append_children(tKeys, tValues, tOperation);
+        auto tOutputDataIDs = tOutputMetadata.randomIDs();
+        for(auto& tOutputDataID : tOutputDataIDs)
+        {
+            auto tDataLayout = tOutputMetadata.randomLayout(tOutputDataID);
+            auto tSupportedDataLayout = XMLGen::check_data_layout(tDataLayout);
+            auto tOperationName = "compute " + tOutputDataID + " statistics";
+            std::vector<std::string> tKeys = {"Function", "Name" , "Layout"};
+            std::vector<std::string> tValues = { "MeanPlusStdDev", tOperationName, tSupportedDataLayout };
+            auto tOperation = aDocument.append_child("Operation");
+            XMLGen::append_children(tKeys, tValues, tOperation);
 
-        auto tOuterFor = tOperation.append_child("For");
-        XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
-        auto tInnerFor = tOuterFor.append_child("For");
-        XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
-        auto tInput = tInnerFor.append_child("Input");
-        tKeys = {"ArgumentName", "Probability"};
-        auto tArgumentName = aXMLMetaData.mOutputMetaData.randomArgumentName(tOutputDataID);
-        tValues = {tArgumentName, "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
-        XMLGen::append_children(tKeys, tValues, tInput);
+            auto tOuterFor = tOperation.append_child("For");
+            XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tOuterFor);
+            auto tInnerFor = tOuterFor.append_child("For");
+            XMLGen::append_attributes({"var", "in"}, {"PerformerSampleIndex", "PerformerSamples"}, tInnerFor);
+            auto tInput = tInnerFor.append_child("Input");
+            tKeys = {"ArgumentName", "Probability"};
+            auto tArgumentName = tOutputMetadata.randomArgumentName(tOutputDataID);
+            tValues = {tArgumentName, "{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}"};
+            XMLGen::append_children(tKeys, tValues, tInput);
 
-        auto tOutput = tOperation.append_child("Output");
-        tArgumentName = tOutputDataID + " mean";
-        XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", tArgumentName}, tOutput);
-        tOutput = tOperation.append_child("Output");
-        tArgumentName = tOutputDataID + " standard deviation";
-        XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
+            auto tOutput = tOperation.append_child("Output");
+            tArgumentName = tOutputDataID + " mean";
+            XMLGen::append_children({"Statistic", "ArgumentName"}, {"mean", tArgumentName}, tOutput);
+            tOutput = tOperation.append_child("Output");
+            tArgumentName = tOutputDataID + " standard deviation";
+            XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", tArgumentName}, tOutput);
+        }
     }
 }
 // function append_qoi_statistics_to_plato_main_operation
@@ -490,11 +515,19 @@ void append_aggregate_data_to_plato_main_operation
     XMLGen::append_children({"ArgumentName"}, {"Field"}, tOutput);
 
     // Weighting and normalization
+    bool tNeedToDoWeightingInAggregator = aXMLMetaData.needToDoWeightingInAggregator();
     auto tWeightingNode = tOperation.append_child("Weighting");
     for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
     {
         auto tWeight = tWeightingNode.append_child("Weight");
-        XMLGen::append_children({"Value"}, {tObjective.weights[i]}, tWeight);
+        if(tNeedToDoWeightingInAggregator)
+        {
+            XMLGen::append_children({"Value"}, {tObjective.weights[i]}, tWeight);
+        }
+        else
+        {
+            XMLGen::append_children({"Value"}, {"1.0"}, tWeight);
+        }
     }
     if(aXMLMetaData.normalizeInAggregator())
     {

@@ -112,8 +112,21 @@ protected:
 
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
+    std::vector<XMLGen::InputData> m_PreProcessedInputData;
 private:
 
+    void preProcessInputMetaData();
+    void loadOutputData(XMLGen::InputData &aNewInputData, 
+                                  const std::string &aServiceID);
+    void loadObjectiveData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID);
+    void loadConstraintData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID);
+    void clearInputDataLists(XMLGen::InputData &aInputData);
+    void generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs);
+    void createCopiesForPerformerCreation();
     // /******************************************************************************//**
     //  * @brief Initialize Plato problem options
     //  **********************************************************************************/

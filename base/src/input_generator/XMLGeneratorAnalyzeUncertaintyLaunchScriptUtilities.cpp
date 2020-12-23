@@ -24,16 +24,42 @@ inline bool is_robust_optimization_problem
 
 inline void append_plato_analyze_code_path
 (const XMLGen::InputData& aInputData,
- FILE*& aFile)
+ FILE*& aFile,
+ const std::string& aServiceID)
 {
-    if(aInputData.codepaths.plato_analyze_path.length() != 0)
+    // Build id string based on the performer id.
+    std::string tIDString;
+    if(aServiceID != "")
     {
-        fprintf(aFile, "%s --input-config=plato_analyze_input_deck.xml \\\n", aInputData.codepaths.plato_analyze_path.c_str());
+        tIDString = "_" + aServiceID + "_";
     }
     else
     {
-        fprintf(aFile, "analyze_MPMD --input-config=plato_analyze_input_deck.xml \\\n");
+        tIDString = "_";
     }
+
+    // Add executable name.
+    if(aInputData.codepaths.plato_analyze_path.length() != 0)
+    {
+        fprintf(aFile, "%s ", aInputData.codepaths.plato_analyze_path.c_str());
+    }
+    else
+    {
+        fprintf(aFile, "analyze_MPMD ");
+    }
+
+    // Add kokkos-device setting if requested.
+    if(aServiceID != "")
+    {
+        XMLGen::Service tService = aInputData.service(aServiceID); 
+        if(tService.deviceID() != "")
+        {
+            fprintf(aFile, "--kokkos-device=%s ", tService.deviceID().c_str());
+        }
+    }
+
+    // Add the input deck syntax.
+    fprintf(aFile, "--input-config=plato_analyze%sinput_deck.xml \\\n", tIDString.c_str());
 }
 
 inline void append_analyze_mpirun_commands
@@ -44,17 +70,25 @@ inline void append_analyze_mpirun_commands
     XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
     XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
 
-    std::string tNumPerformers = "1";
-    fprintf(aFile,
-            ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n",
-            tNumProcsString.c_str(),
-            tNumPerformers.c_str(),
-            tEnvString.c_str(),
-            tSeparationString.c_str());
+    int tServiceIndex = 1;
+    for(auto &tService : aInputData.mPerformerServices)
+    {
+        if(tService.code() == "plato_analyze")
+        {
+            fprintf(aFile,
+                ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n",
+                tNumProcsString.c_str(),
+                tService.numberProcessors().c_str(),
+                tEnvString.c_str(),
+                tSeparationString.c_str(),
+                tServiceIndex);
 
-    fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
-    fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
-    XMLGen::append_plato_analyze_code_path(aInputData, aFile);
+            fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+            fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
+            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id());
+        }
+        tServiceIndex++;
+    }
 }
 
 void append_analyze_mpirun_commands_robust_optimization_problems
@@ -79,7 +113,7 @@ void append_analyze_mpirun_commands_robust_optimization_problems
 
     fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
     fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
-    XMLGen::append_plato_analyze_code_path(aInputData, aFile);
+    XMLGen::append_plato_analyze_code_path(aInputData, aFile, "");
 }
 
 void generate_launch_script(const XMLGen::InputData& aInputData)

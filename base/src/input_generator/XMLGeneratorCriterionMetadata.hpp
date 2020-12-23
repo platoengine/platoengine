@@ -26,6 +26,8 @@ private:
     std::string mID; /*!< criterion identification number */
     std::string mType;  /*!< criterion type */
     std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
+    std::vector<std::string> mCriterionWeights;
+    std::vector<std::string> mCriterionIDs;
 
 public:
     /******************************************************************************//**
@@ -276,6 +278,46 @@ public:
     std::string stressLimit() const
     {
         return (this->value("stress_limit"));
+    }
+
+    /******************************************************************************//**
+     * \fn criterionIDs
+     * \brief Set ID strings for composite criteria
+     * \param [in] aInput list of IDs
+     **********************************************************************************/
+    void criterionIDs(const std::vector<std::string>& aInput)
+    {
+        this->mCriterionIDs = aInput;
+    }
+
+    /******************************************************************************//**
+     * \fn criterionIDs
+     * \brief Return ID strings for composite criteria
+     * \return value
+     **********************************************************************************/
+    std::vector<std::string> criterionIDs() const
+    {
+        return this->mCriterionIDs;
+    }
+
+    /******************************************************************************//**
+     * \fn criterionWeights
+     * \brief Set weight strings for composite criteria
+     * \param [in] aInput list of IDs
+     **********************************************************************************/
+    void criterionWeights(const std::vector<std::string>& aInput)
+    {
+        this->mCriterionWeights = aInput;
+    }
+
+    /******************************************************************************//**
+     * \fn criterionWeights
+     * \brief Return ID strings for composite criteria
+     * \return value
+     **********************************************************************************/
+    std::vector<std::string> criterionWeights() const
+    {
+        return this->mCriterionWeights;
     }
 
 

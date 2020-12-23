@@ -234,18 +234,19 @@ void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aMetaData.mOutputMetaData.isOutputDisabled())
+    const XMLGen::Output &tOutputMetadata = aMetaData.mOutputMetaData[0];
+    if(tOutputMetadata.isOutputDisabled())
     {
         return;
     }
 
-    auto tServiceID = aMetaData.mOutputMetaData.serviceID();
+    auto tServiceID = tOutputMetadata.serviceID();
     auto tCodeName = aMetaData.service(tServiceID).code();
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperationNode);
 
     XMLGen::ValidPerformerOutputKeys tValidKeys;
-    auto tOutputQoIs = aMetaData.mOutputMetaData.outputIDs();
+    auto tOutputQoIs = tOutputMetadata.outputIDs();
     for(auto& tQoI : tOutputQoIs)
     {
         auto tOutput = tOperationNode.append_child("Output");
@@ -266,7 +267,9 @@ void write_plato_analyze_operation_xml_file
     XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
-    tDocument.save_file("plato_analyze_operations.xml", "  ");
+    std::string tServiceID = get_plato_analyze_service_id(aXMLMetaData);
+    std::string tFilename = std::string("plato_analyze_") + tServiceID + "_operations.xml";
+    tDocument.save_file(tFilename.c_str(), "  ");
 }
 /******************************************************************************/
 

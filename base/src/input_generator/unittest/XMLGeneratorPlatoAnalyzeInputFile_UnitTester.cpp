@@ -1098,6 +1098,8 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
 {
     XMLGen::InputData tXMLMetaData;
 
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
     XMLGen::Load tLoad;
     tLoad.type = "traction";
     tLoad.load_id = "1";
@@ -2057,6 +2059,8 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsToPlatoAnalyzeInputDeck)
     XMLGen::Scenario tScenario;
     tScenario.physics("steady_state_mechanics");
     tXMLMetaData.append(tScenario);
+    XMLGen::Output tOutputMetadata;
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
     ASSERT_NO_THROW(XMLGen::append_physics_to_plato_analyze_input_deck(tXMLMetaData, tDocument));
 
     auto tPDE = tDocument.child("ParameterList");

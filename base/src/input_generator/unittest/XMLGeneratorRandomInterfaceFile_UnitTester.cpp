@@ -24,9 +24,11 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetFalse)
     tService.id("1");
     tService.code("plato_analyze");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.disableOutput();
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.disableOutput();
+    tOutputMetadata.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -41,7 +43,9 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetTrueButEmptyO
     tService.id("1");
     tService.code("plato_analyze");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -56,8 +60,10 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Random)
     tService.id("1");
     tService.code("plato_analyze");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendRandomQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -95,8 +101,10 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     tService.id("1");
     tService.code("plato_analyze");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -111,7 +119,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Vonmises", "vonmises"};
+    tGoldValues = {"Vonmises", "vonmises_plato_analyze_1"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
 }
 
@@ -134,7 +142,9 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStage_EmptyStage_OutputDisabled
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.disableOutput();
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.disableOutput();
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
     ASSERT_NO_THROW(XMLGen::append_plato_main_output_stage(tXMLMetaData, tDocument));
     auto tStage = tDocument.child("Stage");
     ASSERT_TRUE(tStage.empty());
@@ -159,8 +169,10 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     tService.code("plato_analyze");
     tXMLMetaData.append(tService);
 
-    tXMLMetaData.mOutputMetaData.serviceID("2");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -183,7 +195,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     ASSERT_FALSE(tOutput.empty());
     ASSERT_STREQ("Output", tOutput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"Vonmises", "vonmises"};
+    tGoldValues = {"Vonmises", "vonmises_plato_analyze_2"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOutput);
     tOutput = tOutput.next_sibling("Output");
     ASSERT_TRUE(tOutput.empty());
@@ -221,7 +233,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     ASSERT_FALSE(tInput.empty());
     ASSERT_STREQ("Input", tInput.name());
     tGoldKeys = {"ArgumentName", "SharedDataName"};
-    tGoldValues = {"vonmises", "vonmises"};
+    tGoldValues = {"vonmises", "vonmises_plato_analyze_2"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tInput);
     tInput = tInput.next_sibling("Input");
     ASSERT_TRUE(tInput.empty());
@@ -244,9 +256,11 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     tService.code("plato_analyze");
     tXMLMetaData.append(tService);
 
-    tXMLMetaData.mOutputMetaData.serviceID("2");
-    tXMLMetaData.mOutputMetaData.outputSamples("true");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("2");
+    tOutputMetadata.outputSamples("true");
+    tOutputMetadata.appendRandomQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -603,7 +617,9 @@ TEST(PlatoTestXMLGenerator, AppendQoiStatisticsSharedData)
     tService.id("1");
     tService.code("platomain");
     tInputData.append(tService);
-    tInputData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.appendRandomQoI("vonmises", "element field");
+    tInputData.mOutputMetaData.push_back(tOutputMetadata);
     XMLGen::append_qoi_statistics_shared_data(tInputData, tDocument);
 
     auto tSharedData = tDocument.child("SharedData");
@@ -734,8 +750,10 @@ TEST(PlatoTestXMLGenerator, AppendQoiSharedDataForNondeterministicUsecase)
     tService.id("3");
     tService.code("sierra");
     tInputData.append(tService);
-    tInputData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
-    tInputData.mOutputMetaData.serviceID("2");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.appendRandomQoI("VonMises", "element field");
+    tOutputMetadata.serviceID("2");
+    tInputData.mOutputMetaData.push_back(tOutputMetadata);
 
     ASSERT_NO_THROW(XMLGen::append_multiperformer_qoi_shared_data(tInputData, tDocument));
     ASSERT_FALSE(tDocument.empty());
@@ -2020,13 +2038,16 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tService.id("1");
     tService.code("plato_analyze");
     tXMLMetaData.append(tService);
+    tService.id("2");
+    tService.code("plato_analyze");
+    tXMLMetaData.append(tService);
     
     // POSE OBJECTIVE
     XMLGen::Objective tObjective;
     tObjective.criteriaIDs.push_back("1");
     tObjective.criteriaIDs.push_back("1");
     tObjective.serviceIDs.push_back("1");
-    tObjective.serviceIDs.push_back("1");
+    tObjective.serviceIDs.push_back("2");
     tObjective.scenarioIDs.push_back("1");
     tObjective.scenarioIDs.push_back("2");
     

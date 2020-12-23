@@ -111,11 +111,13 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
     tService.updateProblem("true");
     tMetaData.append(tService);
 
-    tMetaData.mOutputMetaData.disableOutput();
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.disableOutput();
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     XMLGen::write_plato_analyze_operation_xml_file(tMetaData);
 
-    auto tReadData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tReadData = XMLGen::read_data_from_file("plato_analyze_1_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation>")
         +"<Operation><Function>ComputeCriterionValue</Function><Name>ComputeObjectiveValue</Name><Criterion>MyObjective</Criterion><Input><ArgumentName>Topology</ArgumentName></Input>"
         +"<Output><Argument>Value</Argument><ArgumentName>ObjectiveValue</ArgumentName></Output></Operation>"
@@ -126,7 +128,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
         +"<Operation><Function>ComputeCriterionGradient</Function><Name>ComputeConstraintGradient</Name><Criterion>MyConstraint</Criterion><Input><ArgumentName>Topology</ArgumentName></Input>"
         +"<Output><Argument>Gradient</Argument><ArgumentName>ConstraintGradient</ArgumentName></Output></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
-    Plato::system("rm -f plato_analyze_operations.xml");
+    Plato::system("rm -f plato_analyze_1_operations.xml");
 }
 
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministicUsecase)
@@ -150,10 +152,12 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Objective tObjective;
     tObjective.serviceIDs.push_back("2");
     tXMLMetaData.objective = tObjective;
-    tXMLMetaData.mOutputMetaData.serviceID("2");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispy", "nodal field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispz", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tOutputMetadata.appendDeterminsiticQoI("dispy", "nodal field");
+    tOutputMetadata.appendDeterminsiticQoI("dispz", "nodal field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
@@ -240,7 +244,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
 
     // CALL FUNCTION
     XMLGen::write_plato_analyze_operation_xml_file(tXMLMetaData);
-    auto tData = XMLGen::read_data_from_file("plato_analyze_operations.xml");
+    auto tData = XMLGen::read_data_from_file("plato_analyze_2_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>WriteOutput</Function><Name>WriteOutput</Name><Output><ArgumentName>SolutionX</ArgumentName></Output>")
     +"<Output><ArgumentName>SolutionY</ArgumentName></Output><Output><ArgumentName>SolutionZ</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name>"
     +"</Operation><Operation><Function>ComputeCriterionValue</Function><Name>ComputeObjectiveValue</Name><Criterion>MyObjective</Criterion><Input><ArgumentName>Topology</ArgumentName></Input><Output><Argument>Value</Argument><ArgumentName>ObjectiveValue</ArgumentName></Output>"
@@ -280,7 +284,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     +"</Parameter><Parameter><ArgumentName>poissons_ratio_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:PoissonsRatio</Target><InitialValue>0.0</InitialValue></Parameter>"
     +"<Parameter><ArgumentName>youngs_modulus_block_id_1</ArgumentName><Target>[PlatoProblem]:[MaterialModel]:[IsotropicLinearElastic]:YoungsModulus</Target><InitialValue>0.0</InitialValue></Parameter></Operation>";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
-    Plato::system("rm -f plato_analyze_operations.xml");
+    Plato::system("rm -f plato_analyze_2_operations.xml");
 }
 
 TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
@@ -922,8 +926,8 @@ TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
 TEST(PlatoTestXMLGenerator, AppendDeterminsiticQoI_InvalidKey)
 {
     pugi::xml_document tDocument;
-    XMLGen::InputData tInputData;
-    ASSERT_THROW(tInputData.mOutputMetaData.appendDeterminsiticQoI("fluid pressure", "fpressure"), std::runtime_error);
+    XMLGen::Output tOutputMetadata;
+    ASSERT_THROW(tOutputMetadata.appendDeterminsiticQoI("fluid pressure", "fpressure"), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation_ErrorEmptyUpdateFrequencyKey)

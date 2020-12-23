@@ -5,7 +5,7 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "plato_input_deck.i;bolted_bracket.exo")
+set( testFiles "plato_input_deck.i;beam.exo")
 Plato_add_test_files("${testFiles}")
 
 # write out the path info in the plato input deck

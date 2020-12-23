@@ -402,6 +402,23 @@ void create_natural_boundary_condition_parent_nodes
  pugi::xml_node &aParentNode,
  std::vector<pugi::xml_node> &aParentNodes);
 
+/******************************************************************************//**
+ * \fn get_plato_analyze_service_id
+ * \brief get the id of the service for the performer used in objective or constraint
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+std::string get_plato_analyze_service_id
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn get_scenario_list_from_objectives_and_constraints
+ * \brief get the list of scenarios relevant to this plato analyze performer
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void get_scenario_list_from_objectives_and_constraints
+(const XMLGen::InputData& aXMLMetaData,
+ std::vector<XMLGen::Scenario>& aScenarioList);
+
 }
 
 // namespace XMLGen

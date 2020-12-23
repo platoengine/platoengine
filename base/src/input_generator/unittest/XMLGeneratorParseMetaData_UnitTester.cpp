@@ -921,8 +921,8 @@ TEST(PlatoTestXMLGenerator, ParseOutput_EmptyOutputMetadata)
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
 
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
-    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
+    ASSERT_TRUE(tOutputMetadata[0].isRandomMapEmpty());
+    ASSERT_TRUE(tOutputMetadata[0].isDeterministicMapEmpty());
 }
 
 TEST(PlatoTestXMLGenerator, ParseOutput_ErrorInvalidQoI)
@@ -967,19 +967,19 @@ TEST(PlatoTestXMLGenerator, ParseOutput_DeterministicOnly)
     XMLGen::ParseOutput tOutputParser;
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_TRUE(tOutputMetadata.isRandomMapEmpty());
-    ASSERT_FALSE(tOutputMetadata.isDeterministicMapEmpty());
+    ASSERT_TRUE(tOutputMetadata[0].isRandomMapEmpty());
+    ASSERT_FALSE(tOutputMetadata[0].isDeterministicMapEmpty());
 
     std::vector<std::string> tGoldIDs = {"dispx", "dispy", "dispz", "temperature"};
-    auto tIDs = tOutputMetadata.deterministicIDs();
+    auto tIDs = tOutputMetadata[0].deterministicIDs();
     for(auto& tID : tIDs)
     {
         auto tItr = std::find(tGoldIDs.begin(), tGoldIDs.end(), tID);
         ASSERT_TRUE(tItr != tGoldIDs.end());
         ASSERT_STREQ(tItr->c_str(), tID.c_str());
-        ASSERT_STREQ("Nodal Field", tOutputMetadata.deterministicLayout(tID).c_str());
-        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicArgumentName(tID).c_str());
-        ASSERT_STREQ(tItr->c_str(), tOutputMetadata.deterministicSharedDataName(tID).c_str());
+        ASSERT_STREQ("Nodal Field", tOutputMetadata[0].deterministicLayout(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata[0].deterministicArgumentName(tID).c_str());
+        ASSERT_STREQ(tItr->c_str(), tOutputMetadata[0].deterministicSharedDataName(tID).c_str());
     }
 }
 
@@ -996,8 +996,8 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
     XMLGen::ParseOutput tOutputParser;
     ASSERT_NO_THROW(tOutputParser.parse(tInputSS));
     auto tOutputMetadata = tOutputParser.data();
-    ASSERT_FALSE(tOutputMetadata.isRandomMapEmpty());
-    ASSERT_TRUE(tOutputMetadata.isDeterministicMapEmpty());
+    ASSERT_FALSE(tOutputMetadata[0].isRandomMapEmpty());
+    ASSERT_TRUE(tOutputMetadata[0].isDeterministicMapEmpty());
 
     std::vector<std::string> tGoldRandomID =
     {"accumulated_plastic_strain", "temperature"};
@@ -1009,24 +1009,24 @@ TEST(PlatoTestXMLGenerator, ParseOutput_RandomOnly)
      "temperature {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}"};
     std::vector<std::string> tGoldRandomLayout = {"Element Field", "Nodal Field"};
 
-    auto tRandomIDs = tOutputMetadata.randomIDs();
+    auto tRandomIDs = tOutputMetadata[0].randomIDs();
     for(auto& tID : tRandomIDs)
     {
         auto tItr = std::find(tGoldRandomID.begin(), tGoldRandomID.end(), tID);
         ASSERT_TRUE(tItr != tGoldRandomID.end());
         ASSERT_STREQ(tItr->c_str(), tID.c_str());
 
-        auto tLayout = tOutputMetadata.randomLayout(tID);
+        auto tLayout = tOutputMetadata[0].randomLayout(tID);
         tItr = std::find(tGoldRandomLayout.begin(), tGoldRandomLayout.end(), tLayout);
         ASSERT_TRUE(tItr != tGoldRandomLayout.end());
         ASSERT_STREQ(tItr->c_str(), tLayout.c_str());
 
-        auto tArgumentName = tOutputMetadata.randomArgumentName(tID);
+        auto tArgumentName = tOutputMetadata[0].randomArgumentName(tID);
         tItr = std::find(tGoldRandomArgumentName.begin(), tGoldRandomArgumentName.end(), tArgumentName);
         ASSERT_TRUE(tItr != tGoldRandomArgumentName.end());
         ASSERT_STREQ(tItr->c_str(), tArgumentName.c_str());
 
-        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
+        auto tSharedDataName = tOutputMetadata[0].randomSharedDataName(tID);
         tItr = std::find(tGoldRandomSharedDataName.begin(), tGoldRandomSharedDataName.end(), tSharedDataName);
         ASSERT_TRUE(tItr != tGoldRandomSharedDataName.end());
         ASSERT_STREQ(tItr->c_str(), tSharedDataName.c_str());

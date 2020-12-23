@@ -18,7 +18,9 @@ namespace PlatoTestXMLGenerator
 TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.appendRandomQoI("vonmises", "element field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetaData);
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_statistics_to_output_operation(tXMLMetaData, tDocument);
@@ -987,7 +989,10 @@ TEST(PlatoTestXMLGenerator, AppendStochasticQoiToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetaData);
+
     ASSERT_NO_THROW(XMLGen::append_qoi_statistics_to_plato_main_operation(tXMLMetaData, tDocument));
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1325,10 +1330,13 @@ TEST(PlatoTestXMLGenerator, AppendNonDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.outputSamples("true");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("Cauchy_Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("dispX", "nodal field");
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.outputSamples("true");
+    tOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tOutputMetaData.appendRandomQoI("Cauchy_Stress", "element field");
+    tOutputMetaData.appendRandomQoI("dispX", "nodal field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetaData);
+
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_stochastic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
@@ -1359,19 +1367,27 @@ TEST(PlatoTestXMLGenerator, AppendDeterministicQoiInputsToOutputOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("VonMises", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element field");
-    tXMLMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tXMLMetaData.append(tService);
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.serviceID("1");
+    tOutputMetaData.appendDeterminsiticQoI("VonMises", "element field");
+    tOutputMetaData.appendDeterminsiticQoI("Cauchy_Stress", "element field");
+    tOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetaData);
+
     auto tOperation = tDocument.append_child("Operation");
     ASSERT_NO_THROW(XMLGen::append_deterministic_qoi_to_output_operation(tXMLMetaData, tOperation));
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy_stress", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"cauchy_stress_plato_analyze_1", "Element Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"dispx", "Nodal Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"dispx_plato_analyze_1", "Nodal Field"}, tInput);
     tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises", "Element Field"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises_plato_analyze_1", "Element Field"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
@@ -1409,9 +1425,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientInputToOutputOperation)
     ASSERT_FALSE(tOperation.empty());
 
     auto tInput = tOperation.child("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_1"}, tInput);
-    tInput = tInput.next_sibling("Input");
-    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"criterion gradient - criterion_1_service_1_scenario_2"}, tInput);
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"objective gradient"}, tInput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendConstraintGradientInputToOutputOperation)
@@ -1504,8 +1518,10 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tService.updateProblem("true");
     tXMLMetaData.append(tService);
     tXMLMetaData.optimizer.objective_number_standard_deviations = "1";
-    tXMLMetaData.mOutputMetaData.outputSamples("true");
-    tXMLMetaData.mOutputMetaData.appendRandomQoI("VonMises", "element field");
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.outputSamples("true");
+    tOutputMetaData.appendRandomQoI("VonMises", "element field");
+    tXMLMetaData.mOutputMetaData.push_back(tOutputMetaData);
 
     // add random metadata
     XMLGen::RandomMetaData tRandomMetaData;
@@ -1527,7 +1543,7 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
     auto tGold = std::string("<?xmlversion=\"1.0\"?><includefilename=\"defines.xml\"/><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>PlatoMainOutput</Function><Name>PlatoMainOutput</Name><Input><ArgumentName>topology</ArgumentName>")
-    +"<Layout>NodalField</Layout></Input><Input><ArgumentName>control</ArgumentName><Layout>NodalField</Layout></Input><Input><ArgumentName>vonmisesmean</ArgumentName><Layout>ElementField</Layout></Input><Input><ArgumentName>vonmisesstandarddeviation</ArgumentName>"
+    +"<Layout>NodalField</Layout></Input><Input><ArgumentName>control</ArgumentName><Layout>NodalField</Layout></Input><Input><ArgumentName>objectivegradient</ArgumentName></Input><Input><ArgumentName>vonmisesmean</ArgumentName><Layout>ElementField</Layout></Input><Input><ArgumentName>vonmisesstandarddeviation</ArgumentName>"
     +"<Layout>ElementField</Layout></Input><Forvar=\"SampleIndex\"in=\"Samples\"><Input><ArgumentName>vonmises{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function><Name>InitializeField</Name>"
     +"<Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation><Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization>"
     +"<Input><ArgumentName>LowerBoundValue</ArgumentName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization>"

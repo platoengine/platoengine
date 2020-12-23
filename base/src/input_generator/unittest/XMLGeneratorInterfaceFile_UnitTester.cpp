@@ -23,15 +23,17 @@ namespace PlatoTestXMLGenerator
 
 TEST(PlatoTestXMLGenerator, AppendWriteOutputPlatoAnalyzeOperation)
 {
-    XMLGen::InputData tMetaData;
-    tMetaData.mOutputMetaData.appendRandomQoI("dispx", "nodal field");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("vonmises", "element field");
+    XMLGen::Output tOutput;
+    tOutput.appendRandomQoI("dispx", "nodal field");
+    tOutput.appendDeterminsiticQoI("vonmises", "element field");
 }
 
 TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.mOutputMetaData.appendRandomQoI("vonmises", "element field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.appendRandomQoI("vonmises", "element field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_qoi_statistics_operation(tMetaData, tDocument);
@@ -83,9 +85,12 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tMetaData.append(tService);
     XMLGen::Objective tObjective;
     tObjective.serviceIDs.push_back("1");
+    tObjective.criteriaIDs.push_back("1");
     tMetaData.objective = tObjective;
 
-    tMetaData.mOutputMetaData.disableOutput();
+    XMLGen::Output tOutputMetaData;
+    tOutputMetaData.disableOutput();
+    tMetaData.mOutputMetaData.push_back(tOutputMetaData);
     ASSERT_NO_THROW(XMLGen::write_plato_main_operations_xml_file(tMetaData));
 
     auto tReadData = XMLGen::read_data_from_file("plato_main_operations.xml");
@@ -94,7 +99,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     +"</Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization><Input><ArgumentName>UpperBoundValue</ArgumentName>"
     +"</Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name>"
     +"<Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
-    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation><Operation><Name>AggregateData</Name><Function>Aggregator</Function><Aggregate><Layout>Value</Layout><Output><ArgumentName>Value</ArgumentName></Output></Aggregate><Aggregate><Layout>NodalField</Layout><Output><ArgumentName>Field</ArgumentName></Output></Aggregate><Weighting><Normals/></Weighting></Operation>";
+    +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation><Operation><Name>AggregateData</Name><Function>Aggregator</Function><Aggregate><Layout>Value</Layout><Input><ArgumentName>Value1</ArgumentName></Input><Output><ArgumentName>Value</ArgumentName></Output></Aggregate><Aggregate><Layout>NodalField</Layout><Input><ArgumentName>Field1</ArgumentName></Input><Output><ArgumentName>Field</ArgumentName></Output></Aggregate><Weighting><Weight><Value>1.0</Value></Weight><Normals><Input><ArgumentName>Normal1</ArgumentName></Input></Normals></Weighting></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
     Plato::system("rm -f plato_main_operations.xml");
 }
@@ -400,8 +405,10 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tService.id("1");
     tService.code("plato_analyze");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
     tService.id("2");
     tService.code("platomain");
     tMetaData.append(tService);
@@ -505,7 +512,7 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     ASSERT_FALSE(tSharedData.empty());
     ASSERT_STREQ("SharedData", tSharedData.name());
     tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName"};
-    tValues = {"dispx", "Scalar", "Nodal Field", "plato_analyze_1", "platomain_2"};
+    tValues = {"dispx_plato_analyze_1", "Scalar", "Nodal Field", "plato_analyze_1", "platomain_2"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
 
     tSharedData = tSharedData.next_sibling("SharedData");
@@ -577,8 +584,10 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData_ErrorDidNotMatchOuputServiceID)
     tService.code("plato_analyze");
     tService.id("1");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("2");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     ASSERT_THROW(XMLGen::append_qoi_shared_data(tMetaData, tDocument), std::runtime_error);
@@ -594,8 +603,10 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData)
     tService.id("2");
     tService.code("platomain");
     tMetaData.append(tService);
-    tMetaData.mOutputMetaData.serviceID("1");
-    tMetaData.mOutputMetaData.appendDeterminsiticQoI("dispx", "nodal field");
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
     XMLGen::append_qoi_shared_data(tMetaData, tDocument);
@@ -604,7 +615,7 @@ TEST(PlatoTestXMLGenerator, AppendQoISharedData)
     ASSERT_FALSE(tSharedData.empty());
     ASSERT_STREQ("SharedData", tSharedData.name());
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "OwnerName", "UserName", "UserName"};
-    std::vector<std::string> tValues = {"dispx", "Scalar", "Nodal Field", "plato_analyze_1", "plato_analyze_1", "platomain_2"};
+    std::vector<std::string> tValues = {"dispx_plato_analyze_1", "Scalar", "Nodal Field", "plato_analyze_1", "plato_analyze_1", "platomain_2"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tSharedData);
     tSharedData = tSharedData.next_sibling("Performer");
     ASSERT_TRUE(tSharedData.empty());
@@ -627,6 +638,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     tService.id("2");
     tService.code("plato_analyze");
     tMetaData.append(tService);
+    tMetaData.mPerformerServices.push_back(tService);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_plato_main_performer(tMetaData, tDocument));

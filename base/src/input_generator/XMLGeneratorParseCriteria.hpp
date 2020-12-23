@@ -34,6 +34,20 @@ private:
     void setCriterionType(XMLGen::Criterion& aMetadata);
 
     /******************************************************************************//**
+     * \fn setCriterionIDs
+     * \brief Set 'criterion_ids' keyword for 'composite' criteria.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setCriterionIDs(XMLGen::Criterion& aMetadata);
+
+    /******************************************************************************//**
+     * \fn setCriterionWeights
+     * \brief Set 'criterion_weights' keyword for 'composite' criteria.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setCriterionWeights(XMLGen::Criterion& aMetadata);
+
+    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set XMLGen::Criterion metadata.
      * \param [in/out] aInputFile parsed input metadata

@@ -46,6 +46,7 @@ void ParseService::allocate()
 
     mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "1" } });
     mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "1" } });
+    mTags.insert({ "device_id", { { {"device_id"}, ""}, "" } });
 }
 
 void ParseService::checkCode(XMLGen::Service& aService)

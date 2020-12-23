@@ -83,6 +83,16 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
+void Service::deviceID(const std::string& aInput)
+{
+    mMetaData["device_id"] = aInput;
+}
+
+std::string Service::deviceID() const
+{
+    return (this->getValue("device_id"));
+}
+
 void Service::numberRanks(const std::string& aInput)
 {
     mMetaData["number_ranks"] = aInput;

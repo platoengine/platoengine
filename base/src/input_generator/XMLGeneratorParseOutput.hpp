@@ -17,10 +17,10 @@ namespace XMLGen
  * \class ParseOutput
  * \brief Parse inputs in output block and store values in XMLGen::Output.
 **********************************************************************************/
-class ParseOutput : public XMLGen::ParseMetadata<XMLGen::Output>
+class ParseOutput : public XMLGen::ParseMetadata<std::vector<XMLGen::Output>>
 {
 private:
-    XMLGen::Output mData; /*!< output metadata */
+    std::vector<XMLGen::Output> mData; /*!< output metadata */
     XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
 
 private:
@@ -28,7 +28,7 @@ private:
      * \fn setParameters
      * \brief Set output parameter values.
     **********************************************************************************/
-    void setParameters();
+    void setParameters(XMLGen::Output &aOutput);
 
     /******************************************************************************//**
      * \fn checkService
@@ -40,13 +40,13 @@ private:
      * \fn checkOutputData
      * \brief Check if 'statistics' and 'data' keywords are requested at the same time.
     **********************************************************************************/
-    void checkOutputData();
+    void checkOutputData(XMLGen::Output &aOutput);
 
     /******************************************************************************//**
      * \fn checkMetaData
      * \brief Check if output metadata is set correctly.
     **********************************************************************************/
-    void checkMetaData();
+    void checkMetaData(XMLGen::Output &aOutput);
 
     /******************************************************************************//**
      * \fn allocate
@@ -58,19 +58,19 @@ private:
      * \fn setRandomQoI
      * \brief Set random quantity of interests (QoI) metadata.
     **********************************************************************************/
-    void setRandomQoI();
+    void setRandomQoI(XMLGen::Output &aOutput);
 
     /******************************************************************************//**
      * \fn setDeterministicQoI
      * \brief Set deterministic quantity of interests (QoI) metadata.
     **********************************************************************************/
-    void setDeterministicQoI();
+    void setDeterministicQoI(XMLGen::Output &aOutput);
 
     /******************************************************************************//**
      * \fn setMetaData
      * \brief Set output metadata.
     **********************************************************************************/
-    void setMetaData();
+    void setMetaData(XMLGen::Output &aOutput);
 
 public:
     /******************************************************************************//**
@@ -78,7 +78,7 @@ public:
      * \brief Return output metadata.
      * \return metadata
     **********************************************************************************/
-    XMLGen::Output data() const override;
+    std::vector<XMLGen::Output> data() const override;
 
     /******************************************************************************//**
      * \fn parse

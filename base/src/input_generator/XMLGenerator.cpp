@@ -71,7 +71,7 @@
 #include "XMLG_Macros.hpp"
 
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
-//#include "XMLGeneratorProblem.hpp"
+#include "XMLGeneratorProblem.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 
 #include "XMLGeneratorParseOutput.hpp"
@@ -130,22 +130,148 @@ XMLGenerator::~XMLGenerator()
 // **********************************************************************************/
 void XMLGenerator::writeInputFiles()
 {
-    XMLGen::Analyze::write_optimization_problem(m_InputData);
-    //XMLGen::Problem::write_optimization_problem(m_InputData);
+    //XMLGen::Analyze::write_optimization_problem(m_InputData);
+    XMLGen::Problem::write_optimization_problem(m_InputData, m_PreProcessedInputData);
 }
 
 /******************************************************************************/
 void XMLGenerator::generate()
 /******************************************************************************/
 {
-    this->parseInputFile();
+    parseInputFile();
 
     if(!runSROMForUncertainVariables())
     {
         PRINTERR("Failed to expand uncertainties in file generation.")
     }
 
-    this->writeInputFiles();
+    preProcessInputMetaData();
+
+    writeInputFiles();
+}
+
+/******************************************************************************/
+void XMLGenerator::preProcessInputMetaData()
+/******************************************************************************/
+{
+    createCopiesForPerformerCreation();
+}
+
+/******************************************************************************/
+void XMLGenerator::generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs)
+/******************************************************************************/
+{
+    auto tScenarioServicePairItr = aScenarioServicePairs.begin();
+    while(tScenarioServicePairItr != aScenarioServicePairs.end())
+    {
+        m_InputData.mPerformerServices.push_back(m_InputData.service(tScenarioServicePairItr->second));
+        ++tScenarioServicePairItr;
+    }
+}
+
+/******************************************************************************/
+void XMLGenerator::clearInputDataLists(XMLGen::InputData &aInputData)
+/******************************************************************************/
+{
+    aInputData.objective.scenarioIDs.clear();
+    aInputData.objective.serviceIDs.clear();
+    aInputData.objective.criteriaIDs.clear();
+    aInputData.objective.weights.clear();
+    aInputData.constraints.clear();
+    aInputData.mOutputMetaData.clear();
+}
+
+/******************************************************************************/
+void XMLGenerator::loadObjectiveData(XMLGen::InputData &aNewInputData, 
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID)
+/******************************************************************************/
+{
+    for(size_t j=0; j<m_InputData.objective.scenarioIDs.size(); j++)
+    {
+        std::string tTempScenarioID = m_InputData.objective.scenarioIDs[j];
+        std::string tTempServiceID = m_InputData.objective.serviceIDs[j];
+        if(tTempScenarioID == aScenarioID && tTempServiceID == aServiceID)
+        {
+            std::string tTempCriterionID = m_InputData.objective.criteriaIDs[j];
+            std::string tWeight = m_InputData.objective.weights[j];
+            aNewInputData.objective.serviceIDs.push_back(tTempServiceID);
+            aNewInputData.objective.scenarioIDs.push_back(tTempScenarioID);
+            aNewInputData.objective.criteriaIDs.push_back(tTempCriterionID);
+            aNewInputData.objective.weights.push_back(tWeight);
+        } 
+    }
+}
+
+/******************************************************************************/
+void XMLGenerator::loadConstraintData(XMLGen::InputData &aNewInputData, 
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID)
+/******************************************************************************/
+{
+    for(auto &tConstraint : m_InputData.constraints)
+    {
+        std::string tTempScenarioID = tConstraint.scenario();
+        std::string tTempServiceID = tConstraint.service();
+        std::string tTempCriterionID = tConstraint.criterion();
+        if(tTempScenarioID == aScenarioID && tTempServiceID == aServiceID)
+        {
+            aNewInputData.constraints.push_back(tConstraint);
+        } 
+    }
+}
+
+/******************************************************************************/
+void XMLGenerator::loadOutputData(XMLGen::InputData &aNewInputData, 
+                                  const std::string &aServiceID)
+/******************************************************************************/
+{
+    for(auto &tOutput : m_InputData.mOutputMetaData)
+    {
+        if(tOutput.serviceID() == aServiceID)
+        {
+            aNewInputData.mOutputMetaData.push_back(tOutput);
+            break;
+        } 
+    }
+}
+
+/******************************************************************************/
+void XMLGenerator::createCopiesForPerformerCreation()
+/******************************************************************************/
+{
+    std::set<std::pair<std::string,std::string>> tScenarioServicePairs;
+
+    for(size_t i=0; i<m_InputData.objective.scenarioIDs.size(); i++)
+    {
+        std::string tScenarioID = m_InputData.objective.scenarioIDs[i];
+        std::string tServiceID = m_InputData.objective.serviceIDs[i];
+        std::string tCriterionID = m_InputData.objective.criteriaIDs[i];
+
+        std::pair<std::string,std::string> tCurPair = std::make_pair(tScenarioID,tServiceID);
+        if(tScenarioServicePairs.find(tCurPair) == tScenarioServicePairs.end())
+        {
+            tScenarioServicePairs.insert(tCurPair);
+
+            // Clear out the data in the new metadata--we will only keep the 
+            // necessary parts.
+            XMLGen::InputData tNewInputData = m_InputData;
+            clearInputDataLists(tNewInputData);
+
+            // Add back in the relevant objective data.
+            loadObjectiveData(tNewInputData, tScenarioID, tServiceID);
+
+            // Add back in the relevant constraint data.
+            loadConstraintData(tNewInputData, tScenarioID, tServiceID);
+
+            // Add output block data
+            loadOutputData(tNewInputData, tServiceID);
+
+            m_PreProcessedInputData.push_back(tNewInputData);
+        }
+    }
+
+    generatePerformerList(tScenarioServicePairs);
 }
 
 /******************************************************************************/

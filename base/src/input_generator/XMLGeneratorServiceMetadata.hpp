@@ -113,6 +113,20 @@ public:
     std::string numberRanks() const;
 
     /******************************************************************************//**
+     * \fn deviceID
+     * \brief Set string value for keyword 'device_id'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void deviceID(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn deviceID
+     * \brief Return string value for keyword 'device_id'.
+     * \return value
+    **********************************************************************************/
+    std::string deviceID() const;
+
+    /******************************************************************************//**
      * \fn numberProcessors
      * \brief Set string value for keyword 'number_processors'.
      * \param [in] aInput string value

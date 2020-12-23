@@ -68,6 +68,50 @@ void ParseCriteria::allocate()
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
+    mTags.insert({ "criterion_ids", { { {"criterion_ids"}, ""}, "" } });
+    mTags.insert({ "criterion_weights", { { {"criterion_weights"}, ""}, "" } });
+}
+
+void ParseCriteria::setCriterionWeights(XMLGen::Criterion &aMetadata)
+{
+    if(aMetadata.type() == "composite")
+    {
+        auto tItr = mTags.find("criterion_weights");
+        std::string tValues = tItr->second.first.second;
+        if (tItr != mTags.end() && !tValues.empty())
+        {
+            std::vector<std::string> tWeights;
+            char tValuesBuffer[10000];
+            strcpy(tValuesBuffer, tValues.c_str());
+            XMLGen::parse_tokens(tValuesBuffer, tWeights);
+            aMetadata.criterionWeights(tWeights);
+        }
+        else
+        {
+            THROWERR("Criterion Weights are not defined for composite criterion");
+        }
+    }
+}
+
+void ParseCriteria::setCriterionIDs(XMLGen::Criterion &aMetadata)
+{
+    if(aMetadata.type() == "composite")
+    {
+        auto tItr = mTags.find("criterion_ids");
+        std::string tValues = tItr->second.first.second;
+        if (tItr != mTags.end() && !tValues.empty())
+        {
+            std::vector<std::string> tIDs;
+            char tValuesBuffer[10000];
+            strcpy(tValuesBuffer, tValues.c_str());
+            XMLGen::parse_tokens(tValuesBuffer, tIDs);
+            aMetadata.criterionIDs(tIDs);
+        }
+        else
+        {
+            THROWERR("Criterion IDs are not defined for composite criterion");
+        }
+    }
 }
 
 void ParseCriteria::setCriterionType(XMLGen::Criterion& aMetadata)
@@ -87,6 +131,8 @@ void ParseCriteria::setCriterionType(XMLGen::Criterion& aMetadata)
 void ParseCriteria::setMetadata(XMLGen::Criterion& aMetadata)
 {
     this->setCriterionType(aMetadata);
+    this->setCriterionIDs(aMetadata);
+    this->setCriterionWeights(aMetadata);
     this->setTags(aMetadata);
 }
 

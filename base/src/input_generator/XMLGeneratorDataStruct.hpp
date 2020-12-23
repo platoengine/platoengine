@@ -270,9 +270,49 @@ public:
         return tReturnValue;
     }
 
+    bool needToDoWeightingInAggregator() const
+    {
+        return (objective.criteriaIDs.size() > 1);
+        //return !allSubObjectivesOnOnePlatoAnalyzePerformer();
+    }
+
+    bool allSubObjectivesOnOnePlatoAnalyzePerformer() const
+    {
+        bool tReturn = true;
+        if(objective.criteriaIDs.size() == 0)
+        {
+            THROWERR("XML Generator Input Metadata: There is no objective information.")
+        }
+        std::string tFirstServiceID = objective.serviceIDs[0];
+        for(auto &tServiceID : objective.serviceIDs)
+        {
+            const XMLGen::Service &tService = service(tServiceID);
+            if(tService.code() != "plato_analyze" ||
+               tServiceID != tFirstServiceID)
+            {
+                tReturn = false;
+                break;
+            }
+        }
+        return tReturn; 
+    }
+
     bool needToAggregate() const
     {
-        bool tReturnValue = normalizeInAggregator() || objective.criteriaIDs.size() > 1;
+        bool tReturnValue = false;
+        if(normalizeInAggregator())
+        {
+            tReturnValue = true;
+        }
+        else
+        {
+            if(objective.criteriaIDs.size() > 1 &&
+               needToDoWeightingInAggregator())
+            {
+                tReturnValue = true;
+            }
+        }
+        
         return tReturnValue;
     }
 
@@ -449,12 +489,13 @@ public:
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;
-    XMLGen::Output mOutputMetaData;
+    std::vector<XMLGen::Output> mOutputMetaData;
     XMLGen::Optimizer optimizer;
     XMLGen::Arch m_Arch;
     bool m_UseLaunch;
     XMLGen::RandomMetaData mRandomMetaData;
     XMLGen::UncertaintyMetaData m_UncertaintyMetaData;
+    std::vector<XMLGen::Service> mPerformerServices;
 
     // // miscelaneous data that may be unused
     // int num_shape_design_variables;

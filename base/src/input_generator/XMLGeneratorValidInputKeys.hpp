@@ -76,7 +76,9 @@ struct ValidCriterionParameterKeys
         "scmm_penalty_expansion_multiplier",
         "scmm_penalty_upper_bound",
         "scmm_stress_weight",
-        "scmm_mass_weight"
+        "scmm_mass_weight",
+        "criterion_ids",
+        "criterion_weights"
     };
 };
 
@@ -138,6 +140,7 @@ private:
      **/
     std::vector<std::string> mKeys =
     {
+        "composite", 
         "mechanical_compliance", 
         "thermal_compliance",
         "electrical_compliance",

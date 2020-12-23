@@ -67,11 +67,12 @@ void append_qoi_statistics_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    const XMLGen::Output &tOutputMetadata = aXMLMetaData.mOutputMetaData[0];
+    auto tOutputDataIDs = tOutputMetadata.randomIDs();
     auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
     for(auto& tOutputDataID : tOutputDataIDs)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
+        auto tLayout = tOutputMetadata.randomLayout(tOutputDataID);
         auto tMeanSharedData = tOutputDataID + " mean";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tLayout, "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
@@ -98,13 +99,14 @@ void append_multiperformer_qoi_shared_data
     }
 
     // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE serviceS - I.E. SUPPORT STD::VECTOR
-    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    auto tServiceID = aXMLMetaData.mOutputMetaData.serviceID();
+    const XMLGen::Output &tOutputMetadata = aXMLMetaData.mOutputMetaData[0];
+    auto tIDs = tOutputMetadata.randomIDs();
+    auto tServiceID = tOutputMetadata.serviceID();
     auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
     for(auto& tID : tIDs)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
+        auto tLayout = tOutputMetadata.randomLayout(tID);
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
         auto tOwnerName = aXMLMetaData.service(tServiceID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
         std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, tFirstPlatoMainPerformer};
