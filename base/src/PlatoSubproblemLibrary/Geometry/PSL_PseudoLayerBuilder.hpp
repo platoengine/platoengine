@@ -21,14 +21,17 @@ class PseudoLayerBuilder
         PseudoLayerBuilder(const std::vector<std::vector<double>>& aCoordinates,
                            const std::vector<std::vector<int>>& aConnectivity,
                            const double& aCriticalPrintAngle,
-                           const PlatoSubproblemLibrary::Vector& aBuildDirection,
+                           PlatoSubproblemLibrary::Vector aBuildDirection,
                            const std::vector<int>& aBaseLayer) 
             :mCoordinates(aCoordinates),
              mConnectivity(aConnectivity),
              mCriticalPrintAngle(aCriticalPrintAngle),
              mBuildDirection(aBuildDirection),
              mBaseLayer(aBaseLayer)
-        {}
+        {
+            checkInput();
+            mBuildDirection.normalize();
+        }
 
         ~PseudoLayerBuilder(){}
 
@@ -78,11 +81,13 @@ class PseudoLayerBuilder
                                            const std::vector<int>& aPseudoLayers,
                                            const std::set<int>& aConnectedPseudoLayers) const;
 
+        void checkInput() const;
+
     private:
         const std::vector<std::vector<double>>& mCoordinates;
         const std::vector<std::vector<int>>& mConnectivity;
         const double& mCriticalPrintAngle;
-        const PlatoSubproblemLibrary::Vector& mBuildDirection;
+        PlatoSubproblemLibrary::Vector mBuildDirection;
         const std::vector<int>& mBaseLayer;
 };
 }

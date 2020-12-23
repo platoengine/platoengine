@@ -65,6 +65,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_AbstractAuthority.cpp
 							 PSL_Test_Point.cpp
 							 PSL_Test_Vector.cpp
+							 PSL_Test_PseudoLayerBuilder.cpp
 							 Plato_Test_TimersTree.cpp
 							 )
 

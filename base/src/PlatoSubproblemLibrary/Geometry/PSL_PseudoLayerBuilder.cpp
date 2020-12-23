@@ -314,4 +314,45 @@ std::set<SupportPointData> PseudoLayerBuilder::pruneSupportSet(const int& aNode,
     return tNodeSupportSet;
 }
 
+void PseudoLayerBuilder::checkInput() const
+{
+    int tMaxNodeID = 0;
+    int tMinNodeID = 0;
+    for(auto tElement : mConnectivity)
+    {
+        for(auto tNodeID : tElement)
+        {
+            if(tNodeID > tMaxNodeID)
+            {
+                tMaxNodeID = tNodeID;
+            }
+            if(tNodeID < tMinNodeID)
+            {
+                tMinNodeID = tNodeID;
+            }
+        }
+    }
+
+    for(auto tNodeID : mBaseLayer)
+    {
+        if(tNodeID > tMaxNodeID)
+        {
+            tMaxNodeID = tNodeID;
+        }
+        if(tNodeID < tMinNodeID)
+        {
+            tMinNodeID = tNodeID;
+        }
+    }
+
+    if(tMinNodeID < 0 || tMaxNodeID >= (int) mCoordinates.size())
+    {
+        std::string tError = std::string("Node IDs must be between zero and ") + std::to_string(mCoordinates.size() - 1);
+        throw(std::out_of_range(tError));
+    }
+
+    if(mCriticalPrintAngle <= 0 || mCriticalPrintAngle >= M_PI/2)
+        throw(std::out_of_range("Critical print angle should be between zero and Pi/4"));
+}
+
 }
