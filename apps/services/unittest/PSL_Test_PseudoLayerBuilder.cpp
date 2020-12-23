@@ -97,6 +97,71 @@ PSL_TEST(PseudoLayerBuilder,construction)
     EXPECT_THROW(PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer),std::overflow_error);
 }
 
+PSL_TEST(PseudoLayerBuilder,orderNodesInBuildDirection)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.1, 0.1, 0.1}));
+    tCoordinates.push_back(std::vector<double>({1.0, 0.2, 0.2}));
+    tCoordinates.push_back(std::vector<double>({0.3, 1.0, 0.3}));
+    tCoordinates.push_back(std::vector<double>({0.2, 0.3, 1.0}));
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0, 1, 2, 3});
+
+    double tCriticalPrintAngle = M_PI/4;
+
+    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<int> tBaseLayer({0, 1, 2});
+
+    PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
+
+    EXPECT_EQ(tOrderedNodes[0], 0);
+    EXPECT_EQ(tOrderedNodes[1], 1);
+    EXPECT_EQ(tOrderedNodes[2], 2);
+    EXPECT_EQ(tOrderedNodes[3], 3);
+
+    tBuildDirection = std::vector<double>({0.0,1.0,0.0});
+    PseudoLayerBuilder tBuilder2(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    tOrderedNodes = tBuilder2.orderNodesInBuildDirection();
+    EXPECT_EQ(tOrderedNodes[0], 0);
+    EXPECT_EQ(tOrderedNodes[1], 1);
+    EXPECT_EQ(tOrderedNodes[2], 3);
+    EXPECT_EQ(tOrderedNodes[3], 2);
+
+    tBuildDirection = std::vector<double>({1.0,0.0,0.0});
+    PseudoLayerBuilder tBuilder3(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    tOrderedNodes = tBuilder3.orderNodesInBuildDirection();
+    EXPECT_EQ(tOrderedNodes[0], 0);
+    EXPECT_EQ(tOrderedNodes[1], 3);
+    EXPECT_EQ(tOrderedNodes[2], 2);
+    EXPECT_EQ(tOrderedNodes[3], 1);
+
+    tBuildDirection = std::vector<double>({1.0,1.0,0.0});
+    PseudoLayerBuilder tBuilder4(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    tOrderedNodes = tBuilder4.orderNodesInBuildDirection();
+    EXPECT_EQ(tOrderedNodes[0], 0);
+    EXPECT_EQ(tOrderedNodes[1], 3);
+    EXPECT_EQ(tOrderedNodes[2], 1);
+    EXPECT_EQ(tOrderedNodes[3], 2);
+
+    tBuildDirection = std::vector<double>({1.0,-1.0,1.0});
+    PseudoLayerBuilder tBuilder5(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    tOrderedNodes = tBuilder5.orderNodesInBuildDirection();
+    EXPECT_EQ(tOrderedNodes[0], 2);
+    EXPECT_EQ(tOrderedNodes[1], 0);
+    EXPECT_EQ(tOrderedNodes[2], 3);
+    EXPECT_EQ(tOrderedNodes[3], 1);
+}
+
 
 }
 }
