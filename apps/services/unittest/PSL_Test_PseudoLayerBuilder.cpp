@@ -162,6 +162,54 @@ PSL_TEST(PseudoLayerBuilder,orderNodesInBuildDirection)
     EXPECT_EQ(tOrderedNodes[3], 1);
 }
 
+PSL_TEST(PseudoLayerBuilder,setBaseLayerIDToZeroAndOthersToMinusOne)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({1.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 1.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0, 1, 2, 3});
+
+    double tCriticalPrintAngle = M_PI/4;
+
+    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<int> tBaseLayer({0, 1, 2});
+
+    PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
+
+    EXPECT_EQ(tPseudoLayers[0], 0);
+    EXPECT_EQ(tPseudoLayers[1], 0);
+    EXPECT_EQ(tPseudoLayers[2], 0);
+    EXPECT_EQ(tPseudoLayers[3], -1);
+
+    tCoordinates.push_back(std::vector<double>({-1.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, -1.0, 0.0}));
+
+    tConnectivity.push_back(std::vector<int>({0,4,5,3}));
+
+    tBaseLayer.push_back(4);
+    tBaseLayer.push_back(5);
+
+    PseudoLayerBuilder tBuilder2(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    tPseudoLayers = tBuilder2.setBaseLayerIDToZeroAndOthersToMinusOne();
+
+    EXPECT_EQ(tPseudoLayers[0], 0);
+    EXPECT_EQ(tPseudoLayers[1], 0);
+    EXPECT_EQ(tPseudoLayers[2], 0);
+    EXPECT_EQ(tPseudoLayers[3], -1);
+    EXPECT_EQ(tPseudoLayers[4], 0);
+    EXPECT_EQ(tPseudoLayers[5], 0);
+}
+
 
 }
 }
