@@ -30,6 +30,7 @@ class PseudoLayerBuilder
              mBaseLayer(aBaseLayer)
         {
             checkInput();
+            // constructNodeToElementsMap();
             mBuildDirection.normalize();
         }
 
@@ -48,6 +49,10 @@ class PseudoLayerBuilder
         std::set<SupportPointData> pruneSupportSet(const int& aNode,
                                                    const std::vector<int>& aPseudoLayers,
                                                    const std::set<SupportPointData>& aSupportSet) const;
+
+        PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const SupportPointData& aSupportPoint,
+                                                               const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& aSupportCoefficients,
+                                                               const std::vector<std::vector<double>>& aCoordinates) const;
 
     private:
 
@@ -82,10 +87,12 @@ class PseudoLayerBuilder
                                            const std::set<int>& aConnectedPseudoLayers) const;
 
         void checkInput() const;
+        // void constructNodeToElementsMap();
 
     private:
         const std::vector<std::vector<double>>& mCoordinates;
         const std::vector<std::vector<int>>& mConnectivity;
+        // std::map<int, std::set<int>> mNodeToElementsMap;
         const double& mCriticalPrintAngle;
         PlatoSubproblemLibrary::Vector mBuildDirection;
         const std::vector<int>& mBaseLayer;

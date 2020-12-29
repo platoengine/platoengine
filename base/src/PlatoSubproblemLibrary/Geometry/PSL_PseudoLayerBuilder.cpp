@@ -352,7 +352,37 @@ void PseudoLayerBuilder::checkInput() const
     }
 
     if(mCriticalPrintAngle <= 0 || mCriticalPrintAngle >= M_PI/2)
-        throw(std::out_of_range("Critical print angle should be between zero and Pi/4"));
+        throw(std::out_of_range("Critical print angle should be between zero and Pi/2"));
 }
+
+PlatoSubproblemLibrary::Vector PseudoLayerBuilder::getVectorToSupportPoint(const SupportPointData& aSupportPoint,
+                                                       const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& aSupportCoefficients,
+                                                       const std::vector<std::vector<double>>& aCoordinates) const
+{
+    std::vector<double> tCoefficients = aSupportCoefficients.at(aSupportPoint);
+    std::set<int> tSupportingNodes = aSupportPoint.second;
+    PlatoSubproblemLibrary::Vector tVec;
+    int tCoefficientIndex = 0;
+    for(int tSupportingNode : tSupportingNodes)
+    {
+        double tCoefficient = tCoefficients[tCoefficientIndex];
+        tVec = tVec + tCoefficient*PlatoSubproblemLibrary::Vector(aCoordinates[tSupportingNode]);
+        ++tCoefficientIndex;
+    }
+
+    return tVec;
+}
+
+// void PseudoLayerBuilder::constructNodeToElementsMap()
+// {
+//     for(int i = 0; i < (int) mConnectivity.size(); ++i)
+//     {
+//         auto tElement = mConnectivity[i];
+//         for(auto tNode : tElement)
+//         {
+//             mNodeToElementsMap[tNode].insert(i);
+//         }
+//     }
+// }
 
 }
