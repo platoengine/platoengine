@@ -670,7 +670,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
-    std::vector<int> tBaseLayer({0, 1, 2, 4});
+    std::vector<int> tBaseLayer({0, 1, 2, 4, 5});
 
     PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
 
@@ -746,6 +746,61 @@ PSL_TEST(PseudoLayerBuilder, getVectorToSupportPoint)
     tSupportCoefficients[tSupportPoints[3]] = {0.5};
 
     EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[3], tSupportCoefficients, tCoordinates),std::domain_error);
+}
+
+PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
+    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0, 1, 2, 3});
+    tConnectivity.push_back({0, 2, 5, 3});
+    tConnectivity.push_back({2, 1, 4, 3});
+
+    double tCriticalPrintAngle = M_PI/4;
+
+    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<int> tBaseLayer;
+
+    PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
+    std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
+
+    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tSupportSet;
+    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tSupportCoefficients;
+
+    tSupportSet.resize(tCoordinates.size());
+
+    tBuilder.computeSupportSetAndCoefficients(tSupportSet,tSupportCoefficients);
+
+    tPseudoLayers[0] = 0;
+    tPseudoLayers[1] = 0;
+    tPseudoLayers[2] = 0;
+    tPseudoLayers[3] = -1;
+    tPseudoLayers[4] = 1;
+    tPseudoLayers[5] = 1;
+
+    tPseudoLayers[3] = tBuilder.assignNodeToPseudoLayer(3, tPseudoLayers, tSupportSet[3]);
+
+    EXPECT_EQ(tPseudoLayers[3],1);
+
+    tPseudoLayers[1] = 1;
+    tPseudoLayers[2] = 1;
+    tPseudoLayers[3] = -1;
+    
+    tPseudoLayers[3] = tBuilder.assignNodeToPseudoLayer(3, tPseudoLayers, tSupportSet[3]);
+
+    EXPECT_EQ(tPseudoLayers[3],2);
 }
 
 }
