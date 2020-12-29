@@ -222,7 +222,7 @@ void checkCoefficients(const PseudoLayerBuilder& tBuilder,
     {
         for(SupportPointData tSupportPoint : tNodeSupportSet)
         {
-            PlatoSubproblemLibrary::Vector tVec = tBuilder.getVectorToSupportPoint(tSupportPoint,tSupportCoefficients,tCoordinates);
+            PlatoSubproblemLibrary::Vector tVec = getVectorToSupportPoint(tSupportPoint,tSupportCoefficients,tCoordinates);
 
             auto tSupportingNodes = tSupportPoint.second;
 
@@ -702,6 +702,50 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
 
     checkCoefficients(tBuilder, tSupportSet, tSupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+}
+
+PSL_TEST(PseudoLayerBuilder, getVectorToSupportPoint)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({1.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 1.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<SupportPointData> tSupportPoints;
+    tSupportPoints.push_back(SupportPointData({3, {0,1}}));
+    tSupportPoints.push_back(SupportPointData({3, {1,2}}));
+    tSupportPoints.push_back(SupportPointData({3, {0,5}}));
+    tSupportPoints.push_back(SupportPointData({3, {0,2}}));
+
+    std::map<SupportPointData, std::vector<double>> tSupportCoefficients;
+
+    tSupportCoefficients[tSupportPoints[0]] = {0.73, 0.27};
+    tSupportCoefficients[tSupportPoints[1]] = {0.53, 0.47};
+
+    PlatoSubproblemLibrary::Vector tVec = getVectorToSupportPoint(tSupportPoints[0], tSupportCoefficients, tCoordinates);
+
+    EXPECT_DOUBLE_EQ(tVec(0), 0.27);
+    EXPECT_DOUBLE_EQ(tVec(1), 0.0);
+    EXPECT_DOUBLE_EQ(tVec(2), 0.0);
+
+    tVec = getVectorToSupportPoint(tSupportPoints[1], tSupportCoefficients, tCoordinates);
+
+    EXPECT_DOUBLE_EQ(tVec(0), 0.53);
+    EXPECT_DOUBLE_EQ(tVec(1), 0.47);
+    EXPECT_DOUBLE_EQ(tVec(2), 0.0);
+
+
+    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[2], tSupportCoefficients, tCoordinates),std::out_of_range);
+
+    tSupportCoefficients[tSupportPoints[2]] = {0.5, 0.5};
+
+    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[2], tSupportCoefficients, tCoordinates),std::out_of_range);
+
+    tSupportCoefficients[tSupportPoints[3]] = {0.5};
+
+    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[3], tSupportCoefficients, tCoordinates),std::domain_error);
 }
 
 }

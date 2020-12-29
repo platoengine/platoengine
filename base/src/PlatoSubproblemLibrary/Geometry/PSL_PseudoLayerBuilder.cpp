@@ -355,16 +355,22 @@ void PseudoLayerBuilder::checkInput() const
         throw(std::out_of_range("Critical print angle should be between zero and Pi/2"));
 }
 
-PlatoSubproblemLibrary::Vector PseudoLayerBuilder::getVectorToSupportPoint(const SupportPointData& aSupportPoint,
+PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const SupportPointData& aSupportPoint,
                                                        const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& aSupportCoefficients,
-                                                       const std::vector<std::vector<double>>& aCoordinates) const
+                                                       const std::vector<std::vector<double>>& aCoordinates)
 {
     std::vector<double> tCoefficients = aSupportCoefficients.at(aSupportPoint);
     std::set<int> tSupportingNodes = aSupportPoint.second;
+
+    if(tCoefficients.size() != tSupportingNodes.size())
+        throw(std::domain_error("Number of supporting nodes must match number of coefficients"));
+
     PlatoSubproblemLibrary::Vector tVec;
     int tCoefficientIndex = 0;
     for(int tSupportingNode : tSupportingNodes)
     {
+        if(tSupportingNode < 0 || tSupportingNode > (int) aCoordinates.size())
+            throw(std::out_of_range("Node index must lie within 0 and the number of nodes"));
         double tCoefficient = tCoefficients[tCoefficientIndex];
         tVec = tVec + tCoefficient*PlatoSubproblemLibrary::Vector(aCoordinates[tSupportingNode]);
         ++tCoefficientIndex;
@@ -372,17 +378,5 @@ PlatoSubproblemLibrary::Vector PseudoLayerBuilder::getVectorToSupportPoint(const
 
     return tVec;
 }
-
-// void PseudoLayerBuilder::constructNodeToElementsMap()
-// {
-//     for(int i = 0; i < (int) mConnectivity.size(); ++i)
-//     {
-//         auto tElement = mConnectivity[i];
-//         for(auto tNode : tElement)
-//         {
-//             mNodeToElementsMap[tNode].insert(i);
-//         }
-//     }
-// }
 
 }
