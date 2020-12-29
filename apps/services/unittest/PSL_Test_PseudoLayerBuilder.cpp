@@ -803,5 +803,136 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer)
     EXPECT_EQ(tPseudoLayers[3],2);
 }
 
+PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
+    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0, 1, 2, 3});
+    tConnectivity.push_back({0, 2, 5, 3});
+    tConnectivity.push_back({2, 1, 4, 3});
+
+    double tCriticalPrintAngle = M_PI/4;
+
+    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<int> tBaseLayer;
+
+    PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
+    std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
+
+    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tSupportSet;
+    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tSupportCoefficients;
+
+    tSupportSet.resize(tCoordinates.size());
+
+    tBuilder.computeSupportSetAndCoefficients(tSupportSet,tSupportCoefficients);
+
+    tPseudoLayers[0] = 0;
+    tPseudoLayers[1] = 0;
+    tPseudoLayers[2] = 0;
+    tPseudoLayers[3] = 1;
+    tPseudoLayers[4] = 1;
+    tPseudoLayers[5] = 1;
+
+    std::set<SupportPointData> tGoldSupportSet;
+
+    tGoldSupportSet.insert({3, {0}});
+    tGoldSupportSet.insert({3, {1}});
+    tGoldSupportSet.insert({3, {5}});
+    tGoldSupportSet.insert({3, {0,2}});
+    tGoldSupportSet.insert({3, {1,2}});
+    tGoldSupportSet.insert({3, {1,4}});
+    tGoldSupportSet.insert({3, {2,5}});
+
+    EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
+
+    
+    // nodes 4 and 5 are not in the support layer so any support points
+    // depending on them will be removed from the support set when pruned
+    
+    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3]);
+    tGoldSupportSet.erase({3, {5}});
+    tGoldSupportSet.erase({3, {1,4}});
+    tGoldSupportSet.erase({3, {2,5}});
+
+    EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
+}
+
+PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
+    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0, 1, 2, 3});
+    tConnectivity.push_back({0, 2, 5, 3});
+    tConnectivity.push_back({2, 1, 4, 3});
+
+    double tCriticalPrintAngle = M_PI/4;
+
+    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+
+    std::vector<int> tBaseLayer;
+
+    PseudoLayerBuilder tBuilder(tCoordinates,tConnectivity,tCriticalPrintAngle,tBuildDirection,tBaseLayer);
+
+    std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
+    std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
+
+    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tSupportSet;
+    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tSupportCoefficients;
+
+    tSupportSet.resize(tCoordinates.size());
+
+    tBuilder.computeSupportSetAndCoefficients(tSupportSet,tSupportCoefficients);
+
+    tPseudoLayers[0] = 0;
+    tPseudoLayers[1] = 1;
+    tPseudoLayers[2] = 1;
+    tPseudoLayers[3] = 2;
+    tPseudoLayers[4] = 1;
+    tPseudoLayers[5] = 1;
+
+    std::set<SupportPointData> tGoldSupportSet;
+
+    tGoldSupportSet.insert({3, {0}});
+    tGoldSupportSet.insert({3, {1}});
+    tGoldSupportSet.insert({3, {5}});
+    tGoldSupportSet.insert({3, {0,2}});
+    tGoldSupportSet.insert({3, {1,2}});
+    tGoldSupportSet.insert({3, {1,4}});
+    tGoldSupportSet.insert({3, {2,5}});
+
+    EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
+
+    
+    // nodes 4 and 5 are not in the support layer so any support points
+    // depending on them will be removed from the support set when pruned
+    
+    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3]);
+    tGoldSupportSet.erase({3, {0}});
+    tGoldSupportSet.erase({3, {0,2}});
+
+    EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
+}
+
 }
 }
