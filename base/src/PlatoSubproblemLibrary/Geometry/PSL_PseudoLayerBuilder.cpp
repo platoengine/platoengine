@@ -286,32 +286,105 @@ int PseudoLayerBuilder::determineSupportingPseudoLayer(const int& aNode,
     return tSupportingPseudoLayer;
 }
 
-std::set<SupportPointData> PseudoLayerBuilder::pruneSupportSet(const int& aNode, const std::vector<int>& aPseudoLayers, const std::set<SupportPointData>& aSupportSet) const
+int getOtherNeighbor(const SupportPointData& aSupportPointData, const int& aNeighbor)
+{
+    std::set<int> tNeighbors = aSupportPointData.second;
+
+    if(tNeighbors.size() == 1u)
+        throw(std::runtime_error("Support point depends on only one node"));
+
+    for(auto tNeighbor : tNeighbors)
+    {
+        if(tNeighbor != aNeighbor)
+            return tNeighbor;
+    }
+
+    throw(std::runtime_error("Invalid Support point input data"));
+}
+
+double getCorrespondingCoefficient(const SupportPointData& aSupportPointData, const int& aNeighbor, const std::map<SupportPointData, std::vector<double>>& aSupportCoefficients)
+{
+    std::vector<double> tSupportPointCoefficients = aSupportCoefficients.at(aSupportPointData);
+    auto tNeighborIterator = aSupportPointData.second.begin();
+    auto tCoefficientIterator = tSupportPointCoefficients.begin();
+
+    for(; tNeighborIterator != aSupportPointData.second.end(); ++tNeighborIterator)
+    {
+        if(*tNeighborIterator == aNeighbor)
+            return *tCoefficientIterator;
+
+        ++tCoefficientIterator;
+    }
+    
+    throw(std::domain_error("Support point does not depend on specified node"));
+}
+
+std::set<SupportPointData> PseudoLayerBuilder::pruneSupportSet(const int& aNode,
+                                                               const std::vector<int>& aPseudoLayers,
+                                                               const std::set<SupportPointData>& aSupportSet,
+                                                               std::map<SupportPointData, std::vector<double>>& aSupportCoefficients) const
 {
     int tSupportingPseudoLayer = aPseudoLayers[aNode] - 1;
 
-    std::set<SupportPointData> tNodeSupportSet = aSupportSet;
-
-    for (auto tIterator = tNodeSupportSet.begin(); tIterator != tNodeSupportSet.end(); )
+    std::set<SupportPointData> tPrunedSupportSet;
+    
+    for (auto tSupportPoint : aSupportSet)
     {
-        std::set<int> tSupportPoint = tIterator->second;
-        bool tErased = false;
-        for(auto tNeighbor : tSupportPoint)
+        bool tRemainsInSupportSet = true;
+        for(auto tNeighbor : tSupportPoint.second)
         {
             if(aPseudoLayers[tNeighbor] != tSupportingPseudoLayer)
             {
-                tIterator = tNodeSupportSet.erase(tIterator);
-                tErased = true;
-                break;
+                if(isNeighborInCriticalWindow(aNode,tNeighbor))
+                {
+                    if(tSupportPoint.second.size() == 1)
+                    {
+                        tRemainsInSupportSet = false;
+                        aSupportCoefficients.erase(tSupportPoint);
+                        break;
+                    }
+                    else
+                    {
+                        auto tOtherNeighbor = getOtherNeighbor(tSupportPoint, tNeighbor);
+                        if(aPseudoLayers[tOtherNeighbor] != tSupportingPseudoLayer)
+                        {
+                            tRemainsInSupportSet = false;
+                            aSupportCoefficients.erase(tSupportPoint);
+                            break;
+                        }
+                        else
+                        {
+                            SupportPointData tModifiedSupportPoint;
+
+                            tModifiedSupportPoint.first = tSupportPoint.first;
+                            tModifiedSupportPoint.second = {tOtherNeighbor};
+
+                            std::vector<double> tModifiedCoefficient = {getCorrespondingCoefficient(tSupportPoint, tOtherNeighbor, aSupportCoefficients)};
+
+                            tPrunedSupportSet.insert(tModifiedSupportPoint);
+                            aSupportCoefficients[tModifiedSupportPoint] = tModifiedCoefficient;
+
+                            tRemainsInSupportSet = false;
+                            aSupportCoefficients.erase(tSupportPoint);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    tRemainsInSupportSet = false;
+                    aSupportCoefficients.erase(tSupportPoint);
+                    break;
+                }
             }
         }
-        if(!tErased)
+        if(tRemainsInSupportSet)
         {
-            ++tIterator;
+            tPrunedSupportSet.insert(tSupportPoint);
         }
     }
 
-    return tNodeSupportSet;
+    return tPrunedSupportSet;
 }
 
 void PseudoLayerBuilder::checkInput() const

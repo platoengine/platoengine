@@ -27,7 +27,7 @@ void KernelThenAMFilter::buildPseudoLayers()
     for(auto tNode : mOrderedNodes)
     {
         mPseudoLayers[tNode] = tBuilder.assignNodeToPseudoLayer(tNode, mPseudoLayers, mSupportSet[tNode]);
-        mSupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mSupportSet[tNode]);
+        mSupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mSupportSet[tNode], mSupportCoefficients);
     }
 }
 

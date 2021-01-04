@@ -807,12 +807,12 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
 {
     std::vector<std::vector<double>> tCoordinates;
 
-    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
-    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0})); // in critical window
+    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0})); // in critical window
+    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0})); // not in critical window
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0})); // node being supported
+    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0})); // not in critical window
+    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));// in critical window
 
     std::vector<std::vector<int>> tConnectivity;
 
@@ -860,11 +860,15 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
     
     // nodes 4 and 5 are not in the support layer so any support points
     // depending on them will be removed from the support set when pruned
+    // a support point depending on node 2 gets added back into the support set however 
+    // because 5 is in the critical window but not supporting and 2 is not in the critical
+    // window but is supporting
     
-    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3]);
+    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3], tSupportCoefficients);
     tGoldSupportSet.erase({3, {5}});
     tGoldSupportSet.erase({3, {1,4}});
     tGoldSupportSet.erase({3, {2,5}});
+    tGoldSupportSet.insert({3, {2}});
 
     EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
 }
@@ -873,12 +877,12 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
 {
     std::vector<std::vector<double>> tCoordinates;
 
-    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0}));
-    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
-    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0}));
-    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 0.0})); // in critical window
+    tCoordinates.push_back(std::vector<double>({0.9, 0.0, 0.0})); // in critical window
+    tCoordinates.push_back(std::vector<double>({0.0, 1.1, 0.0})); // not in critical window
+    tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0})); // node being supported
+    tCoordinates.push_back(std::vector<double>({1.0, 1.0, 0.0})); // not in critical window
+    tCoordinates.push_back(std::vector<double>({-0.9, 0.0, 0.0}));// in critical window
 
     std::vector<std::vector<int>> tConnectivity;
 
@@ -924,14 +928,28 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
     EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
 
     
-    // nodes 4 and 5 are not in the support layer so any support points
-    // depending on them will be removed from the support set when pruned
+    // node 0 is not in the support layer so any support points
+    // depending on it will be removed from the support set when pruned
+    // a support point depending on node 2 gets added back into the support set however 
+    // because 0 is in the critical window but not supporting and 2 is not in the critical
+    // window but is supporting
     
-    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3]);
+    auto tGoldSupportCoefficients = tSupportCoefficients;
+    
+    tSupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tSupportSet[3], tSupportCoefficients);
     tGoldSupportSet.erase({3, {0}});
     tGoldSupportSet.erase({3, {0,2}});
+    tGoldSupportCoefficients.erase({3, {0}});
+
+    double tCoefficient = tGoldSupportCoefficients.at({3, {0,2}})[1];
+    tGoldSupportCoefficients.erase({3, {0,2}});
+
+    SupportPointData tNewSupportPoint = {3, {2}};
+    tGoldSupportSet.insert(tNewSupportPoint);
+    tGoldSupportCoefficients[tNewSupportPoint] = {tCoefficient};
 
     EXPECT_EQ(tSupportSet[3], tGoldSupportSet);
+    EXPECT_EQ(tSupportCoefficients, tGoldSupportCoefficients);
 }
 
 }

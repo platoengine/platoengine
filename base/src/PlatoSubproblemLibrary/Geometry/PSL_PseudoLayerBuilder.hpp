@@ -47,7 +47,8 @@ class PseudoLayerBuilder
 
         std::set<SupportPointData> pruneSupportSet(const int& aNode,
                                                    const std::vector<int>& aPseudoLayers,
-                                                   const std::set<SupportPointData>& aSupportSet) const;
+                                                   const std::set<SupportPointData>& aSupportSet,
+                                                   std::map<SupportPointData, std::vector<double>>& aSupportCoefficients) const;
 
     private:
 
@@ -86,7 +87,6 @@ class PseudoLayerBuilder
     private:
         const std::vector<std::vector<double>>& mCoordinates;
         const std::vector<std::vector<int>>& mConnectivity;
-        // std::map<int, std::set<int>> mNodeToElementsMap;
         const double& mCriticalPrintAngle;
         PlatoSubproblemLibrary::Vector mBuildDirection;
         const std::vector<int>& mBaseLayer;
