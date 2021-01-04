@@ -18,7 +18,8 @@ namespace Analyze
 {
 /*!< information used to identify materials, \n
  * i.e. pair<material_category, vector<pair<material_property_argument_name_tag, material_property_tag> > > */
-using MaterialPropertyTags = std::pair<std::string, std::vector<std::pair<std::string, std::string>>>;
+using MaterialPropertyTags = std::tuple<std::string, std::string, std::vector<std::pair<std::string, std::string>>>;
+//using MaterialPropertyTags = std::pair<std::string, std::vector<std::pair<std::string, std::string>>>;
 
 /*!< map from element block identification number to material metadata, i.e. map< block_id, MaterialInfo > */
 using MaterialPropertyMetadata = std::unordered_map<std::string, XMLGen::Analyze::MaterialPropertyTags>;

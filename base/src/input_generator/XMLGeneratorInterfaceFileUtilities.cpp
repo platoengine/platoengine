@@ -389,9 +389,16 @@ void append_objective_value_stage
         XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
 
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
-        // The develop branch uses "Objective Value" here. If it is not "Objective Value" I am not sure what it should be.
-        //XMLGen::append_evaluate_nondeterministic_objective_value_operation(tSharedDataName, aXMLMetaData, tStageNode);
-        XMLGen::append_evaluate_nondeterministic_objective_value_operation("Objective Value", aXMLMetaData, tStageNode);
+    {
+        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tObjectiveName = "Criterion Value - " + tIdentifierString;
+        XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
+    }
+
     std::string tOutputSharedData;
     if(aXMLMetaData.needToAggregate())
     {

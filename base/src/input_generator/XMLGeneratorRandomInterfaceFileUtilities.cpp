@@ -134,10 +134,13 @@ void append_multiperformer_topology_shared_data
 
     for(auto& tService : aXMLMetaData.services())
     {
-        auto tForNode = tSharedData.append_child("For");
-        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tUserName = tService.performer() + "_{PerformerIndex}";
-        XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
+        if(tService.performer() != tFirstPlatoMainPerformer) // don't add platomain performer twice
+        {
+            auto tForNode = tSharedData.append_child("For");
+            XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+            auto tUserName = tService.performer() + "_{PerformerIndex}";
+            XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
+        }
     }
 }
 //function append_multiperformer_topology_shared_data

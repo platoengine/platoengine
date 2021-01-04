@@ -547,7 +547,16 @@ void append_update_problem_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aXMLMetaData.service(0u).updateProblem())
+    bool tNeedUpdate = false;
+    for(auto &tService : aXMLMetaData.services())
+    {
+        if(tService.updateProblem())
+        {
+            tNeedUpdate = true;
+            break;
+        }
+    }
+    if(!tNeedUpdate)
     {
         return;
     }

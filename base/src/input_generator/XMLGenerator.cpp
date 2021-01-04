@@ -897,15 +897,15 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
                 }
               }
             }
-            // else if(parseSingleValue(tokens, tInputStringList = {"objective","number","standard","deviations"}, tStringValue))
-            // {
-            //   if(tokens.size() < 5)
-            //   {
-            //     std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"objective number standard deviations\" keywords.\n";
-            //     return false;
-            //   }
-            //   m_InputData.objective_number_standard_deviations = tokens[4];
-            // }
+            else if(parseSingleValue(tokens, tInputStringList = {"objective","number","standard","deviations"}, tStringValue))
+            {
+              if(tokens.size() < 5)
+              {
+                std::cout << "ERROR:XMLGenerator:parseOptimizationParameters: No value specified after \"objective number standard deviations\" keywords.\n";
+                return false;
+              }
+              m_InputData.optimizer.objective_number_standard_deviations = tokens[4];
+            }
             // else if(parseSingleValue(tokens, tInputStringList = {"output", "standard","deviations"}, tStringValue))
             // {
             //   if(tokens.size() < 4)

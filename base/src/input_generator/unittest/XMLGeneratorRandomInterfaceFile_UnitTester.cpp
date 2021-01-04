@@ -2201,7 +2201,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     auto tRandomObjectiveOutput = tStageOperation.child("Output");
     ASSERT_FALSE(tRandomObjectiveOutput.empty());
     tGoldKeys = { "ArgumentName", "SharedDataName" };
-    tGoldValues = {"Objective Mean Plus 1 StdDev", "Objective Value"};
+    tGoldValues = {"Objective Mean Plus 1 StdDev", "Criterion Value - criterion_1_service_1_scenario_1"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tRandomObjectiveOutput);
 }
 

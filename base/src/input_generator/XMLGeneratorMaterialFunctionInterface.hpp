@@ -42,12 +42,14 @@ public:
     /******************************************************************************//**
      * \fn call
      * \brief Append material properties to plato_analyze_operation.xml file.
+     * \param [in]     aMaterialName material name
      * \param [in]     aCategory     material category, e.g. 'isotropic linear elastic'
      * \param [in]     aMaterialTags material tags, i.e. vector<pair<material_property_argument_name_tag, material_property_tag>>
      * \param [in/out] aParentNode   pugi::xml_node
     **********************************************************************************/
     void call
-    (const std::string &aCategory,
+    (const std::string &aMaterialName,
+     const std::string &aCategory,
      const std::vector<std::pair<std::string,std::string>>& aMaterialTags,
      pugi::xml_node &aParentNode);
 };

@@ -131,10 +131,20 @@ void append_update_problem_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    if(!aMetaData.service(0u).updateProblem())
+    bool tNeedUpdate = false;
+    for(auto &tService : aMetaData.services())
+    {
+        if(tService.updateProblem())
+        {
+            tNeedUpdate = true;
+            break;
+        }
+    }
+    if(!tNeedUpdate)
     {
         return;
     }
+
     if(aMetaData.optimizer.mProblemUpdateFrequency.empty())
     {
         THROWERR("Append Update Problem to Plato Analyze Operation: 'update problem frequency' keyword is empty.")
@@ -179,12 +189,14 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
     {
         auto tMaterial = tSample.material(tID);
         auto tMaterialPropertiesTags = tMaterial.tags();
-        tMap[tID] = std::make_pair(tMaterial.category(), std::vector<std::pair<std::string, std::string>>());
+        tMap[tID] = std::make_tuple(tMaterial.name(), tMaterial.category(), std::vector<std::pair<std::string, std::string>>());
+        //tMap[tID] = std::make_pair(tMaterial.category(), std::vector<std::pair<std::string, std::string>>());
         for(auto& tTag : tMaterialPropertiesTags)
         {
             auto tMaterialPropertyTag = Plato::tolower(tTag);
             auto tArgumentNameTag = tMaterialPropertyTag + "_block_id_" + tID;
-            tMap[tID].second.push_back(std::make_pair(tArgumentNameTag, tMaterialPropertyTag));
+            std::get<2>(tMap[tID]).push_back(std::make_pair(tArgumentNameTag, tMaterialPropertyTag));
+            //tMap[tID].second.push_back(std::make_pair(tArgumentNameTag, tMaterialPropertyTag));
         }
     }
 
@@ -202,7 +214,8 @@ void append_random_material_properties_to_plato_analyze_operation
         XMLGen::return_random_material_metadata_for_plato_analyze_operation_xml_file(aMetaData.mRandomMetaData);
     for (auto &tMaterial : tMaterialTags)
     {
-        tMatFuncInterface.call(tMaterial.second.first, tMaterial.second.second, aParentNode);
+        tMatFuncInterface.call(std::get<0>(tMaterial.second), std::get<1>(tMaterial.second), 
+                               std::get<2>(tMaterial.second), aParentNode);
     }
 }
 /******************************************************************************/
