@@ -65,8 +65,8 @@ private:
 
     void buildPseudoLayers();
 
-    double projection_apply(const double& beta, const double& input);
-    double projection_gradient(const double& beta, const double& input);
+    double internal_apply(AbstractInterface::ParallelVector* const field, const int& i) const;
+    double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const;
 
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
     {

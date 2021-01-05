@@ -6,11 +6,11 @@
 namespace PlatoSubproblemLibrary
 {
 
-double KernelThenTANHFilter::projection_apply(const double& beta, const double& input)
+double KernelThenTANHFilter::projection_apply(const double& beta, const double& input) const
 {
   return tanh_apply(beta,input);
 }
-double KernelThenTANHFilter::projection_gradient(const double& beta, const double& input)
+double KernelThenTANHFilter::projection_gradient(const double& beta, const double& input) const
 {
   return tanh_gradient(beta,input);
 }

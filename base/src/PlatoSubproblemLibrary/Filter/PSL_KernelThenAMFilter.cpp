@@ -1,5 +1,6 @@
 // PlatoSubproblemLibraryVersion(8): a stand-alone library for the kernel filter for plato.
 #include "PSL_KernelThenAMFilter.hpp"
+#include "PSL_Abstract_ParallelVector.hpp"
 #include "PSL_FreeHelpers.hpp"
 #include "PSL_Point.hpp"
 #include "PSL_Vector.hpp"
@@ -7,13 +8,14 @@
 namespace PlatoSubproblemLibrary
 {
 
-double KernelThenAMFilter::projection_apply(const double& beta, const double& input)
+double KernelThenAMFilter::internal_apply(AbstractInterface::ParallelVector* const field, const int& i) const
 {
-  return AM_apply(beta,input);
+  return field->get_value(i);
 }
-double KernelThenAMFilter::projection_gradient(const double& beta, const double& input)
+
+double KernelThenAMFilter::internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const
 {
-  return AM_gradient(beta,input);
+  return 1.0;
 }
 
 void KernelThenAMFilter::buildPseudoLayers()

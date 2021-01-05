@@ -97,22 +97,6 @@ double tanh_gradient(const double& aBeta, const double& aInput)
   return tNumerator/tDenominator;
 }
 
-double AM_apply(const double& aBeta, const double& aInput)
-{
-  double tEta = 0.5;
-  double tNumerator = std::tanh(aBeta*tEta) + tanh(aBeta*(aInput - tEta));
-  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
-  return tNumerator/tDenominator;
-}
-
-double AM_gradient(const double& aBeta, const double& aInput)
-{
-  double tEta = 0.5;
-  double tNumerator = aBeta*(1-std::tanh(aBeta*(aInput - tEta))*std::tanh(aBeta*(aInput - tEta)));
-  double tDenominator = std::tanh(aBeta*tEta) + tanh(aBeta*(1.0-tEta));
-  return tNumerator/tDenominator;
-}
-
 void random_orthogonal_vector(const std::vector<double>& input, std::vector<double>& output)
 {
     const size_t dimension = input.size();

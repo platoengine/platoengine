@@ -53,14 +53,9 @@ private:
     AbstractInterface::PointCloud* m_original_points;
     AbstractInterface::ParallelExchanger* m_parallel_exchanger;
     KernelFilter* m_kernel;
-    double m_current_heaviside_parameter;
-    double m_heaviside_parameter_continuation_scale;
-    double m_max_heaviside_parameter;
 
-    void check_input_data();
-
-    virtual double projection_apply(const double& beta, const double& input) = 0;
-    virtual double projection_gradient(const double& beta, const double& input) = 0;
+    virtual double internal_apply(AbstractInterface::ParallelVector* const field, const int& i) const = 0;
+    virtual double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const = 0;
 };
 
 }

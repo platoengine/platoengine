@@ -6,11 +6,11 @@
 namespace PlatoSubproblemLibrary
 {
 
-double KernelThenHeavisideFilter::projection_apply(const double& beta, const double& input)
+double KernelThenHeavisideFilter::projection_apply(const double& beta, const double& input) const
 {
   return heaviside_apply(beta,input);
 }
-double KernelThenHeavisideFilter::projection_gradient(const double& beta, const double& input)
+double KernelThenHeavisideFilter::projection_gradient(const double& beta, const double& input) const
 {
   return heaviside_gradient(beta,input);
 }
