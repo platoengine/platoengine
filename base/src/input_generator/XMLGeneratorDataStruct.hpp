@@ -21,6 +21,7 @@
 #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
 #include "XMLGeneratorEssentialBoundaryConditionMetadata.hpp"
+#include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
 
@@ -46,33 +47,6 @@ struct Objective
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
 };
-/* now in XMLGeneratorBoundaryMetadata.hpp
-struct Load
-{
-    bool mIsRandom = false;
-    std::string type; // traction, heat flux, force, pressure ...
-    std::string app_type; // nodeset or sideset
-    std::string app_id; // nodeset/sideset id
-    std::string app_name; // nodeset/sideset name
-    std::vector<std::string> values;
-    std::string dof;  // x, y, or z
-    std::string load_id;
-};
-
-struct BC
-{
-    bool mIsRandom = false;
-    std::string mPhysics = "steady_state_mechanics";
-    std::string mCategory = "rigid";
-    std::string type;     // temperature, displacement
-    std::string app_type; // nodeset or sideset
-    std::string app_id; // nodeset/sideset id
-    std::string app_name; // nodeset/sideset name
-    std::string dof;
-    std::string bc_id;
-    std::string value;
-};
-*/
 
 struct Block
 {
@@ -484,6 +458,7 @@ public:
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
+    std::vector<XMLGen::NaturalBoundaryCondition> nbcs;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::Load> loads;
     XMLGen::Mesh mesh;

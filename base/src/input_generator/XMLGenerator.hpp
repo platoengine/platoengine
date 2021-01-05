@@ -116,6 +116,7 @@ protected:
 private:
 
     void preProcessInputMetaData();
+    void convertNBCToLoadData();
     void loadOutputData(XMLGen::InputData &aNewInputData, 
                                   const std::string &aServiceID);
     void loadObjectiveData(XMLGen::InputData &aNewInputData,

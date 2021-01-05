@@ -101,11 +101,20 @@ begin boundary_condition 8
    value 0.0
 end boundary_condition
 
-begin loads
-    traction sideset name ss_1 value 0 1e5 0 load id 1
-    uniform_surface_flux sideset name ss_1 value -0.0e2 load id 2
-end loads
-      
+begin load 2
+    type uniform_surface_flux
+    location_type sideset
+    location_name ss_1
+    value -0.0e2
+end load
+
+begin load 1
+    type traction
+    location_type sideset
+    location_name ss_1
+    value 0 1e5 0
+end load
+
 begin constraint 1
   criterion 2
   relative_target 0.2
@@ -153,6 +162,10 @@ begin mesh
 end mesh
 
 
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
 begin paths
 code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD

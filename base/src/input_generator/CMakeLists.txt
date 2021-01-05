@@ -10,6 +10,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseEssentialBoundaryCondition.cpp
+                      XMLGeneratorParseNaturalBoundaryCondition.cpp
                       XMLGeneratorParseCriteria.cpp
                       XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp

@@ -83,6 +83,7 @@
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
 #include "XMLGeneratorParseEssentialBoundaryCondition.hpp"
+#include "XMLGeneratorParseNaturalBoundaryCondition.hpp"
 
 namespace XMLGen
 {
@@ -339,9 +340,31 @@ void XMLGenerator::parseObjective(std::istream &aInputFile)
 }
 
 /******************************************************************************/
+void XMLGenerator::convertNBCToLoadData()
+/******************************************************************************/
+{
+    m_InputData.loads.clear();
+    for(auto &tNBC : m_InputData.nbcs)
+    {
+        Load tNewLoad;
+        tNewLoad.type = tNBC.value("type");
+        tNewLoad.app_type = tNBC.value("location_type");
+        tNewLoad.app_name = tNBC.value("location_name");
+        tNewLoad.values = tNBC.getLoadValues();
+        tNewLoad.load_id = tNBC.id();
+        m_InputData.loads.push_back(tNewLoad);
+    }
+}
+
+/******************************************************************************/
 bool XMLGenerator::parseLoads(std::istream &fin)
 /******************************************************************************/
 {
+    XMLGen::ParseNaturalBoundaryCondition tParseNaturalBoundaryCondition;
+    tParseNaturalBoundaryCondition.parse(fin);
+    m_InputData.nbcs = tParseNaturalBoundaryCondition.data();
+    convertNBCToLoadData();
+/*
     std::vector<std::string> tInputStringList;
     std::vector<std::string> tokens;
     std::string tStringValue;
@@ -369,6 +392,7 @@ bool XMLGenerator::parseLoads(std::istream &fin)
       std::cout << "ERROR:XMLGenerator:parseLoads: No load block found \n";
       return false;
     }
+*/
 
     return true;
 }

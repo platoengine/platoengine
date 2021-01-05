@@ -94,10 +94,19 @@ begin boundary_condition 3
     value 0 
 end boundary_condition
 
-begin loads
-    traction sideset name ss_2 value 0 -3e3 0 load id 1
-    traction sideset name ss_2 value 0 0 3e3 load id 2
-end loads
+begin load 2
+    type traction
+    location_type sideset
+    location_name ss_2
+    value 0 0 3e3
+end load
+
+begin load 1
+    type traction
+    location_type sideset
+    location_name ss_2
+    value 0 -3e3 0
+end load
       
 begin constraint
   criterion 2
@@ -130,3 +139,7 @@ begin mesh
    //name bolted_bracket.exo
 end mesh
 
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
