@@ -181,15 +181,15 @@ private:
 
 public:
     
-    std::vector<XMLGen::Load> scenarioLoads(const std::string& aID) const
+    std::vector<XMLGen::NaturalBoundaryCondition> scenarioLoads(const std::string& aID) const
     {
-        std::vector<XMLGen::Load> tScenarioLoads;
+        std::vector<XMLGen::NaturalBoundaryCondition> tScenarioLoads;
         auto &tScenario = scenario(aID);
         for(auto &tLoadID : tScenario.loadIDs())
         {
             for(auto &tLoad : loads)
             {
-                if(tLoad.load_id == tLoadID)
+                if(tLoad.id() == tLoadID)
                 {
                     tScenarioLoads.push_back(tLoad);
                     break;
@@ -458,9 +458,9 @@ public:
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
-    std::vector<XMLGen::NaturalBoundaryCondition> nbcs;
+    //std::vector<XMLGen::NaturalBoundaryCondition> nbcs;
     std::vector<XMLGen::Block> blocks;
-    std::vector<XMLGen::Load> loads;
+    std::vector<XMLGen::NaturalBoundaryCondition> loads;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;

@@ -1527,8 +1527,8 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     XMLGen::RandomMetaData tRandomMetaData;
     XMLGen::RandomLoadCase tRandomLoadCase;
     XMLGen::LoadCase tLoadCase;
-    std::vector<XMLGen::Load> tLoads;
-    XMLGen::Load tLoad;
+    std::vector<XMLGen::NaturalBoundaryCondition> tLoads;
+    XMLGen::NaturalBoundaryCondition tLoad;
     tLoads.push_back(tLoad);
     tLoadCase.loads = tLoads;
     tLoadCase.id = 1;

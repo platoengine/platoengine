@@ -80,14 +80,14 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetType_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
-    tLoadCase1.loads[0].type = "traction";
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads[0].type("traction");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads[0].type = "pressure";
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads[0].type("pressure");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;
@@ -103,13 +103,13 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetSize_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;
@@ -125,14 +125,14 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetApplicationName_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
-    tLoadCase1.loads[0].app_name = "sideset";
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads[0].location_name("sideset");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads[0].app_name = "nodeset";
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads[0].location_name("nodeset");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;

@@ -605,7 +605,7 @@ void append_spatial_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
 (const std::string &aPhysics,
- const std::vector<XMLGen::Load> &aLoads,
+ const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
  std::vector<pugi::xml_node> &aParentNodes)
 {
     XMLGen::AppendNaturalBoundaryCondition tNaturalBCFuncInterface;
@@ -624,12 +624,12 @@ void append_natural_boundary_conditions_to_plato_problem
 /**********************************************************************************/
 void get_nbc_parent_node
 (const std::string &aPhysics,
- const XMLGen::Load &aLoad,
+ const XMLGen::NaturalBoundaryCondition &aLoad,
  const std::vector<pugi::xml_node> &aParentNodes,
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidPhysicsNBCCombinations tPhysicsNBCMap;
-    std::string tParentName = tPhysicsNBCMap.get_parent_nbc_node_name(aPhysics, aLoad.type); 
+    std::string tParentName = tPhysicsNBCMap.get_parent_nbc_node_name(aPhysics, aLoad.type()); 
     for(auto &tCurParentNode : aParentNodes)
     {
         if(tParentName.compare(tCurParentNode.attribute("name").value()) == 0)
@@ -638,7 +638,7 @@ void get_nbc_parent_node
             return;
         }
     } 
-    THROWERR("Couldn't find valid parent node for " + aLoad.type + " load.")
+    THROWERR("Couldn't find valid parent node for " + aLoad.type() + " load.")
 }
 /**********************************************************************************/
 
@@ -680,7 +680,7 @@ void append_deterministic_natural_boundary_conditions_to_plato_problem
         std::vector<pugi::xml_node> tParentNodes;
         XMLGen::create_natural_boundary_condition_parent_nodes(tScenario, aParentNode, tParentNodes);
 
-        std::vector<XMLGen::Load> tScenarioLoads = aXMLMetaData.scenarioLoads(tScenario.id());
+        std::vector<XMLGen::NaturalBoundaryCondition> tScenarioLoads = aXMLMetaData.scenarioLoads(tScenario.id());
         XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tScenarioLoads, tParentNodes);
     }
 }

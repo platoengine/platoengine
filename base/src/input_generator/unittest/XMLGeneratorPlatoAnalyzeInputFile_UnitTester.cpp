@@ -1100,11 +1100,12 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
 
     tXMLMetaData.objective.scenarioIDs.push_back("1");
 
-    XMLGen::Load tLoad;
-    tLoad.type = "traction";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0", "2.0", "3.0"};
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("traction");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    tLoad.load_values(tValues);
     tXMLMetaData.loads.push_back(tLoad);
 
     XMLGen::Scenario tScenario;
@@ -1149,28 +1150,26 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::Load tLoad1;
-    tLoad1.mIsRandom = true;
-    tLoad1.type = "traction";
-    tLoad1.load_id = "1";
-    tLoad1.app_name = "sideset";
-    tLoad1.values.push_back("1.0");
-    tLoad1.values.push_back("2.0");
-    tLoad1.values.push_back("3.0");
+    XMLGen::NaturalBoundaryCondition tLoad1;
+    tLoad1.is_random("true");
+    tLoad1.type("traction");
+    tLoad1.id("1");
+    tLoad1.location_name("sideset");
+    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::Load tLoad2;
-    tLoad2.mIsRandom = true;
-    tLoad2.type = "traction";
-    tLoad1.load_id = "1";
-    tLoad2.app_name = "sideset";
-    tLoad2.values.push_back("11");
-    tLoad2.values.push_back("12");
-    tLoad2.values.push_back("13");
+    XMLGen::NaturalBoundaryCondition tLoad2;
+    tLoad2.is_random("true");
+    tLoad2.type("traction");
+    tLoad1.id("1");
+    tLoad2.location_name("sideset");
+    tValues = {"11", "12", "13"};
+    tLoad2.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad2);
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
@@ -1217,8 +1216,8 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
 }
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_ErrorInvalidType)
 {
-    XMLGen::Load tLoad;
-    tLoad.type = "nonsense";
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("nonsense");
     pugi::xml_document tDocument;
     XMLGen::AppendNaturalBoundaryCondition tInterface;
     ASSERT_THROW(tInterface.call("Traction Vector Boundary Condition 1", tLoad, tDocument), std::runtime_error);
@@ -1226,11 +1225,12 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_ErrorInvalidType)
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
 {
-    XMLGen::Load tLoad;
-    tLoad.type = "traction";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0", "2.0", "3.0"};
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("traction");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    tLoad.load_values(tValues);
     pugi::xml_document tDocument;
     XMLGen::AppendNaturalBoundaryCondition tInterface;
     ASSERT_NO_THROW(tInterface.call("Traction Vector Boundary Condition 1", tLoad, tDocument));
@@ -1257,11 +1257,12 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformPressure)
 {
-    XMLGen::Load tLoad;
-    tLoad.type = "uniform_pressure";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0"};
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("uniform_pressure");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0"};
+    tLoad.load_values(tValues);
     pugi::xml_document tDocument;
     XMLGen::AppendNaturalBoundaryCondition tInterface;
     ASSERT_NO_THROW(tInterface.call("Uniform Pressure Boundary Condition 1", tLoad, tDocument));
@@ -1288,11 +1289,12 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformPressure)
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfacePotential)
 {
-    XMLGen::Load tLoad;
-    tLoad.type = "uniform_surface_potential";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0"};
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("uniform_surface_potential");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0"};
+    tLoad.load_values(tValues);
     pugi::xml_document tDocument;
     XMLGen::AppendNaturalBoundaryCondition tInterface;
     ASSERT_NO_THROW(tInterface.call("Uniform Surface Potential Boundary Condition 1", tLoad, tDocument));
@@ -1319,11 +1321,12 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfacePotenti
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfaceFlux)
 {
-    XMLGen::Load tLoad;
-    tLoad.type = "uniform_surface_flux";
-    tLoad.load_id = "1";
-    tLoad.app_name = "ss_1";
-    tLoad.values = {"1.0"};
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("uniform_surface_flux");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0"};
+    tLoad.load_values(tValues);
     pugi::xml_document tDocument;
     XMLGen::AppendNaturalBoundaryCondition tInterface;
     ASSERT_NO_THROW(tInterface.call("Uniform Surface Flux Boundary Condition 1", tLoad, tDocument));
@@ -1351,53 +1354,53 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfaceFlux)
 TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag_ErrorInvalidType)
 {
     XMLGen::NaturalBoundaryConditionTag tInterface;
-    XMLGen::Load tLoad;
-    tLoad.type = "nonsense";
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("nonsense");
     ASSERT_THROW(tInterface.call(tLoad), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag)
 {
     XMLGen::NaturalBoundaryConditionTag tInterface;
-    XMLGen::Load tLoad;
+    XMLGen::NaturalBoundaryCondition tLoad;
 
     // TRACTION TEST
-    tLoad.type = "traction";
-    tLoad.load_id = "1";
+    tLoad.type("traction");
+    tLoad.id("1");
     auto tName = tInterface.call(tLoad);
     ASSERT_STREQ("Traction Vector Boundary Condition with ID 1", tName.c_str());
 
-    tLoad.mIsRandom = true;
+    tLoad.is_random("true");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Random Traction Vector Boundary Condition with ID 1", tName.c_str());
 
     // PRESSURE TEST
-    tLoad.mIsRandom = false;
-    tLoad.type = "uniform_pressure";
+    tLoad.is_random("false");
+    tLoad.type("uniform_pressure");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Uniform Pressure Boundary Condition with ID 1", tName.c_str());
 
-    tLoad.mIsRandom = true;
+    tLoad.is_random("true");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Random Uniform Pressure Boundary Condition with ID 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
-    tLoad.mIsRandom = false;
-    tLoad.type = "uniform_surface_potential";
+    tLoad.is_random("false");
+    tLoad.type("uniform_surface_potential");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Uniform Surface Potential Boundary Condition with ID 1", tName.c_str());
 
-    tLoad.mIsRandom = true;
+    tLoad.is_random("true");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Random Uniform Surface Potential Boundary Condition with ID 1", tName.c_str());
 
     // SURFACE POTENTIAL TEST
-    tLoad.mIsRandom = false;
-    tLoad.type = "uniform_surface_flux";
+    tLoad.is_random("false");
+    tLoad.type("uniform_surface_flux");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Uniform Surface Flux Boundary Condition with ID 1", tName.c_str());
 
-    tLoad.mIsRandom = true;
+    tLoad.is_random("true");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Random Uniform Surface Flux Boundary Condition with ID 1", tName.c_str());
 }

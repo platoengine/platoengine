@@ -74,21 +74,21 @@ return_random_tractions_tags_for_define_xml_file
     auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
-        auto tLoadTagLower = Plato::tolower(tLoad.type);
+        auto tLoadTagLower = Plato::tolower(tLoad.type());
         auto tIsTractionLoad = tLoadTagLower == "traction";
         auto tLoadIdentifier = tNaturalBCNameFuncInterface.call(tLoad);
-        if(tLoad.mIsRandom && tIsTractionLoad)
+        if(tLoad.is_random() && tIsTractionLoad)
         {
-            for (auto &tValue : tLoad.values)
+            for (auto &tValue : tLoad.load_values())
             {
-                auto tDimIndex = &tValue - &tLoad.values[0];
+                auto tDimIndex = &tValue - &tLoad.load_values()[0];
                 auto tDimension = tValidDofs.value(tDimIndex);
                 if(tDimension.empty())
                 {
                     THROWERR(std::string("Return Random Tractions Tags for Define XML File: Invalid dimension key '")
                         + std::to_string(tDimIndex) + "'. Valid dimensions are: 1D, 2D, and 3D.")
                 }
-                auto tTag = tLoadTagLower + "_load_id_" + tLoad.load_id + "_" + tDimension + "_axis";
+                auto tTag = tLoadTagLower + "_load_id_" + tLoad.id() + "_" + tDimension + "_axis";
                 tOutput[tLoadIdentifier].push_back(tTag);
             }
         }
@@ -236,10 +236,10 @@ allocate_map_from_random_load_identifier_to_load_samples
     XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
     for(auto& tLoad : tLoadCase.loads)
     {
-        if(tLoad.mIsRandom)
+        if(tLoad.is_random())
         {
             auto tIdentifier = tIdentifierInterface.call(tLoad);
-            for (size_t i=0; i<tLoad.values.size(); ++i)
+            for (size_t i=0; i<tLoad.load_values().size(); ++i)
             {
                 tOutput[tIdentifier].push_back({});
             }
@@ -265,13 +265,13 @@ prepare_tractions_for_define_xml_file
         auto tLoadCase = tSample.loadcase();
         for(auto& tLoad : tLoadCase.loads)
         {
-            if(tLoad.mIsRandom)
+            if(tLoad.is_random())
             {
                 // append random load values for this sample
                 auto tIdentifier = tIdentifierInterface.call(tLoad);
-                for(auto& tValue : tLoad.values)
+                for(auto& tValue : tLoad.load_values())
                 {
-                    auto tDimIndex = &tValue - &tLoad.values[0];
+                    auto tDimIndex = &tValue - &tLoad.load_values()[0];
                     tMapFromIdentifierToLoadValues[tIdentifier][tDimIndex].push_back(tValue);
                 }
             }

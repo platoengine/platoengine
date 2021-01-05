@@ -82,7 +82,7 @@ void ParseNaturalBoundaryCondition::setLocationName(XMLGen::NaturalBoundaryCondi
 
 void ParseNaturalBoundaryCondition::setValueMetadata(XMLGen::NaturalBoundaryCondition& aMetadata)
 {
-    if(aMetadata.getLoadValues().size() == 0)
+    if(aMetadata.load_values().size() == 0)
     {
         auto tItr = mTags.find("value");
         std::string tValues = tItr->second.first.second;
@@ -92,7 +92,7 @@ void ParseNaturalBoundaryCondition::setValueMetadata(XMLGen::NaturalBoundaryCond
             char tValuesBuffer[10000];
             strcpy(tValuesBuffer, tValues.c_str());
             XMLGen::parse_tokens(tValuesBuffer, tParsedValues);
-            aMetadata.setLoadValues(tParsedValues);
+            aMetadata.load_values(tParsedValues);
         }
         else
         {

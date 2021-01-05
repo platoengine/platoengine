@@ -71,10 +71,6 @@ public:
                                          std::string &aReturnStringValue);
     bool publicParseLoads(std::istream &sin);
     void publicParseObjective(std::istream &sin);
-    bool publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void publicParseMaterials(std::istream &sin);
     void publicParseServices(std::istream &sin);
     void publicParseScenarios(std::istream &sin);

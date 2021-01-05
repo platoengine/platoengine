@@ -141,7 +141,7 @@ void append_self_adjoint_parameter_to_plato_problem
 void get_ebc_vector_for_scenario
 (const XMLGen::InputData& aXMLMetaData,
  const XMLGen::Scenario &aScenario,
- std::vector<XMLGen::Load> &aEBCVector);
+ std::vector<XMLGen::EssentialBoundaryCondition> &aEBCVector);
 
 /******************************************************************************//**
  * \fn append_weighted_sum_objective_to_plato_problem
@@ -326,7 +326,7 @@ void append_material_model_to_plato_analyze_input_deck
 **********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
 (const std::string &aPhysics,
- const std::vector<XMLGen::Load> &aLoads,
+ const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -386,7 +386,7 @@ void write_plato_analyze_input_deck_file
 **********************************************************************************/
 void get_nbc_parent_node
 (const std::string &aPhysics,
- const XMLGen::Load &aLoad,
+ const XMLGen::NaturalBoundaryCondition &aLoad,
  const std::vector<pugi::xml_node> &aParentNodes,
  pugi::xml_node &aParentNode);
 

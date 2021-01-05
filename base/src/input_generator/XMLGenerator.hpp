@@ -74,14 +74,6 @@ public:
 protected:
 
     bool parseLoads(std::istream &fin);
-    bool parseLoadsBlock(std::istream &fin);
-    bool parseLoadLine(std::vector<std::string>& tokens);
-    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     void parseBoundaryConditions(std::istream &fin);
     bool runSROMForUncertainVariables();
@@ -116,7 +108,6 @@ protected:
 private:
 
     void preProcessInputMetaData();
-    void convertNBCToLoadData();
     void loadOutputData(XMLGen::InputData &aNewInputData, 
                                   const std::string &aServiceID);
     void loadObjectiveData(XMLGen::InputData &aNewInputData,
