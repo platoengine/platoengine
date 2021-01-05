@@ -18,12 +18,12 @@ Filter::~Filter()
 
 void Filter::advance_continuation()
 {
-    std::cout << "Filter advance_continuation" << std::endl;
+    // intentionally do nothing
 }
 
 void Filter::additive_advance_continuation()
 {
-    std::cout << "Filter additive_advance_continuation" << std::endl;
+    // intentionally do nothing
 }
 
 }

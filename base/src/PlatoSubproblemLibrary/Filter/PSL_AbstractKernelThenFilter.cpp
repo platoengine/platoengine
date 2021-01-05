@@ -122,15 +122,6 @@ void AbstractKernelThenFilter::build()
     }
 }
 
-void AbstractKernelThenFilter::advance_continuation()
-{
-    std::cout << "AbstractKernelThenFilter advance_continuation" << std::endl;
-}
-void AbstractKernelThenFilter::additive_advance_continuation()
-{
-    std::cout << "AbstractKernelThenFilter additive_advance_continuation" << std::endl;
-}
-
 void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* field)
 {
     m_kernel->apply(field);

@@ -41,8 +41,6 @@ public:
     virtual void build();
     virtual void apply(AbstractInterface::ParallelVector* field);
     virtual void apply(AbstractInterface::ParallelVector* base_field, AbstractInterface::ParallelVector* gradient);
-    virtual void advance_continuation();
-    virtual void additive_advance_continuation();
 
 private:
 
