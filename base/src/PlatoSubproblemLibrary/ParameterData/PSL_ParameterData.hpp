@@ -75,6 +75,7 @@ public:
     PSL_PARAMETER_DATA_POD(tokens_t, double, min_heaviside_parameter)
     PSL_PARAMETER_DATA_POD(tokens_t, double, heaviside_continuation_scale)
     PSL_PARAMETER_DATA_POD(tokens_t, double, max_heaviside_parameter)
+    PSL_PARAMETER_DATA_POD(tokens_t, double, smooth_max_p_norm)
     PSL_PARAMETER_DATA_POD(tokens_t, double, max_overhang_angle)
     PSL_PARAMETER_DATA_POD(tokens_t, double, overhang_projection_angle_fraction)
     PSL_PARAMETER_DATA_POD(tokens_t, double, overhang_projection_radius_fraction)

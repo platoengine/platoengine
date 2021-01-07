@@ -1,4 +1,5 @@
 #include <PSL_PseudoLayerBuilder.hpp>
+#include <iostream>
 
 namespace PlatoSubproblemLibrary
 {
@@ -89,8 +90,9 @@ std::vector<int> PseudoLayerBuilder::setBaseLayerIDToZeroAndOthersToMinusOne() c
     return tPseudoLayers;
 }
 
-void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aSupportSet,
-                                                          std::map<SupportPointData,std::vector<double>>& aSupportCoefficients) const
+void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
+                                                          std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients,
+                                                          std::map<std::pair<int,int>, std::vector<std::vector<double>>>& aInteriorSupportCoefficients) const
 {
     // we loop over elements for efficiency since we only have element to node connectivity
     // stored explicitly
@@ -101,35 +103,45 @@ void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<S
 
         for(size_t i = 0; i < 4; ++i)
         {
-            int tNode = tElement[i];
+            computeBoundarySupportPointsAndCoefficients(i, tElement, aBoundarySupportSet, aBoundarySupportCoefficients);
+        }
+    }
+}
 
-            // add support points of tNode on tElement
-            for(size_t j = 1; j < 4; ++j)
+void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
+                                                      std::vector<int>& aElement,
+                                                      std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
+                                                      std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients) const
+{
+
+    //TODO need to add support for the case where both support points are outside the critical window
+
+    int tNode = aElement[i];
+
+    for(size_t j = 1; j < 4; ++j)
+    {
+        int tNeighbor = aElement[(i+j)%4];
+        LessThanInBuildDirection tLessThanFunctor(mCoordinates,mBuildDirection);
+        if(tLessThanFunctor(tNeighbor,tNode))
+        {
+            if(isNeighborInCriticalWindow(tNode,tNeighbor))
             {
-                int tNeighbor = tElement[(i+j)%4];
-                LessThanInBuildDirection tLessThanFunctor(mCoordinates,mBuildDirection);
-                if(tLessThanFunctor(tNeighbor,tNode))
+                SupportPointData tSupportPoint = {tNode, {tNeighbor}};
+                aBoundarySupportSet[tNode].insert(tSupportPoint);
+                aBoundarySupportCoefficients[tSupportPoint] = {1.0};
+            }
+            else
+            {
+                for(int k = 1; k < 4; ++k)
                 {
-                    if(isNeighborInCriticalWindow(tNode,tNeighbor))
+                    if((i+j+k)%4 != i)
                     {
-                        SupportPointData tSupportPoint = {tNode, {tNeighbor}};
-                        aSupportSet[tNode].insert(tSupportPoint);
-                        aSupportCoefficients[tSupportPoint] = {1.0};
-                    }
-                    else
-                    {
-                        for(int k = 1; k < 4; ++k)
+                        int tOtherNeighbor = aElement[(i+j+k)%4];
+                        if(tLessThanFunctor(tOtherNeighbor,tNode) && isNeighborInCriticalWindow(tNode,tOtherNeighbor))
                         {
-                            if((i+j+k)%4 != i)
-                            {
-                                int tOtherNeighbor = tElement[(i+j+k)%4];
-                                if(tLessThanFunctor(tOtherNeighbor,tNode) && isNeighborInCriticalWindow(tNode,tOtherNeighbor))
-                                {
-                                    SupportPointData tSupportPoint = {tNode, {tNeighbor,tOtherNeighbor}};
-                                    aSupportSet[tNode].insert(tSupportPoint);
-                                    aSupportCoefficients[tSupportPoint] = computeSupportCoefficients(tSupportPoint);
-                                }
-                            }
+                            SupportPointData tSupportPoint = {tNode, {tNeighbor,tOtherNeighbor}};
+                            aBoundarySupportSet[tNode].insert(tSupportPoint);
+                            aBoundarySupportCoefficients[tSupportPoint] = computeSupportCoefficients(tSupportPoint);
                         }
                     }
                 }
@@ -141,6 +153,7 @@ void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<S
 bool PseudoLayerBuilder::isNeighborInCriticalWindow(const int& aNode, 
                                 const int& aNeighbor) const
 {
+    // TODO need to evaluate if this is the right way to do it..
     PlatoSubproblemLibrary::Vector tNodeVector(mCoordinates[aNode]);
     PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[aNeighbor]);
 
@@ -181,12 +194,13 @@ double PseudoLayerBuilder::computeFirstCoefficient(const PlatoSubproblemLibrary:
                                                    const PlatoSubproblemLibrary::Vector& aV1,
                                                    const PlatoSubproblemLibrary::Vector& aV2) const
 {
+    // TODO is there a way we can verify that this will always be a well posed problem?
     double tAnswer = 0.5;
     double tTolerance = 1e-5;
     double tResidual = 1; //fake starting value just to start the while loop
     int tMaxIterations = 10000;
         
-    while(fabs(tResidual/tAnswer) > tTolerance && tMaxIterations > 0)
+    while(fabs(tResidual) > tTolerance && tMaxIterations > 0)
     {
         tResidual = intersectionResidual(tAnswer,aV0,aV1,aV2);
         double tDerivative = intersectionResidualDerivative(tAnswer,aV0,aV1,aV2);
@@ -194,7 +208,7 @@ double PseudoLayerBuilder::computeFirstCoefficient(const PlatoSubproblemLibrary:
         --tMaxIterations;
     }
 
-    if(fabs(tResidual/tAnswer) > tTolerance)
+    if(fabs(tResidual) > tTolerance)
         throw(std::runtime_error("Max iterations reached but newton iteration did not converge"));
 
     return tAnswer;
@@ -204,11 +218,24 @@ int PseudoLayerBuilder::assignNodeToPseudoLayer(const int& aNode,
                                                 const std::vector<int>& aPseudoLayers,
                                                 const std::set<SupportPointData>& aSupportSet) const
 {
-    std::set<int> tSupportingNeighbors = getSupportingNeighbors(aNode, aSupportSet);
-    std::set<int> tConnectedPseudoLayers = determineConnectedPseudoLayers(aNode, aPseudoLayers, tSupportingNeighbors);
-    int tSupportingPseudoLayer = determineSupportingPseudoLayer(aNode, tSupportingNeighbors, aPseudoLayers, tConnectedPseudoLayers);
+    // TODO:  Really I should just use the same function to determine the support density, but assuming a density of one at each node,
+    // to determine which layer contributes the most
+    if(aPseudoLayers[aNode] == 0)
+        return 0;
 
-    return tSupportingPseudoLayer + 1;
+    if(aPseudoLayers[aNode] == -1)
+    {
+        std::set<int> tSupportingNeighbors = getSupportingNeighbors(aNode, aSupportSet);
+        std::set<int> tConnectedPseudoLayers = determineConnectedPseudoLayers(aNode, aPseudoLayers, tSupportingNeighbors);
+        int tSupportingPseudoLayer = determineSupportingPseudoLayer(aNode, tSupportingNeighbors, aPseudoLayers, tConnectedPseudoLayers);
+
+        return tSupportingPseudoLayer + 1;
+    }
+    else
+    {
+        throw(std::runtime_error("Pseudo Layer already assigned"));
+    }
+
 }
 
 std::set<int> PseudoLayerBuilder::getSupportingNeighbors(const int& aNode, const std::set<SupportPointData>& aSupportSet) const

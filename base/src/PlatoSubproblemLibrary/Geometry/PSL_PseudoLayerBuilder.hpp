@@ -38,8 +38,9 @@ class PseudoLayerBuilder
         std::vector<int> orderNodesInBuildDirection() const;
         std::vector<int> setBaseLayerIDToZeroAndOthersToMinusOne() const;
 
-        void computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aSupportSet,
-                                              std::map<SupportPointData,std::vector<double>>& aSupportCoefficients) const;
+        void computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
+                                              std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients,
+                                              std::map<std::pair<int,int>, std::vector<std::vector<double>>>& aInteriorSupportCoefficients) const;
 
         int assignNodeToPseudoLayer(const int& aNode,
                                     const std::vector<int>& aPseudoLayers,
@@ -67,6 +68,11 @@ class PseudoLayerBuilder
                                         const int& aNeighbor) const;
 
         std::vector<double> computeSupportCoefficients(const SupportPointData& aSupportPoint) const;
+
+        void computeBoundarySupportPointsAndCoefficients(size_t& i,
+                                                         std::vector<int>& aElement,
+                                                         std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
+                                                         std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients) const;
 
         double computeFirstCoefficient(const PlatoSubproblemLibrary::Vector& aV0,
                                        const PlatoSubproblemLibrary::Vector& aV1,

@@ -30,6 +30,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     double heaviside_min=-1.;
     double heaviside_update=-1.;
     double heaviside_max=-1;
+    double smooth_max_p_norm=-1;
     if( m_inputData.size<Plato::InputData>("Filter") )
     {
         auto tFilterNode = m_inputData.get<Plato::InputData>("Filter");
@@ -57,6 +58,11 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
         {
             heaviside_max = Plato::Get::Double(tFilterNode, "HeavisideMax");
         }
+        if(tFilterNode.size<std::string>("SmoothMaxPNorm") > 0)
+        {
+            smooth_max_p_norm = Plato::Get::Double(tFilterNode, "SmoothMaxPNorm");
+        }
+
     }
 
     // decide if input was meaningful
@@ -66,6 +72,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     const bool meaningful_HeavisideMin = (heaviside_min > 0);
     const bool meaningful_HeavisideUpdate = (heaviside_update >= 0);
     const bool meaningful_HeavisideMax = (heaviside_max > 0);
+    const bool meaningful_SmoothMaxPNorm = (smooth_max_p_norm > 0);
 
     // if not meaningful, use defaults
     if(meaningful_absolute)
@@ -113,6 +120,14 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     else
     {
         result->set_max_heaviside_parameter(4.2);
+    }
+    if(meaningful_SmoothMaxPNorm)
+    {
+        result->set_smooth_max_p_norm(smooth_max_p_norm);
+    }
+    else
+    {
+        result->set_smooth_max_p_norm(20.0);
     }
 
     // defaults

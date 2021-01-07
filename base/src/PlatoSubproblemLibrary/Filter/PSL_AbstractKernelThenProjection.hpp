@@ -51,7 +51,7 @@ private:
 
     void check_input_data();
 
-    virtual double internal_apply(AbstractInterface::ParallelVector* const field, const int& i) const;
+    virtual double internal_apply(AbstractInterface::ParallelVector* const field, const int& i);
     virtual double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const;
 
     virtual double projection_apply(const double& beta, const double& input) const = 0;

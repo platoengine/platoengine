@@ -66,7 +66,7 @@ namespace Plato
         extractMeshData(aMesh);
 
         PlatoSubproblemLibrary::KernelThenAMFilter* tFilter = dynamic_cast<PlatoSubproblemLibrary::KernelThenAMFilter*>(m_filter);
-        tFilter->init(mCoordinates,mConnectivity,mBaseLayer,PlatoSubproblemLibrary::Vector({0.0,0.0,1.0}),M_PI/4);
+        tFilter->init(mCoordinates,mConnectivity,mBaseLayer,PlatoSubproblemLibrary::Vector({1.0,0.0,0.0}),M_PI/4);
     }
 
     void KernelThenAMFilter::extractMeshData(DataMesh* aMesh)
