@@ -23,7 +23,7 @@ begin scenario 1
   physics steady_state_mechanics
   dimensions 3
   loads 1
-  boundary_conditions 1 2 3
+  boundary_conditions 1
   material 1
   minimum_ersatz_material_value 1e-3
   tolerance 5e-8
@@ -47,24 +47,8 @@ begin boundary_condition 1
     type fixed_value
     location_type nodeset
     location_name ns_1
-    degree_of_freedom dispx
-    value 0 
-end boundary_condition
-
-begin boundary_condition 2
-    type fixed_value
-    location_type nodeset
-    location_name ns_1
-    degree_of_freedom dispy
-    value 0
-end boundary_condition
-
-begin boundary_condition 3
-    type fixed_value
-    location_type nodeset
-    location_name ns_1
-    degree_of_freedom dispz
-    value 0 
+    degree_of_freedom dispx dispz dispy
+    value 0 0 0
 end boundary_condition
 
 begin load 1
@@ -107,6 +91,10 @@ end mesh
 
 begin paths
 code PlatoMain PlatoMain
+code plato_analyze analyze_MPMD
+end paths
+begin paths
+code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD
 end paths
 begin paths

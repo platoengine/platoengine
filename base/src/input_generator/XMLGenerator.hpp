@@ -104,10 +104,13 @@ protected:
 
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
+    XMLGen::InputData m_InputDataWithExpandedEBCs;
     std::vector<XMLGen::InputData> m_PreProcessedInputData;
 private:
 
     void preProcessInputMetaData();
+    void expandEssentialBoundaryConditions();
+    void updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap);
     void loadOutputData(XMLGen::InputData &aNewInputData, 
                                   const std::string &aServiceID);
     void loadObjectiveData(XMLGen::InputData &aNewInputData,

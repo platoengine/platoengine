@@ -62,12 +62,6 @@ public:
     void parse(std::istream &aInputFile) override;
 
     /******************************************************************************//**
-     * \fn expandDofs
-     * \brief Expand multi-dof/value specifications into multiple BCs
-    **********************************************************************************/
-    void expandDofs();
-
-    /******************************************************************************//**
      * \fn setEssentialBoundaryConditionIdentification
      * \brief Set the EssentialBoundaryCondition id.
      * \param [in] aMetadata essential boundary condition metadata.

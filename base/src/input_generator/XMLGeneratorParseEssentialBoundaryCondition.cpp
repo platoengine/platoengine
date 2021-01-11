@@ -42,38 +42,6 @@ void ParseEssentialBoundaryCondition::allocate()
     this->insertCoreProperties();
 }
 
-void ParseEssentialBoundaryCondition::expandDofs()
-{
-    std::vector<XMLGen::EssentialBoundaryCondition> tNewEBCs;
-    for(auto &tCurEBC : mData)
-    {
-        std::string tDofString = tCurEBC.value("degree_of_freedom");
-        std::string tValueString = tCurEBC.value("value");
-        std::vector<std::string> tDofTokens;
-        std::vector<std::string> tValueTokens;
-        XMLGen::parseTokens((char*)(tDofString.c_str()), tDofTokens); 
-        XMLGen::parseTokens((char*)(tValueString.c_str()), tValueTokens); 
-        if(tDofTokens.size() > 1)
-        {
-            if(tDofTokens.size() != tValueTokens.size())
-            {
-                THROWERR(std::string("Parse EssentialBoundaryCondition:expandDofs:  Number of Dofs does not equal the number of values. "))
-            } 
-            for(size_t i=0; i<tDofTokens.size(); ++i)
-            {
-                XMLGen::EssentialBoundaryCondition tNewEBC = tCurEBC;
-                tNewEBC.property("degree_of_freedom", tDofTokens[i]);
-                tNewEBC.property("value", tValueTokens[i]);
-                tNewEBCs.push_back(tNewEBC);
-            }
-        }
-        else
-        {
-            tNewEBCs.push_back(tCurEBC);
-        }
-    }
-    mData = tNewEBCs;
-}
 
 void ParseEssentialBoundaryCondition::setEssentialBoundaryConditionIdentification(XMLGen::EssentialBoundaryCondition& aMetadata)
 {

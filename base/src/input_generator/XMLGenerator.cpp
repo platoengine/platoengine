@@ -152,9 +152,76 @@ void XMLGenerator::generate()
 }
 
 /******************************************************************************/
+void XMLGenerator::expandEssentialBoundaryConditions()
+/******************************************************************************/
+{
+    m_InputDataWithExpandedEBCs = m_InputData;
+    std::vector<XMLGen::EssentialBoundaryCondition> tNewEBCs;
+    std::map<int, std::vector<int> > tOldIDToNewIDMap;
+    int tNewID = 1;
+    for(auto &tCurEBC : m_InputDataWithExpandedEBCs.ebcs)
+    {
+        int tOldID = std::stoi(tCurEBC.id());
+        std::string tDofString = tCurEBC.value("degree_of_freedom");
+        std::string tValueString = tCurEBC.value("value");
+        std::vector<std::string> tDofTokens;
+        std::vector<std::string> tValueTokens;
+        XMLGen::parseTokens((char*)(tDofString.c_str()), tDofTokens); 
+        XMLGen::parseTokens((char*)(tValueString.c_str()), tValueTokens); 
+        if(tDofTokens.size() != tValueTokens.size())
+        {
+            THROWERR(std::string("Parse EssentialBoundaryCondition:expandDofs:  Number of Dofs does not equal the number of values. "))
+        } 
+        for(size_t i=0; i<tDofTokens.size(); ++i)
+        {
+            XMLGen::EssentialBoundaryCondition tNewEBC = tCurEBC;
+            tNewEBC.property("degree_of_freedom", tDofTokens[i]);
+            tNewEBC.property("value", tValueTokens[i]);
+            tNewEBC.id(std::to_string(tNewID));
+            tNewEBCs.push_back(tNewEBC);
+            tOldIDToNewIDMap[tOldID].push_back(tNewID);
+            tNewID++;
+        }
+    }
+    m_InputDataWithExpandedEBCs.ebcs = tNewEBCs;
+    updateScenariosWithExpandedBoundaryConditions(tOldIDToNewIDMap);
+}
+
+/******************************************************************************/
+void XMLGenerator::updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap)
+/******************************************************************************/
+{
+    std::vector<XMLGen::Scenario> tNewScenarios;
+    for(auto &tScenario : m_InputDataWithExpandedEBCs.scenarios())
+    {
+       XMLGen::Scenario tNewScenario = tScenario;
+       std::vector<std::string> tNewBCIDs;
+       for(auto &tBCID : tNewScenario.bcIDs())
+       {
+           int tCurID = std::stoi(tBCID);
+           if(aOldIDToNewIDMap.count(tCurID) > 0)
+           {
+               for(auto &tCurNewBCID : aOldIDToNewIDMap[tCurID])
+               {
+                   tNewBCIDs.push_back(std::to_string(tCurNewBCID));
+               }
+           }
+           else
+           {
+               tNewBCIDs.push_back(tBCID);
+           }
+       }
+       tNewScenario.setBCIDs(tNewBCIDs);
+       tNewScenarios.push_back(tNewScenario);
+   }
+   m_InputDataWithExpandedEBCs.set(tNewScenarios);
+}
+
+/******************************************************************************/
 void XMLGenerator::preProcessInputMetaData()
 /******************************************************************************/
 {
+    expandEssentialBoundaryConditions();
     createCopiesForPerformerCreation();
 }
 
@@ -256,7 +323,7 @@ void XMLGenerator::createCopiesForPerformerCreation()
 
             // Clear out the data in the new metadata--we will only keep the 
             // necessary parts.
-            XMLGen::InputData tNewInputData = m_InputData;
+            XMLGen::InputData tNewInputData = m_InputDataWithExpandedEBCs;
             clearInputDataLists(tNewInputData);
 
             // Add back in the relevant objective data.
