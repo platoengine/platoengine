@@ -90,9 +90,7 @@ std::vector<int> PseudoLayerBuilder::setBaseLayerIDToZeroAndOthersToMinusOne() c
     return tPseudoLayers;
 }
 
-void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
-                                                          std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients,
-                                                          std::map<std::pair<int,int>, std::vector<std::vector<double>>>& aInteriorSupportCoefficients) const
+void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const
 {
     // we loop over elements for efficiency since we only have element to node connectivity
     // stored explicitly
@@ -103,45 +101,47 @@ void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<S
 
         for(size_t i = 0; i < 4; ++i)
         {
-            computeBoundarySupportPointsAndCoefficients(i, tElement, aBoundarySupportSet, aBoundarySupportCoefficients);
+            computeBoundarySupportPointsAndCoefficients(i, tElement, aBoundarySupportSet);
         }
     }
 }
 
 void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
                                                       std::vector<int>& aElement,
-                                                      std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
-                                                      std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients) const
+                                                      std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const
 {
-
-    //TODO need to add support for the case where both support points are outside the critical window
-
     int tNode = aElement[i];
+    LessThanInBuildDirection tLessThanFunctor(mCoordinates,mBuildDirection);
 
     for(size_t j = 1; j < 4; ++j)
     {
         int tNeighbor = aElement[(i+j)%4];
-        LessThanInBuildDirection tLessThanFunctor(mCoordinates,mBuildDirection);
+
         if(tLessThanFunctor(tNeighbor,tNode))
         {
             if(isNeighborInCriticalWindow(tNode,tNeighbor))
             {
-                SupportPointData tSupportPoint = {tNode, {tNeighbor}};
+                BoundarySupportPoint tSupportPoint(tNode, {tNeighbor}, {1.0});
                 aBoundarySupportSet[tNode].insert(tSupportPoint);
-                aBoundarySupportCoefficients[tSupportPoint] = {1.0};
             }
-            else
+            else // tNeighbor is not in the critical window
             {
                 for(int k = 1; k < 4; ++k)
                 {
                     if((i+j+k)%4 != i)
                     {
                         int tOtherNeighbor = aElement[(i+j+k)%4];
-                        if(tLessThanFunctor(tOtherNeighbor,tNode) && isNeighborInCriticalWindow(tNode,tOtherNeighbor))
+                        if(tLessThanFunctor(tOtherNeighbor,tNode))
                         {
-                            SupportPointData tSupportPoint = {tNode, {tNeighbor,tOtherNeighbor}};
-                            aBoundarySupportSet[tNode].insert(tSupportPoint);
-                            aBoundarySupportCoefficients[tSupportPoint] = computeSupportCoefficients(tSupportPoint);
+                            if(isNeighborInCriticalWindow(tNode,tOtherNeighbor))
+                            {
+                                BoundarySupportPoint tSupportPoint(tNode, {tNeighbor,tOtherNeighbor}, computeSupportCoefficients(tNode, {tNeighbor, tOtherNeighbor}));
+                                aBoundarySupportSet[tNode].insert(tSupportPoint);
+                            }
+                            else // tOtherNeighbor is also outside the critical window
+                            {
+                                //add both points to the support set along with coefficients
+                            }
                         }
                     }
                 }
@@ -150,10 +150,8 @@ void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
     }
 }
 
-bool PseudoLayerBuilder::isNeighborInCriticalWindow(const int& aNode, 
-                                const int& aNeighbor) const
+bool PseudoLayerBuilder::isNeighborInCriticalWindow(const int& aNode, const int& aNeighbor) const
 {
-    // TODO need to evaluate if this is the right way to do it..
     PlatoSubproblemLibrary::Vector tNodeVector(mCoordinates[aNode]);
     PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[aNeighbor]);
 
@@ -162,24 +160,21 @@ bool PseudoLayerBuilder::isNeighborInCriticalWindow(const int& aNode,
     return PlatoSubproblemLibrary::angle_between(tVec,-1*mBuildDirection) < mCriticalPrintAngle;
 }
 
-std::vector<double> PseudoLayerBuilder::computeSupportCoefficients(const SupportPointData& aSupportPoint) const
+std::vector<double> PseudoLayerBuilder::computeSupportCoefficients(const int& aNode, const std::set<int>& aSupportDependencyNodes) const
 {
-    const int tNode = aSupportPoint.first;
-    const std::set<int> tSupportDependencyNodes = aSupportPoint.second;
-
-    if(tSupportDependencyNodes.size() != 2)
+    if(aSupportDependencyNodes.size() != 2)
         throw(std::length_error("Expecting support point to be dependent on two nodes"));
 
-    auto tIterator = tSupportDependencyNodes.begin();
+    auto tIterator = aSupportDependencyNodes.begin();
     int tNeighbor1 = *tIterator;
     ++tIterator;
     int tNeighbor2 = *tIterator;
 
-    if((isNeighborInCriticalWindow(tNode,tNeighbor1) && isNeighborInCriticalWindow(tNode,tNeighbor2))
-    || (!isNeighborInCriticalWindow(tNode,tNeighbor1) && !isNeighborInCriticalWindow(tNode,tNeighbor2)))
+    if((isNeighborInCriticalWindow(aNode,tNeighbor1) && isNeighborInCriticalWindow(aNode,tNeighbor2))
+    || (!isNeighborInCriticalWindow(aNode,tNeighbor1) && !isNeighborInCriticalWindow(aNode,tNeighbor2)))
         throw(std::runtime_error("Expecting neighbor exactly one support dependency node to be outside the critical window"));
 
-    PlatoSubproblemLibrary::Vector tNodeVec(mCoordinates[tNode]);
+    PlatoSubproblemLibrary::Vector tNodeVec(mCoordinates[aNode]);
     PlatoSubproblemLibrary::Vector tNeighbor1Vec(mCoordinates[tNeighbor1]);
     PlatoSubproblemLibrary::Vector tNeighbor2Vec(mCoordinates[tNeighbor2]);
 
@@ -194,7 +189,6 @@ double PseudoLayerBuilder::computeFirstCoefficient(const PlatoSubproblemLibrary:
                                                    const PlatoSubproblemLibrary::Vector& aV1,
                                                    const PlatoSubproblemLibrary::Vector& aV2) const
 {
-    // TODO is there a way we can verify that this will always be a well posed problem?
     double tAnswer = 0.5;
     double tTolerance = 1e-5;
     double tResidual = 1; //fake starting value just to start the while loop
@@ -216,7 +210,7 @@ double PseudoLayerBuilder::computeFirstCoefficient(const PlatoSubproblemLibrary:
 
 int PseudoLayerBuilder::assignNodeToPseudoLayer(const int& aNode, 
                                                 const std::vector<int>& aPseudoLayers,
-                                                const std::set<SupportPointData>& aSupportSet) const
+                                                const std::set<BoundarySupportPoint>& aSupportSet) const
 {
     // TODO:  Really I should just use the same function to determine the support density, but assuming a density of one at each node,
     // to determine which layer contributes the most
@@ -238,13 +232,13 @@ int PseudoLayerBuilder::assignNodeToPseudoLayer(const int& aNode,
 
 }
 
-std::set<int> PseudoLayerBuilder::getSupportingNeighbors(const int& aNode, const std::set<SupportPointData>& aSupportSet) const
+std::set<int> PseudoLayerBuilder::getSupportingNeighbors(const int& aNode, const std::set<BoundarySupportPoint>& aSupportSet) const
 {
     std::set<int> tSupportingNeighbors;
 
     for(auto tSupportPoint : aSupportSet)
     {
-        std::set<int> tSupportingNeighborsForThisPoint = tSupportPoint.second;
+        std::set<int> tSupportingNeighborsForThisPoint = tSupportPoint.getSupportingNodeIndices();
         for(auto tNeighbor : tSupportingNeighborsForThisPoint)
         {
             tSupportingNeighbors.insert(tNeighbor);
@@ -313,9 +307,9 @@ int PseudoLayerBuilder::determineSupportingPseudoLayer(const int& aNode,
     return tSupportingPseudoLayer;
 }
 
-int getOtherNeighbor(const SupportPointData& aSupportPointData, const int& aNeighbor)
+int getOtherSupportingNodeIndex(const BoundarySupportPoint& aSupportPoint, const int& aNeighbor)
 {
-    std::set<int> tNeighbors = aSupportPointData.second;
+    std::set<int> tNeighbors = aSupportPoint.getSupportingNodeIndices();
 
     if(tNeighbors.size() == 1u)
         throw(std::runtime_error("Support point depends on only one node"));
@@ -329,70 +323,44 @@ int getOtherNeighbor(const SupportPointData& aSupportPointData, const int& aNeig
     throw(std::runtime_error("Invalid Support point input data"));
 }
 
-double getCorrespondingCoefficient(const SupportPointData& aSupportPointData, const int& aNeighbor, const std::map<SupportPointData, std::vector<double>>& aSupportCoefficients)
-{
-    std::vector<double> tSupportPointCoefficients = aSupportCoefficients.at(aSupportPointData);
-    auto tNeighborIterator = aSupportPointData.second.begin();
-    auto tCoefficientIterator = tSupportPointCoefficients.begin();
-
-    for(; tNeighborIterator != aSupportPointData.second.end(); ++tNeighborIterator)
-    {
-        if(*tNeighborIterator == aNeighbor)
-            return *tCoefficientIterator;
-
-        ++tCoefficientIterator;
-    }
-    
-    throw(std::domain_error("Support point does not depend on specified node"));
-}
-
-std::set<SupportPointData> PseudoLayerBuilder::pruneSupportSet(const int& aNode,
+std::set<BoundarySupportPoint> PseudoLayerBuilder::pruneSupportSet(const int& aNode,
                                                                const std::vector<int>& aPseudoLayers,
-                                                               const std::set<SupportPointData>& aSupportSet,
-                                                               std::map<SupportPointData, std::vector<double>>& aSupportCoefficients) const
+                                                               const std::set<BoundarySupportPoint>& aSupportSet) const
 {
     int tSupportingPseudoLayer = aPseudoLayers[aNode] - 1;
 
-    std::set<SupportPointData> tPrunedSupportSet;
+    std::set<BoundarySupportPoint> tPrunedSupportSet;
     
     for (auto tSupportPoint : aSupportSet)
     {
         bool tRemainsInSupportSet = true;
-        for(auto tNeighbor : tSupportPoint.second)
+        for(auto tNeighbor : tSupportPoint.getSupportingNodeIndices())
         {
             if(aPseudoLayers[tNeighbor] != tSupportingPseudoLayer)
             {
                 if(isNeighborInCriticalWindow(aNode,tNeighbor))
                 {
-                    if(tSupportPoint.second.size() == 1)
+                    if(tSupportPoint.getSupportingNodeIndices().size() == 1)
                     {
                         tRemainsInSupportSet = false;
-                        aSupportCoefficients.erase(tSupportPoint);
                         break;
                     }
                     else
                     {
-                        auto tOtherNeighbor = getOtherNeighbor(tSupportPoint, tNeighbor);
+                        auto tOtherNeighbor = getOtherSupportingNodeIndex(tSupportPoint, tNeighbor);
                         if(aPseudoLayers[tOtherNeighbor] != tSupportingPseudoLayer)
                         {
                             tRemainsInSupportSet = false;
-                            aSupportCoefficients.erase(tSupportPoint);
                             break;
                         }
                         else
                         {
-                            SupportPointData tModifiedSupportPoint;
-
-                            tModifiedSupportPoint.first = tSupportPoint.first;
-                            tModifiedSupportPoint.second = {tOtherNeighbor};
-
-                            std::vector<double> tModifiedCoefficient = {getCorrespondingCoefficient(tSupportPoint, tOtherNeighbor, aSupportCoefficients)};
+                            std::vector<double> tModifiedCoefficient = {tSupportPoint.getCorrespondingCoefficient(tOtherNeighbor)};
+                            BoundarySupportPoint tModifiedSupportPoint(tSupportPoint.getSupportedNodeIndex(),{tOtherNeighbor}, tModifiedCoefficient);
 
                             tPrunedSupportSet.insert(tModifiedSupportPoint);
-                            aSupportCoefficients[tModifiedSupportPoint] = tModifiedCoefficient;
 
                             tRemainsInSupportSet = false;
-                            aSupportCoefficients.erase(tSupportPoint);
                             break;
                         }
                     }
@@ -400,7 +368,6 @@ std::set<SupportPointData> PseudoLayerBuilder::pruneSupportSet(const int& aNode,
                 else
                 {
                     tRemainsInSupportSet = false;
-                    aSupportCoefficients.erase(tSupportPoint);
                     break;
                 }
             }
@@ -455,23 +422,21 @@ void PseudoLayerBuilder::checkInput() const
         throw(std::out_of_range("Critical print angle should be between zero and Pi/2"));
 }
 
-PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const SupportPointData& aSupportPoint,
-                                                       const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& aSupportCoefficients,
+PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
                                                        const std::vector<std::vector<double>>& aCoordinates)
 {
-    std::vector<double> tCoefficients = aSupportCoefficients.at(aSupportPoint);
-    std::set<int> tSupportingNodes = aSupportPoint.second;
-
-    if(tCoefficients.size() != tSupportingNodes.size())
-        throw(std::domain_error("Number of supporting nodes must match number of coefficients"));
+    std::vector<double> tCoefficients = aSupportPoint.getCoefficients();
+    std::set<int> tSupportingNodes = aSupportPoint.getSupportingNodeIndices();
 
     PlatoSubproblemLibrary::Vector tVec;
     int tCoefficientIndex = 0;
     for(int tSupportingNode : tSupportingNodes)
     {
+        double tCoefficient = tCoefficients[tCoefficientIndex];
+
         if(tSupportingNode < 0 || tSupportingNode > (int) aCoordinates.size())
             throw(std::out_of_range("Node index must lie within 0 and the number of nodes"));
-        double tCoefficient = tCoefficients[tCoefficientIndex];
+
         tVec = tVec + tCoefficient*PlatoSubproblemLibrary::Vector(aCoordinates[tSupportingNode]);
         ++tCoefficientIndex;
     }

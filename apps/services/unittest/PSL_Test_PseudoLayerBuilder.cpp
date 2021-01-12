@@ -69,7 +69,7 @@ PSL_TEST(PseudoLayerBuilder,construction)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -112,7 +112,7 @@ PSL_TEST(PseudoLayerBuilder,orderNodesInBuildDirection)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -177,7 +177,7 @@ PSL_TEST(PseudoLayerBuilder,setBaseLayerIDToZeroAndOthersToMinusOne)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -211,20 +211,19 @@ PSL_TEST(PseudoLayerBuilder,setBaseLayerIDToZeroAndOthersToMinusOne)
 }
 
 void checkCoefficients(const PseudoLayerBuilder& tBuilder,
-                       const std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>>& tBoundarySupportSet,
-                       const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& tBoundarySupportCoefficients,
+                       const std::vector<std::set<BoundarySupportPoint>>& tBoundarySupportSet,
                        const std::vector<std::vector<double>>& tCoordinates,
-                       const PlatoSubproblemLibrary::Vector& tBuildDirection,
+                       const Vector& tBuildDirection,
                        const double& tCriticalPrintAngle)
 
 {
-    for(std::set<SupportPointData> tNodeSupportSet : tBoundarySupportSet)
+    for(std::set<BoundarySupportPoint> tNodeSupportSet : tBoundarySupportSet)
     {
-        for(SupportPointData tSupportPoint : tNodeSupportSet)
+        for(BoundarySupportPoint tSupportPoint : tNodeSupportSet)
         {
-            PlatoSubproblemLibrary::Vector tVec = getVectorToSupportPoint(tSupportPoint,tBoundarySupportCoefficients,tCoordinates);
+            Vector tVec = getVectorToSupportPoint(tSupportPoint,tCoordinates);
 
-            auto tSupportingNodes = tSupportPoint.second;
+            auto tSupportingNodes = tSupportPoint.getSupportingNodeIndices();
 
             if(tSupportingNodes.size() == 1u)
             {
@@ -236,10 +235,10 @@ void checkCoefficients(const PseudoLayerBuilder& tBuilder,
             }
             else if(tSupportingNodes.size() == 2u)
             {
-                PlatoSubproblemLibrary::Vector tVec0(tCoordinates[tSupportPoint.first]);
-                PlatoSubproblemLibrary::Vector tSupportIncline = tVec - tVec0;
+                Vector tVec0(tCoordinates[tSupportPoint.getSupportedNodeIndex()]);
+                Vector tSupportIncline = tVec - tVec0;
 
-                EXPECT_NEAR(PlatoSubproblemLibrary::angle_between(tSupportIncline, -1*tBuildDirection),tCriticalPrintAngle,1e-8);
+                EXPECT_NEAR(angle_between(tSupportIncline, -1*tBuildDirection),tCriticalPrintAngle,1e-8);
             }
             else
                 throw(std::runtime_error("Support Point can be defined by only one or two nodes"));
@@ -262,7 +261,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -271,29 +270,26 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients, tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_allNodesInsideCriticalWindow)
@@ -311,7 +307,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = 5*M_PI/11;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -320,28 +316,25 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients, tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {2}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {2}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_oneNodeInsideCriticalWindow)
@@ -359,7 +352,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/8;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -368,28 +361,25 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients, tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_twoTets1)
@@ -409,7 +399,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2, 4});
 
@@ -418,32 +408,29 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,4}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,4}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,4}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,4}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_twoTets2)
@@ -463,7 +450,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2, 4});
 
@@ -472,31 +459,28 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {4}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {4}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_twoTets3)
@@ -516,7 +500,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2, 4});
 
@@ -525,31 +509,28 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,4}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,4}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_twoTets4)
@@ -569,7 +550,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2, 4});
 
@@ -578,31 +559,28 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,4}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,4}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_twoTets5)
@@ -622,7 +600,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2});
 
@@ -631,38 +609,35 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
     tGoldSupportSet.clear();
 
-    tGoldSupportSet.insert(SupportPointData({4, {1}}));
-    tGoldSupportSet.insert(SupportPointData({4, {2}}));
-    tGoldSupportSet.insert(SupportPointData({4, {1,3}}));
-    tGoldSupportSet.insert(SupportPointData({4, {2,3}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(4, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(4, {2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(4, {1,3}));
+    tGoldSupportSet.insert(BoundarySupportPoint(4, {2,3}));
 
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelowSupportedNode_threeTets)
@@ -684,7 +659,7 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer({0, 1, 2, 4, 5});
 
@@ -693,33 +668,30 @@ PSL_TEST(PseudoLayerBuilder,computeSupportSetAndCoefficients_supportingNodesBelo
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
-
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     EXPECT_EQ(tBoundarySupportSet[0], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[1], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[2], tGoldSupportSet);
     EXPECT_EQ(tBoundarySupportSet[4], tGoldSupportSet);
 
-    tGoldSupportSet.insert(SupportPointData({3, {0}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1}}));
-    tGoldSupportSet.insert(SupportPointData({3, {5}}));
-    tGoldSupportSet.insert(SupportPointData({3, {0,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,2}}));
-    tGoldSupportSet.insert(SupportPointData({3, {1,4}}));
-    tGoldSupportSet.insert(SupportPointData({3, {2,5}}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {5}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {0,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,2}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {1,4}));
+    tGoldSupportSet.insert(BoundarySupportPoint(3, {2,5}));
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
 
-    checkCoefficients(tBuilder, tBoundarySupportSet, tBoundarySupportCoefficients, tCoordinates, tBuildDirection, tCriticalPrintAngle);
+    checkCoefficients(tBuilder, tBoundarySupportSet, tCoordinates, tBuildDirection, tCriticalPrintAngle);
 }
 
 PSL_TEST(PseudoLayerBuilder, getVectorToSupportPoint)
@@ -731,39 +703,23 @@ PSL_TEST(PseudoLayerBuilder, getVectorToSupportPoint)
     tCoordinates.push_back(std::vector<double>({0.0, 1.0, 0.0}));
     tCoordinates.push_back(std::vector<double>({0.0, 0.0, 1.0}));
 
-    std::vector<SupportPointData> tSupportPoints;
-    tSupportPoints.push_back(SupportPointData({3, {0,1}}));
-    tSupportPoints.push_back(SupportPointData({3, {1,2}}));
-    tSupportPoints.push_back(SupportPointData({3, {0,5}}));
-    tSupportPoints.push_back(SupportPointData({3, {0,2}}));
-
-    std::map<SupportPointData, std::vector<double>> tBoundarySupportCoefficients;
-
-    tBoundarySupportCoefficients[tSupportPoints[0]] = {0.73, 0.27};
-    tBoundarySupportCoefficients[tSupportPoints[1]] = {0.53, 0.47};
-
-    PlatoSubproblemLibrary::Vector tVec = getVectorToSupportPoint(tSupportPoints[0], tBoundarySupportCoefficients, tCoordinates);
+    BoundarySupportPoint tSupportPoint(3, {0,1}, {0.73, 0.27}); 
+    Vector tVec = getVectorToSupportPoint(tSupportPoint, tCoordinates);
 
     EXPECT_DOUBLE_EQ(tVec(0), 0.27);
     EXPECT_DOUBLE_EQ(tVec(1), 0.0);
     EXPECT_DOUBLE_EQ(tVec(2), 0.0);
 
-    tVec = getVectorToSupportPoint(tSupportPoints[1], tBoundarySupportCoefficients, tCoordinates);
+    tSupportPoint = BoundarySupportPoint(3, {1,2}, {0.53, 0.47});
+    tVec = getVectorToSupportPoint(tSupportPoint, tCoordinates);
 
     EXPECT_DOUBLE_EQ(tVec(0), 0.53);
     EXPECT_DOUBLE_EQ(tVec(1), 0.47);
     EXPECT_DOUBLE_EQ(tVec(2), 0.0);
 
+    tSupportPoint = BoundarySupportPoint(3, {1,5}, {0.53, 0.47});
 
-    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[2], tBoundarySupportCoefficients, tCoordinates),std::out_of_range);
-
-    tBoundarySupportCoefficients[tSupportPoints[2]] = {0.5, 0.5};
-
-    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[2], tBoundarySupportCoefficients, tCoordinates),std::out_of_range);
-
-    tBoundarySupportCoefficients[tSupportPoints[3]] = {0.5};
-
-    EXPECT_THROW(getVectorToSupportPoint(tSupportPoints[3], tBoundarySupportCoefficients, tCoordinates),std::domain_error);
+    EXPECT_THROW(getVectorToSupportPoint(tSupportPoint, tCoordinates),std::out_of_range);
 }
 
 PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer)
@@ -785,7 +741,7 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer;
 
@@ -794,14 +750,12 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer)
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
+    std::map<BoundarySupportPoint,std::vector<double>> tBoundarySupportCoefficients;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
-
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients, tInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
     tPseudoLayers[0] = 0;
     tPseudoLayers[1] = 0;
@@ -843,7 +797,7 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer_nodeAlreadyAssigned)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer;
 
@@ -852,14 +806,11 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer_nodeAlreadyAssigned)
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
-
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
     tPseudoLayers[0] = 0;
     tPseudoLayers[1] = 0;
@@ -890,7 +841,7 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer_assignNodeOnBaseLayer)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer;
 
@@ -899,14 +850,11 @@ PSL_TEST(PseudoLayerBuilder,assignNodeToPseudoLayer_assignNodeOnBaseLayer)
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
-
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
     tPseudoLayers[0] = 0;
     tPseudoLayers[1] = 0;
@@ -939,7 +887,7 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer;
 
@@ -948,14 +896,11 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
-
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
     tPseudoLayers[0] = 0;
     tPseudoLayers[1] = 0;
@@ -964,7 +909,7 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
     tPseudoLayers[4] = 1;
     tPseudoLayers[5] = 1;
 
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet;
 
     tGoldSupportSet.insert({3, {0}});
     tGoldSupportSet.insert({3, {1}});
@@ -983,7 +928,7 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet)
     // because 5 is in the critical window but not supporting and 2 is not in the critical
     // window but is supporting
     
-    tBoundarySupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tBoundarySupportSet[3], tBoundarySupportCoefficients);
+    tBoundarySupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tBoundarySupportSet[3]);
     tGoldSupportSet.erase({3, {5}});
     tGoldSupportSet.erase({3, {1,4}});
     tGoldSupportSet.erase({3, {2,5}});
@@ -1011,7 +956,7 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
 
     double tCriticalPrintAngle = M_PI/4;
 
-    PlatoSubproblemLibrary::Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
+    Vector tBuildDirection(std::vector<double>({0.0, 0.0, 1.0}));
 
     std::vector<int> tBaseLayer;
 
@@ -1020,14 +965,11 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
     std::vector<int> tOrderedNodes = tBuilder.orderNodesInBuildDirection();
     std::vector<int> tPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    std::vector<std::set<PlatoSubproblemLibrary::SupportPointData>> tBoundarySupportSet;
-    std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>> tBoundarySupportCoefficients;
+    std::vector<std::set<BoundarySupportPoint>> tBoundarySupportSet;
 
     tBoundarySupportSet.resize(tCoordinates.size());
 
-    std::map<std::pair<int,int>,std::vector<std::vector<double>>> tInteriorSupportPointCoefficients;
-
-    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet,tBoundarySupportCoefficients,tInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(tBoundarySupportSet);
 
     tPseudoLayers[0] = 0;
     tPseudoLayers[1] = 1;
@@ -1036,41 +978,46 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
     tPseudoLayers[4] = 1;
     tPseudoLayers[5] = 1;
 
-    std::set<SupportPointData> tGoldSupportSet;
+    std::set<BoundarySupportPoint> tGoldSupportSet = tBoundarySupportSet[3];
 
-    tGoldSupportSet.insert({3, {0}});
-    tGoldSupportSet.insert({3, {1}});
-    tGoldSupportSet.insert({3, {5}});
-    tGoldSupportSet.insert({3, {0,2}});
-    tGoldSupportSet.insert({3, {1,2}});
-    tGoldSupportSet.insert({3, {1,4}});
-    tGoldSupportSet.insert({3, {2,5}});
-
-    EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
-
-    
     // node 0 is not in the support layer so any support points
-    // depending on it will be removed from the support set when pruned
+    // depending on it will be removed from the support set when pruned.
     // a support point depending on node 2 gets added back into the support set however 
     // because 0 is in the critical window but not supporting and 2 is not in the critical
     // window but is supporting
     
-    auto tGoldSupportCoefficients = tBoundarySupportCoefficients;
+    double tCoefficient;
+    bool tFoundSupportPoint = false;
+    for(auto tSupportPoint : tBoundarySupportSet[3])
+    {
+        if(tSupportPoint == BoundarySupportPoint(3, {0,2}))
+        {
+            tCoefficient = tSupportPoint.getCorrespondingCoefficient(2);
+            tFoundSupportPoint = true;
+        }
+    }
     
-    tBoundarySupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tBoundarySupportSet[3], tBoundarySupportCoefficients);
+    EXPECT_EQ(true, tFoundSupportPoint);
+
+    tBoundarySupportSet[3] = tBuilder.pruneSupportSet(3, tPseudoLayers, tBoundarySupportSet[3]);
+
     tGoldSupportSet.erase({3, {0}});
     tGoldSupportSet.erase({3, {0,2}});
-    tGoldSupportCoefficients.erase({3, {0}});
 
-    double tCoefficient = tGoldSupportCoefficients.at({3, {0,2}})[1];
-    tGoldSupportCoefficients.erase({3, {0,2}});
-
-    SupportPointData tNewSupportPoint = {3, {2}};
+    BoundarySupportPoint tNewSupportPoint(3, {2}, {tCoefficient});
     tGoldSupportSet.insert(tNewSupportPoint);
-    tGoldSupportCoefficients[tNewSupportPoint] = {tCoefficient};
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);
-    EXPECT_EQ(tBoundarySupportCoefficients, tGoldSupportCoefficients);
+
+    auto tIterator = tBoundarySupportSet[3].begin();
+    auto tGoldIterator = tGoldSupportSet.begin();
+    for(; tIterator != tBoundarySupportSet[3].end(); ++tIterator)
+    {
+        std::vector<double> tBoundarySupportSetCoefficients = (*tIterator).getCoefficients();
+        std::vector<double> tGoldCoefficients = (*tGoldIterator).getCoefficients();
+        ++tGoldIterator;
+        EXPECT_EQ(tBoundarySupportSetCoefficients, tGoldCoefficients);
+    }
 }
 
 }

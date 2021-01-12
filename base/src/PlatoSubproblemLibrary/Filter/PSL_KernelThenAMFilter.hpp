@@ -13,6 +13,7 @@
 #include "PSL_Vector.hpp"
 #include "PSL_Point.hpp"
 #include "PSL_PseudoLayerBuilder.hpp"
+#include "PSL_BoundarySupportPoint.hpp"
 
 
 #include <vector>
@@ -111,12 +112,12 @@ private:
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;
 
-    std::vector<std::set<SupportPointData>> mBoundarySupportSet;
+    std::vector<std::set<BoundarySupportPoint>> mBoundarySupportSet;
 
     std::map<std::pair<int,int>,std::vector<std::vector<double>>> mInteriorSupportPointCoefficients; // input is argument is node, element pair, 
                                                                                                      // output is vector of coefficients for each interior support point
                                                                                                      // coefficient order is determined by the element connectivity
-    std::map<SupportPointData,std::vector<double>> mBoundarySupportCoefficients; // output is coefficients in the same order as second member of SupportPointData
+    std::map<BoundarySupportPoint,std::vector<double>> mBoundarySupportCoefficients; // output is coefficients in the same order as second member of BoundarySupportPoint
 
     std::vector<int> mBaseLayer;
 

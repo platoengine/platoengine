@@ -11,6 +11,7 @@ set(${LIB_NAME}_SOURCES
     PSL_KernelThenAMFilter.cpp
     PSL_AbstractKernelThenFilter.cpp
     PSL_AbstractKernelThenProjection.cpp
+    PSL_BoundarySupportPoint.cpp
     PSL_OverhangFilter.cpp
     )
 
@@ -22,6 +23,7 @@ set(${LIB_NAME}_HEADERS
     PSL_KernelThenAMFilter.hpp
     PSL_AbstractKernelThenFilter.hpp
     PSL_AbstractKernelThenProjection.hpp
+    PSL_BoundarySupportPoint.hpp
     PSL_OverhangFilter.hpp
     )
 

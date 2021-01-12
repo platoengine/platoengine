@@ -38,7 +38,7 @@ void KernelThenAMFilter::buildPseudoLayers()
     mOrderedNodes = tBuilder.orderNodesInBuildDirection();
     mPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    tBuilder.computeSupportSetAndCoefficients(mBoundarySupportSet, mBoundarySupportCoefficients, mInteriorSupportPointCoefficients);
+    tBuilder.computeSupportSetAndCoefficients(mBoundarySupportSet);
 
     for(auto tNode : mOrderedNodes)
     {
@@ -54,7 +54,7 @@ void KernelThenAMFilter::buildPseudoLayers()
     for(auto tNode : mOrderedNodes)
     {
         mPseudoLayers[tNode] = tBuilder.assignNodeToPseudoLayer(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
-        mBoundarySupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mBoundarySupportSet[tNode], mBoundarySupportCoefficients);
+        mBoundarySupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
     }
 
     mFilterBuilt = true;
@@ -69,7 +69,7 @@ void KernelThenAMFilter::computeSupportDensity(AbstractInterface::ParallelVector
 
     for(auto tNode : mOrderedNodes)
     {
-        std::set<SupportPointData> tBoundarySupportPointDataSet = mBoundarySupportSet[tNode];
+        std::set<BoundarySupportPoint> tBoundarySupportPointDataSet = mBoundarySupportSet[tNode];
 
         double tSupportDensity = 0;
 
@@ -82,7 +82,7 @@ void KernelThenAMFilter::computeSupportDensity(AbstractInterface::ParallelVector
 
         for(auto tSupportPointData : tBoundarySupportPointDataSet)
         {
-            std::set<int> tSupportingNodes = tSupportPointData.second;
+            std::set<int> tSupportingNodes = tSupportPointData.getSupportingNodeIndices();
             std::vector<double> tBoundarySupportCoefficients = mBoundarySupportCoefficients[tSupportPointData];
             double tSupportPointDensity = 0;
 

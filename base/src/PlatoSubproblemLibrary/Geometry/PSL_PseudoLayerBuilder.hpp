@@ -7,13 +7,10 @@
 #include <set>
 #include <map>
 #include <PSL_Vector.hpp>
+#include <PSL_BoundarySupportPoint.hpp>
 
 namespace PlatoSubproblemLibrary
 {
-
-// SupportPointData contains the ID of the supported node, and a set of 
-// one or two node IDs needed to compute the support point location and density value
-using SupportPointData = std::pair<int, std::set<int>>; 
 
 class PseudoLayerBuilder
 {
@@ -38,18 +35,15 @@ class PseudoLayerBuilder
         std::vector<int> orderNodesInBuildDirection() const;
         std::vector<int> setBaseLayerIDToZeroAndOthersToMinusOne() const;
 
-        void computeSupportSetAndCoefficients(std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
-                                              std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients,
-                                              std::map<std::pair<int,int>, std::vector<std::vector<double>>>& aInteriorSupportCoefficients) const;
+        void computeSupportSetAndCoefficients(std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const;
 
         int assignNodeToPseudoLayer(const int& aNode,
                                     const std::vector<int>& aPseudoLayers,
-                                    const std::set<SupportPointData>& aSupportSet) const;
+                                    const std::set<BoundarySupportPoint>& aSupportSet) const;
 
-        std::set<SupportPointData> pruneSupportSet(const int& aNode,
+        std::set<BoundarySupportPoint> pruneSupportSet(const int& aNode,
                                                    const std::vector<int>& aPseudoLayers,
-                                                   const std::set<SupportPointData>& aSupportSet,
-                                                   std::map<SupportPointData, std::vector<double>>& aSupportCoefficients) const;
+                                                   const std::set<BoundarySupportPoint>& aSupportSet) const;
 
     private:
 
@@ -67,18 +61,17 @@ class PseudoLayerBuilder
         bool isNeighborInCriticalWindow(const int& aNode, 
                                         const int& aNeighbor) const;
 
-        std::vector<double> computeSupportCoefficients(const SupportPointData& aSupportPoint) const;
+        std::vector<double> computeSupportCoefficients(const int& aNode, const std::set<int>& aSupportDependencyNodes) const;
 
         void computeBoundarySupportPointsAndCoefficients(size_t& i,
                                                          std::vector<int>& aElement,
-                                                         std::vector<std::set<SupportPointData>>& aBoundarySupportSet,
-                                                         std::map<SupportPointData,std::vector<double>>& aBoundarySupportCoefficients) const;
+                                                         std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const;
 
         double computeFirstCoefficient(const PlatoSubproblemLibrary::Vector& aV0,
                                        const PlatoSubproblemLibrary::Vector& aV1,
                                        const PlatoSubproblemLibrary::Vector& aV2) const;
 
-        std::set<int> getSupportingNeighbors(const int& aNode, const std::set<SupportPointData>& aSupportSet) const;
+        std::set<int> getSupportingNeighbors(const int& aNode, const std::set<BoundarySupportPoint>& aSupportSet) const;
         std::set<int> determineConnectedPseudoLayers(const int& aNode, 
                                                      const std::vector<int>& aPseudoLayers,
                                                      const std::set<int>& aNeighbors) const;
@@ -98,7 +91,6 @@ class PseudoLayerBuilder
         const std::vector<int>& mBaseLayer;
 };
 
-PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const SupportPointData& aSupportPoint,
-                                                       const std::map<PlatoSubproblemLibrary::SupportPointData,std::vector<double>>& aSupportCoefficients,
+PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
                                                        const std::vector<std::vector<double>>& aCoordinates);
 }
