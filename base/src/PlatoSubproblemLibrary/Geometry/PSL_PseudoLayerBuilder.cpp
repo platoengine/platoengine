@@ -121,7 +121,7 @@ void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
         {
             if(isNeighborInCriticalWindow(tNode,tNeighbor))
             {
-                BoundarySupportPoint tSupportPoint(tNode, {tNeighbor}, {1.0});
+                BoundarySupportPoint tSupportPoint(tNode, {tNeighbor}, std::vector<double>({1.0}));
                 aBoundarySupportSet[tNode].insert(tSupportPoint);
             }
             else // tNeighbor is not in the critical window

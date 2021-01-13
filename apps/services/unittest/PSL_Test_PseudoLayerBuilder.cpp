@@ -1004,7 +1004,7 @@ PSL_TEST(PseudoLayerBuilder,pruneSupportSet2)
     tGoldSupportSet.erase({3, {0}});
     tGoldSupportSet.erase({3, {0,2}});
 
-    BoundarySupportPoint tNewSupportPoint(3, {2}, {tCoefficient});
+    BoundarySupportPoint tNewSupportPoint(3, {2}, std::vector<double>({tCoefficient}));
     tGoldSupportSet.insert(tNewSupportPoint);
 
     EXPECT_EQ(tBoundarySupportSet[3], tGoldSupportSet);

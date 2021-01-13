@@ -5,24 +5,35 @@ namespace PlatoSubproblemLibrary
 
 bool BoundarySupportPoint::operator<(const BoundarySupportPoint& aSupportPoint) const
 {
-    std::pair<int, std::set<int>> tThisSupportPointData = {this->getSupportedNodeIndex(), this->getSupportingNodeIndices()};
-    std::pair<int, std::set<int>> tInputSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices()};
+    std::tuple<int, std::set<int>, int> tThisSupportPointData = {this->getSupportedNodeIndex(), this->getSupportingNodeIndices(), this->getIndexOnEdge()};
+    std::tuple<int, std::set<int>, int> tInputSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices(), aSupportPoint.getIndexOnEdge()};
     return tThisSupportPointData < tInputSupportPointData;
 }
 
 bool BoundarySupportPoint::operator==(const BoundarySupportPoint& aSupportPoint) const
 {
-    std::pair<int, std::set<int>> tThisSupportPointData = {this->getSupportedNodeIndex(), this->getSupportingNodeIndices()};
-    std::pair<int, std::set<int>> tInputSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices()};
+    std::tuple<int, std::set<int>, int> tThisSupportPointData = {this->getSupportedNodeIndex(), this->getSupportingNodeIndices(), this->getIndexOnEdge()};
+    std::tuple<int, std::set<int>, int> tInputSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices(), aSupportPoint.getIndexOnEdge()};
     return tThisSupportPointData == tInputSupportPointData;
+}
+
+bool BoundarySupportPoint::operator!=(const BoundarySupportPoint& aSupportPoint) const
+{
+    std::tuple<int, std::set<int>, int> tThisSupportPointData = {this->getSupportedNodeIndex(), this->getSupportingNodeIndices(), this->getIndexOnEdge()};
+    std::tuple<int, std::set<int>, int> tInputSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices(), aSupportPoint.getIndexOnEdge()};
+    return tThisSupportPointData != tInputSupportPointData;
 }
 
 double BoundarySupportPoint::getCorrespondingCoefficient(const int& aNeighbor) const
 {
-    auto tNeighborIterator = mSupportingNodeIndices.begin();
+    if(!mCoefficientsSet)
+    {
+        throw(std::runtime_error("BoundarySupportPoint: Coefficients not yet set"));
+    }
+    auto tNeighborIterator = mSupportingNodesAsGiven.begin();
     auto tCoefficientIterator = mCoefficients.begin();
 
-    for(; tNeighborIterator != mSupportingNodeIndices.end(); ++tNeighborIterator)
+    for(; tNeighborIterator != mSupportingNodesAsGiven.end(); ++tNeighborIterator)
     {
         if(*tNeighborIterator == aNeighbor)
             return *tCoefficientIterator;
@@ -36,15 +47,23 @@ double BoundarySupportPoint::getCorrespondingCoefficient(const int& aNeighbor) c
 std::ostream & operator<< (std::ostream &out, const BoundarySupportPoint &aSupportPoint)
 {
     std::pair<int, std::set<int>> tThisSupportPointData = {aSupportPoint.getSupportedNodeIndex(), aSupportPoint.getSupportingNodeIndices()};
-    out << "{" << aSupportPoint.getSupportedNodeIndex() << ",{";
+    out << "{" << aSupportPoint.getSupportedNodeIndex() << ", {";
     
-    for(int i : aSupportPoint.getSupportingNodeIndices())
+    auto tIndices = aSupportPoint.getSupportingNodeIndices();
+    if(tIndices.size() == 1)
     {
-        out << i << ",";
+        out << *(tIndices.begin());
+    }
+    else if(tIndices.size() == 2)
+    {
+        out << *(tIndices.begin()) << "," << *(++(tIndices.begin()));
+    }
+    else
+    {
+        throw(std::runtime_error("BoundarySupportPoint: Support point must depend on 1 or 2 nodes"));
     }
 
-    out << '\b';
-    out << "}}" << std::endl;
+    out << "}}";
 
     return out;
 }
