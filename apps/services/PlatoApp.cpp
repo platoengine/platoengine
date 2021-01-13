@@ -221,6 +221,14 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("CSMParameterOutput");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CSMParameterOutput(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("SetLowerBounds");
             if(tStrFunction == tFunctions.back())
             {

@@ -214,7 +214,7 @@ class ESP
         ocsmSetVelD(mModel, mActiveParameterIndex, /*irow=*/ 1, /*icol=*/ 1, 1.0);
         int tBuildTo = 0;
         int tNbody   = 0;
-        auto tStatus = ocsmBuild(mModel, tBuildTo, &mBuiltTo, &tNbody, NULL);
+        ocsmBuild(mModel, tBuildTo, &mBuiltTo, &tNbody, NULL);
         
         /* retrieve the sensitivities for the active bodies */
         int tNface, tNedge, tNvert, tNtri;

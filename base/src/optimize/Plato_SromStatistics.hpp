@@ -121,7 +121,7 @@ inline void compute_srom_correlation_matrix
     {
         for (decltype(tRandVecDim) tIndexI = 0; tIndexI < tRandVecDim; tIndexI++)
         {
-            auto tXi = aSamples(tIndexI, tSampleIndex);
+            aSamples(tIndexI, tSampleIndex);
             for (decltype(tRandVecDim) tIndexJ = 0; tIndexJ < tRandVecDim; tIndexJ++)
             {
                 aCorrelation(tIndexI, tIndexJ) += aProbabilities[tSampleIndex] * aSamples(tIndexI, tSampleIndex) * aSamples(tIndexJ, tSampleIndex);
