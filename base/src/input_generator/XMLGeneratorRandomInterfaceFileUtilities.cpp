@@ -329,7 +329,7 @@ void append_evaluate_nondeterministic_objective_value_operation
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
-    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimizer.objective_number_standard_deviations + " StdDev";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev";
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, aOutputSharedDataName }, tOutputNode);
 }
 // function append_evaluate_nondeterministic_objective_value_operation
@@ -415,7 +415,7 @@ void append_evaluate_nondeterministic_objective_gradient_operation
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
-    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimizer.objective_number_standard_deviations + " StdDev Gradient";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev Gradient";
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, aOutputSharedDataName }, tOutputNode);
 }
 // function append_evaluate_nondeterministic_objective_gradient_operation

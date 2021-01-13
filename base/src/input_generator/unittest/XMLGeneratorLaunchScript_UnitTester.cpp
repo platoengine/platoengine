@@ -141,7 +141,9 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForOptimizer)
 {
   XMLGen::InputData tInputData;
   tInputData.mesh.run_name = "dummy_mesh.exo";
-  tInputData.optimizer.initial_guess_filename = "dummy_initial_guess.exo";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("initial_guess_file_name", "dummy_initial_guess.exo");
+  tInputData.set(tOptimizationParameters);
   XMLGen::Service tService;
   tService.numberProcessors("10");
   tService.code("platomain");
@@ -494,30 +496,38 @@ TEST(PlatoTestXMLGenerator, appendEngineMPIRunLines)
 TEST(PlatoTestXMLGenerator, getNumBufferLayers)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_buffer_layers = "2";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_buffer_layers", "2");
+  tInputData.set(tOptimizationParameters);
 
   std::string number_buffer_layers = XMLGen::Internal::get_num_buffer_layers(tInputData);
-  EXPECT_STREQ(number_buffer_layers.c_str(), tInputData.optimizer.number_buffer_layers.c_str());
+  EXPECT_STREQ(number_buffer_layers.c_str(), tInputData.optimization_parameters().number_buffer_layers().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, getNumBufferLayers_invalidInput)
 {
   XMLGen::InputData tInputData;
 
-  tInputData.optimizer.number_buffer_layers = "foo";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_buffer_layers", "foo");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_num_buffer_layers(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_buffer_layers = "-10";
+  tOptimizationParameters.append("number_buffer_layers", "-10");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_num_buffer_layers(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_buffer_layers = "12.2";
+  tOptimizationParameters.append("number_buffer_layers", "12.2");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_num_buffer_layers(tInputData),std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, getNumBufferLayers_emptyInput)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_buffer_layers = "";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_buffer_layers", "");
+  tInputData.set(tOptimizationParameters);
 
   std::string number_buffer_layers = XMLGen::Internal::get_num_buffer_layers(tInputData);
   EXPECT_STREQ(number_buffer_layers.c_str(), "2");
@@ -526,16 +536,20 @@ TEST(PlatoTestXMLGenerator, getNumBufferLayers_emptyInput)
 TEST(PlatoTestXMLGenerator, getPruneString)
 {
   XMLGen::InputData tInputData;
+  XMLGen::OptimizationParameters tOptimizationParameters;
 
-  tInputData.optimizer.prune_mesh = "true";
+  tOptimizationParameters.append("prune_mesh", "true");
+  tInputData.set(tOptimizationParameters);
   std::string tPruneString = XMLGen::Internal::get_prune_string(tInputData);
   EXPECT_STREQ(tPruneString.c_str(),"1");
 
-  tInputData.optimizer.prune_mesh = "false";
+  tOptimizationParameters.append("prune_mesh", "false");
+  tInputData.set(tOptimizationParameters);
   tPruneString = XMLGen::Internal::get_prune_string(tInputData);
   EXPECT_STREQ(tPruneString.c_str(),"0");
 
-  tInputData.optimizer.prune_mesh = "some_invalid_string";
+  tOptimizationParameters.append("prune_mesh", "some_invalid_string");
+  tInputData.set(tOptimizationParameters);
   tPruneString = XMLGen::Internal::get_prune_string(tInputData);
   EXPECT_STREQ(tPruneString.c_str(),"0");
 }
@@ -543,8 +557,10 @@ TEST(PlatoTestXMLGenerator, getPruneString)
 TEST(PlatoTestXMLGenerator, appendConcatenateMeshFileLines)
 {
   XMLGen::InputData tInputData;
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_prune_and_refine_processors", "5");
+  tInputData.set(tOptimizationParameters);
   tInputData.mesh.run_name = "dummy.exo";
-  tInputData.optimizer.number_prune_and_refine_processors = "5";
   FILE* fp = fopen("concatenate.txt", "w");
 
   XMLGen::append_concatenate_mesh_file_lines(tInputData,fp);
@@ -561,7 +577,9 @@ TEST(PlatoTestXMLGenerator, appendConcatenateMeshFileLines)
 TEST(PlatoTestXMLGenerator, appendConcatenateMeshFileLines_runMeshNameNotSet)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_prune_and_refine_processors = "5";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_prune_and_refine_processors", "5");
+  tInputData.set(tOptimizationParameters);
   FILE* fp = fopen("concatenate.txt", "w");
 
   EXPECT_THROW(XMLGen::append_concatenate_mesh_file_lines(tInputData, fp),std::runtime_error);
@@ -591,25 +609,32 @@ TEST(PlatoTestXMLGenerator, getExtensionString)
 TEST(PlatoTestXMLGenerator, getNumberOfRefines_invalidInput)
 {
   XMLGen::InputData tInputData;
+  XMLGen::OptimizationParameters tOptimizationParameters;
 
-  tInputData.optimizer.number_refines = "foo";
+  tOptimizationParameters.append("number_refines", "foo");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_refines(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_refines = "-10";
+  tOptimizationParameters.append("number_refines", "-10");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_refines(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_refines = "12.2";
+  tOptimizationParameters.append("number_refines", "12.2");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_refines(tInputData),std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, getNumberOfRefines)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_refines = "";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_refines", "");
+  tInputData.set(tOptimizationParameters);
   int tNumRefines = XMLGen::Internal::get_number_of_refines(tInputData);
   EXPECT_EQ(tNumRefines, 0);
 
-  tInputData.optimizer.number_refines = "2";
+  tOptimizationParameters.append("number_refines", "2");
+  tInputData.set(tOptimizationParameters);
   tNumRefines = XMLGen::Internal::get_number_of_refines(tInputData);
   EXPECT_EQ(tNumRefines, 2);
 }
@@ -664,16 +689,20 @@ TEST(PlatoTestXMLGenerator, getMaxNumberOfObjectiveProcs)
 TEST(PlatoTestXMLGenerator, getNumberOfPruneAndRefineProcs)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_prune_and_refine_processors = "3";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_prune_and_refine_processors", "3");
+  tInputData.set(tOptimizationParameters);
 
   int tNumProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData);
   EXPECT_EQ(tNumProcs,3);
 
-  tInputData.optimizer.number_prune_and_refine_processors = "";
+  tOptimizationParameters.append("number_prune_and_refine_processors", "");
+  tInputData.set(tOptimizationParameters);
   tNumProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData);
   EXPECT_EQ(tNumProcs,0);
 
-  tInputData.optimizer.number_prune_and_refine_processors = "0";
+  tOptimizationParameters.append("number_prune_and_refine_processors", "0");
+  tInputData.set(tOptimizationParameters);
   tNumProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData);
   EXPECT_EQ(tNumProcs,0);
 }
@@ -681,26 +710,32 @@ TEST(PlatoTestXMLGenerator, getNumberOfPruneAndRefineProcs)
 TEST(PlatoTestXMLGenerator, getNumberOfPruneAndRefineProcs_invalidInput)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_prune_and_refine_processors = "foo";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_prune_and_refine_processors", "foo");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_prune_and_refine_processors = "-10";
+  tOptimizationParameters.append("number_prune_and_refine_processors", "-10");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData),std::runtime_error);
 
-  tInputData.optimizer.number_prune_and_refine_processors = "12.2";
+  tOptimizationParameters.append("number_prune_and_refine_processors", "12.2");
+  tInputData.set(tOptimizationParameters);
   EXPECT_THROW(XMLGen::Internal::get_number_of_prune_and_refine_procs(tInputData),std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, appendPruneAndRefineCommand)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.prune_mesh = "true";
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_buffer_layers = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "10";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("prune_mesh", "true");
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_buffer_layers", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "10");
+  tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
+  tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tInputData.set(tOptimizationParameters);
   tInputData.codepaths.prune_and_refine_path = "path/to/some/executable";
-  tInputData.optimizer.initial_guess_filename = "dummy_guess.exo";
-  tInputData.optimizer.initial_guess_field_name = "badGuess";
   tInputData.mesh.name = "dummy.exo";
   tInputData.mesh.run_name = "output.exo";
   tInputData.m_UseLaunch = false;
@@ -716,13 +751,14 @@ TEST(PlatoTestXMLGenerator, appendPruneAndRefineCommand)
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
 
 
-  tInputData.optimizer.prune_mesh = "false";
-  tInputData.optimizer.number_refines = "";
-  tInputData.optimizer.number_buffer_layers = "";
-  tInputData.optimizer.number_prune_and_refine_processors = "";
+  tOptimizationParameters.append("prune_mesh", "false");
+  tOptimizationParameters.append("number_refines", "");
+  tOptimizationParameters.append("number_buffer_layers", "");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "");
+  tOptimizationParameters.append("initial_guess_file_name", "");
+  tOptimizationParameters.append("initial_guess_field_name", "");
+  tInputData.set(tOptimizationParameters);
   tInputData.codepaths.prune_and_refine_path = "";
-  tInputData.optimizer.initial_guess_filename = "";
-  tInputData.optimizer.initial_guess_field_name = "";
 
   tInputData.mesh.name = "dummy.exo";
   tInputData.mesh.run_name = "output.exo";
@@ -741,13 +777,15 @@ TEST(PlatoTestXMLGenerator, appendPruneAndRefineCommand)
 TEST(PlatoTestXMLGenerator, appendPruneAndRefineCommand_invalidInput)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.prune_mesh = "true";
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_buffer_layers = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "10";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("prune_mesh", "true");
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_buffer_layers", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "10");
+  tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
+  tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tInputData.set(tOptimizationParameters);
   tInputData.codepaths.prune_and_refine_path = "path/to/some/executable";
-  tInputData.optimizer.initial_guess_filename = "dummy_guess.exo";
-  tInputData.optimizer.initial_guess_field_name = "badGuess";
   tInputData.mesh.name = "";
   tInputData.mesh.run_name = "output.exo";
 
@@ -769,8 +807,10 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
 {
   //no need to prune, transfer, or refine
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_refines = "0";
-  tInputData.optimizer.number_prune_and_refine_processors = "2";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_refines", "0");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "2");
+  tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
   FILE* fp = fopen("decomp.txt", "w");
   XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp);
@@ -783,8 +823,9 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
 
 
   //no need to decompose
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "1";
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "1");
+  tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
   fp = fopen("decomp.txt", "w");
   XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp);
@@ -794,11 +835,12 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
   tGold = "";
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
 
-  tInputData.optimizer.number_refines = "0";
-  tInputData.optimizer.number_prune_and_refine_processors = "2";
+  tOptimizationParameters.append("number_refines", "0");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "2");
+  tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
+  tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
-  tInputData.optimizer.initial_guess_filename = "dummy_guess.exo";
-  tInputData.optimizer.initial_guess_field_name = "badGuess";
   fp = fopen("decomp.txt", "w");
   XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp);
   fclose(fp);
@@ -808,11 +850,12 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
 
 
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "2";
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "2");
+  tOptimizationParameters.append("initial_guess_file_name", "");
+  tOptimizationParameters.append("initial_guess_field_name", "");
+  tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
-  tInputData.optimizer.initial_guess_filename = "";
-  tInputData.optimizer.initial_guess_field_name = "";
   fp = fopen("decomp.txt", "w");
   XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp);
   fclose(fp);
@@ -827,8 +870,10 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
 TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine_missingMeshName)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "2";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "2");
+  tInputData.set(tOptimizationParameters);
   FILE* fp = fopen("decomp.txt", "w");
   EXPECT_THROW(XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp),std::runtime_error);
   fclose(fp);
@@ -839,13 +884,15 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine_missingMeshName)
 TEST(PlatoTestXMLGenerator, appendPruneAndRefineLinesToMPIRunLaunchScript)
 {
   XMLGen::InputData tInputData;
-  tInputData.optimizer.prune_mesh = "true";
-  tInputData.optimizer.number_refines = "2";
-  tInputData.optimizer.number_buffer_layers = "2";
-  tInputData.optimizer.number_prune_and_refine_processors = "10";
+  XMLGen::OptimizationParameters tOptimizationParameters;
+  tOptimizationParameters.append("prune_mesh", "true");
+  tOptimizationParameters.append("number_refines", "2");
+  tOptimizationParameters.append("number_buffer_layers", "2");
+  tOptimizationParameters.append("number_prune_and_refine_processors", "10");
+  tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
+  tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tInputData.set(tOptimizationParameters);
   tInputData.codepaths.prune_and_refine_path = "path/to/some/executable";
-  tInputData.optimizer.initial_guess_filename = "dummy_guess.exo";
-  tInputData.optimizer.initial_guess_field_name = "badGuess";
   tInputData.mesh.name = "dummy.exo";
   tInputData.mesh.run_name = "output.exo";
   tInputData.m_UseLaunch = false;

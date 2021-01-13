@@ -87,45 +87,45 @@ public:
     std::string getBCApplicationType(const std::string &aBCID);
     std::string getBCApplicationID(const std::string &aBCID);
     std::string getBCApplicationDOF(const std::string &aBCID);
-    std::string getMatBoxMinCoords() {return m_InputData.optimizer.levelset_material_box_min;}
-    std::string getMatBoxMaxCoords() {return m_InputData.optimizer.levelset_material_box_max;}
-    std::string getInitDensityValue() {return m_InputData.optimizer.initial_density_value;}
-    std::string getCreateLevelsetSpheres() {return m_InputData.optimizer.create_levelset_spheres;}
-    std::string getLevelsetInitMethod() {return m_InputData.optimizer.levelset_initialization_method;}
-    std::string getMaxIterations() {return m_InputData.optimizer.max_iterations;}
-    std::string getRestartIteration() {return m_InputData.optimizer.restart_iteration;}
-    std::string getRestartFieldName() {return m_InputData.optimizer.initial_guess_field_name;}
-    std::string getRestartMeshFilename() {return m_InputData.optimizer.initial_guess_filename;}
-    std::string getKSMaxTrustIterations() {return m_InputData.optimizer.mMaxTrustRegionIterations;}
-    std::string getKSExpansionFactor() {return m_InputData.optimizer.mTrustRegionExpansionFactor;}
-    std::string getKSContractionFactor() {return m_InputData.optimizer.mTrustRegionContractionFactor;}
-    std::string getKSOuterGradientTolerance() {return m_InputData.optimizer.mOuterGradientToleranceKS;}
-    std::string getKSOuterStationarityTolerance() {return m_InputData.optimizer.mOuterStationarityToleranceKS;}
-    std::string getKSOuterStagnationTolerance() {return m_InputData.optimizer.mOuterStagnationToleranceKS;}
-    std::string getKSOuterControlStagnationTolerance() {return m_InputData.optimizer.mOuterControlStagnationToleranceKS;}
-    std::string getKSOuterActualReductionTolerance() {return m_InputData.optimizer.mOuterActualReductionToleranceKS;}
-    std::string getGCMMAMaxInnerIterations() {return m_InputData.optimizer.mMaxInnerIterationsGCMMA;}
-    std::string getGCMMAInnerKKTTolerance() {return m_InputData.optimizer.mInnerKKTtoleranceGCMMA;}
-    std::string getGCMMAInnerControlStagnationTolerance() {return m_InputData.optimizer.mInnerControlStagnationToleranceGCMMA;}
-    std::string getGCMMAOuterKKTTolerance() {return m_InputData.optimizer.mOuterKKTtoleranceGCMMA;}
-    std::string getGCMMAOuterControlStagnationTolerance() {return m_InputData.optimizer.mOuterControlStagnationToleranceGCMMA;}
-    std::string getGCMMAOuterObjectiveStagnationTolerance() {return m_InputData.optimizer.mOuterObjectiveStagnationToleranceGCMMA;}
-    std::string getGCMMAOuterStationarityTolerance() {return m_InputData.optimizer.mOuterStationarityToleranceGCMMA;}
-    std::string getGCMMAInitialMovingAsymptotesScaleFactor() {return m_InputData.optimizer.mInitialMovingAsymptotesScaleFactorGCMMA;}
-    std::string getLevelsetSpherePackingFactor() {return m_InputData.optimizer.levelset_sphere_packing_factor;}
-    std::string getLevelsetSphereRadius() {return m_InputData.optimizer.levelset_sphere_radius;}
-    std::string getLevelsetNodeset(const int &aIndex) {return m_InputData.optimizer.levelset_nodesets[aIndex];}
-    std::string getFixedBlock(const int &aIndex) {return m_InputData.optimizer.fixed_block_ids[aIndex];}
-    std::string getFixedSideset(const int &aIndex) {return m_InputData.optimizer.fixed_sideset_ids[aIndex];}
-    std::string getFixedNodeset(const int &aIndex) {return m_InputData.optimizer.fixed_nodeset_ids[aIndex];}
-    std::string getFilterPower() {return m_InputData.optimizer.filter_power;}
+    std::string getMatBoxMinCoords() {return m_InputData.optimization_parameters().levelset_material_box_min();}
+    std::string getMatBoxMaxCoords() {return m_InputData.optimization_parameters().levelset_material_box_max();}
+    std::string getInitDensityValue() {return m_InputData.optimization_parameters().initial_density_value();}
+    std::string getCreateLevelsetSpheres() {return m_InputData.optimization_parameters().create_levelset_spheres();}
+    std::string getLevelsetInitMethod() {return m_InputData.optimization_parameters().levelset_initialization_method();}
+    std::string getMaxIterations() {return m_InputData.optimization_parameters().max_iterations();}
+    std::string getRestartIteration() {return m_InputData.optimization_parameters().restart_iteration();}
+    std::string getRestartFieldName() {return m_InputData.optimization_parameters().initial_guess_field_name();}
+    std::string getRestartMeshFilename() {return m_InputData.optimization_parameters().initial_guess_file_name();}
+    std::string getKSMaxTrustIterations() {return m_InputData.optimization_parameters().ks_max_trust_region_iterations();}
+    std::string getKSExpansionFactor() {return m_InputData.optimization_parameters().ks_trust_region_expansion_factor();}
+    std::string getKSContractionFactor() {return m_InputData.optimization_parameters().ks_trust_region_contraction_factor();}
+    std::string getKSOuterGradientTolerance() {return m_InputData.optimization_parameters().ks_outer_gradient_tolerance();}
+    std::string getKSOuterStationarityTolerance() {return m_InputData.optimization_parameters().ks_outer_stationarity_tolerance();}
+    std::string getKSOuterStagnationTolerance() {return m_InputData.optimization_parameters().ks_outer_stagnation_tolerance();}
+    std::string getKSOuterControlStagnationTolerance() {return m_InputData.optimization_parameters().ks_outer_control_stagnation_tolerance();}
+    std::string getKSOuterActualReductionTolerance() {return m_InputData.optimization_parameters().ks_outer_actual_reduction_tolerance();}
+    std::string getGCMMAMaxInnerIterations() {return m_InputData.optimization_parameters().gcmma_max_inner_iterations();}
+    std::string getGCMMAInnerKKTTolerance() {return m_InputData.optimization_parameters().gcmma_inner_kkt_tolerance();}
+    std::string getGCMMAInnerControlStagnationTolerance() {return m_InputData.optimization_parameters().gcmma_inner_control_stagnation_tolerance();}
+    std::string getGCMMAOuterKKTTolerance() {return m_InputData.optimization_parameters().gcmma_outer_kkt_tolerance();}
+    std::string getGCMMAOuterControlStagnationTolerance() {return m_InputData.optimization_parameters().gcmma_outer_control_stagnation_tolerance();}
+    std::string getGCMMAOuterObjectiveStagnationTolerance() {return m_InputData.optimization_parameters().gcmma_outer_objective_stagnation_tolerance();}
+    std::string getGCMMAOuterStationarityTolerance() {return m_InputData.optimization_parameters().gcmma_outer_stationarity_tolerance();}
+    std::string getGCMMAInitialMovingAsymptotesScaleFactor() {return m_InputData.optimization_parameters().gcmma_initial_moving_asymptotes_scale_factor();}
+    std::string getLevelsetSpherePackingFactor() {return m_InputData.optimization_parameters().levelset_sphere_packing_factor();}
+    std::string getLevelsetSphereRadius() {return m_InputData.optimization_parameters().levelset_sphere_radius();}
+    std::string getLevelsetNodeset(const int &aIndex) {return m_InputData.optimization_parameters().levelset_nodesets()[aIndex];}
+    std::string getFixedBlock(const int &aIndex) {return m_InputData.optimization_parameters().fixed_block_ids()[aIndex];}
+    std::string getFixedSideset(const int &aIndex) {return m_InputData.optimization_parameters().fixed_sideset_ids()[aIndex];}
+    std::string getFixedNodeset(const int &aIndex) {return m_InputData.optimization_parameters().fixed_nodeset_ids()[aIndex];}
+    std::string getFilterPower() {return m_InputData.optimization_parameters().filter_power();}
     std::string getNumberProcessors();
-    std::string getFilterScale() {return m_InputData.optimizer.filter_radius_scale;}
-    std::string getFilterAbsolute() {return m_InputData.optimizer.filter_radius_absolute;}
-    std::string getAlgorithm() {return m_InputData.optimizer.optimization_algorithm;}
-    std::string getDiscretization() {return m_InputData.optimizer.discretization;}
-    std::string getCheckGradient() {return m_InputData.optimizer.check_gradient;}
-    std::string getCheckHessian() {return m_InputData.optimizer.check_hessian;}
+    std::string getFilterScale() {return m_InputData.optimization_parameters().filter_radius_scale();}
+    std::string getFilterAbsolute() {return m_InputData.optimization_parameters().filter_radius_absolute();}
+    std::string getAlgorithm() {return m_InputData.optimization_parameters().optimization_algorithm();}
+    std::string getDiscretization() {return m_InputData.optimization_parameters().discretization();}
+    std::string getCheckGradient() {return m_InputData.optimization_parameters().check_gradient();}
+    std::string getCheckHessian() {return m_InputData.optimization_parameters().check_hessian();}
     std::string getMeshName() {return m_InputData.mesh.name;}
     std::string getSalinasPath() {return m_InputData.codepaths.sierra_sd_path;}
     std::string getAlbanyPath() {return m_InputData.codepaths.albany_path;}

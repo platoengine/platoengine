@@ -75,15 +75,15 @@ begin material 1
    youngs_modulus 1e8
 end material
 
-begin optimization parameters
-   filter radius scale 4.48
-   max iterations 10 
-//   output frequency 1000 
-   algorithm oc
+begin optimization_parameters
+   filter_radius_scale 4.48
+   max_iterations 10 
+   output_frequency 1000 
+   optimization_algorithm oc
    discretization density 
-   initial density value .5
+   initial_density_value .5
    normalize_in_aggregator false
-end optimization parameters
+end optimization_parameters
 
 begin mesh
    name bolted_bracket.exo
@@ -91,21 +91,5 @@ end mesh
 
 begin paths
 code PlatoMain PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD
 end paths

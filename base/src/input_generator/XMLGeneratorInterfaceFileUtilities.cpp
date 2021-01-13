@@ -26,7 +26,7 @@ void write_interface_xml_file
         XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
 
     auto tNode = tDocument.append_child("Console");
-    XMLGen::append_children({"Verbose"}, {aMetaData.optimizer.mVerbose}, tNode);
+    XMLGen::append_children({"Verbose"}, {aMetaData.optimization_parameters().verbose()}, tNode);
 
     XMLGen::append_plato_main_performer(aMetaData, tDocument);
 
@@ -1077,7 +1077,7 @@ void append_lower_bound_stage
 {
     auto tStageNode = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"}, {"Set Lower Bounds"}, tStageNode);
-    auto tLower = Plato::tolower(aXMLMetaData.optimizer.optimization_type);
+    auto tLower = Plato::tolower(aXMLMetaData.optimization_parameters().optimization_type());
     if(tLower.compare("topology") == 0)
     {
         auto tInputNode = tStageNode.append_child("Input");
@@ -1113,7 +1113,7 @@ void append_upper_bound_stage
 {
     auto tStageNode = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"}, {"Set Upper Bounds"}, tStageNode);
-    auto tLower = Plato::tolower(aXMLMetaData.optimizer.optimization_type);
+    auto tLower = Plato::tolower(aXMLMetaData.optimization_parameters().optimization_type());
     if(tLower.compare("topology") == 0)
     {
         auto tInputNode = tStageNode.append_child("Input");
@@ -1219,14 +1219,14 @@ void append_derivative_checker_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tCheckGradient = aXMLMetaData.optimizer.check_gradient.empty() ? std::string("true") : aXMLMetaData.optimizer.check_gradient;
+    auto tCheckGradient = aXMLMetaData.optimization_parameters().check_gradient().empty() ? std::string("true") : aXMLMetaData.optimization_parameters().check_gradient();
     std::vector<std::string> tKeys = {"CheckGradient", "CheckHessian", "UseUserInitialGuess"};
-    std::vector<std::string> tValues = {tCheckGradient, aXMLMetaData.optimizer.check_hessian, "True"};
+    std::vector<std::string> tValues = {tCheckGradient, aXMLMetaData.optimization_parameters().check_hessian(), "True"};
     XMLGen::append_children(tKeys, tValues, aParentNode);
 
     auto tOptionsNode = aParentNode.append_child("Options");
     tKeys = {"DerivativeCheckerInitialSuperscript", "DerivativeCheckerFinalSuperscript"};
-    tValues = {aXMLMetaData.optimizer.mDerivativeCheckerInitialSuperscript, aXMLMetaData.optimizer.mDerivativeCheckerFinalSuperscript};
+    tValues = {aXMLMetaData.optimization_parameters().derivative_checker_initial_superscript(), aXMLMetaData.optimization_parameters().derivative_checker_final_superscript()};
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
 }
 // function append_derivative_checker_options
@@ -1238,7 +1238,7 @@ void append_optimality_criteria_options
  pugi::xml_node& aParentNode)
 {
     auto tConvergenceNode = aParentNode.append_child("Convergence");
-    XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.optimizer.max_iterations}, tConvergenceNode);
+    XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.optimization_parameters().max_iterations()}, tConvergenceNode);
 }
 // function append_optimality_criteria_options
 /******************************************************************************/
@@ -1250,9 +1250,9 @@ void append_method_moving_asymptotes_options
 {
     std::vector<std::string> tKeys = {"MaxNumOuterIterations", "MoveLimit", "AsymptoteExpansion", "AsymptoteContraction",
          "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
-    std::vector<std::string> tValues = {aXMLMetaData.optimizer.max_iterations, aXMLMetaData.optimizer.mMMAMoveLimit, aXMLMetaData.optimizer.mMMAAsymptoteExpansion,
-        aXMLMetaData.optimizer.mMMAAsymptoteContraction, aXMLMetaData.optimizer.mMMAMaxNumSubProblemIterations, aXMLMetaData.optimizer.mMMAControlStagnationTolerance,
-        aXMLMetaData.optimizer.mMMAObjectiveStagnationTolerance};
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().max_iterations(), aXMLMetaData.optimization_parameters().mma_move_limit(), aXMLMetaData.optimization_parameters().mma_asymptote_expansion(),
+        aXMLMetaData.optimization_parameters().mma_asymptote_contraction(), aXMLMetaData.optimization_parameters().mma_max_sub_problem_iterations(), aXMLMetaData.optimization_parameters().mma_control_stagnation_tolerance(),
+        aXMLMetaData.optimization_parameters().mma_objective_stagnation_tolerance()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
@@ -1283,24 +1283,24 @@ void append_trust_region_kelley_sachs_options
                                       "KSTrustRegionRatioLow",       
                                       "KSTrustRegionRatioMid", 
                                       "KSTrustRegionRatioUpper"};
-    std::vector<std::string> tValues = {aXMLMetaData.optimizer.mTrustRegionExpansionFactor, 
-                                        aXMLMetaData.optimizer.mTrustRegionContractionFactor, 
-                                        aXMLMetaData.optimizer.mMaxTrustRegionIterations,
-                                        aXMLMetaData.optimizer.mInitialRadiusScale, 
-                                        aXMLMetaData.optimizer.mMaxRadiusScale, 
-                                        aXMLMetaData.optimizer.mHessianType, 
-                                        aXMLMetaData.optimizer.mMinTrustRegionRadius, 
-                                        aXMLMetaData.optimizer.mLimitedMemoryStorage,
-                                        aXMLMetaData.optimizer.mOuterGradientToleranceKS, 
-                                        aXMLMetaData.optimizer.mOuterStationarityToleranceKS, 
-                                        aXMLMetaData.optimizer.mOuterStagnationToleranceKS, 
-                                        aXMLMetaData.optimizer.mOuterControlStagnationToleranceKS,
-                                        aXMLMetaData.optimizer.mOuterActualReductionToleranceKS, 
-                                        aXMLMetaData.optimizer.mProblemUpdateFrequency, 
-                                        aXMLMetaData.optimizer.mDisablePostSmoothingKS, 
-                                        aXMLMetaData.optimizer.mTrustRegionRatioLowKS,
-                                        aXMLMetaData.optimizer.mTrustRegionRatioMidKS, 
-                                        aXMLMetaData.optimizer.mTrustRegionRatioUpperKS};
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().ks_trust_region_expansion_factor(), 
+                                        aXMLMetaData.optimization_parameters().ks_trust_region_contraction_factor(), 
+                                        aXMLMetaData.optimization_parameters().ks_max_trust_region_iterations(),
+                                        aXMLMetaData.optimization_parameters().ks_initial_radius_scale(), 
+                                        aXMLMetaData.optimization_parameters().ks_max_radius_scale(), 
+                                        aXMLMetaData.optimization_parameters().hessian_type(), 
+                                        aXMLMetaData.optimization_parameters().ks_min_trust_region_radius(), 
+                                        aXMLMetaData.optimization_parameters().limited_memory_storage(),
+                                        aXMLMetaData.optimization_parameters().ks_outer_gradient_tolerance(), 
+                                        aXMLMetaData.optimization_parameters().ks_outer_stationarity_tolerance(), 
+                                        aXMLMetaData.optimization_parameters().ks_outer_stagnation_tolerance(), 
+                                        aXMLMetaData.optimization_parameters().ks_outer_control_stagnation_tolerance(),
+                                        aXMLMetaData.optimization_parameters().ks_outer_actual_reduction_tolerance(), 
+                                        aXMLMetaData.optimization_parameters().problem_update_frequency(), 
+                                        aXMLMetaData.optimization_parameters().ks_disable_post_smoothing(), 
+                                        aXMLMetaData.optimization_parameters().ks_trust_region_ratio_low(),
+                                        aXMLMetaData.optimization_parameters().ks_trust_region_ratio_mid(), 
+                                        aXMLMetaData.optimization_parameters().ks_trust_region_ratio_high()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
@@ -1315,8 +1315,8 @@ void append_augmented_lagrangian_options
 {
     std::vector<std::string> tKeys = {"AugLagPenaltyParam", 
                                       "AugLagPenaltyParamScaleFactor"};
-    std::vector<std::string> tValues = {aXMLMetaData.optimizer.mAugLagPenaltyParam, 
-                                        aXMLMetaData.optimizer.mAugLagPenaltyParamScale};
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().al_penalty_parameter(), 
+                                        aXMLMetaData.optimization_parameters().al_penalty_scale_factor()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.child("Options");
     if(tOptionsNode.empty())
@@ -1333,7 +1333,7 @@ void append_optimization_algorithm_parameters_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tLower = XMLGen::to_lower(aXMLMetaData.optimizer.optimization_algorithm);
+    auto tLower = XMLGen::to_lower(aXMLMetaData.optimization_parameters().optimization_algorithm());
     if(tLower.compare("oc") == 0)
     {
         XMLGen::append_optimality_criteria_options(aXMLMetaData, aParentNode);
@@ -1358,7 +1358,7 @@ void append_optimization_algorithm_parameters_options
     else
     {
         THROWERR(std::string("Append Optimization Algorithm Options: ") + "Optimization algorithm '"
-            + aXMLMetaData.optimizer.optimization_algorithm + "' is not supported.")
+            + aXMLMetaData.optimization_parameters().optimization_algorithm() + "' is not supported.")
     }
 }
 // function append_optimization_algorithm_parameters_options
@@ -1373,12 +1373,12 @@ void append_optimization_algorithm_options
         { {"oc", "OC"}, {"mma", "MMA"}, {"ksbc", "KSBC"}, {"ksal", "KSAL"} ,
           {"rol ksbc", "ROL KSBC"}, {"rol ksal", "ROL KSAL"}, {"derivativechecker", "DerivativeChecker"} };
 
-    auto tLower = Plato::tolower(aXMLMetaData.optimizer.optimization_algorithm);
+    auto tLower = Plato::tolower(aXMLMetaData.optimization_parameters().optimization_algorithm());
     auto tOptimizerItr = tValidOptimizers.find(tLower);
     if(tOptimizerItr == tValidOptimizers.end())
     {
         THROWERR(std::string("Append Optimization Algorithm Option: Optimization algorithm '")
-            + aXMLMetaData.optimizer.optimization_algorithm + "' is not supported.")
+            + aXMLMetaData.optimization_parameters().optimization_algorithm() + "' is not supported.")
     }
 
     XMLGen::append_children( { "Package" }, { tOptimizerItr->second }, aParentNode);

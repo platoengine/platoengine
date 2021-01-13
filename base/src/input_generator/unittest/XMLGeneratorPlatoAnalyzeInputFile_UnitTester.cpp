@@ -1986,7 +1986,9 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Objective tObjective;
     tXMLMetaData.objective = tObjective;
 

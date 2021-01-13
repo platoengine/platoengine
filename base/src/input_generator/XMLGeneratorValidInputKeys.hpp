@@ -12,6 +12,7 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "XMLG_Macros.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
@@ -1157,5 +1158,100 @@ public:
 };
 // struct ValidDofsKeys
 
+struct ValidOptimizationParameterKeys
+{
+    /*!<
+     * valid plato optimization parameters \n
+     * \brief vector of valid optimization parameters \n
+     **/
+    std::unordered_set<std::string> mKeys =
+    {
+     "discretization",
+     "verbose",
+     "number_refines",
+     "mma_move_limit",
+     "max_iterations",
+     "mma_asymptote_expansion",
+     "mma_asymptote_contraction",
+     "mma_max_sub_problem_iterations",
+     "mma_control_stagnation_tolerance",
+     "mma_objective_stagnation_tolerance",
+     "initial_guess_file_name",
+     "initial_guess_field_name",
+     "normalize_in_aggregator",
+     "derivative_checker_final_superscript",
+     "derivative_checker_initial_superscript",
+     "output_method",
+     "output_frequency",
+     "initial_density_value",
+     "restart_iteration",
+     "create_levelset_spheres",
+     "levelset_material_box_min",
+     "levelset_material_box_max",
+     "levelset_sphere_radius",
+     "levelset_sphere_packing_factor",
+     "levelset_initialization_method",
+     "fixed_block_ids",
+     "fixed_sideset_ids",
+     "fixed_nodeset_ids",
+     "levelset_nodesets",
+     "number_prune_and_refine_processors",
+     "number_buffer_layers",
+     "prune_mesh",
+     "optimization_algorithm",
+     "check_gradient",
+     "check_hessian",
+     "filter_type",
+     "filter_power",
+     "gcmma_inner_kkt_tolerance",
+     "gcmma_outer_kkt_tolerance",
+     "gcmma_inner_control_stagnation_tolerance",
+     "gcmma_outer_control_stagnation_tolerance",
+     "gcmma_outer_objective_stagnation_tolerance",
+     "gcmma_max_inner_iterations",
+     "gcmma_outer_stationarity_tolerance",
+     "gcmma_initial_moving_asymptotes_scale_factor",
+     "ks_max_radius_scale",
+     "ks_initial_radius_scale",
+     "max_trust_region_radius",
+     "ks_min_trust_region_radius",
+     "ks_max_trust_region_iterations",
+     "ks_trust_region_expansion_factor",
+     "ks_trust_region_contraction_factor",
+     "ks_trust_region_ratio_low",
+     "ks_trust_region_ratio_mid",
+     "ks_trust_region_ratio_high",
+     "ks_disable_post_smoothing",
+     "use_mean_norm",
+     "objective_number_standard_deviations",
+     "filter_radius_scale",
+     "filter_radius_absolute",
+     "al_penalty_parameter",
+     "feasibility_tolerance",
+     "al_penalty_scale_factor",
+     "al_max_subproblem_iterations",
+     "hessian_type",
+     "limited_memory_storage",
+     "problem_update_frequency",
+     "ks_outer_gradient_tolerance",
+     "ks_outer_stationarity_tolerance",
+     "ks_outer_stagnation_tolerance",
+     "ks_outer_control_stagnation_tolerance",
+     "ks_outer_actual_reduction_tolerance",
+     "filter_heaviside_min",
+     "filter_heaviside_update",
+     "filter_heaviside_max",
+     "filter_heaviside_scale",
+     "filter_projection_start_iteration",
+     "filter_projection_update_interval",
+     "filter_use_additive_continuation",
+     "write_restart_file",
+     "optimization_type",
+     "filter_type_identity_generator_name",
+     "filter_type_kernel_generator_name",
+     "filter_type_kernel_then_heaviside_generator_name",
+     "filter_type_kernel_then_tanh_generator_name"
+    };
+};
 }
 // namespace XMLGen

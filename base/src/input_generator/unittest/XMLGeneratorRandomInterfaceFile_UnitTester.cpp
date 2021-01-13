@@ -127,9 +127,11 @@ TEST(PlatoTestXMLGenerator, AppendTrustRegionKelleySachsOptions)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.mProblemUpdateFrequency = "5";
-    tXMLMetaData.optimizer.mMaxTrustRegionIterations = "10";
-    tXMLMetaData.optimizer.mDisablePostSmoothingKS = "false";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("problem_update_frequency", "5");
+    tOptimizationParameters.append("ks_max_trust_region_iterations", "10");
+    tOptimizationParameters.append("ks_disable_post_smoothing", "false");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_trust_region_kelley_sachs_options(tXMLMetaData, tDocument));
     auto tOptions = tDocument.child("Options");
     ASSERT_FALSE(tOptions.empty());
@@ -1379,7 +1381,9 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_lower_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1417,7 +1421,9 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage_TypeNotEqualToplogy)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "inverse";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "inverse");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_lower_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1437,7 +1443,9 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_upper_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1481,7 +1489,9 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage_TypeNotEqualToplogy)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "inverse";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "inverse");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_upper_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1931,7 +1941,9 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionValueOperatio
 {
     // CALL FUNCTION
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "1";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "1");
+    tXMLMetaData.set(tOptimizationParameters);
     pugi::xml_document tDocument;
     auto tStage = tDocument.append_child("Stage");
     XMLGen::append_evaluate_nondeterministic_objective_value_operation("Objective Value", tXMLMetaData, tStage);
@@ -2074,7 +2086,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     // DEFINE XML GENERATOR INPUT DATA
     tXMLMetaData.objective = tObjective;
     tXMLMetaData.mRandomMetaData = tRandomMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "1";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "1");
+    tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -2400,7 +2414,9 @@ TEST(PlatoTestXMLGenerator, AppendEvaluateNondeterministicCriterionGradientOpera
 {
     // CALL FUNCTION
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "2";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "2");
+    tXMLMetaData.set(tOptimizationParameters);
     pugi::xml_document tDocument;
     auto tStage = tDocument.append_child("Stage");
     XMLGen::append_evaluate_nondeterministic_objective_gradient_operation("Objective Gradient ID-0", tXMLMetaData, tStage);
@@ -2548,7 +2564,9 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     // DEFINE XML GENERATOR INPUT DATA
     tXMLMetaData.objective = tObjective;
     tXMLMetaData.mRandomMetaData = tRandomMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "3";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "3");
+    tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -2734,8 +2752,12 @@ TEST(PlatoTestXMLGenerator, AppendDerivativeCheckerOptions)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.check_gradient = "true";
-    tXMLMetaData.optimizer.check_hessian = "true";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("check_gradient", "true");
+    tOptimizationParameters.append("check_hessian", "true");
+    tOptimizationParameters.append("derivative_checker_initial_superscript", "1");
+    tOptimizationParameters.append("derivative_checker_final_superscript", "8");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_derivative_checker_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2755,7 +2777,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOC_Options)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.max_iterations = "11";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "11");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     XMLGen::append_optimality_criteria_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2775,8 +2799,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     // 1) TEST CASE WHERE ONLY A FEW PARAMETERS ARE DEFINED
     pugi::xml_document tDocument1;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.max_iterations = "11";
-    tXMLMetaData.optimizer.mMMAMoveLimit = "0.2";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "11");
+    tOptimizationParameters.append("mma_move_limit", "0.2");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument1.append_child("Optimizer");
     XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2792,11 +2818,12 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
 
     // 2) TEST CASE WHERE ALL THE PARAMETERS ARE DEFINED
     pugi::xml_document tDocument2;
-    tXMLMetaData.optimizer.mMMAAsymptoteExpansion = "2";
-    tXMLMetaData.optimizer.mMMAAsymptoteContraction = "0.75";
-    tXMLMetaData.optimizer.mMMAMaxNumSubProblemIterations = "50";
-    tXMLMetaData.optimizer.mMMAControlStagnationTolerance = "1e-3";
-    tXMLMetaData.optimizer.mMMAObjectiveStagnationTolerance = "1e-8";
+    tOptimizationParameters.append("mma_asymptote_expansion", "2");
+    tOptimizationParameters.append("mma_asymptote_contraction", "0.75");
+    tOptimizationParameters.append("mma_max_sub_problem_iterations", "50");
+    tOptimizationParameters.append("mma_control_stagnation_tolerance", "1e-3");
+    tOptimizationParameters.append("mma_objective_stagnation_tolerance", "1e-8");
+    tXMLMetaData.set(tOptimizationParameters);
     tOptimizerNode = tDocument2.append_child("Optimizer");
     XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2816,7 +2843,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptions_ErrorOptimizerNot
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_algorithm = "stochastic gradient descent";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_algorithm", "stochastic gradient descent");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode), std::runtime_error);
 }
@@ -2825,10 +2854,12 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsKSBC)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.mTrustRegionContractionFactor = "0.5";
-    tXMLMetaData.optimizer.mTrustRegionExpansionFactor = "4.0";
-    tXMLMetaData.optimizer.mDisablePostSmoothingKS = "false";
-    tXMLMetaData.optimizer.optimization_algorithm = "KSbc";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("ks_trust_region_contraction_factor", "0.5");
+    tOptimizationParameters.append("ks_trust_region_expansion_factor", "4.0");
+    tOptimizationParameters.append("ks_disable_post_smoothing", "false");
+    tOptimizationParameters.append("optimization_algorithm", "KSbc");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode));
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2847,9 +2878,11 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsMMA)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.max_iterations = "11";
-    tXMLMetaData.optimizer.mMMAMoveLimit = "0.2";
-    tXMLMetaData.optimizer.optimization_algorithm = "MmA";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "11");
+    tOptimizationParameters.append("mma_move_limit", "0.2");
+    tOptimizationParameters.append("optimization_algorithm", "MmA");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode));
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2869,8 +2902,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsOC)
     // CALL FUNCTION
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.max_iterations = "11";
-    tXMLMetaData.optimizer.optimization_algorithm = "Oc";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "11");
+    tOptimizationParameters.append("optimization_algorithm", "Oc");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_parameters_options(tXMLMetaData, tOptimizerNode));
     ASSERT_FALSE(tOptimizerNode.empty());
@@ -2889,7 +2924,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOption_ErrorOptimizerNotS
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_algorithm = "stochastic gradient descent";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_algorithm", "stochastic gradient descent");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_THROW(XMLGen::append_optimization_algorithm_options(tXMLMetaData, tOptimizerNode), std::runtime_error);
 }
@@ -2898,9 +2935,13 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOption_DerivativeChecker)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.check_hessian = "false";
-    tXMLMetaData.optimizer.check_gradient = "true";
-    tXMLMetaData.optimizer.optimization_algorithm = "derivativechecker";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("check_hessian", "false");
+    tOptimizationParameters.append("check_gradient", "true");
+    tOptimizationParameters.append("derivative_checker_initial_superscript", "1");
+    tOptimizationParameters.append("derivative_checker_final_superscript", "8");
+    tOptimizationParameters.append("optimization_algorithm", "derivativechecker");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_options(tXMLMetaData, tOptimizerNode));
 
@@ -2918,8 +2959,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOption)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.max_iterations = "12";
-    tXMLMetaData.optimizer.optimization_algorithm = "mma";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "12");
+    tOptimizationParameters.append("optimization_algorithm", "mma");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_NO_THROW(XMLGen::append_optimization_algorithm_options(tXMLMetaData, tOptimizerNode));
 

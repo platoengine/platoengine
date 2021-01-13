@@ -39,9 +39,11 @@ TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "density";
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("1");
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("2");
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.addFixedBlockID("1");
+    tOptimizationParameters.addFixedBlockID("2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_set_lower_bounds_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -79,11 +81,13 @@ TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "density";
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("1");
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("2");
-    tXMLMetaData.optimizer.fixed_sideset_ids.push_back("11");
-    tXMLMetaData.optimizer.fixed_sideset_ids.push_back("12");
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.addFixedBlockID("1");
+    tOptimizationParameters.addFixedBlockID("2");
+    tOptimizationParameters.addFixedSidesetID("11");
+    tOptimizationParameters.addFixedSidesetID("12");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_set_upper_bounds_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -146,8 +150,10 @@ TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("1");
-    tXMLMetaData.optimizer.fixed_block_ids.push_back("2");
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.addFixedBlockID("1");
+    tOptimizationParameters.addFixedBlockID("2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_fixed_blocks_identification_numbers_to_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -177,8 +183,10 @@ TEST(PlatoTestXMLGenerator, AppendFixedSidesetsIdentificationNumbersToOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.fixed_sideset_ids.push_back("1");
-    tXMLMetaData.optimizer.fixed_sideset_ids.push_back("2");
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.addFixedSidesetID("1");
+    tOptimizationParameters.addFixedSidesetID("2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_fixed_sidesets_identification_numbers_to_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -208,8 +216,10 @@ TEST(PlatoTestXMLGenerator, AppendFixedNodesetsIdentificationNumbersToOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.fixed_nodeset_ids.push_back("1");
-    tXMLMetaData.optimizer.fixed_nodeset_ids.push_back("2");
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.addFixedNodesetID("1");
+    tOptimizationParameters.addFixedNodesetID("2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_fixed_nodesets_identification_numbers_to_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -497,8 +507,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_ReadFileKe
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.initial_guess_filename = "dummy.exo";
-    tXMLMetaData.optimizer.initial_guess_field_name = "Control";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("initial_guess_file_name", "dummy.exo");
+    tOptimizationParameters.append("initial_guess_field_name", "Control");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -519,7 +531,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_DensityKey
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "density";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "density");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -546,7 +560,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_InvalidKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "radial basis";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "radial basis");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -554,9 +570,11 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_LevelSetKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "levelset";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "levelset");
+    tOptimizationParameters.append("levelset_initialization_method", "primitives");
+    tXMLMetaData.set(tOptimizationParameters);
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_initialization_method = "primitives";
     ASSERT_NO_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -578,7 +596,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldOperation_DensityKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "density";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "density");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_field_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -605,7 +625,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_InvalidKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.levelset_initialization_method = "magic";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_initialization_method", "magic");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument), std::runtime_error);
 }
 
@@ -613,8 +635,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_PrimitivesKey)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_initialization_method", "primitives");
+    tXMLMetaData.set(tOptimizationParameters);
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_initialization_method = "primitives";
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -637,7 +661,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_SwissCheeseKey)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_initialization_method = "swiss cheese";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_initialization_method", "swiss cheese");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -689,7 +715,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_NoSpher
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_sphere_radius = "1.5";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_sphere_radius", "1.5");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -713,8 +741,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation_NoNodeS
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_sphere_radius = "1.5";
-    tXMLMetaData.optimizer.levelset_sphere_packing_factor = "0.5";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_sphere_radius", "1.5");
+    tOptimizationParameters.append("levelset_sphere_packing_factor", "0.5");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -738,7 +768,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetSwissCheeseOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_nodesets = {"nodeset 1", "nodeset 2"};
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.addLevelsetNodeset("nodeset 1");
+    tOptimizationParameters.addLevelsetNodeset("nodeset 2");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_swiss_cheese_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -791,8 +824,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetPrimitivesOperation)
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
-    tXMLMetaData.optimizer.levelset_material_box_max = "10";
-    tXMLMetaData.optimizer.levelset_material_box_min = "-10";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_material_box_min", "-10");
+    tOptimizationParameters.append("levelset_material_box_max", "10");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_primitives_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -828,8 +863,10 @@ TEST(PlatoTestXMLGenerator, AppendLevelsetMaterialBox)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.levelset_material_box_max = "10";
-    tXMLMetaData.optimizer.levelset_material_box_min = "-10";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("levelset_material_box_min", "-10");
+    tOptimizationParameters.append("levelset_material_box_max", "10");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_levelset_material_box(tXMLMetaData, tDocument);
 
     auto tMaterialBox = tDocument.child("MaterialBox");
@@ -848,8 +885,10 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation1)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.initial_guess_filename = "dummy.exo";
-    tXMLMetaData.optimizer.initial_guess_field_name = "Control";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("initial_guess_file_name", "dummy.exo");
+    tOptimizationParameters.append("initial_guess_field_name", "Control");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -869,9 +908,11 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldFromFileOperation2)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.restart_iteration = "100";
-    tXMLMetaData.optimizer.initial_guess_filename = "dummy.exo";
-    tXMLMetaData.optimizer.initial_guess_field_name = "Control";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("restart_iteration", "100");
+    tOptimizationParameters.append("initial_guess_file_name", "dummy.exo");
+    tOptimizationParameters.append("initial_guess_field_name", "Control");
+    tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_field_from_file_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -892,7 +933,9 @@ TEST(PlatoTestXMLGenerator, AppendInitializeDensityFieldOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.initial_density_value = "0.25";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("initial_density_value", "0.25");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_density_field_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1065,7 +1108,9 @@ TEST(PlatoTestXMLGenerator, AppendStochasticCriterionGradientOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "2";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_stochastic_criterion_gradient_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1099,7 +1144,9 @@ TEST(PlatoTestXMLGenerator, AppendStochasticObjectiveGradientToPlatoMainOperatio
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "2";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1170,7 +1217,9 @@ TEST(PlatoTestXMLGenerator, AppendStochasticObjectiveValueToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "2";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("objective_number_standard_deviations", "2");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_stochastic_objective_value_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1236,7 +1285,9 @@ TEST(PlatoTestXMLGenerator, AppendSurfaceExtractionToOutputOperation)
     ASSERT_TRUE(tOperation.child("SurfaceExtraction").empty());
 
     // CASE 2: CHILD IS DEFINED
-    tXMLMetaData.optimizer.output_method = "epu";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("output_method", "epu");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_surface_extraction_to_output_operation(tXMLMetaData, tOperation);
 
     auto tSurfaceExtraction = tOperation.child("SurfaceExtraction");
@@ -1316,9 +1367,11 @@ TEST(PlatoTestXMLGenerator, AppendChildrenToOutputOperation)
     PlatoTestXMLGenerator::test_children({"Function", "Name"}, {"PlatoMainOutput", "PlatoMainOutput"}, tOperation);
 
     // CASE 1: ALL THE PARAMETERS ARE DEFINED
-    tXMLMetaData.optimizer.write_restart_file = "true";
-    tXMLMetaData.optimizer.output_frequency = "10";
-    tXMLMetaData.optimizer.max_iterations = "100";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("write_restart_file", "true");
+    tOptimizationParameters.append("output_frequency", "10");
+    tOptimizationParameters.append("max_iterations", "100");
+    tXMLMetaData.set(tOptimizationParameters);
     tOperation = tDocument.append_child("Operation");
     XMLGen::append_children_to_output_operation(tXMLMetaData, tOperation);
     ASSERT_FALSE(tOperation.empty());
@@ -1458,7 +1511,9 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
 {
     pugi::xml_document tDocument1;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.filter_type = "kernel_then_tanh";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_type", "kernel_then_tanh");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument1);
     ASSERT_FALSE(tDocument1.empty());
 
@@ -1469,7 +1524,8 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
 
     // CASE 2: DEFAULT FILTER
     pugi::xml_document tDocument2;
-    tXMLMetaData.optimizer.filter_type = "pde_filter";
+    tOptimizationParameters.append("filter_type", "pde_filter");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument2);
     ASSERT_FALSE(tDocument2.empty());
     tFilterNode = tDocument2.child("Filter");
@@ -1481,7 +1537,9 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.filter_radius_scale = "2.5";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_radius_scale", "2.5");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tFilterNode = tDocument.append_child("Filter");
     XMLGen::append_filter_options_to_operation(tXMLMetaData, tFilterNode);
     ASSERT_FALSE(tFilterNode.empty());
@@ -1491,15 +1549,16 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
     PlatoTestXMLGenerator::test_children({"Scale"}, {"2.5"}, tFilterNode);
 
     // CASE 2: ALL PARAMETERS
-    tXMLMetaData.optimizer.filter_radius_scale = "2.5";
-    tXMLMetaData.optimizer.filter_radius_absolute = "1";
-    tXMLMetaData.optimizer.filter_projection_start_iteration = "50";
-    tXMLMetaData.optimizer.filter_projection_update_interval = "2";
-    tXMLMetaData.optimizer.filter_use_additive_continuation = "true";
-    tXMLMetaData.optimizer.filter_power = "3";
-    tXMLMetaData.optimizer.filter_heaviside_min = "0.5";
-    tXMLMetaData.optimizer.filter_heaviside_update = "1";
-    tXMLMetaData.optimizer.filter_heaviside_max = "2";
+    tOptimizationParameters.append("filter_radius_scale", "2.5");
+    tOptimizationParameters.append("filter_radius_absolute", "1");
+    tOptimizationParameters.append("filter_projection_start_iteration", "50");
+    tOptimizationParameters.append("filter_projection_update_interval", "2");
+    tOptimizationParameters.append("filter_use_additive_continuation", "true");
+    tOptimizationParameters.append("filter_power", "3");
+    tOptimizationParameters.append("filter_heaviside_min", "0.5");
+    tOptimizationParameters.append("filter_heaviside_update", "1");
+    tOptimizationParameters.append("filter_heaviside_max", "2");
+    tXMLMetaData.set(tOptimizationParameters);
     tFilterNode = tDocument.append_child("Filter");
     XMLGen::append_filter_options_to_operation(tXMLMetaData, tFilterNode);
     ASSERT_FALSE(tFilterNode.empty());
@@ -1513,11 +1572,15 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
 TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.discretization = "density";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("filter_type", "Kernel");
+    tOptimizationParameters.append("filter_radius_scale", "2.0");
+    tOptimizationParameters.append("objective_number_standard_deviations", "1");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.updateProblem("true");
     tXMLMetaData.append(tService);
-    tXMLMetaData.optimizer.objective_number_standard_deviations = "1";
     XMLGen::Output tOutputMetaData;
     tOutputMetaData.outputSamples("true");
     tOutputMetaData.appendRandomQoI("VonMises", "element field");

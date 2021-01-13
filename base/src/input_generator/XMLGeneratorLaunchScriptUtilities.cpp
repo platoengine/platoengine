@@ -60,8 +60,8 @@ namespace XMLGen
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
 
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimizer.initial_guess_filename != ""
-                                                          && aInputData.optimizer.initial_guess_field_name != "");
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimization_parameters().initial_guess_file_name() != ""
+                                                          && aInputData.optimization_parameters().initial_guess_field_name() != "");
     if(need_to_transfer_prune_or_refine)
     {
       XMLGen::append_prune_and_refine_command(aInputData, fp);
@@ -87,12 +87,12 @@ namespace XMLGen
       tCommand = "launch -n " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
     else
       tCommand = "mpiexec -np " + tNumberPruneAndRefineProcsString + " " + tPruneAndRefineExe;
-    if(aInputData.optimizer.initial_guess_filename != "")
-      tCommand += (" --mesh_with_variable=" + aInputData.optimizer.initial_guess_filename);
+    if(aInputData.optimization_parameters().initial_guess_file_name() != "")
+      tCommand += (" --mesh_with_variable=" + aInputData.optimization_parameters().initial_guess_file_name());
     tCommand += (" --mesh_to_be_pruned=" + aInputData.mesh.name);
     tCommand += (" --result_mesh=" + aInputData.mesh.run_name);
-    if(aInputData.optimizer.initial_guess_field_name != "")
-      tCommand += (" --field_name=" + aInputData.optimizer.initial_guess_field_name);
+    if(aInputData.optimization_parameters().initial_guess_field_name() != "")
+      tCommand += (" --field_name=" + aInputData.optimization_parameters().initial_guess_field_name());
     tCommand += (" --number_of_refines=" + tNumRefinesString);
     tCommand += (" --number_of_buffer_layers=" + tNumBufferLayersString);
     tCommand += (" --prune_mesh=" + tPruneString);
@@ -118,8 +118,8 @@ namespace XMLGen
   void append_decomp_lines_for_prune_and_refine(const XMLGen::InputData& aInputData, FILE*& fp)
   {
     int tNumRefines = XMLGen::Internal::get_number_of_refines(aInputData);
-    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimizer.initial_guess_filename != ""
-                                                          && aInputData.optimizer.initial_guess_field_name != "");
+    bool need_to_transfer_prune_or_refine = tNumRefines > 0 || (aInputData.optimization_parameters().initial_guess_file_name() != ""
+                                                          && aInputData.optimization_parameters().initial_guess_field_name() != "");
     if(need_to_transfer_prune_or_refine)
     {
       int tNumberPruneAndRefineProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(aInputData);
@@ -128,8 +128,8 @@ namespace XMLGen
         if(aInputData.mesh.name.empty())
           THROWERR("Missing input mesh name\n")
         XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.mesh.name);
-        if(aInputData.optimizer.initial_guess_filename != "")
-          XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.optimizer.initial_guess_filename);
+        if(aInputData.optimization_parameters().initial_guess_file_name() != "")
+          XMLGen::append_decomp_line(fp,tNumberPruneAndRefineProcs,aInputData.optimization_parameters().initial_guess_file_name());
       }
     }
   }
@@ -158,8 +158,8 @@ namespace XMLGen
     {
       if(hasBeenDecompedForThisNumberOfProcessors[num_opt_procs]++ == 0)
         XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.mesh.run_name);
-      if(aInputData.optimizer.initial_guess_filename != "")
-        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.optimizer.initial_guess_filename);
+      if(aInputData.optimization_parameters().initial_guess_file_name() != "")
+        XMLGen::append_decomp_line(fp, num_opt_procs, aInputData.optimization_parameters().initial_guess_file_name());
     }
   }
 
@@ -250,10 +250,10 @@ namespace XMLGen
     int get_number_of_refines(const XMLGen::InputData& aInputData)
     {
       int tNumRefines = 0;
-      if(aInputData.optimizer.number_refines != "" && aInputData.optimizer.number_refines != "0")
+      if(aInputData.optimization_parameters().number_refines() != "" && aInputData.optimization_parameters().number_refines() != "0")
       {
-        XMLGen::assert_is_positive_integer(aInputData.optimizer.number_refines);
-        tNumRefines = std::atoi(aInputData.optimizer.number_refines.c_str());
+        XMLGen::assert_is_positive_integer(aInputData.optimization_parameters().number_refines());
+        tNumRefines = std::atoi(aInputData.optimization_parameters().number_refines().c_str());
       }
       return tNumRefines;
     }
@@ -280,10 +280,10 @@ namespace XMLGen
     int get_number_of_prune_and_refine_procs(const XMLGen::InputData& aInputData)
     {
       int tNumberPruneAndRefineProcs = 1;
-      if(aInputData.optimizer.number_prune_and_refine_processors != "" &&
-              aInputData.optimizer.number_prune_and_refine_processors != "0")
+      if(aInputData.optimization_parameters().number_prune_and_refine_processors() != "" &&
+              aInputData.optimization_parameters().number_prune_and_refine_processors() != "0")
       {
-          std::string tNumberPruneAndRefineProcsString = aInputData.optimizer.number_prune_and_refine_processors;
+          std::string tNumberPruneAndRefineProcsString = aInputData.optimization_parameters().number_prune_and_refine_processors();
           XMLGen::assert_is_positive_integer(tNumberPruneAndRefineProcsString);
           tNumberPruneAndRefineProcs = std::atoi(tNumberPruneAndRefineProcsString.c_str());
       }
@@ -311,8 +311,8 @@ namespace XMLGen
     std::string get_num_buffer_layers(const XMLGen::InputData& aInputData)
     {
       std::string tNumBufferLayersString = "2";
-      if(aInputData.optimizer.number_buffer_layers != "")
-        tNumBufferLayersString = aInputData.optimizer.number_buffer_layers;
+      if(aInputData.optimization_parameters().number_buffer_layers() != "")
+        tNumBufferLayersString = aInputData.optimization_parameters().number_buffer_layers();
       if(tNumBufferLayersString != "0")
         XMLGen::assert_is_positive_integer(tNumBufferLayersString);
       return tNumBufferLayersString;
@@ -321,7 +321,7 @@ namespace XMLGen
     std::string get_prune_string(const XMLGen::InputData& aInputData)
     {
       std::string tPruneString = "0";
-      if(aInputData.optimizer.prune_mesh == "true")
+      if(aInputData.optimization_parameters().prune_mesh() == "true")
         tPruneString = "1";
       return tPruneString;
     }

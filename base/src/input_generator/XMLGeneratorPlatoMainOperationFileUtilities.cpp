@@ -106,11 +106,11 @@ void append_filter_options_to_operation
     std::vector<std::string> tKeys = {"Scale", "Absolute", "StartIteration", "UpdateInterval",
         "UseAdditiveContinuation", "Power", "HeavisideMin", "HeavisideUpdate", "HeavisideMax"};
 
-    auto tScale = aXMLMetaData.optimizer.filter_radius_scale.empty() ? std::string("2.0") : aXMLMetaData.optimizer.filter_radius_scale;
-    std::vector<std::string> tValues = {tScale, aXMLMetaData.optimizer.filter_radius_absolute,
-        aXMLMetaData.optimizer.filter_projection_start_iteration, aXMLMetaData.optimizer.filter_projection_update_interval,
-        aXMLMetaData.optimizer.filter_use_additive_continuation, aXMLMetaData.optimizer.filter_power, aXMLMetaData.optimizer.filter_heaviside_min,
-        aXMLMetaData.optimizer.filter_heaviside_update, aXMLMetaData.optimizer.filter_heaviside_max};
+    auto tScale = aXMLMetaData.optimization_parameters().filter_radius_scale().empty() ? std::string("2.0") : aXMLMetaData.optimization_parameters().filter_radius_scale();
+    std::vector<std::string> tValues = {tScale, aXMLMetaData.optimization_parameters().filter_radius_absolute(),
+        aXMLMetaData.optimization_parameters().filter_projection_start_iteration(), aXMLMetaData.optimization_parameters().filter_projection_update_interval(),
+        aXMLMetaData.optimization_parameters().filter_use_additive_continuation(), aXMLMetaData.optimization_parameters().filter_power(), aXMLMetaData.optimization_parameters().filter_heaviside_min(),
+        aXMLMetaData.optimization_parameters().filter_heaviside_update(), aXMLMetaData.optimization_parameters().filter_heaviside_max()};
 
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
@@ -124,7 +124,7 @@ void append_filter_options_to_plato_main_operation
  pugi::xml_document &aDocument)
 {
     XMLGen::ValidFilterKeys tValidKeys;
-    auto tValue = tValidKeys.value(aXMLMetaData.optimizer.filter_type);
+    auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().filter_type());
     auto tFilterName = tValue.empty() ? "Kernel" : tValue;
     auto tFilterNode = aDocument.append_child("Filter");
     XMLGen::append_children({"Name"}, {tFilterName}, tFilterNode);
@@ -268,8 +268,8 @@ void append_children_to_output_operation
  pugi::xml_node &aParentNode)
 {
     std::vector<std::string> tKeys = {"Function", "Name", "WriteRestart", "OutputFrequency", "MaxIterations", "RestartFieldName"};
-    std::vector<std::string> tValues = {"PlatoMainOutput", "PlatoMainOutput", aXMLMetaData.optimizer.write_restart_file,
-        aXMLMetaData.optimizer.output_frequency, aXMLMetaData.optimizer.max_iterations, aXMLMetaData.optimizer.initial_guess_field_name};
+    std::vector<std::string> tValues = {"PlatoMainOutput", "PlatoMainOutput", aXMLMetaData.optimization_parameters().write_restart_file(),
+        aXMLMetaData.optimization_parameters().output_frequency(), aXMLMetaData.optimization_parameters().max_iterations(), aXMLMetaData.optimization_parameters().initial_guess_field_name()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
 }
@@ -301,12 +301,12 @@ void append_surface_extraction_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    if (!aXMLMetaData.optimizer.output_method.empty())
+    if (!aXMLMetaData.optimization_parameters().output_method().empty())
     {
         auto tSurfaceExtraction = aParentNode.append_child("SurfaceExtraction");
         std::vector<std::string> tKeys = { "OutputMethod", "Discretization" };
-        auto tDiscretization = aXMLMetaData.optimizer.discretization.empty() ? "density" : aXMLMetaData.optimizer.discretization;
-        std::vector<std::string> tValues = { aXMLMetaData.optimizer.output_method, tDiscretization };
+        auto tDiscretization = aXMLMetaData.optimization_parameters().discretization().empty() ? "density" : aXMLMetaData.optimization_parameters().discretization();
+        std::vector<std::string> tValues = { aXMLMetaData.optimization_parameters().output_method(), tDiscretization };
         XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
         XMLGen::append_children(tKeys, tValues, tSurfaceExtraction);
 
@@ -365,8 +365,8 @@ void append_stochastic_objective_value_to_plato_main_operation
     tOuterOutput = tOperation.append_child("Output");
     XMLGen::append_children({"Statistic", "ArgumentName"}, {"std_dev", "Objective StdDev"}, tOuterOutput);
     tOuterOutput = tOperation.append_child("Output");
-    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.optimizer.objective_number_standard_deviations + "_std_dev";
-    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimizer.objective_number_standard_deviations + " StdDev";
+    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + "_std_dev";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev";
     XMLGen::append_children({"Statistic", "ArgumentName"}, {tStatistics, tArgumentName}, tOuterOutput);
 }
 // function append_stochastic_objective_value_to_plato_main_operation
@@ -391,9 +391,9 @@ void append_stochastic_criterion_gradient_operation
     XMLGen::append_children(tKeys, tValues, tInnerForInput);
 
     auto tOuterOutput = tCriterionGradient.append_child("Output");
-    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.optimizer.objective_number_standard_deviations + "_std_dev";
+    auto tStatistics = std::string("mean_plus_") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + "_std_dev";
     auto tArgumentName = std::string("Objective Mean Plus ")
-        + aXMLMetaData.optimizer.objective_number_standard_deviations + " StdDev Gradient";
+        + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev Gradient";
     XMLGen::append_children({"Statistic", "ArgumentName"}, {tStatistics, tArgumentName}, tOuterOutput);
 }
 // function append_stochastic_criterion_gradient_operation
@@ -605,7 +605,7 @@ void append_initialize_density_field_operation
     XMLGen::append_children({"Function", "Name", "Method"}, {"InitializeField", "Initialize Field", "Uniform"}, tOperation);
 
     auto tMethod = tOperation.append_child("Uniform");
-    auto tValue = aXMLMetaData.optimizer.initial_density_value.empty() ? "0.5" : aXMLMetaData.optimizer.initial_density_value;
+    auto tValue = aXMLMetaData.optimization_parameters().initial_density_value().empty() ? "0.5" : aXMLMetaData.optimization_parameters().initial_density_value();
     XMLGen::append_children({"Value"}, {tValue}, tMethod);
 
     auto tOutput = tOperation.append_child("Output");
@@ -619,14 +619,14 @@ void append_initialize_field_from_file_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimizer.initial_guess_filename.empty())
+    if(aXMLMetaData.optimization_parameters().initial_guess_file_name().empty())
     {
         THROWERR(std::string("Append Initialize Field From File Operation: ")
             + "Initial guess was supposed to be initialized by reading it from an user-specified file. "
             + "However, the 'filename' keyword is empty.")
     }
 
-    if(aXMLMetaData.optimizer.initial_guess_field_name.empty())
+    if(aXMLMetaData.optimization_parameters().initial_guess_field_name().empty())
     {
         THROWERR(std::string("Append Initialize Field From File Operation: ")
             + "Initial guess was supposed to be initialized by reading it from an user-specified field. "
@@ -640,7 +640,7 @@ void append_initialize_field_from_file_operation
 
     auto tMethod = tOperation.append_child("FromFieldOnInputMesh");
     tKeys = {"Name", "VariableName", "Iteration"};
-    tValues = {aXMLMetaData.optimizer.initial_guess_filename, aXMLMetaData.optimizer.initial_guess_field_name, aXMLMetaData.optimizer.restart_iteration};
+    tValues = {aXMLMetaData.optimization_parameters().initial_guess_file_name(), aXMLMetaData.optimization_parameters().initial_guess_field_name(), aXMLMetaData.optimization_parameters().restart_iteration()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, tMethod);
 }
@@ -652,14 +652,14 @@ void append_levelset_material_box
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    auto tAppendMaterialBox = !aXMLMetaData.optimizer.levelset_material_box_min.empty() &&
-        !aXMLMetaData.optimizer.levelset_material_box_max.empty();
+    auto tAppendMaterialBox = !aXMLMetaData.optimization_parameters().levelset_material_box_min().empty() &&
+        !aXMLMetaData.optimization_parameters().levelset_material_box_max().empty();
     if(tAppendMaterialBox)
     {
         auto tMaterialBox = aParentNode.append_child("MaterialBox");
         std::vector<std::string> tKeys = {"MinCoords", "MaxCoords"};
-        std::vector<std::string> tValues = {aXMLMetaData.optimizer.levelset_material_box_min,
-            aXMLMetaData.optimizer.levelset_material_box_max};
+        std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().levelset_material_box_min(),
+            aXMLMetaData.optimization_parameters().levelset_material_box_max()};
         XMLGen::append_children(tKeys, tValues, tMaterialBox);
     }
 }
@@ -709,15 +709,15 @@ void append_initialize_levelset_swiss_cheese_operation
 
     auto tMethod = tOperation.append_child("SwissCheeseLevelSet");
     tKeys = {"BackgroundMeshName", "SphereRadius", "SpherePackingFactor"};
-    tValues = {aXMLMetaData.mesh.run_name, aXMLMetaData.optimizer.levelset_sphere_radius,
-        aXMLMetaData.optimizer.levelset_sphere_packing_factor};
-    for(auto& tNodeSet : aXMLMetaData.optimizer.levelset_nodesets)
+    tValues = {aXMLMetaData.mesh.run_name, aXMLMetaData.optimization_parameters().levelset_sphere_radius(),
+        aXMLMetaData.optimization_parameters().levelset_sphere_packing_factor()};
+    for(auto& tNodeSet : aXMLMetaData.optimization_parameters().levelset_nodesets())
     {
         tKeys.push_back("NodeSet"); tValues.push_back(tNodeSet);
     }
 
     auto tDefineCreateLevelSetSpheresKeyword =
-        aXMLMetaData.optimizer.levelset_sphere_radius.empty() && aXMLMetaData.optimizer.levelset_sphere_packing_factor.empty();
+        aXMLMetaData.optimization_parameters().levelset_sphere_radius().empty() && aXMLMetaData.optimization_parameters().levelset_sphere_packing_factor().empty();
     auto tCreateLevelSetSpheres = tDefineCreateLevelSetSpheresKeyword ? "false" : "true";
     tKeys.push_back("CreateSpheres"); tValues.push_back(tCreateLevelSetSpheres);
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
@@ -732,7 +732,7 @@ void append_initialize_levelset_operation
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidLevelSetInitKeys tValidKeys;
-    auto tLowerKey = Plato::tolower(aXMLMetaData.optimizer.levelset_initialization_method);
+    auto tLowerKey = Plato::tolower(aXMLMetaData.optimization_parameters().levelset_initialization_method());
     auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
     if(tItr == tValidKeys.mKeys.end())
     {
@@ -758,7 +758,7 @@ void append_initialize_field_operation
  pugi::xml_document& aDocument)
 {
     XMLGen::ValidDiscretizationKeys tValidKeys;
-    auto tValue = tValidKeys.value(aXMLMetaData.optimizer.discretization);
+    auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().discretization());
     if(tValue.empty())
     {
         THROWERR(std::string("Append Initialize Field to Plato Main Operation: ") + "Discretization method '" + tValue + "' is not supported.")
@@ -781,7 +781,7 @@ void append_initialize_field_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimizer.initial_guess_filename.empty())
+    if(aXMLMetaData.optimization_parameters().initial_guess_file_name().empty())
     {
         XMLGen::append_initialize_field_operation(aXMLMetaData, aDocument);
     }
@@ -878,7 +878,7 @@ void append_fixed_blocks_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimizer.fixed_block_ids)
+    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_block_ids())
     {
         auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
         XMLGen::append_children({"Index"}, {tID}, tFixedBlocks);
@@ -892,7 +892,7 @@ void append_fixed_sidesets_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimizer.fixed_sideset_ids)
+    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_sideset_ids())
     {
         auto tFixedSideSet = aParentNode.append_child("FixedSidesets");
         XMLGen::append_children({"Index"}, {tID}, tFixedSideSet);
@@ -906,7 +906,7 @@ void append_fixed_nodesets_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimizer.fixed_nodeset_ids)
+    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_nodeset_ids())
     {
         auto tFixedNodeSet = aParentNode.append_child("FixedNodesets");
         XMLGen::append_children({"Index"}, {tID}, tFixedNodeSet);
@@ -922,7 +922,7 @@ void append_set_lower_bounds_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.optimizer.discretization};
+    std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.optimization_parameters().discretization()};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.append_child("Input");
@@ -944,7 +944,7 @@ void append_set_upper_bounds_to_plato_main_operation
 {
     auto tOperation = aDocument.append_child("Operation");
     std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.optimizer.discretization};
+    std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.optimization_parameters().discretization()};
     XMLGen::append_children(tKeys, tValues, tOperation);
 
     auto tInput = tOperation.append_child("Input");

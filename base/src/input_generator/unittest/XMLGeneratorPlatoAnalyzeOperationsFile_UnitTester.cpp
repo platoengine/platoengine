@@ -75,11 +75,13 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_J2Plasticity)
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationsXmlFile)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.optimizer.max_iterations = "10";
-    tMetaData.optimizer.discretization = "density";
-    tMetaData.optimizer.optimization_algorithm = "oc";
-    tMetaData.optimizer.optimization_type = "topology";
-    tMetaData.optimizer.mProblemUpdateFrequency = "5";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tOptimizationParameters.append("max_iterations", "10");
+    tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("optimization_algorithm", "oc");
+    tOptimizationParameters.append("problem_update_frequency", "5");
+    tMetaData.set(tOptimizationParameters);
 
     XMLGen::Objective tObjective;
     tObjective.criteriaIDs.push_back("1");
@@ -135,8 +137,10 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.mProblemUpdateFrequency = "5";
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tOptimizationParameters.append("problem_update_frequency", "5");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService0;
     tService0.id("1");
     tService0.updateProblem("true");
@@ -388,7 +392,9 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
@@ -940,7 +946,9 @@ TEST(PlatoTestXMLGenerator, AppendUpdateProblemToPlatoAnalyzeOperation)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.mProblemUpdateFrequency = "5";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("problem_update_frequency", "5");
+    tInputData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.updateProblem("true");
     tInputData.append(tService);
@@ -977,7 +985,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveValueToPlatoAnalyzeOperation)
     tService.updateProblem("true");
     tMetaData.append(tService);
 
-    tMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_value_to_plato_analyze_operation(tMetaData, tDocument);
@@ -1020,7 +1030,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeObjectiveGradientToPlatoAnalyzeOperatio
     tService.updateProblem("true");
     tMetaData.append(tService);
 
-    tMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tMetaData, tDocument);
@@ -1059,7 +1071,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintValueToPlatoAnalyzeOperation)
     tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
 
-    tMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tMetaData, tDocument);
@@ -1098,7 +1112,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeConstraintGradientToPlatoAnalyzeOperati
     tConstraint.criterion("1");
     tMetaData.constraints.push_back(tConstraint);
 
-    tMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tMetaData, tDocument);
@@ -1144,7 +1160,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1154,7 +1172,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("sierra_sd");
@@ -1172,7 +1192,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
@@ -1311,7 +1333,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(tInputData, tDocument);
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1321,7 +1345,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("sierra_sd");
@@ -1339,7 +1365,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
@@ -1476,7 +1504,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_compute_objective_value_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1486,7 +1516,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("sierra_sd");
@@ -1504,7 +1536,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");
@@ -1641,7 +1675,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_compute_objective_gradient_to_plato_analyze_operation(tInputData, tDocument));
     auto tOperation = tDocument.child("Operation");
     ASSERT_TRUE(tOperation.empty());
@@ -1651,7 +1687,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
-    tInputData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("sierra_sd");
@@ -1669,7 +1707,9 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
 {
     // POSE INPUTS
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.optimizer.optimization_type = "topology";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");

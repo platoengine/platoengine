@@ -24,6 +24,7 @@
 #include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
+#include "XMLGeneratorOptimizationParametersMetadata.hpp"
 
 namespace XMLGen
 {
@@ -66,7 +67,8 @@ struct CodePaths
     std::string prune_and_refine_path;
 };
 
-struct Optimizer
+/*
+struct OptimizationParameters
 {
     std::string levelset_material_box_min;
     std::string levelset_material_box_max;
@@ -155,6 +157,7 @@ struct Optimizer
     std::string output_method;
     std::string objective_number_standard_deviations;
 };
+*/
 
 struct Mesh
 {
@@ -178,6 +181,7 @@ private:
     std::vector<XMLGen::Scenario> mScenarios;
     std::vector<XMLGen::Service> mServices;
     std::vector<XMLGen::Criterion> mCriteria;
+    XMLGen::OptimizationParameters mOptimizationParameters;
 
 public:
     
@@ -228,17 +232,17 @@ public:
         bool tReturnValue = false;
 
         // First try to determine based off of algorithm
-        if(optimizer.optimization_algorithm == "ksal" ||
-           optimizer.optimization_algorithm == "ksbc" ||
-           optimizer.optimization_algorithm == "oc")
+        if(mOptimizationParameters.optimization_algorithm() == "ksal" ||
+           mOptimizationParameters.optimization_algorithm() == "ksbc" ||
+           mOptimizationParameters.optimization_algorithm() == "oc")
         {
             tReturnValue = true;
         }   
 
         // User-set flag trumps everything else
-        if(optimizer.mNormalizeInAggregator != "")
+        if(mOptimizationParameters.normalize_in_aggregator() != "")
         {
-            tReturnValue = (XMLGen::to_lower(optimizer.mNormalizeInAggregator) == "true");
+            tReturnValue = (XMLGen::to_lower(mOptimizationParameters.normalize_in_aggregator()) == "true");
         }
 
         return tReturnValue;
@@ -302,6 +306,11 @@ public:
             }
         }
         return tReturnValue;
+    }
+
+    const XMLGen::OptimizationParameters& optimization_parameters() const
+    {
+        return mOptimizationParameters;
     }
 
     // Scenario access functions
@@ -454,18 +463,22 @@ public:
         mCriteria.push_back(aCriterion);
     }
 
+    // OptimizationParameters
+    void set(XMLGen::OptimizationParameters aOptimizationParameters)
+    {
+        mOptimizationParameters = aOptimizationParameters;
+    }
+
     XMLGen::Objective objective;
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
-    //std::vector<XMLGen::NaturalBoundaryCondition> nbcs;
     std::vector<XMLGen::Block> blocks;
     std::vector<XMLGen::NaturalBoundaryCondition> loads;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;
     std::vector<XMLGen::Output> mOutputMetaData;
-    XMLGen::Optimizer optimizer;
     XMLGen::Arch m_Arch;
     bool m_UseLaunch;
     XMLGen::RandomMetaData mRandomMetaData;

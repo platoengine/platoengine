@@ -74,9 +74,11 @@ TEST(PlatoTestXMLGenerator, AppendComputeQoiStatisticsOperation)
 TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
 {
     XMLGen::InputData tMetaData;
-    tMetaData.optimizer.max_iterations = "10";
-    tMetaData.optimizer.discretization = "density";
-    tMetaData.optimizer.optimization_algorithm = "oc";
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("max_iterations", "10");
+    tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("optimization_algorithm", "oc");
+    tMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
     tService.code("plato_analyze");

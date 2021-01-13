@@ -20,7 +20,7 @@ void append_compute_objective_value_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimizer.optimization_type);
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_parameters().optimization_type());
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
     auto tAppendComputeObjectiveValueOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
 
@@ -48,7 +48,7 @@ void append_compute_objective_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimizer.optimization_type);
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aMetaData.optimization_parameters().optimization_type());
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData);
     auto tAppendComputeObjectiveGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
 
@@ -75,7 +75,7 @@ void append_compute_constraint_value_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimizer.optimization_type);
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimization_parameters().optimization_type());
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData);
     auto tAppendComputeConstraintValueOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
 
@@ -103,7 +103,7 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimizer.optimization_type);
+    auto tIsTopologyOptimization = XMLGen::is_topology_optimization_problem(aXMLMetaData.optimization_parameters().optimization_type());
     auto tIsPlatoAnalyzePerformer = XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData);
     auto tAppendComputeConstraintGradientOperation = tIsTopologyOptimization && tIsPlatoAnalyzePerformer;
 
@@ -145,13 +145,13 @@ void append_update_problem_to_plato_analyze_operation
         return;
     }
 
-    if(aMetaData.optimizer.mProblemUpdateFrequency.empty())
+    if(aMetaData.optimization_parameters().problem_update_frequency().empty())
     {
         THROWERR("Append Update Problem to Plato Analyze Operation: 'update problem frequency' keyword is empty.")
     }
 
-    auto tIsUpdateFrequencyGreaterThanZero = std::stoi(aMetaData.optimizer.mProblemUpdateFrequency) > 0;
-    if (!aMetaData.optimizer.mProblemUpdateFrequency.empty() && tIsUpdateFrequencyGreaterThanZero)
+    auto tIsUpdateFrequencyGreaterThanZero = std::stoi(aMetaData.optimization_parameters().problem_update_frequency()) > 0;
+    if (!aMetaData.optimization_parameters().problem_update_frequency().empty() && tIsUpdateFrequencyGreaterThanZero)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children( { "Function", "Name" }, { "UpdateProblem", "Update Problem" }, tOperation);

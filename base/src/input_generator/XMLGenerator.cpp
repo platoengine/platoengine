@@ -82,6 +82,7 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParseUncertainty.hpp"
+#include "XMLGeneratorParseOptimizationParameters.hpp"
 #include "XMLGeneratorParseEssentialBoundaryCondition.hpp"
 #include "XMLGeneratorParseNaturalBoundaryCondition.hpp"
 
@@ -107,16 +108,6 @@ XMLGenerator::XMLGenerator(const std::string &input_filename, bool use_launch, c
 {
   m_InputData.m_UseLaunch = use_launch;
   m_InputData.m_Arch = arch;
-  m_InputData.optimizer.m_filterType_identity_generatorName = "identity";
-  m_InputData.optimizer.m_filterType_kernel_generatorName = "kernel";
-  m_InputData.optimizer.m_filterType_kernelThenHeaviside_generatorName = "kernel then heaviside";
-  m_InputData.optimizer.m_filterType_kernelThenTANH_generatorName = "kernel then tanh";
-  // m_InputData.m_filterType_identity_XMLName = "Identity";
-  // m_InputData.m_filterType_kernel_XMLName = "Kernel";
-  // m_InputData.m_filterType_kernelThenHeaviside_XMLName = "KernelThenHeaviside";
-  // m_InputData.m_filterType_kernelThenTANH_XMLName = "KernelThenTANH";
-  // m_InputData.m_HasUncertainties = false;
-  // m_InputData.m_RequestedVonMisesOutput = false;
 }
 
 /******************************************************************************/
@@ -494,74 +485,20 @@ bool XMLGenerator::parseSingleUnLoweredValue(const std::vector<std::string> &aTo
 }
 
 /******************************************************************************/
-void XMLGenerator::initializePlatoProblemOptions()
-/******************************************************************************/
-{
-    // m_InputData.optimizer.output_frequency="5";
-    // m_InputData.optimizer.output_method="epu";
-    m_InputData.optimizer.discretization="density";
-    m_InputData.optimizer.initial_density_value="0.5";
-    m_InputData.optimizer.optimization_algorithm="oc";
-    m_InputData.optimizer.check_gradient = "false";
-    m_InputData.optimizer.check_hessian = "false";
-    m_InputData.optimizer.filter_type = "kernel";
-    m_InputData.optimizer.filter_power = "1";
-
-    m_InputData.optimizer.mInnerKKTtoleranceGCMMA = "";
-    m_InputData.optimizer.mOuterKKTtoleranceGCMMA = "";
-    m_InputData.optimizer.mInnerControlStagnationToleranceGCMMA = "";
-    m_InputData.optimizer.mOuterControlStagnationToleranceGCMMA = "";
-    m_InputData.optimizer.mOuterObjectiveStagnationToleranceGCMMA = "";
-    m_InputData.optimizer.mMaxInnerIterationsGCMMA = "";
-    m_InputData.optimizer.mOuterStationarityToleranceGCMMA = "";
-    m_InputData.optimizer.mInitialMovingAsymptotesScaleFactorGCMMA = "";
-
-    m_InputData.optimizer.mMaxRadiusScale = "";
-    m_InputData.optimizer.mInitialRadiusScale = "";
-    m_InputData.optimizer.mMaxTrustRegionRadius = "";
-    m_InputData.optimizer.mMinTrustRegionRadius = "";
-    m_InputData.optimizer.mMaxTrustRegionIterations = "5";
-    m_InputData.optimizer.mTrustRegionExpansionFactor = "";
-    m_InputData.optimizer.mTrustRegionContractionFactor = "";
-    m_InputData.optimizer.mTrustRegionRatioLowKS = "";
-    m_InputData.optimizer.mTrustRegionRatioMidKS = "";
-    m_InputData.optimizer.mTrustRegionRatioUpperKS = "";
-
-    m_InputData.optimizer.mUseMeanNorm = "";
-    m_InputData.optimizer.mAugLagPenaltyParam = "";
-    m_InputData.optimizer.mFeasibilityTolerance = "";
-    m_InputData.optimizer.mAugLagPenaltyParamScale = "";
-    m_InputData.optimizer.mMaxNumAugLagSubProbIter = "";
-
-    m_InputData.optimizer.mHessianType = "";
-    if(m_InputData.optimizer.mHessianType.compare("lbfgs") == 0)
-    {
-        m_InputData.optimizer.mLimitedMemoryStorage = "8";
-    }
-    m_InputData.optimizer.mDisablePostSmoothingKS = "";
-    m_InputData.optimizer.mProblemUpdateFrequency = "";
-    m_InputData.optimizer.mOuterGradientToleranceKS = "";
-    m_InputData.optimizer.mOuterStationarityToleranceKS = "";
-    m_InputData.optimizer.mOuterStagnationToleranceKS = "";
-    m_InputData.optimizer.mOuterControlStagnationToleranceKS = "";
-    m_InputData.optimizer.mOuterActualReductionToleranceKS = "";
-
-    m_InputData.optimizer.filter_heaviside_min = "";
-    m_InputData.optimizer.filter_heaviside_update = "";
-    m_InputData.optimizer.filter_heaviside_max = "";
-
-    m_InputData.optimizer.filter_projection_start_iteration = "";
-    m_InputData.optimizer.filter_projection_update_interval = "";
-    m_InputData.optimizer.filter_use_additive_continuation = "";
-
-    m_InputData.optimizer.write_restart_file = "False";
-    m_InputData.optimizer.optimization_type = "topology";
-}
-
-/******************************************************************************/
 bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
 /******************************************************************************/
 {
+    XMLGen::ParseOptimizationParameters tParseOptimizationParameters;
+    tParseOptimizationParameters.parse(fin);
+    if(tParseOptimizationParameters.data().size() > 0)
+    {
+        m_InputData.set(tParseOptimizationParameters.data()[0]);
+    }
+    else
+    {
+      THROWERR("Failed to parse an optimization_parameters block.")
+    }
+#if 0
   // Initialize variables
   this->initializePlatoProblemOptions();
 
@@ -1508,6 +1445,7 @@ bool XMLGenerator::parseOptimizationParameters(std::istream &fin)
   //     m_InputData.mUseNormalizationInAggregator = "false";
   //   }
   // }
+#endif
 
   return true;
 }
@@ -1906,10 +1844,10 @@ void XMLGenerator::parseInputFile()
     // reason we need to have our "run" mesh name not be the same
     // as the input mesh name.
     int tNumRefines = 0;
-    if(m_InputData.optimizer.number_refines != "")
-        tNumRefines = std::atoi(m_InputData.optimizer.number_refines.c_str());
+    if(m_InputData.optimization_parameters().number_refines() != "")
+        tNumRefines = std::atoi(m_InputData.optimization_parameters().number_refines().c_str());
     if(tNumRefines > 0 ||
-        (m_InputData.optimizer.initial_guess_filename != "" && m_InputData.optimizer.initial_guess_field_name != ""))
+        (m_InputData.optimization_parameters().initial_guess_file_name() != "" && m_InputData.optimization_parameters().initial_guess_field_name() != ""))
     {
         m_InputData.mesh.run_name_without_extension = m_InputData.mesh.name_without_extension + "_mod";
         m_InputData.mesh.run_name = m_InputData.mesh.run_name_without_extension;

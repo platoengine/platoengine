@@ -88,35 +88,23 @@ begin output
    data temperature
 end output
 
-begin optimization parameters
-   filter radius scale 2.48
-   max iterations 30 
-//   output frequency 1000 
-   algorithm ksal
+begin optimization_parameters
+   filter_radius_scale 2.48
+   max_iterations 30 
+   output_frequency 1000 
+   optimization_algorithm ksal
    discretization density 
-   initial density value .2
-   fixed blocks 2
-   al penalty parameter 1
-   al penalty scale factor 1.05
-end optimization parameters
+   initial_density_value .2
+   fixed_block_ids 2
+   al_penalty_parameter 1
+   al_penalty_scale_factor 1.05
+end optimization_parameters
 
 begin mesh
    name tm2.exo
 end mesh
 
 
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
-begin paths
-code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
-code plato_analyze analyze_MPMD
-end paths
 begin paths
 code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
 code plato_analyze analyze_MPMD

@@ -122,11 +122,6 @@ private:
     void clearInputDataLists(XMLGen::InputData &aInputData);
     void generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs);
     void createCopiesForPerformerCreation();
-    // /******************************************************************************//**
-    //  * @brief Initialize Plato problem options
-    //  **********************************************************************************/
-    void initializePlatoProblemOptions();
-
     void writeInputFiles();
 };
 

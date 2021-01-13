@@ -125,14 +125,14 @@ begin material 1
    youngs_modulus 1e8
 end material
 
-begin optimization parameters
-   filter radius scale 2
-   max iterations 10 
-//   output frequency 1000 
-   algorithm oc
+begin optimization_parameters
+   filter_radius_scale 2
+   max_iterations 10 
+   output_frequency 1000 
+   optimization_algorithm oc
    discretization density 
-   initial density value .5
-end optimization parameters
+   initial_density_value .5
+end optimization_parameters
 
 begin mesh
    name beam.exo
