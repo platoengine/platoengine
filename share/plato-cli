@@ -94,7 +94,13 @@ def list_plato_templates(args):
 def dictToArgs(dictionary):
   retVal = ""
   for key, value in dictionary.items():
-    retVal += (" " + key + "=" + str(value))
+    if isinstance(value, list):
+      retVal += " " + key + "="
+      for entry in value:
+        retVal += str(entry) + ","
+      retVal = retVal[:-1] # remove superfluous comma
+    else:
+      retVal += (" " + key + "=" + str(value))
 
   return retVal
 
@@ -118,15 +124,13 @@ def esp_action(args):
     report("model file, " + args.input + ", doesn't exist.")
     return
 
-  response = subprocess.check_output(['awk', '/attribute/{if ($2~/capsMeshLength/) print $3}', args.input])
-  if response == b'':
-    report("'capsMeshLength' attribute is not defined in the model file, " + args.input)
-    return
+  argsDict = {'modelNameIn': args.input}
 
-  argsDict = {'modelName': args.input}
+  if args.output_model != None:
+    argsDict['modelNameOut'] =  args.output_model
 
-  if args.output != None:
-    argsDict['meshName'] =  args.output
+  if args.output_mesh != None:
+    argsDict['meshName'] =  args.output_mesh
 
   if args.min_scale != None:
     argsDict['minScale'] =  args.min_scale
@@ -136,6 +140,9 @@ def esp_action(args):
 
   if args.mesh_scale != None:
     argsDict['meshLengthFactor'] = args.mesh_scale
+
+  if args.parameters != None:
+    argsDict['parameters'] = args.parameters
 
   scriptFilePath = source_dir() + '/esp/mesh.py'
 
@@ -245,7 +252,11 @@ geo_subparsers = geometry_parser.add_subparsers(help='geometry sub-command help'
 esp_parser = geo_subparsers.add_parser('esp', help='ESP options')
 esp_parser.add_argument('--input', help='Input file name.', required=True)
 
-esp_parser.add_argument('--output', help='Output file name. If not specified, base name of input file is used.')
+esp_parser.add_argument('--output-mesh', dest='output_mesh', \
+  help='Output mesh file name. If not specified, base name of input file is used.')
+
+esp_parser.add_argument('--output-model', dest='output_model', \
+  help='Output model file name. If not specified, updated model file is not written.')
 
 esp_parser.add_argument('--tesselation', help='Tesellation output file name. If not specified, tesselation is not generated.')
 
@@ -257,6 +268,9 @@ esp_parser.add_argument('--min-scale', dest='min_scale', \
 
 esp_parser.add_argument('--max-scale', dest='max_scale', \
   help='Maximum spacing bound relative to refLen.  Default value is 1.0. maxSpacing = maxScale*refLen')
+
+esp_parser.add_argument('--parameters', dest='parameters', nargs='*', \
+  help='List of parameter values to construct the mesh')
 
 esp_parser.set_defaults(func=esp_action)
 

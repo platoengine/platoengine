@@ -274,6 +274,8 @@ int Main(int aArgc, char *aArgv[])
         delete tPlatoInterface;
     }
     safeExit();
+
+    return 0;
 }
 
 }

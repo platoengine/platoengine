@@ -44,12 +44,23 @@
 </Operation>
 <Operation>
   <Function>SystemCall</Function>
+  <Name>Initialize Geometry</Name>
+  <Command>plato-cli geometry esp</Command>
+  <Argument>--input rocker.csm</Argument>
+  <Argument>--output-model rocker_opt.csm</Argument>
+  <Argument>--output-mesh rocker.exo</Argument>
+  <Argument>--tesselation rocker.eto</Argument>
+</Operation>
+<Operation>
+  <Function>SystemCall</Function>
   <Name>Update Geometry on Change</Name>
-  <Command>python aflr.py</Command>
+  <Command>plato-cli geometry esp</Command>
   <OnChange>true</OnChange>
-  <Argument>rocker.csm</Argument>
-  <Argument>rocker.exo</Argument>
-  <Argument>rocker.eto</Argument>
+  <Argument>--input rocker.csm</Argument>
+  <Argument>--output-model rocker_opt.csm</Argument>
+  <Argument>--output-mesh rocker.exo</Argument>
+  <Argument>--tesselation rocker.eto</Argument>
+  <Argument>--parameters</Argument>
   <AppendInput>true</AppendInput>
   <Input>
     <ArgumentName>Parameters</ArgumentName>
