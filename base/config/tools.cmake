@@ -230,9 +230,9 @@ endfunction( Plato_add_simple_performer )
 ## )
 ###############################################################################
 
-function( Plato_add_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX INPUT_MESH OUTPUT_MESH )
+function( Plato_add_test RUN_COMMANDS TEST_NAME NUM_PROCS IO_COMM_INDEX INPUT_MESH OUTPUT_MESH )
 
-    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source "${RUN_COMMANDS}")
 
     set(OptionalArgs ${ARGN})
     list(LENGTH OptionalArgs NumOptionalArgs)
@@ -240,7 +240,7 @@ function( Plato_add_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX INPUT_MES
       list(GET OptionalArgs 0 RESTART_MESH)
       add_test(NAME ${TEST_NAME}
              COMMAND ${CMAKE_COMMAND}
-             -DTEST_COMMAND=${RUN_COMMAND}
+             "-DTEST_COMMANDS=${RUN_COMMANDS}"
              -DTEST_NAME=${TEST_NAME}
              -DNUM_PROCS=${NUM_PROCS}
              -DSEACAS_EPU=${SEACAS_EPU}
@@ -255,7 +255,7 @@ function( Plato_add_test RUN_COMMAND TEST_NAME NUM_PROCS IO_COMM_INDEX INPUT_MES
     else()
       add_test(NAME ${TEST_NAME}
              COMMAND ${CMAKE_COMMAND}
-             -DTEST_COMMAND=${RUN_COMMAND}
+             "-DTEST_COMMANDS=${RUN_COMMANDS}"
              -DTEST_NAME=${TEST_NAME}
              -DNUM_PROCS=${NUM_PROCS}
              -DSEACAS_EPU=${SEACAS_EPU}
