@@ -182,4 +182,11 @@ double angle_between(const Vector& aVec1, const Vector& aVec2)
     return std::acos(tCosineOfAngle);
 }
 
+std::ostream & operator<< (std::ostream &out, const Vector &aVec)
+{
+    out << "{" << aVec.X() << "," << aVec.Y() << "," << aVec.Z() << "}";
+    
+    return out;
+}
+
 }

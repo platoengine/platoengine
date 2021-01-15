@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <iostream>
 
 namespace PlatoSubproblemLibrary
 {
@@ -34,6 +35,11 @@ public:
     Vector operator -(const Vector& aVec) const;
 
     Vector& operator =(const Vector& aVec);
+    friend std::ostream & operator<< (std::ostream &out, const Vector &c);
+
+    double X() const {return m_data[0];}
+    double Y() const {return m_data[1];}
+    double Z() const {return m_data[2];}
 
 private:
     std::vector<double> m_data;

@@ -96,12 +96,18 @@ PSL_TEST(Vector,set_and_get)
     EXPECT_EQ(tVec(0), 3.0);
     EXPECT_EQ(tVec(1), 3.5);
     EXPECT_EQ(tVec(2), 3.7);
+    EXPECT_EQ(tVec.X(), 3.0);
+    EXPECT_EQ(tVec.Y(), 3.5);
+    EXPECT_EQ(tVec.Z(), 3.7);
 
     std::vector<double> tTemp = {4.1,4.2,4.3};
     tVec.set(tTemp);
     EXPECT_EQ(tVec(0), 4.1);
     EXPECT_EQ(tVec(1), 4.2);
     EXPECT_EQ(tVec(2), 4.3);
+    EXPECT_EQ(tVec.X(), 4.1);
+    EXPECT_EQ(tVec.Y(), 4.2);
+    EXPECT_EQ(tVec.Z(), 4.3);
 
     std::vector<double> tTemp2 = {0,0};
     EXPECT_THROW(tVec.set(tTemp2),std::length_error);
