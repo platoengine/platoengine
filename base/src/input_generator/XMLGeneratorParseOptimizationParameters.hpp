@@ -27,6 +27,13 @@ private:
 
 private:
     /******************************************************************************//**
+     * \fn setMeshMapData
+     * \brief Set Scenario mesh map data
+     * \param [in] aScenario Scenario metadata
+    **********************************************************************************/
+    void setMeshMapData(XMLGen::OptimizationParameters &aMetadata);
+
+    /******************************************************************************//**
      * \fn allocate
      * \brief Allocate map from valid tags to valid tokens-value pair
     **********************************************************************************/

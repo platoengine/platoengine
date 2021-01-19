@@ -63,6 +63,26 @@ void OptimizationParameters::append(const std::string& aTag, const std::string& 
     mMetaData[aTag] = aValue;
 }
 
+bool OptimizationParameters::needsMeshMap() const
+{
+    if(mSymmetryPlaneOrigin.size() == 3 && mSymmetryPlaneNormal.size() == 3)
+    {
+        return true;
+    }
+    return false;
+}
+
+std::string OptimizationParameters::filter_before_symmetry_enforcement() const
+{
+    return (this->getValue("filter_before_symmetry_enforcement"));
+}
+
+std::string OptimizationParameters::mesh_map_filter_radius() const
+{
+    return (this->getValue("mesh_map_filter_radius"));
+}
+
+
 
 
 }

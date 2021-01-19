@@ -43,6 +43,11 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "number_refines", { { {"number_refines"}, ""}, "" } });
     mTags.insert({ "mma_move_limit", { { {"mma_move_limit"}, ""}, "" } });
     mTags.insert({ "max_iterations", { { {"max_iterations"}, ""}, "" } });
+    mTags.insert({ "filter_in_engine", { { {"filter_in_engine"}, ""}, "true" } });
+    mTags.insert({ "symmetry_plane_normal", { { {"symmetry_plane_normal"}, ""}, "" } });
+    mTags.insert({ "symmetry_plane_origin", { { {"symmetry_plane_origin"}, ""}, "" } });
+    mTags.insert({ "mesh_map_filter_radius", { { {"mesh_map_filter_radius"}, ""}, "" } });
+    mTags.insert({ "filter_before_symmetry_enforcement", { { {"filter_before_symmetry_enforcement"}, ""}, "" } });
     mTags.insert({ "mma_asymptote_expansion", { { {"mma_asymptote_expansion"}, ""}, "" } });
     mTags.insert({ "mma_asymptote_contraction", { { {"mma_asymptote_contraction"}, ""}, "" } });
     mTags.insert({ "mma_max_sub_problem_iterations", { { {"mma_max_sub_problem_iterations"}, ""}, "" } });
@@ -130,6 +135,36 @@ std::vector<XMLGen::OptimizationParameters> ParseOptimizationParameters::data() 
     return mData;
 }
 
+void ParseOptimizationParameters::setMeshMapData(XMLGen::OptimizationParameters &aMetadata)
+{
+    auto tItr = mTags.find("symmetry_plane_origin");
+    if(tItr != mTags.end())
+    {
+        std::string tValues = tItr->second.first.second;
+        if (!tValues.empty())
+        {
+            std::vector<std::string> tOrigin;
+            char tValuesBuffer[10000];
+            strcpy(tValuesBuffer, tValues.c_str());
+            XMLGen::parse_tokens(tValuesBuffer, tOrigin);
+            aMetadata.symmetryOrigin(tOrigin);
+        }
+    }
+    tItr = mTags.find("symmetry_plane_normal");
+    if(tItr != mTags.end())
+    {
+        std::string tValues = tItr->second.first.second;
+        if (!tValues.empty())
+        {
+            std::vector<std::string> tNormal;
+            char tValuesBuffer[10000];
+            strcpy(tValuesBuffer, tValues.c_str());
+            XMLGen::parse_tokens(tValuesBuffer, tNormal);
+            aMetadata.symmetryNormal(tNormal);
+        }
+    }
+}
+
 void ParseOptimizationParameters::parse(std::istream &aInputFile)
 {
     this->allocate();
@@ -165,6 +200,7 @@ void ParseOptimizationParameters::setMetaData(XMLGen::OptimizationParameters &aM
     this->setLevelsetNodesetIDs(aMetadata);
     this->setMaterialBoxExtents(aMetadata);
     this->checkHeavisideFilterParams(aMetadata);
+    this->setMeshMapData(aMetadata);
 }
 
 void ParseOptimizationParameters::checkHeavisideFilterParams(XMLGen::OptimizationParameters &aMetadata)

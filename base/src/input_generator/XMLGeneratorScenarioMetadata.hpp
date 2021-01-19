@@ -155,6 +155,13 @@ public:
     std::string materialPenaltyExponent() const;
 
     /******************************************************************************//**
+     * \fn material 
+     * \brief Return string value for keyword 'material'.
+     * \return value
+    **********************************************************************************/
+    std::string material() const;
+
+    /******************************************************************************//**
      * \fn minErsatzMaterialConstant
      * \brief Set string value for keyword 'minimum_ersatz_material_value'.
      * \param [in] aInput string value

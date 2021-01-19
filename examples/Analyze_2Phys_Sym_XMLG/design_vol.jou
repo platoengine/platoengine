@@ -1,0 +1,60 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 03/03/2020 07:14:51 PM
+## Command Options:
+#{xdim=1.0}
+#{ydim=1.0}
+#{zdim=1.0}
+#{inset=0.2}
+#{wall_factor=0.5}
+#{base_thickness=0.1}
+#{mesh_size=0.075}
+create brick x {xdim} y {ydim} z {zdim}
+tweak curve 11 12 9 10 fillet radius {inset}
+create cylinder height {zdim-base_thickness} radius {inset*wall_factor}
+volume 2 copy
+move volume 3 x {xdim/2.0-inset} y {ydim/2.0-inset} z {base_thickness/2.0}
+subtract volume 3 from volume 1
+volume 2 copy
+move volume 4 x {-(xdim/2.0-inset)} y {ydim/2.0-inset} z {base_thickness/2.0}
+subtract volume 4 from volume 1
+volume 2 copy
+move volume 5 x {-(xdim/2.0-inset)} y {-(ydim/2.0-inset)} z {base_thickness/2.0}
+subtract volume 5 from volume 1
+move volume 2 x {xdim/2.0-inset} y {-(ydim/2.0-inset)} z {base_thickness/2.0}
+subtract volume 2 from volume 1
+create cylinder height {zdim} radius {inset*wall_factor*wall_factor}
+volume 6 copy
+move volume 7 x {xdim/2.0-inset} y {ydim/2.0-inset}
+subtract volume 7 from volume 1
+volume 6 copy
+move volume 8 x {-(xdim/2.0-inset)} y {ydim/2.0-inset}
+subtract volume 8 from volume 1
+volume 6 copy
+move volume 9 x {-(xdim/2.0-inset)} y {-(ydim/2.0-inset)}
+subtract volume 9 from volume 1
+move volume 6 x {(xdim/2.0-inset)} y {-(ydim/2.0-inset)}
+subtract volume 6 from volume 1
+create cylinder height {xdim} radius {inset*wall_factor}
+rotate volume 10 about y angle 90
+move volume 10 z {zdim/2.0-inset}
+webcut volume 10 with plane xplane offset {inset/2.0}
+webcut volume 11 with plane xplane offset {-inset/2.0}
+delete volume 11
+subtract volume 12 10 from volume 1
+create cylinder height {xdim} radius {inset*wall_factor*wall_factor}
+rotate volume 13 about y angle 90
+move volume 13 z {zdim/2.0-inset}
+subtract volume 13 from volume 1
+volume all scheme tetmesh
+volume all size {mesh_size}
+mesh volume all
+block 1 vol all
+block 1 name "block_1"
+sideset 2 surface 79
+sideset 2 name "ss_2"
+sideset 1 surface 56 53 47 41
+sideset 1 name "ss_1"
+export mesh "design_vol.exo" overwrite

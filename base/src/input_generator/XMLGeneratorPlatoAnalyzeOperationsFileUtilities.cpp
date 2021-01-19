@@ -44,6 +44,27 @@ void append_compute_objective_value_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_mesh_map_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aMetaData.optimization_parameters().needsMeshMap())
+    {
+        auto tMeshMap = aDocument.append_child("MeshMap");
+        XMLGen::append_children( { "FilterFirst" }, { aMetaData.optimization_parameters().filter_before_symmetry_enforcement() }, tMeshMap);
+        auto tFilter = tMeshMap.append_child("Filter");
+        XMLGen::append_children( { "Type", "Radius" }, { "Linear", aMetaData.optimization_parameters().mesh_map_filter_radius() }, tFilter);
+        auto tLinearMap = tMeshMap.append_child("LinearMap");
+        XMLGen::append_children( { "Type" }, { "SymmetryPlane" }, tLinearMap);
+        auto tOrigin = tLinearMap.append_child("Origin");
+        XMLGen::append_children( { "X", "Y", "Z" }, { aMetaData.optimization_parameters().symmetryOrigin()[0], aMetaData.optimization_parameters().symmetryOrigin()[1], aMetaData.optimization_parameters().symmetryOrigin()[2] }, tOrigin);
+        auto tNormal = tLinearMap.append_child("Normal");
+        XMLGen::append_children( { "X", "Y", "Z" }, { aMetaData.optimization_parameters().symmetryNormal()[0], aMetaData.optimization_parameters().symmetryNormal()[1], aMetaData.optimization_parameters().symmetryNormal()[2] }, tNormal);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_compute_objective_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
@@ -247,6 +268,10 @@ void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
 {
+    if(aMetaData.mOutputMetaData.size() == 0)
+    {
+        return;
+    }
     const XMLGen::Output &tOutputMetadata = aMetaData.mOutputMetaData[0];
     if(tOutputMetadata.isOutputDisabled())
     {
@@ -257,6 +282,12 @@ void append_write_output_to_plato_analyze_operation
     auto tCodeName = aMetaData.service(tServiceID).code();
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperationNode);
+
+    if(aMetaData.optimization_parameters().filter_in_engine() == "false")
+    {
+        auto tOutput = tOperationNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tOutput);
+    }
 
     XMLGen::ValidPerformerOutputKeys tValidKeys;
     auto tOutputQoIs = tOutputMetadata.outputIDs();
@@ -274,6 +305,7 @@ void write_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
     pugi::xml_document tDocument;
+    XMLGen::append_mesh_map_data(aXMLMetaData, tDocument);
     XMLGen::append_write_output_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_update_problem_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);

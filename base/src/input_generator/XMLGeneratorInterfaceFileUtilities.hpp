@@ -543,5 +543,14 @@ std::string get_filter_objective_criterion_gradient_input_shared_data_name
 std::string get_filter_constraint_criterion_gradient_input_shared_data_name
 (const XMLGen::Constraint &aConstraint);
 
+/******************************************************************************//**
+ * \fn get_design_variable_name
+ * \brief Get the name for the design variable to be used in calculations
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [out]    Name          Returned name
+**********************************************************************************/
+std::string get_design_variable_name
+(const XMLGen::InputData& aXMLMetaData);
+
 }
 // namespace XMLGen

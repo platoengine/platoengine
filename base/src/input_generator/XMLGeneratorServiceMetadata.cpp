@@ -153,26 +153,6 @@ std::string Service::additiveContinuation() const
     return (this->getValue("additive_continuation"));
 }
 
-void Service::timeStep(const std::string& aInput)
-{
-    mMetaData["time_step"] = aInput;
-}
-
-std::string Service::timeStep() const
-{
-    return (this->getValue("time_step"));
-}
-
-void Service::numTimeSteps(const std::string& aInput)
-{
-    mMetaData["number_time_steps"] = aInput;
-}
-
-std::string Service::numTimeSteps() const
-{
-    return (this->getValue("number_time_steps"));
-}
-
 void Service::maxNumTimeSteps(const std::string& aInput)
 {
     mMetaData["max_number_time_steps"] = aInput;
@@ -191,26 +171,6 @@ void Service::timeStepExpansion(const std::string& aInput)
 std::string Service::timeStepExpansion() const
 {
     return (this->getValue("time_step_expansion_multiplier"));
-}
-
-void Service::newmarkBeta(const std::string& aInput)
-{
-    mMetaData["newmark_beta"] = aInput;
-}
-
-std::string Service::newmarkBeta() const
-{
-    return (this->getValue("newmark_beta"));
-}
-
-void Service::newmarkGamma(const std::string& aInput)
-{
-    mMetaData["newmark_gamma"] = aInput;
-}
-
-std::string Service::newmarkGamma() const
-{
-    return (this->getValue("newmark_gamma"));
 }
 
 void Service::newtonSolverTolerance(const std::string& aInput)

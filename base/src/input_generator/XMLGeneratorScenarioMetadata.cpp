@@ -113,6 +113,11 @@ std::string Scenario::minErsatzMaterialConstant() const
     return (this->getValue("minimum_ersatz_material_value"));
 }
 
+std::string Scenario::material() const
+{
+    return (this->getValue("material"));
+}
+
 void Scenario::timeStep(const std::string& aInput)
 {
     mMetaData["time_step"] = aInput;

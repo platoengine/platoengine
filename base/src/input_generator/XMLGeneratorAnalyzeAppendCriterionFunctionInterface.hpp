@@ -95,7 +95,7 @@ public:
      * \param [in]     Criterion    criterion metadata
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
-    void call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
+    pugi::xml_node call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {
 /* Code is not a member of Criterion and we should never get in here except for plato_analyze if
  * things are being called correctly
@@ -112,12 +112,12 @@ public:
         {
             THROWERR(std::string("Criterion Function Interface: Did not find criterion function with tag '") + tLowerCategory + "' in list.")
         }
-        auto tTypeCastedFunc = reinterpret_cast<void(*)(const CriterionType&, pugi::xml_node&)>(tMapItr->second.first);
+        auto tTypeCastedFunc = reinterpret_cast<pugi::xml_node(*)(const CriterionType&, pugi::xml_node&)>(tMapItr->second.first);
         if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
         {
             THROWERR(std::string("Criterion Function Interface: Reinterpret cast for criterion function with tag '") + tLowerCategory + "' failed.")
         }
-        tTypeCastedFunc(aCriterion, aParentNode);
+        return tTypeCastedFunc(aCriterion, aParentNode);
     }
 };
 // struct AppendCriterionParameters

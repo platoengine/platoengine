@@ -37,6 +37,26 @@ std::string is_criterion_supported_in_plato_analyze
 }
 
 /******************************************************************************//**
+ * \fn is_criterion_linear
+ * \tparam Criterion criterion metadata
+ * \brief Return Plato Analyze's criterion linearity type 
+ * \param [in] aCriterion criterion metadata
+ **********************************************************************************/
+template<typename Criterion>
+std::string is_criterion_linear
+(const Criterion& aCriterion)
+{
+    XMLGen::ValidAnalyzeCriteriaIsLinearKeys tValidKeys;
+    auto tLowerCriterion = Plato::tolower(aCriterion.type());
+    auto tItr = tValidKeys.mKeys.find(tLowerCriterion);
+    if (tItr == tValidKeys.mKeys.end())
+    {
+        return "false";
+    }
+    return tItr->second;
+}
+
+/******************************************************************************//**
  * \fn append_simp_penalty_function
  * \tparam MetaData criterion metadata
  * \brief Append SIMP penalty model parameters to criterion parameter list.
@@ -68,11 +88,12 @@ void append_simp_penalty_function
  * \param [in/out] aParentNode  pugi::xml_node
  **********************************************************************************/
 template<typename Criterion>
-void append_scalar_function_criterion
+pugi::xml_node append_scalar_function_criterion
 (const Criterion& aCriterion,
  pugi::xml_node& aParentNode)
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
+    auto tCriterionLinearFlag = XMLGen::Private::is_criterion_linear(aCriterion);
 
     auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
     //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
@@ -83,9 +104,15 @@ void append_scalar_function_criterion
 
     tKeys = {"name", "type", "value"}; tValues = {"Type", "string", "Scalar Function"};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+    if(tCriterionLinearFlag == "true")
+    {
+        tKeys = {"name", "type", "value"}; tValues = {"Linear", "bool", "true"};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+    }
     tValues = {"Scalar Function Type", "string", tDesignCriterionName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
     XMLGen::Private::append_simp_penalty_function(aCriterion, tObjective);
+    return tObjective;
 }
 
 /******************************************************************************//**
@@ -96,12 +123,12 @@ void append_scalar_function_criterion
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 template<typename Criterion>
-void append_pnorm_criterion
+pugi::xml_node append_pnorm_criterion
 (const Criterion& aCriterion,
  pugi::xml_node& aParentNode)
 {
-    XMLGen::Private::append_scalar_function_criterion(aCriterion, aParentNode);
-    auto tCriterion = aParentNode.child("ParameterList");
+    auto tCriterion = XMLGen::Private::append_scalar_function_criterion(aCriterion, aParentNode);
+ //   auto tCriterion = aParentNode.child("ParameterList");
     if(tCriterion.empty())
     {
         THROWERR("Append P-Norm Criterion: Criterion parameter list is empty. Most likely, "
@@ -110,6 +137,7 @@ void append_pnorm_criterion
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Exponent", "double", aCriterion.pnormExponent()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
+    return tCriterion;
 }
 
 /******************************************************************************//**
@@ -158,7 +186,7 @@ inline void append_stress_constrained_mass_minimization_criterion_parameters
  * \param [in] aCriterion criterion metadata
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-inline void append_stress_constrained_mass_minimization_criterion
+inline pugi::xml_node append_stress_constrained_mass_minimization_criterion
 (const XMLGen::Criterion& aCriterion,
  pugi::xml_node& aParentNode)
 {
@@ -176,6 +204,7 @@ inline void append_stress_constrained_mass_minimization_criterion
     tValues = {"Scalar Function Type", "string", tDesignCriterionName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
     XMLGen::Private::append_stress_constrained_mass_minimization_criterion_parameters(aCriterion, tObjective);
+    return tObjective;
 }
 
 }

@@ -26,6 +26,8 @@ private:
     std::vector<std::string> mFixedBlockIDs;
     std::vector<std::string> mFixedSidesetIDs;
     std::vector<std::string> mFixedNodesetIDs;
+    std::vector<std::string> mSymmetryPlaneOrigin;
+    std::vector<std::string> mSymmetryPlaneNormal;
 
 // private member functions
 private:
@@ -49,6 +51,34 @@ private:
 
 public:
     /******************************************************************************//**
+     * \fn symmetryNormal
+     * \brief Return scenario symmetry plane normal
+     * \return scenario symmetry plane normal
+    **********************************************************************************/
+    std::vector<std::string> symmetryNormal() const {return mSymmetryPlaneNormal;}
+
+    /******************************************************************************//**
+     * \fn symmetryOrigin
+     * \brief Return scenario symmetry plane origin
+     * \return scenario symmetry plane origin
+    **********************************************************************************/
+    std::vector<std::string> symmetryOrigin() const {return mSymmetryPlaneOrigin;}
+
+    /******************************************************************************//**
+     * \fn symmetryOrigin
+     * \brief Set scenario symmetry plane origin
+     * \param [in] input symmetry plane origin
+    **********************************************************************************/
+    void symmetryOrigin(std::vector<std::string>& aOrigin) {mSymmetryPlaneOrigin = aOrigin;}
+
+    /******************************************************************************//**
+     * \fn symmetryNormal
+     * \brief Set scenario symmetry plane normal
+     * \param [in] input symmetry plane normal
+    **********************************************************************************/
+    void symmetryNormal(std::vector<std::string>& aNormal) {mSymmetryPlaneNormal = aNormal;}
+
+    /******************************************************************************//**
      * \fn value
      * \brief Return value for property with input tag; else, throw an error if \n
      * property is not defined in the metadata.
@@ -71,6 +101,20 @@ public:
      * \param [in] aValue parameter value
     **********************************************************************************/
     void append(const std::string& aTag, const std::string& aValue);
+
+    /******************************************************************************//**
+     * \fn mesh_map_filter_radius 
+     * \brief Return string value for keyword 'mesh_map_filter_radius'.
+     * \return value
+    **********************************************************************************/
+    std::string mesh_map_filter_radius() const;
+
+    /******************************************************************************//**
+     * \fn filter_before_symmetry_enforcement 
+     * \brief Return string value for keyword 'filter_before_symmetry_enforcement'.
+     * \return value
+    **********************************************************************************/
+    std::string filter_before_symmetry_enforcement() const;
 
     /******************************************************************************//**
      * \fn setFixedBlockIDs
@@ -152,6 +196,14 @@ public:
         mLevelsetNodesets = aLevelsetNodesets;
     }
 
+    /******************************************************************************//**
+     * \fn needsMeshMap 
+     * \brief Return bool stating whether a mesh map is needed
+     * \return value
+    **********************************************************************************/
+    bool needsMeshMap() const;
+
+
     // Functions to get member values
     std::string optimization_algorithm() const {return value("optimization_algorithm");} 
     std::string normalize_in_aggregator() const {return value("normalize_in_aggregator");} 
@@ -168,6 +220,8 @@ public:
     std::string derivative_checker_initial_superscript() const {return value("derivative_checker_initial_superscript");}
     std::string derivative_checker_final_superscript() const {return value("derivative_checker_final_superscript");}
     std::string max_iterations() const {return value("max_iterations");}
+    std::string filter_in_engine() const {return value("filter_in_engine");}
+    void filter_in_engine(const std::string& aValue) { append("filter_in_engine", aValue); }
     std::string output_method() const {return value("output_method");}
     std::string discretization() const {return value("discretization");}
     std::string initial_density_value() const {return value("initial_density_value");}

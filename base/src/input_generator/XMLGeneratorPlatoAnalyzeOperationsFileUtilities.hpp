@@ -146,5 +146,15 @@ void write_plato_analyze_operation_xml_file
 **********************************************************************************/
 void write_amgx_input_file(const XMLGen::InputData& aMetaData);
 
+/******************************************************************************//**
+ * \fn append_mesh_map_data
+ * \brief Append mesh map data plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_mesh_map_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen

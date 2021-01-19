@@ -395,5 +395,25 @@ void append_aggregate_data_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_copy_value_to_plato_main_operation
+ * \brief Append operation for copying a value from one shared data to another
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_copy_value_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_copy_field_to_plato_main_operation
+ * \brief Append operation for copying a field from one shared data to another
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_copy_field_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen

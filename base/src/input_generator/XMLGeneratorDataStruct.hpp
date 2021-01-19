@@ -294,6 +294,20 @@ public:
         return tReturnValue;
     }
 
+    std::string getFirstPlatoAnalyzePerformer() const
+    {
+        std::string tReturnValue = "";
+        for(auto& tService : mServices)
+        {
+            if(tService.code() == "plato_analyze")
+            {
+                tReturnValue = tService.performer();
+                break;
+            }
+        }
+        return tReturnValue;
+    }
+
     std::string getFirstPlatoMainPerformer() const
     {
         std::string tReturnValue = "";
@@ -308,7 +322,7 @@ public:
         return tReturnValue;
     }
 
-    const XMLGen::OptimizationParameters& optimization_parameters() const
+    const XMLGen::OptimizationParameters& optimization_parameters() const 
     {
         return mOptimizationParameters;
     }

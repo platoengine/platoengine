@@ -109,10 +109,13 @@ protected:
 private:
 
     void preProcessInputMetaData();
+    void determineIfPlatoEngineFilteringIsNeeded();
     void expandEssentialBoundaryConditions();
     void updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap);
     void loadOutputData(XMLGen::InputData &aNewInputData, 
                                   const std::string &aServiceID);
+    void loadMaterialData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID);
     void loadObjectiveData(XMLGen::InputData &aNewInputData,
                                      const std::string &aScenarioID,
                                      const std::string &aServiceID);

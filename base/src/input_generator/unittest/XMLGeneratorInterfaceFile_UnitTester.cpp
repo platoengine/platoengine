@@ -78,6 +78,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tOptimizationParameters.append("max_iterations", "10");
     tOptimizationParameters.append("discretization", "density");
     tOptimizationParameters.append("optimization_algorithm", "oc");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
@@ -99,7 +100,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     auto tGold = std::string("<?xmlversion=\"1.0\"?><Filter><Name>Kernel</Name><Scale>2.0</Scale></Filter><Operation><Function>InitializeField</Function><Name>InitializeField</Name><Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform>")
     +"<Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation><Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization><Input><ArgumentName>LowerBoundValue</ArgumentName>"
     +"</Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization><Input><ArgumentName>UpperBoundValue</ArgumentName>"
-    +"</Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name>"
+    +"</Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>CopyField</Function><Name>CopyField</Name><Input><ArgumentName>InputField</ArgumentName></Input><Output><ArgumentName>OutputField</ArgumentName></Output></Operation><Operation><Function>CopyValue</Function><Name>CopyValue</Name><Input><ArgumentName>InputValue</ArgumentName></Input><Output><ArgumentName>OutputValue</ArgumentName></Output></Operation><Operation><Function>UpdateProblem</Function><Name>UpdateProblem</Name></Operation><Operation><Function>Filter</Function><Name>FilterControl</Name>"
     +"<Gradient>False</Gradient><Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient>"
     +"<Input><ArgumentName>Field</ArgumentName></Input><Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation><Operation><Name>AggregateData</Name><Function>Aggregator</Function><Aggregate><Layout>Value</Layout><Input><ArgumentName>Value1</ArgumentName></Input><Output><ArgumentName>Value</ArgumentName></Output></Aggregate><Aggregate><Layout>NodalField</Layout><Input><ArgumentName>Field1</ArgumentName></Input><Output><ArgumentName>Field</ArgumentName></Output></Aggregate><Weighting><Weight><Value>1.0</Value></Weight><Normals><Input><ArgumentName>Normal1</ArgumentName></Input></Normals></Weighting></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
@@ -224,6 +225,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
 
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_in_engine", "true");
+    tMetaData.set(tOptimizationParameters);
+
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
 
@@ -259,8 +264,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
     // STAGE OUTPUT
     auto tOutput = tStage.child("Output");
     ASSERT_STREQ("Output", tOutput.name());
-    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Criterion Value - criterion_3_service_2_scenario_14"}, tOutput);
-    //PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Value"}, tOutput);
+    PlatoTestXMLGenerator::test_children({"SharedDataName"}, {"Objective Value"}, tOutput);
 }
 
 TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)

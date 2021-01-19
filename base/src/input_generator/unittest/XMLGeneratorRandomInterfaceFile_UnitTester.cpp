@@ -105,6 +105,9 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     tOutputMetadata.serviceID("1");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tMetaData.mOutputMetaData.push_back(tOutputMetadata);
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_in_engine", "true");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_write_ouput_operation(tMetaData, tDocument);
@@ -175,6 +178,10 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
     tOutputMetadata.serviceID("2");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_in_engine", "true");
+    tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -369,7 +376,7 @@ TEST(PlatoTestXMLGenerator, ConstraintValueOperation_ErrorInvalidCode)
     XMLGen::ConstraintValueOperation tInterface;
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
-    ASSERT_THROW(tInterface.call(tConstraint, "plato_analyze", "hippo", tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call(tConstraint, "plato_analyze", "Topology", "hippo", tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, ConstraintValueOperation_PlatoMain)
@@ -379,7 +386,7 @@ TEST(PlatoTestXMLGenerator, ConstraintValueOperation_PlatoMain)
     XMLGen::Constraint tConstraint;
     tConstraint.criterion("11");
     tConstraint.service("22");
-    ASSERT_NO_THROW(tInterface.call(tConstraint, "platomain_1", "platomain", tDocument));
+    ASSERT_NO_THROW(tInterface.call(tConstraint, "platomain_1", "Topology", "platomain", tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -415,7 +422,7 @@ TEST(PlatoTestXMLGenerator, ConstraintValueOperation_PlatoAnalyze)
     XMLGen::Constraint tConstraint;
     tConstraint.criterion("2");
     tConstraint.service("3");
-    ASSERT_NO_THROW(tInterface.call(tConstraint, "plato_analyze_1", "plato_analyze", tDocument));
+    ASSERT_NO_THROW(tInterface.call(tConstraint, "plato_analyze_1", "Topology", "plato_analyze", tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -443,7 +450,7 @@ TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_ErrorInvalidCode)
     XMLGen::ConstraintGradientOperation tInterface;
     pugi::xml_document tDocument;
     XMLGen::Constraint tConstraint;
-    ASSERT_THROW(tInterface.call(tConstraint, "performer", "hippo", tDocument), std::runtime_error);
+    ASSERT_THROW(tInterface.call(tConstraint, "performer", "Topology", "hippo", tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_PlatoMain)
@@ -453,7 +460,7 @@ TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_PlatoMain)
     XMLGen::Constraint tConstraint;
     tConstraint.criterion("1");
     tConstraint.service("1");
-    ASSERT_NO_THROW(tInterface.call(tConstraint, "platomain_1", "platomain", tDocument));
+    ASSERT_NO_THROW(tInterface.call(tConstraint, "platomain_1", "Topology", "platomain", tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -489,7 +496,7 @@ TEST(PlatoTestXMLGenerator, ConstraintGradientOperation_PlatoAnalyze)
     XMLGen::Constraint tConstraint;
     tConstraint.criterion("1");
     tConstraint.service("1");
-    ASSERT_NO_THROW(tInterface.call(tConstraint, "plato_analyze_1", "plato_analyze", tDocument));
+    ASSERT_NO_THROW(tInterface.call(tConstraint, "plato_analyze_1", "Topology", "plato_analyze", tDocument));
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1582,7 +1589,7 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     auto tStageOutput = tStage.child("Output");
     ASSERT_FALSE(tStageOutput.empty());
     tGoldKeys = {"SharedDataName"};
-    tGoldValues = {"Criterion Value - criterion_1_service_1_scenario_"};
+    tGoldValues = {"Constraint Value 3"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tStageOutput);
 
     auto tOperation = tStage.child("Operation");
@@ -2566,6 +2573,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tXMLMetaData.mRandomMetaData = tRandomMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("objective_number_standard_deviations", "3");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
@@ -3089,7 +3097,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationObjectiveOptions)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tObjectiveNode = tOptimizerNode.child("Objective");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName"};
-    tGoldValues = {"Criterion Value - criterion_1_service_1_scenario_1", "Compute Objective Value", "Objective Gradient",
+    tGoldValues = {"Objective Value", "Compute Objective Value", "Objective Gradient",
         "Compute Objective Gradient"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tObjectiveNode);
 }
@@ -3130,7 +3138,7 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     auto tConstraintNode = tOptimizerNode.child("Constraint");
     tGoldKeys = {"ValueName", "ValueStageName", "GradientName", "GradientStageName",
         "ReferenceValueName", "NormalizedTargetValue"};
-    tGoldValues = {"Criterion Value - criterion_1_service_1_scenario_", "Compute Constraint Value 1", "Constraint Gradient 1",
+    tGoldValues = {"Constraint Value 1", "Compute Constraint Value 1", "Constraint Gradient 1",
         "Compute Constraint Gradient 1", "Design Volume", "1.0"};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tConstraintNode);
 }

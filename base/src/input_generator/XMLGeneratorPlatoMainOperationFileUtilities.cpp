@@ -30,6 +30,8 @@ void write_plato_main_operations_xml_file
     XMLGen::append_initialize_field_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_set_lower_bounds_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_set_upper_bounds_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_copy_field_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_copy_value_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_design_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aMetaData, tDocument);
@@ -123,12 +125,15 @@ void append_filter_options_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    XMLGen::ValidFilterKeys tValidKeys;
-    auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().filter_type());
-    auto tFilterName = tValue.empty() ? "Kernel" : tValue;
-    auto tFilterNode = aDocument.append_child("Filter");
-    XMLGen::append_children({"Name"}, {tFilterName}, tFilterNode);
-    XMLGen::append_filter_options_to_operation(aXMLMetaData, tFilterNode);
+    if(aXMLMetaData.optimization_parameters().filter_in_engine() == "true")
+    {
+        XMLGen::ValidFilterKeys tValidKeys;
+        auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().filter_type());
+        auto tFilterName = tValue.empty() ? "Kernel" : tValue;
+        auto tFilterNode = aDocument.append_child("Filter");
+        XMLGen::append_children({"Name"}, {tFilterName}, tFilterNode);
+        XMLGen::append_filter_options_to_operation(aXMLMetaData, tFilterNode);
+    }
 }
 // function append_filter_options_to_plato_main_operation
 /******************************************************************************/
@@ -935,6 +940,42 @@ void append_set_lower_bounds_to_plato_main_operation
     XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
 }
 // function append_set_lower_bounds_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_copy_field_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name"};
+    std::vector<std::string> tValues = {"CopyField", "Copy Field"};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.append_child("Input");
+    XMLGen::append_children({"ArgumentName"}, {"InputField"}, tInput);
+    auto tOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"ArgumentName"}, {"OutputField"}, tOutput);
+}
+// function append_copy_field_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_copy_value_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tOperation = aDocument.append_child("Operation");
+    std::vector<std::string> tKeys = {"Function", "Name"};
+    std::vector<std::string> tValues = {"CopyValue", "Copy Value"};
+    XMLGen::append_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.append_child("Input");
+    XMLGen::append_children({"ArgumentName"}, {"InputValue"}, tInput);
+    auto tOutput = tOperation.append_child("Output");
+    XMLGen::append_children({"ArgumentName"}, {"OutputValue"}, tOutput);
+}
+// function append_copy_value_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/

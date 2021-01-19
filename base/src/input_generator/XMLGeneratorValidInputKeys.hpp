@@ -330,8 +330,8 @@ struct ValidLoadKeys
      **/
     std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure"};
 };
-// struct ValidEssentialBoundaryConditionsKeys
 
+// struct ValidEssentialBoundaryConditionsKeys
 struct ValidEssentialBoundaryConditionsKeys
 {
 private:
@@ -353,6 +353,40 @@ public:
     }
 };
 // struct ValidEssentialBoundaryConditionsKeys
+
+// struct ValidEssentialBoundaryConditionBlockTitleKeys
+struct ValidEssentialBoundaryConditionBlockTitleKeys
+{
+private:
+    /*!<
+     * \brief Valid plato input deck essential boundary condition block keyword/title map.
+     **/
+    std::unordered_map<std::string, std::string> mKeys =
+    {
+        {"steady_state_mechanics","Essential Boundary Conditions"}, 
+        {"transient_mechanics","Displacement Boundary Conditions"}, 
+        {"steady_state_thermal","Essential Boundary Conditions"}, 
+        {"transient_thermal","Essential Boundary Conditions"}, 
+        {"steady_state_electrical","Essential Boundary Conditions"}, 
+        {"steady_state_thermomechanics","Essential Boundary Conditions"},
+        {"transient_thermomechanics","Essential Boundary Conditions"},
+        {"steady_state_electromechanics","Essential Boundary Conditions"},
+        {"plasticity","Essential Boundary Conditions"}, 
+        {"thermoplasticity","Essential Boundary Conditions"}
+    };
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return supported criterion keyword.
+     * \param [in] aKey input file keyword
+     * \return supported criterion keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        return (XMLGen::return_supported_value(aKey, mKeys));
+    }
+};
+// struct ValidEssentialBoundaryConditionBlockTitleKeys
 
 struct ValidOutputToLayoutKeys
 {
@@ -769,6 +803,11 @@ struct ValidPhysicsNBCCombinations
                 {"uniform_surface_flux", "Thermal Natural Boundary Conditions"},
                 {"traction", "Mechanical Natural Boundary Conditions"} 
             }
+        },
+        {"transient_mechanics", 
+            {
+                {"traction", "Natural Boundary Conditions"}
+            }
         }
     };
 public:
@@ -1075,6 +1114,20 @@ struct ValidAnalyzeCriteriaKeys
 };
 // ValidAnalyzeCriteriaKeys
 
+struct ValidAnalyzeCriteriaIsLinearKeys
+{
+    /*!<
+     * valid plato analyze optimization criteria \n
+     * \brief map from plato main objective type key to bool saying whether the criteria is linear \n
+     *
+     **/
+    std::unordered_map<std::string, std::string> mKeys =
+    {
+        { "volume", "true" }
+    };
+};
+// ValidAnalyzeCriteriaIsLinearKeys
+
 struct ValidSpatialDimsKeys
 {
     /*!<
@@ -1171,6 +1224,11 @@ struct ValidOptimizationParameterKeys
      "number_refines",
      "mma_move_limit",
      "max_iterations",
+     "filter_in_engine",
+     "symmetry_plane_normal",
+     "symmetry_plane_origin",
+     "mesh_map_filter_radius",
+     "filter_before_symmetry_enforcement",
      "mma_asymptote_expansion",
      "mma_asymptote_contraction",
      "mma_max_sub_problem_iterations",

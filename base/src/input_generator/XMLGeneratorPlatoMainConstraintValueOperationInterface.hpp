@@ -45,7 +45,8 @@ public:
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
     void call(const XMLGen::Constraint& aConstraint, const std::string &aPerformer,
-              const std::string &aCode, pugi::xml_node& aParentNode) const;
+              const std::string &aDesignVariableName, const std::string &aCode, 
+              pugi::xml_node& aParentNode) const;
 };
 // struct ConstraintValueOperation
 

@@ -158,10 +158,12 @@ void append_weighted_sum_objective_to_plato_problem
  * \brief Append criterion function parameters to weighted sum objective parameter \n
  * list inside the plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aObjectiveFunctions list of objective criterion function names
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_functions_to_weighted_sum_objective
 (const XMLGen::InputData& aXMLMetaData,
+ const std::vector<std::string> &aObjectiveFunctions,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -181,7 +183,7 @@ void append_weights_to_weighted_sum_objective
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_objective_criteria_to_plato_problem
+pugi::xml_node append_objective_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -211,7 +213,7 @@ void append_criteria_list_to_plato_analyze_input_deck
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_constraint_criteria_to_plato_problem
+pugi::xml_node append_constraint_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -230,10 +232,12 @@ void append_weighted_sum_constraint_to_plato_problem
  * \brief Append criterion function parameters to weighted sum constraint parameter \n
  * list inside the plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aConstraintFunctions list of contraint functions
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_functions_to_weighted_sum_constraint
 (const XMLGen::InputData& aXMLMetaData,
+ const std::vector<std::string> &aConstraintFunctions,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -418,6 +422,13 @@ std::string get_plato_analyze_service_id
 void get_scenario_list_from_objectives_and_constraints
 (const XMLGen::InputData& aXMLMetaData,
  std::vector<XMLGen::Scenario>& aScenarioList);
+
+/******************************************************************************//**
+ * \fn get_essential_boundary_condition_block_title
+ * \brief get the title for the essential boundary condition block based on the physics
+ * \param [in] aScenario Scenario input data
+**********************************************************************************/
+std::string get_essential_boundary_condition_block_title(XMLGen::Scenario &aScenario);
 
 }
 

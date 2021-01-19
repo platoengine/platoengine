@@ -1513,6 +1513,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("filter_type", "kernel_then_tanh");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument1);
     ASSERT_FALSE(tDocument1.empty());
@@ -1577,6 +1578,7 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tOptimizationParameters.append("filter_type", "Kernel");
     tOptimizationParameters.append("filter_radius_scale", "2.0");
     tOptimizationParameters.append("objective_number_standard_deviations", "1");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.updateProblem("true");
@@ -1610,7 +1612,7 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     +"<Layout>ElementField</Layout></Input><Forvar=\"SampleIndex\"in=\"Samples\"><Input><ArgumentName>vonmises{SampleIndex}</ArgumentName><Layout>ElementField</Layout></Input></For></Operation><Operation><Function>InitializeField</Function><Name>InitializeField</Name>"
     +"<Method>Uniform</Method><Uniform><Value>0.5</Value></Uniform><Output><ArgumentName>InitializedField</ArgumentName></Output></Operation><Operation><Function>SetLowerBounds</Function><Name>ComputeLowerBounds</Name><Discretization>density</Discretization>"
     +"<Input><ArgumentName>LowerBoundValue</ArgumentName></Input><Output><ArgumentName>LowerBoundVector</ArgumentName></Output></Operation><Operation><Function>SetUpperBounds</Function><Name>ComputeUpperBounds</Name><Discretization>density</Discretization>"
-    +"<Input><ArgumentName>UpperBoundValue</ArgumentName></Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDev</Function><Name>ComputeNon-DeterministicObjectiveValue</Name><Layout>Scalar</Layout>"
+    +"<Input><ArgumentName>UpperBoundValue</ArgumentName></Input><Output><ArgumentName>UpperBoundVector</ArgumentName></Output></Operation><Operation><Function>CopyField</Function><Name>CopyField</Name><Input><ArgumentName>InputField</ArgumentName></Input><Output><ArgumentName>OutputField</ArgumentName></Output></Operation><Operation><Function>CopyValue</Function><Name>CopyValue</Name><Input><ArgumentName>InputValue</ArgumentName></Input><Output><ArgumentName>OutputValue</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDev</Function><Name>ComputeNon-DeterministicObjectiveValue</Name><Layout>Scalar</Layout>"
     +"<Forvar=\"PerformerIndex\"in=\"Performers\"><Forvar=\"PerformerSampleIndex\"in=\"PerformerSamples\"><Input><ArgumentName>ObjectiveValue{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}</ArgumentName>"
     +"<Probability>{Probabilities[{PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}]}</Probability></Input></For></For><Output><Statistic>mean</Statistic><ArgumentName>ObjectiveMean</ArgumentName></Output><Output><Statistic>std_dev</Statistic>"
     +"<ArgumentName>ObjectiveStdDev</ArgumentName></Output><Output><Statistic>mean_plus_1_std_dev</Statistic><ArgumentName>ObjectiveMeanPlus1StdDev</ArgumentName></Output></Operation><Operation><Function>MeanPlusStdDevGradient</Function>"
@@ -1625,7 +1627,7 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     +"<Input><ArgumentName>Field</ArgumentName></Input><Output><ArgumentName>FilteredField</ArgumentName></Output></Operation><Operation><Function>Filter</Function><Name>FilterGradient</Name><Gradient>True</Gradient><Input><ArgumentName>Field</ArgumentName></Input>"
     +"<Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
-    Plato::system("rm -f plato_main_operations.xml");
+ //   Plato::system("rm -f plato_main_operations.xml");
 }
 
 }

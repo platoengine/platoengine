@@ -1007,6 +1007,7 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
     std::vector<std::string> bcIDs = {{"1"},{"2"},{"3"}};
     tScenario.setBCIDs(bcIDs);
     tXMLMetaData.append(tScenario);
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -2219,7 +2220,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
     tCriterion.materialPenaltyExponent("1.0");
     tCriterion.minErsatzMaterialConstant("0.0");
     tXMLMetaData.append(tCriterion);
-    tCriterion.type("volume");
+    tCriterion.type("thermal_compliance");
     tCriterion.id("2");
     tCriterion.materialPenaltyExponent("1.0");
     tCriterion.minErsatzMaterialConstant("0.0");
@@ -2262,7 +2263,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my mechanical_compliance, my volume}"}, {"Weights", "Array(double)", "{1.0, 1.0}"} };
+        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my mechanical_compliance, my thermal_compliance}"}, {"Weights", "Array(double)", "{1.0, 1.0}"} };
     auto tGoldValuesItr = tGoldValues.begin();
 
     auto tChild = tParamList.child("Parameter");
@@ -2313,12 +2314,12 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
         std::advance(tGoldValuesItr, 1);
     }
 
-    // TEST MY OBJECTIVE 2 - 'my volume'
+    // TEST MY OBJECTIVE 2 - 'my thermal_compliance'
     tParamList = tParamList.next_sibling("ParameterList");
     ASSERT_FALSE(tParamList.empty());
     ASSERT_STREQ("ParameterList", tParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"my volume"}, tParamList);
-    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Volume"}, {} };
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"my thermal_compliance"}, tParamList);
+    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Internal Thermal Energy"}, {} };
     tGoldValuesItr = tGoldValues.begin();
 
     tChild = tParamList.child("Parameter");
@@ -2391,31 +2392,11 @@ TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToCriteriaList)
     PlatoTestXMLGenerator::test_attributes({"name"}, {"My Constraint"}, tParamList);
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
-    std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my stress_p-norm}"},
-          {"Weights", "Array(double)", "{0.5}"}, {"Exponent", "double", "6"} };
+    std::vector<std::vector<std::string>> tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Stress P-Norm"}, {}, {"Exponent", "double", "6"} };
     auto tGoldValuesItr = tGoldValues.begin();
 
     auto tChild = tParamList.child("Parameter");
-    while(!tChild.empty())
-    {
-        ASSERT_FALSE(tChild.empty());
-        ASSERT_STREQ("Parameter", tChild.name());
-        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tChild);
-        tChild = tChild.next_sibling();
-        std::advance(tGoldValuesItr, 1);
-    }
-
-    // TEST MY OBJECTIVE 1 - 'my stress p-norm'
-    tParamList = tParamList.next_sibling("ParameterList");
-    ASSERT_FALSE(tParamList.empty());
-    ASSERT_STREQ("ParameterList", tParamList.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"my stress_p-norm"}, tParamList);
-    tGoldValues = { {"Type", "string", "Scalar Function"}, {"Scalar Function Type", "string", "Stress P-Norm"}, {} };
-    tGoldValuesItr = tGoldValues.begin();
-
-    tChild = tParamList.child("Parameter");
-    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "ParameterList"};
+    std::vector<std::string> tGoldChildName = {"Parameter", "Parameter", "ParameterList", "Parameter"};
     auto tGoldChildItr = tGoldChildName.begin();
     while(!tChild.empty())
     {

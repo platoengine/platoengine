@@ -179,6 +179,18 @@ void XMLGenerator::expandEssentialBoundaryConditions()
 }
 
 /******************************************************************************/
+void XMLGenerator::determineIfPlatoEngineFilteringIsNeeded()
+/******************************************************************************/
+{
+    if(m_InputDataWithExpandedEBCs.optimization_parameters().needsMeshMap())
+    {
+        XMLGen::OptimizationParameters tOptimizationParameters = m_InputDataWithExpandedEBCs.optimization_parameters();
+        tOptimizationParameters.filter_in_engine("false");
+        m_InputDataWithExpandedEBCs.set(tOptimizationParameters);
+    }
+}
+
+/******************************************************************************/
 void XMLGenerator::updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap)
 /******************************************************************************/
 {
@@ -213,6 +225,7 @@ void XMLGenerator::preProcessInputMetaData()
 /******************************************************************************/
 {
     expandEssentialBoundaryConditions();
+    determineIfPlatoEngineFilteringIsNeeded();
     createCopiesForPerformerCreation();
 }
 
@@ -237,7 +250,28 @@ void XMLGenerator::clearInputDataLists(XMLGen::InputData &aInputData)
     aInputData.objective.criteriaIDs.clear();
     aInputData.objective.weights.clear();
     aInputData.constraints.clear();
+    std::vector<XMLGen::Scenario> tEmptyScenarioList;
+    aInputData.set(tEmptyScenarioList);
+    std::vector<XMLGen::Service> tEmptyServiceList;
+    aInputData.set(tEmptyServiceList);
     aInputData.mOutputMetaData.clear();
+    aInputData.materials.clear();
+}
+
+/******************************************************************************/
+void XMLGenerator::loadMaterialData(XMLGen::InputData &aNewInputData, 
+                                     const std::string &aScenarioID)
+/******************************************************************************/
+{
+    auto &tScenario = m_InputData.scenario(aScenarioID);
+    for(auto &tMaterial : m_InputData.materials)
+    {
+        if(tMaterial.id() == tScenario.material())
+        {
+            aNewInputData.materials.push_back(tMaterial);
+            break;
+        } 
+    }
 }
 
 /******************************************************************************/
@@ -312,11 +346,21 @@ void XMLGenerator::createCopiesForPerformerCreation()
         {
             tScenarioServicePairs.insert(tCurPair);
 
+            XMLGen::Scenario tCurScenario = m_InputDataWithExpandedEBCs.scenario(tScenarioID);
+            XMLGen::Service tCurService = m_InputDataWithExpandedEBCs.service(tServiceID);
+
             // Clear out the data in the new metadata--we will only keep the 
             // necessary parts.
             XMLGen::InputData tNewInputData = m_InputDataWithExpandedEBCs;
             clearInputDataLists(tNewInputData);
 
+            // Add back in relevant materials
+            loadMaterialData(tNewInputData, tScenarioID);
+
+            // Add back in relevant scenario and serivce data.
+            tNewInputData.append(tCurScenario);
+            tNewInputData.append(tCurService);
+            
             // Add back in the relevant objective data.
             loadObjectiveData(tNewInputData, tScenarioID, tServiceID);
 

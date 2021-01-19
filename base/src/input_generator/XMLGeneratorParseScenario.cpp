@@ -81,6 +81,7 @@ void ParseScenario::allocate()
     mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
     mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "" } });
 
+    mTags.insert({ "material", { { {"material"}, ""}, "" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });

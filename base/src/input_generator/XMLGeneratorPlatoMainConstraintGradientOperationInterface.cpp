@@ -16,14 +16,14 @@ namespace Private
 void append_compute_constraint_gradient_operation_platomain
 (const XMLGen::Constraint& aConstraint,
  const std::string &aPerformer,
-
+ const std::string &aDesignVariableName,
  pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", aPerformer}, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
 
     std::string tCriterionID = aConstraint.criterion();
     std::string tServiceID = aConstraint.service();
@@ -44,14 +44,14 @@ void append_compute_constraint_gradient_operation_platomain
 void append_compute_constraint_gradient_operation_platoanalyze
 (const XMLGen::Constraint& aConstraint,
  const std::string &aPerformer,
-
+ const std::string &aDesignVariableName,
  pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", aPerformer}, tOperationNode);
 
     auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", "Topology"}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
 
     std::string tCriterionID = aConstraint.criterion();
     std::string tServiceID = aConstraint.service();
@@ -84,6 +84,7 @@ void ConstraintGradientOperation::insert()
 void ConstraintGradientOperation::call
 (const XMLGen::Constraint& aConstraint,
  const std::string &aPerformer,
+ const std::string &aDesignVariableName,
  const std::string &aCode,
 
  pugi::xml_node& aParentNode) const
@@ -95,13 +96,13 @@ void ConstraintGradientOperation::call
         THROWERR(std::string("Constraint Gradient Operation Interface: Did not find 'code' keyword with tag '")
             + tLowerCode + "', 'code' keyword '" + tLowerCode + "' is not supported.")
     }
-    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Constraint&, const std::string &aPerformer, pugi::xml_node&)>(tMapItr->second.first);
+    auto tTypeCastedFunc = reinterpret_cast<void(*)(const XMLGen::Constraint&, const std::string &aPerformer, const std::string &aDesignVariableName, pugi::xml_node&)>(tMapItr->second.first);
     if(tMapItr->second.second == std::type_index(typeid(tTypeCastedFunc)))
     {
         THROWERR(std::string("Constraint Gradient Operation Interface: Reinterpret cast of constraint gradient operation ")
             + "for code with tag '" + tLowerCode + "' failed.")
     }
-    tTypeCastedFunc(aConstraint, aPerformer, aParentNode);
+    tTypeCastedFunc(aConstraint, aPerformer, aDesignVariableName, aParentNode);
 }
 
 }
