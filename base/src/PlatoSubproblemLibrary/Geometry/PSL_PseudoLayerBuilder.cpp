@@ -9,7 +9,7 @@ class LessThanInBuildDirection
 {
     public:
         LessThanInBuildDirection(const std::vector<std::vector<double>>& aCoordinates,
-                                 const PlatoSubproblemLibrary::Vector& aBuildDirection)
+                                 const Vector& aBuildDirection)
                                         :mCoordinates(aCoordinates),
                                          mBuildDirection(aBuildDirection)
         {}
@@ -22,17 +22,17 @@ class LessThanInBuildDirection
                 throw(std::out_of_range("Indices must be betweeen zero and number of nodes in mesh to compare distance of node in build direction"));
             }
 
-            PlatoSubproblemLibrary::Vector tVec1(mCoordinates[aIndex1]);
-            PlatoSubproblemLibrary::Vector tVec2(mCoordinates[aIndex2]);
+            Vector tVec1(mCoordinates[aIndex1]);
+            Vector tVec2(mCoordinates[aIndex2]);
 
-            double tSignedDistanceFromOrigin1 = PlatoSubproblemLibrary::dot_product(tVec1,mBuildDirection);
-            double tSignedDistanceFromOrigin2 = PlatoSubproblemLibrary::dot_product(tVec2,mBuildDirection);
+            double tSignedDistanceFromOrigin1 = dot_product(tVec1,mBuildDirection);
+            double tSignedDistanceFromOrigin2 = dot_product(tVec2,mBuildDirection);
 
             return tSignedDistanceFromOrigin1 < tSignedDistanceFromOrigin2;
         }
 
         const std::vector<std::vector<double>>& mCoordinates;
-        const PlatoSubproblemLibrary::Vector& mBuildDirection;
+        const Vector& mBuildDirection;
 };
 
 std::vector<int> PseudoLayerBuilder::orderNodesInBuildDirection() const
@@ -51,27 +51,65 @@ std::vector<int> PseudoLayerBuilder::orderNodesInBuildDirection() const
     return tOrderedNodes;
 }
 
-double PseudoLayerBuilder::intersectionResidual(const double& aSuperUnkown,
-                            const PlatoSubproblemLibrary::Vector& aV0,
-                            const PlatoSubproblemLibrary::Vector& aV1,
-                            const PlatoSubproblemLibrary::Vector& aV2) const
+double PseudoLayerBuilder::angleObjective(const double& aSuperUnkown,
+                                          const Vector& aV0,
+                                          const Vector& aV1,
+                                          const Vector& aV2) const
 {
-     PlatoSubproblemLibrary::Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
+     Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
+     double tCosineDenominator = sqrt(dot_product(tVec,tVec))*sqrt(dot_product(mBuildDirection,mBuildDirection));
 
-     return cos(mCriticalPrintAngle)*sqrt(PlatoSubproblemLibrary::dot_product(tVec,tVec))*sqrt(PlatoSubproblemLibrary::dot_product(mBuildDirection,mBuildDirection)) 
-             + PlatoSubproblemLibrary::dot_product(tVec,mBuildDirection);
+     double tCosine = -1*dot_product(tVec,mBuildDirection)/(tCosineDenominator);
+
+     double tSine = sqrt(1-tCosine*tCosine);
+    
+     return tSine;
+}
+
+double PseudoLayerBuilder::angleObjectiveDerivative(const double& aSuperUnkown,
+                                                    const Vector& aV0,
+                                                    const Vector& aV1,
+                                                    const Vector& aV2) const
+{
+    Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
+    Vector tVecPrime = aV1 - aV2;
+
+    double tCosineDenominator = sqrt(dot_product(tVec,tVec))*sqrt(dot_product(mBuildDirection,mBuildDirection));
+    double tCosine = -1*dot_product(tVec,mBuildDirection)/(tCosineDenominator);
+
+    double tTerm1 = -1*tCosineDenominator*(dot_product(tVecPrime,mBuildDirection));
+    double tTerm2 = dot_product(tVec,mBuildDirection)*pow(dot_product(tVec,tVec),-0.5)*sqrt(dot_product(mBuildDirection,mBuildDirection))*dot_product(tVec,tVecPrime);
+    double tCosinePrimeNumerator = tTerm1 + tTerm2;
+    double tCosinePrimeDenominator = tCosineDenominator*tCosineDenominator;
+
+    double tCosinePrime = tCosinePrimeNumerator / tCosinePrimeDenominator;
+
+    double tSinePrime = -1*pow(1-tCosine*tCosine,-0.5)*tCosine*tCosinePrime;
+
+    return tSinePrime;
+}
+
+double PseudoLayerBuilder::intersectionResidual(const double& aSuperUnkown,
+                                                const Vector& aV0,
+                                                const Vector& aV1,
+                                                const Vector& aV2) const
+{
+     Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
+
+     return cos(mCriticalPrintAngle)*sqrt(dot_product(tVec,tVec))*sqrt(dot_product(mBuildDirection,mBuildDirection)) 
+             + dot_product(tVec,mBuildDirection);
 }
 
 double PseudoLayerBuilder::intersectionResidualDerivative(const double& aSuperUnkown,
-                                      const PlatoSubproblemLibrary::Vector& aV0,
-                                      const PlatoSubproblemLibrary::Vector& aV1,
-                                      const PlatoSubproblemLibrary::Vector& aV2) const
+                                                          const Vector& aV0,
+                                                          const Vector& aV1,
+                                                          const Vector& aV2) const
 {
-    PlatoSubproblemLibrary::Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
-    PlatoSubproblemLibrary::Vector tVecPrime = aV1 - aV2;
-    return cos(mCriticalPrintAngle)*pow(PlatoSubproblemLibrary::dot_product(tVec,tVec),-0.5)
-            *PlatoSubproblemLibrary::dot_product(tVec,tVecPrime)*sqrt(PlatoSubproblemLibrary::dot_product(mBuildDirection,mBuildDirection))
-            + PlatoSubproblemLibrary::dot_product(tVecPrime,mBuildDirection);
+    Vector tVec = aSuperUnkown*aV1 + (1-aSuperUnkown)*aV2 - aV0;
+    Vector tVecPrime = aV1 - aV2;
+    return cos(mCriticalPrintAngle)*pow(dot_product(tVec,tVec),-0.5)
+            *dot_product(tVec,tVecPrime)*sqrt(dot_product(mBuildDirection,mBuildDirection))
+            + dot_product(tVecPrime,mBuildDirection);
 }
 
 std::vector<int> PseudoLayerBuilder::setBaseLayerIDToZeroAndOthersToMinusOne() const
@@ -106,16 +144,16 @@ void PseudoLayerBuilder::computeSupportSetAndCoefficients(std::vector<std::set<B
     }
 }
 
-void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
-                                                      std::vector<int>& aElement,
-                                                      std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const
+void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& aLocalIndexOnElement,
+                                                                     std::vector<int>& aElement,
+                                                                     std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const
 {
-    int tNode = aElement[i];
+    int tNode = aElement[aLocalIndexOnElement];
     LessThanInBuildDirection tLessThanFunctor(mCoordinates,mBuildDirection);
 
     for(size_t j = 1; j < 4; ++j)
     {
-        int tNeighbor = aElement[(i+j)%4];
+        int tNeighbor = aElement[(aLocalIndexOnElement+j)%4];
 
         if(tLessThanFunctor(tNeighbor,tNode))
         {
@@ -126,11 +164,11 @@ void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
             }
             else // tNeighbor is not in the critical window
             {
-                for(int k = 1; k < 4; ++k)
+                for(int k = 1; k < 4; ++k) // for each of the other neighbors
                 {
-                    if((i+j+k)%4 != i)
+                    if((aLocalIndexOnElement+j+k)%4 != aLocalIndexOnElement)
                     {
-                        int tOtherNeighbor = aElement[(i+j+k)%4];
+                        int tOtherNeighbor = aElement[(aLocalIndexOnElement+j+k)%4];
                         if(tLessThanFunctor(tOtherNeighbor,tNode))
                         {
                             if(isNeighborInCriticalWindow(tNode,tOtherNeighbor))
@@ -138,9 +176,14 @@ void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
                                 BoundarySupportPoint tSupportPoint(tNode, {tNeighbor,tOtherNeighbor}, computeSupportCoefficients(tNode, {tNeighbor, tOtherNeighbor}));
                                 aBoundarySupportSet[tNode].insert(tSupportPoint);
                             }
-                            else // tOtherNeighbor is also outside the critical window
+                            else // both tNeighbor and tOtherNeighbor are outside the critical window
                             {
-                                //add both points to the support set along with coefficients
+                                double tFirstCoefficient = 0;
+                                if(criticalWindowIntersectsEdge(tNode, tNeighbor, tOtherNeighbor, tFirstCoefficient))
+                                {
+                                    std::cout << "Edge crossing" << std::endl;
+                                    //add both points to the support set along with coefficients
+                                }
                             }
                         }
                     }
@@ -150,14 +193,74 @@ void PseudoLayerBuilder::computeBoundarySupportPointsAndCoefficients(size_t& i,
     }
 }
 
+bool PseudoLayerBuilder::criticalWindowIntersectsEdge(const int& aNode, const int& aNeighbor0, const int& aNeighbor1, double& aFirstCoefficient) const
+{
+    Vector tNodeVector(mCoordinates[aNode]);
+    Vector tNeighborVector0(mCoordinates[aNeighbor0]);
+    Vector tNeighborVector1(mCoordinates[aNeighbor1]);
+
+    aFirstCoefficient = determineVectorWithMinimalAngleBetweenEdgeAndBuildDirection(tNodeVector, tNeighborVector0, tNeighborVector1);
+
+    Vector tVec = aFirstCoefficient*tNeighborVector0 + (1-aFirstCoefficient)*tNeighborVector1 - tNodeVector;
+
+    if(angle_between(tVec, -1*mBuildDirection) < mCriticalPrintAngle)
+    {
+        if(aFirstCoefficient < 0 || aFirstCoefficient > 1)
+        {
+            std::cout << "tVec: " << tVec << std::endl;
+            std::cout << "aFirstCoefficient: " << aFirstCoefficient << std::endl;
+            std::cout << "Angle Between: " << angle_between(tVec, -1*mBuildDirection) << std::endl;
+            throw(std::runtime_error("PseudoLayerBuilder::criticalWindowIntersectsEdge: Coefficient expected to be between 0 and 1"));
+        }
+        return true;
+    }
+    else
+        return false;
+}
+
+double PseudoLayerBuilder::determineVectorWithMinimalAngleBetweenEdgeAndBuildDirection(const Vector& aV0,
+                                                                                       const Vector& aV1,
+                                                                                       const Vector& aV2) const
+{
+    double tAnswer = 0.5;
+    double tPrevAnswer = 0;
+    double tTolerance = 1e-12;
+    int tMaxIterations = 100000;
+    double tDerivative = 1; //fake starting value just to start the while loop
+    double tPrevDerivative = 1;
+        
+    while(fabs(tDerivative) > tTolerance && tMaxIterations > 0)
+    {
+        tPrevDerivative = tDerivative;
+        tDerivative = angleObjectiveDerivative(tAnswer,aV0,aV1,aV2);
+        double tStepSize = (tAnswer - tPrevAnswer)*(tDerivative - tPrevDerivative)/((tDerivative-tPrevDerivative)*(tDerivative-tPrevDerivative));
+        tPrevAnswer = tAnswer;
+        tAnswer -= tDerivative*tStepSize;
+        --tMaxIterations;
+    }
+
+    if(fabs(tDerivative) > tTolerance)
+        throw(std::runtime_error("Max iterations reached but newton iteration did not converge"));
+
+    return tAnswer;
+}
+
+bool PseudoLayerBuilder::isPointInCriticalWindow(const int& aNode, const Vector& aCoordinateVec) const
+{
+    Vector tNodeVector(mCoordinates[aNode]);
+    Vector tVec = aCoordinateVec - tNodeVector;
+
+    return angle_between(tVec, -1*mBuildDirection) < mCriticalPrintAngle;
+}
+
 bool PseudoLayerBuilder::isNeighborInCriticalWindow(const int& aNode, const int& aNeighbor) const
 {
-    PlatoSubproblemLibrary::Vector tNodeVector(mCoordinates[aNode]);
-    PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[aNeighbor]);
+    Vector tNodeVector(mCoordinates[aNode]);
+    Vector tNeighborVector(mCoordinates[aNeighbor]);
 
-    PlatoSubproblemLibrary::Vector tVec = tNeighborVector - tNodeVector;
+    Vector tVec = tNeighborVector - tNodeVector;
 
-    return PlatoSubproblemLibrary::angle_between(tVec,-1*mBuildDirection) < mCriticalPrintAngle;
+    return angle_between(tVec,-1*mBuildDirection) < mCriticalPrintAngle;
 }
 
 std::vector<double> PseudoLayerBuilder::computeSupportCoefficients(const int& aNode, const std::set<int>& aSupportDependencyNodes) const
@@ -172,38 +275,86 @@ std::vector<double> PseudoLayerBuilder::computeSupportCoefficients(const int& aN
 
     if((isNeighborInCriticalWindow(aNode,tNeighbor1) && isNeighborInCriticalWindow(aNode,tNeighbor2))
     || (!isNeighborInCriticalWindow(aNode,tNeighbor1) && !isNeighborInCriticalWindow(aNode,tNeighbor2)))
-        throw(std::runtime_error("Expecting neighbor exactly one support dependency node to be outside the critical window"));
+        throw(std::runtime_error("Expecting exactly one support dependency node to be outside the critical window"));
 
-    PlatoSubproblemLibrary::Vector tNodeVec(mCoordinates[aNode]);
-    PlatoSubproblemLibrary::Vector tNeighbor1Vec(mCoordinates[tNeighbor1]);
-    PlatoSubproblemLibrary::Vector tNeighbor2Vec(mCoordinates[tNeighbor2]);
+    Vector tNodeVec(mCoordinates[aNode]);
+    Vector tNeighbor1Vec(mCoordinates[tNeighbor1]);
+    Vector tNeighbor2Vec(mCoordinates[tNeighbor2]);
 
-    double tCoefficient1 = computeFirstCoefficient(tNodeVec, tNeighbor1Vec, tNeighbor2Vec);
+    double tInitialGuess = getInitialGuess(aNode, tNeighbor1, tNeighbor2);
+
+    double tCoefficient1 = computeFirstCoefficient(tInitialGuess, tNodeVec, tNeighbor1Vec, tNeighbor2Vec);
     double tCoefficient2 = 1 - tCoefficient1;
 
     std::vector<double> tSupportCoefficients = {tCoefficient1, tCoefficient2};
     return tSupportCoefficients;
 }
 
-double PseudoLayerBuilder::computeFirstCoefficient(const PlatoSubproblemLibrary::Vector& aV0,
-                                                   const PlatoSubproblemLibrary::Vector& aV1,
-                                                   const PlatoSubproblemLibrary::Vector& aV2) const
+double PseudoLayerBuilder::getInitialGuess(const int& aNode,
+                                           const int& aNeighbor1,
+                                           const int& aNeighbor2) const
 {
-    double tAnswer = 0.5;
-    double tTolerance = 1e-5;
-    double tResidual = 1; //fake starting value just to start the while loop
-    int tMaxIterations = 10000;
-        
-    while(fabs(tResidual) > tTolerance && tMaxIterations > 0)
+    double tInitialGuess = 0.5;
+    double tStep = 0.25;
+    int tMaxIterations = 10;
+    double tMultiplier;
+
+    if(isNeighborInCriticalWindow(aNode,aNeighbor1) && !isNeighborInCriticalWindow(aNode,aNeighbor2))
     {
+        tMultiplier = 1.0;
+    }
+    else if(!isNeighborInCriticalWindow(aNode,aNeighbor1) && isNeighborInCriticalWindow(aNode,aNeighbor2))
+    {
+        tMultiplier = -1.0;
+    }
+    else
+    {
+        throw(std::runtime_error("PseudoLayerBuilder::getInitialGuess: Expecting exactly one support dependency node to be inside the critical window"));
+    }
+
+    for(int i = 0; i < tMaxIterations; ++i)
+    {
+        Vector tPoint = tInitialGuess*mCoordinates[aNeighbor1]+(1-tInitialGuess)*mCoordinates[aNeighbor2];
+        if(isPointInCriticalWindow(aNode,tPoint))
+        {
+            tInitialGuess -= tMultiplier*(tStep);
+        }
+        else
+        {
+            tInitialGuess += tMultiplier*(tStep);
+        }
+        tStep = tStep/2.0;
+    }
+
+    return tInitialGuess;
+}
+
+double PseudoLayerBuilder::computeFirstCoefficient(const double& aInitialGuess,
+                                                   const Vector& aV0,
+                                                   const Vector& aV1,
+                                                   const Vector& aV2) const
+{
+    double tAnswer = aInitialGuess;
+    double tPrevAnswer = -1.0;
+    double tTolerance = 1e-12;
+    double tResidual = 0;
+    int tMaxIterations = 100000;
+        
+    while(fabs(tAnswer - tPrevAnswer) > tTolerance && tMaxIterations > 0)
+    {
+        tPrevAnswer = tAnswer;
         tResidual = intersectionResidual(tAnswer,aV0,aV1,aV2);
         double tDerivative = intersectionResidualDerivative(tAnswer,aV0,aV1,aV2);
         tAnswer -= tResidual / tDerivative;
         --tMaxIterations;
     }
 
-    if(fabs(tResidual) > tTolerance)
-        throw(std::runtime_error("Max iterations reached but newton iteration did not converge"));
+    if(fabs(tAnswer - tPrevAnswer) > tTolerance)
+        throw(std::runtime_error("PseudoLayerBuilder::computeFirstCoefficient: Max iterations reached but newton iteration did not converge"));
+
+
+    if(tAnswer < 0.0 || tAnswer > 1.0)
+        throw(std::runtime_error("PseudoLayerBuilder::computeFirstCoefficient: Expecting value to be between 0 and 1"));
 
     return tAnswer;
 }
@@ -280,11 +431,11 @@ int PseudoLayerBuilder::determineSupportingPseudoLayer(const int& aNode,
         {
             if(aPseudoLayers[tNeighbor] == tPseudoLayer)
             {
-                PlatoSubproblemLibrary::Vector tNodeVec(mCoordinates[aNode]);
-                PlatoSubproblemLibrary::Vector tNeighborVector(mCoordinates[tNeighbor]);
-                PlatoSubproblemLibrary::Vector tVec = tNeighborVector - tNodeVec;
+                Vector tNodeVec(mCoordinates[aNode]);
+                Vector tNeighborVector(mCoordinates[tNeighbor]);
+                Vector tVec = tNeighborVector - tNodeVec;
                 double tDistanceBetweeen = tVec.euclideanNorm();
-                double tAngleBetween = PlatoSubproblemLibrary::angle_between(tVec, -1*mBuildDirection);
+                double tAngleBetween = angle_between(tVec, -1*mBuildDirection);
                 tLayerSupportScore += (1/(1+tDistanceBetweeen))*cos(tAngleBetween);
             }
         }
@@ -422,13 +573,13 @@ void PseudoLayerBuilder::checkInput() const
         throw(std::out_of_range("Critical print angle should be between zero and Pi/2"));
 }
 
-PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
+Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
                                                        const std::vector<std::vector<double>>& aCoordinates)
 {
     std::vector<double> tCoefficients = aSupportPoint.getCoefficients();
     std::set<int> tSupportingNodes = aSupportPoint.getSupportingNodeIndices();
 
-    PlatoSubproblemLibrary::Vector tVec;
+    Vector tVec;
     int tCoefficientIndex = 0;
     for(int tSupportingNode : tSupportingNodes)
     {
@@ -437,7 +588,7 @@ PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const BoundarySupportPoin
         if(tSupportingNode < 0 || tSupportingNode > (int) aCoordinates.size())
             throw(std::out_of_range("Node index must lie within 0 and the number of nodes"));
 
-        tVec = tVec + tCoefficient*PlatoSubproblemLibrary::Vector(aCoordinates[tSupportingNode]);
+        tVec = tVec + tCoefficient*Vector(aCoordinates[tSupportingNode]);
         ++tCoefficientIndex;
     }
 

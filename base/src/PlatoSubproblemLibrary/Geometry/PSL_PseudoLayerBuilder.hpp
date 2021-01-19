@@ -18,7 +18,7 @@ class PseudoLayerBuilder
         PseudoLayerBuilder(const std::vector<std::vector<double>>& aCoordinates,
                            const std::vector<std::vector<int>>& aConnectivity,
                            const double& aCriticalPrintAngle,
-                           PlatoSubproblemLibrary::Vector aBuildDirection,
+                           Vector aBuildDirection,
                            const std::vector<int>& aBaseLayer) 
             :mCoordinates(aCoordinates),
              mConnectivity(aConnectivity),
@@ -47,29 +47,52 @@ class PseudoLayerBuilder
 
     private:
 
+        double angleObjective(const double& aSuperUnkown,
+                              const Vector& aV0,
+                              const Vector& aV1,
+                              const Vector& aV2) const;
+
+        double angleObjectiveDerivative(const double& aSuperUnkown,
+                                        const Vector& aV0,
+                                        const Vector& aV1,
+                                        const Vector& aV2) const;
+
         double intersectionResidual(const double& aSuperUnkown,
-                                    const PlatoSubproblemLibrary::Vector& aV0,
-                                    const PlatoSubproblemLibrary::Vector& aV1,
-                                    const PlatoSubproblemLibrary::Vector& aV2) const;
+                                    const Vector& aV0,
+                                    const Vector& aV1,
+                                    const Vector& aV2) const;
 
         double intersectionResidualDerivative(const double& aSuperUnkown,
-                                              const PlatoSubproblemLibrary::Vector& aV0,
-                                              const PlatoSubproblemLibrary::Vector& aV1,
-                                              const PlatoSubproblemLibrary::Vector& aV2) const;
+                                              const Vector& aV0,
+                                              const Vector& aV1,
+                                              const Vector& aV2) const;
 
+        bool criticalWindowIntersectsEdge(const int& aNode,
+                                          const int& aNeighbor0,
+                                          const int& aNeighbor1,
+                                          double& aFirstCoefficient) const;
 
         bool isNeighborInCriticalWindow(const int& aNode, 
                                         const int& aNeighbor) const;
 
+        bool isPointInCriticalWindow(const int& aNode, const Vector& aCoordinateVec) const;
+
         std::vector<double> computeSupportCoefficients(const int& aNode, const std::set<int>& aSupportDependencyNodes) const;
 
-        void computeBoundarySupportPointsAndCoefficients(size_t& i,
+        void computeBoundarySupportPointsAndCoefficients(size_t& aLocalIndexOnElement,
                                                          std::vector<int>& aElement,
                                                          std::vector<std::set<BoundarySupportPoint>>& aBoundarySupportSet) const;
 
-        double computeFirstCoefficient(const PlatoSubproblemLibrary::Vector& aV0,
-                                       const PlatoSubproblemLibrary::Vector& aV1,
-                                       const PlatoSubproblemLibrary::Vector& aV2) const;
+        double determineVectorWithMinimalAngleBetweenEdgeAndBuildDirection(const Vector& aV0,
+                                                                           const Vector& aV1,
+                                                                           const Vector& aV2) const;
+
+        double computeFirstCoefficient(const double& aInitialGuess,
+                                       const Vector& aV0,
+                                       const Vector& aV1,
+                                       const Vector& aV2) const;
+
+        double getInitialGuess(const int& aNode, const int& tNeighbor1, const int& tNeighbor2) const;
 
         std::set<int> getSupportingNeighbors(const int& aNode, const std::set<BoundarySupportPoint>& aSupportSet) const;
         std::set<int> determineConnectedPseudoLayers(const int& aNode, 
@@ -87,10 +110,10 @@ class PseudoLayerBuilder
         const std::vector<std::vector<double>>& mCoordinates;
         const std::vector<std::vector<int>>& mConnectivity;
         const double& mCriticalPrintAngle;
-        PlatoSubproblemLibrary::Vector mBuildDirection;
+        Vector mBuildDirection;
         const std::vector<int>& mBaseLayer;
 };
 
-PlatoSubproblemLibrary::Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
+Vector getVectorToSupportPoint(const BoundarySupportPoint& aSupportPoint,
                                                        const std::vector<std::vector<double>>& aCoordinates);
 }
