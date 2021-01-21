@@ -274,5 +274,16 @@ PSL_TEST(Vector,angleBetween)
     EXPECT_DOUBLE_EQ(tResult,0.83122639765689199);
 }
 
+PSL_TEST(Vector, operatorEqualsEquals)
+{
+    Vector tVec1({1.0,0.0,0.0});
+    Vector tVec2({0.0,1.0,0.0});
+    Vector tVec3({1.0,0.0,0.0});
+
+    EXPECT_EQ(tVec1 == tVec1, true);
+    EXPECT_EQ(tVec1 == tVec3, true);
+    EXPECT_EQ(tVec1 == tVec2, false);
+}
+
 }
 }

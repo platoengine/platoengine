@@ -129,6 +129,14 @@ Vector& Vector::operator =(const Vector& aInputVector)
     return *this;
 }
 
+bool Vector::operator ==(const Vector& aVec) const
+{
+    if(aVec(0) == (*this)(0) && aVec(1) == (*this)(1) && aVec(2) == (*this)(2))
+        return true;
+    else
+        return false;
+}
+
 Vector operator *(const double scalar, const Vector& aInputVector)
 {
     std::vector<double> tVec(3);

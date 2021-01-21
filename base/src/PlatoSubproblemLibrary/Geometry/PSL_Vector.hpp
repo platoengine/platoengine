@@ -35,6 +35,8 @@ public:
     Vector operator -(const Vector& aVec) const;
 
     Vector& operator =(const Vector& aVec);
+    bool operator ==(const Vector& aVec) const;
+
     friend std::ostream & operator<< (std::ostream &out, const Vector &c);
 
     double X() const {return m_data[0];}
