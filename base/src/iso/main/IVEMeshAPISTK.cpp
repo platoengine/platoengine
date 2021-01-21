@@ -1058,26 +1058,38 @@ void IVEMeshAPISTK::prepare_field_data(std::string &outputFieldsString, IVEMeshA
       outAPI->prepare_as_destination();
 }
 
+void convert_block_names_to_parts(const stk::mesh::MetaData& meta,
+                                  const std::vector<std::string>& blocks,
+                                  stk::mesh::PartVector& blockParts)
+{
+  blockParts.clear();
+  for(const std::string& block : blocks)
+  {
+    std::string blockName = "block_" + block;
+    stk::mesh::Part* partPtr = meta.get_part(blockName);
+    if (partPtr != nullptr)
+    {
+      blockParts.push_back(partPtr);
+    }
+  }
+}
+
 void IVEMeshAPISTK::get_fixed_block_nodes(std::vector<IVEHandle> &fixed_block_nodes)
 {
   fixed_block_nodes.clear();
   if(mFixedBlocks.size() > 0)
   {
-    std::string part_name = "block_" + mFixedBlocks[0];
-    stk::mesh::Selector sel(*mMetaData->get_part(part_name));
-    for(size_t i=1; i<mFixedBlocks.size(); ++i)
+    stk::mesh::PartVector blockParts;
+    convert_block_names_to_parts(*mMetaData, mFixedBlocks, blockParts);
+    stk::mesh::Selector sel = stk::mesh::selectUnion(blockParts);
+    const stk::mesh::BucketVector& fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
+    for(const stk::mesh::Bucket* bucket : fixed_node_buckets)
+
     {
-      part_name = "block_" + mFixedBlocks[i];
-      sel |= *mMetaData->get_part(part_name);
-    }
-    stk::mesh::BucketVector fixed_node_buckets;
-    fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
-    for(size_t i=0; i<fixed_node_buckets.size(); ++i) 
-    {
-      stk::mesh::Bucket &cur_bucket = *fixed_node_buckets[i];
-      for(size_t j=0; j<cur_bucket.size(); ++j)
+      for(stk::mesh::Entity node : *bucket)
       {
-        fixed_block_nodes.push_back(get_handle(cur_bucket[j]));
+        fixed_block_nodes.push_back(get_handle(node));
+
       }
     }
   }
