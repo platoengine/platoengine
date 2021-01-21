@@ -70,6 +70,8 @@ enum tokens_t
     heaviside_continuation_scale,
     max_heaviside_parameter,
     smooth_max_p_norm,
+    critical_print_angle,
+    base_layer_side_set_name,
     max_overhang_angle,
     overhang_projection_angle_fraction,
     overhang_projection_radius_fraction,
