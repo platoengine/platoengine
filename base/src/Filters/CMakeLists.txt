@@ -7,6 +7,7 @@ set(${LIB_NAME}_SOURCES
     PlatoEngine_KernelThenHeavisideFilter.cpp
     PlatoEngine_KernelThenTANHFilter.cpp
     PlatoEngine_KernelThenAMFilter.cpp
+    PlatoEngine_KernelThenStructuredAMFilter.cpp
     PlatoEngine_AbstractKernelThenFilter.cpp
     PlatoEngine_AbstractFilter.cpp
     PlatoEngine_FilterFactory.cpp
@@ -16,7 +17,7 @@ set(${LIB_NAME}_HEADERS
     PlatoEngine_KernelFilter.hpp
     PlatoEngine_KernelThenHeavisideFilter.hpp
     PlatoEngine_KernelThenTANHFilter.hpp
-    PlatoEngine_KernelThenAMFilter.hpp
+    PlatoEngine_KernelThenStructuredAMFilter.hpp
     PlatoEngine_AbstractKernelThenFilter.hpp
     PlatoEngine_AbstractFilter.hpp
     PlatoEngine_FilterFactory.hpp

@@ -48,6 +48,7 @@
 #include "PlatoEngine_KernelThenHeavisideFilter.hpp"
 #include "PlatoEngine_KernelThenTANHFilter.hpp"
 #include "PlatoEngine_KernelThenAMFilter.hpp"
+#include "PlatoEngine_KernelThenStructuredAMFilter.hpp"
 #include "Plato_Interface.hpp"
 #include "data_mesh.hpp"
 #include "Plato_Parser.hpp"
@@ -89,7 +90,7 @@ Plato::AbstractFilter* build_filter(InputData aInputData, MPI_Comm& aLocalComm, 
         {
             // we need to call the custom build function with the AM filter 
             // to extract the mesh data
-            Plato::KernelThenAMFilter* tCustomFilter = new Plato::KernelThenAMFilter();
+            Plato::KernelThenStructuredAMFilter* tCustomFilter = new Plato::KernelThenStructuredAMFilter();
             tCustomFilter->build(aInputData, aLocalComm, aMesh);
             return tCustomFilter;
         }

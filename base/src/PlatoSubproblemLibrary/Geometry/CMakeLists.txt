@@ -10,6 +10,7 @@ set(${LIB_NAME}_SOURCES
     PSL_Vector.cpp
     PSL_Triangle.cpp
     PSL_PseudoLayerBuilder.cpp
+    PSL_AMFilterUtilities.cpp
     )
 
 set(${LIB_NAME}_HEADERS 
@@ -19,6 +20,7 @@ set(${LIB_NAME}_HEADERS
     PSL_Vector.hpp
     PSL_Triangle.hpp
     PSL_PseudoLayerBuilder.hpp
+    PSL_AMFilterUtilities.hpp
     )
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})

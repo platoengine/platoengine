@@ -9,6 +9,7 @@ set(${LIB_NAME}_SOURCES
     PSL_KernelThenHeavisideFilter.cpp
     PSL_KernelThenTANHFilter.cpp
     PSL_KernelThenAMFilter.cpp
+    PSL_KernelThenStructuredAMFilter.cpp
     PSL_AbstractKernelThenFilter.cpp
     PSL_AbstractKernelThenProjection.cpp
     PSL_BoundarySupportPoint.cpp
@@ -21,6 +22,7 @@ set(${LIB_NAME}_HEADERS
     PSL_KernelThenHeavisideFilter.hpp
     PSL_KernelThenTANHFilter.hpp
     PSL_KernelThenAMFilter.hpp
+    PSL_KernelThenStructuredAMFilter.hpp
     PSL_AbstractKernelThenFilter.hpp
     PSL_AbstractKernelThenProjection.hpp
     PSL_BoundarySupportPoint.hpp
