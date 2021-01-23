@@ -114,7 +114,7 @@ PSL_TEST(AMFilterUtilities,construction)
     EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,2*tBuildDirection,tBaseLayer),std::domain_error);
 }
 
-PSL_TEST(AMFilterUtilities, getBoundingBox)
+PSL_TEST(AMFilterUtilities, computeBoundingBox)
 {
     std::vector<std::vector<double>> tCoordinates;
 
@@ -127,9 +127,9 @@ PSL_TEST(AMFilterUtilities, getBoundingBox)
 
     tConnectivity.push_back({0,1,2,3});
 
-    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
 
     std::vector<int> tBaseLayer({0,1,2});
 
@@ -137,7 +137,7 @@ PSL_TEST(AMFilterUtilities, getBoundingBox)
 
     Vector tMaxUVWCoords, tMinUVWCoords;
 
-    tUtilities.getBoundingBox(tMaxUVWCoords,tMinUVWCoords);
+    tUtilities.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
 
     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
@@ -145,7 +145,7 @@ PSL_TEST(AMFilterUtilities, getBoundingBox)
     AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tBuildDirection,tUBasisVector,tVBasisVector,tBaseLayer);
     
     // rotate space 90 degrees
-    tUtilities2.getBoundingBox(tMaxUVWCoords,tMinUVWCoords);
+    tUtilities2.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
 
     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({3.0,1.0,2.0})));
     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-3.0,-1.0,-2.0})));
@@ -167,7 +167,7 @@ PSL_TEST(AMFilterUtilities, getBoundingBox)
 
     AMFilterUtilities tUtilities3(tCoordinates2,tConnectivity,tUBasisVector2,tVBasisVector2,tBuildDirection2,tBaseLayer);
 
-    tUtilities3.getBoundingBox(tMaxUVWCoords,tMinUVWCoords);
+    tUtilities3.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
 
     EXPECT_DOUBLE_EQ(tMaxUVWCoords(0),sqrt(2)/2);
     EXPECT_DOUBLE_EQ(tMaxUVWCoords(1),sqrt(2)/2);
@@ -176,6 +176,228 @@ PSL_TEST(AMFilterUtilities, getBoundingBox)
     EXPECT_EQ(tMinUVWCoords(0),0.0);
     EXPECT_DOUBLE_EQ(tMinUVWCoords(1),-1*sqrt(2)/2);
     EXPECT_EQ(tMinUVWCoords(2),0.0);
+}
+
+PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0,1,2,3});
+
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
+    std::vector<int> tBaseLayer({0,1,2});
+
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    double tMinEdgeLength = tUtilities.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 1.0);
+
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({0.4,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities2.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.4);
+
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,0.4,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    AMFilterUtilities tUtilities3(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities3.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.4);
+
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,0.4});
+
+    AMFilterUtilities tUtilities4(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities4.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.4);
+
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.1,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    AMFilterUtilities tUtilities5(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities5.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.9);
+    
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.0,0.1,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    AMFilterUtilities tUtilities6(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities6.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.9);
+
+    tCoordinates.clear();
+
+    tCoordinates.push_back({0.0,0.0,0.1});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    AMFilterUtilities tUtilities7(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    tMinEdgeLength = tUtilities7.computeMinEdgeLength();
+
+    EXPECT_DOUBLE_EQ(tMinEdgeLength, 0.9);
+}
+
+PSL_TEST(AMFilterUtilities, computeNumElementsInEachDirection)
+{
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 0.1;
+    std::vector<int> tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    EXPECT_EQ(tNumElements, std::vector<int>({10,20,30}));
+
+    tTargetEdgeLength = 0.11;
+    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    EXPECT_EQ(tNumElements, std::vector<int>({9,18,27}));
+
+    tTargetEdgeLength = 0.11;
+    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    EXPECT_EQ(tNumElements, std::vector<int>({9,18,27}));
+
+    tTargetEdgeLength = 0.105;
+    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    EXPECT_EQ(tNumElements, std::vector<int>({9,19,28}));
+
+    // target length larger than bounding box
+    tTargetEdgeLength = 1.1;
+    EXPECT_THROW(computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
+
+    // negative target length
+    tTargetEdgeLength = -1.0;
+    EXPECT_THROW(computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
+}
+
+PSL_TEST(AMFilterUtilities, computeGridXYZCoordinates)
+{
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
+    std::vector<int> tNumElements({10,20,30});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<int> tIndex = {1,1,1};
+    Vector tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),0.1);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.1);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),0.1);
+
+    tIndex = {1, 5, 12};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),0.1);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.5);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),1.2);
+
+    tNumElements = {5,8,15};
+    tIndex = {1, 1, 1};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),0.2);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.25);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),0.2);
+    
+    tNumElements = {10,20,30};
+    tMaxUVWCoords = Vector({1.0,2.0,3.0});
+    tMinUVWCoords = Vector({-1.0,-2.0,-3.0});
+    tIndex = {1, 1, 1};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),-0.8);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),-1.8);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),-2.8);
+
+    tUBasisVector = Vector({0.0,1.0,0.0});
+    tVBasisVector = Vector({0.0,0.0,1.0});
+    tBuildDirection = Vector({1.0,0.0,0.0});
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),-2.8);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),-0.8);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),-1.8);
+
+    tUBasisVector = Vector({1.0,1.0,0.0});
+    tVBasisVector = Vector({-1.0,1.0,0.0});
+    tBuildDirection = Vector({0.0,0.0,1.0});
+    tMaxUVWCoords = Vector({1.0,1.0,3.0});
+    tMinUVWCoords = Vector({0.0,0.0,0.0});
+    tNumElements = {10,10,10};
+    tIndex = {0, 0, 1};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),0.0);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.0);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),0.3);
+
+    tIndex = {1, 0, 0};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),0.1);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.1);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),0.0);
+
+    tIndex = {1, 3, 2};
+    tCoordinates = computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex);
+    EXPECT_DOUBLE_EQ(tCoordinates(0),-0.2);
+    EXPECT_DOUBLE_EQ(tCoordinates(1),0.4);
+    EXPECT_DOUBLE_EQ(tCoordinates(2),0.6);
+
+    // min and max flipped so max input is less than min
+    EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMinUVWCoords,tMaxUVWCoords,tNumElements,tIndex),std::domain_error);
+
+    // non-positive number of elements
+    tNumElements = {-1,20,30};
+    EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::domain_error);
+    tNumElements = {0,20,30};
+    EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::domain_error);
+    tNumElements = {10,20,30};
+
+    // index out of range
+    tIndex = {-1,1,1};
+    EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::out_of_range);
+    tIndex = {20,1,1};
+    EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::out_of_range);
 }
 
 }

@@ -60,6 +60,7 @@ public:
         setConnectivity(aConnectivity);
         setBaseLayer(aBaseLayer);
         setCriticalPrintAngle(aCriticalAngle);
+        setBuildDirectionAndUVWBasis(aBuildDirection);
 
         mBuildDirection = aBuildDirection;
         mBuildDirection.normalize();
@@ -96,6 +97,38 @@ private:
         mCriticalPrintAngle = aCriticalAngle;
     }
 
+    void setBuildDirectionAndUVWBasis(const PlatoSubproblemLibrary::Vector& aVector)
+    {
+        mBuildDirection = aVector;
+        mBuildDirection.normalize();
+
+        Vector tXUnit({1.0,0.0,0.0});
+        Vector tYUnit({0.0,1.0,0.0});
+        Vector tZUnit({0.0,0.0,1.0});
+
+        if(fabs(dot_product(tXUnit,aVector)) < 0.8)
+        {
+            mUBasisVector = cross_product(mBuildDirection,tXUnit);
+            mUBasisVector.normalize();
+            mVBasisVector = cross_product(mBuildDirection,mUBasisVector);
+            mVBasisVector.normalize();
+        }
+        else if(fabs(dot_product(tYUnit,aVector)) < 0.8)
+        {
+            mUBasisVector = cross_product(mBuildDirection,tYUnit);
+            mUBasisVector.normalize();
+            mVBasisVector = cross_product(mBuildDirection,mUBasisVector);
+            mVBasisVector.normalize();
+        }
+        else if(fabs(dot_product(tZUnit,aVector)) < 0.8)
+        {
+            mUBasisVector = cross_product(mBuildDirection,tZUnit);
+            mUBasisVector.normalize();
+            mVBasisVector = cross_product(mBuildDirection,mUBasisVector);
+            mVBasisVector.normalize();
+        }
+    }
+
     void computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
     std::vector<std::vector<double>> mCoordinates;
@@ -103,6 +136,8 @@ private:
 
     std::vector<int> mBaseLayer;
 
+    Vector mUBasisVector;
+    Vector mVBasisVector;
     Vector mBuildDirection;
 
     double mCriticalPrintAngle;

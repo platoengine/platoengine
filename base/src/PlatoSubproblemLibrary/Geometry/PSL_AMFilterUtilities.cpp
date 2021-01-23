@@ -1,10 +1,11 @@
 #include <PSL_AMFilterUtilities.hpp>
 #include <iostream>
+#include <limits>
 
 namespace PlatoSubproblemLibrary
 {
 
-void AMFilterUtilities::getBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const
+void AMFilterUtilities::computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const
 {
     Vector tCoords(mCoordinates[0]);
 
@@ -36,6 +37,105 @@ void AMFilterUtilities::getBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoo
         if(dot_product(tNodeVec, mBuildDirection) < aMinUVWCoords(2))
             aMinUVWCoords.set(2,dot_product(tNodeVec, mBuildDirection));
     }
+}
+
+double AMFilterUtilities::computeMinEdgeLength() const
+{
+    double tMinEdgeLength = std::numeric_limits<double>::max();
+
+    for(auto tElement : mConnectivity)
+    {
+        Vector tNode0(mCoordinates[tElement[0]]);
+        Vector tNode1(mCoordinates[tElement[1]]);
+        Vector tNode2(mCoordinates[tElement[2]]);
+        Vector tNode3(mCoordinates[tElement[3]]);
+
+        Vector tEdge0 = tNode1 - tNode0;
+        Vector tEdge1 = tNode2 - tNode0;
+        Vector tEdge2 = tNode3 - tNode0;
+        Vector tEdge3 = tNode1 - tNode2;
+        Vector tEdge4 = tNode3 - tNode2;
+        Vector tEdge5 = tNode3 - tNode1;
+
+        std::vector<Vector> tEdges;
+
+        tEdges.push_back(tEdge0);
+        tEdges.push_back(tEdge1);
+        tEdges.push_back(tEdge2);
+        tEdges.push_back(tEdge3);
+        tEdges.push_back(tEdge4);
+        tEdges.push_back(tEdge5);
+
+        for(auto tEdge : tEdges)
+        {
+            if(tEdge.euclideanNorm() < tMinEdgeLength)
+                tMinEdgeLength = tEdge.euclideanNorm();
+        }
+    }
+
+    return tMinEdgeLength;
+}
+
+std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, const Vector& aMinUVWCoords, const double& aTargetEdgeLength)
+{
+    double tULength = aMaxUVWCoords(0) - aMinUVWCoords(0);
+    double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
+    double tWLength = aMaxUVWCoords(2) - aMinUVWCoords(2);
+
+    if(aTargetEdgeLength <= 0.0)
+        throw(std::domain_error("AMFilterUtilities: target edge length must be greater than zero"));
+
+    if(tULength < aTargetEdgeLength || tVLength < aTargetEdgeLength || tWLength < aTargetEdgeLength)
+        throw(std::domain_error("AMFilterUtilities: target edge length is longer than the provided bounding box"));
+
+    std::vector<int> tNumElements;
+
+    tNumElements.push_back((int) tULength/aTargetEdgeLength);
+    tNumElements.push_back((int) tVLength/aTargetEdgeLength);
+    tNumElements.push_back((int) tWLength/aTargetEdgeLength);
+
+    return tNumElements;
+}
+
+Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
+                                 const Vector& aVBasisVector,
+                                 const Vector& aBuildDirection,
+                                 const Vector& aMaxUVWCoords,
+                                 const Vector& aMinUVWCoords,
+                                 const std::vector<int>& aNumElements,
+                                 const std::vector<int>& aIndex)
+{
+    double tULength = aMaxUVWCoords(0) - aMinUVWCoords(0);
+    double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
+    double tWLength = aMaxUVWCoords(2) - aMinUVWCoords(2);
+
+    std::vector<double> tLength = {tULength,tVLength,tWLength};
+
+    if(tULength < 0 || tVLength < 0 || tWLength < 0)
+        throw(std::domain_error("AMFilterUtilities::computeGridXYZCoordinates: Max UVW coordinates expected to be greater than Min UVW coordinates"));
+
+    if(aNumElements[0] <= 0 || aNumElements[1] <= 0 || aNumElements[2] <= 0)
+        throw(std::domain_error("AMFilterUtilities::computeGridXYZCoordinates: Number of elements in each direction must be greater than zero"));
+
+    for(int i = 0; i < 3; ++i)
+    {
+        if(aIndex[i] < 0 || aIndex[0] > aNumElements[i])
+            throw(std::out_of_range("AMFilterUtilities::computeGridXYZCoordinates: Index must be between zero and number of elements"));
+    }
+
+    Vector tXYZCoordinates;
+    Vector tUVWCoordinates;
+
+    std::vector<Vector> tBasis = {aUBasisVector,aVBasisVector,aBuildDirection};
+    for(int i = 0; i < 3; ++i)
+    {
+        double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*tLength[i]/aNumElements[i]; 
+        tUVWCoordinates.set(i,tUVWCoordinate);
+    }
+
+    tXYZCoordinates = tUVWCoordinates(0)*aUBasisVector + tUVWCoordinates(1)*aVBasisVector + tUVWCoordinates(2)*aBuildDirection;
+
+    return tXYZCoordinates;
 }
 
 void AMFilterUtilities::checkInput() const
