@@ -46,7 +46,7 @@ void ParseService::allocate()
 
     mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "1" } });
     mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "1" } });
-    mTags.insert({ "device_id", { { {"device_id"}, ""}, "" } });
+    mTags.insert({ "device_ids", { { {"device_ids"}, ""}, "" } });
 }
 
 void ParseService::checkCode(XMLGen::Service& aService)
@@ -78,6 +78,20 @@ std::vector<XMLGen::Service> ParseService::data() const
     return mData;
 }
 
+void ParseService::setDeviceIDs(XMLGen::Service &aMetadata)
+{
+    auto tItr = mTags.find("device_ids");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tDeviceIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tDeviceIDs);
+        aMetadata.deviceIDs(tDeviceIDs);
+    }
+}
+
 void ParseService::parse(std::istream &aInputFile)
 {
     mData.clear();
@@ -100,6 +114,7 @@ void ParseService::parse(std::istream &aInputFile)
             XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "service" }, aInputFile, mTags);
             this->setTags(tService);
+            this->setDeviceIDs(tService);
             tService.id(tServiceBlockID);
             this->checkTags(tService);
             mData.push_back(tService);

@@ -83,14 +83,14 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
-void Service::deviceID(const std::string& aInput)
+void Service::deviceIDs(const std::vector<std::string>& aInput)
 {
-    mMetaData["device_id"] = aInput;
+    mDeviceIDs = aInput;
 }
 
-std::string Service::deviceID() const
+std::vector<std::string> Service::deviceIDs() const
 {
-    return (this->getValue("device_id"));
+    return mDeviceIDs;
 }
 
 void Service::numberRanks(const std::string& aInput)

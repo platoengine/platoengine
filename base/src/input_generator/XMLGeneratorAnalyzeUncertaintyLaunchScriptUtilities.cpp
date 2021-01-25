@@ -25,7 +25,8 @@ inline bool is_robust_optimization_problem
 inline void append_plato_analyze_code_path
 (const XMLGen::InputData& aInputData,
  FILE*& aFile,
- const std::string& aServiceID)
+ const std::string& aServiceID,
+ const std::string& aDeviceID)
 {
     // Build id string based on the performer id.
     std::string tIDString;
@@ -49,13 +50,9 @@ inline void append_plato_analyze_code_path
     }
 
     // Add kokkos-device setting if requested.
-    if(aServiceID != "")
+    if(aDeviceID != "")
     {
-        XMLGen::Service tService = aInputData.service(aServiceID); 
-        if(tService.deviceID() != "")
-        {
-            fprintf(aFile, "--kokkos-device=%s ", tService.deviceID().c_str());
-        }
+        fprintf(aFile, "--kokkos-device=%s ", aDeviceID.c_str());
     }
 
     // Add the input deck syntax.
@@ -85,7 +82,7 @@ inline void append_analyze_mpirun_commands
 
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
-            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id());
+            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), "");
         }
         tServiceIndex++;
     }
@@ -104,16 +101,53 @@ void append_analyze_mpirun_commands_robust_optimization_problems
         THROWERR("Number of performers for uncertainty workflow must be greater than zero\n")
     }
 
-    fprintf(aFile,
+    XMLGen::Service tService = aInputData.mPerformerServices[0];
+    std::vector<std::string> tDeviceIDs = tService.deviceIDs();
+
+    // If no device ids were specified just put all of the performers in one executable 
+    // statement in the mpirun.source file
+    if(tDeviceIDs.size() == 0)
+    {
+        fprintf(aFile,
             ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n",
             tNumProcsString.c_str(),
             Plato::to_string(aInputData.m_UncertaintyMetaData.numPerformers).c_str(),
             tEnvString.c_str(),
             tSeparationString.c_str());
+        if(aInputData.mPerformerServices.size() == 0)
+        {
+            THROWERR("Number of services must be greater than zero\n")
+        }
 
-    fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
-    fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
-    XMLGen::append_plato_analyze_code_path(aInputData, aFile, "");
+        fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+        fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
+        XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), "");
+    }
+    // Id device ids were specified spread the performers out on the devices by putting them in 
+    // separate executable statements and specifying the kokkos-device id.
+    else
+    {
+        size_t tMinNumPerformersPerDevice = aInputData.m_UncertaintyMetaData.numPerformers/tDeviceIDs.size();
+        size_t tRemainder = aInputData.m_UncertaintyMetaData.numPerformers%tDeviceIDs.size();
+        for(size_t i=0; i<tDeviceIDs.size(); ++i)
+        {
+            int tNumPerformersOnThisDevice = tMinNumPerformersPerDevice;
+            // On the last device add the remainder performers
+            if(i == (tDeviceIDs.size()-1))
+            {
+                tNumPerformersOnThisDevice += tRemainder;
+            }
+            fprintf(aFile,
+                ": %s %d %s PLATO_PERFORMER_ID%s1 \\\n",
+                tNumProcsString.c_str(),
+                tNumPerformersOnThisDevice,
+                tEnvString.c_str(),
+                tSeparationString.c_str());
+            fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+            fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
+            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), tDeviceIDs[i]);
+        }
+    }
 }
 
 void generate_launch_script(const XMLGen::InputData& aInputData)

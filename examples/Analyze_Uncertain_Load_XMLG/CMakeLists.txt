@@ -5,14 +5,14 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "input.i;mesh_file.exo")
+set( testFiles "plato_input_deck.i;beam.exo")
 Plato_add_test_files("${testFiles}")
 
 # write out the path info in the plato input deck
-Plato_add_text_to_file("input.i" "begin paths\n")
-Plato_add_text_to_file("input.i" "code PlatoMain ${PLATOMAIN_BINARY}\n")
-Plato_add_text_to_file("input.i" "code plato_analyze ${ANALYZE_BINARY}\n")
-Plato_add_text_to_file("input.i" "end paths\n")
+Plato_add_text_to_file("plato_input_deck.i" "begin paths\n")
+Plato_add_text_to_file("plato_input_deck.i" "code PlatoMain ${PLATOMAIN_BINARY}\n")
+Plato_add_text_to_file("plato_input_deck.i" "code plato_analyze ${ANALYZE_BINARY}\n")
+Plato_add_text_to_file("plato_input_deck.i" "end paths\n")
 
 # Specify which comm will provide the output for comparison
 set( IO_COMM_INDEX 0 )
@@ -28,7 +28,7 @@ set( NUM_PROCS "${PLATOMAIN_NP} ${ANALYZE_NP}" )
 
 # set mesh for epu at end
 set(OUTPUT_MESH platomain.exo)
-set(XMLGEN_COMMAND "../../base/src/input_generator/XMLGenerator input.i")
+set(XMLGEN_COMMAND "../../base/src/input_generator/XMLGenerator plato_input_deck.i")
 
 set( SKIP_EXODIFF 0 )
 

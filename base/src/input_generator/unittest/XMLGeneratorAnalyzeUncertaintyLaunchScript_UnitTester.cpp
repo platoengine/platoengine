@@ -46,7 +46,13 @@ TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines)
   XMLGen::Service tService;
   tService.numberProcessors("10");
   tService.code("platomain");
+  tService.id("1");
   tInputData.append(tService);
+  tService.numberProcessors("1");
+  tService.code("plato_analyze");
+  tService.id("2");
+  tInputData.append(tService);
+  tInputData.mPerformerServices.push_back(tService);
 
   tInputData.m_UseLaunch = false;
   tInputData.mesh.run_name = "dummy_mesh.exo";
@@ -56,7 +62,7 @@ TEST(PlatoTestXMLGenerator, appendAnalyzeMPIRunLines)
   fclose(fp);
 
   auto tReadData = XMLGen::read_data_from_file("appendEngineMPIRunLines.txt");
-  auto tGold = std::string(":-np5-xPLATO_PERFORMER_ID=1\\-xPLATO_INTERFACE_FILE=interface.xml\\-xPLATO_APP_FILE=plato_analyze_operations.xml\\analyze_MPMD--input-config=plato_analyze_input_deck.xml\\");
+  auto tGold = std::string(":-np5-xPLATO_PERFORMER_ID=1\\-xPLATO_INTERFACE_FILE=interface.xml\\-xPLATO_APP_FILE=plato_analyze_2_operations.xml\\analyze_MPMD--input-config=plato_analyze_2_input_deck.xml\\");
 
   EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
   Plato::system("rm -rf appendEngineMPIRunLines.txt");

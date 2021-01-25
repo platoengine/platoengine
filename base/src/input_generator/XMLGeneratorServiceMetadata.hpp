@@ -24,6 +24,7 @@ public:
 // private member data
 private:
     std::unordered_map<std::string, std::string> mMetaData; /*!< Service metadata, map< tag, value > */
+    std::vector<std::string> mDeviceIDs;
 
 // private member functions
 private:
@@ -113,18 +114,18 @@ public:
     std::string numberRanks() const;
 
     /******************************************************************************//**
-     * \fn deviceID
-     * \brief Set string value for keyword 'device_id'.
+     * \fn deviceIDs
+     * \brief Set the vector of device ids
      * \param [in] aInput string value
     **********************************************************************************/
-    void deviceID(const std::string& aInput);
+    void deviceIDs(const std::vector<std::string>& aInput);
 
     /******************************************************************************//**
-     * \fn deviceID
-     * \brief Return string value for keyword 'device_id'.
+     * \fn deviceIDs
+     * \brief Return list of device ids
      * \return value
     **********************************************************************************/
-    std::string deviceID() const;
+    std::vector<std::string> deviceIDs() const;
 
     /******************************************************************************//**
      * \fn numberProcessors

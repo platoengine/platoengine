@@ -417,35 +417,41 @@ void append_objective_value_stage
 
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
     {
+/*
         std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
         std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
         std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
         auto tObjectiveName = "Criterion Value - " + tIdentifierString;
+*/
+        auto tObjectiveName = "Objective Value";
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
     }
 
-    if(aXMLMetaData.needToAggregate())
+    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
     {
-        XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
-    }
-    else
-    {
-        std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
-        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
-        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-        auto tInputValue = "Criterion Value - " + tIdentifierString;
+        if(aXMLMetaData.needToAggregate())
+        {
+            XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
+        }
+        else
+        {
+            std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+            std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+            std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+            auto tInputValue = "Criterion Value - " + tIdentifierString;
 
-        auto tCopyOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"Copy Value", tFirstPlatoMainPerformer}, tCopyOperationNode);
-        auto tInputNode = tCopyOperationNode.append_child("Input");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputValue", tInputValue}, tInputNode);
-        auto tOutputNode = tCopyOperationNode.append_child("Output");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputValue", "Objective Value"}, tOutputNode);
+            auto tCopyOperationNode = tStageNode.append_child("Operation");
+            XMLGen::append_children({"Name", "PerformerName"}, {"Copy Value", tFirstPlatoMainPerformer}, tCopyOperationNode);
+            auto tInputNode = tCopyOperationNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputValue", tInputValue}, tInputNode);
+            auto tOutputNode = tCopyOperationNode.append_child("Output");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputValue", "Objective Value"}, tOutputNode);
+        }
     }
 
     auto tStageOutputNode = tStageNode.append_child("Output");
