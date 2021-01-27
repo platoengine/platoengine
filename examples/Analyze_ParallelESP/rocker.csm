@@ -1,11 +1,11 @@
 # v2.csm written by ocsmSave (v1.16)
 
 # Constant, Design, and Output Parameters:
-despmtr Py 2.0 lbound 2.0 ubound 3.0
-despmtr Boffset 0.25 lbound 0.05 ubound 0.38
-despmtr Lx 6.5 lbound 5.0 ubound 8.0
-despmtr Rx 6.5 lbound 5.0 ubound 8.0
-despmtr Px 2.0 lbound 1.6 ubound 2.4
+despmtr Py 2.0 lbound 2.0 ubound 3.0 initial 2.0
+despmtr Boffset 0.25 lbound 0.05 ubound 0.38 initial 0.25
+despmtr Lx 6.5 lbound 5.0 ubound 8.0 initial 6.5
+despmtr Rx 6.5 lbound 5.0 ubound 8.0 initial 6.5
+despmtr Px 2.0 lbound 1.6 ubound 2.4 initial 2.0
 
 conpmtr Pz 2.0 # lbound 1.6 ubound 2.4
 conpmtr Rcap 1 # lbound 1.0 ubound 1.0
@@ -15,6 +15,7 @@ conpmtr Rlo 0.3 # lbound 0.3 ubound 0.3
 conpmtr Po 0.2 # lbound 0.2 ubound 0.2
 
 # Global Attributes:
+set MeshLength Px/4
 
 # Branches:
 skbeg     0   0   0   1
@@ -59,17 +60,6 @@ subtract  none   1   0
 cylinder  -Lx/2.0   Py/2.0   0.0   -Lx/2.0   Py/2.0   Pz   Rlo
 subtract  none   1   0
 
-select    body
-attribute _name   $solid_body
-attribute capsAIM   $aflr4AIM;aflr3AIM
-attribute capsMeshLength   Px/4
-attribute capsGroup   $solid_group
-
-select    face
-attribute capsGroup   $solid_group
-attribute capsMeshLength   Px/4
-
-#named_face mark 2 sideset ss_2
 select    body   28
 select    face   27   3   1
 attribute capsGroup   $left_axis
@@ -78,7 +68,6 @@ select    body   28
 select    face   27   4   1
 attribute capsGroup   $left_axis
 
-#named_face mark 3 sideset ss_3
 select    body   28
 select    face   19   3   1
 attribute capsGroup   $right_axis
@@ -87,7 +76,6 @@ select    body   28
 select    face   19   4   1
 attribute capsGroup   $right_axis
 
-#named_face mark 4 nodeset ns_4
 select    body   28
 select    face   17   4   1
 attribute capsGroup   $center_axis
