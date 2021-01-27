@@ -150,6 +150,7 @@ IF( PLATO_ENABLE_SERVICES_PYTHON AND EXPY AND GEOMETRY )
     add_subdirectory(Analyze_LBracket2D_MLS)
     add_subdirectory(GeometryMLS/SolveWithMLSField)
     add_subdirectory(GeometryMLS/SolveWithMLSField2D)
+    add_subdirectory(Analyze_IS_ESP)
   ENDIF()
 ENDIF()
 

@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<Operation>
+  <Function>CSMMeshOutput</Function>
+  <Name>CSMMeshOutput</Name>
+  <BaseMeshName>brick.exo</BaseMeshName>
+  <OutputFrequency>1</OutputFrequency>
+  <MaxIterations>100</MaxIterations>
+</Operation>
+<Operation>
+  <Function>InitializeValues</Function>
+  <Name>Initialize Values</Name>
+  <Output>
+    <ArgumentName>Values</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Lower Bounds</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Upper Bounds</ArgumentName>
+  </Output>
+  <Method>ReadFromCSMFile</Method>
+  <CSMFileName>brick.csm</CSMFileName>
+</Operation>
+<Operation>
+  <Function>Aggregator</Function>
+  <Name>AggregateValues</Name>
+  <Aggregate>
+    <Layout>Value</Layout>
+    <Input>
+      <ArgumentName>Value 1</ArgumentName>
+    </Input>
+    <Output>
+      <ArgumentName>Values</ArgumentName>
+    </Output>
+  </Aggregate>
+  <Weighting>
+    <Weight>
+      <Value>1</Value>
+    </Weight>
+  </Weighting>
+</Operation>
+<Operation>
+  <Function>SystemCall</Function>
+  <Name>Initialize Geometry</Name>
+  <Command>plato-cli geometry esp</Command>
+  <Argument>--input brick.csm</Argument>
+  <Argument>--output-model brick_opt.csm</Argument>
+  <Argument>--output-mesh brick.exo</Argument>
+  <Argument>--tesselation brick.eto</Argument>
+</Operation>
+<Operation>
+  <Function>SystemCall</Function>
+  <Name>Update Geometry on Change</Name>
+  <Command>plato-cli geometry esp</Command>
+  <OnChange>true</OnChange>
+  <Argument>--input brick.csm</Argument>
+  <Argument>--output-model brick_opt.csm</Argument>
+  <Argument>--output-mesh brick.exo</Argument>
+  <Argument>--tesselation brick.eto</Argument>
+  <Argument>--parameters</Argument>
+  <AppendInput>true</AppendInput>
+  <Input>
+    <ArgumentName>Parameters</ArgumentName>
+  </Input>
+</Operation>

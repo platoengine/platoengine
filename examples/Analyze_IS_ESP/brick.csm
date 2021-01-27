@@ -1,0 +1,20 @@
+# brick.csm written by ocsmSave (v1.17)
+
+# Constant, Design, and Output Parameters:
+despmtr   Xdim       1.00000
+despmtr   Ydim       1.00000
+despmtr   Zdim       1.00000
+despmtr   Radius       0.25000
+
+# Global Attributes:
+
+# Branches:
+box       -Xdim/2.0   -Ydim/2.0   -Zdim/2.0   Xdim   Ydim   Zdim
+cylinder  -Xdim/2.0   0.0   0.0   Xdim/2.0   0.0   0.0   Radius
+subtract  none   1   0
+set       MeshLength Xdim/50.0
+select    body   3
+select    face   1   1   1
+attribute capsGroup   $base
+
+end

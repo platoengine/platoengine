@@ -220,6 +220,7 @@ def updateModel(modelName, paramVals):
 
   for ip in range(len(paramVals)):
     p = paramVals[ip]
+    print "param: " + str(p)
     f = open('tmp.file', "w")
     command = 'BEGIN{ip=0};{if($1~"despmtr"){if(ip=='+str(ip)+'){print $1, $2, val, $4, $5, $6, $7, $8, $9}else{print $0}ip++}else{print $0}}'
     print "command: ", command
@@ -271,11 +272,16 @@ def updateModel(modelName, paramVals):
 ##############################################################################
 ## define function that generates exodus mesh from csm file
 ##############################################################################
-def mesh(modelName, meshName=None, minScale=0.2, maxScale=1.0, meshLengthFactor=1.0, etoName=None ):
+def mesh(modelNameIn, modelNameOut=None, meshName=None, minScale=0.2, maxScale=1.0, meshLengthFactor=1.0, etoName=None, parameters=None ):
+
+  deleteOnExit = False
+  if modelNameOut == None:
+    modelNameOut = "work" + modelNameIn
+    deleteOnExit = True
 
   if meshName == None:
     dot = '.'
-    tokens = modelName.split(dot)
+    tokens = modelNameIn.split(dot)
     tokens.pop()
     meshName = dot.join(tokens) + ".exo"
 
@@ -288,16 +294,19 @@ def mesh(modelName, meshName=None, minScale=0.2, maxScale=1.0, meshLengthFactor=
   if type(meshLengthFactor) == str:
     meshLengthFactor = float(meshLengthFactor)
 
-  paramVals = getInitialValues(modelName)
+  paramVals = []
+  if type(parameters) == str:
+    paramVals = [float(entry) for entry in parameters.split(',')]
+  else:
+    paramVals = getInitialValues(modelNameIn)
 
-  workModelName = "work" + modelName
-  subprocess.call(['cp', modelName, workModelName])
+  subprocess.call(['cp', modelNameIn, modelNameOut])
 
   with redirected('csm.console'):
-    updateModel(workModelName, paramVals)
+    updateModel(modelNameOut, paramVals)
 
   with redirected('aflr.console'):
-    aflr(workModelName, meshName, minScale, maxScale, meshLengthFactor, etoName)
+    aflr(modelNameOut, meshName, minScale, maxScale, meshLengthFactor, etoName)
 
   ## get capsGroup map
   groupAttrs = []
@@ -323,5 +332,6 @@ def mesh(modelName, meshName=None, minScale=0.2, maxScale=1.0, meshLengthFactor=
   with redirected('toExo.console'):
     toExo(meshName, groupAttrs)
 
-#  subprocess.call(['rm', workModelName])
+  if deleteOnExit:
+    subprocess.call(['rm', modelNameOut])
   
