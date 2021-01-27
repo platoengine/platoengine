@@ -400,5 +400,58 @@ PSL_TEST(AMFilterUtilities, computeGridXYZCoordinates)
     EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::out_of_range);
 }
 
+PSL_TEST(AMFilterUtilities, pointInTetrahedron)
+{
+    std::vector<std::vector<double>> tCoordinates;
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    std::vector<std::vector<int>> tConnectivity;
+    tConnectivity.push_back({0,1,2,3});
+
+    std::vector<int> tBaseLayer({0,1,2});
+
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+
+    Vector tPoint({0.1,0.1,0.1});
+
+    // not enough indices
+    std::vector<int> tBogusTet = {0,1,2};
+    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+
+    // repeated index
+    tBogusTet = {0,0,1,2};
+    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+
+    // index out of range
+    tBogusTet = {0,1,2,4};
+    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::out_of_range);
+
+    bool tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    EXPECT_EQ(tIsPointInTet, true);
+
+    tPoint = Vector({1.0,1.0,1.0});
+    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    EXPECT_EQ(tIsPointInTet, false);
+
+    tPoint = Vector({-0.1,0.1,0.1});
+    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    EXPECT_EQ(tIsPointInTet, false);
+
+    tPoint = Vector({0.1,-0.1,0.1});
+    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    EXPECT_EQ(tIsPointInTet, false);
+
+    tPoint = Vector({0.1,0.1,-0.1});
+    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    EXPECT_EQ(tIsPointInTet, false);
+}
+
 }
 }

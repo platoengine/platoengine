@@ -1,6 +1,7 @@
 #include <PSL_AMFilterUtilities.hpp>
 #include <iostream>
 #include <limits>
+#include <cmath>
 
 namespace PlatoSubproblemLibrary
 {
@@ -138,6 +139,52 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
     return tXYZCoordinates;
 }
 
+bool AMFilterUtilities::pointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const
+{
+    if(aTet.size() != 4)
+        throw(std::domain_error("AMFilterUtilities::pointInTetrahedron: Expected tetrahedron to contain 4 vertices"));
+
+    auto tTemp = aTet;
+
+    std::sort(tTemp.begin(),tTemp.end());
+    auto tLast = std::unique(tTemp.begin(),tTemp.end());
+    
+    if(tLast != tTemp.end())
+        throw(std::domain_error("AMFilterUtilities::pointInTetrahedron: repeated node index"));
+
+    auto tMaxIterator = std::max_element(tTemp.begin(),tTemp.end());
+    auto tMinIterator = std::min_element(tTemp.begin(),tTemp.end());
+
+    if(*tMinIterator < 0 || *tMaxIterator >= (int) mCoordinates.size())
+        throw(std::out_of_range("AMFilterUtilities::pointInTetrahedron: node index out of range"));
+
+
+    int v1 = aTet[0];
+    int v2 = aTet[1];
+    int v3 = aTet[2];
+    int v4 = aTet[3];
+
+    return sameSide(v1, v2, v3, v4, aPoint) &&
+           sameSide(v2, v3, v4, v1, aPoint) &&
+           sameSide(v3, v4, v1, v2, aPoint) &&
+           sameSide(v4, v1, v2, v3, aPoint);
+}
+
+bool AMFilterUtilities::sameSide(const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint) const
+{
+    Vector tVec1(mCoordinates[v1]);
+    Vector tVec2(mCoordinates[v2]);
+    Vector tVec3(mCoordinates[v3]);
+    Vector tVec4(mCoordinates[v4]);
+
+    Vector tNormal = cross_product(tVec2 - tVec1, tVec3 - tVec1);
+
+    double tDot1 = dot_product(tNormal, tVec4 - tVec1);
+    double tDot2 = dot_product(tNormal, aPoint - tVec1);
+
+    return tDot1*tDot2 > 0;
+}
+ 
 void AMFilterUtilities::checkInput() const
 {
     if(mConnectivity.size() == 0 || mCoordinates.size() < 4)

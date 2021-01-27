@@ -34,12 +34,15 @@ class AMFilterUtilities
 
         void computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const;
 
-
         double computeMinEdgeLength() const;
+
+        bool pointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const;
 
     private:
 
         void checkInput() const;
+
+        bool sameSide(const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint) const;
 
     private:
         const std::vector<std::vector<double>>& mCoordinates;
