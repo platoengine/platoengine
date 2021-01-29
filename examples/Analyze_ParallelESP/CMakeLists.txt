@@ -47,7 +47,6 @@ Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_NP} ${LOCAL_COMM_
 
 # prepend pretest command
 set( PLATO_NEW_TEST ${PRETEST_COMMAND} ${PLATO_NEW_TEST} )
-message("WITH PRETEST: ${PLATO_NEW_TEST}")
 
 # Add the test
 set(INPUT_MESH SKIP_DECOMP)
