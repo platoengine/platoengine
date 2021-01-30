@@ -11,6 +11,8 @@ Plato_find_lib( EXODUS_LIB ON exodus ${SEACAS_PATH}/lib )
 
 ADD_EXECUTABLE(exo2obj src/exo-to-objs-tets-only.cpp)
 
+SET_PROPERTY(TARGET exo2obj PROPERTY CXX_STANDARD 14)
+
 TARGET_LINK_LIBRARIES(exo2obj ${EXODUS_LIB})
 
 if( CMAKE_INSTALL_PREFIX )
