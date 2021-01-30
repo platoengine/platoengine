@@ -596,7 +596,7 @@ public:
     {
         return (XMLGen::return_supported_value(aKey, mKeys));
     }
-    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "lightmp", "platomain"};
+    std::vector<std::string> mKeys = {"plato_analyze", "sierra_sd", "lightmp", "platomain", "plato_esp"};
 };
 // struct ValidCodeKeys
 
@@ -1225,6 +1225,7 @@ struct ValidOptimizationParameterKeys
      "mma_move_limit",
      "max_iterations",
      "filter_in_engine",
+     "num_shape_design_variables",
      "symmetry_plane_normal",
      "symmetry_plane_origin",
      "mesh_map_filter_radius",
@@ -1243,6 +1244,7 @@ struct ValidOptimizationParameterKeys
      "output_frequency",
      "initial_density_value",
      "restart_iteration",
+     "csm_file",
      "create_levelset_spheres",
      "levelset_material_box_min",
      "levelset_material_box_max",

@@ -28,6 +28,8 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorMaterialFunctionInterface.cpp
                       XMLGeneratorRandomInterfaceFileUtilities.cpp
                       XMLGeneratorPlatoMainInputFileUtilities.cpp
+                      XMLGeneratorPlatoESPInputFileUtilities.cpp
+                      XMLGeneratorPlatoESPOperationsFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                       XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
@@ -68,6 +70,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorAnalyzePhysicsFunctionInterface.hpp
                       XMLGeneratorMaterialFunctionInterface.hpp
                       XMLGeneratorPlatoMainInputFileUtilities.hpp
+                      XMLGeneratorPlatoESPInputFileUtilities.hpp
+                      XMLGeneratorPlatoESPOperationsFileUtilities.hpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp

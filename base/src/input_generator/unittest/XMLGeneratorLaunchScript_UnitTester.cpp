@@ -483,7 +483,8 @@ TEST(PlatoTestXMLGenerator, appendEngineMPIRunLines)
   tService.code("platomain");
   tInputData.append(tService);
   FILE* fp=fopen("appendEngineMPIRunLines.txt", "w");
-  XMLGen::append_engine_mpirun_lines(tInputData, fp);
+  int tPerformerID = 0;
+  XMLGen::append_engine_mpirun_lines(tInputData, tPerformerID, fp);
   fclose(fp);
 
   auto tReadData = XMLGen::read_data_from_file("appendEngineMPIRunLines.txt");

@@ -67,7 +67,7 @@ void ParseCriteria::allocate()
     mTags.insert({ "stress_p_norm_exponent", { { {"stress_p_norm_exponent"}, ""}, "6.0" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
-    mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "1e-9" } });
+    mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "" } });
     mTags.insert({ "criterion_ids", { { {"criterion_ids"}, ""}, "" } });
     mTags.insert({ "criterion_weights", { { {"criterion_weights"}, ""}, "" } });
 }

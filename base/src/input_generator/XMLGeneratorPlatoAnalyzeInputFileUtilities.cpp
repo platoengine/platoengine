@@ -260,6 +260,10 @@ void append_self_adjoint_parameter_to_plato_problem
         }
         tIsSelfAdjoint = tItr->second.second ? "true" : "false";
     }
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        tIsSelfAdjoint = "false";
+    }
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::vector<std::string> tValues = {"Self-Adjoint", "bool", tIsSelfAdjoint};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);

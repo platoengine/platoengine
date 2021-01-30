@@ -181,6 +181,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
 
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
@@ -270,6 +271,10 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageRandom)
     tOutputMetadata.outputSamples("true");
     tOutputMetadata.appendRandomQoI("vonmises", "element field");
     tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
     pugi::xml_document tDocument;
@@ -885,6 +890,9 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeSaredData)
     tService.id("1");
     tService.code("platomain");
     tInputData.append(tService);
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_design_volume_shared_data(tInputData, tDocument);
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1058,7 +1066,8 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainPerformer)
     tService.id("1");
     tService.code("platomain");
     tInputData.append(tService);
-    XMLGen::append_plato_main_performer(tInputData, tDocument);
+    int tID = 0;
+    XMLGen::append_plato_main_performer(tInputData, tID, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1071,8 +1080,9 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainPerformer)
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase_ErrorEmptyObjectiveList)
 {
     pugi::xml_document tDocument;
+    int tID = 0;
     XMLGen::InputData tInputData;
-    ASSERT_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tDocument), std::runtime_error);
+    ASSERT_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tID, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
@@ -1087,8 +1097,9 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformersForNondeterministicUsecase)
     tService.id("2");
     tService.code("plato_analyze");
     tInputData.append(tService);
+    int tID = 0;
 
-    ASSERT_NO_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_physics_performers_multiperformer_usecase(tInputData, tID, tDocument));
 
     auto tPerformer = tDocument.child("Performer");
     ASSERT_FALSE(tPerformer.empty());
@@ -1520,6 +1531,9 @@ TEST(PlatoTestXMLGenerator, AppendDesignVolumeStage)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
     XMLGen::append_design_volume_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
@@ -1569,6 +1583,10 @@ TEST(PlatoTestXMLGenerator, AppendConstraintValueStage)
     tConstraint.service("1");
     tConstraint.criterion("1");
     tInputData.constraints.push_back(tConstraint);
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
 
     XMLGen::append_constraint_value_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1648,6 +1666,10 @@ TEST(PlatoTestXMLGenerator, AppendConstraintGradientStage)
     tConstraint.service("1");
     tConstraint.criterion("1");
     tInputData.constraints.push_back(tConstraint);
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tInputData.set(tOptimizationParameters);
 
     XMLGen::append_constraint_gradient_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -2095,6 +2117,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tXMLMetaData.mRandomMetaData = tRandomMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("objective_number_standard_deviations", "1");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
@@ -2574,6 +2597,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("objective_number_standard_deviations", "3");
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
 
     // CALL FUNCTION
@@ -3046,8 +3070,12 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationUpdateProblemOptions)
 TEST(PlatoTestXMLGenerator, AppendOptimizationVariablesOptions)
 {
     pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
     auto tOptimizerNode = tDocument.append_child("Optimizer");
-    XMLGen::append_optimization_variables_options(tOptimizerNode);
+    XMLGen::append_optimization_variables_options(tXMLMetaData, tOptimizerNode);
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
     std::vector<std::string> tGoldKeys = {"OptimizationVariables"};
@@ -3123,6 +3151,11 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationConstraintOptions)
     tConstraint.service("1");
 
     tXMLMetaData.constraints.push_back(tConstraint);
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+
     auto tOptimizerNode = tDocument.append_child("Optimizer");
     ASSERT_THROW(XMLGen::append_optimization_constraint_options(tXMLMetaData, tOptimizerNode), std::runtime_error);
 

@@ -798,7 +798,6 @@ TEST(PlatoTestXMLGenerator, ParseScenario_DefaultMainValues)
 
         ASSERT_STREQ("simp", tScenario.value("material_penalty_model").c_str());
         ASSERT_STREQ("3.0", tScenario.value("material_penalty_exponent").c_str());
-        ASSERT_STREQ("1e-9", tScenario.value("minimum_ersatz_material_value").c_str());
 
         ASSERT_STREQ("1.0", tScenario.value("time_step").c_str());
         ASSERT_STREQ("0.25", tScenario.value("newmark_beta").c_str());

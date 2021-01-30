@@ -53,9 +53,18 @@ void append_multiperformer_criterion_shared_data
             XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
 
         // shared data - nondeterministic criterion gradient
-            tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-            tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
-            XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+            {
+                tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+                tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
+                XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            }
+            else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+            {
+                tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+                tValues = { tTag, "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tOwnerName, tFirstPlatoMainPerformer };
+                XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            }
         }
     }
 }
@@ -121,6 +130,10 @@ void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        return;
+    }
     if(aXMLMetaData.services().empty())
     {
         THROWERR("Append Topology Shared Data for a Nondeterministic Use Case: Services list is empty.")
@@ -149,7 +162,8 @@ void append_multiperformer_topology_shared_data
 /******************************************************************************/
 void append_physics_performers_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ int &aNextPerformerID,
+ pugi::xml_node& aNode)
 {
     if(aXMLMetaData.services().empty())
     {
@@ -158,17 +172,21 @@ void append_physics_performers_multiperformer_usecase
 
     for(auto& tService : aXMLMetaData.services())
     {
-        const int tID = (&tService - &aXMLMetaData.services()[0]);
-        // The PlatoMain optimizer should always be the first service in the list
-        // so skip it.
-        if(tID > 0)
+        if(tService.code() != "plato_esp")  
         {
-            auto tPerformerNode = aDocument.append_child("Performer");
-            XMLGen::append_children( { "PerformerID" }, { std::to_string(tID) }, tPerformerNode);
-            auto tForNode = tPerformerNode.append_child("For");
-            XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-            auto tPerformerName = tService.performer() + "_{PerformerIndex}";
-            XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tService.code() }, tForNode);
+            const int tID = (&tService - &aXMLMetaData.services()[0]);
+            // The PlatoMain optimizer should always be the first service in the list
+            // so skip it.
+            if(tID > 0)
+            {
+                auto tPerformerNode = aNode.append_child("Performer");
+                XMLGen::append_children( { "PerformerID" }, { std::to_string(aNextPerformerID) }, tPerformerNode);
+                aNextPerformerID++;
+                auto tForNode = tPerformerNode.append_child("For");
+                XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+                auto tPerformerName = tService.performer() + "_{PerformerIndex}";
+                XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tService.code() }, tForNode);
+            }
         }
     }
 }

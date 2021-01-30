@@ -211,6 +211,7 @@ public:
     std::string number_prune_and_refine_processors() const {return value("number_prune_and_refine_processors");}
     std::string number_buffer_layers() const {return value("number_buffer_layers");}
     std::string prune_mesh() const {return value("prune_mesh");}
+    std::string num_shape_design_variables() const {return value("num_shape_design_variables");}
     std::string initial_guess_file_name() const {return value("initial_guess_file_name");}
     std::string initial_guess_field_name() const {return value("initial_guess_field_name");}
     std::string verbose() const {return value("verbose");}
@@ -284,6 +285,10 @@ public:
     std::string gcmma_outer_objective_stagnation_tolerance() const {return value("gcmma_outer_objective_stagnation_tolerance");}
     std::string gcmma_outer_stationarity_tolerance() const {return value("gcmma_outer_stationarity_tolerance");}
     std::string gcmma_initial_moving_asymptotes_scale_factor() const {return value("gcmma_initial_moving_asymptotes_scale_factor");}
+    std::string csm_file() const {return value("csm_file");}
+    std::string csm_exodus_file() const {return value("csm_exodus_file");}
+    std::string csm_tesselation_file() const {return value("csm_tesselation_file");}
+    std::string csm_opt_file() const {return value("csm_opt_file");}
 
 };
 // struct OptimizationParameters

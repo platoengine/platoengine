@@ -45,6 +45,7 @@ struct Objective
     std::string type;
     std::vector<std::string> criteriaIDs;
     std::vector<std::string> serviceIDs;
+    std::vector<std::string> shapeServiceIDs;
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
 };

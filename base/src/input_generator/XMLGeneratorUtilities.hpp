@@ -231,5 +231,22 @@ namespace XMLGen
     **********************************************************************************/
     void assert_is_positive_integer(const std::string& aString);
 
+    /******************************************************************************//**
+     * \fn is_shape_optimization_problem
+     * \brief Check if this is a shape optimization problem
+     * \param [in] aMetaData Input metadata
+    **********************************************************************************/
+    bool is_shape_optimization_problem(const XMLGen::InputData& aMetaData);
+
+    /******************************************************************************//**
+     * \fn append_include_defines_xml_data
+     * \brief Append "include defines.xml" to interface.xml file.
+     * \param [in]     aXMLMetaData Plato problem input metadata
+     * \param [in/out] aParentNode  parent xml node
+    **********************************************************************************/
+    void append_include_defines_xml_data
+    (const XMLGen::InputData& aMetaData,
+     pugi::xml_document& aDocument);
+
 }
 // namespace XMLGen

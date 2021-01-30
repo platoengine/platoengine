@@ -118,12 +118,14 @@ private:
                                      const std::string &aScenarioID);
     void loadObjectiveData(XMLGen::InputData &aNewInputData,
                                      const std::string &aScenarioID,
-                                     const std::string &aServiceID);
+                                     const std::string &aServiceID,
+                                     const std::string &aShapeServiceID);
     void loadConstraintData(XMLGen::InputData &aNewInputData,
                                      const std::string &aScenarioID,
                                      const std::string &aServiceID);
     void clearInputDataLists(XMLGen::InputData &aInputData);
-    void generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs);
+    void generatePerformerList(std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
+    //void generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs);
     void createCopiesForPerformerCreation();
     void writeInputFiles();
 };

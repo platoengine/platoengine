@@ -19,12 +19,7 @@ void write_plato_main_operations_xml_file
 {
     pugi::xml_document tDocument;
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
-    {
-        auto tInclude = tDocument.append_child("include");
-        XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);
-    }
-
+    XMLGen::append_include_defines_xml_data(aMetaData, tDocument);
     XMLGen::append_filter_options_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_output_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_initialize_field_to_plato_main_operation(aMetaData, tDocument);
@@ -44,13 +39,18 @@ void write_plato_main_operations_xml_file
     }
 
     XMLGen::append_update_problem_to_plato_main_operation(aMetaData, tDocument);
-    XMLGen::append_filter_control_to_plato_main_operation(tDocument);
-    XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
+    XMLGen::append_filter_control_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_filter_gradient_to_plato_main_operation(aMetaData, tDocument);
     //if(!XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
     if(aMetaData.needToAggregate())
     {
         XMLGen::append_aggregate_data_to_plato_main_operation(aMetaData, tDocument);
     }
+
+    XMLGen::append_csm_mesh_output_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_initialize_geometry_operation_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_update_geometry_on_change_operation_to_plato_main_operation(aMetaData, tDocument);
+
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
 /******************************************************************************/
@@ -125,7 +125,8 @@ void append_filter_options_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().filter_in_engine() == "true")
+    if(aXMLMetaData.optimization_parameters().filter_in_engine() == "true" &&
+       aXMLMetaData.optimization_parameters().optimization_type() == "topology")
     {
         XMLGen::ValidFilterKeys tValidKeys;
         auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().filter_type());
@@ -327,6 +328,10 @@ void append_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        return;
+    }
     for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
     {
         if(tOutputMetadata.isOutputDisabled())
@@ -573,30 +578,101 @@ void append_update_problem_to_plato_main_operation
 
 /******************************************************************************/
 void append_filter_control_to_plato_main_operation
-(pugi::xml_document& aDocument)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Control", "False"}, tOperation);
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Filtered Field"}, tOutput);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Control", "False"}, tOperation);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Filtered Field"}, tOutput);
+    }
 }
 // function append_filter_control_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_filter_gradient_to_plato_main_operation
-(pugi::xml_document& aDocument)
+void append_initialize_geometry_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
 {
-    auto tOperation = aDocument.append_child("Operation");
-    XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Gradient", "True"}, tOperation);
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
-    tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Gradient"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Filtered Gradient"}, tOutput);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        pugi::xml_node tmp_node = aDocument.append_child("Operation");
+        addChild(tmp_node, "Function", "SystemCall");
+        addChild(tmp_node, "Name", "Initialize Geometry");
+        addChild(tmp_node, "Command", "plato-cli geometry esp");
+        addChild(tmp_node, "Argument", std::string("--input ") + aXMLMetaData.optimization_parameters().csm_file());
+        addChild(tmp_node, "Argument", std::string("--output-model ") + aXMLMetaData.optimization_parameters().csm_opt_file());
+        addChild(tmp_node, "Argument", std::string("--output-mesh ") + aXMLMetaData.optimization_parameters().csm_exodus_file());
+        addChild(tmp_node, "Argument", std::string("--tesselation ") + aXMLMetaData.optimization_parameters().csm_tesselation_file());
+    }
+}
+// function append_initialize_geometry_operation_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_update_geometry_on_change_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        pugi::xml_node tmp_node = aDocument.append_child("Operation");
+        addChild(tmp_node, "Function", "SystemCall");
+        addChild(tmp_node, "Name", "Update Geometry on Change");
+        addChild(tmp_node, "Command", "plato-cli geometry esp");
+        addChild(tmp_node, "OnChange", "true");
+        addChild(tmp_node, "Argument", std::string("--input ") + aXMLMetaData.optimization_parameters().csm_file());
+        addChild(tmp_node, "Argument", std::string("--output-model ") + aXMLMetaData.optimization_parameters().csm_opt_file());
+        addChild(tmp_node, "Argument", std::string("--output-mesh ") + aXMLMetaData.optimization_parameters().csm_exodus_file());
+        addChild(tmp_node, "Argument", std::string("--tesselation ") + aXMLMetaData.optimization_parameters().csm_tesselation_file());
+        addChild(tmp_node, "Argument", "--parameters");
+        addChild(tmp_node, "AppendInput", "true");
+        pugi::xml_node tmp_node1 = tmp_node.append_child("Input");
+        addChild(tmp_node1, "ArgumentName", "Parameters");
+    }
+}
+// function append_update_geometry_on_change_operation_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_csm_mesh_output_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        pugi::xml_node tmp_node = aDocument.append_child("Operation");
+        addChild(tmp_node, "Function", "CSMMeshOutput");
+        addChild(tmp_node, "Name", "CSMMeshOutput");
+        addChild(tmp_node, "BaseMeshName", aXMLMetaData.optimization_parameters().csm_exodus_file());
+        addChild(tmp_node, "OutputFrequency", aXMLMetaData.optimization_parameters().output_frequency());
+        addChild(tmp_node, "MaxIterations", aXMLMetaData.optimization_parameters().max_iterations());
+    }
+}
+// function append_csm_mesh_output_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_filter_gradient_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Gradient", "True"}, tOperation);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Field"}, tInput);
+        tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Gradient"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Filtered Gradient"}, tOutput);
+    }
 }
 // function append_filter_gradient_to_plato_main_operation
 /******************************************************************************/
@@ -786,6 +862,23 @@ void append_initialize_field_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        append_initialize_data_for_shape_problem(aXMLMetaData, aDocument);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        append_initialize_data_for_topology_problem(aXMLMetaData, aDocument);
+    }
+}
+// function append_initialize_field_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_initialize_data_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
     if(aXMLMetaData.optimization_parameters().initial_guess_file_name().empty())
     {
         XMLGen::append_initialize_field_operation(aXMLMetaData, aDocument);
@@ -795,7 +888,27 @@ void append_initialize_field_to_plato_main_operation
         XMLGen::append_initialize_field_from_file_operation(aXMLMetaData, aDocument);
     }
 }
-// function append_initialize_field_to_plato_main_operation
+// function append_initialize_data_for_topology_problem
+/******************************************************************************/
+
+/******************************************************************************/
+void append_initialize_data_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    pugi::xml_node tmp_node = aDocument.append_child("Operation");
+    addChild(tmp_node, "Function", "InitializeValues");
+    addChild(tmp_node, "Name", "Initialize Values");
+    pugi::xml_node tmp_node1 = tmp_node.append_child("Output");
+    addChild(tmp_node1, "ArgumentName", "Values");
+    tmp_node1 = tmp_node.append_child("Output");
+    addChild(tmp_node1, "ArgumentName", "Lower Bounds");
+    tmp_node1 = tmp_node.append_child("Output");
+    addChild(tmp_node1, "ArgumentName", "Upper Bounds");
+    addChild(tmp_node, "Method", "ReadFromCSMFile");
+    addChild(tmp_node, "CSMFileName", aXMLMetaData.optimization_parameters().csm_file());
+}
+// function append_initialize_data_for_topology_problem
 /******************************************************************************/
 
 /******************************************************************************/
@@ -925,19 +1038,22 @@ void append_set_lower_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tOperation = aDocument.append_child("Operation");
-    std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.optimization_parameters().discretization()};
-    XMLGen::append_children(tKeys, tValues, tOperation);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
+        std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.optimization_parameters().discretization()};
+        XMLGen::append_children(tKeys, tValues, tOperation);
 
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Lower Bound Value"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Lower Bound Vector"}, tOutput);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Lower Bound Value"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Lower Bound Vector"}, tOutput);
 
-    XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
-    XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
-    XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    }
 }
 // function append_set_lower_bounds_to_plato_main_operation
 /******************************************************************************/
@@ -983,19 +1099,22 @@ void append_set_upper_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tOperation = aDocument.append_child("Operation");
-    std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-    std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.optimization_parameters().discretization()};
-    XMLGen::append_children(tKeys, tValues, tOperation);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
+        std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.optimization_parameters().discretization()};
+        XMLGen::append_children(tKeys, tValues, tOperation);
 
-    auto tInput = tOperation.append_child("Input");
-    XMLGen::append_children({"ArgumentName"}, {"Upper Bound Value"}, tInput);
-    auto tOutput = tOperation.append_child("Output");
-    XMLGen::append_children({"ArgumentName"}, {"Upper Bound Vector"}, tOutput);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Upper Bound Value"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Upper Bound Vector"}, tOutput);
 
-    XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
-    XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
-    XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_blocks_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_sidesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+        XMLGen::append_fixed_nodesets_identification_numbers_to_operation(aXMLMetaData, tOperation);
+    }
 }
 // function append_set_upper_bounds_to_plato_main_operation
 /******************************************************************************/

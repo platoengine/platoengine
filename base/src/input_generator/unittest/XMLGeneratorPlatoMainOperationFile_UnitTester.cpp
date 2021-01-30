@@ -41,6 +41,7 @@ TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("optimization_type", "topology");
     tOptimizationParameters.addFixedBlockID("1");
     tOptimizationParameters.addFixedBlockID("2");
     tXMLMetaData.set(tOptimizationParameters);
@@ -83,6 +84,7 @@ TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("optimization_type", "topology");
     tOptimizationParameters.addFixedBlockID("1");
     tOptimizationParameters.addFixedBlockID("2");
     tOptimizationParameters.addFixedSidesetID("11");
@@ -510,6 +512,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_ReadFileKe
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("initial_guess_file_name", "dummy.exo");
     tOptimizationParameters.append("initial_guess_field_name", "Control");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -533,6 +536,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_DensityKey
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("discretization", "density");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -961,7 +965,11 @@ TEST(PlatoTestXMLGenerator, AppendInitializeDensityFieldOperation)
 TEST(PlatoTestXMLGenerator, AppendFilterGradientToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
-    XMLGen::append_filter_gradient_to_plato_main_operation(tDocument);
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+    XMLGen::append_filter_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -990,7 +998,11 @@ TEST(PlatoTestXMLGenerator, AppendFilterGradientToPlatoMainOperation)
 TEST(PlatoTestXMLGenerator, AppendFilterControlToPlatoMainOperation)
 {
     pugi::xml_document tDocument;
-    XMLGen::append_filter_control_to_plato_main_operation(tDocument);
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+    XMLGen::append_filter_control_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
 
     // TEST RESULTS AGAINST GOLD VALUES
@@ -1514,6 +1526,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToPlatoMainOperation)
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("filter_type", "kernel_then_tanh");
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument1);
     ASSERT_FALSE(tDocument1.empty());
@@ -1579,6 +1592,7 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     tOptimizationParameters.append("filter_radius_scale", "2.0");
     tOptimizationParameters.append("objective_number_standard_deviations", "1");
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.updateProblem("true");

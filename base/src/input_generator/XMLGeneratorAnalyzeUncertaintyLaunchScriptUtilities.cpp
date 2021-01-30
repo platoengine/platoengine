@@ -61,13 +61,14 @@ inline void append_plato_analyze_code_path
 
 inline void append_analyze_mpirun_commands
 (const XMLGen::InputData& aInputData,
+ int &aNextPerformerID,
  FILE*& aFile)
 {
     std::string tEnvString, tSeparationString, tLaunchString, tNumProcsString;
     XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
     XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
 
-    int tServiceIndex = 1;
+    int tServiceIndex = aNextPerformerID;
     for(auto &tService : aInputData.mPerformerServices)
     {
         if(tService.code() == "plato_analyze")
@@ -79,6 +80,7 @@ inline void append_analyze_mpirun_commands
                 tEnvString.c_str(),
                 tSeparationString.c_str(),
                 tServiceIndex);
+            aNextPerformerID++;
 
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
@@ -90,6 +92,7 @@ inline void append_analyze_mpirun_commands
 
 void append_analyze_mpirun_commands_robust_optimization_problems
 (const XMLGen::InputData& aInputData,
+ int &aNextPerformerID,
  FILE*& aFile)
 {
     std::string tEnvString, tSeparationString, tLaunchString, tNumProcsString;
@@ -109,11 +112,13 @@ void append_analyze_mpirun_commands_robust_optimization_problems
     if(tDeviceIDs.size() == 0)
     {
         fprintf(aFile,
-            ": %s %s %s PLATO_PERFORMER_ID%s1 \\\n",
+            ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n",
             tNumProcsString.c_str(),
             Plato::to_string(aInputData.m_UncertaintyMetaData.numPerformers).c_str(),
             tEnvString.c_str(),
-            tSeparationString.c_str());
+            tSeparationString.c_str(),
+            aNextPerformerID);
+        aNextPerformerID++;
         if(aInputData.mPerformerServices.size() == 0)
         {
             THROWERR("Number of services must be greater than zero\n")
@@ -138,11 +143,13 @@ void append_analyze_mpirun_commands_robust_optimization_problems
                 tNumPerformersOnThisDevice += tRemainder;
             }
             fprintf(aFile,
-                ": %s %d %s PLATO_PERFORMER_ID%s1 \\\n",
+                ": %s %d %s PLATO_PERFORMER_ID%s%d \\\n",
                 tNumProcsString.c_str(),
                 tNumPerformersOnThisDevice,
                 tEnvString.c_str(),
-                tSeparationString.c_str());
+                tSeparationString.c_str(),
+                aNextPerformerID);
+            aNextPerformerID++;
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
             XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), tDeviceIDs[i]);
@@ -162,10 +169,13 @@ void generate_mpirun_launch_script(const XMLGen::InputData& aInputData)
 {
     FILE *fp = fopen("mpirun.source", "w");
 
+    int tNextPerformerID = 0;
+    XMLGen::append_esp_initialization_line(aInputData, fp);
     XMLGen::append_prune_and_refine_lines_to_mpirun_launch_script(aInputData, fp);
     XMLGen::append_decomp_lines_to_mpirun_launch_script(aInputData, fp);
-    XMLGen::append_engine_mpirun_lines(aInputData, fp);
-    XMLGen::append_analyze_mpirun_lines(aInputData, fp);
+    XMLGen::append_engine_mpirun_lines(aInputData, tNextPerformerID, fp);
+    XMLGen::append_analyze_mpirun_lines(aInputData, tNextPerformerID, fp);
+    XMLGen::append_esp_mpirun_lines(aInputData, tNextPerformerID, fp);
 
     fclose(fp);
 }
@@ -201,15 +211,63 @@ void generate_analyze_bash_script()
     analyzeBash.close();
 }
 
-void append_analyze_mpirun_lines(const XMLGen::InputData& aInputData, FILE*& aFile)
+void append_analyze_mpirun_lines(const XMLGen::InputData& aInputData, 
+                                 int &aNextPerformerID, 
+                                 FILE*& aFile)
 {
     if(XMLGen::is_robust_optimization_problem(aInputData))
     {
-        XMLGen::append_analyze_mpirun_commands_robust_optimization_problems(aInputData, aFile);
+        XMLGen::append_analyze_mpirun_commands_robust_optimization_problems(aInputData, aNextPerformerID, aFile);
     }
     else
     {
-        XMLGen::append_analyze_mpirun_commands(aInputData, aFile);
+        XMLGen::append_analyze_mpirun_commands(aInputData, aNextPerformerID, aFile);
+    }
+}
+
+void append_esp_mpirun_lines(const XMLGen::InputData& aInputData, int &aNextPerformerID, FILE*& aFile)
+{
+    std::string tEnvString, tSeparationString, tLaunchString, tNumProcsString;
+    XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
+    XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
+
+    for(auto &tService : aInputData.mPerformerServices)
+    {
+        if(tService.code() == "plato_esp")
+        {
+            fprintf(aFile,
+                ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n",
+                tNumProcsString.c_str(),
+                tService.numberProcessors().c_str(),
+                tEnvString.c_str(),
+                tSeparationString.c_str(),
+                aNextPerformerID);
+            aNextPerformerID++;
+
+            fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+            fprintf(aFile, "%s PLATO_APP_FILE%splato_esp_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+            fprintf(aFile, "PlatoESP plato_esp_input_deck.xml \\\n");
+        }
+    }
+}
+
+void append_esp_initialization_line(const XMLGen::InputData& aInputData, FILE*& aFile)
+{
+    std::string tEnvString, tSeparationString, tLaunchString, tNumProcsString;
+    XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
+    XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
+
+    if(aInputData.optimization_parameters().csm_file() != "" &&
+       aInputData.optimization_parameters().csm_opt_file() != "" &&
+       aInputData.optimization_parameters().csm_tesselation_file() != "" &&
+       aInputData.optimization_parameters().csm_exodus_file() != "")
+    {
+        fprintf(aFile,
+            "plato-cli geometry esp --input %s --output-model %s --output-mesh %s --tesselation %s; \\\n",
+            aInputData.optimization_parameters().csm_file().c_str(),
+            aInputData.optimization_parameters().csm_opt_file().c_str(),
+            aInputData.optimization_parameters().csm_exodus_file().c_str(),
+            aInputData.optimization_parameters().csm_tesselation_file().c_str());
     }
 }
 

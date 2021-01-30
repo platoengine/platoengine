@@ -72,6 +72,7 @@ void CopyValue::operator()()
         mPlatoApp->getTimersTree()->begin_partition(Plato::timer_partition_t::timer_partition_t::filter);
     }
 
+/*
     std::vector<double>& tToData = *(mPlatoApp->getValue(mOutputName));
     std::vector<double>* tMyValue = mPlatoApp->getValue(mInputName);
     tToData.resize(1);
@@ -80,6 +81,42 @@ void CopyValue::operator()()
     if(mPlatoApp->getTimersTree())
     {
         mPlatoApp->getTimersTree()->end_partition();
+    }
+*/
+
+    std::vector<double>& tToData = *(mPlatoApp->getValue(mOutputName));
+
+    unsigned int tDataLength = 0;
+    //int tNvals = tMyAggStruct.mInputNames.size();
+    int tNvals = 1;
+    std::vector<double*> tFromData(tNvals);
+
+    // read first input value
+    std::vector<double>* tMyValue = mPlatoApp->getValue(mInputName);
+    tFromData[0] = tMyValue->data();
+    tDataLength = tMyValue->size();
+
+    // read remaining input values
+    /*
+    for(int tIval = 1; tIval < tNvals; tIval++)
+    {
+        tMyValue = mPlatoApp->getValue(tMyAggStruct.mInputNames[tIval]);
+        tFromData[tIval] = tMyValue->data();
+        if(tMyValue->size() != tDataLength)
+        {
+            throw ParsingException("PlatoApp::Aggregator: attempted to aggregate vectors of differing lengths.");
+        }
+    }
+*/
+
+    tToData.resize(tDataLength);
+    for(unsigned int tIndex = 0; tIndex < tDataLength; tIndex++)
+    {
+        tToData[tIndex] = 0.0;
+        for(int j = 0; j < tNvals; j++)
+        {
+            tToData[tIndex] += tFromData[j][tIndex];
+        }
     }
 }
 

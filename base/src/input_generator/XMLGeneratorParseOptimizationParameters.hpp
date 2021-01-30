@@ -95,6 +95,13 @@ private:
     **********************************************************************************/
     void setMetaData(XMLGen::OptimizationParameters &aMetadata);
 
+    /******************************************************************************//**
+     * \fn setCSMParameters
+     * \brief Set the csm parameters 
+     * \param [in] aMetadata optimization parameters metadata
+    **********************************************************************************/
+    void setCSMParameters(XMLGen::OptimizationParameters &aMetadata);
+
 public:
 
     /******************************************************************************//**

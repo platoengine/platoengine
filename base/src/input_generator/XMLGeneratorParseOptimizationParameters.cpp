@@ -41,6 +41,8 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "discretization", { { {"discretization"}, ""}, "density" } });
     mTags.insert({ "verbose", { { {"verbose"}, ""}, "false" } });
     mTags.insert({ "number_refines", { { {"number_refines"}, ""}, "" } });
+    mTags.insert({ "csm_file", { { {"csm_file"}, ""}, "" } });
+    mTags.insert({ "num_shape_design_variables", { { {"num_shape_design_variables"}, ""}, "" } });
     mTags.insert({ "mma_move_limit", { { {"mma_move_limit"}, ""}, "" } });
     mTags.insert({ "max_iterations", { { {"max_iterations"}, ""}, "" } });
     mTags.insert({ "filter_in_engine", { { {"filter_in_engine"}, ""}, "true" } });
@@ -201,6 +203,7 @@ void ParseOptimizationParameters::setMetaData(XMLGen::OptimizationParameters &aM
     this->setMaterialBoxExtents(aMetadata);
     this->checkHeavisideFilterParams(aMetadata);
     this->setMeshMapData(aMetadata);
+    this->setCSMParameters(aMetadata);
 }
 
 void ParseOptimizationParameters::checkHeavisideFilterParams(XMLGen::OptimizationParameters &aMetadata)
@@ -306,6 +309,25 @@ void ParseOptimizationParameters::setFixedBlockIDs(XMLGen::OptimizationParameter
     }
 }
 
+void ParseOptimizationParameters::setCSMParameters(XMLGen::OptimizationParameters &aMetadata)
+{
+    auto tItr = mTags.find("csm_file");
+    std::string tValue = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValue.empty())
+    {
+        size_t tPos = tValue.rfind(".csm");
+        if(tPos != std::string::npos)
+        {
+            std::string tBaseName = tValue.substr(0, tPos);
+            std::string tTessName = tBaseName + ".eto";
+            std::string tExoName = tBaseName + ".exo";
+            std::string tOptName = tBaseName + "_opt.csm";
+            aMetadata.append("csm_opt_file", tOptName);
+            aMetadata.append("csm_tesselation_file", tTessName);
+            aMetadata.append("csm_exodus_file", tExoName);
+        }
+    }
+}
 
 
 }

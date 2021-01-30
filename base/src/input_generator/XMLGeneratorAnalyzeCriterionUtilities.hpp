@@ -76,7 +76,8 @@ void append_simp_penalty_function
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
     tValues = {"Exponent", "double", aMetadata.materialPenaltyExponent()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-    tValues = {"Minimum Value", "double", aMetadata.minErsatzMaterialConstant()};
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMetadata.minErsatzMaterialConstant());
+    tValues = {"Minimum Value", "double", tPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
 }
 

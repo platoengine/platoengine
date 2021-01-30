@@ -18,7 +18,7 @@ namespace XMLGen
       std::map<std::string,int>& hasBeenDecompedForThisNumberOfProcessors);
   void append_decomp_lines_for_prune_and_refine(const XMLGen::InputData& aInputData, FILE*& fp);
   void append_decomp_lines_to_mpirun_launch_script(const XMLGen::InputData& aInputData, FILE*& fp);
-  void append_engine_mpirun_lines(const XMLGen::InputData& aInputData, FILE*& fp);
+  void append_engine_mpirun_lines(const XMLGen::InputData& aInputData, int &aNextPerformerID, FILE*& fp);
   void append_concatenate_mesh_file_lines(const XMLGen::InputData& aInputData, FILE*& fp);
   void append_prune_and_refine_command(const XMLGen::InputData& aInputData, FILE*& fp);
   void append_prune_and_refine_lines_to_mpirun_launch_script(const XMLGen::InputData& aInputData, FILE*& fp);

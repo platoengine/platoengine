@@ -27,10 +27,46 @@ void write_interface_xml_file
  * \fn append_physics_performers
  * \brief Append physics performers to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in]     aNextPerformerID Next available performer id
  * \param [in/out] aParentNode  parent xml node
 **********************************************************************************/
 void append_physics_performers
 (const XMLGen::InputData& aXMLMetaData,
+ int &aNextPerformerID,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_performer_data
+ * \brief Append performers to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in]     aNextPerformerID Next available performer id
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_performer_data
+(const XMLGen::InputData& aMetaData,
+ int &aNextPerformerID,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_console_data
+ * \brief Append console data to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_console_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_esp_performers
+ * \brief Append esp shape derivative performers to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in]     aNextPerformerID Next available performer id
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_esp_performers
+(const XMLGen::InputData& aXMLMetaData,
+ int &aNextPerformerID,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -215,11 +251,13 @@ void append_control_shared_data
 /******************************************************************************//**
  * \fn append_plato_main_performer
  * \brief Append Plato Main performer information to PUGI XML document.
+ * \param [in] aNextPerformerID Next available performer id
  * \param [in/out] aDocument pugi::xml_document
 **********************************************************************************/
 void append_plato_main_performer
 (const XMLGen::InputData& aMetaData,
- pugi::xml_document& aDocument);
+ int &aNextPerformerID,
+ pugi::xml_node& aDocument);
 
 /******************************************************************************//**
  * \fn append_compute_qoi_statistics_operation
@@ -230,6 +268,216 @@ void append_plato_main_performer
 void append_compute_qoi_statistics_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_initialize_geometry_operation
+ * \brief Append initialize geometry operation for shape optimization problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_initialize_geometry_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_initial_values_operation
+ * \brief Append initialize values operation for shape optimization problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_initial_values_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_update_geometry_on_change_operation
+ * \brief Append operation for updating geometry for shape optimization
+ * \param [in]     aFirstPlatoMainPerformer PlatoMain performer name 
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_update_geometry_on_change_operation 
+(const std::string &aFirstPlatoMainPerformer, 
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_reinitialize_on_change_operation
+ * \brief Append operation for reinitializing performer after geometry is updated
+ * \param [in]     aPerformer Performer name
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_reinitialize_on_change_operation 
+(const std::string &aPerformer, 
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_design_parameters_shared_data
+ * \brief Append design parameters shared data for shape optimization problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_design_parameters_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_constraint_stage_for_topology_problem
+ * \brief Append constaint stage for topology optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_constraint_stage_for_topology_problem 
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_objective_gradient_stage_for_topology_problem
+ * \brief Append objective gradient stage for topology optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_objective_gradient_stage_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_objective_gradient_stage_for_shape_problem
+ * \brief Append objective gradient stage for shape optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_objective_gradient_stage_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_objective_value_stage_for_topology_problem
+ * \brief Append objective value stage for topology optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_objective_value_stage_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_constraint_gradient_stage_for_topology_problem
+ * \brief Append constaint gradient stage for topology optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_constraint_gradient_stage_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_copy_value_operation
+ * \brief Append operation copying a value from one shared data to another
+ * \param [in]     aPlatoMainPerformer performer doing the copy
+ * \param [in]     aInputSharedDataName name of input shared data
+ * \param [in]     aOutputSharedDataName name of output shared data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_copy_value_operation
+(const std::string &aPerformer,
+ const std::string &aInputSharedDataName,
+ const std::string &aOutputSharedDataName,
+ pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_copy_field_operation
+ * \brief Append operation copying a field from one shared data to another
+ * \param [in]     aPlatoMainPerformer performer doing the copy
+ * \param [in]     aInputSharedDataName name of input shared data
+ * \param [in]     aOutputSharedDataName name of output shared data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_copy_field_operation
+(const std::string &aPerformer,
+ const std::string &aInputSharedDataName,
+ const std::string &aOutputSharedDataName,
+ pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_compute_objective_sensitivity_operation
+ * \brief Append objective sensitivity operation for shape optimization problem
+ * \param [in]     aPerformer Name of current performer
+ * \param [in]     aSharedDataName Name of shared data to store result
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_compute_objective_sensitivity_operation
+(const std::string &aPerformer,
+ const std::string &aSharedDataName,
+ pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_sensitivity_operation
+ * \brief Append constraint sensitivity operation for shape optimization problem
+ * \param [in]     aPerformer Name of current performer
+ * \param [in]     aSharedDataName Name of shared data to store result
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_compute_constraint_sensitivity_operation
+(const std::string &aPerformer,
+ const std::string &aSharedDataName,
+ pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_compute_shape_sensitivity_on_change_operation
+ * \brief Append compute shape sensitivity on change operation for shape optimization problem
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_compute_shape_sensitivity_on_change_operation
+(pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_gradient_operation
+ * \brief Append constaint gradient operation for shape optimization problem
+ * \param [in]     aPerformer Name of performer calculating the constraint gradient
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_compute_constraint_gradient_operation
+(const std::string &aPerformer,
+ pugi::xml_node &aParent);
+
+/******************************************************************************//**
+ * \fn append_constraint_gradient_stage_for_shape_problem
+ * \brief Append constaint gradient stage for shape optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_constraint_gradient_stage_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_constraint_stage_for_shape_problem
+ * \brief Append constaint stage for shape optimization problem
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_constraint_stage_for_shape_problem 
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_design_variables_shared_data
+ * \brief Append design variables shared data
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_design_variables_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_parameter_sensitivity_shared_data
+ * \brief Append parameters sensitivity shared data for shape optimization problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+void append_parameter_sensitivity_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_filter_control_operation
@@ -470,10 +718,12 @@ void append_optimization_update_problem_stage_options
 /******************************************************************************//**
  * \fn append_optimization_variables_options
  * \brief Append optimization variables options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode pugi::xml_node
 **********************************************************************************/
 void append_optimization_variables_options
-(pugi::xml_node& aParentNode);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
  * \fn append_optimization_objective_options

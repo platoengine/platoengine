@@ -37,12 +37,92 @@ void append_compute_objective_value_to_plato_analyze_operation
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_compute_objective_value_operation_for_topology_problem
+ * \brief Append compute objective value operation for topology optimizatino problems
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_value_operation_for_topology_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_objective_value_operation_for_shape_problem
+ * \brief Append compute objective value operation for shape optimizatino problems
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_value_operation_for_shape_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_value_operation_for_topology_problem
+ * \brief Append compute constraint value operation for topology optimizatino problems
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_value_operation_for_topology_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_value_operation_for_shape_problem
+ * \brief Append compute constraint value operation for shape optimizatino problems
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_value_operation_for_shape_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_compute_objective_gradient_to_plato_analyze_operation
  * \brief Append compute objective gradient operation to plato_analyze_operation.xml.
  * \param [in]     aMetaData   Plato problem input data
  * \param [in/out] aDocument   pugi::xml_document
 **********************************************************************************/
 void append_compute_objective_gradient_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_objective_gradient_operation_for_topology_problem
+ * \brief Append compute objective gradient operation for topology optimization problems to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_gradient_operation_for_topology_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_objective_gradient_operation_for_shape_problem
+ * \brief Append compute objective gradient operation for shape optimization problems to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_objective_gradient_operation_for_shape_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_gradient_operation_for_topology_problem
+ * \brief Append compute constraint gradient operation for topology optimization problems to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_gradient_operation_for_topology_problem
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_compute_constraint_gradient_operation_for_shape_problem
+ * \brief Append compute constraint gradient operation for shape optimization problems to plato_analyze_operation.xml.
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_compute_constraint_gradient_operation_for_shape_problem
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
@@ -64,6 +144,16 @@ void append_compute_constraint_value_to_plato_analyze_operation
 **********************************************************************************/
 void append_compute_constraint_gradient_to_plato_analyze_operation
 (const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_reinit_on_change_data
+ * \brief Append reinitialize on change operation
+ * \param [in]     aMetaData   Plato problem input data
+ * \param [in/out] aDocument   pugi::xml_document
+**********************************************************************************/
+void append_reinit_on_change_data
+(const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**

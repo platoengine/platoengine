@@ -21,6 +21,7 @@ void ParseObjective::allocate()
     mTags.insert({ "weights", { { {"weights"}, ""}, "" } });
     mTags.insert({ "criteria", { { {"criteria"}, ""}, "" } });
     mTags.insert({ "services", { { {"services"}, ""}, "" } });
+    mTags.insert({ "shape_services", { { {"shape_services"}, ""}, "" } });
     mTags.insert({ "scenarios", { { {"scenarios"}, ""}, "" } });
     //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
@@ -76,6 +77,20 @@ void ParseObjective::setServiceIDs(XMLGen::Objective &aMetadata)
     }
 }
 
+void ParseObjective::setShapeServiceIDs(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("shape_services");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tServiceIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tServiceIDs);
+        aMetadata.shapeServiceIDs = tServiceIDs;
+    }
+}
+
 void ParseObjective::setScenarioIDs(XMLGen::Objective &aMetadata)
 {
     auto tItr = mTags.find("scenarios");
@@ -122,6 +137,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setType(aMetadata);
     this->setCriteriaIDs(aMetadata);
     this->setServiceIDs(aMetadata);
+    this->setShapeServiceIDs(aMetadata);
     this->setScenarioIDs(aMetadata);
     this->setWeights(aMetadata);
 }

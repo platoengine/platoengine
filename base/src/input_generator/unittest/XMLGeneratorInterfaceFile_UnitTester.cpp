@@ -78,6 +78,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     tOptimizationParameters.append("max_iterations", "10");
     tOptimizationParameters.append("discretization", "density");
     tOptimizationParameters.append("optimization_algorithm", "oc");
+    tOptimizationParameters.append("optimization_type", "topology");
     tOptimizationParameters.append("filter_in_engine", "true");
     tMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
@@ -140,6 +141,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStage)
     tObjective.scenarioIDs.push_back("14");
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_gradient_stage(tMetaData, tDocument));
@@ -227,6 +232,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
 
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
     tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
@@ -310,6 +316,10 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage_MultiObjective)
     tObjective.weights.push_back("1");
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
@@ -439,6 +449,10 @@ TEST(PlatoTestXMLGenerator, AppendSharedData)
     tObjective.scenarioIDs.push_back("14");
     tObjective.weights.push_back("1");
     tMetaData.objective = tObjective;
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("optimization_type", "topology");
+    tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
     XMLGen::append_shared_data(tMetaData, tDocument);
@@ -631,7 +645,8 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers_EmptyService)
 {
     XMLGen::InputData tMetaData;
     pugi::xml_document tDocument;
-    ASSERT_THROW(XMLGen::append_physics_performers(tMetaData, tDocument), std::runtime_error);
+    int tID = 0;
+    ASSERT_THROW(XMLGen::append_physics_performers(tMetaData, tID, tDocument), std::runtime_error);
 }
 
 TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
@@ -647,8 +662,9 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     tMetaData.mPerformerServices.push_back(tService);
 
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_plato_main_performer(tMetaData, tDocument));
-    ASSERT_NO_THROW(XMLGen::append_physics_performers(tMetaData, tDocument));
+    int tID = 0;
+    ASSERT_NO_THROW(XMLGen::append_plato_main_performer(tMetaData, tID, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_physics_performers(tMetaData, tID, tDocument));
 
     auto tPerformer = tDocument.child("Performer");
     ASSERT_FALSE(tPerformer.empty());

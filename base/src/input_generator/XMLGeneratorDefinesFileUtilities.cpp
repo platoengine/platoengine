@@ -6,6 +6,7 @@
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
+#include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
 #include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
 
@@ -316,25 +317,61 @@ void append_tractions_to_define_xml_file
 
 /******************************************************************************/
 void write_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData,
- const XMLGen::UncertaintyMetaData& aUncertaintyMetaData)
+(const XMLGen::InputData& aMetaData)
 {
     pugi::xml_document tDocument;
-    XMLGen::append_basic_attributes_to_define_xml_file(aRandomMetaData, aUncertaintyMetaData, tDocument);
-
-    auto tTractionTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aRandomMetaData);
-    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, tDocument);
-
-    auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_material_properties_to_define_xml_file(tMaterialValues, tDocument);
-
-    auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(aRandomMetaData);
-    XMLGen::append_probabilities_to_define_xml_file(tProbabilities, tDocument);
-
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    {
+        add_robust_optimization_data_to_define_xml_file(aMetaData, tDocument);
+    }
+    if(is_shape_optimization_problem(aMetaData))
+    {
+        add_shape_optimization_data_to_define_xml_file(aMetaData, tDocument);
+    }
     tDocument.save_file("defines.xml", "  ");
 }
 // function write_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
+void add_robust_optimization_data_to_define_xml_file
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document &aDocument)
+{
+    auto &tRandomMetaData = aMetaData.mRandomMetaData;
+    auto &tUncertaintyMetaData = aMetaData.m_UncertaintyMetaData;
+
+    XMLGen::append_basic_attributes_to_define_xml_file(tRandomMetaData, tUncertaintyMetaData, aDocument);
+
+    auto tTractionTags = XMLGen::return_random_tractions_tags_for_define_xml_file(tRandomMetaData);
+    auto tTractionValues = XMLGen::prepare_tractions_for_define_xml_file(tRandomMetaData);
+    XMLGen::append_tractions_to_define_xml_file(tTractionTags, tTractionValues, aDocument);
+
+    auto tMaterialValues = XMLGen::prepare_material_properties_for_define_xml_file(tRandomMetaData);
+    XMLGen::append_material_properties_to_define_xml_file(tMaterialValues, aDocument);
+
+    auto tProbabilities = XMLGen::prepare_probabilities_for_define_xml_file(tRandomMetaData);
+    XMLGen::append_probabilities_to_define_xml_file(tProbabilities, aDocument);
+}
+// function add_robust_optimization_data_to_define_xml_file
+/******************************************************************************/
+
+/******************************************************************************/
+void add_shape_optimization_data_to_define_xml_file
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document &aDocument)
+{
+    pugi::xml_node tTmpNode = aDocument.append_child("Define");
+    tTmpNode.append_attribute("name") = "NumParameters";
+    tTmpNode.append_attribute("value") = aMetaData.optimization_parameters().num_shape_design_variables().c_str();
+    tTmpNode = aDocument.append_child("Array");
+    tTmpNode.append_attribute("name") = "Parameters";
+    tTmpNode.append_attribute("type") = "int";
+    tTmpNode.append_attribute("from") = "1";
+    tTmpNode.append_attribute("to") = "{NumParameters}";
+}
+
+// function add_shape_optimization_data_to_define_xml_file
 /******************************************************************************/
 
 }

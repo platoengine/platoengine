@@ -22,8 +22,11 @@ void append_compute_constraint_value_operation_platomain
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", aPerformer}, tOperationNode);
 
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
+    if(aDesignVariableName != "")
+    {
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
+    }
 
     std::string tCriterionID = aConstraint.criterion();
     std::string tServiceID = aConstraint.service();
@@ -49,8 +52,11 @@ void append_compute_constraint_value_operation_platoanalyze
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Value", aPerformer}, tOperationNode);
 
-    auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
+    if(aDesignVariableName != "")
+    {
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", aDesignVariableName}, tInputNode);
+    }
 
     std::string tCriterionID = aConstraint.criterion();
     std::string tServiceID = aConstraint.service();

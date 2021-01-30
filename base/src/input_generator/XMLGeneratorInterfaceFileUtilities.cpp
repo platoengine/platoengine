@@ -21,26 +21,45 @@ void write_interface_xml_file
 (const XMLGen::InputData& aMetaData)
 {
     pugi::xml_document tDocument;
+    int tNextPerformerID = 0;
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
-        XMLGen::append_attributes("include", {"filename"}, {"defines.xml"}, tDocument);
-
-    auto tNode = tDocument.append_child("Console");
-    XMLGen::append_children({"Verbose"}, {aMetaData.optimization_parameters().verbose()}, tNode);
-
-    XMLGen::append_plato_main_performer(aMetaData, tDocument);
-
-    // note: multiperformer use case currently only works with Plato Analyze, and is only used currently with the robust optimization workflow
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
-        XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, tDocument);
-    else
-        XMLGen::append_physics_performers(aMetaData, tDocument);
-
+    XMLGen::append_include_defines_xml_data(aMetaData, tDocument);
+    XMLGen::append_console_data(aMetaData, tDocument);
+    XMLGen::append_performer_data(aMetaData, tNextPerformerID, tDocument);
     XMLGen::append_shared_data(aMetaData, tDocument);
     XMLGen::append_stages(aMetaData, tDocument);
     XMLGen::append_optimizer_options(aMetaData, tDocument);
 
     tDocument.save_file("interface.xml", "  ");
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_performer_data
+(const XMLGen::InputData& aMetaData,
+ int &aNextPerformerID,
+ pugi::xml_node& aParentNode)
+{
+    XMLGen::append_plato_main_performer(aMetaData, aNextPerformerID, aParentNode);
+
+    // note: multiperformer use case currently only works with Plato Analyze, and is only used currently with the robust optimization workflow
+    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+        XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, aNextPerformerID, aParentNode);
+    else
+        XMLGen::append_physics_performers(aMetaData, aNextPerformerID, aParentNode);
+
+    XMLGen::append_esp_performers(aMetaData, aNextPerformerID, aParentNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_console_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    auto tNode = aParentNode.append_child("Console");
+    XMLGen::append_children({"Enabled"}, {"true"}, tNode);
+    XMLGen::append_children({"Verbose"}, {aMetaData.optimization_parameters().verbose()}, tNode);
 }
 /******************************************************************************/
 
@@ -78,8 +97,34 @@ void append_compute_qoi_statistics_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_esp_performers
+(const XMLGen::InputData& aXMLMetaData,
+ int &aNextPerformerID,
+ pugi::xml_node& aParentNode)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        for(auto& tService : aXMLMetaData.mPerformerServices)
+        {
+            if(tService.code() == "plato_esp")
+            {
+                auto tPerformerNode = aParentNode.append_child("Performer");
+                addChild(tPerformerNode, "PerformerID", std::to_string(aNextPerformerID));
+                aNextPerformerID++;
+                auto tForNode = tPerformerNode.append_child("For");
+                tForNode.append_attribute("var") = "I";
+                tForNode.append_attribute("in") = "Parameters";
+                addChild(tForNode, "Name", "plato_esp_{I}");
+            }
+        }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_physics_performers
 (const XMLGen::InputData& aXMLMetaData,
+ int &aNextPerformerID,
  pugi::xml_node& aParentNode)
 {
     if(aXMLMetaData.mPerformerServices.empty())
@@ -90,10 +135,13 @@ void append_physics_performers
     std::vector<std::string> tKeywords = { "Name", "Code", "PerformerID" };
     for(auto& tService : aXMLMetaData.mPerformerServices)
     {
-        const int tID = (&tService - &aXMLMetaData.mPerformerServices[0]) + 1;
-        auto tPerformerNode = aParentNode.append_child("Performer");
-        std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(tID) };
-        XMLGen::append_children( tKeywords, tValues, tPerformerNode);
+        if(tService.code() != "plato_esp")
+        {
+            auto tPerformerNode = aParentNode.append_child("Performer");
+            std::vector<std::string> tValues = { tService.performer(), tService.code(), std::to_string(aNextPerformerID) };
+            aNextPerformerID++;
+            XMLGen::append_children( tKeywords, tValues, tPerformerNode);
+        }
     }
 }
 /******************************************************************************/
@@ -133,6 +181,10 @@ void append_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        return;
+    }
     if(aXMLMetaData.services().empty())
     {
         THROWERR("Append Topology Shared Data: Services list is empty.")
@@ -172,10 +224,11 @@ void append_shared_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    XMLGen::append_control_shared_data(aMetaData, aDocument);
+    XMLGen::append_design_variables_shared_data(aMetaData, aDocument);
     XMLGen::append_lower_bounds_shared_data(aMetaData, aDocument);
     XMLGen::append_upper_bounds_shared_data(aMetaData, aDocument);
     XMLGen::append_design_volume_shared_data(aMetaData, aDocument);
+    XMLGen::append_parameter_sensitivity_shared_data(aMetaData, aDocument);
     XMLGen::append_criteria_shared_data(aMetaData, aDocument);
     XMLGen::append_constraint_shared_data(aMetaData, aDocument);
     XMLGen::append_objective_shared_data(aMetaData, aDocument);
@@ -271,9 +324,16 @@ void append_update_problem_stage
 std::string get_design_variable_name
 (const XMLGen::InputData& aXMLMetaData)
 {
-    if(aXMLMetaData.optimization_parameters().filter_in_engine() == "false")
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
     {
-        return "Control";
+        return "";
+    }
+    else
+    {
+        if(aXMLMetaData.optimization_parameters().filter_in_engine() == "false")
+        {
+            return "Control";
+        }
     }
     return "Topology";
 }
@@ -305,9 +365,12 @@ void append_objective_value_operation
 
         auto tOperationNode = tParentNode.append_child("Operation");
         XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Value", tService.performer()}, tOperationNode);
-        auto tOperationInput = tOperationNode.append_child("Input");
         auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
+        if(tDesignVariableName != "")
+        {
+            auto tOperationInput = tOperationNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
+        }
         auto tOperationOutput = tOperationNode.append_child("Output");
 
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
@@ -399,7 +462,7 @@ void append_aggregate_objective_gradient_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_value_stage
+void append_objective_value_stage_for_topology_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -417,14 +480,6 @@ void append_objective_value_stage
 
     if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
     {
-/*
-        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
-        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-        auto tObjectiveName = "Criterion Value - " + tIdentifierString;
-*/
         auto tObjectiveName = "Objective Value";
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
     }
@@ -445,17 +500,86 @@ void append_objective_value_stage
             auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
             auto tInputValue = "Criterion Value - " + tIdentifierString;
 
-            auto tCopyOperationNode = tStageNode.append_child("Operation");
-            XMLGen::append_children({"Name", "PerformerName"}, {"Copy Value", tFirstPlatoMainPerformer}, tCopyOperationNode);
-            auto tInputNode = tCopyOperationNode.append_child("Input");
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputValue", tInputValue}, tInputNode);
-            auto tOutputNode = tCopyOperationNode.append_child("Output");
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputValue", "Objective Value"}, tOutputNode);
+            append_copy_value_operation(tFirstPlatoMainPerformer, tInputValue, "Objective Value", tStageNode);
         }
     }
 
     auto tStageOutputNode = tStageNode.append_child("Output");
     XMLGen::append_children( { "SharedDataName" }, { "Objective Value" }, tStageOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_stage_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    auto tObjective = aXMLMetaData.objective;
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children( { "Name" }, { "Compute Objective Value" }, tStageNode);
+    auto tStageInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children( { "SharedDataName" }, { "Design Parameters" }, tStageInputNode);
+    XMLGen::append_update_geometry_on_change_operation(tFirstPlatoMainPerformer, tStageNode);
+    auto tOuterOperationNode = tStageNode.append_child("Operation");
+    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[i];
+        std::string tServiceID = tObjective.serviceIDs[i];
+        std::string tScenarioID = tObjective.scenarioIDs[i];
+        XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
+        XMLGen::append_reinitialize_on_change_operation(tService.performer(), tOuterOperationNode);
+    }
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+        XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
+    else
+        XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
+
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
+        auto tObjectiveName = "Objective Value";
+        XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
+    }
+
+    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
+        if(aXMLMetaData.needToAggregate())
+        {
+            XMLGen::append_aggregate_objective_value_operation(aXMLMetaData, tStageNode);
+        }
+        else
+        {
+            std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
+            std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
+            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+            auto tInputValue = "Criterion Value - " + tIdentifierString;
+
+            append_copy_value_operation(tFirstPlatoMainPerformer, tInputValue, "Objective Value", tStageNode);
+        }
+    }
+
+    auto tStageOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children( { "SharedDataName" }, { "Objective Value" }, tStageOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        append_objective_value_stage_for_topology_problem(aXMLMetaData, aDocument);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        append_objective_value_stage_for_shape_problem(aXMLMetaData, aDocument);
+    }
 }
 /******************************************************************************/
 
@@ -487,11 +611,14 @@ void append_objective_gradient_operation
         XMLGen::Service tService = aXMLMetaData.service(tObjective.serviceIDs[i]); 
         auto tOperationNode = tParentNode.append_child("Operation");
         XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Gradient", tService.performer()}, tOperationNode);
-        auto tOperationInput = tOperationNode.append_child("Input");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
-        auto tOperationOutput = tOperationNode.append_child("Output");
-        auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", tOutputSharedData}, tOperationOutput);
+        if(tDesignVariableName != "")
+        {
+            auto tOperationInput = tOperationNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
+            auto tOperationOutput = tOperationNode.append_child("Output");
+            auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", tOutputSharedData}, tOperationOutput);
+        }
     }
 }
 /******************************************************************************/
@@ -536,6 +663,22 @@ void append_objective_gradient_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        append_objective_gradient_stage_for_topology_problem(aXMLMetaData, aDocument);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        append_objective_gradient_stage_for_shape_problem(aXMLMetaData, aDocument);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_stage_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
     auto tObjective = aXMLMetaData.objective;
     auto tStageNode = aDocument.append_child("Stage");
     XMLGen::append_children({"Name"}, {"Compute Objective Gradient"}, tStageNode);
@@ -574,12 +717,75 @@ void append_objective_gradient_stage
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
-        auto tCopyOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"Copy Field", tFirstPlatoMainPerformer}, tCopyOperationNode);
-        auto tInputNode = tCopyOperationNode.append_child("Input");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputField", std::string("Criterion Gradient - ") + tIdentifierString}, tInputNode);
-        auto tOutputNode = tStageNode.append_child("Output");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputField", "Objective Gradient"}, tOutputNode);
+        append_copy_field_operation(tFirstPlatoMainPerformer, std::string("Criterion Gradient - ") + tIdentifierString, "Objective Gradient", tStageNode);
+    }
+
+    auto tStageOutputNode = tStageNode.append_child("Output");
+    XMLGen::append_children({"SharedDataName"}, {"Objective Gradient"}, tStageOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_stage_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    auto tObjective = aXMLMetaData.objective;
+    auto tStageNode = aDocument.append_child("Stage");
+    XMLGen::append_children({"Name"}, {"Compute Objective Gradient"}, tStageNode);
+    auto tStageInputNode = tStageNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName"}, {"Design Parameters"}, tStageInputNode);
+    XMLGen::append_update_geometry_on_change_operation(tFirstPlatoMainPerformer, tStageNode);
+    auto tOuterOperationNode = tStageNode.append_child("Operation");
+    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[i];
+        std::string tServiceID = tObjective.serviceIDs[i];
+        std::string tScenarioID = tObjective.scenarioIDs[i];
+        XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
+        XMLGen::append_reinitialize_on_change_operation(tService.performer(), tOuterOperationNode);
+    }
+
+    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    {
+        XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
+        auto tSharedDataName = std::string("Objective Gradient");
+        XMLGen::append_evaluate_nondeterministic_objective_gradient_operation(tSharedDataName, aXMLMetaData, tStageNode);
+    }
+    else
+    {
+        auto tOuterOperationNode = tStageNode.append_child("Operation");
+        XMLGen::append_objective_gradient_operation(aXMLMetaData, tOuterOperationNode);
+        append_compute_shape_sensitivity_on_change_operation(tOuterOperationNode);
+        tOuterOperationNode = tStageNode.append_child("Operation");
+        for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+        {
+            std::string tCriterionID = tObjective.criteriaIDs[i];
+            std::string tServiceID = tObjective.serviceIDs[i];
+            std::string tScenarioID = tObjective.scenarioIDs[i];
+            XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
+            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+            auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+            auto tSharedDataName = "Criterion Gradient - " + tIdentifierString;
+            append_compute_objective_sensitivity_operation(tService.performer(), tSharedDataName, tOuterOperationNode);
+        }
+        if(aXMLMetaData.needToAggregate())
+        {
+            XMLGen::append_aggregate_objective_gradient_operation(aXMLMetaData, tStageNode);
+        }
+    }
+
+    if(!aXMLMetaData.needToAggregate())
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[0];
+        std::string tServiceID = tObjective.serviceIDs[0];
+        std::string tScenarioID = tObjective.scenarioIDs[0];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tSharedDataName = "Criterion Gradient - " + tIdentifierString;
+        append_copy_value_operation(tFirstPlatoMainPerformer, tSharedDataName, "Objective Gradient", tStageNode);
+
     }
 
     auto tStageOutputNode = tStageNode.append_child("Output");
@@ -842,11 +1048,22 @@ void append_plato_main_output_stage
     {
         return;
     }
-    auto tOutputStage = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
-    XMLGen::append_write_ouput_operation(aXMLMetaData, tOutputStage);
-    XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
-    XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOutputStage = aDocument.append_child("Stage");
+        XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+        XMLGen::append_write_ouput_operation(aXMLMetaData, tOutputStage);
+        XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
+        XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+        auto tOutputStage = aDocument.append_child("Stage");
+        XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+        auto tOperation = tOutputStage.append_child("Operation");
+        XMLGen::append_children({"Name", "PerformerName"}, {"CSMMeshOutput", tFirstPlatoMainPerformer}, tOperation);
+    }
 }
 // function append_plato_main_output_stage
 /******************************************************************************/
@@ -864,9 +1081,18 @@ void append_lower_bounds_shared_data
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
     // shared data - lower bound vector
-    tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    if(aMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        tValues = {"Lower Bound Vector", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
+    else if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        tValues = {"Lower Bound Vector", "Scalar", "Global", aMetaData.optimization_parameters().num_shape_design_variables(), tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
 }
 // function append_lower_bounds_shared_data
 /******************************************************************************/
@@ -884,9 +1110,18 @@ void append_upper_bounds_shared_data
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
     // shared data - upper bound vector
-    tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    if(aMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        tValues = {"Upper Bound Vector", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
+    else if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        tValues = {"Upper Bound Vector", "Scalar", "Global", aMetaData.optimization_parameters().num_shape_design_variables(), tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
 }
 // function append_upper_bounds_shared_data
 /******************************************************************************/
@@ -896,13 +1131,46 @@ void append_design_volume_shared_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    std::string tFirstPlatoMainPerformer = aMetaData.getFirstPlatoMainPerformer();
-    std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Design Volume", "Scalar", "Global", "1", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
-    auto tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    if(aMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        std::string tFirstPlatoMainPerformer = aMetaData.getFirstPlatoMainPerformer();
+        std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
+        std::vector<std::string> tValues = {"Design Volume", "Scalar", "Global", "1", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
+        auto tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
 }
 // function append_design_volume_shared_data
+/******************************************************************************/
+
+/******************************************************************************/
+void append_parameter_sensitivity_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        std::string tFirstPlatoMainPerformer = aMetaData.getFirstPlatoMainPerformer();
+        auto tForNode = aDocument.append_child("For");
+        tForNode.append_attribute("var") = "I";
+        tForNode.append_attribute("in") = "Parameters";
+        auto tTmpNode = tForNode.append_child("SharedData");
+        addChild(tTmpNode, "Name", "Parameter Sensitivity {I}");
+        addChild(tTmpNode, "Type", "Scalar");
+        addChild(tTmpNode, "Layout", "Global");
+        addChild(tTmpNode, "Dynamic", "true");
+        addChild(tTmpNode, "OwnerName", "plato_esp_{I}");
+        addChild(tTmpNode, "UserName", tFirstPlatoMainPerformer);
+        for(auto& tService : aMetaData.mPerformerServices)
+        {
+            if(tService.code() != "plato_esp")
+            {
+                addChild(tTmpNode, "UserName", tService.performer());
+            }
+        }
+    }
+}
+// function append_parameter_sensitivity_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
@@ -932,10 +1200,20 @@ void append_design_volume_shared_data
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
         // shared data - deterministic criterion gradient
-        tTag = std::string("Criterion Gradient - ") + tIdentifierString;
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
-        tSharedDataNode = aDocument.append_child("SharedData");
-        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        {
+            tTag = std::string("Criterion Gradient - ") + tIdentifierString;
+            tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
+            tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
+        else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        {
+            tTag = std::string("Criterion Gradient - ") + tIdentifierString;
+            tValues = { tTag, "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tOwnerName, tFirstPlatoMainPerformer };
+            tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
     }
 }
 // function append_criteria_shared_data
@@ -957,10 +1235,20 @@ void append_constraint_shared_data
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
-        tTag = std::string("Constraint Gradient ") + tConstraint.id();
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
-        tSharedDataNode = aDocument.append_child("SharedData");
-        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        {
+            tTag = std::string("Constraint Gradient ") + tConstraint.id();
+            tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
+            tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
+        else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        {
+            tTag = std::string("Constraint Gradient ") + tConstraint.id();
+            tValues = { tTag, "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
+            tSharedDataNode = aDocument.append_child("SharedData");
+            XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+        }
     }
 }
 // function append_constraint_shared_data
@@ -978,9 +1266,18 @@ void append_objective_shared_data
     auto tSharedDataNode = aDocument.append_child("SharedData");
     XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
-    tValues = {"Objective Gradient", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
-    tSharedDataNode = aDocument.append_child("SharedData");
-    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        tValues = {"Objective Gradient", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        tValues = {"Objective Gradient", "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tFirstPlatoMainPerformer, tFirstPlatoMainPerformer };
+        tSharedDataNode = aDocument.append_child("SharedData");
+        XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+    }
 }
 // function append_objective_shared_data
 /******************************************************************************/
@@ -1017,6 +1314,47 @@ void append_normalization_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
+void append_design_variables_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        XMLGen::append_control_shared_data(aMetaData, aDocument);
+    }
+    else if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        XMLGen::append_design_parameters_shared_data(aMetaData, aDocument);
+    }
+}
+// function append_design_variables_shared_data
+/******************************************************************************/
+
+/******************************************************************************/
+void append_design_parameters_shared_data
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document& aDocument)
+{
+    std::string tFirstPlatoMainPerformer = aMetaData.getFirstPlatoMainPerformer();
+    auto tTmpNode = aDocument.append_child("SharedData");
+    addChild(tTmpNode, "Name", "Design Parameters");
+    addChild(tTmpNode, "Type", "Scalar");
+    addChild(tTmpNode, "Layout", "Global");
+    addChild(tTmpNode, "Size", aMetaData.optimization_parameters().num_shape_design_variables());
+    addChild(tTmpNode, "OwnerName", tFirstPlatoMainPerformer);
+    addChild(tTmpNode, "UserName", tFirstPlatoMainPerformer);
+    for(auto& tService : aMetaData.mPerformerServices)
+    {
+        if(tService.code() != "plato_esp")
+        {
+            addChild(tTmpNode, "UserName", tService.performer());
+        }
+    }
+}
+// append_design_parameters_shared_data append_control_shared_data
+/******************************************************************************/
+
+/******************************************************************************/
 void append_control_shared_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
@@ -1045,12 +1383,14 @@ void append_control_shared_data
 /******************************************************************************/
 void append_plato_main_performer
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ int &aNextPerformerID,
+ pugi::xml_node& aNode)
 {
     // The platomain optimizer should always be the first service in the list.
     const XMLGen::Service &tService = aXMLMetaData.service(0);
-    auto tPerformerNode = aDocument.append_child("Performer");
-    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {tService.performer(), tService.code(), "0"}, tPerformerNode);
+    auto tPerformerNode = aNode.append_child("Performer");
+    XMLGen::append_children( {"Name", "Code", "PerformerID"}, {tService.performer(), tService.code(), std::to_string(aNextPerformerID)}, tPerformerNode);
+    aNextPerformerID++;
 }
 // function append_plato_main_performer
 /******************************************************************************/
@@ -1127,14 +1467,56 @@ void append_initial_guess_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"},{"Initial Guess"}, tStageNode);
-    XMLGen::append_initial_field_operation(aXMLMetaData, tStageNode);
-    XMLGen::append_compute_normalization_factor_operation(aXMLMetaData, tStageNode);
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children({"SharedDataName"},{"Control"}, tOutputNode);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tStageNode = aDocument.append_child("Stage");
+        XMLGen::append_children({"Name"},{"Initial Guess"}, tStageNode);
+        XMLGen::append_initial_field_operation(aXMLMetaData, tStageNode);
+        XMLGen::append_compute_normalization_factor_operation(aXMLMetaData, tStageNode);
+        auto tOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"},{"Control"}, tOutputNode);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        auto tStageNode = aDocument.append_child("Stage");
+        XMLGen::append_children({"Name"},{"Initialize Design Parameters"}, tStageNode);
+        XMLGen::append_initial_values_operation(aXMLMetaData, tStageNode);
+        XMLGen::append_initialize_geometry_operation(aXMLMetaData, tStageNode);
+        auto tOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"},{"Design Parameters"}, tOutputNode);
+    }
 }
 // function append_initial_guess_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_initialize_geometry_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"},{"Initialize Geometry", tFirstPlatoMainPerformer}, tOperationNode);
+}
+// function append_initialize_geometry_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_initial_values_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"},{"Initialize Values", tFirstPlatoMainPerformer}, tOperationNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Values", "Design Parameters"}, tOutputNode);
+    tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Lower Bounds", "Lower Bound Vector"}, tOutputNode);
+    tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Upper Bounds", "Upper Bound Vector"}, tOutputNode);
+}
+// function append_initial_values_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -1228,17 +1610,37 @@ void append_design_volume_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tStageNode = aDocument.append_child("Stage");
-    XMLGen::append_children({"Name"}, {"Design Volume"}, tStageNode);
-    XMLGen::append_design_volume_operation(aXMLMetaData, tStageNode);
-    auto tOutputNode = tStageNode.append_child("Output");
-    XMLGen::append_children({"SharedDataName"}, {"Design Volume"}, tOutputNode);
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tStageNode = aDocument.append_child("Stage");
+        XMLGen::append_children({"Name"}, {"Design Volume"}, tStageNode);
+        XMLGen::append_design_volume_operation(aXMLMetaData, tStageNode);
+        auto tOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"}, {"Design Volume"}, tOutputNode);
+    }
 }
 // function append_design_volume_stage
 /******************************************************************************/
 
 /******************************************************************************/
 void append_constraint_value_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        append_constraint_stage_for_topology_problem(aXMLMetaData, aDocument);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        append_constraint_stage_for_shape_problem(aXMLMetaData, aDocument);
+    }
+}
+// function append_constraint_value_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_constraint_stage_for_topology_problem 
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -1263,23 +1665,96 @@ void append_constraint_value_stage
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
         tValueOperationInterface.call(tConstraint, tService.performer(), tDesignVariableName, tService.code(), tStageNode);
 
-        auto tCopyOperationNode = tStageNode.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"Copy Value", tFirstPlatoMainPerformer}, tCopyOperationNode);
-        tInputNode = tCopyOperationNode.append_child("Input");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputValue", std::string("Criterion Value - ") + tIdentifierString}, tInputNode);
-        auto tOutputNode = tCopyOperationNode.append_child("Output");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputValue", std::string("Constraint Value ") + tConstraint.id()}, tOutputNode);
+        append_copy_value_operation(tFirstPlatoMainPerformer, std::string("Criterion Value - ") + tIdentifierString, std::string("Constraint Value ") + tConstraint.id(), tStageNode);
 
-        tOutputNode = tStageNode.append_child("Output");
+        auto tOutputNode = tStageNode.append_child("Output");
         auto tSharedDataName = std::string("Constraint Value ") + tConstraint.id();
         XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
     }
 }
-// function append_constraint_value_stage
+// function append_constraint_stage_for_topology_problem
+/******************************************************************************/
+
+/******************************************************************************/
+void append_update_geometry_on_change_operation 
+(const std::string &aFirstPlatoMainPerformer, 
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Update Geometry on Change", aFirstPlatoMainPerformer}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName", "ArgumentName"}, {"Design Parameters", "Parameters"}, tInputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_reinitialize_on_change_operation 
+(const std::string &aPerformer, 
+ pugi::xml_node& aParentNode)
+{
+    auto tOperationNode = aParentNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Reinitialize on Change", aPerformer}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"SharedDataName", "ArgumentName"}, {"Design Parameters", "Parameters"}, tInputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_constraint_stage_for_shape_problem 
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    XMLGen::ConstraintValueOperation tValueOperationInterface;
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        std::string tCriterionID = tConstraint.criterion();
+        std::string tServiceID = tConstraint.service();
+        std::string tScenarioID = tConstraint.scenario();
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tStageName = std::string("Compute Constraint Value ") + tConstraint.id();
+        XMLGen::append_children({"Name"}, {tStageName}, tStageNode);
+        auto tInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children({"SharedDataName"}, {"Design Parameters"}, tInputNode);
+
+        auto tService = aXMLMetaData.service(tConstraint.service()); 
+        XMLGen::append_update_geometry_on_change_operation(tFirstPlatoMainPerformer, tStageNode);
+        XMLGen::append_reinitialize_on_change_operation(tService.performer(), tStageNode);
+        tValueOperationInterface.call(tConstraint, tService.performer(), tDesignVariableName, tService.code(), tStageNode);
+
+        append_copy_value_operation(tFirstPlatoMainPerformer, std::string("Criterion Value - ") + tIdentifierString, std::string("Constraint Value ") + tConstraint.id(), tStageNode);
+
+        auto tOutputNode = tStageNode.append_child("Output");
+        auto tSharedDataName = std::string("Constraint Value ") + tConstraint.id();
+        XMLGen::append_children({"SharedDataName"}, {tSharedDataName}, tOutputNode);
+    }
+}
+// function append_constraint_stage_for_shape_problem
 /******************************************************************************/
 
 /******************************************************************************/
 void append_constraint_gradient_stage
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology") 
+    {
+        append_constraint_gradient_stage_for_topology_problem(aXMLMetaData, aDocument);
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape") 
+    {
+        append_constraint_gradient_stage_for_shape_problem(aXMLMetaData, aDocument);
+    }
+}
+// function append_constraint_gradient_stage
+/******************************************************************************/
+
+/******************************************************************************/
+void append_constraint_gradient_stage_for_topology_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
@@ -1301,13 +1776,8 @@ void append_constraint_gradient_stage
         std::string tOutputSharedData = "Constraint Gradient " + tConstraint.id();
         if(aXMLMetaData.optimization_parameters().filter_in_engine() == "false")
         {
-            auto tCopyOperationNode = tStageNode.append_child("Operation");
-            XMLGen::append_children({"Name", "PerformerName"}, {"Copy Field", tFirstPlatoMainPerformer}, tCopyOperationNode);
             auto tSharedDataName = get_filter_constraint_criterion_gradient_input_shared_data_name(tConstraint);
-            tInputNode = tCopyOperationNode.append_child("Input");
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputField", tSharedDataName}, tInputNode);
-            auto tOutputNode = tCopyOperationNode.append_child("Output");
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputField", tOutputSharedData}, tOutputNode);
+            append_copy_field_operation(tFirstPlatoMainPerformer, tSharedDataName, tOutputSharedData, tStageNode);
         }
         else
         {
@@ -1319,7 +1789,138 @@ void append_constraint_gradient_stage
         XMLGen::append_children({"SharedDataName"}, {tOutputSharedData}, tOutputNode);
     }
 }
-// function append_constraint_gradient_stage
+// function append_constraint_gradient_stage_for_topology_problem
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_constraint_gradient_operation
+(const std::string &aPerformer,
+ pugi::xml_node &aParent)
+{
+    auto tOperationNode = aParent.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Gradient", aPerformer}, tOperationNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_shape_sensitivity_on_change_operation
+(pugi::xml_node &aParent)
+{
+    auto tForNode = aParent.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"I", "Parameters"}, tForNode);
+    auto tOperationNode = tForNode.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Parameter Sensitivity on Change", "plato_esp_{I}"}, tOperationNode);
+    auto tParamNode = tOperationNode.append_child("Parameter");
+    XMLGen::append_children({"ArgumentName", "ArgumentValue"}, {"Parameter Index", "{I-1}"}, tParamNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Parameters", "Design Parameters"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Parameter Sensitivity", "Parameter Sensitivity {I}"}, tOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_constraint_sensitivity_operation
+(const std::string &aPerformer,
+ const std::string &aSharedDataName,
+ pugi::xml_node &aParent)
+{
+    auto tOperationNode = aParent.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Constraint Sensitivity", aPerformer}, tOperationNode);
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"I", "Parameters"}, tForNode);
+    auto tInputNode = tForNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Parameter Sensitivity {I}", "Parameter Sensitivity {I}"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Criterion Sensitivity", aSharedDataName}, tOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_compute_objective_sensitivity_operation
+(const std::string &aPerformer,
+ const std::string &aSharedDataName,
+ pugi::xml_node &aParent)
+{
+    auto tOperationNode = aParent.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Sensitivity", aPerformer}, tOperationNode);
+    auto tForNode = tOperationNode.append_child("For");
+    XMLGen::append_attributes({"var", "in"}, {"I", "Parameters"}, tForNode);
+    auto tInputNode = tForNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Parameter Sensitivity {I}", "Parameter Sensitivity {I}"}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Criterion Sensitivity", aSharedDataName}, tOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_copy_value_operation
+(const std::string &aPerformer,
+ const std::string &aInputSharedDataName,
+ const std::string &aOutputSharedDataName,
+ pugi::xml_node &aParent)
+{
+    auto tOperationNode = aParent.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Copy Value", aPerformer}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputValue", aInputSharedDataName}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputValue", aOutputSharedDataName}, tOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_copy_field_operation
+(const std::string &aPerformer,
+ const std::string &aInputSharedDataName,
+ const std::string &aOutputSharedDataName,
+ pugi::xml_node &aParent)
+{
+    auto tOperationNode = aParent.append_child("Operation");
+    XMLGen::append_children({"Name", "PerformerName"}, {"Copy Field", aPerformer}, tOperationNode);
+    auto tInputNode = tOperationNode.append_child("Input");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"InputField", aInputSharedDataName}, tInputNode);
+    auto tOutputNode = tOperationNode.append_child("Output");
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"OutputField", aOutputSharedDataName}, tOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_constraint_gradient_stage_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    XMLGen::ConstraintGradientOperation tGradOperationInterface;
+    for(auto& tConstraint : aXMLMetaData.constraints)
+    {
+        std::string tCriterionID = tConstraint.criterion();
+        std::string tServiceID = tConstraint.service();
+        std::string tScenarioID = tConstraint.scenario();
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tSharedDataName = std::string("Criterion Gradient - ") + tIdentifierString;
+        auto tService = aXMLMetaData.service(tConstraint.service()); 
+        auto tStageNode = aDocument.append_child("Stage");
+        auto tStageName = std::string("Compute Constraint Gradient ") + tConstraint.id();
+        auto tStageOutputName = std::string("Constraint Gradient ") + tConstraint.id();
+        XMLGen::append_children({"Name"}, {tStageName}, tStageNode);
+        auto tInputNode = tStageNode.append_child("Input");
+        XMLGen::append_children({"SharedDataName"}, {"Design Parameters"}, tInputNode);
+
+        XMLGen::append_update_geometry_on_change_operation(tFirstPlatoMainPerformer, tStageNode);
+        XMLGen::append_reinitialize_on_change_operation(tService.performer(), tStageNode);
+        auto tOuterOperationNode = tStageNode.append_child("Operation");
+        append_compute_constraint_gradient_operation(tService.performer(), tOuterOperationNode);
+        append_compute_shape_sensitivity_on_change_operation(tOuterOperationNode);
+        append_compute_constraint_sensitivity_operation(tService.performer(), tSharedDataName, tStageNode);
+        append_copy_value_operation(tFirstPlatoMainPerformer, tSharedDataName, tStageOutputName, tStageNode);
+        auto tOutputNode = tStageNode.append_child("Output");
+        XMLGen::append_children({"SharedDataName"}, {"Constraint Gradient " + tConstraint.id()}, tOutputNode);
+    }
+}
+// function append_constraint_gradient_stage_for_shape_problem
 /******************************************************************************/
 
 /******************************************************************************/
@@ -1543,14 +2144,25 @@ void append_optimization_update_problem_stage_options
 
 /******************************************************************************/
 void append_optimization_variables_options
-(pugi::xml_node& aParentNode)
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
 {
     std::vector<std::string> tKeys =
         {"ValueName", "InitializationStage", "FilteredName", "LowerBoundValueName", "LowerBoundVectorName",
          "UpperBoundValueName", "UpperBoundVectorName", "SetLowerBoundsStage", "SetUpperBoundsStage"};
-    std::vector<std::string> tValues =
-        {"Control", "Initial Guess", "Topology", "Lower Bound Value", "Lower Bound Vector",
-         "Upper Bound Value", "Upper Bound Vector", "Set Lower Bounds", "Set Upper Bounds"};
+    std::vector<std::string> tValues;
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        tValues =
+            {"Control", "Initial Guess", "Topology", "Lower Bound Value", "Lower Bound Vector",
+             "Upper Bound Value", "Upper Bound Vector", "Set Lower Bounds", "Set Upper Bounds"};
+    }
+    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        tValues =
+            {"Design Parameters", "Initialize Design Parameters", "Topology", "Lower Bound Value", "Lower Bound Vector",
+             "Upper Bound Value", "Upper Bound Vector", "Set Lower Bounds", "Set Upper Bounds"};
+    }
     auto tNode = aParentNode.append_child("OptimizationVariables");
     XMLGen::append_children(tKeys, tValues, tNode);
 }
@@ -1566,21 +2178,6 @@ void append_optimization_objective_options
         { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""} };
 
     std::string tValueNameString = "Objective Value";
-/*
-    if(aXMLMetaData.needToAggregate())
-    {
-        tValueNameString = "Objective Value";
-    }
-    else
-    {
-        std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
-        std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-        tValueNameString = "Criterion Value - " + tIdentifierString;
-    }
-*/
 
     tKeyToValueMap.find("ValueName")->second = tValueNameString;
     tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Objective Value");
@@ -1602,9 +2199,18 @@ void append_optimization_constraint_options
 {
     for (auto &tConstraint : aXMLMetaData.constraints)
     {
-        std::unordered_map<std::string, std::string> tKeyToValueMap =
-        { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""},
-          {"ReferenceValueName", "Design Volume"} };
+        std::unordered_map<std::string, std::string> tKeyToValueMap;
+        if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        {
+            tKeyToValueMap =
+            { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""},
+              {"ReferenceValueName", "Design Volume"} };
+        }
+        else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        {
+            tKeyToValueMap =
+            { {"ValueName", ""}, {"ValueStageName", ""}, {"GradientName", ""}, {"GradientStageName", ""} };
+        }
 
         tKeyToValueMap.find("ValueName")->second = std::string("Constraint Value ") + tConstraint.id();
         tKeyToValueMap.find("ValueStageName")->second = std::string("Compute Constraint Value ") + tConstraint.id();
@@ -1648,7 +2254,7 @@ void append_optimizer_options
     XMLGen::append_optimization_update_problem_stage_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_cache_stage_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_output_options(aXMLMetaData, tOptimizerNode);
-    XMLGen::append_optimization_variables_options(tOptimizerNode);
+    XMLGen::append_optimization_variables_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_objective_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_constraint_options(aXMLMetaData, tOptimizerNode);
     XMLGen::append_optimization_bound_constraints_options({"1.0", "0.0"}, tOptimizerNode);

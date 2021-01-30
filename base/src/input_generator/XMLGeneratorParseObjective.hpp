@@ -67,6 +67,13 @@ private:
     void setServiceIDs(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
+     * \fn setShapeServiceIDs
+     * \brief Set IDs of shape services that will provide the criteria evaluations.
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setShapeServiceIDs(XMLGen::Objective& aMetadata);
+
+    /******************************************************************************//**
      * \fn setScenarioIDs
      * \brief Set IDs of scenarios that will be used for criteria evaluations.
      * \param [in/out] aInputFile parsed input metadata

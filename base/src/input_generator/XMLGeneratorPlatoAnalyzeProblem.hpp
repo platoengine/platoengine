@@ -39,6 +39,7 @@ inline bool is_robust_optimization_problem
 }
 // function is_robust_optimization_problem
 
+#if 0
 /******************************************************************************//**
  * \fn write_optimization_problem
  * \brief Write input files needed to solve optimization problems with Plato Analyze.
@@ -58,6 +59,7 @@ inline void write_optimization_problem
     XMLGen::write_amgx_input_file(aMetaData);
     XMLGen::generate_launch_script(aMetaData);
 }
+#endif
 
 }
 // namespace Analyze

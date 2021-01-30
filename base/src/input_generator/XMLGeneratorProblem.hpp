@@ -8,11 +8,10 @@
 
 #include <iostream>
 
-//#include "XMLGeneratorDefinesFileUtilities.hpp"
-//#include "XMLGeneratorLaunchScriptUtilities.hpp"
 #include "XMLGeneratorInterfaceFileUtilities.hpp"
-//#include "XMLGeneratorRandomInterfaceFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainInputFileUtilities.hpp"
+#include "XMLGeneratorPlatoESPInputFileUtilities.hpp"
+#include "XMLGeneratorPlatoESPOperationsFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
@@ -33,14 +32,14 @@ inline void write_optimization_problem
 (const XMLGen::InputData& aMetaData,
  const std::vector<XMLGen::InputData>& aPreProcessedMetaData)
 {
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
-        XMLGen::write_define_xml_file(aMetaData.mRandomMetaData, aMetaData.m_UncertaintyMetaData);
-
+    XMLGen::write_define_xml_file(aMetaData);
     XMLGen::write_interface_xml_file(aMetaData);
     XMLGen::generate_launch_script(aMetaData);
     XMLGen::write_plato_main_operations_xml_file(aMetaData);
     XMLGen::write_plato_main_input_deck_file(aMetaData);
     XMLGen::write_amgx_input_file(aMetaData);
+    XMLGen::write_plato_esp_input_deck_file(aMetaData);
+    XMLGen::write_plato_esp_operations_file(aMetaData);
 
     for(auto tCurMetaData : aPreProcessedMetaData)
     {
@@ -48,6 +47,7 @@ inline void write_optimization_problem
         XMLGen::write_plato_analyze_input_deck_file(tCurMetaData);
     }
 }
+
 
 /*
 inline void write_service_operation_files

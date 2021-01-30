@@ -191,7 +191,12 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tUncertaintyMetaData.numPerformers = 2;
 
     // 3. CALL FUNCTION
-    XMLGen::write_define_xml_file(tRandomMetaData, tUncertaintyMetaData);
+    pugi::xml_document tDoc;
+    XMLGen::InputData tInputData;
+    tInputData.mRandomMetaData = tRandomMetaData;
+    tInputData.m_UncertaintyMetaData = tUncertaintyMetaData;
+    XMLGen::add_robust_optimization_data_to_define_xml_file(tInputData, tDoc);
+    tDoc.save_file("defines.xml", "  ");
 
     // 4. TEST OUTPUT FILE
     auto tReadData = XMLGen::read_data_from_file("defines.xml");
