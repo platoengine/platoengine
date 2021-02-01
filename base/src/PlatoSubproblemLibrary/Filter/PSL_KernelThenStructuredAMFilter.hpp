@@ -117,7 +117,9 @@ private:
         }
     }
 
-    void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
+    double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
+
+    // void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
     void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
 

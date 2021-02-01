@@ -18,7 +18,7 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     if(aBlueprintDensity->get_length() != mCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    computePrintableDensity(aBlueprintDensity);
+    // computePrintableDensity(aBlueprintDensity);
 }
 
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
@@ -77,10 +77,59 @@ int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j,
     return -1;
 }
 
-void KernelThenStructuredAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+double KernelThenStructuredAMFilter::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 {
-    ;
+    auto tTet = mConnectivity[mContainingTetID[getSerializedIndex(i,j,k)]];
+    std::vector<int> tIndex = {i,j,k};
+
+    Vector tGridPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
+    std::vector<double> tBaryCentricCoordinates = mUtilities->computeBarycentricCoordinates(tTet, tGridPoint);
+
+    double tGridPointDensity = 0;
+    for(int tNodeIndex = 0; tNodeIndex < (int) tTet.size(); ++tNodeIndex)
+    {
+       tGridPointDensity += tBaryCentricCoordinates[tNodeIndex]*(aTetMeshBlueprintDensity->get_value(tTet[tNodeIndex])); 
+    }
+
+    return tGridPointDensity;
 }
+
+// double KernelThenStructuredAMFilter::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+// {
+//     // use grid point blueprint density to compute support density
+//     // this has to be done bottom to top so it must be stored
+//     return 0;
+// }
+
+// double KernelThenStructuredAMFilter::getGridPointSupportDensity(const int& i, const int& j, const int&k) const
+// {
+//     // use grid point blueprint density to compute support density
+//     // this has to be done bottom to top so it must be stored
+//     return 0;
+// }
+
+// double KernelThenStructuredAMFilter::computeGridPointPrintableDensity(const int& i const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+// {
+//     // use grid point support density on points below to compute printable density
+//     return 0;
+// }
+
+// double KernelThenStructuredAMFilter::computeTetNodePrintableDensity(const int& aTetNodeIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+// {
+//     // get grid element that tet node belongs to
+//     // use printable density at each grid point to compute tet node printable density
+//     return 0;
+// }
+
+// void KernelThenStructuredAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+// {
+    // computeGridSupportDensity(aBlueprintDensity);
+
+    // for(size_t i = 0; i < aBlueprintDensity->get_length(); ++i)
+    // {
+    //     aBlueprintDensity->set_value(i, computeTetNodePrintableDensity(i, aBlueprintDensity));
+    // }
+// }
 
 }
 
