@@ -52,10 +52,10 @@ private:
     void check_input_data();
 
     virtual void internal_apply(AbstractInterface::ParallelVector* field);
-    virtual double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const;
+    virtual void internal_gradient(AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const;
 
     virtual void projection_apply(const double& beta, AbstractInterface::ParallelVector* field) const = 0;
-    virtual double projection_gradient(const double& beta, const double& input) const = 0;
+    virtual void projection_gradient(const double& beta, AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const = 0;
 };
 
 }

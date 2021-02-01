@@ -142,13 +142,7 @@ void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* base_fie
     m_kernel->apply(base_field);
 
     // apply post filter gradient 
-    const size_t num_controls = base.size();
-    for(size_t control_index = 0u; control_index < num_controls; control_index++)
-    {
-        double initial_gradient_value = gradient->get_value(control_index);
-        double internal_derivative_value = internal_gradient(base_field, control_index);
-        gradient->set_value(control_index, initial_gradient_value * internal_derivative_value);
-    }
+    internal_gradient(base_field, gradient);
 
     // finish gradient calculation by applying kernel filter
     base_field->set_values(base);

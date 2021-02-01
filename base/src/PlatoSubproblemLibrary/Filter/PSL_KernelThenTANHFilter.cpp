@@ -15,9 +15,13 @@ void KernelThenTANHFilter::projection_apply(const double& beta, AbstractInterfac
         field->set_value(i,tanh_apply(beta,field->get_value(i)));
     }
 }
-double KernelThenTANHFilter::projection_gradient(const double& beta, const double& input) const
+void KernelThenTANHFilter::projection_gradient(const double& beta, AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const
 {
-  return tanh_gradient(beta,input);
+    size_t tLength = gradient->get_length();
+    for(size_t i = 0u; i < tLength; ++i)
+    {
+        gradient->set_value(i, gradient->get_value(i)*tanh_gradient(beta,field->get_value(i)));
+    }
 }
 
 

@@ -14,9 +14,13 @@ void KernelThenHeavisideFilter::projection_apply(const double& beta, AbstractInt
         field->set_value(i,heaviside_apply(beta,field->get_value(i)));
     }
 }
-double KernelThenHeavisideFilter::projection_gradient(const double& beta, const double& input) const
+void KernelThenHeavisideFilter::projection_gradient(const double& beta, AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const
 {
-  return heaviside_gradient(beta,input);
+    size_t tLength = gradient->get_length();
+    for(size_t i = 0u; i < tLength; ++i)
+    {
+        gradient->set_value(i, gradient->get_value(i)*heaviside_gradient(beta,field->get_value(i)));
+    }
 }
 
 }

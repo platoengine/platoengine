@@ -53,7 +53,7 @@ private:
     KernelFilter* m_kernel;
 
     virtual void internal_apply(AbstractInterface::ParallelVector* field) = 0;
-    virtual double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const = 0;
+    virtual void internal_gradient(AbstractInterface::ParallelVector* const density_field, AbstractInterface::ParallelVector* gradient) const = 0;
 };
 
 }

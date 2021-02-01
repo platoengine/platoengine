@@ -43,7 +43,7 @@ public:
 private:
 
     void projection_apply(const double& beta, AbstractInterface::ParallelVector* field) const;
-    double projection_gradient(const double& beta, const double& input) const;
+    void projection_gradient(const double& beta, AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const;
 
 };
 

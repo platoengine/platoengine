@@ -21,9 +21,9 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     computePrintableDensity(aBlueprintDensity);
 }
 
-double KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const
+void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
 {
-    return 1.0;
+    ;
 }
 
 void KernelThenStructuredAMFilter::buildStructuredGrid()

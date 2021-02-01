@@ -73,7 +73,7 @@ private:
     void buildStructuredGrid();
 
     void internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity);
-    double internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const;
+    void internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const;
 
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
     {

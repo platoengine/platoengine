@@ -20,9 +20,9 @@ void KernelThenAMFilter::internal_apply(AbstractInterface::ParallelVector* aBlue
     computePrintableDensity(aBlueprintDensity);
 }
 
-double KernelThenAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const
+void KernelThenAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
 {
-    return 1.0;
+    ;
 }
 
 void KernelThenAMFilter::buildPseudoLayers()
