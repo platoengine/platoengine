@@ -72,7 +72,7 @@ private:
 
     void buildStructuredGrid();
 
-    double internal_apply(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex);
+    void internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity);
     double internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const;
 
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
@@ -117,7 +117,7 @@ private:
         }
     }
 
-    void computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
+    void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
     void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
 

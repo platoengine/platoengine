@@ -10,7 +10,7 @@
 namespace PlatoSubproblemLibrary
 {
 
-double KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex)
+void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity)
 {
     if(!mFilterBuilt)
         throw(std::runtime_error("Pseudo Layers not built before attempting to apply filter"));
@@ -18,13 +18,7 @@ double KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelV
     if(aBlueprintDensity->get_length() != mCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    if(!mSupportDensityHasBeenComputed)
-    {
-        computeSupportDensity(aBlueprintDensity);
-        mSupportDensityHasBeenComputed = true;
-    }
-
-    return aBlueprintDensity->get_value(aNodeIndex);
+    computePrintableDensity(aBlueprintDensity);
 }
 
 double KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const
@@ -83,7 +77,7 @@ int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j,
     return -1;
 }
 
-void KernelThenStructuredAMFilter::computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+void KernelThenStructuredAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
 {
     ;
 }

@@ -9,7 +9,7 @@
 namespace PlatoSubproblemLibrary
 {
 
-double KernelThenAMFilter::internal_apply(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex)
+void KernelThenAMFilter::internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity)
 {
     if(!mFilterBuilt)
         throw(std::runtime_error("Pseudo Layers not built before attempting to apply filter"));
@@ -17,13 +17,7 @@ double KernelThenAMFilter::internal_apply(AbstractInterface::ParallelVector* con
     if(aBlueprintDensity->get_length() != mCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    if(!mSupportDensityHasBeenComputed)
-    {
-        computeSupportDensity(aBlueprintDensity);
-        mSupportDensityHasBeenComputed = true;
-    }
-
-    return aBlueprintDensity->get_value(aNodeIndex);
+    computePrintableDensity(aBlueprintDensity);
 }
 
 double KernelThenAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const
@@ -60,7 +54,7 @@ void KernelThenAMFilter::buildPseudoLayers()
     mFilterBuilt = true;
 }
 
-void KernelThenAMFilter::computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+void KernelThenAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
 {
     for(auto tNode : mBaseLayer)
     {

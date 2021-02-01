@@ -127,11 +127,7 @@ void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* field)
     m_kernel->apply(field);
 
     // apply post filter
-    const size_t dimension = field->get_length();
-    for(size_t i = 0u; i < dimension; i++)
-    {
-        field->set_value(i, internal_apply(field, i));
-    }
+    internal_apply(field);
 }
 
 void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* base_field, AbstractInterface::ParallelVector* gradient)

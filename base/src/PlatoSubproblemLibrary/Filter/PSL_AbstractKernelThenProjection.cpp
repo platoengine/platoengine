@@ -116,9 +116,9 @@ void AbstractKernelThenProjection::check_input_data()
     }
 }
 
-double AbstractKernelThenProjection::internal_apply(AbstractInterface::ParallelVector* const field, const int& i)
+void AbstractKernelThenProjection::internal_apply(AbstractInterface::ParallelVector* field)
 {
-    return projection_apply(m_current_heaviside_parameter, field->get_value(i));
+    projection_apply(m_current_heaviside_parameter, field);
 }
 
 double AbstractKernelThenProjection::internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const

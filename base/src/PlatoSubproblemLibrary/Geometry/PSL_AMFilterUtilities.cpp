@@ -110,11 +110,7 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
     double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
     double tWLength = aMaxUVWCoords(2) - aMinUVWCoords(2);
 
-    // std::vector<double> tLength;
-    // // = {tULength,tVLength,tWLength};
-    // tLength.push_back(tULength);
-    // tLength.push_back(tVLength);
-    // tLength.push_back(tWLength);
+    std::vector<double> tLength = {tULength,tVLength,tWLength};
 
     if(tULength < 0 || tVLength < 0 || tWLength < 0)
         throw(std::domain_error("AMFilterUtilities::computeGridXYZCoordinates: Max UVW coordinates expected to be greater than Min UVW coordinates"));
@@ -134,8 +130,7 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
     std::vector<Vector> tBasis = {aUBasisVector,aVBasisVector,aBuildDirection};
     for(int i = 0; i < 3; ++i)
     {
-        // double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*tLength[i]/aNumElements[i]; 
-        double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*10/aNumElements[i]; 
+        double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*tLength[i]/aNumElements[i]; 
         tUVWCoordinates.set(i,tUVWCoordinate);
     }
 

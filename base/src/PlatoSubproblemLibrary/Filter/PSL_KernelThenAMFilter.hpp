@@ -74,7 +74,7 @@ private:
 
     void buildPseudoLayers();
 
-    double internal_apply(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex);
+    void internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity);
     double internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, const int& aNodeIndex) const;
 
     void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
@@ -107,7 +107,7 @@ private:
         mCriticalPrintAngle = aCriticalAngle;
     }
 
-    void computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
+    void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;

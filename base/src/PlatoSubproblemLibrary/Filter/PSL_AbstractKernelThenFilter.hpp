@@ -52,7 +52,7 @@ private:
     AbstractInterface::ParallelExchanger* m_parallel_exchanger;
     KernelFilter* m_kernel;
 
-    virtual double internal_apply(AbstractInterface::ParallelVector* const field, const int& i) = 0;
+    virtual void internal_apply(AbstractInterface::ParallelVector* field) = 0;
     virtual double internal_gradient(AbstractInterface::ParallelVector* const field, const int& i) const = 0;
 };
 
