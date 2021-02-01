@@ -5,6 +5,7 @@
 #include "PSL_Point.hpp"
 #include "PSL_Vector.hpp"
 #include <iostream>
+#include <memory>
 
 namespace PlatoSubproblemLibrary
 {
@@ -17,11 +18,11 @@ double KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelV
     if(aBlueprintDensity->get_length() != mCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    // if(!mSupportDensityHasBeenComputed)
-    // {
-    //     computeSupportDensity(aBlueprintDensity);
-    //     mSupportDensityHasBeenComputed = true;
-    // }
+    if(!mSupportDensityHasBeenComputed)
+    {
+        computeSupportDensity(aBlueprintDensity);
+        mSupportDensityHasBeenComputed = true;
+    }
 
     return aBlueprintDensity->get_value(aNodeIndex);
 }
@@ -33,60 +34,59 @@ double KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::Parall
 
 void KernelThenStructuredAMFilter::buildStructuredGrid()
 {
-    // Vector tMaxUVWCoords, tMinUVWCoords;
+    mUtilities = std::unique_ptr<AMFilterUtilities>(new AMFilterUtilities(mCoordinates,mConnectivity,mUBasisVector,mVBasisVector,mBuildDirection));
 
-    // AMFilterUtilities tUtilities(mCoordinates,mConnectivity,mCriticalPrintAngle,mBuildDirection,mBaseLayer);
+    mUtilities->computeBoundingBox(mMaxUVWCoords,mMinUVWCoords);
+    mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;
+    mNumElementsInEachDirection = computeNumElementsInEachDirection(mMaxUVWCoords,mMinUVWCoords,mTargetEdgeLength);
 
-    // tUtilities.getBoundingBox(tMaxUVWCoords, tMinUVWCoords);
+    mNumElementsInEachDirection = {5,5,5};
 
+    getTetIDForEachGridPoint(mContainingTetID);
+
+    mFilterBuilt = true;
 }
 
-// void KernelThenStructuredAMFilter::computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
-// {
-//     for(auto tNode : mBaseLayer)
-//     {
-//         mSupportDensity[tNode] = 1.0;
-//     }
+int KernelThenStructuredAMFilter::getSerializedIndex(const int& i, const int& j, const int& k) const
+{
+    return i + j*(mNumElementsInEachDirection[0]+1) + k*(mNumElementsInEachDirection[0]+1)*(mNumElementsInEachDirection[1]+1);
+}
 
-//     for(auto tNode : mOrderedNodes)
-//     {
-//         std::set<BoundarySupportPoint> tBoundarySupportPointDataSet = mBoundarySupportSet[tNode];
+void KernelThenStructuredAMFilter::getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const
+{
+    aTetIDs.resize((mNumElementsInEachDirection[0]+1) * (mNumElementsInEachDirection[1]+1) * (mNumElementsInEachDirection[2]+1));
+    for(int i = 0; i <= mNumElementsInEachDirection[0]; ++i)
+    {
+        for(int j = 0; j <= mNumElementsInEachDirection[1]; ++j)
+        {
+            for(int k = 0; k <= mNumElementsInEachDirection[2]; ++k)
+            {
+                aTetIDs[getSerializedIndex(i,j,k)] = getContainingTetID(i,j,k);
+            }
+        }
+    }
+}
 
-//         double tSupportDensity = 0;
+int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j, const int& k) const
+{
+    std::vector<int> tIndex({i,j,k});
+    Vector tPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
 
-//         if(tBoundarySupportPointDataSet.size() == 0)
-//         {
-//             if(mPseudoLayers[tNode] != 0)
-//                 throw(std::runtime_error("only nodes on the base layer should have no support points"));
-//             continue;
-//         }
+    for(int tTetIndex = 0; tTetIndex < (int) mConnectivity.size(); ++tTetIndex)
+    {
+        auto tTet = mConnectivity[tTetIndex];
 
-//         for(auto tSupportPointData : tBoundarySupportPointDataSet)
-//         {
-//             std::set<int> tSupportingNodes = tSupportPointData.getSupportingNodeIndices();
-//             std::vector<double> tBoundarySupportCoefficients = mBoundarySupportCoefficients[tSupportPointData];
-//             double tSupportPointDensity = 0;
+        if(mUtilities->isPointInTetrahedron(tTet,tPoint)) 
+            return tTetIndex;
+    }
 
-//             auto tCoefficientIterator = tBoundarySupportCoefficients.begin();
+    return -1;
+}
 
-//             for(auto tSupportNode : tSupportingNodes)
-//             {
-//                 tSupportPointDensity += aBlueprintDensity->get_value(tSupportNode) * (*tCoefficientIterator);
-//                 ++tCoefficientIterator;
-//             }
-
-//             tSupportDensity += std::pow(tSupportPointDensity, mSmoothMaxPNorm);
-//         }
-
-//         // double tSmoothMaxQ = mSmoothMaxPNorm + (std::log((double) tSupportPointDataSet.size()) / std::log(mX0));
-//         double tSmoothMaxQ = mSmoothMaxPNorm;
-
-//         tSupportDensity = std::pow(tSupportDensity, 1.0/tSmoothMaxQ);
-
-//         mSupportDensity[tNode] = tSupportDensity;
-//     }
-
-// }
+void KernelThenStructuredAMFilter::computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+{
+    ;
+}
 
 }
 

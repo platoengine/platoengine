@@ -64,10 +64,8 @@ PSL_TEST(AMFilterUtilities,construction)
     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
 
-    std::vector<int> tBaseLayer({});
-
     // tCoordinates empty
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection),std::domain_error);
 
     tCoordinates.push_back({0.0,0.0,0.0});
     tCoordinates.push_back({1.0,0.0,0.0});
@@ -75,43 +73,38 @@ PSL_TEST(AMFilterUtilities,construction)
     tCoordinates.push_back({0.0,0.0,1.0});
 
     // tConnectivity empty
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection),std::domain_error);
 
     tConnectivity.push_back({0,1,2,3});
 
-    // tBaseLayer empty
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
-
-    tBaseLayer = std::vector<int>({0,1,2});
-
     // valid construction
-    EXPECT_NO_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer));
+    EXPECT_NO_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection));
 
     // wrong size coordinate vector
     tCoordinates.push_back({0.0,1.0,1.0,0.0});
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection),std::domain_error);
 
     // wrong size connectivity vector
     tCoordinates.pop_back();
     tConnectivity.push_back({0,1,2});
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection),std::domain_error);
 
     // index in connectivity out of range of coordinate vector
     tConnectivity.pop_back();
     tConnectivity.push_back({1,2,3,4});
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::out_of_range);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection),std::out_of_range);
 
     // provided basis not orthogonal
     tConnectivity.pop_back();
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tUBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tUBasisVector,tBuildDirection),std::domain_error);
     
     // provided basis is not positively oriented
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tVBasisVector,tUBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tVBasisVector,tUBasisVector,tBuildDirection),std::domain_error);
 
     // provided basis is not unit length 
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,2*tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,2*tVBasisVector,tBuildDirection,tBaseLayer),std::domain_error);
-    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,2*tBuildDirection,tBaseLayer),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,2*tUBasisVector,tVBasisVector,tBuildDirection),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,2*tVBasisVector,tBuildDirection),std::domain_error);
+    EXPECT_THROW(AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,2*tBuildDirection),std::domain_error);
 }
 
 PSL_TEST(AMFilterUtilities, computeBoundingBox)
@@ -131,9 +124,7 @@ PSL_TEST(AMFilterUtilities, computeBoundingBox)
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
 
-    std::vector<int> tBaseLayer({0,1,2});
-
-    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     Vector tMaxUVWCoords, tMinUVWCoords;
 
@@ -142,7 +133,7 @@ PSL_TEST(AMFilterUtilities, computeBoundingBox)
     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
 
-    AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tBuildDirection,tUBasisVector,tVBasisVector,tBaseLayer);
+    AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tBuildDirection,tUBasisVector,tVBasisVector);
     
     // rotate space 90 degrees
     tUtilities2.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
@@ -165,7 +156,7 @@ PSL_TEST(AMFilterUtilities, computeBoundingBox)
     tUBasisVector2.normalize();
     tVBasisVector2.normalize();
 
-    AMFilterUtilities tUtilities3(tCoordinates2,tConnectivity,tUBasisVector2,tVBasisVector2,tBuildDirection2,tBaseLayer);
+    AMFilterUtilities tUtilities3(tCoordinates2,tConnectivity,tUBasisVector2,tVBasisVector2,tBuildDirection2);
 
     tUtilities3.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
 
@@ -195,9 +186,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
 
-    std::vector<int> tBaseLayer({0,1,2});
-
-    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     double tMinEdgeLength = tUtilities.computeMinEdgeLength();
 
@@ -210,7 +199,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities2(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities2.computeMinEdgeLength();
 
@@ -223,7 +212,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,0.4,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    AMFilterUtilities tUtilities3(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities3(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities3.computeMinEdgeLength();
 
@@ -236,7 +225,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,0.4});
 
-    AMFilterUtilities tUtilities4(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities4(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities4.computeMinEdgeLength();
 
@@ -249,7 +238,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    AMFilterUtilities tUtilities5(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities5(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities5.computeMinEdgeLength();
 
@@ -262,7 +251,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    AMFilterUtilities tUtilities6(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities6(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities6.computeMinEdgeLength();
 
@@ -275,7 +264,7 @@ PSL_TEST(AMFilterUtilities, computeMinEdgeLength)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    AMFilterUtilities tUtilities7(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities7(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     tMinEdgeLength = tUtilities7.computeMinEdgeLength();
 
@@ -400,7 +389,7 @@ PSL_TEST(AMFilterUtilities, computeGridXYZCoordinates)
     EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tIndex),std::out_of_range);
 }
 
-PSL_TEST(AMFilterUtilities, pointInTetrahedron)
+PSL_TEST(AMFilterUtilities, isPointInTetrahedron)
 {
     std::vector<std::vector<double>> tCoordinates;
     tCoordinates.push_back({0.0,0.0,0.0});
@@ -411,46 +400,140 @@ PSL_TEST(AMFilterUtilities, pointInTetrahedron)
     std::vector<std::vector<int>> tConnectivity;
     tConnectivity.push_back({0,1,2,3});
 
-    std::vector<int> tBaseLayer({0,1,2});
-
     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
 
-    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection,tBaseLayer);
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
     Vector tPoint({0.1,0.1,0.1});
 
     // not enough indices
     std::vector<int> tBogusTet = {0,1,2};
-    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::domain_error);
 
     // repeated index
     tBogusTet = {0,0,1,2};
-    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::domain_error);
 
     // index out of range
     tBogusTet = {0,1,2,4};
-    EXPECT_THROW(tUtilities.pointInTetrahedron(tBogusTet,tPoint),std::out_of_range);
+    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::out_of_range);
 
-    bool tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    bool tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
     EXPECT_EQ(tIsPointInTet, true);
 
     tPoint = Vector({1.0,1.0,1.0});
-    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({-0.1,0.1,0.1});
-    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({0.1,-0.1,0.1});
-    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({0.1,0.1,-0.1});
-    tIsPointInTet = tUtilities.pointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
     EXPECT_EQ(tIsPointInTet, false);
+}
+
+PSL_TEST(AMFilterUtilities, computeBarycentricCoordinates)
+{
+    std::vector<std::vector<double>> tCoordinates;
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    std::vector<std::vector<int>> tConnectivity;
+    tConnectivity.push_back({0,1,2,3});
+
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
+
+    Vector tPoint({0.0,0.0,0.0});
+
+    // not enough indices
+    std::vector<int> tBogusTet = {0,1,2};
+    EXPECT_THROW(tUtilities.computeBarycentricCoordinates(tBogusTet,tPoint),std::domain_error);
+
+    // repeated index
+    tBogusTet = {0,0,1,2};
+    EXPECT_THROW(tUtilities.computeBarycentricCoordinates(tBogusTet,tPoint),std::domain_error);
+
+    // index out of range
+    tBogusTet = {0,1,2,4};
+    EXPECT_THROW(tUtilities.computeBarycentricCoordinates(tBogusTet,tPoint),std::out_of_range);
+
+    // singular tet
+    std::vector<std::vector<double>> tCoordinates2;
+    tCoordinates2.push_back({0.0,0.0,0.0});
+    tCoordinates2.push_back({0.0,0.0,0.0});
+    tCoordinates2.push_back({0.0,1.0,0.0});
+    tCoordinates2.push_back({0.0,0.0,1.0});
+    AMFilterUtilities tUtilities2(tCoordinates2,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
+    EXPECT_THROW(tUtilities2.computeBarycentricCoordinates(tConnectivity[0],tPoint),std::domain_error);
+
+    std::vector<double> tBarycentricCoordinates = tUtilities.computeBarycentricCoordinates(tConnectivity[0], tPoint);
+    EXPECT_EQ(tBarycentricCoordinates.size(), 4u);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[0], 1.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[1], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[2], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[3], 0.0);
+
+    tPoint = Vector({1.0,0.0,0.0});
+    tBarycentricCoordinates = tUtilities.computeBarycentricCoordinates(tConnectivity[0], tPoint);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[0], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[1], 1.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[2], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[3], 0.0);
+
+    tPoint = Vector({0.0,1.0,0.0});
+    tBarycentricCoordinates = tUtilities.computeBarycentricCoordinates(tConnectivity[0], tPoint);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[0], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[1], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[2], 1.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[3], 0.0);
+
+    tPoint = Vector({0.0,0.0,1.0});
+    tBarycentricCoordinates = tUtilities.computeBarycentricCoordinates(tConnectivity[0], tPoint);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[0], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[1], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[2], 0.0);
+    EXPECT_DOUBLE_EQ(tBarycentricCoordinates[3], 1.0);
+}
+
+PSL_TEST(AMFilterUtilities, determinant3X3)
+{
+    Vector tRow1({1.0,0.0,0.0});
+    Vector tRow2({0.0,1.0,0.0});
+    Vector tRow3({0.0,0.0,1.0});
+    double tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,1.0);
+
+    tRow1 = Vector({1.0,2.0,0.0});
+    tRow2 = Vector({6.3,1.0,-8.4});
+    tRow3 = Vector({9.21,0.0,1.0});
+    tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,-166.328);
+
+    tRow1 = Vector({1.0,2.0,0.0});
+    tRow2 = Vector({2.0,4.0,0.0});
+    tRow3 = Vector({9.21,0.0,1.0});
+    tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,0.0);
+
+    Vector tColumn1({3.9, 4.6, -2.8});
+    Vector tColumn2({1.2, 3.6, -1.7});
+    Vector tColumn3({5.4, -7.6, -2.8});
+    tDeterminant = determinant3X3(tColumn1,tColumn2,tColumn3);
+    EXPECT_DOUBLE_EQ(tDeterminant,-36.504);
 }
 
 }

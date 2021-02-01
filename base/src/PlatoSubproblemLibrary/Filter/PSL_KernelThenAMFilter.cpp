@@ -33,29 +33,29 @@ double KernelThenAMFilter::internal_gradient(AbstractInterface::ParallelVector* 
 
 void KernelThenAMFilter::buildPseudoLayers()
 {
-    PseudoLayerBuilder tBuilder(mCoordinates, mConnectivity, mCriticalPrintAngle, mBuildDirection, mBaseLayer);
+    // PseudoLayerBuilder tBuilder(mCoordinates, mConnectivity, mCriticalPrintAngle, mBuildDirection, mBaseLayer);
 
-    mOrderedNodes = tBuilder.orderNodesInBuildDirection();
-    mPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
+    // mOrderedNodes = tBuilder.orderNodesInBuildDirection();
+    // mPseudoLayers = tBuilder.setBaseLayerIDToZeroAndOthersToMinusOne();
 
-    tBuilder.computeSupportSetAndCoefficients(mBoundarySupportSet);
+    // tBuilder.computeSupportSetAndCoefficients(mBoundarySupportSet);
 
-    for(auto tNode : mOrderedNodes)
-    {
-        if(mBoundarySupportSet[tNode].size() == 0)
-        {
-            if(mPseudoLayers[tNode] != 0)
-            {
-                throw(std::runtime_error("BuildPseudoLayers: only nodes on the base layer should have no support points"));
-            }
-        } 
-    }
+    // for(auto tNode : mOrderedNodes)
+    // {
+    //     if(mBoundarySupportSet[tNode].size() == 0)
+    //     {
+    //         if(mPseudoLayers[tNode] != 0)
+    //         {
+    //             throw(std::runtime_error("BuildPseudoLayers: only nodes on the base layer should have no support points"));
+    //         }
+    //     } 
+    // }
 
-    for(auto tNode : mOrderedNodes)
-    {
-        mPseudoLayers[tNode] = tBuilder.assignNodeToPseudoLayer(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
-        mBoundarySupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
-    }
+    // for(auto tNode : mOrderedNodes)
+    // {
+    //     mPseudoLayers[tNode] = tBuilder.assignNodeToPseudoLayer(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
+    //     mBoundarySupportSet[tNode] = tBuilder.pruneSupportSet(tNode, mPseudoLayers, mBoundarySupportSet[tNode]);
+    // }
 
     mFilterBuilt = true;
 }

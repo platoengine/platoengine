@@ -110,7 +110,11 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
     double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
     double tWLength = aMaxUVWCoords(2) - aMinUVWCoords(2);
 
-    std::vector<double> tLength = {tULength,tVLength,tWLength};
+    // std::vector<double> tLength;
+    // // = {tULength,tVLength,tWLength};
+    // tLength.push_back(tULength);
+    // tLength.push_back(tVLength);
+    // tLength.push_back(tWLength);
 
     if(tULength < 0 || tVLength < 0 || tWLength < 0)
         throw(std::domain_error("AMFilterUtilities::computeGridXYZCoordinates: Max UVW coordinates expected to be greater than Min UVW coordinates"));
@@ -120,17 +124,18 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
 
     for(int i = 0; i < 3; ++i)
     {
-        if(aIndex[i] < 0 || aIndex[0] > aNumElements[i])
+        if(aIndex[i] < 0 || aIndex[i] > aNumElements[i])
             throw(std::out_of_range("AMFilterUtilities::computeGridXYZCoordinates: Index must be between zero and number of elements"));
     }
 
-    Vector tXYZCoordinates;
-    Vector tUVWCoordinates;
+    Vector tXYZCoordinates({0.0,0.0,0.0});
+    Vector tUVWCoordinates({0.0,0.0,0.0});
 
     std::vector<Vector> tBasis = {aUBasisVector,aVBasisVector,aBuildDirection};
     for(int i = 0; i < 3; ++i)
     {
-        double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*tLength[i]/aNumElements[i]; 
+        // double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*tLength[i]/aNumElements[i]; 
+        double tUVWCoordinate = aMinUVWCoords(i) + aIndex[i]*10/aNumElements[i]; 
         tUVWCoordinates.set(i,tUVWCoordinate);
     }
 
@@ -139,7 +144,7 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
     return tXYZCoordinates;
 }
 
-bool AMFilterUtilities::pointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const
+void checkTet(const std::vector<int>& aTet, const int& aNumNodes)
 {
     if(aTet.size() != 4)
         throw(std::domain_error("AMFilterUtilities::pointInTetrahedron: Expected tetrahedron to contain 4 vertices"));
@@ -155,19 +160,53 @@ bool AMFilterUtilities::pointInTetrahedron(const std::vector<int>& aTet, const V
     auto tMaxIterator = std::max_element(tTemp.begin(),tTemp.end());
     auto tMinIterator = std::min_element(tTemp.begin(),tTemp.end());
 
-    if(*tMinIterator < 0 || *tMaxIterator >= (int) mCoordinates.size())
+    if(*tMinIterator < 0 || *tMaxIterator >= (int) aNumNodes)
         throw(std::out_of_range("AMFilterUtilities::pointInTetrahedron: node index out of range"));
+}
+
+bool AMFilterUtilities::isPointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const
+{
+    checkTet(aTet, mCoordinates.size());
+
+    return sameSide(aTet[0], aTet[1], aTet[2], aTet[3], aPoint) &&
+           sameSide(aTet[1], aTet[2], aTet[3], aTet[0], aPoint) &&
+           sameSide(aTet[2], aTet[3], aTet[0], aTet[1], aPoint) &&
+           sameSide(aTet[3], aTet[0], aTet[1], aTet[2], aPoint);
+}
 
 
-    int v1 = aTet[0];
-    int v2 = aTet[1];
-    int v3 = aTet[2];
-    int v4 = aTet[3];
+std::vector<double> AMFilterUtilities::computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const
+{
+    checkTet(aTet, mCoordinates.size());
 
-    return sameSide(v1, v2, v3, v4, aPoint) &&
-           sameSide(v2, v3, v4, v1, aPoint) &&
-           sameSide(v3, v4, v1, v2, aPoint) &&
-           sameSide(v4, v1, v2, v3, aPoint);
+    Vector tR1(mCoordinates[aTet[0]]);
+    Vector tR2(mCoordinates[aTet[1]]);
+    Vector tR3(mCoordinates[aTet[2]]);
+    Vector tR4(mCoordinates[aTet[3]]);
+
+    Vector tRightHandSide = aPoint - tR4;
+
+    // matrix
+    Vector tColumn1({tR1(0) - tR4(0), tR1(1) - tR4(1), tR1(2) - tR4(2)});
+    Vector tColumn2({tR2(0) - tR4(0), tR2(1) - tR4(1), tR2(2) - tR4(2)});
+    Vector tColumn3({tR3(0) - tR4(0), tR3(1) - tR4(1), tR3(2) - tR4(2)});
+
+    // use Cramers rule to solve the system
+    double tDeterminant = determinant3X3(tColumn1,tColumn2,tColumn3);
+
+    if(fabs(tDeterminant) < 1e-12)
+        throw(std::domain_error("AMFilterUtilities::computeBarycentricCoordinates: Tetrahedron is singular"));
+
+    double tInverseDeterminant = 1.0/tDeterminant;
+
+    double tBary1 = determinant3X3(tRightHandSide,tColumn2,tColumn3)*tInverseDeterminant;
+    double tBary2 = determinant3X3(tColumn1,tRightHandSide,tColumn3)*tInverseDeterminant;
+    double tBary3 = determinant3X3(tColumn1,tColumn2,tRightHandSide)*tInverseDeterminant;
+    double tBary4 = 1 - tBary1 - tBary2 - tBary3;
+
+    std::vector<double> tBarycentricCoordinates({tBary1,tBary2,tBary3,tBary4});
+
+    return tBarycentricCoordinates;
 }
 
 bool AMFilterUtilities::sameSide(const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint) const
@@ -184,14 +223,29 @@ bool AMFilterUtilities::sameSide(const int& v1, const int& v2, const int& v3, co
 
     return tDot1*tDot2 > 0;
 }
- 
+
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3)
+{
+    // rows may actually be columns instead because the
+    // determinant of a matrix is equal to the determinant
+    // of its transpose
+    
+    double tTerm1 = aRow1(0)*(aRow2(1)*aRow3(2) - aRow2(2)*aRow3(1));
+    double tTerm2 = aRow1(1)*(aRow2(0)*aRow3(2) - aRow2(2)*aRow3(0));
+    double tTerm3 = aRow1(2)*(aRow2(0)*aRow3(1) - aRow2(1)*aRow3(0));
+
+    return tTerm1 - tTerm2 + tTerm3;
+}
+
 void AMFilterUtilities::checkInput() const
 {
     if(mConnectivity.size() == 0 || mCoordinates.size() < 4)
         throw(std::domain_error("AMFilterUtilities expected at least one tetrahedron in mesh"));
 
-    if(mBaseLayer.size() == 0)
-        throw(std::domain_error("AMFilterUtilities at least one node must be specified on the base layer"));
+    // if(mBaseLayer.size() == 0)
+    //     throw(std::domain_error("AMFilterUtilities at least one node must be specified on the base layer"));
 
     for(auto tCoord: mCoordinates)
     {
@@ -219,17 +273,17 @@ void AMFilterUtilities::checkInput() const
             throw(std::domain_error("AMFilterUtilities expected tetrahedral elements"));
     }
 
-    for(auto tNodeID : mBaseLayer)
-    {
-        if(tNodeID > tMaxNodeID)
-        {
-            tMaxNodeID = tNodeID;
-        }
-        if(tNodeID < tMinNodeID)
-        {
-            tMinNodeID = tNodeID;
-        }
-    }
+    // for(auto tNodeID : mBaseLayer)
+    // {
+    //     if(tNodeID > tMaxNodeID)
+    //     {
+    //         tMaxNodeID = tNodeID;
+    //     }
+    //     if(tNodeID < tMinNodeID)
+    //     {
+    //         tMinNodeID = tNodeID;
+    //     }
+    // }
 
     if(tMinNodeID < 0 || tMaxNodeID >= (int) mCoordinates.size())
     {

@@ -18,6 +18,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <memory>
 #include <cstddef>
 #include <cassert>
 #include <iostream>
@@ -48,18 +49,16 @@ public:
     virtual ~KernelThenStructuredAMFilter()
     {
         mInputData = NULL;
+        // delete mUtilities;
+        // mUtilities = NULL;
     }
 
     void init(const std::vector<std::vector<double>>& aCoordinates,
               const std::vector<std::vector<int>>&    aConnectivity,
-              const std::vector<int>&                 aBaseLayer,
-              const PlatoSubproblemLibrary::Vector&   aBuildDirection,
-              const double                            aCriticalAngle)
+              const PlatoSubproblemLibrary::Vector&   aBuildDirection)
     {
         setCoordinates(aCoordinates);
         setConnectivity(aConnectivity);
-        setBaseLayer(aBaseLayer);
-        setCriticalPrintAngle(aCriticalAngle);
         setBuildDirectionAndUVWBasis(aBuildDirection);
 
         mBuildDirection = aBuildDirection;
@@ -84,17 +83,6 @@ private:
     void setConnectivity(const std::vector<std::vector<int>>& aConnectivity)
     {
         mConnectivity = aConnectivity;
-    }
-
-    void setBaseLayer(const std::vector<int>& aBaseLayer)
-    {
-        mBaseLayer = aBaseLayer;
-    }
-    
-
-    void setCriticalPrintAngle(const double aCriticalAngle)
-    {
-        mCriticalPrintAngle = aCriticalAngle;
     }
 
     void setBuildDirectionAndUVWBasis(const PlatoSubproblemLibrary::Vector& aVector)
@@ -131,20 +119,34 @@ private:
 
     void computeSupportDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
+    void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
+
+    int getSerializedIndex(const int& i, const int& j, const int& k) const;
+
+    int getContainingTetID(const int& i, const int& j, const int& k) const;
+
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;
 
-    std::vector<int> mBaseLayer;
+    std::vector<int> mNumElementsInEachDirection;
+    std::vector<int> mContainingTetID;
 
     Vector mUBasisVector;
     Vector mVBasisVector;
     Vector mBuildDirection;
 
-    double mCriticalPrintAngle;
+    Vector mMaxUVWCoords;
+    Vector mMinUVWCoords;
+
+    double mTargetEdgeLength;
+
     bool mSupportDensityHasBeenComputed = false;
     bool mFilterBuilt = false;
 
     ParameterData* mInputData;
+
+    // AMFilterUtilities* mUtilities;
+    std::unique_ptr<AMFilterUtilities> mUtilities;
 };
 
 }

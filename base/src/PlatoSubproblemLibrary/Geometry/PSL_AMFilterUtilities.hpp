@@ -18,14 +18,12 @@ class AMFilterUtilities
                            const std::vector<std::vector<int>>& aConnectivity,
                            Vector aUBasisVector,
                            Vector aVBasisVector,
-                           Vector aBuildDirection,
-                           const std::vector<int>& aBaseLayer) 
+                           Vector aBuildDirection)
             :mCoordinates(aCoordinates),
              mConnectivity(aConnectivity),
              mUBasisVector(aUBasisVector),
              mVBasisVector(aVBasisVector),
-             mBuildDirection(aBuildDirection),
-             mBaseLayer(aBaseLayer)
+             mBuildDirection(aBuildDirection)
         {
             checkInput();
         }
@@ -36,7 +34,10 @@ class AMFilterUtilities
 
         double computeMinEdgeLength() const;
 
-        bool pointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const;
+        bool isPointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const;
+
+        std::vector<double> computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const;
+
 
     private:
 
@@ -50,7 +51,6 @@ class AMFilterUtilities
         Vector mUBasisVector;
         Vector mVBasisVector;
         Vector mBuildDirection;
-        const std::vector<int>& mBaseLayer;
 };
 
 std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
@@ -64,5 +64,10 @@ Vector computeGridXYZCoordinates(const Vector& aUBasisVector,
                                  const Vector& aMinUVWCoords,
                                  const std::vector<int>& aNumElements,
                                  const std::vector<int>& aIndex);
+
+
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3);
 
 }

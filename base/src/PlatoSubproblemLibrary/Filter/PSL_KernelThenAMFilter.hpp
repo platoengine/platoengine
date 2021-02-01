@@ -66,7 +66,7 @@ public:
         buildPseudoLayers();
 
 
-        mSmoothMaxPNorm =  mInputData->get_smooth_max_p_norm();
+        // mSmoothMaxPNorm =  mInputData->get_smooth_max_p_norm();
     }
 
 
