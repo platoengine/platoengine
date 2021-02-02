@@ -73,6 +73,13 @@ inline void append_analyze_mpirun_commands
     {
         if(tService.code() == "plato_analyze")
         {
+            std::vector<std::string> tDeviceIDs = tService.deviceIDs();
+            std::string tDeviceID = "";
+            if(tDeviceIDs.size() != 0)
+            {
+                tDeviceID = tDeviceIDs[0];
+            }
+
             fprintf(aFile,
                 ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n",
                 tNumProcsString.c_str(),
@@ -84,7 +91,7 @@ inline void append_analyze_mpirun_commands
 
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
-            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), "");
+            XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), tDeviceID);
         }
         tServiceIndex++;
     }
@@ -149,11 +156,11 @@ void append_analyze_mpirun_commands_robust_optimization_problems
                 tEnvString.c_str(),
                 tSeparationString.c_str(),
                 aNextPerformerID);
-            aNextPerformerID++;
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
             XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), tDeviceIDs[i]);
         }
+        aNextPerformerID++;
     }
 }
 

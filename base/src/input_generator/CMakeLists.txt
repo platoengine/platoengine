@@ -33,6 +33,7 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                       XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
+                      XMLGeneratorSalinasOperationsFileUtilities.cpp
                       XMLGeneratorLaunchScriptUtilities.cpp
                       XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
                       XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
@@ -75,6 +76,7 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp
+                      XMLGeneratorSalinasOperationsFileUtilities.hpp
                       XMLGeneratorLaunchScriptUtilities.hpp
                       # XMLGeneratorAnalyzeCriterionUtilities.hpp
                       XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
