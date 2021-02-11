@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<Operation>
+  <Name>Compute Displacement Solution</Name>
+  <Function>ComputeSolution</Function>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Gradient</Name>
+  <Function>ComputeCriterionGradient</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective</Name>
+  <Function>ComputeCriterion</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>WriteOutput</Function>
+  <Name>Write Output</Name>
+  <Output>
+    <ArgumentName>Solution X</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Y</ArgumentName>
+  </Output>
+  <Output>
+    <ArgumentName>Solution Z</ArgumentName>
+  </Output>
+</Operation>
+
