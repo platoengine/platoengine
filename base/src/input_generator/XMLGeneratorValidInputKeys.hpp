@@ -78,8 +78,31 @@ struct ValidCriterionParameterKeys
         "scmm_penalty_upper_bound",
         "scmm_stress_weight",
         "scmm_mass_weight",
+        "scmm_constraint_exponent",
         "criterion_ids",
-        "criterion_weights"
+        "criterion_weights",
+        "relative_stress_limit",
+        "relaxed_stress_ramp_factor",
+        /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
+        "volume_misfit_target",
+        "limit_power_min",
+        "limit_power_max",
+        "limit_power_feasible_bias",
+        "limit_power_feasible_slope",
+        "limit_power_infeasible_bias",
+        "limit_power_infeasible_slope",
+        "limit_reset_subfrequency",
+        "limit_reset_count",
+        "inequality_allowable_feasibility_upper",
+        "inequality_feasibility_scale",
+        "inequality_infeasibility_scale",
+        "stress_inequality_power",
+        "stress_favor_final",
+        "stress_favor_updates",
+        "volume_penalty_power",
+        "volume_penalty_divisor",
+        "volume_penalty_bias",
+        "surface_area_sideset_id"
     };
 };
 
@@ -151,7 +174,6 @@ private:
         "elastic_work",
         "plastic_work",
         "volume", 
-        "stress_p-norm", 
         "mass", 
         "CG_x", 
         "CG_y", 
@@ -167,10 +189,14 @@ private:
         "flux_p-norm", 
         "stress", 
         "average_temperature", 
+        "stress_p-norm", 
         "stress_constraint",  
         "stress_constraint_general",  
         "stress_constraint_quadratic",  
-        "flux" 
+        "flux", 
+        "frf_mismatch", 
+        "limit_stress",
+        "compliance_and_volume_min"
     };
 
 public:
@@ -467,7 +493,8 @@ private:
         "transient_thermomechanics",
         "steady_state_electromechanics",
         "plasticity", 
-        "thermoplasticity"
+        "thermoplasticity",
+        "frequency_response_function"
     };
 
 
@@ -623,7 +650,7 @@ public:
 struct ValidLevelSetInitKeys
 {
     /*!< valid level set initialization methods */
-    std::vector<std::string> mKeys = {"primitives", "swiss cheese"};
+    std::vector<std::string> mKeys = {"primitives", "swiss_cheese"};
 };
 // struct ValidLevelSetInitKeys
 
@@ -748,6 +775,14 @@ private:
                 {"dispz", "Solution Z"},
                 {"principal_stresses", "principal stresses"}, 
                 {"temperature", "Solution"} 
+            }
+        },
+        { "sierra_sd", 
+            { 
+                {"vonmises", "vonmises"}, 
+                {"dispx", "dispx"}, 
+                {"dispy", "dispy"}, 
+                {"dispz", "dispz"} 
             }
         }
     };
@@ -1221,6 +1256,7 @@ struct ValidOptimizationParameterKeys
     {
      "discretization",
      "verbose",
+     "enforce_bounds",
      "number_refines",
      "mma_move_limit",
      "max_iterations",

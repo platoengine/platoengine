@@ -41,43 +41,72 @@
  */
 
 /*
- * Plato_Operations_incl.hpp
+ * Plato_OutputNodalFieldSharedData.cpp
  *
- *  Created on: Jun 27, 2019
+ *  Created on: October 10, 2020
  */
 
-#pragma once
+#include <string>
+#include <cstdio>
+#include <cstdlib>
 
-#include "Plato_Filter.hpp"
-#include "Plato_CopyField.hpp"
-#include "Plato_CopyValue.hpp"
-#include "Plato_Roughness.hpp"
-#include "Plato_SystemCall.hpp"
-#include "Plato_Aggregator.hpp"
-#include "Plato_DesignVolume.hpp"
-#include "Plato_EnforceBounds.hpp"
-#include "Plato_UpdateProblem.hpp"
-#include "Plato_ComputeVolume.hpp"
-#include "Plato_CSMMeshOutput.hpp"
-#include "Plato_SetUpperBounds.hpp"
-#include "Plato_SetLowerBounds.hpp"
-#include "Plato_PlatoMainOutput.hpp"
-#include "Plato_InitializeField.hpp"
-#include "Plato_InitializeValues.hpp"
-#include "Plato_WriteGlobalValue.hpp"
-#include "Plato_CSMParameterOutput.hpp"
-#include "Plato_OperationsUtilities.hpp"
-#include "Plato_NormalizeObjectiveValue.hpp"
-#include "Plato_MeanPlusVarianceMeasure.hpp"
-#include "Plato_MeanPlusVarianceGradient.hpp"
-#include "Plato_ReciprocateObjectiveValue.hpp"
-#include "Plato_NormalizeObjectiveGradient.hpp"
+#include "PlatoApp.hpp"
 #include "Plato_OutputNodalFieldSharedData.hpp"
-#include "Plato_ReciprocateObjectiveGradient.hpp"
+#include "Plato_OperationsUtilities.hpp"
 
-#ifdef GEOMETRY
-#include "Plato_MapMLSField.hpp"
-#include "Plato_MetaDataMLS.hpp"
-#include "Plato_ComputeMLSField.hpp"
-#include "Plato_InitializeMLSPoints.hpp"
-#endif
+namespace Plato
+{
+
+OutputNodalFieldSharedData::OutputNodalFieldSharedData(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
+        Plato::LocalOp(aPlatoApp)
+{
+    mIndex = 0;
+    for(Plato::InputData tInputNode : aNode.getByName<Plato::InputData>("Input"))
+    {
+        mInputNames.push_back(Plato::Get::String(tInputNode, "ArgumentName"));
+    }
+}
+
+OutputNodalFieldSharedData::~OutputNodalFieldSharedData()
+{
+}
+
+void OutputNodalFieldSharedData::getArguments(std::vector<Plato::LocalArg>& aLocalArgs)
+{
+    for(auto& tInputName : mInputNames) {
+        aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR_FIELD, tInputName));
+    }
+}
+
+void OutputNodalFieldSharedData::operator()()
+{
+    int tMyRank = 0;
+    MPI_Comm_rank(mPlatoApp->getComm(), &tMyRank);
+    if(tMyRank == 0)
+    {
+        mIndex++;
+        for(size_t i=0; i<mInputNames.size(); ++i)
+        {
+            auto tInputName = mInputNames[i];
+            auto tFileName = tInputName;
+            
+            tFileName += std::to_string(mIndex);
+            FILE *fp=fopen(tFileName.c_str(), "w");
+            if(fp)
+            {
+                // get input data
+                auto tInfield = mPlatoApp->getNodeField(tInputName);
+                Real* tInputField;
+                tInfield->ExtractView(&tInputField);
+                const int tLength = tInfield->MyLength();
+                for(size_t j=0; j<tLength; ++j)
+                {
+                    fprintf(fp, "%lf\n", tInputField[j]);
+                }
+                fclose(fp);
+            }
+        }
+    }
+}
+
+}

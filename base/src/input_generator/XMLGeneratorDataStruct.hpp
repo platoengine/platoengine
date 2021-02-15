@@ -48,6 +48,7 @@ struct Objective
     std::vector<std::string> shapeServiceIDs;
     std::vector<std::string> scenarioIDs;
     std::vector<std::string> weights;
+    std::string multi_load_case;
 };
 
 struct Block
@@ -215,13 +216,31 @@ public:
             tConcretizedCriteria.insert(tConcretizedCriterion);
         }
 
-        for(size_t i=0; i<objective.criteriaIDs.size(); ++i)
+        if(objective.multi_load_case == "true")
         {
-            std::string tCriterionID = objective.criteriaIDs[i];
-            std::string tServiceID = objective.serviceIDs[i];
-            std::string tScenarioID = objective.scenarioIDs[i];
-            ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-            tConcretizedCriteria.insert(tConcretizedCriterion);
+            if(objective.criteriaIDs.size() > 0)
+            {
+                std::string tCriterionID = objective.criteriaIDs[0];
+                std::string tServiceID = objective.serviceIDs[0];
+                std::string tScenarioID = "";
+                for(auto tCurScenarioID : objective.scenarioIDs)
+                {
+                    tScenarioID += tCurScenarioID;
+                }
+                ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+                tConcretizedCriteria.insert(tConcretizedCriterion);
+            }
+        }
+        else
+        {
+            for(size_t i=0; i<objective.criteriaIDs.size(); ++i)
+            {
+                std::string tCriterionID = objective.criteriaIDs[i];
+                std::string tServiceID = objective.serviceIDs[i];
+                std::string tScenarioID = objective.scenarioIDs[i];
+                ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+                tConcretizedCriteria.insert(tConcretizedCriterion);
+            }
         }
 
 
@@ -285,7 +304,8 @@ public:
         }
         else
         {
-            if(objective.criteriaIDs.size() > 1 &&
+            if(objective.multi_load_case != "true" && 
+               objective.criteriaIDs.size() > 1 &&
                needToDoWeightingInAggregator())
             {
                 tReturnValue = true;
@@ -383,6 +403,17 @@ public:
     {
         mScenarios.push_back(aScenario);
     }
+    void append_unique(const XMLGen::Scenario& aScenario)
+    {
+        for(auto &tScenario : mScenarios)
+        {
+            if(tScenario.id() == aScenario.id())
+            {
+                return;
+            }
+        }
+        mScenarios.push_back(aScenario);
+    }
 
     // Service access functions
     const XMLGen::Service& service(const size_t& aIndex) const
@@ -439,6 +470,17 @@ public:
     {
         mServices.push_back(aService);
     }
+    void append_unique(const XMLGen::Service& aService)
+    {
+        for(auto &tService : mServices)
+        {
+            if(tService.id() == aService.id())
+            {
+                return;
+            }
+        }
+        mServices.push_back(aService);
+    }
     // Criteria access
     const XMLGen::Criterion& criterion(const std::string& aID) const
     {
@@ -475,6 +517,17 @@ public:
     }
     void append(const XMLGen::Criterion& aCriterion)
     {
+        mCriteria.push_back(aCriterion);
+    }
+    void append_unique(const XMLGen::Criterion& aCriterion)
+    {
+        for(auto &tCriterion : mCriteria)
+        {
+            if(tCriterion.id() == aCriterion.id())
+            {
+                return;
+            }
+        }
         mCriteria.push_back(aCriterion);
     }
 

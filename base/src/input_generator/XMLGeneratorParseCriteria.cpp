@@ -58,8 +58,9 @@ void ParseCriteria::allocate()
     mTags.insert({ "normalize", { { {"normalize"}, ""}, "false" } });
     mTags.insert({ "normalization_value", { { {"normalization_value"}, ""}, "1.0" } });
     mTags.insert({ "stress_limit", { { {"stress_limit"}, ""}, "" } });
-    mTags.insert({ "scmm_initial_penalty", { { {"sccmm_initial_penalty"}, ""}, "" } });
+    mTags.insert({ "scmm_initial_penalty", { { {"scmm_initial_penalty"}, ""}, "" } });
     mTags.insert({ "scmm_penalty_expansion_multiplier", { { {"scmm_penalty_expansion_multiplier"}, ""}, "" } });
+    mTags.insert({ "scmm_constraint_exponent", { { {"scmm_constraint_exponent"}, ""}, "" } });
     mTags.insert({ "scmm_penalty_upper_bound", { { {"scmm_penalty_upper_bound"}, ""}, "" } });
     mTags.insert({ "scmm_stress_weight", { { {"scmm_stress_weight"}, ""}, "1.0" } });
     mTags.insert({ "scmm_mass_weight", { { {"scmm_mass_weight"}, ""}, "1.0" } });
@@ -70,6 +71,28 @@ void ParseCriteria::allocate()
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "" } });
     mTags.insert({ "criterion_ids", { { {"criterion_ids"}, ""}, "" } });
     mTags.insert({ "criterion_weights", { { {"criterion_weights"}, ""}, "" } });
+    /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
+    mTags.insert({ "volume_misfit_target", { { {"volume_misfit_target"}, ""}, "" } });
+    mTags.insert({ "relative_stress_limit", { { {"relative_stress_limit"}, ""}, "" } });
+    mTags.insert({ "relaxed_stress_ramp_factor", { { {"relaxed_stress_ramp_factor"}, ""}, "" } });
+    mTags.insert({ "limit_power_min", { { {"limit_power_min"}, ""}, "" } });
+    mTags.insert({ "limit_power_max", { { {"limit_power_max"}, ""}, "" } });
+    mTags.insert({ "limit_power_feasible_bias", { { {"limit_power_feasible_bias"}, ""}, "" } });
+    mTags.insert({ "limit_power_feasible_slope", { { {"limit_power_feasible_slope"}, ""}, "" } });
+    mTags.insert({ "limit_power_infeasible_bias", { { {"limit_power_infeasible_bias"}, ""}, "" } });
+    mTags.insert({ "limit_power_infeasible_slope", { { {"limit_power_infeasible_slope"}, ""}, "" } });
+    mTags.insert({ "limit_reset_subfrequency", { { {"limit_reset_subfrequency"}, ""}, "" } });
+    mTags.insert({ "limit_reset_count", { { {"limit_reset_count"}, ""}, "" } });
+    mTags.insert({ "inequality_allowable_feasibility_upper", { { {"inequality_allowable_feasibility_upper"}, ""}, "" } });
+    mTags.insert({ "inequality_feasibility_scale", { { {"inequality_feasibility_scale"}, ""}, "" } });
+    mTags.insert({ "inequality_infeasibility_scale", { { {"inequality_infeasibility_scale"}, ""}, "" } });
+    mTags.insert({ "stress_inequality_power", { { {"stress_inequality_power"}, ""}, "" } });
+    mTags.insert({ "stress_favor_final", { { {"stress_favor_final"}, ""}, "" } });
+    mTags.insert({ "stress_favor_updates", { { {"stress_favor_updates"}, ""}, "" } });
+    mTags.insert({ "volume_penalty_power", { { {"volume_penalty_power"}, ""}, "" } });
+    mTags.insert({ "volume_penalty_divisor", { { {"volume_penalty_divisor"}, ""}, "" } });
+    mTags.insert({ "volume_penalty_bias", { { {"volume_penalty_bias"}, ""}, "" } });
+    mTags.insert({ "surface_area_sideset_id", { { {"surface_area_sideset_id"}, ""}, "" } });
 }
 
 void ParseCriteria::setCriterionWeights(XMLGen::Criterion &aMetadata)

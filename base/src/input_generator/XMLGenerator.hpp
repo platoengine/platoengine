@@ -124,9 +124,30 @@ private:
                                      const std::string &aScenarioID,
                                      const std::string &aServiceID);
     void clearInputDataLists(XMLGen::InputData &aInputData);
-    void generatePerformerList(std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
-    //void generatePerformerList(std::set<std::pair<std::string,std::string>> &aScenarioServicePairs);
+    void createCopiesForMultiLoadCase();
+    void createCopiesForMultiPerformerCase(std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
     void createCopiesForPerformerCreation();
+    void findObjectiveScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void findConstraintScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void removeDuplicateTuplesFromConstraintList(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples, 
+         std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void createInputDataCopiesForObjectivePerformers(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void createInputDataCopiesForConstraintPerformers(
+         std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void createObjectiveCopiesForMultiLoadCase(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void verifyAllServicesAreTheSame();
+    bool serviceExists(std::vector<XMLGen::Service> &aServiceList, XMLGen::Service &aService);
+
+
+
+
+
+
+
+
     void writeInputFiles();
 };
 

@@ -77,6 +77,66 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn location_type
+     * \brief Type of application (nodeset or sideset)
+     * \return ebc location_type
+    **********************************************************************************/
+    std::string location_type() const
+    {
+        auto tItr = mProperties.find("location_type");
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
+     * \fn location_name
+     * \brief Name of application 
+     * \return ebc location_name
+    **********************************************************************************/
+    std::string location_name() const
+    {
+        auto tItr = mProperties.find("location_name");
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
+     * \fn location_id
+     * \brief ID of application 
+     * \return ebc location_id
+    **********************************************************************************/
+    std::string location_id() const
+    {
+        auto tItr = mProperties.find("location_id");
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
+     * \fn degree_of_freedom
+     * \brief degree of freedom of EBC 
+     * \return ebc degree of freedom
+    **********************************************************************************/
+    std::string degree_of_freedom() const
+    {
+        auto tItr = mProperties.find("degree_of_freedom");
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
+     * \fn dof_value
+     * \brief degree of freedom value of EBC 
+     * \return ebc degree of freedom value
+    **********************************************************************************/
+    std::string dof_value() const
+    {
+        auto tItr = mProperties.find("value");
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
+        return tOutput;
+    }
+
+    /******************************************************************************//**
      * \fn property
      * \brief If ebc property is defined, return its value; else, throw an error.
      * \param [in] aTag ebc property tag

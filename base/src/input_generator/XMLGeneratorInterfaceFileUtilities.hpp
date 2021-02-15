@@ -489,6 +489,15 @@ void append_filter_control_operation
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_enforce_bounds_operation
+ * \brief Append enforce bounds operation to PUGI XML document.
+ * \param [in/out] aParentNode pugi::xml_node
+**********************************************************************************/
+void append_enforce_bounds_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_filter_criterion_gradient_operation
  * \brief Append filter criterion gradient operation to PUGI XML document.
  * \param [in]     aSharedDataName criterion gradient shared data name
@@ -801,6 +810,130 @@ std::string get_filter_constraint_criterion_gradient_input_shared_data_name
 **********************************************************************************/
 std::string get_design_variable_name
 (const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn append_objective_value_operation_for_multi_load_case
+ * \brief Append the objective value operation for multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aCalculatingNormalizationFactor Flag telling if we are calculating the objective normalization factor
+**********************************************************************************/
+void append_objective_value_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode,
+ bool aCalculatingNormalizationFactor);
+
+/******************************************************************************//**
+ * \fn append_objective_value_operation_for_non_multi_load_case
+ * \brief Append the objective value operation for non multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aCalculatingNormalizationFactor Flag telling if we are calculating the objective normalization factor
+**********************************************************************************/
+void append_objective_value_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode,
+ bool aCalculatingNormalizationFactor);
+
+/******************************************************************************//**
+ * \fn append_gradient_value_operation_for_multi_load_case
+ * \brief Append the gradient value operation for multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aCalculatingNormalizationFactor Flag telling if we are calculating the gradient normalization factor
+**********************************************************************************/
+void append_gradient_value_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_gradient_value_operation_for_non_multi_load_case
+ * \brief Append the gradient value operation for non multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aCalculatingNormalizationFactor Flag telling if we are calculating the gradient normalization factor
+**********************************************************************************/
+void append_gradient_value_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_aggregate_objective_value_operation_for_multi_load_case
+ * \brief Append the aggregate objective value operation for multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_aggregate_objective_value_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_aggregate_objective_value_operation_for_non_multi_load_case
+ * \brief Append the aggregate objective value operation for non multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_aggregate_objective_value_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn getCompoundScenarioID
+ * \brief Build a compound scenario id from a list of ids
+ * \param [in]     aScenarioIDs  List of ids to build compound id from
+**********************************************************************************/
+std::string get_compound_scenario_id
+(const std::vector<std::string> &aScenarioIDs);
+
+/******************************************************************************//**
+ * \fn get_objective_value_operation_name
+ * \brief Get the name of the Compute Objective Value operation based on the service provider
+ * \param [in] aService The service provider
+**********************************************************************************/
+std::string get_objective_value_operation_name
+(XMLGen::Service &aService);
+
+/******************************************************************************//**
+ * \fn get_objective_gradient_operation_name
+ * \brief Get the name of the Compute Objective Gradient operation based on the service provider
+ * \param [in] aService The service provider
+**********************************************************************************/
+std::string get_objective_gradient_operation_name
+(XMLGen::Service &aService);
+
+/******************************************************************************//**
+ * \fn get_objective_value_operation_output_name
+ * \brief Get the name of the Compute Objective Value operation output based on the service provider
+ * \param [in] aService The service provider
+**********************************************************************************/
+std::string get_objective_value_operation_output_name
+(XMLGen::Service &aService);
+
+/******************************************************************************//**
+ * \fn get_objective_gradient_operation_output_name
+ * \brief Get the name of the Compute Objective Gradient operation output based on the service provider
+ * \param [in] aService The service provider
+**********************************************************************************/
+std::string get_objective_gradient_operation_output_name
+(XMLGen::Service &aService);
+
+/******************************************************************************//**
+ * \fn cache_state_exists
+ * \brief Return whether there is a service with the cache state flag set
+ * \param [in] aServices List of services to check
+**********************************************************************************/
+bool cache_state_exists
+(const std::vector<XMLGen::Service> &aServices);
+
+/******************************************************************************//**
+ * \fn append_globally_convergent_method_moving_asymptotes_options
+ * \brief Append GCMMA options
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_globally_convergent_method_moving_asymptotes_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 }
 // namespace XMLGen

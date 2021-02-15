@@ -14,6 +14,8 @@
 #include "XMLGeneratorPlatoESPOperationsFileUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
+#include "XMLGeneratorSierraSDOperationsFileUtilities.hpp"
+#include "XMLGeneratorSierraSDInputDeckUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
 #include "XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.hpp"
 
@@ -22,6 +24,49 @@ namespace XMLGen
 
 namespace Problem
 {
+
+
+/******************************************************************************//**
+ * \fn write_performer_operation_xml_file
+ * \brief Write the operations file for the performer in the metada
+ * \param [in] aInputData input metadata
+**********************************************************************************/
+inline void write_performer_operation_xml_file
+(const XMLGen::InputData& aMetaData)
+{
+    if(aMetaData.services().size() > 0)
+    {
+        if(aMetaData.services()[0].code() == "plato_analyze")
+        {
+            XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
+        }
+        else if(aMetaData.services()[0].code() == "sierra_sd")
+        {
+            XMLGen::write_sierra_sd_operation_xml_file(aMetaData);
+        }
+    }
+}
+
+/******************************************************************************//**
+ * \fn write_performer_input_deck_file
+ * \brief Write the input deck file for the performer in the metada
+ * \param [in] aInputData input metadata
+**********************************************************************************/
+inline void write_performer_input_deck_file
+(const XMLGen::InputData& aMetaData)
+{
+    if(aMetaData.services().size() > 0)
+    {
+        if(aMetaData.services()[0].code() == "plato_analyze")
+        {
+            XMLGen::write_plato_analyze_input_deck_file(aMetaData);
+        }
+        else if(aMetaData.services()[0].code() == "sierra_sd")
+        {
+            XMLGen::write_sierra_sd_input_deck(aMetaData);
+        }
+    }
+}
 
 /******************************************************************************//**
  * \fn write_optimization_problem
@@ -43,27 +88,10 @@ inline void write_optimization_problem
 
     for(auto tCurMetaData : aPreProcessedMetaData)
     {
-        XMLGen::write_plato_analyze_operation_xml_file(tCurMetaData);
-        XMLGen::write_plato_analyze_input_deck_file(tCurMetaData);
+        write_performer_operation_xml_file(tCurMetaData);
+        write_performer_input_deck_file(tCurMetaData);
     }
 }
-
-
-/*
-inline void write_service_operation_files
-(const XMLGen::InputData& aMetaData,
- const XMLGen::Service &aService)
-{
-    if(aService.code() == "platomain")
-    {
-        XMLGen::write_plato_main_operations_xml_file(aMetaData, aService);
-
-    }
-    else if(aService.code() == "plato_analyze")
-    {
-    }
-}
-*/
 
 }
 // namespace Problem

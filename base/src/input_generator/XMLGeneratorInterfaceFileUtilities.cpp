@@ -43,7 +43,7 @@ void append_performer_data
     XMLGen::append_plato_main_performer(aMetaData, aNextPerformerID, aParentNode);
 
     // note: multiperformer use case currently only works with Plato Analyze, and is only used currently with the robust optimization workflow
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    if(XMLGen::is_robust_optimization_problem(aMetaData))
         XMLGen::append_physics_performers_multiperformer_usecase(aMetaData, aNextPerformerID, aParentNode);
     else
         XMLGen::append_physics_performers(aMetaData, aNextPerformerID, aParentNode);
@@ -234,7 +234,7 @@ void append_shared_data
     XMLGen::append_objective_shared_data(aMetaData, aDocument);
     XMLGen::append_normalization_shared_data(aMetaData, aDocument);
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    if(XMLGen::is_robust_optimization_problem(aMetaData))
     {
         XMLGen::append_qoi_statistics_shared_data(aMetaData, aDocument);
         XMLGen::append_multiperformer_qoi_shared_data(aMetaData, aDocument);
@@ -262,10 +262,15 @@ void append_stages
     XMLGen::append_plato_main_output_stage(aXMLMetaData, aDocument);
 
     // nondeterministic stages
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         XMLGen::append_cache_state_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
         XMLGen::append_update_problem_stage_for_nondeterministic_usecase(aXMLMetaData, aDocument);
+    }
+    else
+    {
+        XMLGen::append_cache_state_stage(aXMLMetaData, aDocument);
+        XMLGen::append_update_problem_stage(aXMLMetaData, aDocument);
     }
 
     // constraint stages
@@ -279,22 +284,42 @@ void append_stages
 /******************************************************************************/
 
 /******************************************************************************/
+bool cache_state_exists
+(const std::vector<XMLGen::Service> &aServices)
+{
+    bool tCacheFlagExists = false;
+    for(auto &tService : aServices)
+    {
+        if(tService.cacheState())
+        {
+            tCacheFlagExists = true;
+            break;
+        }
+    }
+    return tCacheFlagExists;
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_cache_state_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tService : aXMLMetaData.services())
+    if(cache_state_exists(aXMLMetaData.services()))
     {
-        if (!tService.cacheState())
-        {
-            continue;
-        }
         auto tStageNode = aDocument.append_child("Stage");
         XMLGen::append_children( { "Name" }, { "Cache State" }, tStageNode);
-        auto tOperationNode = tStageNode.append_child("Operation");
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Cache State", tService.performer() };
-        XMLGen::append_children(tKeys, tValues, tOperationNode);
+        for (auto &tService : aXMLMetaData.services())
+        {
+            if (!tService.cacheState())
+            {
+                continue;
+            }
+            auto tOperationNode = tStageNode.append_child("Operation");
+            std::vector<std::string> tKeys = { "Name", "PerformerName" };
+            std::vector<std::string> tValues = { "Cache State", tService.performer() };
+            XMLGen::append_children(tKeys, tValues, tOperationNode);
+        }
     }
 }
 /******************************************************************************/
@@ -340,22 +365,72 @@ std::string get_design_variable_name
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_value_operation
+std::string get_objective_value_operation_name(XMLGen::Service &aService)
+{
+    if(aService.code() == "sierra_sd")
+    {
+        return "Compute Objective";
+    }
+    else
+    {
+        return "Compute Objective Value";
+    }
+    return "";
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_objective_gradient_operation_name(XMLGen::Service &aService)
+{
+    if(aService.code() == "sierra_sd")
+    {
+        return "Compute Gradient";
+    }
+    else
+    {
+        return "Compute Objective Gradient";
+    }
+    return "";
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_objective_value_operation_output_name(XMLGen::Service &aService)
+{
+    if(aService.code() == "sierra_sd")
+    {
+        return "Internal Energy";
+    }
+    else
+    {
+        return "Objective Value";
+    }
+    return "";
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_objective_gradient_operation_output_name(XMLGen::Service &aService)
+{
+    if(aService.code() == "sierra_sd")
+    {
+        return "Internal Energy Gradient";
+    }
+    else
+    {
+        return "Objective Gradient";
+    }
+    return "";
+}
+/******************************************************************************/
+  
+/******************************************************************************/
+void append_objective_value_operation_for_non_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode,
  bool aCalculatingNormalizationFactor)
 {
-    pugi::xml_node tParentNode = aParentNode;
     XMLGen::Objective tObjective = aXMLMetaData.objective;
-
-    bool tMultiObjective = (tObjective.criteriaIDs.size() > 1);
-
-    // If there is more than one sub-objective add an
-    // outer "Operation" block so the sub-objectives
-    // will be executed in parallel.
-    if(tMultiObjective)
-        tParentNode = aParentNode.append_child("Operation");
-
     for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
     {
         std::string tCriterionID = tObjective.criteriaIDs[i];
@@ -363,8 +438,9 @@ void append_objective_value_operation
         std::string tScenarioID = tObjective.scenarioIDs[i];
         XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
 
-        auto tOperationNode = tParentNode.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Value", tService.performer()}, tOperationNode);
+        auto tOperationNode = aParentNode.append_child("Operation");
+        auto tOperationName = get_objective_value_operation_name(tService);
+        XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tService.performer()}, tOperationNode);
         auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
         if(tDesignVariableName != "")
         {
@@ -380,7 +456,129 @@ void append_objective_value_operation
         {
             tOutputSharedData = std::string("Initial ") + tOutputSharedData;
         }
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Value", tOutputSharedData}, tOperationOutput);
+        auto tOperationOutputName = get_objective_value_operation_output_name(tService);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tOperationOutputName, tOutputSharedData}, tOperationOutput);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode,
+ bool aCalculatingNormalizationFactor)
+{
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+    if(tObjective.criteriaIDs.size() > 0)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[0];
+        std::string tServiceID = tObjective.serviceIDs[0];
+        std::string tCompoundScenarioID = get_compound_scenario_id(tObjective.scenarioIDs);
+        XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
+
+        auto tOperationNode = aParentNode.append_child("Operation");
+        auto tOperationName = get_objective_value_operation_name(tService);
+        XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tService.performer()}, tOperationNode);
+        auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
+        if(tDesignVariableName != "")
+        {
+            auto tOperationInput = tOperationNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
+        }
+        auto tOperationOutput = tOperationNode.append_child("Output");
+
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tCompoundScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
+        if(aCalculatingNormalizationFactor)
+        {
+            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
+        }
+        auto tOperationOutputName = get_objective_value_operation_output_name(tService);
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tOperationOutputName, tOutputSharedData}, tOperationOutput);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_value_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode,
+ bool aCalculatingNormalizationFactor)
+{
+    pugi::xml_node tParentNode = aParentNode;
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+
+    bool tMultiObjective = (tObjective.criteriaIDs.size() > 1 &&
+                            tObjective.multi_load_case != "true");
+
+    // If there is more than one sub-objective add an
+    // outer "Operation" block so the sub-objectives
+    // will be executed in parallel.
+    if(tMultiObjective)
+        tParentNode = aParentNode.append_child("Operation");
+ 
+    if(tObjective.multi_load_case == "true")
+    {
+        append_objective_value_operation_for_multi_load_case(aXMLMetaData, tParentNode, aCalculatingNormalizationFactor);
+    }
+    else
+    {
+        append_objective_value_operation_for_non_multi_load_case(aXMLMetaData, tParentNode, aCalculatingNormalizationFactor);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_aggregate_objective_value_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[i];
+        std::string tServiceID = tObjective.serviceIDs[i];
+        std::string tScenarioID = tObjective.scenarioIDs[i];
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tOperationInput = aParentNode.append_child("Input");
+        auto tArgName = std::string("Value ") + std::to_string(i+1);
+        auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        if(aXMLMetaData.normalizeInAggregator())
+        {
+            tOperationInput = aParentNode.append_child("Input");
+            tArgName = std::string("Normal ") + std::to_string(i+1);
+            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
+        }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_aggregate_objective_value_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+    if(tObjective.criteriaIDs.size() > 0)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[0];
+        std::string tServiceID = tObjective.serviceIDs[0];
+        std::string tCompoundScenarioID = get_compound_scenario_id(tObjective.scenarioIDs);
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tCompoundScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        auto tOperationInput = aParentNode.append_child("Input");
+        auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
+        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Value 1", tOutputSharedData}, tOperationInput);
+        if(aXMLMetaData.normalizeInAggregator())
+        {
+            tOperationInput = aParentNode.append_child("Input");
+            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Normal 1", tOutputSharedData}, tOperationInput);
+        }
     }
 }
 /******************************************************************************/
@@ -397,25 +595,13 @@ void append_aggregate_objective_value_operation
     auto tOperationNode = tParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Aggregate Data", tFirstPlatoMainPerformer}, tOperationNode);
 
-    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    if(tObjective.multi_load_case == "true")
     {
-        std::string tCriterionID = tObjective.criteriaIDs[i];
-        std::string tServiceID = tObjective.serviceIDs[i];
-        std::string tScenarioID = tObjective.scenarioIDs[i];
-        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
-        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
-        auto tOperationInput = tOperationNode.append_child("Input");
-        auto tArgName = std::string("Value ") + std::to_string(i+1);
-        auto tOutputSharedData = std::string("Criterion Value - ") + tIdentifierString;
-        XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
-        if(aXMLMetaData.normalizeInAggregator())
-        {
-            tOperationInput = tOperationNode.append_child("Input");
-            tArgName = std::string("Normal ") + std::to_string(i+1);
-            tOutputSharedData = std::string("Initial ") + tOutputSharedData;
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
-        }
+        append_aggregate_objective_value_operation_for_multi_load_case(aXMLMetaData, tOperationNode);
+    }
+    else
+    {
+        append_aggregate_objective_value_operation_for_non_multi_load_case(aXMLMetaData, tOperationNode);
     }
 
     auto tOperationOutput = tOperationNode.append_child("Output");
@@ -472,19 +658,20 @@ void append_objective_value_stage_for_topology_problem
     auto tStageInputNode = tStageNode.append_child("Input");
     XMLGen::append_children( { "SharedDataName" }, { "Control" }, tStageInputNode);
     XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
+    XMLGen::append_enforce_bounds_operation(aXMLMetaData, tStageNode);
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
         XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
     else
         XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         auto tObjectiveName = "Objective Value";
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
     }
 
-    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(!XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         if(aXMLMetaData.needToAggregate())
         {
@@ -495,7 +682,15 @@ void append_objective_value_stage_for_topology_problem
             std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
             std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
             std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            std::string tScenarioID = "";
+            if(aXMLMetaData.objective.multi_load_case == "true")
+            {
+                tScenarioID = get_compound_scenario_id(aXMLMetaData.objective.scenarioIDs);
+            }
+            else
+            {
+                tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            }
             ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
             auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
             auto tInputValue = "Criterion Value - " + tIdentifierString;
@@ -506,6 +701,18 @@ void append_objective_value_stage_for_topology_problem
 
     auto tStageOutputNode = tStageNode.append_child("Output");
     XMLGen::append_children( { "SharedDataName" }, { "Objective Value" }, tStageOutputNode);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_compound_scenario_id(const std::vector<std::string> &aScenarioIDs)
+{
+    std::string tReturn = "";
+    for(auto tScenarioID : aScenarioIDs)
+    {
+        tReturn += tScenarioID;
+    }
+    return tReturn;
 }
 /******************************************************************************/
 
@@ -531,19 +738,19 @@ void append_objective_value_stage_for_shape_problem
         XMLGen::append_reinitialize_on_change_operation(tService.performer(), tOuterOperationNode);
     }
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
         XMLGen::append_sample_objective_value_operation(aXMLMetaData, tStageNode);
     else
         XMLGen::append_objective_value_operation(aXMLMetaData, tStageNode, false);
 
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         auto tObjectiveName = "Objective Value";
         XMLGen::append_evaluate_nondeterministic_objective_value_operation(tObjectiveName, aXMLMetaData, tStageNode);
     }
 
-    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(!XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         if(aXMLMetaData.needToAggregate())
         {
@@ -553,7 +760,15 @@ void append_objective_value_stage_for_shape_problem
         {
             std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
             std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-            std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            std::string tScenarioID = "";
+            if(aXMLMetaData.objective.multi_load_case == "true")
+            {
+                tScenarioID = get_compound_scenario_id(aXMLMetaData.objective.scenarioIDs);
+            }
+            else
+            {
+                tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+            }
             ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
             auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
             auto tInputValue = "Criterion Value - " + tIdentifierString;
@@ -584,22 +799,12 @@ void append_objective_value_stage
 /******************************************************************************/
 
 /******************************************************************************/
-void append_objective_gradient_operation
+void append_objective_gradient_operation_for_non_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    pugi::xml_node tParentNode = aParentNode;
     XMLGen::Objective tObjective = aXMLMetaData.objective;
-
-    bool tMultiObjective = (tObjective.criteriaIDs.size() > 1);
     auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
-
-    // If there is more than one sub-objective add an
-    // outer "Operation" block so the sub-objectives
-    // will be executed in parallel.
-    if(tMultiObjective)
-        tParentNode = aParentNode.append_child("Operation");
-
     for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
     {
         std::string tCriterionID = tObjective.criteriaIDs[i];
@@ -607,18 +812,78 @@ void append_objective_gradient_operation
         std::string tScenarioID = tObjective.scenarioIDs[i];
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
-
         XMLGen::Service tService = aXMLMetaData.service(tObjective.serviceIDs[i]); 
-        auto tOperationNode = tParentNode.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"Compute Objective Gradient", tService.performer()}, tOperationNode);
+        auto tOperationNode = aParentNode.append_child("Operation");
+        auto tOperationName = get_objective_gradient_operation_name(tService);
+        XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tService.performer()}, tOperationNode);
         if(tDesignVariableName != "")
         {
             auto tOperationInput = tOperationNode.append_child("Input");
             XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
             auto tOperationOutput = tOperationNode.append_child("Output");
             auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
-            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Objective Gradient", tOutputSharedData}, tOperationOutput);
+            auto tOperationOutputName = get_objective_gradient_operation_output_name(tService);
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tOperationOutputName, tOutputSharedData}, tOperationOutput);
         }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+    auto tDesignVariableName = get_design_variable_name(aXMLMetaData);
+    if(tObjective.scenarioIDs.size() > 0)
+    {
+        std::string tCriterionID = tObjective.criteriaIDs[0];
+        std::string tServiceID = tObjective.serviceIDs[0];
+        std::string tScenarioID = get_compound_scenario_id(aXMLMetaData.objective.scenarioIDs);
+        ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
+        auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
+        XMLGen::Service tService = aXMLMetaData.service(tServiceID); 
+        auto tOperationNode = aParentNode.append_child("Operation");
+        auto tOperationName = get_objective_gradient_operation_name(tService);
+        XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tService.performer()}, tOperationNode);
+        if(tDesignVariableName != "")
+        {
+            auto tOperationInput = tOperationNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Topology", tDesignVariableName}, tOperationInput);
+            auto tOperationOutput = tOperationNode.append_child("Output");
+            auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
+            auto tOperationOutputName = get_objective_gradient_operation_output_name(tService);
+            XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tOperationOutputName, tOutputSharedData}, tOperationOutput);
+        }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_objective_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    pugi::xml_node tParentNode = aParentNode;
+    XMLGen::Objective tObjective = aXMLMetaData.objective;
+
+    bool tMultiObjective = (tObjective.criteriaIDs.size() > 1 &&
+                            tObjective.multi_load_case != "true");
+
+    // If there is more than one sub-objective add an
+    // outer "Operation" block so the sub-objectives
+    // will be executed in parallel.
+    if(tMultiObjective)
+        tParentNode = aParentNode.append_child("Operation");
+
+    if(tObjective.multi_load_case == "true")
+    {
+        append_objective_gradient_operation_for_multi_load_case(aXMLMetaData, tParentNode);
+    }
+    else
+    {
+        append_objective_gradient_operation_for_non_multi_load_case(aXMLMetaData, tParentNode);
     }
 }
 /******************************************************************************/
@@ -629,12 +894,20 @@ std::string get_filter_objective_criterion_gradient_input_shared_data_name
 {
     std::string tReturnString = "Objective Gradient";
 
-    if(!XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData) &&
+    if(!XMLGen::is_robust_optimization_problem(aXMLMetaData) &&
        !aXMLMetaData.needToAggregate())
     {
         std::string tCriterionID = aXMLMetaData.objective.criteriaIDs[0];
         std::string tServiceID = aXMLMetaData.objective.serviceIDs[0];
-        std::string tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        std::string tScenarioID = "";
+        if(aXMLMetaData.objective.multi_load_case == "true")
+        {
+            tScenarioID = get_compound_scenario_id(aXMLMetaData.objective.scenarioIDs);
+        }
+        else
+        {
+            tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        }
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
         tReturnString = "Criterion Gradient - " + tIdentifierString;
@@ -685,8 +958,9 @@ void append_objective_gradient_stage_for_topology_problem
     auto tStageInputNode = tStageNode.append_child("Input");
     XMLGen::append_children({"SharedDataName"}, {"Control"}, tStageInputNode);
     XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
+    XMLGen::append_enforce_bounds_operation(aXMLMetaData, tStageNode);
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
         auto tSharedDataName = std::string("Objective Gradient");
@@ -747,7 +1021,7 @@ void append_objective_gradient_stage_for_shape_problem
         XMLGen::append_reinitialize_on_change_operation(tService.performer(), tOuterOperationNode);
     }
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aXMLMetaData))
+    if(XMLGen::is_robust_optimization_problem(aXMLMetaData))
     {
         XMLGen::append_sample_objective_gradient_operation(aXMLMetaData, tStageNode);
         auto tSharedDataName = std::string("Objective Gradient");
@@ -780,7 +1054,15 @@ void append_objective_gradient_stage_for_shape_problem
     {
         std::string tCriterionID = tObjective.criteriaIDs[0];
         std::string tServiceID = tObjective.serviceIDs[0];
-        std::string tScenarioID = tObjective.scenarioIDs[0];
+        std::string tScenarioID = "";
+        if(aXMLMetaData.objective.multi_load_case == "true")
+        {
+            tScenarioID = get_compound_scenario_id(aXMLMetaData.objective.scenarioIDs);
+        }
+        else
+        {
+            tScenarioID = aXMLMetaData.objective.scenarioIDs[0];
+        }
         ConcretizedCriterion tConcretizedCriterion(tCriterionID,tServiceID,tScenarioID);
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
         auto tSharedDataName = "Criterion Gradient - " + tIdentifierString;
@@ -854,18 +1136,23 @@ inline void append_random_write_output_operation
         return;
     }
 
-    auto tForNode = aParentNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
-    auto tOperationNode = tForNode.append_child("Operation");
-    tForNode = tOperationNode.append_child("For");
-    XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-
-    tOperationNode = tForNode.append_child("Operation");
     auto tServiceID = tOutputMetadata.serviceID();
-    auto tBasePerformerName = aMetaData.service(tServiceID).performer();
-    auto tPerformerName = tBasePerformerName + "_{PerformerIndex}";
-    XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
-    XMLGen::append_qoi_to_random_write_output_operation(aMetaData, tOperationNode);
+    auto &tService = aMetaData.service(tServiceID);
+    if(tService.code() == "plato_analyze")
+    {
+        auto tForNode = aParentNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
+        auto tOperationNode = tForNode.append_child("Operation");
+        tForNode = tOperationNode.append_child("For");
+        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+
+        tOperationNode = tForNode.append_child("Operation");
+        auto tServiceID = tOutputMetadata.serviceID();
+        auto tBasePerformerName = aMetaData.service(tServiceID).performer();
+        auto tPerformerName = tBasePerformerName + "_{PerformerIndex}";
+        XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
+        XMLGen::append_qoi_to_random_write_output_operation(aMetaData, tOperationNode);
+    }
 }
 // function append_random_qoi_outputs
 /******************************************************************************/
@@ -905,19 +1192,23 @@ inline void append_deterministic_write_output_operation
 
     for(auto &tOutputMetadata : aMetaData.mOutputMetaData)
     {
-        if(!tOutputMetadata.deterministicIDs().empty())
+        auto tServiceID = tOutputMetadata.serviceID();
+        auto &tService = aMetaData.service(tServiceID);
+        if(tService.code() == "plato_analyze")
         {
-            auto tOperationNode = tCurParentNode.append_child("Operation");
-            auto tServiceID = tOutputMetadata.serviceID();
-            auto tPerformerName = aMetaData.service(tServiceID).performer();
-            XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
-            if(aMetaData.optimization_parameters().filter_in_engine() != "true")
+            if(!tOutputMetadata.deterministicIDs().empty())
             {
-                auto tTopologyNode = tOperationNode.append_child("Output");
-                XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { "Topology", "Topology"}, tTopologyNode);
-            }
+                auto tOperationNode = tCurParentNode.append_child("Operation");
+                auto tPerformerName = aMetaData.service(tServiceID).performer();
+                XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
+                if(aMetaData.optimization_parameters().filter_in_engine() != "true")
+                {
+                    auto tTopologyNode = tOperationNode.append_child("Output");
+                    XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { "Topology", "Topology"}, tTopologyNode);
+                }
 
-            XMLGen::append_qoi_to_deterministic_write_output_operation(aMetaData, tOutputMetadata, tOperationNode);
+                XMLGen::append_qoi_to_deterministic_write_output_operation(aMetaData, tOutputMetadata, tOperationNode);
+            }
         }
     }
 }
@@ -1415,6 +1706,29 @@ void append_filter_control_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_enforce_bounds_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    if(aXMLMetaData.optimization_parameters().enforce_bounds() == "true")
+    {
+        std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+        auto tOperationNode = aParentNode.append_child("Operation");
+        XMLGen::append_children({"Name", "PerformerName"},{"EnforceBounds", tFirstPlatoMainPerformer}, tOperationNode);
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Lower Bound Vector", "Lower Bound Vector"}, tInputNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Upper Bound Vector", "Upper Bound Vector"}, tInputNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Topology"}, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Topology"}, tOutputNode);
+    }
+}
+// function append_enforce_bounds_operation
+/******************************************************************************/
+
+/******************************************************************************/
 void append_filter_criterion_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
  const std::string& aInputSharedDataName,
@@ -1456,6 +1770,7 @@ void append_compute_normalization_factor_operation
     if(aXMLMetaData.normalizeInAggregator())
     {
         XMLGen::append_filter_control_operation(aXMLMetaData, aParentNode);
+        XMLGen::append_enforce_bounds_operation(aXMLMetaData, aParentNode);
         XMLGen::append_objective_value_operation(aXMLMetaData, aParentNode, true);
     }
 }
@@ -1663,6 +1978,7 @@ void append_constraint_stage_for_topology_problem
 
         auto tService = aXMLMetaData.service(tConstraint.service()); 
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
+        XMLGen::append_enforce_bounds_operation(aXMLMetaData, tStageNode);
         tValueOperationInterface.call(tConstraint, tService.performer(), tDesignVariableName, tService.code(), tStageNode);
 
         append_copy_value_operation(tFirstPlatoMainPerformer, std::string("Criterion Value - ") + tIdentifierString, std::string("Constraint Value ") + tConstraint.id(), tStageNode);
@@ -1771,6 +2087,7 @@ void append_constraint_gradient_stage_for_topology_problem
 
         auto tService = aXMLMetaData.service(tConstraint.service()); 
         XMLGen::append_filter_control_operation(aXMLMetaData, tStageNode);
+        XMLGen::append_enforce_bounds_operation(aXMLMetaData, tStageNode);
         tGradOperationInterface.call(tConstraint, tService.performer(), tDesignVariableName, tService.code(), tStageNode);
 
         std::string tOutputSharedData = "Constraint Gradient " + tConstraint.id();
@@ -1970,6 +2287,36 @@ void append_method_moving_asymptotes_options
 /******************************************************************************/
 
 /******************************************************************************/
+void append_globally_convergent_method_moving_asymptotes_options
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+    std::vector<std::string> tKeys = 
+                                      {"GCMMAInnerKKTTolerance", 
+                                       "GCMMAOuterKKTTolerance", 
+                                       "GCMMAInnerControlStagnationTolerance", 
+                                       "GCMMAOuterControlStagnationTolerance", 
+                                       "GCMMAOuterObjectiveStagnationTolerance", 
+                                       "GCMMAMaxInnerIterations", 
+                                       "GCMMAOuterStationarityTolerance", 
+                                       "GCMMAInitialMovingAsymptoteScaleFactor"};
+    std::vector<std::string> tValues = {
+             aXMLMetaData.optimization_parameters().gcmma_inner_kkt_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_outer_kkt_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_inner_control_stagnation_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_outer_control_stagnation_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_outer_objective_stagnation_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_max_inner_iterations(), 
+             aXMLMetaData.optimization_parameters().gcmma_outer_stationarity_tolerance(), 
+             aXMLMetaData.optimization_parameters().gcmma_initial_moving_asymptotes_scale_factor()};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.append_child("Options");
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+}
+// function append_globally_convergent_method_moving_asymptotes_options
+/******************************************************************************/
+
+/******************************************************************************/
 void append_trust_region_kelley_sachs_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -2013,6 +2360,8 @@ void append_trust_region_kelley_sachs_options
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
+    auto tConvergenceNode = aParentNode.append_child("Convergence");
+    XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.optimization_parameters().max_iterations()}, tConvergenceNode);
 }
 // function append_trust_region_kelley_sachs_options
 /******************************************************************************/
@@ -2051,6 +2400,10 @@ void append_optimization_algorithm_parameters_options
     {
         XMLGen::append_method_moving_asymptotes_options(aXMLMetaData, aParentNode);
     }
+    else if(tLower.compare("gcmma") == 0)
+    {
+        XMLGen::append_globally_convergent_method_moving_asymptotes_options(aXMLMetaData, aParentNode);
+    }
     else if(tLower.compare("ksbc") == 0)
     {
         XMLGen::append_trust_region_kelley_sachs_options(aXMLMetaData, aParentNode);
@@ -2079,7 +2432,7 @@ void append_optimization_algorithm_options
  pugi::xml_node& aParentNode)
 {
     std::unordered_map<std::string, std::string> tValidOptimizers =
-        { {"oc", "OC"}, {"mma", "MMA"}, {"ksbc", "KSBC"}, {"ksal", "KSAL"} ,
+        { {"oc", "OC"}, {"mma", "MMA"}, {"gcmma", "GCMMA"}, {"ksbc", "KSBC"}, {"ksal", "KSAL"} ,
           {"rol ksbc", "ROL KSBC"}, {"rol ksal", "ROL KSAL"}, {"derivativechecker", "DerivativeChecker"} };
 
     auto tLower = Plato::tolower(aXMLMetaData.optimization_parameters().optimization_algorithm());
@@ -2117,12 +2470,11 @@ void append_optimization_cache_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.service(0u).cacheState())
+    if(cache_state_exists(aXMLMetaData.services()))
     {
-        return;
+        auto tNode = aParentNode.append_child("CacheStage");
+        append_children({"Name"}, {"Cache State"}, tNode);
     }
-    auto tNode = aParentNode.append_child("CacheStage");
-    append_children({"Name"}, {"Cache State"}, tNode);
 }
 // function append_optimization_cache_stage_options
 /******************************************************************************/

@@ -31,7 +31,7 @@ void write_plato_main_operations_xml_file
     XMLGen::append_compute_volume_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_compute_volume_gradient_to_plato_main_operation(aMetaData, tDocument);
 
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    if(XMLGen::is_robust_optimization_problem(aMetaData))
     {
         XMLGen::append_stochastic_objective_value_to_plato_main_operation(aMetaData, tDocument);
         XMLGen::append_stochastic_objective_gradient_to_plato_main_operation(aMetaData, tDocument);
@@ -41,7 +41,7 @@ void write_plato_main_operations_xml_file
     XMLGen::append_update_problem_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_filter_control_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_filter_gradient_to_plato_main_operation(aMetaData, tDocument);
-    //if(!XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    //if(!XMLGen::is_robust_optimization_problem(aMetaData))
     if(aMetaData.needToAggregate())
     {
         XMLGen::append_aggregate_data_to_plato_main_operation(aMetaData, tDocument);
@@ -50,6 +50,7 @@ void write_plato_main_operations_xml_file
     XMLGen::append_csm_mesh_output_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_initialize_geometry_operation_to_plato_main_operation(aMetaData, tDocument);
     XMLGen::append_update_geometry_on_change_operation_to_plato_main_operation(aMetaData, tDocument);
+    XMLGen::append_enforce_bounds_operation_to_plato_main_operation(aMetaData, tDocument);
 
     tDocument.save_file("plato_main_operations.xml", "  ");
 }
@@ -137,6 +138,28 @@ void append_filter_options_to_plato_main_operation
     }
 }
 // function append_filter_options_to_plato_main_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_enforce_bounds_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().enforce_bounds() == "true")
+    {
+        auto tOperationNode = aDocument.append_child("Operation");
+        XMLGen::append_children({"Name","Function"}, {"EnforceBounds","EnforceBounds"}, tOperationNode);
+        auto tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Upper Bound Vector"}, tInputNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Lower Bound Vector"}, tInputNode);
+        tInputNode = tOperationNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInputNode);
+        auto tOutputNode = tOperationNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tOutputNode);
+    }
+}
+// function append_enforce_bounds_operation_to_plato_main_operation
 /******************************************************************************/
 
 /******************************************************************************/
@@ -825,7 +848,7 @@ void append_initialize_levelset_operation
     {
         XMLGen::append_initialize_levelset_primitives_operation(aXMLMetaData, aDocument);
     }
-    else if(tItr->compare("swiss cheese") == 0)
+    else if(tItr->compare("swiss_cheese") == 0)
     {
         XMLGen::append_initialize_levelset_swiss_cheese_operation(aXMLMetaData, aDocument);
     }

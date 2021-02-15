@@ -41,43 +41,54 @@
  */
 
 /*
- * Plato_Operations_incl.hpp
+ * Plato_OutputNodalFieldSharedData.hpp
  *
- *  Created on: Jun 27, 2019
+ *  Created on: Feb 11, 2021
  */
 
 #pragma once
 
-#include "Plato_Filter.hpp"
-#include "Plato_CopyField.hpp"
-#include "Plato_CopyValue.hpp"
-#include "Plato_Roughness.hpp"
-#include "Plato_SystemCall.hpp"
-#include "Plato_Aggregator.hpp"
-#include "Plato_DesignVolume.hpp"
-#include "Plato_EnforceBounds.hpp"
-#include "Plato_UpdateProblem.hpp"
-#include "Plato_ComputeVolume.hpp"
-#include "Plato_CSMMeshOutput.hpp"
-#include "Plato_SetUpperBounds.hpp"
-#include "Plato_SetLowerBounds.hpp"
-#include "Plato_PlatoMainOutput.hpp"
-#include "Plato_InitializeField.hpp"
-#include "Plato_InitializeValues.hpp"
-#include "Plato_WriteGlobalValue.hpp"
-#include "Plato_CSMParameterOutput.hpp"
-#include "Plato_OperationsUtilities.hpp"
-#include "Plato_NormalizeObjectiveValue.hpp"
-#include "Plato_MeanPlusVarianceMeasure.hpp"
-#include "Plato_MeanPlusVarianceGradient.hpp"
-#include "Plato_ReciprocateObjectiveValue.hpp"
-#include "Plato_NormalizeObjectiveGradient.hpp"
-#include "Plato_OutputNodalFieldSharedData.hpp"
-#include "Plato_ReciprocateObjectiveGradient.hpp"
+#include "Plato_LocalOperation.hpp"
 
-#ifdef GEOMETRY
-#include "Plato_MapMLSField.hpp"
-#include "Plato_MetaDataMLS.hpp"
-#include "Plato_ComputeMLSField.hpp"
-#include "Plato_InitializeMLSPoints.hpp"
-#endif
+namespace Plato
+{
+
+class InputData;
+
+/******************************************************************************//**
+ * @brief Manage PLATO Main output
+ **********************************************************************************/
+class OutputNodalFieldSharedData : public Plato::LocalOp
+{
+public:
+    /******************************************************************************//**
+     * @brief Constructor
+     * @param [in] aPlatoApp PLATO application
+     * @param [in] aNode input XML data
+     **********************************************************************************/
+    OutputNodalFieldSharedData(PlatoApp* aPlatoApp, Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * @brief Destructor
+     **********************************************************************************/
+    ~OutputNodalFieldSharedData();
+
+    /******************************************************************************//**
+     * @brief perform local operation - output data
+     **********************************************************************************/
+    void operator()();
+
+    /******************************************************************************//**
+     * @brief Return local operation's argument list
+     * @param [out] aLocalArgs argument list
+    **********************************************************************************/
+    void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
+
+private:
+    std::vector<std::string> mInputNames;
+    int mIndex;
+};
+// class OutputNodalFieldSharedData
+
+}
+// namespace Plato

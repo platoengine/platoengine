@@ -9,18 +9,6 @@
 
 namespace XMLGen
 {
-inline bool is_robust_optimization_problem
-(const XMLGen::InputData& aMetaData)
-{
-    if(aMetaData.mRandomMetaData.empty())
-    {
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
 
 inline void append_plato_analyze_code_path
 (const XMLGen::InputData& aInputData,
@@ -92,6 +80,47 @@ inline void append_analyze_mpirun_commands
             fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
             fprintf(aFile, "%s PLATO_APP_FILE%splato_analyze_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
             XMLGen::append_plato_analyze_code_path(aInputData, aFile, tService.id(), tDeviceID);
+        }
+        tServiceIndex++;
+    }
+}
+
+void append_sierra_sd_mpirun_commands
+(const XMLGen::InputData& aInputData,
+ int &aNextPerformerID,
+ FILE*& aFile)
+{
+    std::string tEnvString, tSeparationString, tLaunchString, tNumProcsString;
+    XMLGen::determine_mpi_env_and_separation_strings(tEnvString, tSeparationString);
+    XMLGen::determine_mpi_launch_strings(aInputData, tLaunchString, tNumProcsString);
+
+    int tServiceIndex = aNextPerformerID;
+    for(auto &tService : aInputData.mPerformerServices)
+    {
+        if(tService.code() == "sierra_sd")
+        {
+            std::vector<std::string> tDeviceIDs = tService.deviceIDs();
+            std::string tDeviceID = "";
+            if(tDeviceIDs.size() != 0)
+            {
+                tDeviceID = tDeviceIDs[0];
+            }
+
+            fprintf(aFile,
+                ": %s %s %s PLATO_PERFORMER_ID%s%d \\\n",
+                tNumProcsString.c_str(),
+                tService.numberProcessors().c_str(),
+                tEnvString.c_str(),
+                tSeparationString.c_str(),
+                tServiceIndex);
+            aNextPerformerID++;
+
+            fprintf(aFile, "%s PLATO_INTERFACE_FILE%sinterface.xml \\\n", tEnvString.c_str(), tSeparationString.c_str());
+            fprintf(aFile, "%s PLATO_APP_FILE%ssierra_sd_%s_operations.xml \\\n", tEnvString.c_str(), tSeparationString.c_str(), tService.id().c_str());
+            if(aInputData.codepaths.sierra_sd_path.length() != 0)
+              fprintf(aFile, "%s sierra_sd_%s_input_deck.i \\\n", aInputData.codepaths.sierra_sd_path.c_str(), tService.id().c_str());
+            else
+              fprintf(aFile, "plato_sd_main sierra_sd_%s_input_deck.i \\\n", tService.id().c_str());
         }
         tServiceIndex++;
     }
@@ -178,10 +207,12 @@ void generate_mpirun_launch_script(const XMLGen::InputData& aInputData)
 
     int tNextPerformerID = 0;
     XMLGen::append_esp_initialization_line(aInputData, fp);
+    XMLGen::append_decomp_lines_for_prune_and_refine(aInputData, fp);
     XMLGen::append_prune_and_refine_lines_to_mpirun_launch_script(aInputData, fp);
     XMLGen::append_decomp_lines_to_mpirun_launch_script(aInputData, fp);
     XMLGen::append_engine_mpirun_lines(aInputData, tNextPerformerID, fp);
     XMLGen::append_analyze_mpirun_lines(aInputData, tNextPerformerID, fp);
+    XMLGen::append_sierra_sd_mpirun_lines(aInputData, tNextPerformerID, fp);
     XMLGen::append_esp_mpirun_lines(aInputData, tNextPerformerID, fp);
 
     fclose(fp);
@@ -216,6 +247,19 @@ void generate_analyze_bash_script()
     analyzeBash << "analyze_MPMD --input-config=plato_analyze_input_deck.xml\n";
 
     analyzeBash.close();
+}
+
+void append_sierra_sd_mpirun_lines(const XMLGen::InputData& aInputData, 
+                                 int &aNextPerformerID, 
+                                 FILE*& aFile)
+{
+    if(XMLGen::is_robust_optimization_problem(aInputData))
+    {
+    }
+    else
+    {
+        XMLGen::append_sierra_sd_mpirun_commands(aInputData, aNextPerformerID, aFile);
+    }
 }
 
 void append_analyze_mpirun_lines(const XMLGen::InputData& aInputData, 

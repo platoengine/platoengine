@@ -289,6 +289,7 @@ public:
     std::string csm_exodus_file() const {return value("csm_exodus_file");}
     std::string csm_tesselation_file() const {return value("csm_tesselation_file");}
     std::string csm_opt_file() const {return value("csm_opt_file");}
+    std::string enforce_bounds() const {return value("enforce_bounds");}
 
 };
 // struct OptimizationParameters

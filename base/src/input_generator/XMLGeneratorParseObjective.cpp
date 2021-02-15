@@ -23,6 +23,7 @@ void ParseObjective::allocate()
     mTags.insert({ "services", { { {"services"}, ""}, "" } });
     mTags.insert({ "shape_services", { { {"shape_services"}, ""}, "" } });
     mTags.insert({ "scenarios", { { {"scenarios"}, ""}, "" } });
+    mTags.insert({ "multi_load_case", { { {"multi_load_case"}, ""}, "" } });
     //mTags.insert({ "standard_deviation_multiplier", { { {"standard_deviation_multiplier"}, ""}, "0" } });
 }
 
@@ -37,6 +38,15 @@ void ParseObjective::setType(XMLGen::Objective &aMetadata)
     {
         THROWERR(std::string("Parse Objective: objective 'type' keyword is empty. ")
             + "At least one objective must be defined for an optimization problem.")
+    }
+}
+
+void ParseObjective::setMultiLoadCase(XMLGen::Objective &aMetadata)
+{
+    auto tItr = mTags.find("multi_load_case");
+    if (tItr != mTags.end() && !tItr->second.first.second.empty())
+    {
+        aMetadata.multi_load_case = tItr->second.first.second;
     }
 }
 
@@ -140,6 +150,7 @@ void ParseObjective::setMetaData(XMLGen::Objective &aMetadata)
     this->setShapeServiceIDs(aMetadata);
     this->setScenarioIDs(aMetadata);
     this->setWeights(aMetadata);
+    this->setMultiLoadCase(aMetadata);
 }
 
 void ParseObjective::checkType(const XMLGen::Objective &aMetadata)

@@ -89,6 +89,13 @@ public:
     void setLocationType(XMLGen::NaturalBoundaryCondition& aMetadata);
 
     /******************************************************************************//**
+     * \fn setLocationID
+     * \brief Set the NaturalBoundaryCondition location id.
+     * \param [in] aMetadata natural boundary condition metadata.
+    **********************************************************************************/
+    void setLocationID(XMLGen::NaturalBoundaryCondition& aMetadata);
+
+    /******************************************************************************//**
      * \fn setLocationName
      * \brief Set the NaturalBoundaryCondition location name.
      * \param [in] aMetadata natural boundary condition metadata.

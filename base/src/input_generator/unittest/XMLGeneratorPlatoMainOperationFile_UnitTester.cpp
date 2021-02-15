@@ -666,7 +666,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeLevelsetOperation_SwissCheeseKey)
     XMLGen::InputData tXMLMetaData;
     tXMLMetaData.mesh.run_name = "dummy.exo";
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("levelset_initialization_method", "swiss cheese");
+    tOptimizationParameters.append("levelset_initialization_method", "swiss_cheese");
     tXMLMetaData.set(tOptimizationParameters);
     ASSERT_NO_THROW(XMLGen::append_initialize_levelset_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());

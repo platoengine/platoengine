@@ -79,8 +79,21 @@ namespace XMLGen
     std::string tPruneString = XMLGen::Internal::get_prune_string(aInputData);
     std::string tNumRefinesString = Plato::to_string(XMLGen::Internal::get_number_of_refines(aInputData));
     std::string tNumBufferLayersString = XMLGen::Internal::get_num_buffer_layers(aInputData);
-    std::string tNumberPruneAndRefineProcsString = Plato::to_string(XMLGen::Internal::get_number_of_prune_and_refine_procs(aInputData));
+    int tNumberPruneAndRefineProcs = XMLGen::Internal::get_number_of_prune_and_refine_procs(aInputData);
+    std::string tNumberPruneAndRefineProcsString = Plato::to_string(tNumberPruneAndRefineProcs);
     std::string tPruneAndRefineExe = XMLGen::Internal::get_prune_and_refine_executable_path(aInputData);
+
+    // Decompose files if necessary
+     /*
+    if(tNumberPruneAndRefineProcs > 1)
+    {
+        fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, aInputData.mesh.name.c_str());
+        if(aInputData.optimization_parameters().initial_guess_file_name() != "")
+        {
+            fprintf(fp, "decomp -p %d %s\n", tNumberPruneAndRefineProcs, aInputData.optimization_parameters().initial_guess_file_name().c_str());
+        }
+    }
+*/
 
     std::string tCommand;
     if(aInputData.m_UseLaunch)
@@ -140,7 +153,6 @@ namespace XMLGen
 
     XMLGen::append_decomp_lines_for_optimizer(aInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
     XMLGen::append_decomp_lines_for_performers(aInputData, fp, hasBeenDecompedForThisNumberOfProcessors);
-    XMLGen::append_decomp_lines_for_prune_and_refine(aInputData, fp);
   }
 
   void append_decomp_lines_for_optimizer(const XMLGen::InputData& aInputData,

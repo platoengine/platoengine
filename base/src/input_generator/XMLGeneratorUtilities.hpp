@@ -248,5 +248,26 @@ namespace XMLGen
     (const XMLGen::InputData& aMetaData,
      pugi::xml_document& aDocument);
 
+    /******************************************************************************//**
+     * \fn get_salinas_service_id
+     * \brief Get the id of the Sierra/SD service
+     * \param [in]     aXMLMetaData Plato problem input metadata
+    **********************************************************************************/
+    std::string get_salinas_service_id
+    (const XMLGen::InputData& aXMLMetaData);
+
+    /******************************************************************************//**
+     * \fn is_robust_optimization_problem
+     * \brief Write input files needed to solve optimization problems with Plato Analyze.
+     * \param [in] aInputData input metadata
+    **********************************************************************************/
+    inline bool is_robust_optimization_problem
+    (const XMLGen::InputData& aMetaData)
+    {
+        if(aMetaData.mRandomMetaData.empty())
+            return false;
+        else
+            return true;
+    }
 }
 // namespace XMLGen

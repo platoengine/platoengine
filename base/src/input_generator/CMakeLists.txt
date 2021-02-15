@@ -33,7 +33,8 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.cpp
                       XMLGeneratorPlatoMainOperationFileUtilities.cpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
-                      XMLGeneratorSalinasOperationsFileUtilities.cpp
+                      XMLGeneratorSierraSDOperationsFileUtilities.cpp
+                      XMLGeneratorSierraSDInputDeckUtilities.cpp
                       XMLGeneratorLaunchScriptUtilities.cpp
                       XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
                       XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
@@ -45,7 +46,6 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
                       # PlatoAnalyzeInputDeckWriter.cpp
                       XMLGeneratorUtilities.cpp
-                      # SalinasInputDeckWriter.cpp
                       )
                       
 SET(XMLGenerator_HDRS XMLGenerator.hpp 
@@ -76,7 +76,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp
                       XMLGeneratorPlatoMainOperationFileUtilities.hpp
                       XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp
-                      XMLGeneratorSalinasOperationsFileUtilities.hpp
+                      XMLGeneratorSierraSDOperationsFileUtilities.hpp
+                      XMLGeneratorSierraSDInputDeckUtilities.hpp
                       XMLGeneratorLaunchScriptUtilities.hpp
                       # XMLGeneratorAnalyzeCriterionUtilities.hpp
                       XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
@@ -104,7 +105,6 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorParseServices.hpp 
                       XMLGeneratorParseConstraint.hpp 
                       XMLGeneratorParseUncertainty.hpp
-                      # SalinasInputDeckWriter.hpp
                       )
 
 find_package(MPI)

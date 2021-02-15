@@ -46,6 +46,13 @@ private:
     void setType(XMLGen::Objective& aMetadata);
 
     /******************************************************************************//**
+     * \fn setMultiLoadCase
+     * \brief Set whether this is a sierra sd multi load case run
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setMultiLoadCase(XMLGen::Objective &aMetadata);
+
+    /******************************************************************************//**
      * \fn setWeight
      * \brief Set objective function weight.
      * \param [in/out] aInputFile parsed input metadata

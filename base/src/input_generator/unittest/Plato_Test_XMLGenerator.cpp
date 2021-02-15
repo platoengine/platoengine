@@ -556,7 +556,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     iss.seekg (0);
     tester.clearInputData();
     EXPECT_EQ(tester.publicParseOptimizationParameters(iss), true);
-    EXPECT_EQ(tester.getRestartIteration(), "22");
+    EXPECT_EQ(tester.getRestartIteration(), "1");
     stringInput = "begin optimization_parameters\n"
             "initial_guess_file_name file.gen\n"
             "initial_guess_field_name topology\n"

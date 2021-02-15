@@ -48,6 +48,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorAnalyzePhysicsFunctionInterface.cpp
                                       ../XMLGeneratorPlatoMainOperationFileUtilities.cpp
                                       ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
+                                      ../XMLGeneratorSierraSDOperationsFileUtilities.cpp
+                                      ../XMLGeneratorSierraSDInputDeckUtilities.cpp
                                       ../XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp

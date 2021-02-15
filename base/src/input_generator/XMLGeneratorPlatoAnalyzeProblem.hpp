@@ -24,20 +24,6 @@ namespace XMLGen
 namespace Analyze
 {
 
-/******************************************************************************//**
- * \fn is_robust_optimization_problem
- * \brief Write input files needed to solve optimization problems with Plato Analyze.
- * \param [in] aInputData input metadata
-**********************************************************************************/
-inline bool is_robust_optimization_problem
-(const XMLGen::InputData& aMetaData)
-{
-    if(aMetaData.mRandomMetaData.empty())
-        return false;
-    else
-        return true;
-}
-// function is_robust_optimization_problem
 
 #if 0
 /******************************************************************************//**

@@ -320,7 +320,7 @@ void write_define_xml_file
 (const XMLGen::InputData& aMetaData)
 {
     pugi::xml_document tDocument;
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData))
+    if(XMLGen::is_robust_optimization_problem(aMetaData))
     {
         add_robust_optimization_data_to_define_xml_file(aMetaData, tDocument);
     }

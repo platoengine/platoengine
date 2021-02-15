@@ -18,4 +18,8 @@ namespace XMLGen
     (const XMLGen::InputData& aInputData,
      int &aNextPerformerID,
      FILE*& aFile);
+    void append_sierra_sd_mpirun_lines(const XMLGen::InputData& aInputData, 
+                                 int &aNextPerformerID, FILE*& aFile);
+    void append_sierra_sd_mpirun_commands(const XMLGen::InputData& aInputData,
+              int &aNextPerformerID, FILE*& aFile);
 }

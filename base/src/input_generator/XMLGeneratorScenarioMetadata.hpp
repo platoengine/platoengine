@@ -24,6 +24,7 @@ private:
     std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
     std::vector<std::string> mLoadIDs;
     std::vector<std::string> mBCIDs;
+    std::vector<std::string> mFRFMatchNodesetIDs;
 
 // private member functions
 private:
@@ -59,6 +60,20 @@ public:
      * \param [in] input load IDs 
     **********************************************************************************/
     void setLoadIDs(std::vector<std::string>& aLoadIDs) {mLoadIDs = aLoadIDs;};
+
+    /******************************************************************************//**
+     * \fn frfMatchNodesetIDs
+     * \brief Return nodeset ids for matching frfs
+     * \return mFRFMatchNodesetIDs
+    **********************************************************************************/
+    std::vector<std::string> frfMatchNodesetIDs() const {return mFRFMatchNodesetIDs;};
+
+    /******************************************************************************//**
+     * \fn setFRFMatchNodesetIDs
+     * \brief Set nodeset ids for matching frfs
+     * \param [in] input nodeset IDs 
+    **********************************************************************************/
+    void setFRFMatchNodesetIDs(std::vector<std::string>& aNodesetIDs) {mFRFMatchNodesetIDs = aNodesetIDs;};
 
     /******************************************************************************//**
      * \fn bcIDs
@@ -328,6 +343,22 @@ public:
      * \return value
     **********************************************************************************/
     std::string additiveContinuation() const;
+
+    /******************************************************************************//**
+     * \fn weightMassScaleFactor
+     * \brief Return string value Sierra/SD weight/mass scale factor
+     * \return value
+    **********************************************************************************/
+    std::string weightMassScaleFactor() const;
+    
+    std::string frequency_min() const {return this->getValue("frequency_min"); }
+    std::string frequency_max() const {return this->getValue("frequency_max"); }
+    std::string frequency_step() const {return this->getValue("frequency_step"); }
+    std::string raleigh_damping_alpha() const {return this->getValue("raleigh_damping_alpha"); }
+    std::string raleigh_damping_beta() const {return this->getValue("raleigh_damping_beta"); }
+    std::string complex_error_measure() const {return this->getValue("complex_error_measure"); }
+    std::string convert_to_tet10() const {return this->getValue("convert_to_tet10"); }
+    std::string ref_frf_file() const {return this->getValue("ref_frf_file"); }
 
 };
 // struct Scenario

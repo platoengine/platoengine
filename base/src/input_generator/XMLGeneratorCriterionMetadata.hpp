@@ -320,6 +320,29 @@ public:
         return this->mCriterionWeights;
     }
 
+    /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
+    std::string volume_misfit_target() const { return this->value("volume_misfit_target"); }
+    std::string scmm_constraint_exponent() const { return this->value("scmm_constraint_exponent"); }
+    std::string relative_stress_limit() const { return this->value("relative_stress_limit"); }
+    std::string relaxed_stress_ramp_factor() const { return this->value("relaxed_stress_ramp_factor"); }
+    std::string limit_power_min() const { return this->value("limit_power_min"); }
+    std::string limit_power_max() const { return this->value("limit_power_max"); }
+    std::string limit_power_feasible_bias() const { return this->value("limit_power_feasible_bias"); }
+    std::string limit_power_feasible_slope() const { return this->value("limit_power_feasible_slope"); }
+    std::string limit_power_infeasible_bias() const { return this->value("limit_power_infeasible_bias"); }
+    std::string limit_power_infeasible_slope() const { return this->value("limit_power_infeasible_slope"); }
+    std::string limit_reset_subfrequency() const { return this->value("limit_reset_subfrequency"); }
+    std::string limit_reset_count() const { return this->value("limit_reset_count"); }
+    std::string inequality_allowable_feasibility_upper() const { return this->value("inequality_allowable_feasibility_upper"); }
+    std::string inequality_feasibility_scale() const { return this->value("inequality_feasibility_scale"); }
+    std::string inequality_infeasibility_scale() const { return this->value("inequality_infeasibility_scale"); }
+    std::string stress_inequality_power() const { return this->value("stress_inequality_power"); }
+    std::string stress_favor_final() const { return this->value("stress_favor_final"); }
+    std::string stress_favor_updates() const { return this->value("stress_favor_updates"); }
+    std::string volume_penalty_power() const { return this->value("volume_penalty_power"); }
+    std::string volume_penalty_divisor() const { return this->value("volume_penalty_divisor"); }
+    std::string volume_penalty_bias() const { return this->value("volume_penalty_bias"); }
+    std::string surface_area_sideset_id() const { return this->value("surface_area_sideset_id"); }
 
 };
 // struct Criterion

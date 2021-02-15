@@ -2897,8 +2897,8 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmOptionsKSBC)
     ASSERT_FALSE(tOptimizerNode.empty());
 
     // ****** TEST RESULTS AGAINST GOLD VALUES ******
-    std::vector<std::string> tGoldKeys = {"Options"};
-    std::vector<std::string> tGoldValues = {""};
+    std::vector<std::string> tGoldKeys = {"Options","Convergence"};
+    std::vector<std::string> tGoldValues = {"",""};
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     auto tOptionsNode = tOptimizerNode.child("Options");
     tGoldKeys = {"KSTrustRegionExpansionFactor", "KSTrustRegionContractionFactor", "DisablePostSmoothing"};

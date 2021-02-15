@@ -237,6 +237,14 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("OutputNodalFieldSharedData");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::OutputNodalFieldSharedData(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("CSMParameterOutput");
             if(tStrFunction == tFunctions.back())
             {

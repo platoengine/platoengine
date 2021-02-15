@@ -40,6 +40,7 @@ void ParseOptimizationParameters::allocate()
     mTags.clear();
     mTags.insert({ "discretization", { { {"discretization"}, ""}, "density" } });
     mTags.insert({ "verbose", { { {"verbose"}, ""}, "false" } });
+    mTags.insert({ "enforce_bounds", { { {"enforce_bounds"}, ""}, "" } });
     mTags.insert({ "number_refines", { { {"number_refines"}, ""}, "" } });
     mTags.insert({ "csm_file", { { {"csm_file"}, ""}, "" } });
     mTags.insert({ "num_shape_design_variables", { { {"num_shape_design_variables"}, ""}, "" } });
@@ -194,6 +195,38 @@ void ParseOptimizationParameters::parse(std::istream &aInputFile)
     }
 }
 
+void ParseOptimizationParameters::autoFillRestartParameters(XMLGen::OptimizationParameters &aMetadata)
+{
+    // If there is a restart iteration but no filename specified then we will
+    // assume we are coming from the gui and we will use the default "restart_XXX.exo"
+    // filename, iteration 1 from the file, and field name "optimizationdofs".
+    if(aMetadata.restart_iteration() != "" &&
+       aMetadata.restart_iteration() != "0")
+    {
+        if(aMetadata.initial_guess_file_name() == "" &&
+           aMetadata.initial_guess_field_name() == "")
+        {
+            // This block indicates that we are coming from the gui so only the
+            // restart iteration was specified.  We will fill in the other values
+            // based on what we know the gui will be providing for the run.
+            aMetadata.append("initial_guess_file_name",  "restart_" + aMetadata.restart_iteration() + ".exo");
+            aMetadata.append("restart_iteration", "1");
+            aMetadata.append("initial_guess_field_name", "control");
+        }
+        else
+        {
+            // This block indicates that the user is manually setting up the
+            // restart file and so we depend on him having specified a filename
+            // and field name.  If either of these is empty we need to error out.
+            if(aMetadata.initial_guess_field_name() == "" ||
+               aMetadata.initial_guess_file_name() == "")
+            {
+                THROWERR("ERROR:XMLGenerator:parseOptimizationParameters: You must specify a valid initial guess mesh filename and a valid field name on that mesh from which initial values will be obtained.\n");
+            }
+        }
+    }
+}
+
 void ParseOptimizationParameters::setMetaData(XMLGen::OptimizationParameters &aMetadata)
 {
     this->setFixedBlockIDs(aMetadata);
@@ -204,6 +237,7 @@ void ParseOptimizationParameters::setMetaData(XMLGen::OptimizationParameters &aM
     this->checkHeavisideFilterParams(aMetadata);
     this->setMeshMapData(aMetadata);
     this->setCSMParameters(aMetadata);
+    this->autoFillRestartParameters(aMetadata);
 }
 
 void ParseOptimizationParameters::checkHeavisideFilterParams(XMLGen::OptimizationParameters &aMetadata)

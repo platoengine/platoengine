@@ -48,6 +48,20 @@ void ParseScenario::setLoadIDs(XMLGen::Scenario &aMetadata)
     }
 }
 
+void ParseScenario::setFRFMatchNodesetIDs(XMLGen::Scenario &aMetadata)
+{
+    auto tItr = mTags.find("frf_match_nodesets");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty())
+    {
+        std::vector<std::string> tNodesetIDs;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tNodesetIDs);
+        aMetadata.setFRFMatchNodesetIDs(tNodesetIDs);
+    }
+}
+
 void ParseScenario::setBCIDs(XMLGen::Scenario &aMetadata)
 {
     auto tItr = mTags.find("boundary_conditions");
@@ -101,17 +115,18 @@ void ParseScenario::allocate()
     mTags.insert({ "loads", { { {"loads"}, ""}, "" } });
     mTags.insert({ "boundary_conditions", { { {"boundary_conditions"}, ""}, "" } });
     mTags.insert({ "ref_frf_file", { { {"ref_frf_file"}, ""}, "" } });
+    mTags.insert({ "weight_mass_scale_factor", { { {"weight_mass_scale_factor"}, ""}, "" } });
+
+    mTags.insert({ "frequency_min", { { {"frequency_min"}, ""}, "" } });
+    mTags.insert({ "frequency_max", { { {"frequency_max"}, ""}, "" } });
+    mTags.insert({ "frequency_step", { { {"frequency_step"}, ""}, "" } });
+    mTags.insert({ "raleigh_damping_alpha", { { {"raleigh_damping_alpha"}, ""}, "" } });
+    mTags.insert({ "raleigh_damping_beta", { { {"raleigh_damping_beta"}, ""}, "" } });
+    mTags.insert({ "frf_match_nodesets", { { {"frf_match_nodesets"}, ""}, "" } });
+    mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
+    mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
 
     //frf matching, some of these probably should belong as criterion parameters instead
-    // mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
-    // mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
-    // mTags.insert({ "frf_match_nodesets", { { {"frf_match_nodesets"}, ""}, "" } });
-    // mTags.insert({ "freq_min", { { {"freq_min"}, ""}, "" } });
-    // mTags.insert({ "freq_max", { { {"freq_max"}, ""}, "" } });
-    // mTags.insert({ "freq_step", { { {"freq_step"}, ""}, "" } });
-    // mTags.insert({ "raleigh_damping_alpha", { { {"raleigh_damping_alpha"}, ""}, "" } });
-    // mTags.insert({ "raleigh_damping_beta", { { {"raleigh_damping_beta"}, ""}, "" } });
-    // mTags.insert({ "wtmass_scale_factor", { { {"wtmass_scale_factor"}, ""}, "" } });
     // mTags.insert({ "normalize_objective", { { {"normalize_objective"}, ""}, "" } });
 }
 
@@ -137,11 +152,14 @@ void ParseScenario::checkIDs(XMLGen::Scenario& aScenario)
     {
         THROWERR("Parse Scenario: No load IDs are defined")
     }
+/*
+ for frf matching case there are no boundary conditions
     auto tBCIDs = aScenario.bcIDs();
     if (tBCIDs.empty())
     {
         THROWERR("Parse Scenario: No boundary condition IDs are defined")
     }
+*/
 }
 
 void ParseScenario::checkPhysics(XMLGen::Scenario& aScenario)
@@ -202,6 +220,7 @@ void ParseScenario::parse(std::istream &aInputFile)
             this->setTags(tScenario);
             this->setLoadIDs(tScenario);
             this->setBCIDs(tScenario);
+            this->setFRFMatchNodesetIDs(tScenario);
             tScenario.id(tScenarioBlockID);
             this->checkTags(tScenario);
             mData.push_back(tScenario);

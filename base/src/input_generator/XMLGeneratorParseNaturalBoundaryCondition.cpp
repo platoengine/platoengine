@@ -18,6 +18,7 @@ void ParseNaturalBoundaryCondition::insertCoreProperties()
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
     mTags.insert({ "location_type", { { {"location_type"}, ""}, "" } });
     mTags.insert({ "location_name", { { {"location_name"}, ""}, "" } });
+    mTags.insert({ "location_id", { { {"location_id"}, ""}, "" } });
     mTags.insert({ "value", { { {"value"}, ""}, "" } });
 }
 
@@ -59,11 +60,10 @@ void ParseNaturalBoundaryCondition::setLocationType(XMLGen::NaturalBoundaryCondi
     if(aMetadata.value("location_type").empty())
     {
         auto tItr = mTags.find("location_type");
-        if(tItr->second.first.second.empty())
+        if(!tItr->second.first.second.empty())
         {
-            THROWERR("Parse NaturalBoundaryCondition: natural boundary condition location_type is empty.")
+            aMetadata.property("location_type", tItr->second.first.second);
         }
-        aMetadata.property("location_type", tItr->second.first.second);
     }
 }
 
@@ -72,11 +72,22 @@ void ParseNaturalBoundaryCondition::setLocationName(XMLGen::NaturalBoundaryCondi
     if(aMetadata.value("location_name").empty())
     {
         auto tItr = mTags.find("location_name");
-        if(tItr->second.first.second.empty())
+        if(!tItr->second.first.second.empty())
         {
-            THROWERR("Parse NaturalBoundaryCondition: natural boundary condition location_name is empty.")
+            aMetadata.property("location_name", tItr->second.first.second);
         }
-        aMetadata.property("location_name", tItr->second.first.second);
+    }
+}
+
+void ParseNaturalBoundaryCondition::setLocationID(XMLGen::NaturalBoundaryCondition& aMetadata)
+{
+    if(aMetadata.value("location_id").empty())
+    {
+        auto tItr = mTags.find("location_id");
+        if(!tItr->second.first.second.empty())
+        {
+            aMetadata.property("location_id", tItr->second.first.second);
+        }
     }
 }
 
@@ -107,6 +118,7 @@ void ParseNaturalBoundaryCondition::setMetadata(XMLGen::NaturalBoundaryCondition
     this->setType(aMetadata);
     this->setLocationType(aMetadata);
     this->setLocationName(aMetadata);
+    this->setLocationID(aMetadata);
     this->setValueMetadata(aMetadata);
 }
 

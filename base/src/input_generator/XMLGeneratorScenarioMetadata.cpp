@@ -228,6 +228,11 @@ std::string Scenario::additiveContinuation() const
     return (this->getValue("additive_continuation"));
 }
 
+std::string Scenario::weightMassScaleFactor() const
+{
+    return (this->getValue("weight_mass_scale_factor"));
+}
+
 
 }
 // namespace XMLGen

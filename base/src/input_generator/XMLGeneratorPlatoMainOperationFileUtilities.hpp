@@ -469,5 +469,15 @@ void append_copy_field_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
 
+/******************************************************************************//**
+ * \fn append_enforce_bounds_operation_to_plato_main_operation
+ * \brief Append operation for enforcing bounds on the control
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_enforce_bounds_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument);
+
 }
 // namespace XMLGen

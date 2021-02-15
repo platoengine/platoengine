@@ -102,6 +102,12 @@ private:
     **********************************************************************************/
     void setCSMParameters(XMLGen::OptimizationParameters &aMetadata);
 
+    /******************************************************************************//**
+     * \fn autoFillRestartParameters
+     * \brief Auto populate restart parameters based on user input
+     * \param [in] aMetadata optimization parameters metadata
+    **********************************************************************************/
+    void autoFillRestartParameters(XMLGen::OptimizationParameters &aMetadata);
 public:
 
     /******************************************************************************//**

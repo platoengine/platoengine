@@ -90,6 +90,13 @@ public:
     void setLocationName(XMLGen::EssentialBoundaryCondition& aMetadata);
 
     /******************************************************************************//**
+     * \fn setLocationID
+     * \brief Set the EssentialBoundaryCondition location id.
+     * \param [in] aMetadata essential boundary condition metadata.
+    **********************************************************************************/
+    void setLocationID(XMLGen::EssentialBoundaryCondition& aMetadata);
+
+    /******************************************************************************//**
      * \fn setDegreeOfFreedom
      * \brief Set the EssentialBoundaryCondition degree of freedom.
      * \param [in] aMetadata essential boundary condition metadata.

@@ -446,7 +446,7 @@ void append_include_defines_xml_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    if(XMLGen::Analyze::is_robust_optimization_problem(aMetaData) ||
+    if(XMLGen::is_robust_optimization_problem(aMetaData) ||
        aMetaData.optimization_parameters().optimization_type() == "shape")
     {
         auto tInclude = aDocument.append_child("include");
@@ -455,6 +455,33 @@ void append_include_defines_xml_data
 }
 /******************************************************************************/
 
+std::string get_salinas_service_id(const XMLGen::InputData& aXMLMetaData)
+{
+    std::string tServiceID = "";
+    for(auto &tID : aXMLMetaData.objective.serviceIDs)
+    {
+        auto &tService = aXMLMetaData.service(tID);
+        if(tService.code() == "sierra_sd")
+        {
+            tServiceID = tID;
+            break;
+        }
+    }
+    if(tServiceID == "")
+    {
+        for(auto &tConstraint : aXMLMetaData.constraints)
+        {
+            auto tID = tConstraint.service();
+            auto &tService = aXMLMetaData.service(tID);
+            if(tService.code() == "sierra_sd")
+            {
+                tServiceID = tID;
+                break;
+            }
+        } 
+    }
+    return tServiceID;
+}
 
 }
 // namespace XMLGen

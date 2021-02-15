@@ -12,26 +12,13 @@
 namespace XMLGen
 {
 
-/*
-std::string check_material_model_key
-(const std::string& aKeyword)
-{
-    XMLGen::ValidMaterialModelKeys tValidKeys;
-    auto tValue = tValidKeys.value(aKeyword);
-    if(tValue.empty())
-    {
-        THROWERR(std::string("Check Material Model Key: Material model keyword '") + aKeyword + "' is not supported.")
-    }
-    return tValue;
-}
-*/
-
 void ParseEssentialBoundaryCondition::insertCoreProperties()
 {
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
     mTags.insert({ "location_type", { { {"location_type"}, ""}, "" } });
     mTags.insert({ "location_name", { { {"location_name"}, ""}, "" } });
+    mTags.insert({ "location_id", { { {"location_id"}, ""}, "" } });
     mTags.insert({ "degree_of_freedom", { { {"degree_of_freedom"}, ""}, "" } });
     mTags.insert({ "value", { { {"value"}, ""}, "" } });
 }
@@ -88,11 +75,22 @@ void ParseEssentialBoundaryCondition::setLocationName(XMLGen::EssentialBoundaryC
     if(aMetadata.value("location_name").empty())
     {
         auto tItr = mTags.find("location_name");
-        if(tItr->second.first.second.empty())
+        if(!tItr->second.first.second.empty())
         {
-            THROWERR("Parse EssentialBoundaryCondition: essential boundary condition location_name is empty.")
+            aMetadata.property("location_name", tItr->second.first.second);
         }
-        aMetadata.property("location_name", tItr->second.first.second);
+    }
+}
+
+void ParseEssentialBoundaryCondition::setLocationID(XMLGen::EssentialBoundaryCondition& aMetadata)
+{
+    if(aMetadata.value("location_id").empty())
+    {
+        auto tItr = mTags.find("location_id");
+        if(!tItr->second.first.second.empty())
+        {
+            aMetadata.property("location_id", tItr->second.first.second);
+        }
     }
 }
 
@@ -128,6 +126,7 @@ void ParseEssentialBoundaryCondition::setMetadata(XMLGen::EssentialBoundaryCondi
     this->setType(aMetadata);
     this->setLocationType(aMetadata);
     this->setLocationName(aMetadata);
+    this->setLocationID(aMetadata);
     this->setDegreeOfFreedom(aMetadata);
     this->setValue(aMetadata);
 }
