@@ -44,7 +44,6 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorPlatoMainConstraintValueOperationInterface.cpp
                       XMLGeneratorPlatoMainConstraintGradientOperationInterface.cpp
                       XMLGeneratorAnalyzeUncertaintyLaunchScriptUtilities.cpp
-                      # PlatoAnalyzeInputDeckWriter.cpp
                       XMLGeneratorUtilities.cpp
                       )
                       
@@ -92,7 +91,6 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       # XMLGeneratorRandomInterfaceFileUtilities.hpp 
                       # XMLGeneratorPlatoMainFunctionMapTypes.hpp
                       # XMLGeneratorDataStruct.hpp
-                      # PlatoAnalyzeInputDeckWriter.hpp
                       XMLGeneratorUtilities.hpp
                       XMLGeneratorParseOutput.hpp 
                       XMLGeneratorParseMaterial.hpp 
