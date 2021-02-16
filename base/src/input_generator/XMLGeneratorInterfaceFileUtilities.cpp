@@ -329,18 +329,21 @@ void append_update_problem_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    for (auto &tService : aXMLMetaData.services())
+    if(need_update_problem_stage(aXMLMetaData))
     {
-        if (!tService.updateProblem())
-        {
-            continue;
-        }
         auto tStageNode = aDocument.append_child("Stage");
         XMLGen::append_children( { "Name" }, { "Update Problem" }, tStageNode);
-        auto tOperationNode = tStageNode.append_child("Operation");
-        std::vector<std::string> tKeys = { "Name", "PerformerName" };
-        std::vector<std::string> tValues = { "Update Problem", tService.performer() };
-        XMLGen::append_children(tKeys, tValues, tOperationNode);
+        for (auto &tService : aXMLMetaData.services())
+        {
+            if (!tService.updateProblem())
+            {
+                continue;
+            }
+            auto tOperationNode = tStageNode.append_child("Operation");
+            std::vector<std::string> tKeys = { "Name", "PerformerName" };
+            std::vector<std::string> tValues = { "Update Problem", tService.performer() };
+            XMLGen::append_children(tKeys, tValues, tOperationNode);
+        }
     }
 }
 /******************************************************************************/
@@ -2321,7 +2324,8 @@ void append_trust_region_kelley_sachs_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    std::vector<std::string> tKeys = {"KSTrustRegionExpansionFactor", 
+    std::vector<std::string> tKeys = {"MaxNumOuterIterations",
+                                      "KSTrustRegionExpansionFactor", 
                                       "KSTrustRegionContractionFactor", 
                                       "KSMaxTrustRegionIterations", 
                                       "KSInitialRadiusScale",
@@ -2339,7 +2343,8 @@ void append_trust_region_kelley_sachs_options
                                       "KSTrustRegionRatioLow",       
                                       "KSTrustRegionRatioMid", 
                                       "KSTrustRegionRatioUpper"};
-    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().ks_trust_region_expansion_factor(), 
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().max_iterations(),
+                                        aXMLMetaData.optimization_parameters().ks_trust_region_expansion_factor(), 
                                         aXMLMetaData.optimization_parameters().ks_trust_region_contraction_factor(), 
                                         aXMLMetaData.optimization_parameters().ks_max_trust_region_iterations(),
                                         aXMLMetaData.optimization_parameters().ks_initial_radius_scale(), 
@@ -2480,11 +2485,26 @@ void append_optimization_cache_stage_options
 /******************************************************************************/
 
 /******************************************************************************/
+bool need_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData)
+{
+    for (auto &tService : aXMLMetaData.services())
+    {
+        if (tService.updateProblem())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+/******************************************************************************/
+
+/******************************************************************************/
 void append_optimization_update_problem_stage_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(!aXMLMetaData.service(0u).updateProblem())
+    if(!need_update_problem_stage(aXMLMetaData))
     {
         return;
     }

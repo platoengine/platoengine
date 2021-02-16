@@ -168,7 +168,7 @@ void append_gdsw_block
         isDifficultForSolver = true;
     else if(aCriterion.type() == "stress_p-norm")
         isDifficultForSolver = true;
-    else if(aCriterion.type() == "stress_constraint")
+    else if(aCriterion.type() == "stress_constrained_mass_minimization")
         isDifficultForSolver = true;
     fprintf(aFilePtr, "GDSW\n");
     const bool haveSolverTolerance = (aScenario.solverTolerance() != "");
@@ -295,7 +295,7 @@ void append_stress_parameters
  const XMLGen::Scenario &aScenario,
  FILE *aFilePtr)
 {
-    if(aCriterion.type() == "stress_constraint" ||
+    if(aCriterion.type() == "stress_constrained_mass_minimization" ||
        aCriterion.type() == "limit_stress" ||
        aCriterion.type() == "stress_p-norm")
     {
@@ -416,7 +416,7 @@ void append_case
     {
         fprintf(aFilePtr, "  case = stress_limit\n");
     }
-    else if(aCriterion.type() == "stress_constraint")
+    else if(aCriterion.type() == "stress_constrained_mass_minimization")
     {
         fprintf(aFilePtr, "  case = stress_constrained_mass_minimization\n");
     }
@@ -462,7 +462,7 @@ void append_normalization_parameter
     {
         tNormalizeObjective = false;
     }
-    if(aCriterion.type() == "stress_constraint")
+    if(aCriterion.type() == "stress_constrained_mass_minimization")
     {
         tNormalizeObjective = false;
     }

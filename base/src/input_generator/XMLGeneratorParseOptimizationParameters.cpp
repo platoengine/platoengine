@@ -101,7 +101,7 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "ks_trust_region_ratio_low", { { {"ks_trust_region_ratio_low"}, ""}, "" } });
     mTags.insert({ "ks_trust_region_ratio_mid", { { {"ks_trust_region_ratio_mid"}, ""}, "" } });
     mTags.insert({ "ks_trust_region_ratio_high", { { {"ks_trust_region_ratio_high"}, ""}, "" } });
-    mTags.insert({ "ks_disable_post_smoothing", { { {"ks_disable_post_smoothing"}, ""}, "" } });
+    mTags.insert({ "ks_disable_post_smoothing", { { {"ks_disable_post_smoothing"}, ""}, "true" } });
     mTags.insert({ "use_mean_norm", { { {"use_mean_norm"}, ""}, "" } });
     mTags.insert({ "objective_number_standard_deviations", { { {"objective_number_standard_deviations"}, ""}, "" } });
     mTags.insert({ "filter_radius_scale", { { {"filter_radius_scale"}, ""}, "2.0" } });
@@ -112,7 +112,7 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "al_max_subproblem_iterations", { { {"al_max_subproblem_iterations"}, ""}, "" } });
     mTags.insert({ "hessian_type", { { {"hessian_type"}, ""}, "" } });
     mTags.insert({ "limited_memory_storage", { { {"limited_memory_storage"}, ""}, "8" } });
-    mTags.insert({ "problem_update_frequency", { { {"problem_update_frequency"}, ""}, "" } });
+    mTags.insert({ "problem_update_frequency", { { {"problem_update_frequency"}, ""}, "5" } });
     mTags.insert({ "ks_outer_gradient_tolerance", { { {"ks_outer_gradient_tolerance"}, ""}, "" } });
     mTags.insert({ "ks_outer_stationarity_tolerance", { { {"ks_outer_stationarity_tolerance"}, ""}, "" } });
     mTags.insert({ "ks_outer_stagnation_tolerance", { { {"ks_outer_stagnation_tolerance"}, ""}, "" } });

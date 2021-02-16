@@ -193,6 +193,7 @@ private:
         "stress_constraint",  
         "stress_constraint_general",  
         "stress_constraint_quadratic",  
+        "stress_constrained_mass_minimization",
         "flux", 
         "frf_mismatch", 
         "limit_stress",

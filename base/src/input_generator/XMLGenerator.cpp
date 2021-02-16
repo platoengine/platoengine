@@ -251,23 +251,19 @@ void XMLGenerator::loadMaterialData(XMLGen::InputData &aNewInputData,
     auto &tScenario = m_InputData.scenario(aScenarioID);
     for(auto &tMaterial : m_InputData.materials)
     {
-        if(tMaterial.id() == tScenario.material())
+        bool tFound = false;
+        for(auto &tExistingMaterial : aNewInputData.materials)
         {
-            bool tFound = false;
-            for(auto &tExistingMaterial : aNewInputData.materials)
+            if(tExistingMaterial.id() == tMaterial.id())
             {
-                if(tExistingMaterial.id() == tMaterial.id())
-                {
-                    tFound = true;
-                    break;
-                }
+                tFound = true;
+                break;
             }
-            if(!tFound)
-            {
-                aNewInputData.materials.push_back(tMaterial);
-            }
-            break;
-        } 
+        }
+        if(!tFound)
+        {
+            aNewInputData.materials.push_back(tMaterial);
+        }
     }
 }
 

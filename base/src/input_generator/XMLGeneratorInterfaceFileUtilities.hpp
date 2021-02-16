@@ -935,5 +935,13 @@ void append_globally_convergent_method_moving_asymptotes_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
+/******************************************************************************//**
+ * \fn need_update_problem_stage
+ * \brief Return whether any of the serivces have the update problem flag set to true
+ * \param [in]     aXMLMetaData  Plato problem input data
+**********************************************************************************/
+bool need_update_problem_stage
+(const XMLGen::InputData& aXMLMetaData);
+
 }
 // namespace XMLGen
