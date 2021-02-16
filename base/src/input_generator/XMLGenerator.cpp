@@ -248,7 +248,6 @@ void XMLGenerator::loadMaterialData(XMLGen::InputData &aNewInputData,
                                      const std::string &aScenarioID)
 /******************************************************************************/
 {
-    auto &tScenario = m_InputData.scenario(aScenarioID);
     for(auto &tMaterial : m_InputData.materials)
     {
         bool tFound = false;

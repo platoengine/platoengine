@@ -93,112 +93,6 @@ inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plat
 // function variable_type_string_to_enum
 
 /******************************************************************************//**
- * \brief Initialize counter used to set load identifiers (IDs)
- * \param [in] aLoadCases array of load cases
- * \param [in] aUniqueCounter IDs counter
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-/*
-inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoadCases,
-                                       Plato::UniqueCounter &aUniqueCounter)
-{
-    if(aLoadCases.empty() == true)
-    {
-        PRINTERR("INPUT SET OF LOAD CASES IS EMPTY.\n");
-        return (false);
-    }
-
-    aUniqueCounter.mark(0); // Mark 0 as true since we don't want to have a 0 ID
-    for(size_t tIndex = 0; tIndex < aLoadCases.size(); tIndex++)
-    {
-        aUniqueCounter.mark(std::stoi(aLoadCases[tIndex].id.c_str()));
-    }
-
-    return (true);
-}
-*/
-// function initialize_load_id_counter
-
-/******************************************************************************//**
- * \brief Expand set of load cases into an array of single load cases
- * \param [in] aOldLoadCase old load case metadata
- * \param [out] aNewLoadCaseList expanded set of load cases - load case is reformatted
- *               to facilitate the creation of the stochastic reduced order models
- * \param [out] aUniqueLoadIDCounter load identifiers counter
- * \param [out] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-/*
-inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
-                                    std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
-                                    Plato::UniqueCounter &aUniqueLoadIDCounter,
-                                    std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
-{
-    if(aOldLoadCase.loads.empty() == true)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Expand Single Load Case: Loads container in load case with identification number '" << aOldLoadCase.id << " is empty.\n";
-        PRINTERR(tMsg.str());
-        return (false);
-    }
-
-    auto tOriginalLoadCaseID = std::stoi(aOldLoadCase.id);
-    for(auto& tOldLoad : aOldLoadCase.loads)
-    {
-        XMLGen::LoadCase tNewLoadCase;
-        tNewLoadCase.id = aOldLoadCase.id;
-        // If this is a multi-load load case, create a new load case with a new identification number.
-        auto tLoadCaseIndex = &tOldLoad - &aOldLoadCase.loads[0];
-        if(tLoadCaseIndex > 0)
-        {
-            auto tNewLoadCaseID = aUniqueLoadIDCounter.assignNextUnique();
-            tNewLoadCase.id = std::to_string(tNewLoadCaseID);
-        }
-        aOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(aNewLoadCaseList.size());
-
-        tNewLoadCase.loads.push_back(tOldLoad);
-        aNewLoadCaseList.push_back(tNewLoadCase);
-    }
-
-    return (true);
-}
-*/
-// function expand_single_load_case
-
-/******************************************************************************//**
- * \brief Expand old set of load cases into an array of new load cases with one load
- *
- * \param [in] aOldLoadCase old set of load cases
- * \param [in] aNewLoadCaseList new set of load cases re-formatted to create the
- *             stochastic reduced order models (srom)
- * \param [in] aOriginalToNewLoadCaseMap map between original load case IDs and \n
- *   new load case IDs, i.e. map<old_load_case_id,new_load_case_id>
- *
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-/*
-inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aOldLoadCases,
-                              std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
-                              std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
-{
-    Plato::UniqueCounter tUniqueLoadIDCounter;
-    if(Plato::srom::initialize_load_id_counter(aOldLoadCases, tUniqueLoadIDCounter) == false)
-    {
-        PRINTERR("Expand Load Cases: FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n");
-        return (false);
-    }
-
-    for(auto& tOldLoadCase : aOldLoadCases)
-    {
-        Plato::srom::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
-    }
-
-    return (true);
-}
-*/
-// function expand_load_cases
-
-/******************************************************************************//**
  * \brief Create a deterministic load from the input deterministic load
  * \param [in] aLoad deterministic load metadata 
  * \param [out] aLoad deterministic load metadata
@@ -312,7 +206,6 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
     {
         THROWERR("Input random load identification number (id) is empty.")
     }
-    const auto tRandomVarLoadID = std::stoi(aRandomVariable.id());
 
     for(size_t tIndexJ = 0; tIndexJ < aLoads.size(); tIndexJ++)
     {
