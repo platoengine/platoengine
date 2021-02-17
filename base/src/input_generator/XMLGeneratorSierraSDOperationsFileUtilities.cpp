@@ -21,8 +21,6 @@ void append_cache_state_operation
     {
         auto tScenarioID = aMetaData.objective.scenarioIDs[k];
         auto tServiceID = aMetaData.objective.serviceIDs[k];
-        auto &tScenario = aMetaData.scenario(tScenarioID);
-        auto &tService = aMetaData.service(tServiceID);
         char buffer[100];
         sprintf(buffer, "%lu", k);
         for(size_t j=0; j<aMetaData.mOutputMetaData.size(); ++j)

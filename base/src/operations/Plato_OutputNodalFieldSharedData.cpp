@@ -99,7 +99,7 @@ void OutputNodalFieldSharedData::operator()()
                 Real* tInputField;
                 tInfield->ExtractView(&tInputField);
                 const int tLength = tInfield->MyLength();
-                for(size_t j=0; j<tLength; ++j)
+                for(int j=0; j<tLength; ++j)
                 {
                     fprintf(fp, "%lf\n", tInputField[j]);
                 }
