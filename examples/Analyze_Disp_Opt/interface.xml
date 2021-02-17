@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 
+<Console>
+  <Enabled>true</Enabled>
+</Console>
+
 <Performer> 
   <Name>PlatoMain</Name>
   <Code>Plato_Main</Code>

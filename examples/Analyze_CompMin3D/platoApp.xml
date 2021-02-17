@@ -120,8 +120,9 @@
 </Operation>
 
 <Operation>
+  <Name>AggregateEnergyValue</Name>
   <Function>Aggregator</Function>
-  <Name>AggregateEnergy</Name>
+  <Report>true</Report>
   <Aggregate>
     <Layout>Value</Layout>
     <Input>
@@ -131,6 +132,16 @@
       <ArgumentName>Value</ArgumentName>
     </Output>
   </Aggregate>
+  <Weighting>
+    <Weight>
+      <Value>1.00</Value>
+    </Weight>
+  </Weighting>
+</Operation>
+
+<Operation>
+  <Name>AggregateEnergyGradient</Name>
+  <Function>Aggregator</Function>
   <Aggregate>
     <Layout>Nodal Field</Layout>
     <Input>
@@ -146,6 +157,7 @@
     </Weight>
   </Weighting>
 </Operation>
+
 <Operation>
   <Function>SetLowerBounds</Function>
   <Name>Calculate Lower Bounds</Name>

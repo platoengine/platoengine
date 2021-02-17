@@ -559,6 +559,17 @@ DistributedVector* PlatoApp::getNodeField(const std::string & aName)
     return tIterator->second;
 }
 
+std::string PlatoApp::getSharedDataName(const std::string & aName) const
+{
+    std::string tRetVal;
+    auto tIterator = mSharedDataNames.find(aName);
+    if(tIterator != mSharedDataNames.end())
+    {
+        tRetVal = tIterator->second;
+    }
+    return tRetVal;
+}
+
 size_t PlatoApp::getLocalNumElements() const
 {
     return mLightMp != nullptr ? mLightMp->getMesh()->getNumElems() : 0;
