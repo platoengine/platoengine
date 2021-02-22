@@ -263,7 +263,14 @@ int Main(int aArgc, char *aArgv[])
         safeExit();
     }
 
-    tPlatoInterface->perform();
+    try
+    {
+      tPlatoInterface->perform();
+    }
+    catch(...)
+    {
+        safeExit();
+    }
 
     if(tApp)
     {
