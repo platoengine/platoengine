@@ -123,8 +123,6 @@ private:
 
     void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
 
-    int getSerializedIndex(const int& i, const int& j, const int& k) const;
-
     int getContainingTetID(const int& i, const int& j, const int& k) const;
 
     std::vector<std::vector<double>> mCoordinates;

@@ -68,17 +68,12 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_TimersTree.cpp
 							 )
 
-if (AMFILTER_ENABLED )
-SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS}
-                                                         PSL_Test_AMFilterUtilities.cpp
-                                                         PSL_Test_MeshMap.cpp
-                                                         )
+if( AMFILTER_ENABLED )
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_AMFilterUtilities.cpp)
 endif()
 
 IF( ENABLE_ROL )
-SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS}
-							   Plato_Test_ROL.cpp
-                                                         )
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} Plato_Test_ROL.cpp)
 ENDIF()
 
 ###############################################################################

@@ -21,8 +21,7 @@ set(${LIB_NAME}_HEADERS
 
 if( AMFILTER_ENABLED )
     set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PSL_AMFilterUtilities.cpp)
-    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_AMFilterUtilities.hpp
-                                                   PSL_MeshMap.hpp)
+    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_AMFilterUtilities.hpp)
 endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})

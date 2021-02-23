@@ -4,7 +4,6 @@
 #include "PSL_FreeHelpers.hpp"
 #include "PSL_Point.hpp"
 #include "PSL_Vector.hpp"
-#include "PSL_MeshMap.hpp"
 #include <iostream>
 #include <memory>
 
@@ -37,17 +36,11 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 
     // mNumElementsInEachDirection = {5,5,5};
 
-    // MeshMap<double,int> tMeshMap(mCoordinates,mConnectivity);
-
-    // tMeshMap.getTetIDForEachGridPoint(mNumElementsInEachDirection,mContainingTetID);
+    // mUtilities->getTetIDForEachGridPoint(mNumElementsInEachDirection,mContainingTetID);
 
     mFilterBuilt = true;
 }
 
-int KernelThenStructuredAMFilter::getSerializedIndex(const int& i, const int& j, const int& k) const
-{
-    return i + j*(mNumElementsInEachDirection[0]+1) + k*(mNumElementsInEachDirection[0]+1)*(mNumElementsInEachDirection[1]+1);
-}
 
 // void KernelThenStructuredAMFilter::getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const
 // {
@@ -80,22 +73,22 @@ int KernelThenStructuredAMFilter::getSerializedIndex(const int& i, const int& j,
 //     return -1;
 // }
 
-double KernelThenStructuredAMFilter::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
-{
-    auto tTet = mConnectivity[mContainingTetID[getSerializedIndex(i,j,k)]];
-    std::vector<int> tIndex = {i,j,k};
+// double KernelThenStructuredAMFilter::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+// {
+//     auto tTet = mConnectivity[mContainingTetID[getSerializedIndex(i,j,k)]];
+//     std::vector<int> tIndex = {i,j,k};
 
-    Vector tGridPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
-    std::vector<double> tBaryCentricCoordinates = mUtilities->computeBarycentricCoordinates(tTet, tGridPoint);
+//     Vector tGridPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
+//     std::vector<double> tBaryCentricCoordinates = mUtilities->computeBarycentricCoordinates(tTet, tGridPoint);
 
-    double tGridPointDensity = 0;
-    for(int tNodeIndex = 0; tNodeIndex < (int) tTet.size(); ++tNodeIndex)
-    {
-       tGridPointDensity += tBaryCentricCoordinates[tNodeIndex]*(aTetMeshBlueprintDensity->get_value(tTet[tNodeIndex])); 
-    }
+//     double tGridPointDensity = 0;
+//     for(int tNodeIndex = 0; tNodeIndex < (int) tTet.size(); ++tNodeIndex)
+//     {
+//        tGridPointDensity += tBaryCentricCoordinates[tNodeIndex]*(aTetMeshBlueprintDensity->get_value(tTet[tNodeIndex])); 
+//     }
 
-    return tGridPointDensity;
-}
+//     return tGridPointDensity;
+// }
 
 // double KernelThenStructuredAMFilter::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 // {
