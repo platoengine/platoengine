@@ -166,6 +166,14 @@ if( REGRESSION OR UNIT_TESTING )
     enable_testing()
 endif()
 
+if( AMFILTER_ENABLED )
+    message( "-- Compiling AMFilter, c++14 required " )
+    string(REPLACE "-std=c++11" "-std=c++14" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+    add_definitions(-DAMFILTER_ENABLED)
+    # find_package(ArborX REQUIRED)
+    # set(PLATO_LIBRARIES ${PLATO_LIBRARIES} ArborX::ArborX)
+endif()
+
 set(PLATO_INCLUDES)
 
 add_subdirectory(base/src)

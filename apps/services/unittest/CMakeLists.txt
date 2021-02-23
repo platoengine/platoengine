@@ -65,11 +65,15 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_AbstractAuthority.cpp
 							 PSL_Test_Point.cpp
 							 PSL_Test_Vector.cpp
-                                                         PSL_Test_BoundarySupportPoint.cpp
-							 PSL_Test_PseudoLayerBuilder.cpp
-                                                         PSL_Test_AMFilterUtilities.cpp
 							 Plato_Test_TimersTree.cpp
 							 )
+
+if (AMFILTER_ENABLED )
+SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS}
+                                                         PSL_Test_AMFilterUtilities.cpp
+                                                         PSL_Test_MeshMap.cpp
+                                                         )
+endif()
 
 IF( ENABLE_ROL )
 SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS}

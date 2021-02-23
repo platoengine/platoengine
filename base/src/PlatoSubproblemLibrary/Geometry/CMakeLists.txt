@@ -9,8 +9,6 @@ set(${LIB_NAME}_SOURCES
     PSL_Point.cpp
     PSL_Vector.cpp
     PSL_Triangle.cpp
-    PSL_PseudoLayerBuilder.cpp
-    PSL_AMFilterUtilities.cpp
     )
 
 set(${LIB_NAME}_HEADERS 
@@ -19,9 +17,13 @@ set(${LIB_NAME}_HEADERS
     PSL_Point.hpp
     PSL_Vector.hpp
     PSL_Triangle.hpp
-    PSL_PseudoLayerBuilder.hpp
-    PSL_AMFilterUtilities.hpp
     )
+
+if( AMFILTER_ENABLED )
+    set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PSL_AMFilterUtilities.cpp)
+    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_AMFilterUtilities.hpp
+                                                   PSL_MeshMap.hpp)
+endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface)

@@ -4,6 +4,7 @@
 #include "PSL_FreeHelpers.hpp"
 #include "PSL_Point.hpp"
 #include "PSL_Vector.hpp"
+#include "PSL_MeshMap.hpp"
 #include <iostream>
 #include <memory>
 
@@ -34,9 +35,11 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
     mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;
     mNumElementsInEachDirection = computeNumElementsInEachDirection(mMaxUVWCoords,mMinUVWCoords,mTargetEdgeLength);
 
-    mNumElementsInEachDirection = {5,5,5};
+    // mNumElementsInEachDirection = {5,5,5};
 
-    getTetIDForEachGridPoint(mContainingTetID);
+    // MeshMap<double,int> tMeshMap(mCoordinates,mConnectivity);
+
+    // tMeshMap.getTetIDForEachGridPoint(mNumElementsInEachDirection,mContainingTetID);
 
     mFilterBuilt = true;
 }
@@ -46,36 +49,36 @@ int KernelThenStructuredAMFilter::getSerializedIndex(const int& i, const int& j,
     return i + j*(mNumElementsInEachDirection[0]+1) + k*(mNumElementsInEachDirection[0]+1)*(mNumElementsInEachDirection[1]+1);
 }
 
-void KernelThenStructuredAMFilter::getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const
-{
-    aTetIDs.resize((mNumElementsInEachDirection[0]+1) * (mNumElementsInEachDirection[1]+1) * (mNumElementsInEachDirection[2]+1));
-    for(int i = 0; i <= mNumElementsInEachDirection[0]; ++i)
-    {
-        for(int j = 0; j <= mNumElementsInEachDirection[1]; ++j)
-        {
-            for(int k = 0; k <= mNumElementsInEachDirection[2]; ++k)
-            {
-                aTetIDs[getSerializedIndex(i,j,k)] = getContainingTetID(i,j,k);
-            }
-        }
-    }
-}
+// void KernelThenStructuredAMFilter::getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const
+// {
+//     aTetIDs.resize((mNumElementsInEachDirection[0]+1) * (mNumElementsInEachDirection[1]+1) * (mNumElementsInEachDirection[2]+1));
+//     for(int i = 0; i <= mNumElementsInEachDirection[0]; ++i)
+//     {
+//         for(int j = 0; j <= mNumElementsInEachDirection[1]; ++j)
+//         {
+//             for(int k = 0; k <= mNumElementsInEachDirection[2]; ++k)
+//             {
+//                 aTetIDs[getSerializedIndex(i,j,k)] = getContainingTetID(i,j,k);
+//             }
+//         }
+//     }
+// }
 
-int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j, const int& k) const
-{
-    std::vector<int> tIndex({i,j,k});
-    Vector tPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
+// int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j, const int& k) const
+// {
+//     std::vector<int> tIndex({i,j,k});
+//     Vector tPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
 
-    for(int tTetIndex = 0; tTetIndex < (int) mConnectivity.size(); ++tTetIndex)
-    {
-        auto tTet = mConnectivity[tTetIndex];
+//     for(int tTetIndex = 0; tTetIndex < (int) mConnectivity.size(); ++tTetIndex)
+//     {
+//         auto tTet = mConnectivity[tTetIndex];
 
-        if(mUtilities->isPointInTetrahedron(tTet,tPoint)) 
-            return tTetIndex;
-    }
+//         if(mUtilities->isPointInTetrahedron(tTet,tPoint)) 
+//             return tTetIndex;
+//     }
 
-    return -1;
-}
+//     return -1;
+// }
 
 double KernelThenStructuredAMFilter::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 {

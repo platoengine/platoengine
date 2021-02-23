@@ -147,7 +147,6 @@ private:
 
     ParameterData* mInputData;
 
-    // AMFilterUtilities* mUtilities;
     std::unique_ptr<AMFilterUtilities> mUtilities;
 };
 
