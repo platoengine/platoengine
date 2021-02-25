@@ -10,15 +10,15 @@
 namespace PlatoSubproblemLibrary
 {
 
-void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVector* aBlueprintDensity)
+void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVector* aDensity)
 {
     if(!mFilterBuilt)
         throw(std::runtime_error("Pseudo Layers not built before attempting to apply filter"));
 
-    if(aBlueprintDensity->get_length() != mCoordinates.size())
+    if(aDensity->get_length() != mCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    // computePrintableDensity(aBlueprintDensity);
+    // computePrintableDensity(aDensity);
 }
 
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
@@ -34,9 +34,12 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
     mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;
     mNumElementsInEachDirection = computeNumElementsInEachDirection(mMaxUVWCoords,mMinUVWCoords,mTargetEdgeLength);
 
-    // mNumElementsInEachDirection = {5,5,5};
+    mNumElementsInEachDirection = {5,5,5};
 
-    // mUtilities->getTetIDForEachGridPoint(mNumElementsInEachDirection,mContainingTetID);
+    std::vector<Vector> tGridCoordinates;
+    computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
+
+    mUtilities->getTetIDForEachPoint(tGridCoordinates,mContainingTetID);
 
     mFilterBuilt = true;
 }
@@ -90,18 +93,15 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 //     return tGridPointDensity;
 // }
 
-// double KernelThenStructuredAMFilter::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+// double KernelThenStructuredAMFilter::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
 // {
-//     // use grid point blueprint density to compute support density
+//     // use grid point blueprint density to compute grid support density
 //     // this has to be done bottom to top so it must be stored
 //     return 0;
 // }
 
 // double KernelThenStructuredAMFilter::getGridPointSupportDensity(const int& i, const int& j, const int&k) const
 // {
-//     // use grid point blueprint density to compute support density
-//     // this has to be done bottom to top so it must be stored
-//     return 0;
 // }
 
 // double KernelThenStructuredAMFilter::computeGridPointPrintableDensity(const int& i const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
@@ -117,14 +117,14 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 //     return 0;
 // }
 
-// void KernelThenStructuredAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity)
+// void KernelThenStructuredAMFilter::computePrintableDensity(AbstractInterface::ParallelVector* aDensity)
 // {
-    // computeGridSupportDensity(aBlueprintDensity);
-
-    // for(size_t i = 0; i < aBlueprintDensity->get_length(); ++i)
-    // {
-    //     aBlueprintDensity->set_value(i, computeTetNodePrintableDensity(i, aBlueprintDensity));
-    // }
+//     // compute and store grid support density
+//
+//     for(size_t i = 0; i < aBlueprintDensity->get_length(); ++i)
+//     {
+//         aDensity->set_value(i, computeTetNodePrintableDensity(i, aDensity));
+//     }
 // }
 
 }

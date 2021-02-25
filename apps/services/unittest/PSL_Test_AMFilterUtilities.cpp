@@ -591,5 +591,39 @@ PSL_TEST(AMFilterUtilities, getSerializedIndex)
     EXPECT_EQ(tSerializedIndex,22);
 }
 
+PSL_TEST(AMFilterUtilities, getTetIDForEachPoint)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    std::vector<std::vector<int>> tConnectivity;
+
+    tConnectivity.push_back({0,1,2,3});
+
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
+    std::vector<int> tNumElements = {2,2,2};
+
+    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
+
+    Vector tMaxUVWCoords, tMinUVWCoords;
+    tUtilities.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
+
+    std::vector<Vector> tGridCoordinates;
+
+    computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tGridCoordinates);
+
+    std::vector<int> tContainingTetID;
+    tUtilities.getTetIDForEachPoint(tGridCoordinates,tContainingTetID);
+
+    EXPECT_EQ(tGridCoordinates.size(), tContainingTetID.size());
+}
+
 }
 }

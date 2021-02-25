@@ -11,6 +11,70 @@
 #include <ArborX.hpp>
 #include <Kokkos_Core.hpp>
 
+using ExecSpace = Kokkos::DefaultExecutionSpace;
+using MemSpace = typename ExecSpace::memory_space;
+using DeviceType = Kokkos::Device<ExecSpace, MemSpace>;
+
+struct BoundingBoxes
+{
+  double *d_x0;
+  double *d_y0;
+  double *d_z0;
+  double *d_x1;
+  double *d_y1;
+  double *d_z1;
+  int N;
+};
+
+struct Points
+{
+  double *d_x;
+  double *d_y;
+  double *d_z;
+  int N;
+};
+
+namespace ArborX
+{
+namespace Traits
+{
+template <>
+struct Access<BoundingBoxes, PrimitivesTag>
+{
+  inline static std::size_t size(BoundingBoxes const &boxes) { return boxes.N; }
+  KOKKOS_INLINE_FUNCTION static Box get(BoundingBoxes const &boxes, std::size_t i)
+  {
+    return {{boxes.d_x0[i], boxes.d_y0[i], boxes.d_z0[i]},
+            {boxes.d_x1[i], boxes.d_y1[i], boxes.d_z1[i]}};
+  }
+  using memory_space = MemSpace;
+};
+
+template <>
+struct Access<Points, PrimitivesTag>
+{
+  inline static std::size_t size(Points const &points) { return points.N; }
+  KOKKOS_INLINE_FUNCTION static Point get(Points const &points, std::size_t i)
+  {
+    return {{points.d_x[i], points.d_y[i], points.d_z[i]}};
+  }
+  using memory_space = MemSpace;
+};
+
+template <>
+struct Access<Points, PredicatesTag>
+{
+  inline static std::size_t size(Points const &d) { return d.N; }
+  KOKKOS_INLINE_FUNCTION static auto get(Points const &d, std::size_t i)
+  {
+    return intersects(Point{d.d_x[i], d.d_y[i], d.d_z[i]});
+  }
+  using memory_space = MemSpace;
+};
+
+} // namespace Traits
+}
+
 namespace PlatoSubproblemLibrary
 {
 
@@ -52,111 +116,98 @@ class AMFilterUtilities
          is set to the index of the tet in mConnectivity
         *******************************************************************************/
         void
-        getTetIDForEachPoint(std::vector<std::vector<double>> aPoints,
-                             std::vector<int> aContainingTetID)
+        getTetIDForEachPoint(const std::vector<Vector>& aPoints,
+                             std::vector<int>& aContainingTetID)
         {
-        //     auto tNElems = aMesh.nelems();
-        //     VectorArrayT tMin("min", cSpaceDim, tNElems);
-        //     VectorArrayT tMax("max", cSpaceDim, tNElems);
+            
+            constexpr int cDimension = 3;
+            int tNumPoints = aPoints.size();
+            int tNumTets = mConnectivity.size();
+            aContainingTetID.resize(tNumPoints);
 
-        //     constexpr ScalarT cRelativeTol = 1e-2;
+            std::vector<std::vector<double>> tMinXYZCoordinates(cDimension, std::vector<double>(tNumTets));
+            std::vector<std::vector<double>> tMaxXYZCoordinates(cDimension, std::vector<double>(tNumTets));
 
-        //     // fill d_* data
-        //     auto tCoords = aMesh.coords();
-        //     Omega_h::LOs tCells2Nodes = aMesh.ask_elem_verts();
-        //     Kokkos::parallel_for(Kokkos::RangePolicy<OrdinalT>(0, tNElems), LAMBDA_EXPRESSION(OrdinalT iCellOrdinal)
-        //     {
-        //         OrdinalT tNVertsPerElem = cSpaceDim+1;
+            constexpr double cRelativeTol = 1e-2;
 
-        //         // set min and max of element bounding box to first node
-        //         for(size_t iDim=0; iDim<cSpaceDim; ++iDim)
-        //         {
-        //             OrdinalT tVertIndex = tCells2Nodes[iCellOrdinal*tNVertsPerElem];
-        //             tMin(iDim, iCellOrdinal) = tCoords[tVertIndex*cSpaceDim+iDim];
-        //             tMax(iDim, iCellOrdinal) = tCoords[tVertIndex*cSpaceDim+iDim];
-        //         }
-        //         // loop on remaining nodes to find min
-        //         for(OrdinalT iVert=1; iVert<tNVertsPerElem; ++iVert)
-        //         {
-        //             OrdinalT tVertIndex = tCells2Nodes[iCellOrdinal*tNVertsPerElem + iVert];
-        //             for(size_t iDim=0; iDim<cSpaceDim; ++iDim)
-        //             {
-        //                 if( tMin(iDim, iCellOrdinal) > tCoords[tVertIndex*cSpaceDim+iDim] )
-        //                 {
-        //                     tMin(iDim, iCellOrdinal) = tCoords[tVertIndex*cSpaceDim+iDim];
-        //                 }
-        //                 else
-        //                 if( tMax(iDim, iCellOrdinal) < tCoords[tVertIndex*cSpaceDim+iDim] )
-        //                 {
-        //                     tMax(iDim, iCellOrdinal) = tCoords[tVertIndex*cSpaceDim+iDim];
-        //                 }
-        //             }
-        //         }
-        //         for(size_t iDim=0; iDim<cSpaceDim; ++iDim)
-        //         {
-        //             ScalarT tLen = tMax(iDim, iCellOrdinal) - tMin(iDim, iCellOrdinal);
-        //             tMax(iDim, iCellOrdinal) += cRelativeTol * tLen;
-        //             tMin(iDim, iCellOrdinal) -= cRelativeTol * tLen;
-        //         }
-        //     }, "element bounding boxes");
+            // compute bounding box for each tet element
+            
+            // set min and max to coordinate values of the first node of the tet
+            for(int tTetIndex = 0; tTetIndex < tNumTets; ++tTetIndex)
+            {
+                auto tTet = mConnectivity[tTetIndex];
+                auto tFirstNode = tTet[0];
+                for(int tDimIndex = 0; tDimIndex < cDimension; ++tDimIndex)
+                {
+                    tMaxXYZCoordinates[tDimIndex][tTetIndex] = mCoordinates[tFirstNode][tDimIndex];
+                    tMinXYZCoordinates[tDimIndex][tTetIndex] = mCoordinates[tFirstNode][tDimIndex];
+                }
 
+                constexpr int cNumNodesPerTet = 4;
 
-        //     auto d_x0 = Kokkos::subview(tMin, (size_t)Dim::X, Kokkos::ALL());
-        //     auto d_y0 = Kokkos::subview(tMin, (size_t)Dim::Y, Kokkos::ALL());
-        //     auto d_z0 = Kokkos::subview(tMin, (size_t)Dim::Z, Kokkos::ALL());
-        //     auto d_x1 = Kokkos::subview(tMax, (size_t)Dim::X, Kokkos::ALL());
-        //     auto d_y1 = Kokkos::subview(tMax, (size_t)Dim::Y, Kokkos::ALL());
-        //     auto d_z1 = Kokkos::subview(tMax, (size_t)Dim::Z, Kokkos::ALL());
+                //loop on remaining nodes to find tet bounding box
+                for(int tNodeIndex = 1; tNodeIndex < cNumNodesPerTet; ++tNodeIndex)
+                {
+                    auto tNode = tTet[tNodeIndex];
+                    auto tNodeCoordinates = mCoordinates[tNode];
+                    for(int tDimIndex = 0; tDimIndex < cDimension; ++tDimIndex)
+                    {
+                        if(tNodeCoordinates[tDimIndex] > tMaxXYZCoordinates[tDimIndex][tTetIndex])
+                        {
+                            tMaxXYZCoordinates[tDimIndex][tTetIndex] = tNodeCoordinates[tDimIndex];
+                        }
+                        else if(tNodeCoordinates[tDimIndex] < tMinXYZCoordinates[tDimIndex][tTetIndex])
+                        {
+                            tMinXYZCoordinates[tDimIndex][tTetIndex] = tNodeCoordinates[tDimIndex];
+                        }
+                    }
 
-        //     // construct search tree
-        //     ArborX::BVH<DeviceType>
-        //       bvh{BoundingBoxes{d_x0.data(), d_y0.data(), d_z0.data(),
-        //                         d_x1.data(), d_y1.data(), d_z1.data(), tNElems}};
+                }
 
-        //     // conduct search for bounding box elements
-        //     auto d_x = Kokkos::subview(aMappedLocations, (size_t)Dim::X, Kokkos::ALL());
-        //     auto d_y = Kokkos::subview(aMappedLocations, (size_t)Dim::Y, Kokkos::ALL());
-        //     auto d_z = Kokkos::subview(aMappedLocations, (size_t)Dim::Z, Kokkos::ALL());
+                for(int tDimIndex = 0; tDimIndex < cDimension; ++tDimIndex)
+                {
+                    double tLength = tMaxXYZCoordinates[tDimIndex][tTetIndex] - tMinXYZCoordinates[tDimIndex][tTetIndex];
+                    tMaxXYZCoordinates[tDimIndex][tTetIndex] += cRelativeTol * tLength;
+                    tMinXYZCoordinates[tDimIndex][tTetIndex] -= cRelativeTol * tLength;
+                }
+            }
 
-        //     auto tNVerts = aMesh.nverts();
-        //     Kokkos::View<int*, DeviceType> tIndices("indices", 0), tOffset("offset", 0);
-        //     bvh.query(Points{d_x.data(), d_y.data(), d_z.data(), tNVerts}, tIndices, tOffset);
+            // construct search tree
+            ArborX::BVH<DeviceType>
+              bvh{BoundingBoxes{tMinXYZCoordinates[0].data(), tMinXYZCoordinates[1].data(), tMinXYZCoordinates[2].data(),
+                                tMaxXYZCoordinates[0].data(), tMaxXYZCoordinates[1].data(), tMaxXYZCoordinates[2].data(), tNumTets}};
 
-        //     // loop over indices and find containing element
-        //     GetBasis<ScalarT> tGetBasis(aMesh);
-        //     Kokkos::parallel_for(Kokkos::RangePolicy<OrdinalT>(0, tNVerts), LAMBDA_EXPRESSION(OrdinalT iNodeOrdinal)
-        //     {
-        //         ScalarT tBasis[cNVertsPerElem];
-        //         aParentElements(iNodeOrdinal) = -1;
-        //         if( aLocations(Dim::X, iNodeOrdinal) != aMappedLocations(Dim::X, iNodeOrdinal) ||
-        //             aLocations(Dim::Y, iNodeOrdinal) != aMappedLocations(Dim::Y, iNodeOrdinal) ||
-        //             aLocations(Dim::Z, iNodeOrdinal) != aMappedLocations(Dim::Z, iNodeOrdinal) )
-        //         {
-        //             aParentElements(iNodeOrdinal) = -2;
-        //             constexpr ScalarT cNotFound = -1e8; // big negative number ensures max min is found
-        //             ScalarT tMaxMin = cNotFound;
-        //             typename IntegerArrayT::value_type iParent = -2;
-        //             for( int iElem=tOffset(iNodeOrdinal); iElem<tOffset(iNodeOrdinal+1); iElem++ )
-        //             {
-        //                 auto tElem = tIndices(iElem);
-        //                 tGetBasis(aMappedLocations, iNodeOrdinal, tElem, tBasis);
-        //                 ScalarT tMin = tBasis[0];
-        //                 for(OrdinalT iB=1; iB<cNVertsPerElem; iB++)
-        //                 {
-        //                     if( tBasis[iB] < tMin ) tMin = tBasis[iB];
-        //                 }
-        //                 if( tMin > cNotFound )
-        //                 {
-        //                      tMaxMin = tMin;
-        //                      iParent = tElem;
-        //                 }
-        //             }
-        //             if( tMaxMin > cNotFound )
-        //             {
-        //                 aParentElements(iNodeOrdinal) = iParent;
-        //             }
-        //         }
-        //     }, "find parent element");
+            
+            // std::vector<double> tPointsX(tNumPoints);
+            // std::vector<double> tPointsY(tNumPoints);
+            // std::vector<double> tPointsZ(tNumPoints);
+
+            // for(auto tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
+            // {
+            //     auto tPoint = aPoints[tPointIndex];
+            //     tPointsX[tPointIndex] = tPoint.X();
+            //     tPointsY[tPointIndex] = tPoint.Y();
+            //     tPointsZ[tPointIndex] = tPoint.Z();
+            // }
+
+            // Kokkos::View<int*, DeviceType> tIndices("indices", 0), tOffset("offset", 0);
+            // bvh.query(Points{tPointsX.data(), tPointsY.data(), tPointsZ.data(), tNumPoints}, tIndices, tOffset);
+
+            // for(int tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
+            // {
+            //     aContainingTetID[tPointIndex] = -1;
+
+            //     for(int i = tOffset(tPointIndex); i < tOffset(tPointIndex+1); ++tPointIndex)
+            //     {
+            //         int tTetIndex = tIndices(i);
+            //         std::vector<int> tTet = mConnectivity[tTetIndex];
+            //         Vector tPoint = aPoints[tPointIndex];
+            //         if(isPointInTetrahedron(tTet,tPoint))
+            //         {
+            //             aContainingTetID[tPointIndex] = tTetIndex;
+            //         }
+            //     }
+            // }
         }
 
     private:
