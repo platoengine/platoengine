@@ -121,7 +121,8 @@ private:
 
     // void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
 
-    // int getContainingTetID(const int& i, const int& j, const int& k) const;
+    void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
+    int getContainingTetID(const int& i, const int& j, const int& k) const;
 
     std::vector<std::vector<double>> mCoordinates;
     std::vector<std::vector<int>> mConnectivity;

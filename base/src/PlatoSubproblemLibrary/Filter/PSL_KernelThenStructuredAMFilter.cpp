@@ -40,6 +40,7 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
     computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
 
     mUtilities->getTetIDForEachPoint(tGridCoordinates,mContainingTetID);
+    // getTetIDForEachGridPoint(mContainingTetID);
 
     mFilterBuilt = true;
 }
@@ -54,7 +55,7 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 //         {
 //             for(int k = 0; k <= mNumElementsInEachDirection[2]; ++k)
 //             {
-//                 aTetIDs[getSerializedIndex(i,j,k)] = getContainingTetID(i,j,k);
+//                 aTetIDs[getSerializedIndex(mNumElementsInEachDirection,i,j,k)] = getContainingTetID(i,j,k);
 //             }
 //         }
 //     }
@@ -63,7 +64,9 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 // int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j, const int& k) const
 // {
 //     std::vector<int> tIndex({i,j,k});
-//     Vector tPoint = computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tIndex);
+//     std::vector<Vector> tGridCoordinates;
+//     computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
+//     Vector tPoint = tGridCoordinates[getSerializedIndex(mNumElementsInEachDirection,i,j,k)];
 
 //     for(int tTetIndex = 0; tTetIndex < (int) mConnectivity.size(); ++tTetIndex)
 //     {

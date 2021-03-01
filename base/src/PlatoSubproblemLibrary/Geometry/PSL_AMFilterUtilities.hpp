@@ -178,36 +178,36 @@ class AMFilterUtilities
                                 tMaxXYZCoordinates[0].data(), tMaxXYZCoordinates[1].data(), tMaxXYZCoordinates[2].data(), tNumTets}};
 
             
-            // std::vector<double> tPointsX(tNumPoints);
-            // std::vector<double> tPointsY(tNumPoints);
-            // std::vector<double> tPointsZ(tNumPoints);
+            std::vector<double> tPointsX(tNumPoints);
+            std::vector<double> tPointsY(tNumPoints);
+            std::vector<double> tPointsZ(tNumPoints);
 
-            // for(auto tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
-            // {
-            //     auto tPoint = aPoints[tPointIndex];
-            //     tPointsX[tPointIndex] = tPoint.X();
-            //     tPointsY[tPointIndex] = tPoint.Y();
-            //     tPointsZ[tPointIndex] = tPoint.Z();
-            // }
+            for(auto tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
+            {
+                auto tPoint = aPoints[tPointIndex];
+                tPointsX[tPointIndex] = tPoint.X();
+                tPointsY[tPointIndex] = tPoint.Y();
+                tPointsZ[tPointIndex] = tPoint.Z();
+            }
 
-            // Kokkos::View<int*, DeviceType> tIndices("indices", 0), tOffset("offset", 0);
-            // bvh.query(Points{tPointsX.data(), tPointsY.data(), tPointsZ.data(), tNumPoints}, tIndices, tOffset);
+            Kokkos::View<int*, DeviceType> tIndices("indices", 0), tOffset("offset", 0);
+            bvh.query(Points{tPointsX.data(), tPointsY.data(), tPointsZ.data(), tNumPoints}, tIndices, tOffset);
 
-            // for(int tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
-            // {
-            //     aContainingTetID[tPointIndex] = -1;
+            for(int tPointIndex = 0; tPointIndex < tNumPoints; ++tPointIndex)
+            {
+                aContainingTetID[tPointIndex] = -1;
 
-            //     for(int i = tOffset(tPointIndex); i < tOffset(tPointIndex+1); ++tPointIndex)
-            //     {
-            //         int tTetIndex = tIndices(i);
-            //         std::vector<int> tTet = mConnectivity[tTetIndex];
-            //         Vector tPoint = aPoints[tPointIndex];
-            //         if(isPointInTetrahedron(tTet,tPoint))
-            //         {
-            //             aContainingTetID[tPointIndex] = tTetIndex;
-            //         }
-            //     }
-            // }
+                for(int i = tOffset(tPointIndex); i < tOffset(tPointIndex+1); ++i)
+                {
+                    int tTetIndex = tIndices(i);
+                    std::vector<int> tTet = mConnectivity[tTetIndex];
+                    Vector tPoint = aPoints[tPointIndex];
+                    if(isPointInTetrahedron(tTet,tPoint))
+                    {
+                        aContainingTetID[tPointIndex] = tTetIndex;
+                    }
+                }
+            }
         }
 
     private:
