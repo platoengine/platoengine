@@ -9,7 +9,7 @@
 #include "pugixml.hpp"
 
 #include "XMLGeneratorOutputMetadata.hpp"
-#include "XMLGeneratorServiceMetadata.hpp"
+#include "XMLGeneratorScenarioMetadata.hpp"
 #include "XMLGeneratorAnalyzeFunctionMapTypes.hpp"
 
 namespace XMLGen
@@ -78,11 +78,11 @@ public:
     /******************************************************************************//**
      * \fn call
      * \brief Append physics and respective parameters to plato_analyze_input_deck.xml file.
-     * \param [in]     aServiceMetaData    physics service metadata
+     * \param [in]     aScenarioMetaData    physics scenario metadata
      * \param [in]     aOutputMetaData      physics output metadata
      * \param [in/out] aParentNode          pugi::xml_node
     **********************************************************************************/
-    void call(const XMLGen::Service& aServiceMetaData,
+    void call(const XMLGen::Scenario& aScenarioMetaData,
               const XMLGen::Output& aOutputMetaData,
               pugi::xml_node &aParentNode) const;
 };

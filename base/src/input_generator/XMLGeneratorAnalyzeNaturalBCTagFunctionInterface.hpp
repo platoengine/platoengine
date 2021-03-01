@@ -43,7 +43,7 @@ public:
      * \param [in] aLoad natural boundary condition metadata
      * \return natural boundary condition name
     **********************************************************************************/
-    std::string call(const XMLGen::Load& aLoad) const;
+    std::string call(const XMLGen::NaturalBoundaryCondition& aLoad) const;
 };
 // struct NaturalBoundaryConditionTag
 

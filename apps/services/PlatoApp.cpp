@@ -189,6 +189,22 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("CopyField");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CopyField(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("CopyValue");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CopyValue(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("SystemCall");
             if(tStrFunction == tFunctions.back())
             {
@@ -217,6 +233,14 @@ void PlatoApp::initialize()
             if(tStrFunction == tFunctions.back())
             {
                 mOperationMap[tStrName] = new Plato::CSMMeshOutput(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("OutputNodalFieldSharedData");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::OutputNodalFieldSharedData(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }

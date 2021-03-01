@@ -5,7 +5,7 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "aflr.py;prime.source;rocker.csm;plato_input_deck.i")
+set( testFiles "aflr.py;rocker.csm;plato_input_deck.i")
 Plato_add_test_files("${testFiles}")
 
 # write out the path info in the plato input deck

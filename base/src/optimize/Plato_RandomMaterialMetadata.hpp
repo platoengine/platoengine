@@ -81,6 +81,7 @@ struct Material
 private:
     std::string mBlockID;     /*!< material block identification number */
     std::string mCategory;    /*!< isotropic, orthotropic, anisotropic, etc. */
+    std::string mName;        /*!< material name */
     std::string mMaterialID;  /*!< material identification number */
 
     std::vector<Plato::srom::RandomVariable> mRandomVars; /*!< non-deterministic material property */
@@ -182,6 +183,24 @@ public:
     }
 
     /******************************************************************************//**
+     * \brief Set material name
+     * \param [in] aName material name
+    **********************************************************************************/
+    void name(const std::string& aName)
+    {
+        mName = aName;
+    }
+
+    /******************************************************************************//**
+     * \brief Return material name.
+     * \return material name
+    **********************************************************************************/
+    std::string name() const
+    {
+        return mName;
+    }
+
+    /******************************************************************************//**
      * \brief Return tags of material properties that define the material.
      * \return list with material property tags
     **********************************************************************************/
@@ -272,6 +291,7 @@ private:
     double mProbability;       /*!< probability for this material instance */
     std::string mBlockID;      /*!< material block identification number */
     std::string mCategory;     /*!< isotropic, orthotropic, anisotropic, etc. */
+    std::string mName;         /*!< material name */
     std::string mMaterialID;   /*!< material identification number */
 
     MaterialProps mTags; /*!< map between material property tag/label and its attribute and value, i.e. tags(tag,(attribute,value)) */
@@ -367,6 +387,24 @@ public:
     std::string category() const
     {
         return mCategory;
+    }
+
+    /******************************************************************************//**
+     * \brief Set material name
+     * \param [in] aName material name
+    **********************************************************************************/
+    void name(const std::string& aName)
+    {
+        mName = aName;
+    }
+
+    /******************************************************************************//**
+     * \brief Return material name.
+     * \return material name
+    **********************************************************************************/
+    std::string name() const
+    {
+        return mName;
     }
 
     /******************************************************************************//**

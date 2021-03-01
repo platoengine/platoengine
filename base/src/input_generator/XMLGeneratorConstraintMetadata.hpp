@@ -68,151 +68,94 @@ public:
     void id(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn name
+     * \fn id
      * \brief Return string value for keyword 'id'.
      * \return output string
     **********************************************************************************/
     std::string id() const;
 
     /******************************************************************************//**
-     * \fn name
-     * \brief Set string value for keyword 'name'.
+     * \fn criterion
+     * \brief Set string value for keyword 'criterion'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void name(const std::string& aInput);
+    void criterion(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn name
-     * \brief Return string value for keyword 'name'.
+     * \fn criterion
+     * \brief Return string value for keyword 'criterion'.
      * \return output string
     **********************************************************************************/
-    std::string name() const;
+    std::string criterion() const;
 
     /******************************************************************************//**
-     * \fn code
-     * \brief Set string value for keyword 'code'.
+     * \fn service
+     * \brief Set string value for keyword 'service'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void code(const std::string& aInput);
+    void service(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn code
-     * \brief Return string value for keyword 'code'.
+     * \fn service
+     * \brief Return string value for keyword 'service'.
      * \return output string
     **********************************************************************************/
-    std::string code() const;
+    std::string service() const;
 
     /******************************************************************************//**
-     * \fn weight
-     * \brief Set string value for keyword 'weight'.
+     * \fn scenario
+     * \brief Set string value for keyword 'scenario'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void weight(const std::string& aInput);
+    void scenario(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn weight
-     * \brief Return string value for keyword 'weight'.
+     * \fn scenario
+     * \brief Return string value for keyword 'scenario'.
      * \return output string
     **********************************************************************************/
-    std::string weight() const;
-
+    std::string scenario() const;
     /******************************************************************************//**
-     * \fn category
-     * \brief Set string value for keyword 'category'.
+     * \fn relativeTarget
+     * \brief Set string value for keyword 'relative_target'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void category(const std::string& aInput);
+    void relativeTarget(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn category
-     * \brief Return string value for keyword 'category'.
+     * \fn relativeTarget
+     * \brief Return string value for keyword 'relative_target'.
      * \return output string
     **********************************************************************************/
-    std::string category() const;
-
-    /******************************************************************************//**
-     * \fn performer
-     * \brief Set string value for keyword 'performer'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void performer(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn performer
-     * \brief Return string value for keyword 'performer'.
-     * \return output string
-    **********************************************************************************/
-    std::string performer() const;
-
-    /******************************************************************************//**
-     * \fn pnormExponent
-     * \brief Set string value for keyword 'pnorm exponent'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void pnormExponent(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn pnormExponent
-     * \brief Return string value for keyword 'pnorm exponent'.
-     * \return output string
-    **********************************************************************************/
-    std::string pnormExponent() const;
-
-    /******************************************************************************//**
-     * \fn normalizedTarget
-     * \brief Set string value for keyword 'target normalized'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void normalizedTarget(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn normalizedTarget
-     * \brief Return string value for keyword 'target normalized'.
-     * \return output string
-    **********************************************************************************/
-    std::string normalizedTarget() const;
+    std::string relativeTarget() const;
 
     /******************************************************************************//**
      * \fn absoluteTarget
-     * \brief Set string value for keyword 'target absolute'.
+     * \brief Set string value for keyword 'absolute_target'.
      * \param [in] aInput string value
     **********************************************************************************/
     void absoluteTarget(const std::string& aInput);
 
     /******************************************************************************//**
      * \fn absoluteTarget
-     * \brief Return string value for keyword 'target absolute'.
+     * \brief Return string value for keyword 'absolute_target'.
      * \return output string
     **********************************************************************************/
     std::string absoluteTarget() const;
 
     /******************************************************************************//**
-     * \fn materialPenaltyExponent
-     * \brief Set string value for keyword 'penalty power'.
+     * \fn weight
+     * \brief Set string value for keyword 'weight'.
      * \param [in] aInput string value
-    **********************************************************************************/
-    void materialPenaltyExponent(const std::string& aInput);
+     **********************************************************************************/
+    void weight(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn materialPenaltyExponent
-     * \brief Return string value for keyword 'penalty power'.
-     * \return output string
-    **********************************************************************************/
-    std::string materialPenaltyExponent() const;
-
-    /******************************************************************************//**
-     * \fn minErsatzMaterialConstant
-     * \brief Set string value for keyword 'minimum ersatz material value'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void minErsatzMaterialConstant(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn minErsatzMaterialConstant
-     * \brief Return string value for keyword 'minimum ersatz material value'.
-     * \return output string
-    **********************************************************************************/
-    std::string minErsatzMaterialConstant() const;
+     * \fn weight
+     * \brief Return string value for keyword 'weight'.
+     * \return value
+     **********************************************************************************/
+    std::string weight() const;
 };
 // struct Constraint
 

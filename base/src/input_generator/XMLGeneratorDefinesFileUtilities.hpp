@@ -103,12 +103,30 @@ void append_material_properties_to_define_xml_file
 /******************************************************************************//**
  * \fn write_define_xml_file
  * \brief Write define XML file.
- * \param [in] aRandomMetaData      random samples metadata
- * \param [in] aUncertaintyMetaData uncertainty metadata
+ * \param [in] aMetaData  input meta data
 **********************************************************************************/
 void write_define_xml_file
-(const XMLGen::RandomMetaData& aRandomMetaData,
- const XMLGen::UncertaintyMetaData& aUncertaintyMetaData);
+(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
+ * \fn add_robust_optimization_data_to_define_xml_file
+ * \brief Add robust optimization parameters to defines.xml
+ * \param [in] aMetaData  input meta data
+ * \param [in] aDocument  document to add to
+**********************************************************************************/
+void add_robust_optimization_data_to_define_xml_file
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document &aDocument);
+
+/******************************************************************************//**
+ * \fn add_shape_optimization_data_to_define_xml_file
+ * \brief Add shape optimization parameters to defines.xml
+ * \param [in] aMetaData  input meta data
+ * \param [in] aDocument  document to add to
+**********************************************************************************/
+void add_shape_optimization_data_to_define_xml_file
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_document &aDocument);
 
 /******************************************************************************//**
  * \fn allocate_map_from_random_load_identifier_to_load_samples

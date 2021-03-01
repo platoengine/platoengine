@@ -38,22 +38,20 @@
         <Parameter name="Minimum Value" type="double" value="1.0e-3"/>
       </ParameterList>
     </ParameterList>
-
     <ParameterList name="Spatial Model">
       <ParameterList name="Domains">
-        <ParameterList name="Design Volume">
-          <Parameter name="Element Block" type="string" value="block_1"/>
-          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        <ParameterList name="Block 1">
+          <Parameter name="Element Block" type="string" value="block_1" />
+          <Parameter name="Material Model" type="string" value="Material 1" />
         </ParameterList>
-        <ParameterList name="Mounts">
-          <Parameter name="Element Block" type="string" value="block_2"/>
-          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        <ParameterList name="Block 2">
+          <Parameter name="Element Block" type="string" value="block_2" />
+          <Parameter name="Material Model" type="string" value="Material 1" />
         </ParameterList>
       </ParameterList>
     </ParameterList>
-
     <ParameterList name="Material Models">
-      <ParameterList name="Unobtainium">
+      <ParameterList name="Material 1">
         <ParameterList name="Thermal Conduction">
           <Parameter  name="Thermal Conductivity" type="double" value="210.0"/>
         </ParameterList>

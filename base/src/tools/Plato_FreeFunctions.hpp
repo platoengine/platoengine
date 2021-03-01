@@ -57,10 +57,6 @@
 namespace Plato
 {
 
-size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
-                                   const size_t& num_processors_in_group,
-                                   const size_t& atmost_processor_count);
-
 template<typename T>
 T free_sum(const std::vector<T>& in_)
 {

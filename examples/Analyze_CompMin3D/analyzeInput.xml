@@ -43,15 +43,15 @@
 
     <ParameterList name="Spatial Model">
       <ParameterList name="Domains">
-        <ParameterList name="Design Volume">
-          <Parameter name="Element Block" type="string" value="block_1"/>
-          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        <ParameterList name="Block 1">
+          <Parameter name="Element Block" type="string" value="block_1" />
+          <Parameter name="Material Model" type="string" value="Material 1" />
         </ParameterList>
       </ParameterList>
     </ParameterList>
 
     <ParameterList name="Material Models">
-      <ParameterList name="Unobtainium">
+      <ParameterList name="Material 1">
         <ParameterList name="Isotropic Linear Elastic">
           <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
           <Parameter  name="Youngs Modulus" type="double" value="1.0e8"/>

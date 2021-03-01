@@ -19,9 +19,12 @@ namespace XMLGen
 **********************************************************************************/
 struct Service
 {
+public:
+
 // private member data
 private:
     std::unordered_map<std::string, std::string> mMetaData; /*!< Service metadata, map< tag, value > */
+    std::vector<std::string> mDeviceIDs;
 
 // private member functions
 private:
@@ -97,32 +100,46 @@ public:
     std::string code() const;
 
     /******************************************************************************//**
-     * \fn performer
-     * \brief Set string value for keyword 'performer'.
+     * \fn numberRanks
+     * \brief Set string value for keyword 'number_ranks'.
      * \param [in] aInput string value
     **********************************************************************************/
-    void performer(const std::string& aInput);
+    void numberRanks(const std::string& aInput);
 
     /******************************************************************************//**
-     * \fn performer
-     * \brief Return string value for keyword 'performer'.
+     * \fn numberRanks
+     * \brief Return string value for keyword 'number_ranks'.
      * \return value
     **********************************************************************************/
-    std::string performer() const;
+    std::string numberRanks() const;
 
     /******************************************************************************//**
-     * \fn physics
-     * \brief Set string value for keyword 'physics'.
+     * \fn deviceIDs
+     * \brief Set the vector of device ids
      * \param [in] aInput string value
     **********************************************************************************/
-    void physics(const std::string& aInput);
+    void deviceIDs(const std::vector<std::string>& aInput);
 
     /******************************************************************************//**
-     * \fn physics
-     * \brief Return string value for keyword 'physics'.
+     * \fn deviceIDs
+     * \brief Return list of device ids
      * \return value
     **********************************************************************************/
-    std::string physics() const;
+    std::vector<std::string> deviceIDs() const;
+
+    /******************************************************************************//**
+     * \fn numberProcessors
+     * \brief Set string value for keyword 'number_processors'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void numberProcessors(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn numberProcessors
+     * \brief Return string value for keyword 'number_processors'.
+     * \return value
+    **********************************************************************************/
+    std::string numberProcessors() const;
 
     /******************************************************************************//**
      * \fn dimensions
@@ -181,34 +198,6 @@ public:
     std::string additiveContinuation() const;
 
     /******************************************************************************//**
-     * \fn timeStep
-     * \brief Set string value for keyword 'time_step'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void timeStep(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn timeStep
-     * \brief Return string value for keyword 'time_step'.
-     * \return value
-    **********************************************************************************/
-    std::string timeStep() const;
-
-    /******************************************************************************//**
-     * \fn numTimeSteps
-     * \brief Set string value for keyword 'number_time_steps'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void numTimeSteps(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn numTimeSteps
-     * \brief Return string value for keyword 'number_time_steps'.
-     * \return value
-    **********************************************************************************/
-    std::string numTimeSteps() const;
-
-    /******************************************************************************//**
      * \fn maxNumTimeSteps
      * \brief Set string value for keyword 'max_number_time_steps'.
      * \param [in] aInput string value
@@ -235,34 +224,6 @@ public:
      * \return value
     **********************************************************************************/
     std::string timeStepExpansion() const;
-
-    /******************************************************************************//**
-     * \fn newmarkBeta
-     * \brief Set string value for keyword 'newmark_beta'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void newmarkBeta(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn newmarkBeta
-     * \brief Return string value for keyword 'newmark_beta'.
-     * \return value
-    **********************************************************************************/
-    std::string newmarkBeta() const;
-
-    /******************************************************************************//**
-     * \fn newmarkGamma
-     * \brief Set string value for keyword 'newmark_gamma'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void newmarkGamma(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn newmarkGamma
-     * \brief Return string value for keyword 'newmark_gamma'.
-     * \return value
-    **********************************************************************************/
-    std::string newmarkGamma() const;
 
     /******************************************************************************//**
      * \fn newtonSolverTolerance
@@ -321,6 +282,13 @@ public:
     std::string solverMaxNumIterations() const;
 
     /******************************************************************************//**
+     * \fn performer
+     * \brief Return derived string value for performer.
+     * \return value
+    **********************************************************************************/
+    std::string performer() const;
+
+    /******************************************************************************//**
      * \fn cacheState
      * \brief Set string value for keyword 'cache_state'.
      * \param [in] aInput string value
@@ -347,20 +315,6 @@ public:
      * \return output bool
     **********************************************************************************/
     bool updateProblem() const;
-
-    /******************************************************************************//**
-     * \fn useNewAnalyzeUQWorkflow
-     * \brief Set string value for keyword 'use_new_analyze_uq_workflow'.
-     * \param [in] aInput string value
-    **********************************************************************************/
-    void useNewAnalyzeUQWorkflow(const std::string& aInput);
-
-    /******************************************************************************//**
-     * \fn useNewAnalyzeUQWorkflow
-     * \brief Return bool value for keyword 'use_new_analyze_uq_workflow'.
-     * \return output bool
-    **********************************************************************************/
-    bool useNewAnalyzeUQWorkflow() const;
 };
 // struct Service
 

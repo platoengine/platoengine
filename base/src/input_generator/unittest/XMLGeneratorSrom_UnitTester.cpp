@@ -10,35 +10,30 @@
 
 #include "Plato_SromXMLGenTools.hpp"
 #include "XMLGeneratorRandomMetadata.hpp"
-#include "XMLGeneratorBoundaryMetadata.hpp"
 
 namespace PlatoTestXMLGenerator
 {
 
 TEST(PlatoTestXMLGenerator, CheckRandomLoadIdentificationNumbers)
 {
-    // POSE LOAD CASE 1
-    XMLGen::Load tLoad1;
-    tLoad1.load_id = "1";
-    XMLGen::Load tLoad2;
-    tLoad2.load_id = "2";
-    XMLGen::LoadCase tLoadCase1;
-    tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(tLoad1);
-    tLoadCase1.loads.push_back(tLoad2);
-
-    // POSE LOAD CASE 2
-    tLoad1.load_id = "3";
-    tLoad2.load_id = "4";
-    XMLGen::LoadCase tLoadCase2;
-    tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(tLoad1);
-    tLoadCase2.loads.push_back(tLoad2);
-
-    // APPEND LOAD CASES
     XMLGen::InputData tInputMetadata;
-    tInputMetadata.load_cases.push_back(tLoadCase1);
-    tInputMetadata.load_cases.push_back(tLoadCase2);
+
+    // POSE LOAD SCENARIO 1
+    XMLGen::Scenario tScenario1;
+    tScenario1.id("1");
+    std::vector<std::string> tLoadIDs = {"1","2"};
+    tScenario1.setLoadIDs(tLoadIDs);
+    tInputMetadata.append(tScenario1);
+
+    // POSE LOAD SCENARIO 2
+    XMLGen::Scenario tScenario2;
+    tScenario2.id("2");
+    tLoadIDs = {"3", "4"};
+    tScenario2.setLoadIDs(tLoadIDs);
+    tInputMetadata.append(tScenario2);
+
+    tInputMetadata.objective.scenarioIDs.push_back("1");
+    tInputMetadata.objective.scenarioIDs.push_back("2");
 
     // POSE UNCERTAINTIES
     XMLGen::Uncertainty tUQCase1;
@@ -85,14 +80,14 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetType_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
-    tLoadCase1.loads[0].type = "traction";
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads[0].type("traction");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads[0].type = "pressure";
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads[0].type("pressure");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;
@@ -108,13 +103,13 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetSize_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads.push_back(XMLGen::Load());
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;
@@ -130,14 +125,14 @@ TEST(PlatoTestXMLGenerator, CheckOutputLoadSetApplicationName_Error)
 {
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::Load());
-    tLoadCase1.loads[0].app_name = "sideset";
+    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads[0].location_name("sideset");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::Load());
-    tLoadCase2.loads[0].app_name = "nodeset";
+    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads[0].location_name("nodeset");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
     XMLGen::RandomMetaData tMetaData;
@@ -315,14 +310,6 @@ TEST(PlatoTestXMLGenerator, RandomMetaData_Set_ErrorUndefinedLoadCaseID)
     EXPECT_THROW(tMetaData.append(tLoadSet), std::runtime_error);
 }
 
-TEST(PlatoTestXMLGenerator, RandomMetaData_Set_ErrorUndefinedLoadsContainer)
-{
-    XMLGen::RandomMetaData tMetaData;
-    XMLGen::LoadCase tLoadCase;
-    tLoadCase.id = "1";
-    auto tLoadSet = std::make_pair(0.5, tLoadCase);
-    EXPECT_THROW(tMetaData.append(tLoadSet), std::runtime_error);
-}
 
 TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedBlockID)
 {
@@ -520,7 +507,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Material tMaterial;
     tMaterial.id("30");
@@ -550,7 +537,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase2;
     tCase2.category("load");
@@ -562,7 +549,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase3;
     tCase3.category("material");
@@ -813,7 +800,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialIdToRandomMaterialMap_Error)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     std::vector<XMLGen::Uncertainty> tRandomVars;
     tRandomVars.push_back(tCase1);
@@ -920,7 +907,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     tCase1.mean("0");
     tCase1.std("0.2");
     tCase1.samples("12");
-    tCase1.tag("angle variation");;
+    tCase1.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase2;
     tCase2.category("load");
@@ -932,7 +919,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     tCase2.mean("2");
     tCase2.std("2");
     tCase2.samples("8");
-    tCase2.tag("angle variation");;
+    tCase2.tag("angle_variation");;
 
     XMLGen::Uncertainty tCase3;
     tCase3.category("material");
@@ -958,7 +945,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     auto tLoads = tCategoriesMap.find(Plato::srom::category::LOAD);
     ASSERT_EQ(2u, tLoads->second.size());
     ASSERT_STREQ("load", tLoads->second[0].category().c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads->second[0].tag().c_str());
     ASSERT_STREQ("x", tLoads->second[0].attribute().c_str());
     ASSERT_STREQ("2", tLoads->second[0].id().c_str());
     ASSERT_STREQ("2", tLoads->second[0].upper().c_str());
@@ -969,7 +956,7 @@ TEST(PlatoTestXMLGenerator, SplitUncertaintiesIntoCategories)
     ASSERT_STREQ("beta", tLoads->second[0].distribution().c_str());
 
     ASSERT_STREQ("load", tLoads->second[1].category().c_str());
-    ASSERT_STREQ("angle variation", tLoads->second[1].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads->second[1].tag().c_str());
     ASSERT_STREQ("y", tLoads->second[1].attribute().c_str());
     ASSERT_STREQ("20", tLoads->second[1].id().c_str());
     ASSERT_STREQ("20", tLoads->second[1].upper().c_str());
@@ -1000,45 +987,92 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs_Error)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "end material\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
+
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     auto tInputData = tTester.getInputData();
 
@@ -1052,61 +1086,107 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
+
     auto tInputData = tTester.getInputData();
 
     Plato::srom::InputMetaData tSromInputs;
@@ -1121,10 +1201,10 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
     // 1.1. TEST INTEGERS
     ASSERT_EQ(1u, tLoads.size());
     ASSERT_EQ(2147483647, tLoads[0].mAppID);
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
 
     // 1.2. TEST STRINGS
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
     ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
     ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
@@ -1137,7 +1217,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicLoadInputs)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1153,61 +1233,106 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Error)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
-
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
+
     auto tInputData = tTester.getInputData();
 
     // CALL FUNCTION
@@ -1222,61 +1347,106 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
     auto tInputData = tTester.getInputData();
 
     // CALL FUNCTION
@@ -1293,10 +1463,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
     // 1.1. TEST INTEGERS
     ASSERT_EQ(1u, tLoads.size());
     ASSERT_EQ(2147483647, tLoads[0].mAppID); // not defined, thus it takes the value std::numeric_limit::max
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
 
     // 1.2. TEST STRINGS
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
     ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
     ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
@@ -1309,7 +1479,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1325,65 +1495,112 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear thermoelastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-            "thermal_conductivity .02\n"
-            "mass_density .001\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category material\n"
-        "    tag thermal_conductivity\n"
-        "    material_id 1\n"
-        "    attribute homogeneous\n"
-        "    distribution beta\n"
-        "    mean 0.02\n"
-        "    upper_bound 0.04\n"
-        "    lower_bound 0.01\n"
-        "    standard_deviation 0.0075\n"
-        "    number_samples 8\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  penalty_exponent 3\n"
+      "  material_model isotropic_linear_thermoelastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "  thermal_conductivity .02\n"
+      "  mass_density .001\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category material\n"
+      "  tag thermal_conductivity\n"
+      "  material_id 1\n"
+      "  attribute homogeneous\n"
+      "  distribution beta\n"
+      "  mean 0.02\n"
+      "  upper_bound 0.04\n"
+      "  lower_bound 0.01\n"
+      "  standard_deviation 0.0075\n"
+      "  number_samples 8\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseMaterials(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
 
     // CALL FUNCTION
@@ -1407,7 +1624,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials)
     // 1.2. TEST STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
-    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_thermoelastic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST STATISTICS
@@ -1433,75 +1650,121 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear thermoelastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-            "thermal_conductivity .02\n"
-            "mass_density .001\n"
-        "end material\n"
-        "begin material 2\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 5e6\n"
-            "poissons_ratio 0.28\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin block 2\n"
-        "   material 2\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category material\n"
-        "    tag thermal_conductivity\n"
-        "    material_id 1\n"
-        "    attribute homogeneous\n"
-        "    distribution beta\n"
-        "    mean 0.02\n"
-        "    upper_bound 0.04\n"
-        "    lower_bound 0.01\n"
-        "    standard_deviation 0.0075\n"
-        "    number_samples 8\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin block 2\n"
+      "  material 2\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_thermoelastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "  thermal_conductivity .02\n"
+      "  mass_density .001\n"
+      "  penalty_exponent 3\n"
+      "end material\n"
+      "begin material 2\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  penalty_exponent 3\n"
+      "  poissons_ratio 0.28\n"
+      "  youngs_modulus 5e6\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category material\n"
+      "  tag thermal_conductivity\n"
+      "  material_id 1\n"
+      "  attribute homogeneous\n"
+      "  distribution beta\n"
+      "  mean 0.02\n"
+      "  upper_bound 0.04\n"
+      "  lower_bound 0.01\n"
+      "  standard_deviation 0.0075\n"
+      "  number_samples 8\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseMaterials(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1523,7 +1786,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
 
     // 1.2. TEST STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
-    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_thermoelastic", tMaterials[0].category().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
@@ -1549,7 +1812,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Materials_1RandomAnd1Det
 
     // 2.2. TEST STRINGS
     ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[1].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterials[1].category().c_str());
     ASSERT_STREQ("2", tMaterials[1].materialID().c_str());
     ASSERT_EQ(3u, tMaterials[1].tags().size());
 
@@ -1572,78 +1835,124 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear thermoelastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-            "thermal_conductivity .02\n"
-            "mass_density .001\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category material\n"
-        "    tag thermal_conductivity\n"
-        "    material_id 1\n"
-        "    attribute homogeneous\n"
-        "    distribution beta\n"
-        "    mean 0.02\n"
-        "    upper_bound 0.04\n"
-        "    lower_bound 0.01\n"
-        "    standard_deviation 0.0075\n"
-        "    number_samples 8\n"
-        "end uncertainty\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_thermoelastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "  thermal_conductivity .02\n"
+      "  mass_density .001\n"
+      "  penalty_exponent 3\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category material\n"
+      "  tag thermal_conductivity\n"
+      "  material_id 1\n"
+      "  attribute homogeneous\n"
+      "  distribution beta\n"
+      "  mean 0.02\n"
+      "  upper_bound 0.04\n"
+      "  lower_bound 0.01\n"
+      "  standard_deviation 0.0075\n"
+      "  number_samples 8\n"
+      "end uncertainty\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseMaterials(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1665,7 +1974,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     EXPECT_FALSE(tMaterials[0].isDeterministic());
 
     // 1.2. TEST MATERIAL STRINGS
-    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_thermoelastic", tMaterials[0].category().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
@@ -1688,10 +1997,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(1u, tLoads.size());
     ASSERT_EQ(2147483647, tLoads[0].mAppID); // not defined, thus it takes the value std::numeric_limit::max
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
 
     // 2.2. TEST LOAD STRINGS
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
     ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
     ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
@@ -1704,7 +2013,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad)
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1720,88 +2029,139 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 1 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "    traction sideset name 3 value 0 -1e4 0 load id 1\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear thermoelastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-            "thermal_conductivity 0.33\n"
-            "mass_density 1.0\n"
-        "end material\n"
-        "begin material 2\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 5e6\n"
-            "poissons_ratio 0.28\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin block 2\n"
-        "   material 2\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category material\n"
-        "    tag thermal_conductivity\n"
-        "    material_id 1\n"
-        "    attribute homogeneous\n"
-        "    distribution beta\n"
-        "    mean 0.02\n"
-        "    upper_bound 0.04\n"
-        "    lower_bound 0.01\n"
-        "    standard_deviation 0.0075\n"
-        "    number_samples 8\n"
-        "end uncertainty\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 1 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin load 1\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_3\n"
+      "  value 0 -1e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin block 2\n"
+      "  material 2\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_thermoelastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "  thermal_conductivity .02\n"
+      "  mass_density .001\n"
+      "  penalty_exponent 3\n"
+      "end material\n"
+      "begin material 2\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.28\n"
+      "  youngs_modulus 5e6\n"
+      "  penalty_exponent 3\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category material\n"
+      "  tag thermal_conductivity\n"
+      "  material_id 1\n"
+      "  attribute homogeneous\n"
+      "  distribution beta\n"
+      "  mean 0.02\n"
+      "  upper_bound 0.04\n"
+      "  lower_bound 0.01\n"
+      "  standard_deviation 0.0075\n"
+      "  number_samples 8\n"
+      "end uncertainty\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseMaterials(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
-    tInputSS.clear();
-    tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1825,7 +2185,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     // 1.2. TEST MATERIAL STRINGS
     ASSERT_STREQ("1", tMaterials[0].blockID().c_str());
     ASSERT_STREQ("1", tMaterials[0].materialID().c_str());
-    ASSERT_STREQ("isotropic linear thermoelastic", tMaterials[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_thermoelastic", tMaterials[0].category().c_str());
     ASSERT_EQ(5u, tMaterials[0].tags().size());
 
     // 1.3. TEST MATERIAL STATISTICS
@@ -1850,7 +2210,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
 
     ASSERT_STREQ("2", tMaterials[1].blockID().c_str());
     ASSERT_STREQ("2", tMaterials[1].materialID().c_str());
-    ASSERT_STREQ("isotropic linear elastic", tMaterials[1].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterials[1].category().c_str());
     ASSERT_EQ(3u, tMaterials[1].tags().size());
 
     ASSERT_STREQ("3", tMaterials[1].deterministicVars()[0].value().c_str());
@@ -1868,10 +2228,10 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     // 2.1. TEST LOAD INTEGERS
     ASSERT_EQ(2u, tLoads.size());
     ASSERT_EQ(2147483647, tLoads[0].mAppID); // not defined, thus it takes the value std::numeric_limit::max
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
 
     // 2.2. TEST LOAD STRINGS
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
     ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
     ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
@@ -1884,7 +2244,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -1895,7 +2255,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_MaterialsPlusLoad_1Rando
 
     // 2.4 TEST DETERMINISTIC LOAD
     ASSERT_STREQ("1", tLoads[1].mLoadID.c_str());
-    ASSERT_STREQ("3", tLoads[1].mAppName.c_str());
+    ASSERT_STREQ("ss_3", tLoads[1].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[1].mAppType.c_str());
     ASSERT_STREQ("traction", tLoads[1].mLoadType.c_str());
     ASSERT_STREQ("0", tLoads[1].mValues[0].c_str());
@@ -1911,69 +2271,118 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     XMLGenerator_UnitTester tTester;
     std::istringstream tInputSS;
     std::string tStringInput =
-        "begin objective\n"
-        "   type maximize stiffness\n"
-        "   load ids 1 10\n"
-        "   boundary condition ids 11\n"
-        "   code plato_analyze\n"
-        "   number processors 1\n"
-        "   weight 1\n"
-        "   number ranks 1\n"
-        "end objective\n"
-        "begin boundary conditions\n"
-        "   fixed displacement nodeset name 1 bc id 11\n"
-        "end boundary conditions\n"
-        "begin loads\n"
-        "    traction sideset name 2 value 0 -5e4 0 load id 10\n"
-        "    traction sideset name 3 value 0 -1e4 0 load id 1\n"
-        "end loads\n"
-        "begin material 1\n"
-            "material_model isotropic linear elastic\n"
-            "penalty_exponent 3\n"
-            "youngs_modulus 1e6\n"
-            "poissons_ratio 0.33\n"
-        "end material\n"
-        "begin block 1\n"
-        "   material 1\n"
-        "end block\n"
-        "begin uncertainty\n"
-        "    category load\n"
-        "    tag angle variation\n"
-        "    load_id 10\n"
-        "    attribute X\n"
-        "    distribution beta\n"
-        "    mean 0.0\n"
-        "    upper_bound 45.0\n"
-        "    lower_bound -45.0\n"
-        "    standard_deviation 22.5\n"
-        "    number_samples 2\n"
-        "end uncertainty\n"
-        "begin optimization parameters\n"
-        "end optimization parameters\n";
+      "begin service 1\n"
+      "  code platomain\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin service 2\n"
+      "  code plato_analyze\n"
+      "  number_processors 1\n"
+      "end service\n"
+      "begin criterion 1\n"
+      "  type mechanical_compliance\n"
+      "end criterion\n"
+      "begin scenario 1\n"
+      "  physics steady_state_mechanics\n"
+      "  dimensions 3\n"
+      "  loads 1 10\n"
+      "  boundary_conditions 1 2 3\n"
+      "  material 1\n"
+      "end scenario\n"
+      "begin objective\n"
+      "  scenarios 1\n"
+      "  criteria 1\n"
+      "  services 2\n"
+      "  type weighted_sum\n"
+      "  weights 1\n"
+      "end objective\n"
+      "begin boundary_condition 1\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispx\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 2\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispy\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin boundary_condition 3\n"
+      "  type fixed_value\n"
+      "  location_type nodeset\n"
+      "  location_name ns_1\n"
+      "  degree_of_freedom dispz\n"
+      "  value 0\n"
+      "end boundary_condition\n"
+      "begin load 10\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_2\n"
+      "  value 0 -5e4 0\n"
+      "end load\n"
+      "begin load 1\n"
+      "  type traction\n"
+      "  location_type sideset\n"
+      "  location_name ss_3\n"
+      "  value 0 -1e4 0\n"
+      "end load\n"
+      "begin block 1\n"
+      "  material 1\n"
+      "end block\n"
+      "begin material 1\n"
+      "  material_model isotropic_linear_elastic\n"
+      "  poissons_ratio 0.33\n"
+      "  youngs_modulus 1e6\n"
+      "  penalty_exponent 3\n"
+      "end material\n"
+      "begin uncertainty\n"
+      "  category load\n"
+      "  tag angle_variation\n"
+      "  load_id 10\n"
+      "  attribute X\n"
+      "  distribution beta\n"
+      "  mean 0.0\n"
+      "  upper_bound 45.0\n"
+      "  lower_bound -45.0\n"
+      "  standard_deviation 22.5\n"
+      "  number_samples 2\n"
+      "end uncertainty\n"
+      "begin optimization parameters\n"
+      "end optimization parameters\n";
 
     tInputSS.str(tStringInput);
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseObjectives(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseObjective(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseLoads(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseBCs(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseBCs(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
-    EXPECT_TRUE(tTester.publicParseUncertainties(tInputSS));
+    ASSERT_NO_THROW(tTester.publicParseUncertainties(tInputSS));
     tInputSS.clear();
     tInputSS.seekg(0);
     EXPECT_TRUE(tTester.publicParseBlocks(tInputSS));
+    tInputSS.clear();
+    tInputSS.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tInputSS));
 
     auto tInputData = tTester.getInputData();
-    ASSERT_EQ(2u, tInputData.load_cases.size());
-    for(auto& tLoadCase : tInputData.load_cases)
-    {
-        ASSERT_EQ(1u, tLoadCase.loads.size());
-    }
 
     // CALL FUNCTION
     Plato::srom::InputMetaData tSromInputs;
@@ -1990,11 +2399,11 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     ASSERT_EQ(2u, tLoads.size());
     ASSERT_EQ(std::numeric_limits<int>::max(), tLoads[0].mAppID);
     ASSERT_EQ(std::numeric_limits<int>::max(), tLoads[1].mAppID);
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
-    ASSERT_STREQ("3", tLoads[1].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_3", tLoads[1].mAppName.c_str());
 
     // 1.2. TEST STRINGS - LOAD 1
-    ASSERT_STREQ("2", tLoads[0].mAppName.c_str());
+    ASSERT_STREQ("ss_2", tLoads[0].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[0].mAppType.c_str());
     ASSERT_STREQ("10", tLoads[0].mLoadID.c_str());
     ASSERT_STREQ("traction", tLoads[0].mLoadType.c_str());
@@ -2007,7 +2416,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
     ASSERT_EQ(1u, tLoads[0].mRandomVars.size());
     ASSERT_EQ(0, tLoads[0].mRandomVars[0].id());
 
-    ASSERT_STREQ("angle variation", tLoads[0].mRandomVars[0].tag().c_str());
+    ASSERT_STREQ("angle_variation", tLoads[0].mRandomVars[0].tag().c_str());
     ASSERT_STREQ("x", tLoads[0].mRandomVars[0].attribute().c_str());
     ASSERT_STREQ("22.5", tLoads[0].mRandomVars[0].deviation().c_str());
     ASSERT_STREQ("beta", tLoads[0].mRandomVars[0].distribution().c_str());
@@ -2018,7 +2427,7 @@ TEST(PlatoTestXMLGenerator, PreprocessSromProblemInputs_Loads_1RandomAnd1Determi
 
     // 2 TEST DETERMINISTIC LOAD
     ASSERT_STREQ("1", tLoads[1].mLoadID.c_str());
-    ASSERT_STREQ("3", tLoads[1].mAppName.c_str());
+    ASSERT_STREQ("ss_3", tLoads[1].mAppName.c_str());
     ASSERT_STREQ("sideset", tLoads[1].mAppType.c_str());
     ASSERT_STREQ("traction", tLoads[1].mLoadType.c_str());
     ASSERT_STREQ("0", tLoads[1].mValues[0].c_str());
