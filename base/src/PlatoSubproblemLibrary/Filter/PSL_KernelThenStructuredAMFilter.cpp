@@ -40,44 +40,10 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
     computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
 
     mUtilities->getTetIDForEachPoint(tGridCoordinates,mContainingTetID);
-    // getTetIDForEachGridPoint(mContainingTetID);
 
     mFilterBuilt = true;
 }
 
-
-// void KernelThenStructuredAMFilter::getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const
-// {
-//     aTetIDs.resize((mNumElementsInEachDirection[0]+1) * (mNumElementsInEachDirection[1]+1) * (mNumElementsInEachDirection[2]+1));
-//     for(int i = 0; i <= mNumElementsInEachDirection[0]; ++i)
-//     {
-//         for(int j = 0; j <= mNumElementsInEachDirection[1]; ++j)
-//         {
-//             for(int k = 0; k <= mNumElementsInEachDirection[2]; ++k)
-//             {
-//                 aTetIDs[getSerializedIndex(mNumElementsInEachDirection,i,j,k)] = getContainingTetID(i,j,k);
-//             }
-//         }
-//     }
-// }
-
-// int KernelThenStructuredAMFilter::getContainingTetID(const int& i, const int& j, const int& k) const
-// {
-//     std::vector<int> tIndex({i,j,k});
-//     std::vector<Vector> tGridCoordinates;
-//     computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
-//     Vector tPoint = tGridCoordinates[getSerializedIndex(mNumElementsInEachDirection,i,j,k)];
-
-//     for(int tTetIndex = 0; tTetIndex < (int) mConnectivity.size(); ++tTetIndex)
-//     {
-//         auto tTet = mConnectivity[tTetIndex];
-
-//         if(mUtilities->isPointInTetrahedron(tTet,tPoint)) 
-//             return tTetIndex;
-//     }
-
-//     return -1;
-// }
 
 // double KernelThenStructuredAMFilter::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 // {
@@ -114,6 +80,7 @@ void KernelThenStructuredAMFilter::buildStructuredGrid()
 // }
 
 // double KernelThenStructuredAMFilter::computeTetNodePrintableDensity(const int& aTetNodeIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+//
 // {
 //     // get grid element that tet node belongs to
 //     // use printable density at each grid point to compute tet node printable density

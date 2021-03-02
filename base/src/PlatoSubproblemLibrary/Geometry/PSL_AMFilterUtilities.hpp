@@ -78,6 +78,29 @@ struct Access<Points, PredicatesTag>
 namespace PlatoSubproblemLibrary
 {
 
+std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
+                                                   const Vector& aMinUVWCoords,
+                                                   const double& aTargetEdgeLength);
+
+void computeGridXYZCoordinates(const Vector& aUBasisVector,
+                                 const Vector& aVBasisVector,
+                                 const Vector& aBuildDirection,
+                                 const Vector& aMaxUVWCoords,
+                                 const Vector& aMinUVWCoords,
+                                 const std::vector<int>& aNumElements,
+                                 std::vector<Vector>& aXYZCoordinates);
+
+
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3);
+
+int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const int& i, const int& j, const int& k);
+int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const std::vector<int>& aIndex);
+
+bool sameSide(const std::vector<std::vector<double>>& aCoordinates, const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint);
+bool isPointInTetrahedron(const std::vector<std::vector<double>>& aCoordinates,const std::vector<int>& aTet, const Vector& aPoint);
+
 class AMFilterUtilities
 {
     public:
@@ -101,11 +124,8 @@ class AMFilterUtilities
 
         double computeMinEdgeLength() const;
 
-        bool isPointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const;
 
         std::vector<double> computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const;
-
-
 
         /***************************************************************************//**
         * @brief Find id of tet that contains each point 
@@ -202,7 +222,7 @@ class AMFilterUtilities
                     int tTetIndex = tIndices(i);
                     std::vector<int> tTet = mConnectivity[tTetIndex];
                     Vector tPoint = aPoints[tPointIndex];
-                    if(isPointInTetrahedron(tTet,tPoint))
+                    if(isPointInTetrahedron(mCoordinates,tTet,tPoint))
                     {
                         aContainingTetID[tPointIndex] = tTetIndex;
                     }
@@ -214,7 +234,7 @@ class AMFilterUtilities
 
         void checkInput() const;
 
-        bool sameSide(const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint) const;
+
 
     private:
         const std::vector<std::vector<double>>& mCoordinates;
@@ -224,23 +244,4 @@ class AMFilterUtilities
         Vector mBuildDirection;
 };
 
-std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
-                                                   const Vector& aMinUVWCoords,
-                                                   const double& aTargetEdgeLength);
-
-void computeGridXYZCoordinates(const Vector& aUBasisVector,
-                                 const Vector& aVBasisVector,
-                                 const Vector& aBuildDirection,
-                                 const Vector& aMaxUVWCoords,
-                                 const Vector& aMinUVWCoords,
-                                 const std::vector<int>& aNumElements,
-                                 std::vector<Vector>& aXYZCoordinates);
-
-
-double determinant3X3(const Vector& aRow1,
-                      const Vector& aRow2,
-                      const Vector& aRow3);
-
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const int& i, const int& j, const int& k);
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const std::vector<int>& aIndex);
 }

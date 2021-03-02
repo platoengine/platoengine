@@ -201,16 +201,15 @@ void checkTet(const std::vector<int>& aTet, const int& aNumNodes)
         throw(std::out_of_range("AMFilterUtilities::pointInTetrahedron: node index out of range"));
 }
 
-bool AMFilterUtilities::isPointInTetrahedron(const std::vector<int>& aTet, const Vector& aPoint) const
+bool isPointInTetrahedron(const std::vector<std::vector<double>>& aCoordinates,const std::vector<int>& aTet, const Vector& aPoint)
 {
-    checkTet(aTet, mCoordinates.size());
+    checkTet(aTet, aCoordinates.size());
 
-    return sameSide(aTet[0], aTet[1], aTet[2], aTet[3], aPoint) &&
-           sameSide(aTet[1], aTet[2], aTet[3], aTet[0], aPoint) &&
-           sameSide(aTet[2], aTet[3], aTet[0], aTet[1], aPoint) &&
-           sameSide(aTet[3], aTet[0], aTet[1], aTet[2], aPoint);
+    return sameSide(aCoordinates, aTet[0], aTet[1], aTet[2], aTet[3], aPoint) &&
+           sameSide(aCoordinates, aTet[1], aTet[2], aTet[3], aTet[0], aPoint) &&
+           sameSide(aCoordinates, aTet[2], aTet[3], aTet[0], aTet[1], aPoint) &&
+           sameSide(aCoordinates, aTet[3], aTet[0], aTet[1], aTet[2], aPoint);
 }
-
 
 std::vector<double> AMFilterUtilities::computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const
 {
@@ -246,12 +245,12 @@ std::vector<double> AMFilterUtilities::computeBarycentricCoordinates(const std::
     return tBarycentricCoordinates;
 }
 
-bool AMFilterUtilities::sameSide(const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint) const
+bool sameSide(const std::vector<std::vector<double>>& aCoordinates, const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint)
 {
-    Vector tVec1(mCoordinates[v1]);
-    Vector tVec2(mCoordinates[v2]);
-    Vector tVec3(mCoordinates[v3]);
-    Vector tVec4(mCoordinates[v4]);
+    Vector tVec1(aCoordinates[v1]);
+    Vector tVec2(aCoordinates[v2]);
+    Vector tVec3(aCoordinates[v3]);
+    Vector tVec4(aCoordinates[v4]);
 
     Vector tNormal = cross_product(tVec2 - tVec1, tVec3 - tVec1);
 

@@ -53,6 +53,27 @@ namespace PlatoSubproblemLibrary
 {
 namespace TestingPoint
 {
+int getContainingTetID(const std::vector<std::vector<int>>& aConnectivity,
+                       const std::vector<std::vector<double>>& aCoordinates,
+                       const std::vector<int>& aNumElementsInEachDirection,
+                       const Vector& aUBasisVector,
+                       const Vector& aVBasisVector,
+                       const Vector& aBuildDirection,
+                       const Vector& aMaxUVWCoords,
+                       const Vector& aMinUVWCoords,
+                       const int& i,
+                       const int& j,
+                       const int& k);
+
+void getTetIDForEachGridPoint(const std::vector<std::vector<int>>& aConnectivity,
+                              const std::vector<std::vector<double>>& aCoordinates,
+                              const std::vector<int>& aNumElementsInEachDirection,
+                              const Vector& aUBasisVector,
+                              const Vector& aVBasisVector,
+                              const Vector& aBuildDirection,
+                              const Vector& aMaxUVWCoords,
+                              const Vector& aMinUVWCoords,
+                              std::vector<int>& aTetIDs);
 
 PSL_TEST(AMFilterUtilities,construction)
 {
@@ -398,46 +419,39 @@ PSL_TEST(AMFilterUtilities, isPointInTetrahedron)
     tCoordinates.push_back({0.0,1.0,0.0});
     tCoordinates.push_back({0.0,0.0,1.0});
 
-    std::vector<std::vector<int>> tConnectivity;
-    tConnectivity.push_back({0,1,2,3});
-
-    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
-    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
-    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
-
-    AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
+    std::vector<int> tTet = {0,1,2,3};
 
     Vector tPoint({0.1,0.1,0.1});
 
     // not enough indices
     std::vector<int> tBogusTet = {0,1,2};
-    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+    EXPECT_THROW(isPointInTetrahedron(tCoordinates,tBogusTet,tPoint),std::domain_error);
 
     // repeated index
     tBogusTet = {0,0,1,2};
-    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::domain_error);
+    EXPECT_THROW(isPointInTetrahedron(tCoordinates,tBogusTet,tPoint),std::domain_error);
 
     // index out of range
     tBogusTet = {0,1,2,4};
-    EXPECT_THROW(tUtilities.isPointInTetrahedron(tBogusTet,tPoint),std::out_of_range);
+    EXPECT_THROW(isPointInTetrahedron(tCoordinates,tBogusTet,tPoint),std::out_of_range);
 
-    bool tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
+    bool tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, true);
 
     tPoint = Vector({1.0,1.0,1.0});
-    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({-0.1,0.1,0.1});
-    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({0.1,-0.1,0.1});
-    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 
     tPoint = Vector({0.1,0.1,-0.1});
-    tIsPointInTet = tUtilities.isPointInTetrahedron(tConnectivity[0], tPoint);
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, false);
 }
 
@@ -595,20 +609,29 @@ PSL_TEST(AMFilterUtilities, getTetIDForEachPoint)
 {
     std::vector<std::vector<double>> tCoordinates;
 
-    tCoordinates.push_back({0.0,0.0,0.0});
-    tCoordinates.push_back({1.0,0.0,0.0});
-    tCoordinates.push_back({0.0,1.0,0.0});
-    tCoordinates.push_back({0.0,0.0,1.0});
+    tCoordinates.push_back({1,0,1});
+    tCoordinates.push_back({1,1,1});
+    tCoordinates.push_back({0,1,1});
+    tCoordinates.push_back({0,0,1});
+    tCoordinates.push_back({1,1,0});
+    tCoordinates.push_back({1,0,0});
+    tCoordinates.push_back({0,0,0});
+    tCoordinates.push_back({0,1,0});
 
     std::vector<std::vector<int>> tConnectivity;
 
-    tConnectivity.push_back({0,1,2,3});
+    tConnectivity.push_back({0,2,7,6});
+    tConnectivity.push_back({0,2,6,3});
+    tConnectivity.push_back({0,4,5,6});
+    tConnectivity.push_back({0,4,6,7});
+    tConnectivity.push_back({0,1,4,7});
+    tConnectivity.push_back({0,1,7,3});
 
     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
 
-    std::vector<int> tNumElements = {2,2,2};
+    std::vector<int> tNumElements = {5,5,5};
 
     AMFilterUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
 
@@ -623,7 +646,64 @@ PSL_TEST(AMFilterUtilities, getTetIDForEachPoint)
     tUtilities.getTetIDForEachPoint(tGridCoordinates,tContainingTetID);
 
     EXPECT_EQ(tGridCoordinates.size(), tContainingTetID.size());
+
+    std::vector<int> tOldWayContainingTetID;
+    getTetIDForEachGridPoint(tConnectivity,tCoordinates,tNumElements,tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tOldWayContainingTetID);
+
+    EXPECT_EQ(tContainingTetID,tOldWayContainingTetID);
 }
+
+void getTetIDForEachGridPoint(const std::vector<std::vector<int>>& aConnectivity,
+                              const std::vector<std::vector<double>>& aCoordinates,
+                              const std::vector<int>& aNumElementsInEachDirection,
+                              const Vector& aUBasisVector,
+                              const Vector& aVBasisVector,
+                              const Vector& aBuildDirection,
+                              const Vector& aMaxUVWCoords,
+                              const Vector& aMinUVWCoords,
+                              std::vector<int>& aTetIDs)
+{
+    aTetIDs.resize((aNumElementsInEachDirection[0]+1) * (aNumElementsInEachDirection[1]+1) * (aNumElementsInEachDirection[2]+1));
+    for(int i = 0; i <= aNumElementsInEachDirection[0]; ++i)
+    {
+        for(int j = 0; j <= aNumElementsInEachDirection[1]; ++j)
+        {
+            for(int k = 0; k <= aNumElementsInEachDirection[2]; ++k)
+            {
+                aTetIDs[getSerializedIndex(aNumElementsInEachDirection,i,j,k)] = getContainingTetID(aConnectivity,aCoordinates,aNumElementsInEachDirection,aUBasisVector,aVBasisVector,aBuildDirection,aMaxUVWCoords,aMinUVWCoords,i,j,k);
+            }
+        }
+    }
+}
+
+int getContainingTetID(const std::vector<std::vector<int>>& aConnectivity,
+                       const std::vector<std::vector<double>>& aCoordinates,
+                       const std::vector<int>& aNumElementsInEachDirection,
+                       const Vector& aUBasisVector,
+                       const Vector& aVBasisVector,
+                       const Vector& aBuildDirection,
+                       const Vector& aMaxUVWCoords,
+                       const Vector& aMinUVWCoords,
+                       const int& i,
+                       const int& j,
+                       const int& k)
+{
+    std::vector<int> tIndex({i,j,k});
+    std::vector<Vector> tGridCoordinates;
+    computeGridXYZCoordinates(aUBasisVector,aVBasisVector,aBuildDirection,aMaxUVWCoords,aMinUVWCoords,aNumElementsInEachDirection,tGridCoordinates);
+    Vector tPoint = tGridCoordinates[getSerializedIndex(aNumElementsInEachDirection,i,j,k)];
+
+    for(int tTetIndex = 0; tTetIndex < (int) aConnectivity.size(); ++tTetIndex)
+    {
+        auto tTet = aConnectivity[tTetIndex];
+
+        if(isPointInTetrahedron(aCoordinates,tTet,tPoint)) 
+            return tTetIndex;
+    }
+
+    return -1;
+}
+
 
 }
 }
