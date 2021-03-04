@@ -479,5 +479,25 @@ void append_enforce_bounds_operation_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument);
 
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_output_operation_for_non_multi_load_case
+ * \brief Append qoi to output operation for non multi load case problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_deterministic_qoi_to_output_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_output_operation_for_multi_load_case
+ * \brief Append qoi to output operation for multi load case problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_deterministic_qoi_to_output_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
 }
 // namespace XMLGen

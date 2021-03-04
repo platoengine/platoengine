@@ -598,6 +598,25 @@ void append_loads_block
     }
 }
 /**************************************************************************/
+std::string convertDOF
+(const std::string &aDOFIn)
+{
+    std::string tReturn = aDOFIn;
+    if(aDOFIn == "dispx")
+    {
+        tReturn = "x";
+    }
+    else if(aDOFIn == "dispy")
+    {
+        tReturn = "y";
+    }
+    else if(aDOFIn == "dispz")
+    {
+        tReturn = "z";
+    }
+    return tReturn;
+}
+/**************************************************************************/
 void append_boundary_block
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion& aCriterion,
@@ -627,19 +646,20 @@ void append_boundary_block
             }
             else
             {
+                std::string tDOF = convertDOF(tCurEBC.degree_of_freedom());
                 if(tCurEBC.dof_value().empty())
                 {
                     fprintf(aFilePtr, "  %s %s %s 0\n",
                             tCurEBC.location_type().c_str(),
                             tCurEBC.location_id().c_str(),
-                            tCurEBC.degree_of_freedom().c_str());
+                            tDOF.c_str());
                 }
                 else
                 {
                     fprintf(aFilePtr, "  %s %s %s %s\n",
                             tCurEBC.location_type().c_str(),
                             tCurEBC.location_id().c_str(),
-                            tCurEBC.degree_of_freedom().c_str(),
+                            tDOF.c_str(),
                             tCurEBC.dof_value().c_str());
                 }
             }
