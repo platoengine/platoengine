@@ -54,6 +54,13 @@ private:
     void checkCode(XMLGen::Service& aService);
 
     /******************************************************************************//**
+     * \fn checkCacheState
+     * \brief Set cache state variable appropriately if needed
+     * \param [in] aService Service metadata
+    **********************************************************************************/
+    void checkCacheState(XMLGen::Service& aService);
+
+    /******************************************************************************//**
      * \fn checkServiceID
      * \brief If service 'id' keyword is empty, set 'id' to default = 'code_keyword'+ '0',
      * where 'code_keyword' denotes the value set for 'code' keyword.

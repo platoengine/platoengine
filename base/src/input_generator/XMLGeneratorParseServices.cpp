@@ -33,6 +33,7 @@ void ParseService::setTags(XMLGen::Service& aService)
 void ParseService::checkTags(XMLGen::Service& aService)
 {
     this->checkCode(aService);
+    this->checkCacheState(aService);
 }
 
 void ParseService::allocate()
@@ -47,6 +48,16 @@ void ParseService::allocate()
     mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "1" } });
     mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "1" } });
     mTags.insert({ "device_ids", { { {"device_ids"}, ""}, "" } });
+}
+
+void ParseService::checkCacheState(XMLGen::Service& aService)
+{
+    // Sierra SD has to have cache state set to true and we don't want to make 
+    // the user have to set this.
+    if(aService.value("code") == "sierra_sd")
+    {
+        aService.cacheState("true");
+    }
 }
 
 void ParseService::checkCode(XMLGen::Service& aService)

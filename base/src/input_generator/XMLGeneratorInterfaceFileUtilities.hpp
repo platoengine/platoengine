@@ -878,6 +878,26 @@ void append_aggregate_objective_value_operation_for_non_multi_load_case
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
+ * \fn append_aggregate_objective_gradient_operation_for_multi_load_case
+ * \brief Append the aggregate objective gradient operation for multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_aggregate_objective_gradient_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_aggregate_objective_gradient_operation_for_non_multi_load_case
+ * \brief Append the aggregate objective gradient operation for non multi-load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_aggregate_objective_gradient_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
  * \fn getCompoundScenarioID
  * \brief Build a compound scenario id from a list of ids
  * \param [in]     aScenarioIDs  List of ids to build compound id from
@@ -918,11 +938,11 @@ std::string get_objective_gradient_operation_output_name
 (XMLGen::Service &aService);
 
 /******************************************************************************//**
- * \fn cache_state_exists
- * \brief Return whether there is a service with the cache state flag set
+ * \fn num_cache_states
+ * \brief Return the number of services with the cache state flag set
  * \param [in] aServices List of services to check
 **********************************************************************************/
-bool cache_state_exists
+int num_cache_states
 (const std::vector<XMLGen::Service> &aServices);
 
 /******************************************************************************//**
@@ -942,6 +962,46 @@ void append_globally_convergent_method_moving_asymptotes_options
 **********************************************************************************/
 bool need_update_problem_stage
 (const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn append_qoi_shared_data_for_multi_load_case
+ * \brief Append quantities of interest shared data for multi load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_qoi_shared_data_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_qoi_shared_data_for_non_multi_load_case
+ * \brief Append quantities of interest shared data for non multi load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_qoi_shared_data_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_plato_main_output_stage_for_non_multi_load_case
+ * \brief Append quantities of interest to output stage for non multi load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_deterministic_qoi_to_plato_main_output_stage_for_non_multi_load_case 
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_plato_main_output_stage_for_multi_load_case
+ * \brief Append quantities of interest to output stage for multi load case problems
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_deterministic_qoi_to_plato_main_output_stage_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
 
 }
 // namespace XMLGen

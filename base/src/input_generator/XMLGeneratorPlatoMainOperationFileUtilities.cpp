@@ -241,7 +241,7 @@ void append_qoi_statistics_to_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
-void append_deterministic_qoi_to_output_operation
+void append_deterministic_qoi_to_output_operation_for_non_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
@@ -258,6 +258,48 @@ void append_deterministic_qoi_to_output_operation
             tArgumentName += tPerformerString;
             XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
         }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_deterministic_qoi_to_output_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    for(auto &tOutputMetadata : aXMLMetaData.mOutputMetaData)
+    {
+        auto tIDs = tOutputMetadata.deterministicIDs();
+        for(auto& tID : tIDs)
+        {
+            auto tLayout = tOutputMetadata.deterministicLayout(tID);
+            for(auto tScenarioID : aXMLMetaData.objective.scenarioIDs)
+            {
+                auto tArgumentName = tOutputMetadata.deterministicArgumentName(tID);
+                auto tInput = aParentNode.append_child("Input");
+                auto tPerformerString = std::string("_") + 
+                                        aXMLMetaData.service(tOutputMetadata.serviceID()).performer();
+                tArgumentName += tPerformerString;
+                tArgumentName += "_scenario_" + tScenarioID;
+                XMLGen::append_children( { "ArgumentName", "Layout" }, { tArgumentName, tLayout }, tInput);
+            }
+        }
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_deterministic_qoi_to_output_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode)
+{
+    if(aXMLMetaData.objective.multi_load_case == "true")
+    {
+        append_deterministic_qoi_to_output_operation_for_multi_load_case(aXMLMetaData, aParentNode);
+    }
+    else
+    {
+        append_deterministic_qoi_to_output_operation_for_non_multi_load_case(aXMLMetaData, aParentNode);
     }
 }
 // function append_deterministic_qoi_to_output_operation
@@ -525,7 +567,12 @@ void append_aggregate_data_to_plato_main_operation
     auto tAggregateNode = tOperation.append_child("Aggregate");
     XMLGen::append_children({"Layout"}, {"Value"}, tAggregateNode);
 
-    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    int tNumEntries = tObjective.criteriaIDs.size();
+    if(tObjective.multi_load_case == "true")
+    {
+        tNumEntries = 1;
+    }
+    for (int i=0; i<tNumEntries; ++i)
     {
         auto tInput = tAggregateNode.append_child("Input");
         auto tArgName = std::string("Value ") + std::to_string(i+1);
@@ -538,7 +585,7 @@ void append_aggregate_data_to_plato_main_operation
     tAggregateNode = tOperation.append_child("Aggregate");
     XMLGen::append_children({"Layout"}, {"Nodal Field"}, tAggregateNode);
 
-    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    for (int i=0; i<tNumEntries; ++i)
     {
         auto tInput = tAggregateNode.append_child("Input");
         auto tArgName = std::string("Field ") + std::to_string(i+1);
@@ -550,7 +597,7 @@ void append_aggregate_data_to_plato_main_operation
     // Weighting and normalization
     bool tNeedToDoWeightingInAggregator = aXMLMetaData.needToDoWeightingInAggregator();
     auto tWeightingNode = tOperation.append_child("Weighting");
-    for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+    for (int i=0; i<tNumEntries; ++i)
     {
         auto tWeight = tWeightingNode.append_child("Weight");
         if(tNeedToDoWeightingInAggregator)
@@ -565,7 +612,7 @@ void append_aggregate_data_to_plato_main_operation
     if(aXMLMetaData.normalizeInAggregator())
     {
         auto tNormals = tWeightingNode.append_child("Normals");
-        for (size_t i=0; i<tObjective.criteriaIDs.size(); ++i)
+        for (int i=0; i<tNumEntries; ++i)
         {
             auto tInput = tNormals.append_child("Input");
             auto tArgName = std::string("Normal ") + std::to_string(i+1);

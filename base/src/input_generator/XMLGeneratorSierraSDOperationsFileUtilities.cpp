@@ -21,16 +21,32 @@ void append_cache_state_operation
     {
         auto tScenarioID = aMetaData.objective.scenarioIDs[k];
         auto tServiceID = aMetaData.objective.serviceIDs[k];
-        char buffer[100];
-        sprintf(buffer, "%lu", k);
-        for(size_t j=0; j<aMetaData.mOutputMetaData.size(); ++j)
+        for(auto &tOutput : aMetaData.mOutputMetaData)
         {
-            if(aMetaData.mOutputMetaData[j].serviceID() == tServiceID)
+   
+            if(tOutput.serviceID() == tServiceID)
             {
-                for(auto tOutputName : aMetaData.mOutputMetaData[j].outputIDs())
+                XMLGen::Service tService = aMetaData.service(tServiceID);
+                if(aMetaData.objective.multi_load_case == "true")
                 {
-                    auto tOutputNode = tOperationNode.append_child("Output");
-                    append_children({"ArgumentName"}, {tOutputName + buffer}, tOutputNode);
+                    auto &tScenario = aMetaData.scenario(aMetaData.objective.scenarioIDs[0]);
+                    for(size_t i=0; i<tScenario.loadIDs().size(); ++i)
+                    {
+                        auto tLoadIndex = std::to_string(i);
+                        for(auto &tCurData : tOutput.outputIDs())
+                        {
+                            auto tOutputNode = tOperationNode.append_child("Output");
+                            XMLGen::append_children({"ArgumentName"}, {tCurData + tLoadIndex}, tOutputNode);
+                        }
+                    }                        
+                }
+                else
+                {
+                    for(auto &tCurData : tOutput.outputIDs())
+                    {
+                        auto tOutputNode = tOperationNode.append_child("Output");
+                        append_children({"ArgumentName"}, {tCurData + "0"}, tOutputNode);
+                    }
                 }
                 break;
             } 
