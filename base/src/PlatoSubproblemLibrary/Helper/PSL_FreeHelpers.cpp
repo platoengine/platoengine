@@ -279,4 +279,19 @@ std::string remove_all_filename_prefix(const std::string& full_filename)
     return full_filename;
 }
 
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3)
+{
+    // rows may actually be columns instead because the
+    // determinant of a matrix is equal to the determinant
+    // of its transpose
+    
+    double tTerm1 = aRow1(0)*(aRow2(1)*aRow3(2) - aRow2(2)*aRow3(1));
+    double tTerm2 = aRow1(1)*(aRow2(0)*aRow3(2) - aRow2(2)*aRow3(0));
+    double tTerm3 = aRow1(2)*(aRow2(0)*aRow3(1) - aRow2(1)*aRow3(0));
+
+    return tTerm1 - tTerm2 + tTerm3;
+}
+
 }

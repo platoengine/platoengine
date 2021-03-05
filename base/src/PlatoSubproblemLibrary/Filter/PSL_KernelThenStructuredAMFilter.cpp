@@ -28,7 +28,7 @@ void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::Parallel
 
 void KernelThenStructuredAMFilter::buildStructuredGrid()
 {
-    mUtilities = std::unique_ptr<AMFilterUtilities>(new AMFilterUtilities(mCoordinates,mConnectivity,mUBasisVector,mVBasisVector,mBuildDirection));
+    mUtilities = std::unique_ptr<TetMeshUtilities>(new TetMeshUtilities(mCoordinates,mConnectivity));
 
     mUtilities->computeBoundingBox(mMaxUVWCoords,mMinUVWCoords);
     mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;

@@ -12,7 +12,8 @@
 #include "PSL_ParameterDataEnums.hpp"
 #include "PSL_Vector.hpp"
 #include "PSL_Point.hpp"
-#include "PSL_AMFilterUtilities.hpp"
+#include "PSL_TetMeshUtilities.hpp"
+#include "PSL_OrthogonalGridUtilities.hpp"
 
 
 #include <vector>
@@ -144,7 +145,7 @@ private:
 
     ParameterData* mInputData;
 
-    std::unique_ptr<AMFilterUtilities> mUtilities;
+    std::unique_ptr<TetMeshUtilities> mUtilities;
 };
 
 }

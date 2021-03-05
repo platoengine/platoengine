@@ -1,4 +1,5 @@
 #pragma once
+#include "PSL_Vector.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -309,6 +310,10 @@ void invert_vector_to_map(const std::vector<T>& in_, std::map<T,int>& out_)
         out_[in_[in_index]] = in_index;
     }
 }
+
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3);
 
 double getTimeInSeconds();
 

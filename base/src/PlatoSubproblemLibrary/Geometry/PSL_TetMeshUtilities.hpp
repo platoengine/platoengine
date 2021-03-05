@@ -78,47 +78,21 @@ struct Access<Points, PredicatesTag>
 namespace PlatoSubproblemLibrary
 {
 
-std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
-                                                   const Vector& aMinUVWCoords,
-                                                   const double& aTargetEdgeLength);
-
-void computeGridXYZCoordinates(const Vector& aUBasisVector,
-                                 const Vector& aVBasisVector,
-                                 const Vector& aBuildDirection,
-                                 const Vector& aMaxUVWCoords,
-                                 const Vector& aMinUVWCoords,
-                                 const std::vector<int>& aNumElements,
-                                 std::vector<Vector>& aXYZCoordinates);
-
-
-double determinant3X3(const Vector& aRow1,
-                      const Vector& aRow2,
-                      const Vector& aRow3);
-
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const int& i, const int& j, const int& k);
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const std::vector<int>& aIndex);
-
 bool sameSide(const std::vector<std::vector<double>>& aCoordinates, const int& v1, const int& v2, const int& v3, const int& v4, const Vector& aPoint);
 bool isPointInTetrahedron(const std::vector<std::vector<double>>& aCoordinates,const std::vector<int>& aTet, const Vector& aPoint);
 
-class AMFilterUtilities
+class TetMeshUtilities
 {
     public:
-        AMFilterUtilities(const std::vector<std::vector<double>>& aCoordinates,
-                           const std::vector<std::vector<int>>& aConnectivity,
-                           Vector aUBasisVector,
-                           Vector aVBasisVector,
-                           Vector aBuildDirection)
+        TetMeshUtilities(const std::vector<std::vector<double>>& aCoordinates,
+                           const std::vector<std::vector<int>>& aConnectivity)
             :mCoordinates(aCoordinates),
-             mConnectivity(aConnectivity),
-             mUBasisVector(aUBasisVector),
-             mVBasisVector(aVBasisVector),
-             mBuildDirection(aBuildDirection)
+             mConnectivity(aConnectivity)
         {
             checkInput();
         }
 
-        ~AMFilterUtilities(){}
+        ~TetMeshUtilities(){}
 
         void computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const;
 
@@ -239,9 +213,6 @@ class AMFilterUtilities
     private:
         const std::vector<std::vector<double>>& mCoordinates;
         const std::vector<std::vector<int>>& mConnectivity;
-        Vector mUBasisVector;
-        Vector mVBasisVector;
-        Vector mBuildDirection;
 };
 
 }

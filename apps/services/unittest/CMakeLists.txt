@@ -66,10 +66,11 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_Point.cpp
 							 PSL_Test_Vector.cpp
 							 Plato_Test_TimersTree.cpp
+                                                         PSL_Test_OrthogonalGridUtilities.cpp
 							 )
 
 if( AMFILTER_ENABLED )
-    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_AMFilterUtilities.cpp)
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_TetMeshUtilities.cpp)
 endif()
 
 IF( ENABLE_ROL )
