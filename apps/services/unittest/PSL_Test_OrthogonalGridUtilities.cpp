@@ -64,7 +64,7 @@ PSL_TEST(OrthogonalGridUtilities, constructor)
 
     double tTargetEdgeLength = 0.1;
 
-    OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    EXPECT_NO_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength));
 
     // Basis not orthogonal
     EXPECT_THROW(OrthogonalGridUtilities(tVBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
@@ -82,36 +82,51 @@ PSL_TEST(OrthogonalGridUtilities, constructor)
     // Target edge length non-positive 
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,-tTargetEdgeLength),std::domain_error);
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,0),std::domain_error);
+
+    std::vector<int> aNumElementsInEachDirection({5,5,5});
+    EXPECT_NO_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,aNumElementsInEachDirection));
+
+    // Wrong size vector
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<int>({5,5})),std::domain_error);
+
+    // Non-positive number of elements
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<int>({5,5,0})),std::domain_error);
 }
 
-PSL_TEST(OrthogonalGridUtilities, computeNumElementsInEachDirection)
+PSL_TEST(OrthogonalGridUtilities, getGridDimensions)
 {
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
+
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
     double tTargetEdgeLength = 0.1;
-    std::vector<int> tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    EXPECT_EQ(tNumElements, std::vector<int>({10,20,30}));
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    auto tDimensions = tUtilities.getGridDimensions();
+    EXPECT_EQ(tDimensions, std::vector<int>({11,21,31}));
 
     tTargetEdgeLength = 0.11;
-    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    EXPECT_EQ(tNumElements, std::vector<int>({9,18,27}));
-
-    tTargetEdgeLength = 0.11;
-    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    EXPECT_EQ(tNumElements, std::vector<int>({9,18,27}));
+    OrthogonalGridUtilities tUtilities2(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    tDimensions = tUtilities2.getGridDimensions();
+    EXPECT_EQ(tDimensions, std::vector<int>({10,19,28}));
 
     tTargetEdgeLength = 0.105;
-    tNumElements = computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    EXPECT_EQ(tNumElements, std::vector<int>({9,19,28}));
+    OrthogonalGridUtilities tUtilities3(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    tDimensions = tUtilities3.getGridDimensions();
+    EXPECT_EQ(tDimensions, std::vector<int>({10,20,29}));
 
-    // target length larger than bounding box
+    // // target length larger than bounding box
     tTargetEdgeLength = 1.1;
-    EXPECT_THROW(computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
+    OrthogonalGridUtilities tUtilities4(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    tDimensions = tUtilities4.getGridDimensions();
+    EXPECT_EQ(tDimensions, std::vector<int>({2,2,3}));
 
-    // negative target length
-    tTargetEdgeLength = -1.0;
-    EXPECT_THROW(computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
+    std::vector<int> tNumElements({5,6,7});
+    OrthogonalGridUtilities tUtilities5(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    tDimensions = tUtilities5.getGridDimensions();
+    EXPECT_EQ(tDimensions, std::vector<int>({6,7,8}));
 }
 
 PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)

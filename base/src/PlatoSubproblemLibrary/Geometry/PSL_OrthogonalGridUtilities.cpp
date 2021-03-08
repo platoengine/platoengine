@@ -7,7 +7,7 @@
 namespace PlatoSubproblemLibrary
 {
 
-std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, const Vector& aMinUVWCoords, const double& aTargetEdgeLength)
+std::vector<int> OrthogonalGridUtilities::computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, const Vector& aMinUVWCoords, const double& aTargetEdgeLength) const
 {
     double tULength = aMaxUVWCoords(0) - aMinUVWCoords(0);
     double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
@@ -16,14 +16,11 @@ std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, 
     if(aTargetEdgeLength <= 0.0)
         throw(std::domain_error("OrthogonalGridUtilities: target edge length must be greater than zero"));
 
-    if(tULength < aTargetEdgeLength || tVLength < aTargetEdgeLength || tWLength < aTargetEdgeLength)
-        throw(std::domain_error("OrthogonalGridUtilities: target edge length is longer than the provided bounding box"));
-
     std::vector<int> tNumElements;
 
-    tNumElements.push_back((int) tULength/aTargetEdgeLength);
-    tNumElements.push_back((int) tVLength/aTargetEdgeLength);
-    tNumElements.push_back((int) tWLength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tULength ? 1 : (int) tULength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tVLength ? 1 : (int) tVLength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tWLength ? 1 : (int) tWLength/aTargetEdgeLength);
 
     return tNumElements;
 }
@@ -142,6 +139,18 @@ void OrthogonalGridUtilities::checkTargetEdgeLength(const double& aTargetEdgeLen
 {
     if(aTargetEdgeLength <= 0)
         throw(std::domain_error("OrthogonalGridUtilities: Target edge length is not positive"));
+}
+
+void OrthogonalGridUtilities::checkNumElementsInEachDirection(const std::vector<int>& aNumElementsInEachDirection) const
+{
+    if(aNumElementsInEachDirection.size() != 3u)
+        throw(std::domain_error("OrthogonalGridUtilities: Grid dimension must be 3"));
+
+    for(int i = 0; i < 3; ++i)
+    {
+        if(aNumElementsInEachDirection[i] <= 0)
+            throw(std::domain_error("OrthogonalGridUtilities: Number of elements in each direction must be positive"));
+    }
 }
 
 }
