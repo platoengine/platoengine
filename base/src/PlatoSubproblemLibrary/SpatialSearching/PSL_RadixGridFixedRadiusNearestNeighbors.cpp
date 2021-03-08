@@ -75,17 +75,17 @@ void RadixGridFixedRadiusNearestNeighbors::build(PlatoSubproblemLibrary::PointCl
     m_radix_step_y = m_radius;
     m_radix_step_z = m_radius;
 
-    if(double(m_radix_step_x * std::numeric_limits<size_t>::max()) < m_max_x_domain - m_min_x_domain)
+    if(m_radix_step_x * (double)(std::numeric_limits<size_t>::max()) < m_max_x_domain - m_min_x_domain)
     {
-        m_radix_step_x = (m_max_x_domain - m_min_x_domain) / (std::numeric_limits<size_t>::max() - 1024u);
+        m_radix_step_x = (m_max_x_domain - m_min_x_domain) / (double)(std::numeric_limits<size_t>::max() - 1024u);
     }
-    if(double(m_radix_step_y * std::numeric_limits<size_t>::max()) < m_max_y_domain - m_min_y_domain)
+    if(m_radix_step_y * (double)(std::numeric_limits<size_t>::max()) < m_max_y_domain - m_min_y_domain)
     {
-        m_radix_step_y = (m_max_y_domain - m_min_y_domain) / (std::numeric_limits<size_t>::max() - 1024u);
+        m_radix_step_y = (m_max_y_domain - m_min_y_domain) / (double)(std::numeric_limits<size_t>::max() - 1024u);
     }
-    if(double(m_radix_step_z * std::numeric_limits<size_t>::max()) < m_max_z_domain - m_min_z_domain)
+    if(m_radix_step_z * (double)(std::numeric_limits<size_t>::max()) < m_max_z_domain - m_min_z_domain)
     {
-        m_radix_step_z = (m_max_z_domain - m_min_z_domain) / (std::numeric_limits<size_t>::max() - 1024u);
+        m_radix_step_z = (m_max_z_domain - m_min_z_domain) / (double)(std::numeric_limits<size_t>::max() - 1024u);
     }
 
     for(size_t point_index = 0u; point_index < num_points; point_index++)
