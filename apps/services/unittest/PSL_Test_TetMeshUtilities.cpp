@@ -52,27 +52,6 @@ namespace PlatoSubproblemLibrary
 {
 namespace TestingPoint
 {
-int getContainingTetID(const std::vector<std::vector<int>>& aConnectivity,
-                       const std::vector<std::vector<double>>& aCoordinates,
-                       const std::vector<int>& aNumElementsInEachDirection,
-                       const Vector& aUBasisVector,
-                       const Vector& aVBasisVector,
-                       const Vector& aBuildDirection,
-                       const Vector& aMaxUVWCoords,
-                       const Vector& aMinUVWCoords,
-                       const int& i,
-                       const int& j,
-                       const int& k);
-
-void getTetIDForEachGridPoint(const std::vector<std::vector<int>>& aConnectivity,
-                              const std::vector<std::vector<double>>& aCoordinates,
-                              const std::vector<int>& aNumElementsInEachDirection,
-                              const Vector& aUBasisVector,
-                              const Vector& aVBasisVector,
-                              const Vector& aBuildDirection,
-                              const Vector& aMaxUVWCoords,
-                              const Vector& aMinUVWCoords,
-                              std::vector<int>& aTetIDs);
 
 PSL_TEST(TetMeshUtilities,construction)
 {

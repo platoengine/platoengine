@@ -195,21 +195,6 @@ void TetMeshUtilities::checkInput() const
         std::string tError = std::string("Node IDs must be between zero and ") + std::to_string(mCoordinates.size() - 1);
         throw(std::out_of_range(tError));
     }
-
-    // if(fabs(mUBasisVector.euclideanNorm() - 1) > 1e-12 || fabs(mVBasisVector.euclideanNorm() -1) > 1e-12 || fabs(mBuildDirection.euclideanNorm() - 1) > 1e-12)
-    // {
-    //     throw(std::domain_error("TetMeshUtilities: provided basis not unit length"));
-    // }
-
-    // if(dot_product(mUBasisVector,mVBasisVector) > 1e-12 || dot_product(mUBasisVector,mBuildDirection) > 1e-12 || dot_product(mVBasisVector,mBuildDirection) > 1e-12)
-    // {
-    //     throw(std::domain_error("TetMeshUtilities: provided basis is not orthogonal"));
-    // }
-
-    // if(dot_product(cross_product(mUBasisVector,mVBasisVector),mBuildDirection) < 0)
-    // {
-    //     throw(std::domain_error("TetMeshUtilities: provided basis is not positively oriented"));
-    // }
 }
 
 }

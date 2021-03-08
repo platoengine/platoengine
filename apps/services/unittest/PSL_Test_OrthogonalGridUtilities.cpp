@@ -53,69 +53,38 @@ namespace PlatoSubproblemLibrary
 namespace TestingPoint
 {
 
-// PSL_TEST(TetMeshUtilities, computeBoundingBox)
-// {
-//     std::vector<std::vector<double>> tCoordinates;
+PSL_TEST(OrthogonalGridUtilities, constructor)
+{
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
 
-//     tCoordinates.push_back({-1.0,-2.0,-3.0});
-//     tCoordinates.push_back({1.0,0.0,0.0});
-//     tCoordinates.push_back({0.0,2.0,0.0});
-//     tCoordinates.push_back({0.0,0.0,3.0});
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
 
-//     std::vector<std::vector<int>> tConnectivity;
+    double tTargetEdgeLength = 0.1;
 
-//     tConnectivity.push_back({0,1,2,3});
+    OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
 
-//     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
-//     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
-//     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+    // Basis not orthogonal
+    EXPECT_THROW(OrthogonalGridUtilities(tVBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 
-//     TetMeshUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
+    // Basis not positively oriented
+    EXPECT_THROW(OrthogonalGridUtilities(tVBasisVector,tUBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 
-//     Vector tMaxUVWCoords, tMinUVWCoords;
+    // Basis not unit length
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,2*tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 
-//     tUtilities.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
+    // Max not strictly greater than min
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMinUVWCoords,tMaxUVWCoords,tTargetEdgeLength),std::domain_error);
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMaxUVWCoords,tTargetEdgeLength),std::domain_error);
 
-//     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
-//     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
+    // Target edge length non-positive 
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,-tTargetEdgeLength),std::domain_error);
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,0),std::domain_error);
+}
 
-//     TetMeshUtilities tUtilities2(tCoordinates,tConnectivity,tBuildDirection,tUBasisVector,tVBasisVector);
-    
-//     // rotate space 90 degrees
-//     tUtilities2.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
-//     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({3.0,1.0,2.0})));
-//     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-3.0,-1.0,-2.0})));
-
-//     // rotate space 45 degrees
-//     std::vector<std::vector<double>> tCoordinates2;
-
-//     tCoordinates2.push_back({0.0,0.0,0.0});
-//     tCoordinates2.push_back({1.0,0.0,0.0});
-//     tCoordinates2.push_back({0.0,1.0,0.0});
-//     tCoordinates2.push_back({0.0,0.0,1.0});
-
-//     Vector tBuildDirection2(std::vector<double>({0.0,0.0,1.0}));
-//     Vector tUBasisVector2(std::vector<double>({1.0,1.0,0.0}));
-//     Vector tVBasisVector2(std::vector<double>({-1.0,1.0,0.0}));
-
-//     tUBasisVector2.normalize();
-//     tVBasisVector2.normalize();
-
-//     TetMeshUtilities tUtilities3(tCoordinates2,tConnectivity,tUBasisVector2,tVBasisVector2,tBuildDirection2);
-
-//     tUtilities3.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
-//     EXPECT_DOUBLE_EQ(tMaxUVWCoords(0),sqrt(2)/2);
-//     EXPECT_DOUBLE_EQ(tMaxUVWCoords(1),sqrt(2)/2);
-//     EXPECT_EQ(tMaxUVWCoords(2),1.0);
-
-//     EXPECT_EQ(tMinUVWCoords(0),0.0);
-//     EXPECT_DOUBLE_EQ(tMinUVWCoords(1),-1*sqrt(2)/2);
-//     EXPECT_EQ(tMinUVWCoords(2),0.0);
-// }
-
-PSL_TEST(TetMeshUtilities, computeNumElementsInEachDirection)
+PSL_TEST(OrthogonalGridUtilities, computeNumElementsInEachDirection)
 {
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
@@ -145,7 +114,7 @@ PSL_TEST(TetMeshUtilities, computeNumElementsInEachDirection)
     EXPECT_THROW(computeNumElementsInEachDirection(tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 }
 
-PSL_TEST(TetMeshUtilities, computeGridXYZCoordinates)
+PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
 {
     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
@@ -234,7 +203,7 @@ PSL_TEST(TetMeshUtilities, computeGridXYZCoordinates)
     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.6);
 }
 
-PSL_TEST(TetMeshUtilities, getSerializedIndex)
+PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
 {
     // tIndex wrong dimension
     std::vector<int> tIndex = {0,0};
