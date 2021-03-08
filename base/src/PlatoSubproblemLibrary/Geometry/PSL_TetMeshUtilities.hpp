@@ -94,7 +94,11 @@ class TetMeshUtilities
 
         ~TetMeshUtilities(){}
 
-        void computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const;
+        void computeBoundingBox(const Vector& aUBasisVector,
+                                const Vector& aVBasisVector,
+                                const Vector& aWBasisVector,
+                                Vector& aMaxUVWCoords,
+                                Vector& aMinUVWCoords) const;
 
         double computeMinEdgeLength() const;
 

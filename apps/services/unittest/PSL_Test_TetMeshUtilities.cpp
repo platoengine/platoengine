@@ -124,77 +124,52 @@ PSL_TEST(TetMeshUtilities, computeBoundingBox)
 
     tConnectivity.push_back({0,1,2,3});
 
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+
     TetMeshUtilities tUtilities(tCoordinates,tConnectivity);
 
-    Vector tMaxCoords, tMinCoords;
+    Vector tMaxUVWCoords, tMinUVWCoords;
 
-    tUtilities.computeBoundingBox(tMaxCoords,tMinCoords);
+    tUtilities.computeBoundingBox(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords);
 
-    EXPECT_EQ(tMaxCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
-    EXPECT_EQ(tMinCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
+    EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
+    EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
+
+    // rotate space 90 degrees
+    tUtilities.computeBoundingBox(tBuildDirection,tUBasisVector,tVBasisVector,tMaxUVWCoords,tMinUVWCoords);
+
+    EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({3.0,1.0,2.0})));
+    EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-3.0,-1.0,-2.0})));
+
+    // rotate space 45 degrees
+    std::vector<std::vector<double>> tCoordinates2;
+
+    tCoordinates2.push_back({0.0,0.0,0.0});
+    tCoordinates2.push_back({1.0,0.0,0.0});
+    tCoordinates2.push_back({0.0,1.0,0.0});
+    tCoordinates2.push_back({0.0,0.0,1.0});
+
+    Vector tBuildDirection2(std::vector<double>({0.0,0.0,1.0}));
+    Vector tUBasisVector2(std::vector<double>({1.0,1.0,0.0}));
+    Vector tVBasisVector2(std::vector<double>({-1.0,1.0,0.0}));
+
+    tUBasisVector2.normalize();
+    tVBasisVector2.normalize();
+
+    TetMeshUtilities tUtilities2(tCoordinates2,tConnectivity);
+
+    tUtilities2.computeBoundingBox(tUBasisVector2,tVBasisVector2,tBuildDirection2,tMaxUVWCoords,tMinUVWCoords);
+
+    EXPECT_DOUBLE_EQ(tMaxUVWCoords(0),sqrt(2)/2);
+    EXPECT_DOUBLE_EQ(tMaxUVWCoords(1),sqrt(2)/2);
+    EXPECT_EQ(tMaxUVWCoords(2),1.0);
+
+    EXPECT_EQ(tMinUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tMinUVWCoords(1),-1*sqrt(2)/2);
+    EXPECT_EQ(tMinUVWCoords(2),0.0);
 }
-
-// PSL_TEST(TetMeshUtilities, computeBoundingBox)
-// {
-//     std::vector<std::vector<double>> tCoordinates;
-
-//     tCoordinates.push_back({-1.0,-2.0,-3.0});
-//     tCoordinates.push_back({1.0,0.0,0.0});
-//     tCoordinates.push_back({0.0,2.0,0.0});
-//     tCoordinates.push_back({0.0,0.0,3.0});
-
-//     std::vector<std::vector<int>> tConnectivity;
-
-//     tConnectivity.push_back({0,1,2,3});
-
-//     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
-//     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
-//     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
-
-//     TetMeshUtilities tUtilities(tCoordinates,tConnectivity,tUBasisVector,tVBasisVector,tBuildDirection);
-
-//     Vector tMaxUVWCoords, tMinUVWCoords;
-
-//     tUtilities.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
-//     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({1.0,2.0,3.0})));
-//     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-1.0,-2.0,-3.0})));
-
-//     TetMeshUtilities tUtilities2(tCoordinates,tConnectivity,tBuildDirection,tUBasisVector,tVBasisVector);
-    
-//     // rotate space 90 degrees
-//     tUtilities2.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
-//     EXPECT_EQ(tMaxUVWCoords,Vector(std::vector<double>({3.0,1.0,2.0})));
-//     EXPECT_EQ(tMinUVWCoords,Vector(std::vector<double>({-3.0,-1.0,-2.0})));
-
-//     // rotate space 45 degrees
-//     std::vector<std::vector<double>> tCoordinates2;
-
-//     tCoordinates2.push_back({0.0,0.0,0.0});
-//     tCoordinates2.push_back({1.0,0.0,0.0});
-//     tCoordinates2.push_back({0.0,1.0,0.0});
-//     tCoordinates2.push_back({0.0,0.0,1.0});
-
-//     Vector tBuildDirection2(std::vector<double>({0.0,0.0,1.0}));
-//     Vector tUBasisVector2(std::vector<double>({1.0,1.0,0.0}));
-//     Vector tVBasisVector2(std::vector<double>({-1.0,1.0,0.0}));
-
-//     tUBasisVector2.normalize();
-//     tVBasisVector2.normalize();
-
-//     TetMeshUtilities tUtilities3(tCoordinates2,tConnectivity,tUBasisVector2,tVBasisVector2,tBuildDirection2);
-
-//     tUtilities3.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
-//     EXPECT_DOUBLE_EQ(tMaxUVWCoords(0),sqrt(2)/2);
-//     EXPECT_DOUBLE_EQ(tMaxUVWCoords(1),sqrt(2)/2);
-//     EXPECT_EQ(tMaxUVWCoords(2),1.0);
-
-//     EXPECT_EQ(tMinUVWCoords(0),0.0);
-//     EXPECT_DOUBLE_EQ(tMinUVWCoords(1),-1*sqrt(2)/2);
-//     EXPECT_EQ(tMinUVWCoords(2),0.0);
-// }
 
 PSL_TEST(TetMeshUtilities, computeMinEdgeLength)
 {

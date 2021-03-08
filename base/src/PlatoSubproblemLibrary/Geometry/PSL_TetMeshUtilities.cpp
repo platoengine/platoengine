@@ -6,47 +6,40 @@
 
 namespace PlatoSubproblemLibrary
 {
-// void TetMeshUtilities::computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const
-// {
-//     Vector tCoords(mCoordinates[0]);
 
-//     aMaxUVWCoords = tCoords;
-//     aMinUVWCoords = tCoords;
-
-//     for(auto tNodeCoordinates : mCoordinates)
-//     {
-//         Vector tNodeVec(tNodeCoordinates);
-
-//         if(tNodeVec(0) > aMaxUVWCoords(0))
-//             aMaxUVWCoords.set(0,tNodeVec, mUBasisVector));
-//         if(dot_product(tNodeVec, mVBasisVector) > aMaxUVWCoords(1))
-//             aMaxUVWCoords.set(1,dot_product(tNodeVec, mVBasisVector));
-//         if(dot_product(tNodeVec, mBuildDirection) > aMaxUVWCoords(2))
-//             aMaxUVWCoords.set(2,dot_product(tNodeVec, mBuildDirection));
-
-//         if(dot_product(tNodeVec, mUBasisVector) < aMinUVWCoords(0))
-//             aMinUVWCoords.set(0,dot_product(tNodeVec, mUBasisVector));
-//         if(dot_product(tNodeVec, mVBasisVector) < aMinUVWCoords(1))
-//             aMinUVWCoords.set(1,dot_product(tNodeVec, mVBasisVector));
-//         if(dot_product(tNodeVec, mBuildDirection) < aMinUVWCoords(2))
-//             aMinUVWCoords.set(2,dot_product(tNodeVec, mBuildDirection));
-//     }
-// }
-
-void TetMeshUtilities::computeBoundingBox(Vector& aMaxUVWCoords, Vector& aMinUVWCoords) const
+void TetMeshUtilities::computeBoundingBox(const Vector& aUBasisVector,
+                                          const Vector& aVBasisVector,
+                                          const Vector& aWBasisVector,
+                                          Vector& aMaxUVWCoords,
+                                          Vector& aMinUVWCoords) const
 {
-    aMaxUVWCoords = mCoordinates[0];
-    aMinUVWCoords = mCoordinates[0];
+    Vector tCoords(mCoordinates[0]);
+
+    aMaxUVWCoords.set(0, dot_product(tCoords, aUBasisVector));
+    aMaxUVWCoords.set(1, dot_product(tCoords, aVBasisVector));
+    aMaxUVWCoords.set(2, dot_product(tCoords, aWBasisVector));
+
+    aMinUVWCoords.set(0, dot_product(tCoords, aUBasisVector));
+    aMinUVWCoords.set(1, dot_product(tCoords, aVBasisVector));
+    aMinUVWCoords.set(2, dot_product(tCoords, aWBasisVector));
 
     for(auto tNodeCoordinates : mCoordinates)
     {
-        for(int i = 0; i < 3; ++i)
-        {
-            if(tNodeCoordinates[i] > aMaxUVWCoords(i))
-                aMaxUVWCoords.set(i,tNodeCoordinates[i]);
-            else if(tNodeCoordinates[i] < aMinUVWCoords(i))
-                aMinUVWCoords.set(i,tNodeCoordinates[i]);
-        }
+        Vector tNodeVec(tNodeCoordinates);
+
+        if(dot_product(tNodeVec, aUBasisVector) > aMaxUVWCoords(0))
+            aMaxUVWCoords.set(0,dot_product(tNodeVec, aUBasisVector));
+        if(dot_product(tNodeVec, aVBasisVector) > aMaxUVWCoords(1))
+            aMaxUVWCoords.set(1,dot_product(tNodeVec, aVBasisVector));
+        if(dot_product(tNodeVec, aWBasisVector) > aMaxUVWCoords(2))
+            aMaxUVWCoords.set(2,dot_product(tNodeVec, aWBasisVector));
+
+        if(dot_product(tNodeVec, aUBasisVector) < aMinUVWCoords(0))
+            aMinUVWCoords.set(0,dot_product(tNodeVec, aUBasisVector));
+        if(dot_product(tNodeVec, aVBasisVector) < aMinUVWCoords(1))
+            aMinUVWCoords.set(1,dot_product(tNodeVec, aVBasisVector));
+        if(dot_product(tNodeVec, aWBasisVector) < aMinUVWCoords(2))
+            aMinUVWCoords.set(2,dot_product(tNodeVec, aWBasisVector));
     }
 }
 

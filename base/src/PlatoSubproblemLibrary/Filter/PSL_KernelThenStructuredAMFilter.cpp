@@ -28,18 +28,18 @@ void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::Parallel
 
 void KernelThenStructuredAMFilter::buildStructuredGrid()
 {
-    mUtilities = std::unique_ptr<TetMeshUtilities>(new TetMeshUtilities(mCoordinates,mConnectivity));
+    // mUtilities = std::unique_ptr<TetMeshUtilities>(new TetMeshUtilities(mCoordinates,mConnectivity));
 
-    mUtilities->computeBoundingBox(mMaxUVWCoords,mMinUVWCoords);
-    mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;
-    mNumElementsInEachDirection = computeNumElementsInEachDirection(mMaxUVWCoords,mMinUVWCoords,mTargetEdgeLength);
+    // mUtilities->computeBoundingBox(mMaxUVWCoords,mMinUVWCoords);
+    // mTargetEdgeLength = mUtilities->computeMinEdgeLength()/2.0;
+    // mNumElementsInEachDirection = computeNumElementsInEachDirection(mMaxUVWCoords,mMinUVWCoords,mTargetEdgeLength);
 
-    mNumElementsInEachDirection = {5,5,5};
+    // mNumElementsInEachDirection = {5,5,5};
 
-    std::vector<Vector> tGridCoordinates;
-    computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
+    // std::vector<Vector> tGridCoordinates;
+    // computeGridXYZCoordinates(mUBasisVector,mVBasisVector,mBuildDirection,mMaxUVWCoords,mMinUVWCoords,mNumElementsInEachDirection,tGridCoordinates);
 
-    mUtilities->getTetIDForEachPoint(tGridCoordinates,mContainingTetID);
+    // mUtilities->getTetIDForEachPoint(tGridCoordinates,mContainingTetID);
 
     mFilterBuilt = true;
 }
