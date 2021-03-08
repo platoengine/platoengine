@@ -1,7 +1,8 @@
 <mesh>
   <type>unstructured</type>
   <format>exodus</format>
-  <mesh>square_tri_bc.gen</mesh>
+  <ignore_node_map>true</ignore_node_map>
+  <mesh>square_tri_bc.exo</mesh>
   <block>
     <index>1</index>
     <integration>

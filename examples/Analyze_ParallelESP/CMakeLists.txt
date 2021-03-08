@@ -5,8 +5,10 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "aflr.py;amgx.json;defines.xml;interface.xml;plato_analyze_input_deck_1.xml;plato_analyze_operations_1.xml;platoesp_operations.xml;PlatoESP.xml;platomain_operations.xml;PlatoMain.xml;prime.source;rocker.csm;rocker.eto;rocker.exo")
+set( testFiles "amgx.json;defines.xml;interface.xml;plato_analyze_input_deck_1.xml;plato_analyze_operations_1.xml;platoesp_operations.xml;PlatoESP.xml;platomain_operations.xml;PlatoMain.xml;prime.source;rocker.csm")
 Plato_add_test_files("${testFiles}")
+
+set( PRETEST_COMMAND "plato-cli geometry esp --input rocker.csm --output-model rocker_opt.csm --output-mesh rocker.exo --tesselation rocker.eto")
 
 # Set number of processors for PlatoMain comm
 set( PLATOMAIN_NP 1 )
@@ -43,9 +45,13 @@ set(APP_FILE plato_analyze_operations_1.xml)
 set(INPUT_FILE --input-config=plato_analyze_input_deck_1.xml)
 Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
 
+# prepend pretest command
+set( PLATO_NEW_TEST ${PRETEST_COMMAND} ${PLATO_NEW_TEST} )
+message("WITH PRETEST: ${PLATO_NEW_TEST}")
+
 # Add the test
 set(INPUT_MESH SKIP_DECOMP)
 set(OUTPUT_MESH SKIP_EXODIFF)
-Plato_add_test(${PLATO_NEW_TEST} ${TEST_NAME} ${NUM_PROCS} ${IO_COMM_INDEX} ${INPUT_MESH} ${OUTPUT_MESH})
+Plato_add_test("${PLATO_NEW_TEST}" ${TEST_NAME} ${NUM_PROCS} ${IO_COMM_INDEX} ${INPUT_MESH} ${OUTPUT_MESH})
 
 endif()

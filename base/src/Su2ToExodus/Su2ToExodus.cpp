@@ -455,6 +455,12 @@ bool Su2ToExodus::writeElementConnectivity()
             tRet = false;
         }
 
+        if(tRet && ex_put_name(mExodusFileID, EX_ELEM_BLOCK, tElementBlockID, "block_1"))
+        {
+            std::cout << "\n!!! Problem writing element block name to exodus file \n";
+            tRet = false;
+        }
+
         if(tRet)
         {
             // Change connectivity to be 1-based rather than 0-based

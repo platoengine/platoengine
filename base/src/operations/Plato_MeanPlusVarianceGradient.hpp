@@ -279,21 +279,21 @@ private:
      * @brief Set standard deviation multiplier
      * @param [in] aStatisticMeasure string with statistic measure, e.g. 'MEAN_PLUS_1_STD_DEV'
     **********************************************************************************/
-    void setMyStandardDeviationMultiplier(const std::string& aStatisticMeasure);
+    void setStandardDeviationMultiplier(const std::string& aStatisticMeasure);
 
     /******************************************************************************//**
      * @brief Return numeric value for the probability
-     * @param [in] aInput string with probability value
+     * @param [in] aTokens list of tokens
      * @return numeric value for the probability
     **********************************************************************************/
-    double getMyStandardDeviationMultiplier(const std::string& aInput);
+    double getStandardDeviationMultiplier(const std::vector<std::string>& aTokens);
 
     /******************************************************************************//**
      * @brief Return sample probability
      * @param [in] aInputNode XML inputs associated with a given input argument
      * @return sample probability
     **********************************************************************************/
-    double getMyProbability(const Plato::InputData& aInputNode);
+    double getProbability(const Plato::InputData& aInputNode);
 
     /******************************************************************************//**
      * @brief Add a new local argument to the set of local arguments
@@ -330,6 +330,8 @@ private:
     void computeGradientMeanPlusStdDevCriterionForElementField();
 
 private:
+    bool mIsMeanPlusStdDevFormulation; /*!< flag is set to true if it is a robust optimization problem */
+
     double mStdDevMultiplier; /*!< standard deviation multiplier */
     std::string mOperationName; /*!< user defined function name */
     std::string mFunctionIdentifier; /*!< function identifier */

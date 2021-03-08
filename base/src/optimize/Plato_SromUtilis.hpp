@@ -68,9 +68,9 @@ namespace Plato
 
 /******************************************************************************//**
  *
- * @brief Check cumulative distribution function container dimension.
- * @param [in] aNumSamples number of samples
- * @param [in] aCDF cumulative distribution function
+ * \brief Check cumulative distribution function container dimension.
+ * \param [in] aNumSamples number of samples
+ * \param [in] aCDF cumulative distribution function
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -95,9 +95,9 @@ inline void check_cdf_container_size(const OrdinalType & aNumSamples, const Plat
 
 /******************************************************************************//**
  *
- * @brief Check sample's container dimension.
- * @param [in] aNumSamples number of samples
- * @param [in] aSamples samples
+ * \brief Check sample's container dimension.
+ * \param [in] aNumSamples number of samples
+ * \param [in] aSamples samples
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -121,10 +121,10 @@ inline void check_samples_container_size(const OrdinalType & aNumSamples, const 
 
 /******************************************************************************//**
  *
- * @brief Normalize sample value, i.e. map sample from [LB,UP] interval to [0,1] interval.
- * @param [in] aLowerBound lower bound (LB)
- * @param [in] aUpperBound upper bound (UB)
- * @param [in] aSampleValue unnormalized sample value
+ * \brief Normalize sample value, i.e. map sample from [LB,UP] interval to [0,1] interval.
+ * \param [in] aLowerBound lower bound (LB)
+ * \param [in] aUpperBound upper bound (UB)
+ * \param [in] aSampleValue unnormalized sample value
  * @return normalized sample value
  *
 **********************************************************************************/
@@ -136,10 +136,10 @@ inline ScalarType normalize(const ScalarType& aLowerBound, const ScalarType& aUp
 
 /******************************************************************************//**
  *
- * @brief Undo normalization, i.e. map sample from [0,1] interval to [LB,UP] interval.
- * @param [in] aLowerBound lower bound (LB)
- * @param [in] aUpperBound upper bound (UB)
- * @param [in] aSampleValue normalized sample value
+ * \brief Undo normalization, i.e. map sample from [0,1] interval to [LB,UP] interval.
+ * \param [in] aLowerBound lower bound (LB)
+ * \param [in] aUpperBound upper bound (UB)
+ * \param [in] aSampleValue normalized sample value
  * @return unnormalized sample value
  *
 **********************************************************************************/
@@ -151,11 +151,11 @@ inline ScalarType undo_normalization(const ScalarType& aLowerBound, const Scalar
 
 /******************************************************************************//**
  *
- * @brief Check sample's container dimension.
- * @param [in] aDistribution probability distribution function interface
- * @param [in] aInputParamUQ statistics core input parameters
- * @param [in,out] aSamples monte carlo samples
- * @param [in,out] aCDF monte carlo cumulative distribution function values
+ * \brief Check sample's container dimension.
+ * \param [in] aDistribution probability distribution function interface
+ * \param [in] aInputParamUQ statistics core input parameters
+ * \param [in,out] aSamples monte carlo samples
+ * \param [in,out] aCDF monte carlo cumulative distribution function values
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -187,11 +187,11 @@ inline void compute_monte_carlo_data(const OrdinalType & aNumMonteCarloSamples,
 
 /******************************************************************************//**
  *
- * @brief Check sample's container dimension.
- * @param [in] aLowerBound range's lower bound
- * @param [in] aUpperBound range's upper bound
- * @param [in] aNormalizedSamples normalized sample values
- * @param [in,out] aUnnormalizedSamples unnnormalized sample values
+ * \brief Check sample's container dimension.
+ * \param [in] aLowerBound range's lower bound
+ * \param [in] aUpperBound range's upper bound
+ * \param [in] aNormalizedSamples normalized sample values
+ * \param [in,out] aUnnormalizedSamples unnnormalized sample values
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -217,11 +217,11 @@ inline void compute_unnormalized_samples(const ScalarType & aLowerBound,
 
 /******************************************************************************//**
  *
- * @brief Print cumulative distribution function output data to file
- * @param [in] aCommWrapper distributed memory communicator wrapper
- * @param [in] aSromCDF stochastic reduced order model cumulative distribution function values
- * @param [in] aMonteCarloCDF monte carlo cumulative distribution function values
- * @param [in] aSamples monte carlo samples
+ * \brief Print cumulative distribution function output data to file
+ * \param [in] aCommWrapper distributed memory communicator wrapper
+ * \param [in] aSromCDF stochastic reduced order model cumulative distribution function values
+ * \param [in] aMonteCarloCDF monte carlo cumulative distribution function values
+ * \param [in] aSamples monte carlo samples
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -249,11 +249,11 @@ inline void print_cumulative_distribution_function_to_file(const Plato::CommWrap
 
 /******************************************************************************//**
  *
- * @brief output cumulative distribution function data to file (main interface)
- * @param [in] aCommWrapper distributed memory communicator wrapper
- * @param [in] aSromCDF stochastic reduced order model cumulative distribution function values
- * @param [in] aMonteCarloCDF monte carlo cumulative distribution function values
- * @param [in] aSamples monte carlo samples
+ * \brief output cumulative distribution function data to file (main interface)
+ * \param [in] aCommWrapper distributed memory communicator wrapper
+ * \param [in] aSromCDF stochastic reduced order model cumulative distribution function values
+ * \param [in] aMonteCarloCDF monte carlo cumulative distribution function values
+ * \param [in] aSamples monte carlo samples
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -278,12 +278,12 @@ inline void output_cumulative_distribution_function(const Plato::CommWrapper & a
 
 /******************************************************************************//**
  *
- * @brief Compute cumulative distribution function from Stochastic Reduced Order Model (SROM) approximation.
- * @param [in] aSamplesMC Monte Carlo samples
- * @param [in] aSamplesSROM SROM samples from optimization problem
- * @param [in] aProbsSROM SROM sample probabilities from optimization problem
- * @param [in,out] aProbsSROM aSromCDF SROM cumulative distribution function
- * @param [in] aSigma smoothing parameter (Default = 1e-7)
+ * \brief Compute cumulative distribution function from Stochastic Reduced Order Model (SROM) approximation.
+ * \param [in] aSamplesMC Monte Carlo samples
+ * \param [in] aSamplesSROM SROM samples from optimization problem
+ * \param [in] aProbsSROM SROM sample probabilities from optimization problem
+ * \param [in,out] aProbsSROM aSromCDF SROM cumulative distribution function
+ * \param [in] aSigma smoothing parameter (Default = 1e-7)
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -322,34 +322,46 @@ inline void compute_srom_cdf_plot(const Plato::Vector<ScalarType, OrdinalType>& 
 
 /******************************************************************************//**
  *
- * @brief Save solution from the stochastic reduced order model (SROM) optimization problem
- * @param [in] aStatsInputs data structure with inputs for probability distribution function
- * @param [in] aOptimalControls optimal controls from SROM problem
- * @param [in,out] aOutput data structure used to save solution from SROM problem
+ * \brief Save solution from the stochastic reduced order model (SROM) problem
+ * \param [in]   aInputMetaData    SROM problem input metadata
+ * \param [in]   aOptimalControls  SROM problem solution
+ * \param [out]  aOutputMetaData   SROM problem output metadata
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
-inline void save_srom_solution(const Plato::SromInputs<ScalarType, OrdinalType>& aStatsInputs,
-                               const Plato::MultiVector<ScalarType, OrdinalType>& aOptimalControls,
-                               std::vector<SromOutputs<ScalarType> >& aOutput)
+inline void save_srom_solution
+(const Plato::SromInputs<ScalarType, OrdinalType>& aInputMetaData,
+ const Plato::MultiVector<ScalarType, OrdinalType>& aSolution,
+ Plato::SromOutputs<ScalarType>& aOutputMetaData)
 {
-    for(OrdinalType tIndex = 0; tIndex < aStatsInputs.mNumSamples; tIndex++)
+    // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
+    // confirmed accurate for beta and uniform dist'n alone
+    auto tNumSamples = aInputMetaData.mNumSamples;
+    auto tRandVecDim = aInputMetaData.mDimensions;
+    for (decltype(tRandVecDim) tDimIndex = 0; tDimIndex < tRandVecDim; tDimIndex++)
     {
-        // undo scaling
-        const ScalarType tUnscaledSampleValue = aOptimalControls(0, tIndex);
-        aOutput[tIndex].mSampleValue = aStatsInputs.mLowerBound
-                + (aStatsInputs.mUpperBound - aStatsInputs.mLowerBound) * tUnscaledSampleValue;
-        // NOTE: The upper/lower bounds are not always defined. For example, normal dist'n what should be done?
-        // confirmed accurate for beta dist'n alone
-        aOutput[tIndex].mSampleWeight = aOptimalControls(1, tIndex);
+        aOutputMetaData.mSamples.push_back(std::vector<ScalarType>());
+        for (decltype(tNumSamples) tSampleIndex = 0; tSampleIndex < tNumSamples; tSampleIndex++)
+        {
+            // undo scaling
+            const auto tUnscaledValue = aSolution(tDimIndex, tSampleIndex);
+            auto tScaledValue = aInputMetaData.mLowerBound
+                + (aInputMetaData.mUpperBound - aInputMetaData.mLowerBound) * tUnscaledValue;
+            aOutputMetaData.mSamples.rbegin()->push_back(tScaledValue);
+        }
+    }
+
+    for (decltype(tNumSamples) tSampleIndex = 0; tSampleIndex < tNumSamples; tSampleIndex++)
+    {
+        aOutputMetaData.mProbabilities.push_back(aSolution(tRandVecDim, tSampleIndex));
     }
 }
 
 /******************************************************************************//**
  *
- * @brief Save diagnostics associated with the stochastic reduced order model (SROM) moment metrics
- * @param [in] aSromObjective objective function interface for SROM problem
- * @param [in,out] aOutput diagnostics associated with the SROM optimization problem
+ * \brief Save diagnostics associated with the stochastic reduced order model (SROM) moment metrics
+ * \param [in] aSromObjective objective function interface for SROM problem
+ * \param [in,out] aOutput diagnostics associated with the SROM optimization problem
  *
  **********************************************************************************/
 template<typename ScalarType, typename OrdinalType>
@@ -389,9 +401,9 @@ inline void save_srom_moments_diagnostics(const Plato::SromObjective<ScalarType,
 
 /******************************************************************************//**
  *
- * @brief Save diagnostics associated with the SROM CDF
- * @param [in] aSromObjective objective function interface for SROM problem
- * @param [in,out] aOutput diagnostics associated with the SROM optimization problem
+ * \brief Save diagnostics associated with the SROM CDF
+ * \param [in] aSromObjective objective function interface for SROM problem
+ * \param [in,out] aOutput diagnostics associated with the SROM optimization problem
  *
  * NOTE: CDF = cumulative distribution function; 2) SROM = stochastic reduced order model
  *

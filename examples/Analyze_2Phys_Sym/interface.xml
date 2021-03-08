@@ -1,4 +1,7 @@
 <?xml version="1.0"?>
+<Console>
+  <Enabled>true</Enabled>
+</Console>
 
 <Performer> 
   <Name>PlatoMain</Name>
@@ -38,7 +41,7 @@
   <Name>Displacement X</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_1</OwnerName>
+  <OwnerName>Alexa_2</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
@@ -46,7 +49,7 @@
   <Name>Displacement Y</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_1</OwnerName>
+  <OwnerName>Alexa_2</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
@@ -54,7 +57,7 @@
   <Name>Displacement Z</Name>
   <Type>Scalar</Type>
   <Layout>Nodal Field</Layout>
-  <OwnerName>Alexa_1</OwnerName>
+  <OwnerName>Alexa_2</OwnerName>
   <UserName>PlatoMain</UserName>
 </SharedData>
 
@@ -440,7 +443,7 @@
   </Operation>
 
   <Operation>
-    <Name>Aggregate</Name>
+    <Name>Aggregate Value</Name>
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Value 1</ArgumentName>
@@ -500,7 +503,7 @@
   </Operation>
 
   <Operation>
-    <Name>Aggregate</Name>
+    <Name>Aggregate Gradient</Name>
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Field 1</ArgumentName>

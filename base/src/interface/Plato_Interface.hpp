@@ -126,6 +126,7 @@ public:
     void registerException();
     void registerException(Plato::ParsingException aParsingException);
     void registerException(Plato::LogicException aLogicException);
+    void registerException(Plato::TerminateSignal aTerminateSignal);
 
     // control
     bool isDone();

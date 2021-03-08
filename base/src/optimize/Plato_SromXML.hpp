@@ -41,26 +41,270 @@
 */
 
 /*
- * Plato_SROM_Metadata.hpp
+ * Plato_SromXML.hpp
  *
  *  Created on: June 18, 2019
  */
 
-#ifndef PLATO_SROM_UTILITIES_HPP_
-#define PLATO_SROM_UTILITIES_HPP_
+#pragma once
 
-#include "Plato_SromMetadata.hpp"
+#include "Plato_SromLoadUtils.hpp"
+#include "Plato_SromMaterialUtils.hpp"
 
 namespace Plato
 {
 
+namespace srom
+{
+
 /******************************************************************************//**
- * @brief Generate the stochastic reduced order model for this set of random loads
- * @param [in] aInput input metadata
- * @param [in] aOutput output metadata
+ * \struct OutputMetaData
+ * \brief Output metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
 **********************************************************************************/
-bool generate_load_sroms(const Plato::srom::InputMetaData & aInput, Plato::srom::OutputMetaData & aOutput);
+struct OutputMetaData
+{
+private:
+    Plato::srom::usecase mUseCase;
+    std::vector<Plato::srom::RandomLoadCase> mLoadCases; /*!< set of random load cases */
+    std::vector<Plato::srom::RandomMaterialCase> mMaterialCases; /*!< set of random material cases */
 
-} // namespace Plato
+public:
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append random load case.
+     * \param [in] aLoadCase random load case
+    **********************************************************************************/
+    void append(const Plato::srom::RandomLoadCase& aLoadCase)
+    {
+        mLoadCases.push_back(aLoadCase);
+    }
 
-#endif /* PLATO_SROM_UTILITIES_HPP_ */
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append random material case.
+     * \param [in] aMaterialCase random material case
+    **********************************************************************************/
+    void append(const Plato::srom::RandomMaterialCase& aMaterialCase)
+    {
+        mMaterialCases.push_back(aMaterialCase);
+    }
+
+    /******************************************************************************//**
+     * \fn loads
+     * \brief Set random load cases.
+     * \param [in] aCases random load cases
+    **********************************************************************************/
+    void loads(const std::vector<Plato::srom::RandomLoadCase>& aCases)
+    {
+        mLoadCases = aCases;
+    }
+
+    /******************************************************************************//**
+     * \fn materials
+     * \brief Set random material cases.
+     * \param [in] aCases random material cases
+    **********************************************************************************/
+    void materials(const std::vector<Plato::srom::RandomMaterialCase>& aMaterials)
+    {
+        mMaterialCases = aMaterials;
+    }
+
+    /******************************************************************************//**
+     * \fn loads
+     * \brief Return random load cases.
+     * \return random load cases
+    **********************************************************************************/
+    std::vector<Plato::srom::RandomLoadCase> loads() const
+    {
+        return mLoadCases;
+    }
+
+    /******************************************************************************//**
+     * \fn materialCases
+     * \brief Return container of material cases.
+     * \return material cases
+    **********************************************************************************/
+    std::vector<Plato::srom::RandomMaterialCase> materials() const
+    {
+        return mMaterialCases;
+    }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Return use case tag.
+     * \return use case tag
+    **********************************************************************************/
+    Plato::srom::usecase usecase() const
+    {
+        return mUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Set use case tag. Options are:\n
+     *   -# load: use case only has non-deterministic loads,
+     *   -# material: use case only has non-deterministic materials, and
+     *   -# mix: use case has non-deterministic loads and materials.
+     * \param[in] use case tag
+    **********************************************************************************/
+    void usecase(const Plato::srom::usecase& aUseCase)
+    {
+        mUseCase = aUseCase;
+    }
+};
+// struct OutputMetaData
+
+/******************************************************************************//**
+ * \struct InputMetaData
+ * \brief Input metadata for Stochastic Reduced Order Model (SROM) problem with random loads.
+**********************************************************************************/
+struct InputMetaData
+{
+private:
+    /*!< defines non-deterministic use case: 1) load, 2) material, and 3) load plus material */
+    Plato::srom::usecase mUseCase = Plato::srom::usecase::LOAD;
+
+    std::vector<Plato::srom::Load> mLoads; /*!< set of loads */
+    std::vector<Plato::srom::Material> mMaterials; /*!< set of materials */
+
+public:
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Return use case tag.
+     * \return use case tag
+    **********************************************************************************/
+    Plato::srom::usecase usecase() const
+    {
+        return mUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn loads
+     * \brief Return set of loads.
+     * \return set of loads
+    **********************************************************************************/
+    std::vector<Plato::srom::Load> loads() const
+    {
+        return mLoads;
+    }
+
+    /******************************************************************************//**
+     * \fn materials
+     * \brief Return set of materials.
+     * \return set of materials
+    **********************************************************************************/
+    std::vector<Plato::srom::Material> materials() const
+    {
+        return mMaterials;
+    }
+
+    /******************************************************************************//**
+     * \fn usecase
+     * \brief Set use case tag. Options are:\n
+     *   -# load: use case only has non-deterministic loads,
+     *   -# material: use case only has non-deterministic materials, and
+     *   -# mix: use case has non-deterministic loads and materials.
+     * \param[in] use case tag
+    **********************************************************************************/
+    void usecase(const Plato::srom::usecase& aUseCase)
+    {
+        mUseCase = aUseCase;
+    }
+
+    /******************************************************************************//**
+     * \fn loads
+     * \brief Initialize set of loads.
+     * \param [in] aLoads set of loads
+    **********************************************************************************/
+    void loads(const std::vector<Plato::srom::Load>& aLoads)
+    {
+        mLoads = aLoads;
+    }
+
+    /******************************************************************************//**
+     * \fn materials
+     * \brief Initialize set of materials.
+     * \param [in] aMaterials set of materials
+    **********************************************************************************/
+    void materials(const std::vector<Plato::srom::Material>& aMaterials)
+    {
+        mMaterials = aMaterials;
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append load.
+     * \param [in] aLoad load metadata
+    **********************************************************************************/
+    void append(const Plato::srom::Load& aLoad)
+    {
+        mLoads.push_back(aLoad);
+    }
+
+    /******************************************************************************//**
+     * \fn append
+     * \brief Append material.
+     * \param [in] aMaterial material metadata
+    **********************************************************************************/
+    void append(const Plato::srom::Material& aMaterial)
+    {
+        mMaterials.push_back(aMaterial);
+    }
+};
+// struct InputMetaData
+
+/******************************************************************************//**
+ * \fn build_sroms
+ * \brief Build Stochastic Reduced Order Models (SROMs)
+ * \param [in] aInput  input metadata
+ * \param [in] aOutput output metadata
+**********************************************************************************/
+inline void build_sroms
+(const Plato::srom::InputMetaData & aInput,
+ Plato::srom::OutputMetaData & aOutput)
+{
+    switch(aInput.usecase())
+    {
+        case Plato::srom::usecase::LOAD:
+        {
+            std::vector<Plato::srom::RandomLoadCase> tLoadCases;
+            Plato::srom::build_load_sroms(aInput.loads(), tLoadCases);
+            aOutput.loads(tLoadCases);
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL:
+        {
+            std::vector<Plato::srom::RandomMaterialCase> tMaterialCases;
+            Plato::srom::build_material_sroms(aInput.materials(), tMaterialCases);
+            aOutput.materials(tMaterialCases);
+            break;
+        }
+        case Plato::srom::usecase::MATERIAL_PLUS_LOAD:
+        {
+            std::vector<Plato::srom::RandomLoadCase> tLoadCases;
+            Plato::srom::build_load_sroms(aInput.loads(), tLoadCases);
+            aOutput.loads(tLoadCases);
+
+            std::vector<Plato::srom::RandomMaterialCase> tMaterialCases;
+            Plato::srom::build_material_sroms(aInput.materials(), tMaterialCases);
+            aOutput.materials(tMaterialCases);
+            break;
+        }
+        default:
+        case Plato::srom::usecase::UNDEFINED:
+        {
+            std::ostringstream tMsg;
+            tMsg << "Build SROMs: Input use case '" << Plato::srom::to_string(aInput.usecase())
+                << "' is not supported. " << "Supported options are: 'load', 'material', and 'material+load'.";
+            THROWERR(tMsg.str().c_str())
+        }
+    }
+    aOutput.usecase(aInput.usecase());
+}
+// function build_sroms
+
+}
+// namespace srom
+
+}
+// namespace Plato

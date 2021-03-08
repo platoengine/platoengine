@@ -62,6 +62,7 @@
 #include "Plato_ParticleSwarmParser.hpp"
 
 #include "Plato_UnitTestUtils.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace ParticleSwarmTest
 {
@@ -239,7 +240,7 @@ TEST(PlatoTest, output_restart_data_multivector)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold("CURRENTPARTICLES23333232513112112322PREVIOUSVELOCITIES3124122215");
         ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
@@ -283,7 +284,7 @@ TEST(PlatoTest, output_restart_data_vector)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold("CURRENTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05CURRENTBESTOBJECTIVEFUNCTIONVALUES0.10.340.50.40.05");
         ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
@@ -326,7 +327,7 @@ TEST(PlatoTest, output_restart_data_value)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold("CURRENTGLOBALBESTPARTICLERANK0CURRENTGLOBALBESTPARTICLEINDEX1CURRENTGLOBALBESTOBJECTIVEVALUE0.12");
         ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
@@ -369,7 +370,7 @@ TEST(PlatoTest, read_restart_data_vector)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
 
         // ****** TEST RESTART DATA ******
         PlatoTest::checkVectorData(tCurrentFval, tRestartCurrentFval);
@@ -408,7 +409,7 @@ TEST(PlatoTest, read_restart_data_vector_error)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
     }
 }
 
@@ -468,7 +469,7 @@ TEST(PlatoTest, read_restart_data_multivector)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
 
         // ****** TEST RESTART DATA ******
         PlatoTest::checkMultiVectorData(tCurrentParticleSet, tRestartCurrentParticleSet);
@@ -519,7 +520,7 @@ TEST(PlatoTest, read_restart_data_multivector_error)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
     }
 }
 
@@ -567,7 +568,7 @@ TEST(PlatoTest, read_restart_data_value)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
     }
 }
 
@@ -601,7 +602,7 @@ TEST(PlatoTest, read_restart_data_value_error)
 
         // ****** CLOSE AND DELETE FILE ******
         tInputFile.close();
-        std::system("rm -f MyRestartFile.txt");
+        Plato::system("rm -f MyRestartFile.txt");
     }
 }
 
@@ -696,7 +697,7 @@ TEST(PlatoTest, PSO_IsFileOpenExeption)
         tFile.open("MyFile.txt");
         ASSERT_NO_THROW(Plato::pso::is_file_open(tFile));
         tFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
     }
 }
 
@@ -791,7 +792,7 @@ TEST(PlatoTest, PSO_PrintParticleData)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold;
         tGold << "OUTPUTFORMAT:(F_i(X),X_i^j,...,X_i^J)...(F_I(X),X_I^j,...,X_I^J)";
@@ -841,7 +842,7 @@ TEST(PlatoTest, PSO_PrintGlobalBestParticleData)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold;
         tGold << "OUTPUTFORMAT:(F(X),X^j,...,X^J)Thesuperscriptjdenotesthedesignvariableindex.";
@@ -890,7 +891,7 @@ TEST(PlatoTest, PSO_PrintDiagnostics)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f MyFile1.txt");
+        Plato::system("rm -f MyFile1.txt");
 
         std::stringstream tGold;
         tGold << "IterF-countBest(F)Mean(F)StdDev(F)TR-Radius";
@@ -925,7 +926,7 @@ TEST(PlatoTest, PSO_PrintSolution)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f plato_pso_solution.txt");
+        Plato::system("rm -f plato_pso_solution.txt");
 
         std::stringstream tGold;
         tGold << "Best(X)Mean(X)StdDev(X)";
@@ -1036,7 +1037,7 @@ TEST(PlatoTest, PSO_PrintDiagnosticsALPSO)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f MyFile.txt");
+        Plato::system("rm -f MyFile.txt");
 
         std::stringstream tGold;
         tGold << "IterF-countBest(L)Mean(L)StdDev(L)Best(F)Mean(F)StdDev(F)TR-RadiusBest(H1)Mean(H1)StdDev(H1)Mean(P1)StdDev(P1)Mean(l1)StdDev(l1)";
@@ -1913,7 +1914,7 @@ TEST(PlatoTest, PSO_SolveBCPSO_Circle_Restart)
         const double tTolerance = 1e-3;
         EXPECT_NEAR(0, tOutputs.mGlobalBestObjFuncValue, tTolerance);
 
-        std::system("rm -f plato_bcpso_restart_data.txt");
+        Plato::system("rm -f plato_bcpso_restart_data.txt");
     }
 }
 

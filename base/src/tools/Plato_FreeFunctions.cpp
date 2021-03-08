@@ -47,26 +47,16 @@
 
 #include "Plato_FreeFunctions.hpp"
 
+#include <cmath>
+#include <vector>
 #include <cstddef>
+#include <iterator>
 #include <algorithm>
 
 namespace Plato
 {
 
-size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
-                                   const size_t& num_processors_in_group,
-                                   const size_t& atmost_processor_count)
-{
-    // this logic is used to divide tasks into groups of processors.
-    // total number of processors used will not exceed "atmost_processor_count"
-
-    // how many tasks would you have if you used all the processors in groups
-    const size_t equal_division_of_tasks = (atmost_processor_count / num_processors_in_group);
-
-    // you can't do more tasks than total
-    return std::min(total_number_of_tasks, equal_division_of_tasks);
-}
-
+/**********************************************************************************/
 std::string to_string(const double d)
 {
   int sig_digits = DECIMAL_DIG;
@@ -76,7 +66,9 @@ std::string to_string(const double d)
   tString = buf;
   return tString;
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const float f)
 {
   int sig_digits = DECIMAL_DIG;
@@ -86,15 +78,73 @@ std::string to_string(const float f)
   tString = buf;
   return tString;
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const int d)
 {
   return std::to_string(d);
 }
+/**********************************************************************************/
 
+/**********************************************************************************/
 std::string to_string(const size_t d)
 {
   return std::to_string(d);
 }
+/**********************************************************************************/
+
+/**********************************************************************************/
+std::string toupper(const std::string& aInput)
+{
+    std::locale tLocale;
+    std::ostringstream tOutput;
+    for (auto& tChar : aInput)
+    {
+        tOutput << std::toupper(tChar,tLocale);
+    }
+    return (tOutput.str());
+}
+/**********************************************************************************/
+
+/**********************************************************************************/
+bool equal(const double& aA, const double& aB)
+{
+  return std::nextafter(aA, std::numeric_limits<double>::lowest()) <= aB
+    && std::nextafter(aA, std::numeric_limits<double>::max()) >= aB;
+}
+/**********************************************************************************/
+
+/**********************************************************************************/
+std::string transform_tokens(const std::vector<std::string>& aTokens)
+{
+    if(aTokens.empty())
+    {
+        return std::string("");
+    }
+
+    std::string tOutput;
+    auto tEndIndex = aTokens.size() - 1u;
+    auto tEndIterator = std::next(aTokens.begin(), tEndIndex);
+    for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
+    {
+        auto tIndex = std::distance(aTokens.begin(), tItr);
+        tOutput += aTokens[tIndex] + " ";
+    }
+    tOutput += aTokens[tEndIndex];
+
+    return tOutput;
+}
+// function transform_tokens
+/**********************************************************************************/
+
+/**********************************************************************************/
+void system(const char* aString)
+{
+  int return_val = std::system(aString);
+  int temp = return_val;
+  return_val = temp;
+}
+/**********************************************************************************/
 
 } // end namespace Plato

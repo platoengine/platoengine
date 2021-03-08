@@ -71,10 +71,10 @@ MeanPlusVarianceMeasure::~MeanPlusVarianceMeasure()
 void MeanPlusVarianceMeasure::operator()()
 {
     this->computeMeanQoI();
+    this->computeStandardDeviationQoI();
     bool tStandardDeviationMeasuresRequested = mOutArgumentToStdDevMultiplier.size() > 0u;
     if (tStandardDeviationMeasuresRequested == true)
     {
-        this->computeStandardDeviationQoI();
         this->computeMeanPlusStdDev();
     }
 }
@@ -195,7 +195,7 @@ void MeanPlusVarianceMeasure::parseDataLayout(const Plato::InputData &aOperation
 
 void MeanPlusVarianceMeasure::parseInputs(const Plato::InputData &aOperationNode)
 {
-    for (auto tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
+    for (auto& tInputNode : aOperationNode.getByName<Plato::InputData>("Input"))
     {
         std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         this->setMyLocalArgument(tInputArgumentName);
@@ -206,7 +206,7 @@ void MeanPlusVarianceMeasure::parseInputs(const Plato::InputData &aOperationNode
 
 void MeanPlusVarianceMeasure::parseOutputs(const Plato::InputData &aOperationNode)
 {
-    for (auto tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
+    for (auto& tOutputNode : aOperationNode.getByName<Plato::InputData>("Output"))
     {
         std::string tStatisticMeasure = Plato::Get::String(tOutputNode, "Statistic", true);
         std::string tOutputArgumentName = Plato::Get::String(tOutputNode, "ArgumentName");
@@ -223,11 +223,11 @@ void MeanPlusVarianceMeasure::setMySigmaValue(const std::string &aStatisticMeasu
         THROWERR("OUTPUT ARGUMENT NAME IS EMPTY, I.E. ARGUMENT'S NAME IS NOT DEFINED.\n");
     }
 
-    std::vector<std::string> tStringList;
-    Plato::split(aStatisticMeasure, tStringList);
-    if (tStringList.size() > 2u)
+    std::vector<std::string> tTokens;
+    Plato::split(aStatisticMeasure, tTokens);
+    if (tTokens.size() > 2u)
     {
-        const double tMySigmaValue = this->getMySigmaValue(tStringList[2]);
+        const double tMySigmaValue = this->getMySigmaValue(tTokens[2]);
         const std::string &tOutputArgumentName = mStatisticsToOutArgument.find(aStatisticMeasure)->second;
         mOutArgumentToStdDevMultiplier[tOutputArgumentName] = tMySigmaValue;
     }
@@ -480,7 +480,8 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevGlobalQoI()
     std::vector<double> *tOutputSigmaData = this->getOutputDataGlobalQoI("STD_DEV");
 
     // tIterator->first = statistic's measure argument name AND tIterator->second = standard deviation multiplier
-    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
+    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); 
+         tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
     {
         const std::string &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
         std::vector<double> *tOutMeanPlusSigmaData = mPlatoApp->getValue(tOutputArgumentMeanPlusSigma);
@@ -490,15 +491,16 @@ void MeanPlusVarianceMeasure::computeMeanPlusStdDevGlobalQoI()
 
 void MeanPlusVarianceMeasure::computeMeanPlusStdDevFieldQoI()
 {
-    const std::string tArgumentName = this->getOutputArgument("MEAN");
+    const auto tArgumentName = this->getOutputArgument("MEAN");
     const size_t tLocalLength = this->getLocalLength(tArgumentName);
     double *tOutputMeanData = this->getOutputDataFieldQoI("MEAN");
     double *tOutputSigmaData = this->getOutputDataFieldQoI("STD_DEV");
 
     // tIterator->first = statistic's measure argument name AND tIterator->second = standard deviation multiplier
-    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
+    for (auto tOuterIterator = mOutArgumentToStdDevMultiplier.begin(); 
+         tOuterIterator != mOutArgumentToStdDevMultiplier.end(); ++tOuterIterator)
     {
-        const std::string &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
+        const auto &tOutputArgumentMeanPlusSigma = tOuterIterator->first;
         double *tOutMeanPlusSigmaData = mPlatoApp->getNodeFieldData(tOutputArgumentMeanPlusSigma);
         for (size_t tIndex = 0; tIndex < tLocalLength; tIndex++)
         {

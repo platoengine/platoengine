@@ -69,6 +69,10 @@ void ExceptionHandler::Catch()
     {
         this->registerException(tLogicException);
     }
+    catch(const TerminateSignal & tTerminateSignal)
+    {
+        this->registerException(tTerminateSignal);
+    }
     catch(std::exception const& any_std_exception)
     {
         this->registerException(any_std_exception);
@@ -185,6 +189,20 @@ void ExceptionHandler::registerException(const Plato::LogicException & aLogicExc
 }
 
 /******************************************************************************/
+void ExceptionHandler::registerException(const Plato::TerminateSignal & aTerminateSignal)
+/******************************************************************************/
+{
+    this->setError();
+    if(mMyPID == 0)
+    {
+        mErrorStream << " -----------------------------------------------------------------------------" << std::endl;
+        mErrorStream << "  Terminate signal received on Performer '" << mMyCommName << "': " << std::endl;
+        mErrorStream << "  " << aTerminateSignal.message();
+        mErrorStream << " -----------------------------------------------------------------------------" << std::endl;
+    }
+}
+
+/******************************************************************************/
 void ExceptionHandler::handleExceptions()
 /******************************************************************************/
 {
@@ -213,6 +231,13 @@ std::string LogicException::message() const
 {
     std::stringstream errorStream;
     errorStream << "  Error message: " << mMessage << std::endl;
+    return errorStream.str();
+}
+
+std::string TerminateSignal::message() const
+{
+    std::stringstream errorStream;
+    errorStream << "  Message: " << mMessage << std::endl;
     return errorStream.str();
 }
 
@@ -259,4 +284,10 @@ LogicException::LogicException(const std::string & aMessage) :
 {
 }
 
+/******************************************************************************/
+TerminateSignal::TerminateSignal(const std::string & aMessage) :
+        mMessage(aMessage)
+/******************************************************************************/
+{
+}
 } // End namespace Plato

@@ -111,6 +111,7 @@
 <Operation>
   <Function>Aggregator</Function>
   <Name>AggregateEnergy</Name>
+  <Report>true</Report>
   <Aggregate>
     <Layout>Value</Layout>
     <Input>

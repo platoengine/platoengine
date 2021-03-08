@@ -48,6 +48,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace Plato
 {
 

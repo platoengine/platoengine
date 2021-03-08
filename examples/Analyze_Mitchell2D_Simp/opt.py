@@ -9,7 +9,7 @@ from numpy import *
 ctypes.CDLL("libmpi.so",mode=ctypes.RTLD_GLOBAL)
 
 # create global Analyze instance
-appFileName = "alexaApp.xml"
+appFileName = "analyzeApp.xml"
 defaultInputFile = "mitchell_tri.xml"
 analyze = PlatoPython.Analyze(defaultInputFile, appFileName, "2D mitchell")
 analyze.initialize();
@@ -20,7 +20,7 @@ services.initialize();
 
 # initialize control
 targetFraction = 0.5
-inputMeshName    = "mitchell_tri.gen"
+inputMeshName    = "mitchell_tri.exo"
 inMesh = exodus.ExodusDB()
 inMesh.read(inputMeshName)
 numOptDofs = inMesh.numNodes

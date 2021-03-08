@@ -47,17 +47,15 @@
 
 #pragma once
 
-#include <cstddef>
 #include <vector>
 #include <cfloat>
 #include <string>
+#include <locale>
+#include <sstream>
+#include <cstddef>
 
 namespace Plato
 {
-
-size_t divide_up_atmost_processors(const size_t& total_number_of_tasks,
-                                   const size_t& num_processors_in_group,
-                                   const size_t& atmost_processor_count);
 
 template<typename T>
 T free_sum(const std::vector<T>& in_)
@@ -75,5 +73,50 @@ std::string to_string(const double d);
 std::string to_string(const float f);
 std::string to_string(const int d);
 std::string to_string(const size_t d);
+
+/******************************************************************************//**
+ * \fn equal
+ * \brief Return true if the two floating point numbers are the same.
+ * \param [in] aA value one
+ * \param [in] aB value two
+ * \return Flag
+**********************************************************************************/
+bool equal(const double& aA, const double& aB);
+
+/******************************************************************************//**
+ * \fn transform_tokens
+ * \brief Convert uppercase word to lowercase.
+ * \param [in] aInput word
+ * \return lowercase word
+**********************************************************************************/
+std::string transform_tokens(const std::vector<std::string>& aTokens);
+
+/******************************************************************************//**
+ * \fn tolower
+ * \brief Convert uppercase word to lowercase.
+ * \param [in] aInput word
+ * \return lowercase word
+**********************************************************************************/
+inline std::string tolower(const std::string& aInput)
+{
+    std::locale tLocale;
+    std::ostringstream tOutput;
+    for (auto& tChar : aInput)
+    {
+        tOutput << std::tolower(tChar,tLocale);
+    }
+    return (tOutput.str());
+}
+// function tolower
+
+/******************************************************************************//**
+ * \fn toupper
+ * \brief Convert string to upper case.
+ * \param [in] aInput word
+ * \return upper case word
+**********************************************************************************/
+std::string toupper(const std::string& aInput);
+
+void system(const char* aString);
 
 } // end namespace Plato

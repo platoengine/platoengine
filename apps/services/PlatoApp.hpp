@@ -48,6 +48,7 @@
 #include "Plato_Application.hpp"
 #include "Plato_Exceptions.hpp"
 #include "Plato_TimersTree.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 #ifdef GEOMETRY
 #include "Plato_MetaDataMLS.hpp"
@@ -175,6 +176,13 @@ public:
     Plato::TimersTree* getTimersTree();
 
     /******************************************************************************//**
+     * @brief Return shared data name
+     * @param [in] aName argument name
+     * @return shared data name
+    **********************************************************************************/
+    std::string getSharedDataName(const std::string & aName) const;
+
+    /******************************************************************************//**
      * @brief Return local number of elements
      * @param [in] aName field name
      * @return local number of elements
@@ -256,6 +264,8 @@ public:
     {
         if(aImportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
         {
+            mSharedDataNames[aArgumentName] = aImportData.myName();
+
             DistributedVector* tLocalData = getNodeField(aArgumentName);
 
             int tMyLength = tLocalData->getEpetraVector()->MyLength();
@@ -272,6 +282,8 @@ public:
         }
         else if(aImportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
         {
+            mSharedDataNames[aArgumentName] = aImportData.myName();
+
             auto dataContainer = mLightMp->getDataContainer();
             double* tDataView;
             dataContainer->getVariable(getElementField(aArgumentName), tDataView);
@@ -286,6 +298,8 @@ public:
         }
         else if(aImportData.myLayout() == Plato::data::layout_t::SCALAR)
         {
+            mSharedDataNames[aArgumentName] = aImportData.myName();
+
             std::vector<double>* tLocalData = getValue(aArgumentName);
             tLocalData->resize(aImportData.size());
             aImportData.getData(*tLocalData);
@@ -302,6 +316,8 @@ public:
     {
         if(aExportData.myLayout() == Plato::data::layout_t::SCALAR_FIELD)
         {
+            mSharedDataNames[aArgumentName] = aExportData.myName();
+
             DistributedVector* tLocalData = getNodeField(aArgumentName);
 
             tLocalData->LocalExport();
@@ -317,6 +333,8 @@ public:
         }
         else if(aExportData.myLayout() == Plato::data::layout_t::ELEMENT_FIELD)
         {
+            mSharedDataNames[aArgumentName] = aExportData.myName();
+
             auto dataContainer = mLightMp->getDataContainer();
             double* tDataView;
             dataContainer->getVariable(getElementField(aArgumentName), tDataView);
@@ -330,6 +348,8 @@ public:
         }
         else if(aExportData.myLayout() == Plato::data::layout_t::SCALAR)
         {
+            mSharedDataNames[aArgumentName] = aExportData.myName();
+
             std::vector<double>* tLocalData = getValue(aArgumentName);
             if(int(tLocalData->size()) == aExportData.size())
             {
@@ -354,7 +374,7 @@ private:
      * @param [in] aValueMap name-data map
     **********************************************************************************/
     template<typename ValueType>
-    void throwParsingException(const std::string & aName, const std::map<std::string, ValueType> & aValueMap)
+    void throwParsingException(const std::string & aName, const std::map<std::string, ValueType> & aValueMap) const
     {
         std::stringstream tMessage;
         tMessage << "Cannot find specified Argument: " << aName.c_str() << std::endl;
@@ -393,6 +413,7 @@ private:
     std::map<std::string,std::shared_ptr<Plato::MLSstruct>> mMLS;  /*!< Moving Least Squared (MLS) metadata */
 #endif
 
+    std::map<std::string, std::string> mSharedDataNames; /*!< Argument name -> SharedData name */
     std::map<std::string, VarIndex> mElementFieldMap; /*!< Name - Element Field map */
     std::map<std::string, DistributedVector*> mNodeFieldMap; /*!< Name - Node Field map */
     std::map<std::string, std::vector<double>*> mValueMap; /*!< Name - Scalar values map */

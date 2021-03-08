@@ -57,6 +57,7 @@
 #include "Plato_CcsaTestObjective.hpp"
 #include "Plato_CcsaTestInequality.hpp"
 
+#include "Plato_DataFactory.hpp"
 #include "Plato_ProxyVolume.hpp"
 #include "Plato_ProxyCompliance.hpp"
 #include "Plato_EpetraSerialDenseVector.hpp"
@@ -293,7 +294,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsOneConstraints)
             tReadData << tInputString.c_str();
         }
         tReadFile.close();
-        std::system("rm -f MyFile1.txt");
+        Plato::system("rm -f MyFile1.txt");
 
         std::stringstream tGold;
         tGold << "IterF-countF(X)Norm(F')H1(X)abs(dX)abs(dF)";
@@ -344,7 +345,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_PrintDiagnosticsTwoConstraints)
          tReadData << tInputString.c_str();
          }
          tReadFile.close();
-         std::system("rm -f MyFile1.txt");
+         Plato::system("rm -f MyFile1.txt");
 
          std::stringstream tGold;
          tGold << "IterF-countF(X)Norm(F')H1(X)H2(X)abs(dX)abs(dF)";
