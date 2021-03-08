@@ -43,7 +43,6 @@
 // PlatoSubproblemLibraryVersion(3): a stand-alone library for the kernel filter for plato.
 #include "PSL_UnitTestingHelper.hpp"
 #include "PSL_TetMeshUtilities.hpp"
-#include "PSL_OrthogonalGridUtilities.hpp"
 #include "PSL_Vector.hpp"
 
 #include <vector>
@@ -322,6 +321,18 @@ PSL_TEST(TetMeshUtilities, isPointInTetrahedron)
     bool tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, true);
 
+    tPoint = Vector({0.01,0.01,0.02});
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
+    EXPECT_EQ(tIsPointInTet, true);
+
+    tPoint = Vector({0.0001,0.0001,0.0001});
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
+    EXPECT_EQ(tIsPointInTet, true);
+
+    tPoint = Vector({0.0001,0.0001,0.9});
+    tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
+    EXPECT_EQ(tIsPointInTet, true);
+
     tPoint = Vector({1.0,1.0,1.0});
     tIsPointInTet = isPointInTetrahedron(tCoordinates, tTet, tPoint);
     EXPECT_EQ(tIsPointInTet, false);
@@ -408,101 +419,43 @@ PSL_TEST(TetMeshUtilities, getTetIDForEachPoint)
 {
     std::vector<std::vector<double>> tCoordinates;
 
-    tCoordinates.push_back({1,0,1});
-    tCoordinates.push_back({1,1,1});
-    tCoordinates.push_back({0,1,1});
-    tCoordinates.push_back({0,0,1});
-    tCoordinates.push_back({1,1,0});
-    tCoordinates.push_back({1,0,0});
-    tCoordinates.push_back({0,0,0});
-    tCoordinates.push_back({0,1,0});
-
+     tCoordinates.push_back({1,0,1}); //0
+     tCoordinates.push_back({1,1,1}); //1
+     tCoordinates.push_back({0,1,1}); //2
+     tCoordinates.push_back({0,0,1}); //3
+     tCoordinates.push_back({1,1,0}); //4
+     tCoordinates.push_back({1,0,0}); //5
+     tCoordinates.push_back({0,0,0}); //6
+     tCoordinates.push_back({0,1,0}); //7
+    
     std::vector<std::vector<int>> tConnectivity;
 
-    tConnectivity.push_back({0,2,7,6});
-    tConnectivity.push_back({0,2,6,3});
-    tConnectivity.push_back({0,4,5,6});
-    tConnectivity.push_back({0,4,6,7});
-    tConnectivity.push_back({0,1,4,7});
-    tConnectivity.push_back({0,1,7,3});
-
-    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
-    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
-    Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
-
-    std::vector<int> tNumElements = {5,5,5};
-
+     tConnectivity.push_back({0,2,7,6}); //0
+     tConnectivity.push_back({0,2,6,3}); //1
+     tConnectivity.push_back({0,4,5,6}); //2
+     tConnectivity.push_back({0,4,6,7}); //3
+     tConnectivity.push_back({0,1,4,7}); //4
+     tConnectivity.push_back({0,1,7,2}); //5
+    
     TetMeshUtilities tUtilities(tCoordinates,tConnectivity);
 
-    Vector tMaxUVWCoords, tMinUVWCoords;
-    tUtilities.computeBoundingBox(tMaxUVWCoords,tMinUVWCoords);
-
     std::vector<Vector> tGridCoordinates;
-
-    computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tGridCoordinates);
+    tGridCoordinates.push_back(Vector({0.1,0.1,0.1}));
+    tGridCoordinates.push_back(Vector({0.1,0.1,0.0}));
+    tGridCoordinates.push_back(Vector({0.25,0.25,0.75}));
+    tGridCoordinates.push_back(Vector({0.25,0.5,0.5}));
+    tGridCoordinates.push_back(Vector({0.75,0.25,0.25}));
+    tGridCoordinates.push_back(Vector({0.5,0.5,0.25}));
+    tGridCoordinates.push_back(Vector({0.75,0.75,0.5}));
+    tGridCoordinates.push_back(Vector({0.5,0.75,0.75}));
 
     std::vector<int> tContainingTetID;
     tUtilities.getTetIDForEachPoint(tGridCoordinates,tContainingTetID);
 
     EXPECT_EQ(tGridCoordinates.size(), tContainingTetID.size());
 
-    std::vector<int> tOldWayContainingTetID;
-    getTetIDForEachGridPoint(tConnectivity,tCoordinates,tNumElements,tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tOldWayContainingTetID);
-
-    EXPECT_EQ(tContainingTetID,tOldWayContainingTetID);
+    EXPECT_EQ(tContainingTetID,std::vector<int>({ 0, 2, 1, 0, 2, 3, 4, 5 }));
 }
-
-void getTetIDForEachGridPoint(const std::vector<std::vector<int>>& aConnectivity,
-                              const std::vector<std::vector<double>>& aCoordinates,
-                              const std::vector<int>& aNumElementsInEachDirection,
-                              const Vector& aUBasisVector,
-                              const Vector& aVBasisVector,
-                              const Vector& aBuildDirection,
-                              const Vector& aMaxUVWCoords,
-                              const Vector& aMinUVWCoords,
-                              std::vector<int>& aTetIDs)
-{
-    aTetIDs.resize((aNumElementsInEachDirection[0]+1) * (aNumElementsInEachDirection[1]+1) * (aNumElementsInEachDirection[2]+1));
-    for(int i = 0; i <= aNumElementsInEachDirection[0]; ++i)
-    {
-        for(int j = 0; j <= aNumElementsInEachDirection[1]; ++j)
-        {
-            for(int k = 0; k <= aNumElementsInEachDirection[2]; ++k)
-            {
-                aTetIDs[getSerializedIndex(aNumElementsInEachDirection,i,j,k)] = getContainingTetID(aConnectivity,aCoordinates,aNumElementsInEachDirection,aUBasisVector,aVBasisVector,aBuildDirection,aMaxUVWCoords,aMinUVWCoords,i,j,k);
-            }
-        }
-    }
-}
-
-int getContainingTetID(const std::vector<std::vector<int>>& aConnectivity,
-                       const std::vector<std::vector<double>>& aCoordinates,
-                       const std::vector<int>& aNumElementsInEachDirection,
-                       const Vector& aUBasisVector,
-                       const Vector& aVBasisVector,
-                       const Vector& aBuildDirection,
-                       const Vector& aMaxUVWCoords,
-                       const Vector& aMinUVWCoords,
-                       const int& i,
-                       const int& j,
-                       const int& k)
-{
-    std::vector<int> tIndex({i,j,k});
-    std::vector<Vector> tGridCoordinates;
-    computeGridXYZCoordinates(aUBasisVector,aVBasisVector,aBuildDirection,aMaxUVWCoords,aMinUVWCoords,aNumElementsInEachDirection,tGridCoordinates);
-    Vector tPoint = tGridCoordinates[getSerializedIndex(aNumElementsInEachDirection,i,j,k)];
-
-    for(int tTetIndex = 0; tTetIndex < (int) aConnectivity.size(); ++tTetIndex)
-    {
-        auto tTet = aConnectivity[tTetIndex];
-
-        if(isPointInTetrahedron(aCoordinates,tTet,tPoint)) 
-            return tTetIndex;
-    }
-
-    return -1;
-}
-
 
 }
 }

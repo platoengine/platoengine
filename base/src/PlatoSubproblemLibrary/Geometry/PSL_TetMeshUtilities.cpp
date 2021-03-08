@@ -163,7 +163,7 @@ bool sameSide(const std::vector<std::vector<double>>& aCoordinates, const int& v
     double tDot1 = dot_product(tNormal, tVec4 - tVec1);
     double tDot2 = dot_product(tNormal, aPoint - tVec1);
 
-    return tDot1*tDot2 > 0;
+    return tDot1*tDot2 >= 0.0;
 }
 
 void TetMeshUtilities::checkInput() const
