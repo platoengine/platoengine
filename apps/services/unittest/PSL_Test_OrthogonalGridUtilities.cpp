@@ -129,94 +129,92 @@ PSL_TEST(OrthogonalGridUtilities, getGridDimensions)
     EXPECT_EQ(tDimensions, std::vector<int>({6,7,8}));
 }
 
-// PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
-// {
-//     Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
-//     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
-//     Vector tBuildDirection(std::vector<double>({0.0,0.0,1.0}));
+PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
+{
+    Vector tUBasisVector(std::vector<double>({1.0,0.0,0.0}));
+    Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
+    Vector tWBasisVector(std::vector<double>({0.0,0.0,1.0}));
 
-//     std::vector<int> tNumElements({10,20,30});
+    std::vector<int> tNumElements({10,20,30});
 
-//     Vector tMaxUVWCoords({1.0,2.0,3.0});
-//     Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
 
-//     std::vector<Vector> tCoordinates;
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
-//     // non-positive number of elements
-//     tNumElements = {-1,20,30};
-//     EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates),std::domain_error);
-//     tNumElements = {0,20,30};
-//     EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates),std::domain_error);
+    std::vector<Vector> tCoordinates;
 
-//     // min and max flipped so max input is less than min
-//     tNumElements = {10,20,30};
-//     EXPECT_THROW(computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMinUVWCoords,tMaxUVWCoords,tNumElements,tCoordinates),std::domain_error);
+    tUtilities.computeGridXYZCoordinates(tCoordinates);
+    std::vector<int> tIndex = {1,1,1};
+    Vector tGridPointCoordinate = tCoordinates[tUtilities.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.1);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.1);
 
-//     computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates);
-//     std::vector<int> tIndex = {1,1,1};
-//     Vector tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.1);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.1);
+    tIndex = {1, 5, 12};
+    tGridPointCoordinate = tCoordinates[tUtilities.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.5);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),1.2);
 
-//     tIndex = {1, 5, 12};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.5);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),1.2);
-
-//     tNumElements = {5,8,15};
-//     computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates);
-//     tIndex = {1, 1, 1};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.2);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.25);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.2);
+    tNumElements = {5,8,15};
+    OrthogonalGridUtilities tUtilities2(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    tUtilities2.computeGridXYZCoordinates(tCoordinates);
+    tIndex = {1, 1, 1};
+    tGridPointCoordinate = tCoordinates[tUtilities2.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.2);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.25);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.2);
     
-//     tNumElements = {10,20,30};
-//     tMaxUVWCoords = Vector({1.0,2.0,3.0});
-//     tMinUVWCoords = Vector({-1.0,-2.0,-3.0});
-//     computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates);
-//     tIndex = {1, 1, 1};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-0.8);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),-1.8);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),-2.8);
+    tNumElements = {10,20,30};
+    tMaxUVWCoords = Vector({1.0,2.0,3.0});
+    tMinUVWCoords = Vector({-1.0,-2.0,-3.0});
+    OrthogonalGridUtilities tUtilities3(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    tUtilities3.computeGridXYZCoordinates(tCoordinates);
+    tIndex = {1, 1, 1};
+    tGridPointCoordinate = tCoordinates[tUtilities3.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-0.8);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),-1.8);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),-2.8);
 
-//     tUBasisVector = Vector({0.0,1.0,0.0});
-//     tVBasisVector = Vector({0.0,0.0,1.0});
-//     tBuildDirection = Vector({1.0,0.0,0.0});
-//     computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates);
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-2.8);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),-0.8);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),-1.8);
+    tUBasisVector = Vector({0.0,1.0,0.0});
+    tVBasisVector = Vector({0.0,0.0,1.0});
+    tWBasisVector = Vector({1.0,0.0,0.0});
+    OrthogonalGridUtilities tUtilities4(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    tUtilities4.computeGridXYZCoordinates(tCoordinates);
+    tGridPointCoordinate = tCoordinates[tUtilities4.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-2.8);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),-0.8);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),-1.8);
 
-//     tUBasisVector = Vector({1.0,1.0,0.0});
-//     tVBasisVector = Vector({-1.0,1.0,0.0});
-//     tBuildDirection = Vector({0.0,0.0,1.0});
-//     tMaxUVWCoords = Vector({1.0,1.0,3.0});
-//     tMinUVWCoords = Vector({0.0,0.0,0.0});
-//     tNumElements = {10,10,10};
-//     computeGridXYZCoordinates(tUBasisVector,tVBasisVector,tBuildDirection,tMaxUVWCoords,tMinUVWCoords,tNumElements,tCoordinates);
-//     tIndex = {0, 0, 1};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.0);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.0);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.3);
+    tUBasisVector = Vector({1.0,1.0,0.0});
+    tVBasisVector = Vector({-1.0,1.0,0.0});
+    tUBasisVector.normalize();
+    tVBasisVector.normalize();
+    tWBasisVector = Vector({0.0,0.0,1.0});
+    tMaxUVWCoords = Vector({1.0,1.0,3.0});
+    tMinUVWCoords = Vector({0.0,0.0,0.0});
+    tNumElements = {10,10,10};
+    OrthogonalGridUtilities tUtilities5(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    tUtilities5.computeGridXYZCoordinates(tCoordinates);
+    tIndex = {0, 0, 1};
+    tGridPointCoordinate = tCoordinates[tUtilities5.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.0);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.0);
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.3);
 
-//     tIndex = {1, 0, 0};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.1);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.0);
+    tIndex = {1, 0, 0};
+    tGridPointCoordinate = tCoordinates[tUtilities5.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1/sqrt(2));
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.1/sqrt(2));
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.0);
 
-//     tIndex = {1, 3, 2};
-//     tGridPointCoordinate = tCoordinates[getSerializedIndex(tNumElements,tIndex)];
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-0.2);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.4);
-//     EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.6);
-// }
+    tIndex = {1, 3, 2};
+    tGridPointCoordinate = tCoordinates[tUtilities5.getSerializedIndex(tIndex)];
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),-0.2/sqrt(2));
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.4/sqrt(2));
+    EXPECT_DOUBLE_EQ(tGridPointCoordinate(2),0.6);
+}
 
 PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
 {

@@ -45,55 +45,44 @@ int OrthogonalGridUtilities::getSerializedIndex(const std::vector<int>& aIndex) 
     return getSerializedIndex(aIndex.at(0), aIndex.at(1), aIndex.at(2));
 }
 
-// void computeGridXYZCoordinates(const Vector& aUBasisVector,
-//                                  const Vector& aVBasisVector,
-//                                  const Vector& aBuildDirection,
-//                                  const Vector& aMaxUVWCoords,
-//                                  const Vector& aMinUVWCoords,
-//                                  const std::vector<int>& aNumElements,
-//                                  std::vector<Vector>& aXYZCoordinates)
-// {
-//     double tULength = aMaxUVWCoords(0) - aMinUVWCoords(0);
-//     double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
-//     double tWLength = aMaxUVWCoords(2) - aMinUVWCoords(2);
+void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const
+{
+    double tULength = mMaxUVWCoords(0) - mMinUVWCoords(0);
+    double tVLength = mMaxUVWCoords(1) - mMinUVWCoords(1);
+    double tWLength = mMaxUVWCoords(2) - mMinUVWCoords(2);
 
-//     std::vector<double> tLength = {tULength,tVLength,tWLength};
-//     std::vector<Vector> tBasis = {aUBasisVector,aVBasisVector,aBuildDirection};
+    std::vector<double> tLength = {tULength,tVLength,tWLength};
+    std::vector<Vector> tBasis = {mUBasisVector,mVBasisVector,mWBasisVector};
 
-//     if(tULength < 0 || tVLength < 0 || tWLength < 0)
-//         throw(std::domain_error("OrthogonalGridUtilities::computeGridXYZCoordinates: Max UVW coordinates expected to be greater than Min UVW coordinates"));
+    auto tDimension = getGridDimensions();
 
-//     if(aNumElements[0] <= 0 || aNumElements[1] <= 0 || aNumElements[2] <= 0)
-//         throw(std::domain_error("OrthogonalGridUtilities::computeGridXYZCoordinates: Number of elements in each direction must be greater than zero"));
+    aXYZCoordinates.resize(tDimension[0] * tDimension[1] * tDimension[2]);
 
-//     aXYZCoordinates.resize((aNumElements[0]+1) * (aNumElements[1]+1) * (aNumElements[2]+1));
+    for(int i = 0; i < tDimension[0]; ++i)
+    {
+        for(int j = 0; j < tDimension[1]; ++j)
+        {
+            for(int k = 0; k < tDimension[2]; ++k)
+            {
 
+                Vector tXYZCoordinates({0.0,0.0,0.0});
+                Vector tUVWCoordinates({0.0,0.0,0.0});
 
-//     for(int i = 0; i <= aNumElements[0]; ++i)
-//     {
-//         for(int j = 0; j <= aNumElements[1]; ++j)
-//         {
-//             for(int k = 0; k <= aNumElements[2]; ++k)
-//             {
+                std::vector<int> tIndex = {i,j,k};
 
-//                 Vector tXYZCoordinates({0.0,0.0,0.0});
-//                 Vector tUVWCoordinates({0.0,0.0,0.0});
+                for(int tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
+                {
+                    double tUVWCoordinate = mMinUVWCoords(tTempIndex) + tIndex[tTempIndex]*tLength[tTempIndex]/mNumElementsInEachDirection[tTempIndex]; 
+                    tUVWCoordinates.set(tTempIndex,tUVWCoordinate);
+                }
 
-//                 std::vector<int> tIndex = {i,j,k};
+                tXYZCoordinates = tUVWCoordinates(0)*mUBasisVector + tUVWCoordinates(1)*mVBasisVector + tUVWCoordinates(2)*mWBasisVector;
 
-//                 for(int tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
-//                 {
-//                     double tUVWCoordinate = aMinUVWCoords(tTempIndex) + tIndex[tTempIndex]*tLength[tTempIndex]/aNumElements[tTempIndex]; 
-//                     tUVWCoordinates.set(tTempIndex,tUVWCoordinate);
-//                 }
-
-//                 tXYZCoordinates = tUVWCoordinates(0)*aUBasisVector + tUVWCoordinates(1)*aVBasisVector + tUVWCoordinates(2)*aBuildDirection;
-
-//                 aXYZCoordinates[getSerializedIndex(aNumElements,i,j,k)] = tXYZCoordinates;
-//             }
-//         }
-//     }
-// }
+                aXYZCoordinates[getSerializedIndex(i,j,k)] = tXYZCoordinates;
+            }
+        }
+    }
+}
 
 void OrthogonalGridUtilities::checkBasis(const Vector& aUBasisVector,
                                          const Vector& aVBasisVector,

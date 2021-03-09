@@ -56,7 +56,7 @@ class OrthogonalGridUtilities
                                                                              mNumElementsInEachDirection[1]+1,
                                                                              mNumElementsInEachDirection[2]+1});}
 
-        // void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates);
+        void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const;
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& aSerializedIndex);
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& i, const int& j, const int& k);
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const std::vector<int>& aIndex);
