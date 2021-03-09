@@ -55,6 +55,14 @@ class OrthogonalGridUtilities
         std::vector<int> getGridDimensions() const {return std::vector<int>({mNumElementsInEachDirection[0]+1,
                                                                              mNumElementsInEachDirection[1]+1,
                                                                              mNumElementsInEachDirection[2]+1});}
+
+        // void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates);
+        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& aSerializedIndex);
+        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& i, const int& j, const int& k);
+        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const std::vector<int>& aIndex);
+
+        int getSerializedIndex(const int& i, const int& j, const int& k) const;
+        int getSerializedIndex(const std::vector<int>& aIndex) const;
         
     private:
 
@@ -82,17 +90,5 @@ class OrthogonalGridUtilities
         std::vector<int> mNumElementsInEachDirection;
 
 };
-
-
-void computeGridXYZCoordinates(const Vector& aUBasisVector,
-        const Vector& aVBasisVector,
-        const Vector& aBuildDirection,
-        const Vector& aMaxUVWCoords,
-        const Vector& aMinUVWCoords,
-        const std::vector<int>& aNumElements,
-        std::vector<Vector>& aXYZCoordinates);
-
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const int& i, const int& j, const int& k);
-int getSerializedIndex(const std::vector<int>& aNumElementsInEachDirection, const std::vector<int>& aIndex);
 
 }
