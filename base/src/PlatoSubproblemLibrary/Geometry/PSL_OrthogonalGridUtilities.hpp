@@ -65,6 +65,9 @@ class OrthogonalGridUtilities
 
         int getSerializedIndex(const int& i, const int& j, const int& k) const;
         int getSerializedIndex(const std::vector<int>& aIndex) const;
+
+        std::vector<std::vector<int>> getSupportIndices(const int& i, const int& j, const int& k) const;
+        std::vector<std::vector<int>> getSupportIndices(const std::vector<int>& aIndex) const;
         
     private:
 

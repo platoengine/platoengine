@@ -43,6 +43,55 @@ int OrthogonalGridUtilities::getSerializedIndex(const std::vector<int>& aIndex) 
     }
 
     return getSerializedIndex(aIndex.at(0), aIndex.at(1), aIndex.at(2));
+}    
+
+std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const int& i, const int& j, const int& k) const
+{
+    auto tDimensions = getGridDimensions();
+    std::vector<std::vector<int>> tIndices;
+
+    std::vector<int> tFirstIndexSupports;
+    std::vector<int> tSecondIndexSupports;
+    std::vector<int> tThirdIndexSupports;
+
+        tFirstIndexSupports.push_back(i);
+        if(i > 0)
+            tFirstIndexSupports.push_back(i-1);
+        if(i < tDimensions[0] - 1)
+            tFirstIndexSupports.push_back(i+1);
+
+        tSecondIndexSupports.push_back(j);
+        if(j > 0)
+            tSecondIndexSupports.push_back(j-1);
+        if(j < tDimensions[1] - 1)
+            tSecondIndexSupports.push_back(j+1);
+
+        if(k > 0)
+            tThirdIndexSupports.push_back(k-1);
+
+        for(auto tFirst : tFirstIndexSupports)
+        {
+            for(auto tSecond : tSecondIndexSupports)
+            {
+                for(auto tThird : tThirdIndexSupports)
+                {
+                    if(tFirst == i || tSecond == j)
+                        tIndices.push_back({tFirst,tSecond,tThird});
+                }
+            }
+        }
+                
+    return tIndices;
+}
+
+std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const std::vector<int>& aIndex) const
+{
+    if(aIndex.size() != 3)
+    {
+        throw(std::domain_error("OrthogonalGridUtilities: Index must have 3 entries"));
+    }
+
+    return getSupportIndices(aIndex.at(0), aIndex.at(1), aIndex.at(2));
 }
 
 void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const

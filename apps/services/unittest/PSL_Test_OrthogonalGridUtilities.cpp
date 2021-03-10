@@ -269,5 +269,62 @@ PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
     EXPECT_EQ(tSerializedIndex,22);
 }
 
+PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
+{
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<int> tNumElements = {2,2,2};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    auto tDimensions = tUtilities.getGridDimensions();
+
+    EXPECT_EQ(tUtilities.getSupportIndices(0,0,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,0,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,0,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,1,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,1,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,1,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,2,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,2,0).size(),0u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,2,0).size(),0u);
+
+    // a couple example support sets
+    EXPECT_EQ(tUtilities.getSupportIndices(0,0,1).size(),3u);
+    auto tSupportIndices = tUtilities.getSupportIndices(0,0,1);
+    EXPECT_EQ(tSupportIndices[0],std::vector<int>({0,0,0}));
+    EXPECT_EQ(tSupportIndices[1],std::vector<int>({0,1,0}));
+    EXPECT_EQ(tSupportIndices[2],std::vector<int>({1,0,0}));
+
+    EXPECT_EQ(tUtilities.getSupportIndices(1,0,1).size(),4u);
+    tSupportIndices = tUtilities.getSupportIndices(1,0,1);
+    EXPECT_EQ(tSupportIndices[0],std::vector<int>({1,0,0}));
+    EXPECT_EQ(tSupportIndices[1],std::vector<int>({1,1,0}));
+    EXPECT_EQ(tSupportIndices[2],std::vector<int>({0,0,0}));
+    EXPECT_EQ(tSupportIndices[3],std::vector<int>({2,0,0}));
+
+    EXPECT_EQ(tUtilities.getSupportIndices(2,0,1).size(),3u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,1,1).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,1,1).size(),5u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,1,1).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,2,1).size(),3u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,2,1).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,2,1).size(),3u);
+
+    EXPECT_EQ(tUtilities.getSupportIndices(0,0,2).size(),3u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,0,2).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,0,2).size(),3u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,1,2).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,1,2).size(),5u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,1,2).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(0,2,2).size(),3u);
+    EXPECT_EQ(tUtilities.getSupportIndices(1,2,2).size(),4u);
+    EXPECT_EQ(tUtilities.getSupportIndices(2,2,2).size(),3u);
+}
+
 }
 }
