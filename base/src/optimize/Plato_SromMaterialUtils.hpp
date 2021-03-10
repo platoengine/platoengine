@@ -204,7 +204,7 @@ inline void update_random_material_set
             auto tOriginalTags = tOriginalRandomMaterial.tags();
             for(auto& tTag : tOriginalTags)
             {
-                auto tValue = tOriginalRandomMaterial.value(tTag);
+                tValue = tOriginalRandomMaterial.value(tTag);
                 auto tAttribute = tOriginalRandomMaterial.attribute(tTag);
                 tNewRandomMaterial.append(tTag, tAttribute, tValue);
             }
@@ -354,7 +354,7 @@ inline void update_random_material_cases
             auto tOriginalMaterials = tOriginalRandomMaterialCase.materials();
             for(auto& tMaterial : tOriginalMaterials)
             {
-                auto tID = tMaterial.materialID();
+                tID = tMaterial.materialID();
                 tNewRandomMaterialCase.append(tID, tMaterial);
             }
 

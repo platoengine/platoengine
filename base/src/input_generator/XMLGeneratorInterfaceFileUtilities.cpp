@@ -1170,7 +1170,7 @@ void append_objective_gradient_stage_for_shape_problem
     }
     else
     {
-        auto tOuterOperationNode = tStageNode.append_child("Operation");
+        tOuterOperationNode = tStageNode.append_child("Operation");
         XMLGen::append_objective_gradient_operation(aXMLMetaData, tOuterOperationNode);
         append_compute_shape_sensitivity_on_change_operation(tOuterOperationNode);
         tOuterOperationNode = tStageNode.append_child("Operation");
@@ -1288,7 +1288,7 @@ inline void append_random_write_output_operation
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
 
         tOperationNode = tForNode.append_child("Operation");
-        auto tServiceID = tOutputMetadata.serviceID();
+        tServiceID = tOutputMetadata.serviceID();
         auto tBasePerformerName = aMetaData.service(tServiceID).performer();
         auto tPerformerName = tBasePerformerName + "_{PerformerIndex}";
         XMLGen::append_children( { "Name", "PerformerName" }, { "Write Output", tPerformerName }, tOperationNode);
