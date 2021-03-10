@@ -15,25 +15,33 @@ class AMFilterUtilities
 {
 public:
     AMFilterUtilities(const TetMeshUtilities& aTetUtilities,
-                      const OrthogonalGridUtilities& aGridUtilities)
+                      const OrthogonalGridUtilities& aGridUtilities,
+                      const double& aPNorm)
                     :mTetUtilities(aTetUtilities),
-                     mGridUtilities(aGridUtilities)
+                     mGridUtilities(aGridUtilities),
+                     mPNorm(aPNorm)
     {
+        if(aPNorm < 1)
+            throw(std::domain_error("AMFilterUtilities: P norm must be greater than 1"));
+
         mGridUtilities.computeGridXYZCoordinates(mGridPointCoordinates);
         mTetUtilities.getTetIDForEachPoint(mGridPointCoordinates,mContainingTetID);
     }
 
-    // void computePrintableDensity(AbstractInterface::ParallelVector* aDensity) const;
     double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
+    void computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const;
+
 
 private:
 
     const TetMeshUtilities& mTetUtilities;
     const OrthogonalGridUtilities& mGridUtilities;
+    const double& mPNorm;
 
     std::vector<int> mContainingTetID;
     std::vector<Vector> mGridPointCoordinates;
 };
 
+double smax(const std::vector<double>& aArguments, const double& aPNorm);
 
 }

@@ -82,7 +82,11 @@ PSL_TEST(AMFilterUtilities,construction)
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
 
-    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities);
+    double tPNorm = 20;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
+
+    EXPECT_THROW(AMFilterUtilities(tTetUtilities,tGridUtilities, 0.5),std::domain_error);
 }
 
 PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
@@ -115,7 +119,9 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
     std::vector<Vector> tGridCoordinates;
     tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
-    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities);
+    double tPNorm = 20;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
 
     example::Interface_ParallelVector tVector({1,1,1,0});
 
@@ -138,6 +144,107 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
             }
         }
     }
+}
+
+PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 0.1;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<Vector> tGridCoordinates;
+    tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
+
+    double tPNorm = 20;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    example::Interface_ParallelVector tVector({1,1,0,1});
+
+    std::vector<double> tGridSupportDensity;
+    tAMFilterUtilities.computeGridSupportDensity(&tVector, tGridSupportDensity);
+
+    EXPECT_EQ(tGridSupportDensity.size(),(unsigned int) tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                if(k == 0)
+                {
+                    EXPECT_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)],1);
+                }
+                else
+                {
+                    auto tSupportIndices = tGridUtilities.getSupportIndices(i,j,k);
+                    // EXPECT_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]
+                }
+            }
+        }
+    }
+}
+
+PSL_TEST(AMFilterUtilities, smoothMax)
+{
+    std::vector<double> tArgs;
+
+    tArgs.push_back(0);
+    tArgs.push_back(0.1);
+    tArgs.push_back(0.2);
+    tArgs.push_back(0.3);
+    tArgs.push_back(0.4);
+    tArgs.push_back(0.5);
+    tArgs.push_back(0.6);
+    tArgs.push_back(0.7);
+    tArgs.push_back(0.8);
+    tArgs.push_back(0.9);
+
+    double tPNorm = 200;
+    
+    double tSmax = smax(tArgs,tPNorm);
+    EXPECT_DOUBLE_EQ(tSmax,0.89839982193243095);
+
+    tArgs.clear();
+
+    tArgs.push_back(0);
+    tArgs.push_back(0.1);
+    tArgs.push_back(0.23);
+    tArgs.push_back(0.48);
+    tArgs.push_back(0.71);
+    tArgs.push_back(0.32);
+    tArgs.push_back(0.22);
+    tArgs.push_back(0.17);
+    tArgs.push_back(1.0);
+    tArgs.push_back(0.336);
+
+    tSmax = smax(tArgs,tPNorm);
+
+    std::cout << tSmax << std::endl;
+
+    EXPECT_DOUBLE_EQ(tSmax,1.0);
 }
 
 }

@@ -27,12 +27,35 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
     return tGridPointDensity;
 }
 
-// double KernelThenStructuredAMFilter::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
-// {
-//     // use grid point blueprint density to compute grid support density
-//     // this has to be done bottom to top so it must be stored
-//     return 0;
-// }
+void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+
+    aGridSupportDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                if(k == 0)
+                {
+                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1;
+                }
+                else
+                {
+                    double tSupportDensity = 0;
+                    auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+                    for(auto tSupportIndex : tSupportIndices)
+                    {
+                        tSupportDensity += 0;
+                    }
+                }
+            }
+        }
+    }
+}
 
 // double KernelThenStructuredAMFilter::getGridPointSupportDensity(const int& i, const int& j, const int&k) const
 // {
@@ -61,5 +84,20 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
 //         aDensity->set_value(i, computeTetNodePrintableDensity(i, aDensity));
 //     }
 // }
+//
+double smax(const std::vector<double>& aArguments, const double& aPNorm)
+{
+    double tSmax = 0;
+    double aQNorm = aPNorm + std::log(aArguments.size())/std::log(0.5);
+
+    for(auto tArgument : aArguments)
+    {
+        tSmax += std::pow(std::abs(tArgument),aPNorm);
+    }
+
+    tSmax = std::pow(tSmax,1.0/aQNorm);
+
+    return tSmax;
+}
 
 }

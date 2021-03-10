@@ -38,7 +38,9 @@ void KernelThenStructuredAMFilter::buildStructuredGrid(const std::vector<std::ve
 
     mGridUtilities = std::unique_ptr<OrthogonalGridUtilities>(new OrthogonalGridUtilities(mUBasisVector,mVBasisVector,mBuildDirection,aMaxUVWCoords,aMinUVWCoords,aTargetEdgeLength));
 
-    mAMFilterUtilities = std::unique_ptr<AMFilterUtilities>(new AMFilterUtilities( *(mTetUtilities.get()) , *(mGridUtilities.get()) ));
+    double tPNorm = mInputData->get_smooth_max_p_norm();
+
+    mAMFilterUtilities = std::unique_ptr<AMFilterUtilities>(new AMFilterUtilities( *(mTetUtilities.get()) , *(mGridUtilities.get()), tPNorm));
 
     mFilterBuilt = true;
 }
