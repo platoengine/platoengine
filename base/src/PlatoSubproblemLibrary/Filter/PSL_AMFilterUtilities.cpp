@@ -8,7 +8,12 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
 {
     auto tConnectivity = mTetUtilities.getConnectivity();
 
-    auto tTet = tConnectivity[mContainingTetID[mGridUtilities.getSerializedIndex(i,j,k)]];
+    int tContainingTetID = mContainingTetID[mGridUtilities.getSerializedIndex(i,j,k)];
+    
+    if(tContainingTetID == -1)
+        return 0;
+
+    auto tTet = tConnectivity[tContainingTetID];
     Vector tGridPoint = mGridPointCoordinates[mGridUtilities.getSerializedIndex(i,j,k)];
 
     std::vector<double> tBaryCentricCoordinates = mTetUtilities.computeBarycentricCoordinates(tTet, tGridPoint);

@@ -112,23 +112,32 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<Vector> tGridCoordinates;
+    tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
     AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities);
 
     example::Interface_ParallelVector tVector({1,1,1,0});
 
-    double tDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(0,0,0,&tVector);
-
-    std::vector<Vector> tGridPointCoordinates;
-
-    tGridUtilities.computeGridXYZCoordinates(tGridPointCoordinates);
-
-    for(auto tPointCoordinates : tGridPointCoordinates)
+    for(int i = 0; i < tGridDimensions[0]; ++i)
     {
-        std::cout << "(" << tPointCoordinates(0) << "," << tPointCoordinates(1) << "," << tPointCoordinates(2) << ")" << std::endl;
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                double tDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(i,j,k,&tVector);
+                if(isPointInTetrahedron(tCoordinates,tConnectivity[0],tGridCoordinates[tGridUtilities.getSerializedIndex(i,j,k)]))
+                {
+                    double tGold = 1 - (k*0.1);
+                    EXPECT_DOUBLE_EQ(tDensity,tGold);
+                }
+                else
+                {
+                    EXPECT_DOUBLE_EQ(tDensity,0);
+                }
+            }
+        }
     }
-
-    EXPECT_DOUBLE_EQ(tDensity,1);
 }
 
 }
