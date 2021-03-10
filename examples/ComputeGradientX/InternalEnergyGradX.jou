@@ -1,0 +1,17 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 09/02/2020 12:30:22 PM
+## Command Options:
+create brick x 5 y 1 z 1
+volume all scheme tetmesh
+volume all size 0.2
+mesh volume all
+block 1 volume all
+block 1 name "block_1"
+sideset 1 surface 6
+sideset 1 name "ss_1"
+nodeset 2 surface 4
+nodeset 2 name "ns_2"
+export mesh "InternalEnergyGradX.exo" overwrite

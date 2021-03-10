@@ -4,7 +4,6 @@ set(LIB_NAME Optimizer)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_OptimizersIO_Utilities.cpp
                         Plato_OptimizersIO.cpp
-                        Plato_SromXML.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
@@ -140,7 +139,8 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_Vector.hpp
                         Plato_Diagnostics.hpp
                         Plato_DiagnosticsInterface.hpp
-                        Plato_PlotObjective.hpp
+                        Plato_SOParameterStudies.hpp
+                        Plato_SOParameterStudiesInterface.hpp
                         Plato_DistributedVector.hpp
                         Plato_OptimizerInterface.hpp
                         Plato_EpetraSerialDenseVector.hpp
@@ -150,14 +150,23 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_Distribution.hpp
                         Plato_NormalDistribution.hpp
                         Plato_UniformDistribution.hpp
+                        Plato_SromSolve.hpp
                         Plato_SromUtilis.hpp
+                        Plato_SromHelpers.hpp
                         Plato_SromConstraint.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
-                        Plato_SromXMLUtils.hpp
+                        Plato_SromLoadUtils.hpp
+                        # Plato_SromXMLGenLoad.hpp
+                        # Plato_SromXMLGenMaterial.hpp
+                        # Plato_SromXMLGenTools.hpp
+                        # Plato_SromXMLGenHelpers.hpp
+                        Plato_SromMaterialUtils.hpp
                         Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp
                         Plato_StatisticsUtils.hpp
+                        Plato_RandomLoadMetadata.hpp
+                        Plato_RandomMaterialMetadata.hpp
                         Plato_LinearCriterionHessian.hpp
                         Plato_CentralDifferenceHessian.hpp
                         Plato_OptimizerUtilities.hpp

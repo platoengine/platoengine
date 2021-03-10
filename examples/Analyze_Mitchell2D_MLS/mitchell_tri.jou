@@ -17,6 +17,9 @@ volume all scheme tetmesh
 mesh surface 33 31 24 45 38
 block 1 surface 33 31 24 45 38
 block 1 element type TRI
+block 1 name "block_1"
 sideset 1 curve 43
+sideset 1 name "ss_1"
 nodeset 2 curve 58 65
-export mesh "mitchell_tri.gen" dimension 2 overwrite
+nodeset 2 name "ns_2"
+export mesh "mitchell_tri.exo" dimension 2 overwrite

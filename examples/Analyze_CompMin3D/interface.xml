@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
 
+<Console>
+  <Enabled>true</Enabled>
+</Console>
+
 <Performer> 
   <Name>PlatoMain</Name>
   <Code>Plato_Main</Code>
@@ -422,7 +426,7 @@
   </Operation>
 
   <Operation>
-    <Name>AggregateEnergy</Name>
+    <Name>AggregateEnergyValue</Name>
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Value 1</ArgumentName>
@@ -479,7 +483,7 @@
   </Operation>
 
   <Operation>
-    <Name>AggregateEnergy</Name>
+    <Name>AggregateEnergyGradient</Name>
     <PerformerName>PlatoMain</PerformerName>
     <Input>
       <ArgumentName>Field 1</ArgumentName>

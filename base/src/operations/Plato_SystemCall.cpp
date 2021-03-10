@@ -56,6 +56,7 @@
 #include "Plato_Exceptions.hpp"
 #include "Plato_SystemCall.hpp"
 #include "Plato_OperationsUtilities.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace Plato
 {
@@ -163,7 +164,7 @@ void SystemCall::operator()()
         }
 
         // make system call
-        std::system(commandPlusArgs.str().c_str());
+        Plato::system(commandPlusArgs.str().c_str());
     }
 }
 

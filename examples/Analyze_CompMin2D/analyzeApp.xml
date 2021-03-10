@@ -3,12 +3,14 @@
 <!-- DEFINE COMPUTE OBJECTIVE VALUE OPERATION -->
 
 <Operation>
-  <Function>ComputeObjectiveValue</Function>
   <Name>Compute Objective Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
@@ -16,12 +18,14 @@
 <!-- DEFINE COMPUTE OBJECTIVE GRADIENT OPERATION -->
 
 <Operation>
-  <Function>ComputeObjectiveGradient</Function>
   <Name>Compute Objective Gradient</Name>
+  <Function>ComputeCriterionGradient</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
   <Input>
     <ArgumentName>Topology</ArgumentName>
   </Input>
   <Output>
+    <Argument>Gradient</Argument>
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>

@@ -1,5 +1,5 @@
 /*
- //@HEADER
+ //\HEADER
  // *************************************************************************
  //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
  //                    Solutions of Sandia, LLC (NTESS).
@@ -34,10 +34,10 @@
  // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  //
- // Questions? Contact the Plato team (plato3D-help@sandia.gov)
+ // Questions? Contact the Plato team (plato3D-help\sandia.gov)
  //
  // *************************************************************************
- //@HEADER
+ //\HEADER
  */
 
 /*
@@ -58,31 +58,39 @@ namespace Plato
 class InputData;
 
 /******************************************************************************//**
- * @brief Compute original design, i.e. starting design, volume
+ * \brief Compute original design, i.e. starting design, volume
 **********************************************************************************/
 class DesignVolume : public Plato::LocalOp
 {
+private:
+    /******************************************************************************//**
+     * \fn initialize
+     * \brief Allocate member data.
+     * \param [in] aOperationNode input XML data for this operation
+    **********************************************************************************/
+    void initialize(Plato::InputData& aOperationNode);
+
 public:
     /******************************************************************************//**
-     * @brief Constructor
-     * @param [in] aPlatoApp PLATO application
-     * @param [in] aNode input XML data
+     * \brief Constructor
+     * \param [in] aPlatoApp PLATO application
+     * \param [in] aOperationNode input XML data for this operation
     **********************************************************************************/
-    DesignVolume(PlatoApp* aPlatoApp, Plato::InputData& aNode);
+    DesignVolume(PlatoApp* aPlatoApp, Plato::InputData& aOperationNode);
 
     /******************************************************************************//**
-     * @brief perform local operation - compute structural volume
+     * \brief perform local operation - compute structural volume
     **********************************************************************************/
     void operator()();
 
     /******************************************************************************//**
-     * @brief Return local operation's argument list
-     * @param [out] aLocalArgs argument list
+     * \brief Return local operation's argument list
+     * \param [out] aLocalArgs argument list
     **********************************************************************************/
     void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
 
 private:
-    std::string mOutValueName; /*!< output argument name */
+    std::vector<Plato::LocalArg> mLocalArguments; /*!< input/output shared data set */
 };
 // class DesignVolume;
 

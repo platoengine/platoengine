@@ -58,7 +58,8 @@ namespace Plato
 
 MeanPlusVarianceGradient::MeanPlusVarianceGradient(PlatoApp* aPlatoApp, const Plato::InputData& aOperationNode) :
         Plato::LocalOp(aPlatoApp),
-        mStdDevMultiplier(-1),
+        mIsMeanPlusStdDevFormulation(false),
+        mStdDevMultiplier(0.0),
         mCriterionValueDataLayout(Plato::data::UNDEFINED),
         mCriterionGradientDataLayout(Plato::data::UNDEFINED),
         mCriterionValueSamplesToProbability(),
@@ -74,17 +75,15 @@ MeanPlusVarianceGradient::~MeanPlusVarianceGradient()
 void MeanPlusVarianceGradient::operator()()
 {
     this->setCriterionGradientSampleProbabilityPairs();
-
-    bool tStandardDeviationMultiplierNotDefined = mStdDevMultiplier <= 0.0;
-    if(tStandardDeviationMultiplierNotDefined == true)
-    {
-        this->computeMeanCriterionGradientSampleSet();
-    }
-    else
+    if(mIsMeanPlusStdDevFormulation == true)
     {
         this->setCriterionValueSampleProbabilityPairs();
         this->computeMeanAndStdDevCriterionValueSampleSet();
         this->computeGradientMeanPlusStandardDeviationCriterion();
+    }
+    else
+    {
+        this->computeMeanCriterionGradientSampleSet();
     }
 }
 
@@ -127,7 +126,7 @@ double MeanPlusVarianceGradient::getCriterionValueProbability(const std::string&
     }
     else
     {
-        const std::string tError = std::string("INPUT ARGUMENT NAME = ") + aInput + " IS NOT DEFINED.\n";
+        const auto tError = std::string("INPUT ARGUMENT NAME = ") + aInput + " IS NOT DEFINED.\n";
         THROWERR(tError)
     }
 }
@@ -176,8 +175,7 @@ void MeanPlusVarianceGradient::initialize(const Plato::InputData& aOperationNode
     this->parseName(aOperationNode);
     this->parseFunction(aOperationNode);
     this->parseCriterionGradientArguments(aOperationNode);
-    bool tStandardDeviationMultiplierIsDefined = mStdDevMultiplier > 0.0;
-    if(tStandardDeviationMultiplierIsDefined == true)
+    if(mIsMeanPlusStdDevFormulation == true)
     {
         this->parseCriterionValueArguments(aOperationNode);
         this->checkInputProbabilityValues();
@@ -188,26 +186,27 @@ void MeanPlusVarianceGradient::checkInputProbabilityValues()
 {
     if(mCriterionValueSamplesArgNameToProbability.size() != mCriterionGradSamplesArgNameToProbability.size())
     {
-        const std::string tError = std::string("THE NUMBER OF CRITERION VALUE AND GRADIENT SAMPLES DON'T MATCH. ") +
+        const auto tError = std::string("THE NUMBER OF CRITERION VALUE AND GRADIENT SAMPLES DON'T MATCH. ") +
                 "THE NUMBER OF CRITERION VALUE SAMPLES IS " + std::to_string(mCriterionValueSamplesArgNameToProbability.size()) +
                 " AND THE NUMBER OF CRITERION GRADIENT SAMPLES IS " + std::to_string(mCriterionGradSamplesArgNameToProbability.size()) + ".\n";
         THROWERR(tError)
     }
 
     auto tGradIterator = mCriterionGradSamplesArgNameToProbability.begin();
-    for(auto tValIterator = mCriterionValueSamplesArgNameToProbability.begin(); tValIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tValIterator)
+    for(auto tValIterator = mCriterionValueSamplesArgNameToProbability.begin(); 
+        tValIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tValIterator)
     {
         auto tDiff = std::abs(tValIterator->second - tGradIterator->second);
         if(tDiff > std::double_t(1e-16))
         {
-            const std::string tError = std::string("THE PROBABILITY ASSOCIATED WITH THE CRITERION VALUE SAMPLE, ") +
+            const auto tError = std::string("THE PROBABILITY ASSOCIATED WITH THE CRITERION VALUE SAMPLE, ") +
                     tValIterator->first + ", AND THE CRITERION GRADIENT SAMPLE, " + tGradIterator->first +
                     ", DON'T MATCH. " + "THE PROBAILITY FOR THE CRITERION VALUE SAMPLE IS " +
                     std::to_string(tValIterator->second) + " AND THE PROBABILITY FOR THE CRITERION GRADIENT SAMPLE IS " +
                     std::to_string(tGradIterator->second) + ". THESE TWO PROBABILITIES ARE EXPECTED TO HAVE THE SAME VALUE.\n";
             THROWERR(tError)
         }
-        ++tGradIterator;
+        std::advance(tGradIterator, 1);
     }
 }
 
@@ -225,7 +224,7 @@ void MeanPlusVarianceGradient::parseFunction(const Plato::InputData& aOperationN
     mFunctionIdentifier = Plato::Get::String(aOperationNode, "Function");
     if(mFunctionIdentifier.empty() == true)
     {
-        const std::string tError = std::string("FUNCTION KEYWORD IS NOT DEFINED IN OPERATION = ") + mOperationName +
+        const auto tError = std::string("FUNCTION KEYWORD IS NOT DEFINED IN OPERATION = ") + mOperationName +
                 ". PLATO EXPECTS THE FOLLOWING FUNCTION NAME, MeanPlusStdDevGradient, AS INPUT.\n";
         THROWERR(tError)
     }
@@ -251,14 +250,15 @@ void MeanPlusVarianceGradient::setCriterionValueSampleProbabilityPairs()
         THROWERR("EXPECTED THE CRITERIA VALUE SAMPLE-PROBABILITY SET AND SAMPLE-PROBABILITY MAP TO HAVE THE SAME SIZE.\n")
     }
 
-    auto tVectorIterator = mCriterionValueSamplesToProbability.begin();
+    auto tSampleProbPairsItr = mCriterionValueSamplesToProbability.begin();
     // tIterator->first = Argument name & tIterator->second = Probability
     for(auto tIterator = mCriterionValueSamplesArgNameToProbability.begin();
             tIterator != mCriterionValueSamplesArgNameToProbability.end(); ++tIterator)
     {
         std::vector<double>* tInputValue = mPlatoApp->getValue(tIterator->first);
-        tVectorIterator->mSample = (*tInputValue)[0];
-        tVectorIterator->mProbability = tIterator->second;
+        tSampleProbPairsItr->mSample = (*tInputValue)[0];
+        tSampleProbPairsItr->mProbability = tIterator->second;
+        std::advance(tSampleProbPairsItr, 1);
     }
 }
 
@@ -289,6 +289,7 @@ void MeanPlusVarianceGradient::setNodeFieldGradientSampleProbabilityPairs()
         tVectorIterator->mProbability = tIterator->second;
         tVectorIterator->mLength = mPlatoApp->getNodeFieldLength(tIterator->first);
         tVectorIterator->mSample = mPlatoApp->getNodeFieldData(tIterator->first);
+        std::advance(tVectorIterator, 1);
     }
 }
 
@@ -302,6 +303,7 @@ void MeanPlusVarianceGradient::setElementFieldGradientSampleProbabilityPairs()
         tVectorIterator->mProbability = tIterator->second;
         tVectorIterator->mLength = mPlatoApp->getLocalNumElements();
         tVectorIterator->mSample = mPlatoApp->getElementFieldData(tIterator->first);
+        std::advance(tVectorIterator, 1);
     }
 }
 
@@ -327,18 +329,18 @@ void MeanPlusVarianceGradient::parseInputs(const Plato::data::layout_t& aDataLay
                                            const Plato::InputData& aInput,
                                            std::map<std::string, double> & aOutput)
 {
-    for(auto tInputNode : aInput.getByName<Plato::InputData>("Input"))
+    for(auto& tInputNode : aInput.getByName<Plato::InputData>("Input"))
     {
-        std::string tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
+        auto tInputArgumentName = Plato::Get::String(tInputNode, "ArgumentName");
         this->addLocalArgument(aDataLayout, tInputArgumentName);
-        double tProbability = this->getMyProbability(tInputNode);
+        auto tProbability = this->getProbability(tInputNode);
         aOutput[tInputArgumentName] = tProbability;
     }
 }
 
 void MeanPlusVarianceGradient::parseCriterionValueArguments(const Plato::InputData& aOperationNode)
 {
-    for(auto tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionValue"))
+    for(auto& tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionValue"))
     {
         mCriterionValueDataLayout = this->parseDataLayout(tCriteriaNode, "CriterionValue");
         this->parseInputs(mCriterionValueDataLayout, tCriteriaNode, mCriterionValueSamplesArgNameToProbability);
@@ -349,7 +351,7 @@ void MeanPlusVarianceGradient::parseCriterionValueArguments(const Plato::InputDa
 
 void MeanPlusVarianceGradient::parseCriterionGradientArguments(const Plato::InputData& aOperationNode)
 {
-    for(auto tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionGradient"))
+    for(auto& tCriteriaNode : aOperationNode.getByName<Plato::InputData>("CriterionGradient"))
     {
         mCriterionGradientDataLayout = this->parseDataLayout(tCriteriaNode, "CriterionGradient");
         this->parseInputs(mCriterionGradientDataLayout, tCriteriaNode, mCriterionGradSamplesArgNameToProbability);
@@ -361,7 +363,7 @@ void MeanPlusVarianceGradient::parseCriterionGradientArguments(const Plato::Inpu
 std::string MeanPlusVarianceGradient::getStatisticMeasure(const Plato::InputData& aOutputNode,
                                                           const std::string& aOutputArgumentName) const
 {
-    std::string tStatisticMeasure = Plato::Get::String(aOutputNode, "Statistic", true);
+    auto tStatisticMeasure = Plato::Get::String(aOutputNode, "Statistic", true);
     if(tStatisticMeasure.empty() == true)
     {
         THROWERR("THE STATISTIC KEYWORD FOR OUTPUT ARGUMENT " + aOutputArgumentName + " IS EMPTY.\n");
@@ -372,7 +374,7 @@ std::string MeanPlusVarianceGradient::getStatisticMeasure(const Plato::InputData
 std::string MeanPlusVarianceGradient::getOutputArgument(const Plato::InputData& aOutputNode,
                                                         const std::string& aCriterionName) const
 {
-    std::string tOutputArgumentName = Plato::Get::String(aOutputNode, "ArgumentName");
+    auto tOutputArgumentName = Plato::Get::String(aOutputNode, "ArgumentName");
     if(tOutputArgumentName.empty() == true)
     {
         THROWERR("DETECTED AN EMPTY OUTPUT ARGUMENT KEYWORD IN THE " + aCriterionName + " BLOCK.\n");
@@ -382,10 +384,10 @@ std::string MeanPlusVarianceGradient::getOutputArgument(const Plato::InputData& 
 
 void MeanPlusVarianceGradient::parseCriterionValueOutputs(const Plato::InputData& aCriteriaNode)
 {
-    for(auto tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
+    for(auto& tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
     {
-        const std::string tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionValue");
-        const std::string tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);
+        const auto tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionValue");
+        const auto tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);
         mCriterionValueStatisticsToOutputName[tStatisticMeasure] = tOutputArgumentName;
         this->addLocalArgument(mCriterionValueDataLayout, tOutputArgumentName);
     }
@@ -393,32 +395,38 @@ void MeanPlusVarianceGradient::parseCriterionValueOutputs(const Plato::InputData
 
 void MeanPlusVarianceGradient::parseCriterionGradientOutputs(const Plato::InputData& aCriteriaNode)
 {
-    for(auto tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
+    for(auto& tOutputNode : aCriteriaNode.getByName<Plato::InputData>("Output"))
     {
-        const std::string tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionGradient");
-        const std::string tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);
+        const auto tOutputArgumentName = this->getOutputArgument(tOutputNode, "CriterionGradient");
+        const auto tStatisticMeasure = this->getStatisticMeasure(tOutputNode, tOutputArgumentName);
         mCriterionGradientStatisticsToOutputName[tStatisticMeasure] = tOutputArgumentName;
-        this->setMyStandardDeviationMultiplier(tStatisticMeasure);
+        this->setStandardDeviationMultiplier(tStatisticMeasure);
         this->addLocalArgument(mCriterionGradientDataLayout, tOutputArgumentName);
     }
 }
 
-void MeanPlusVarianceGradient::setMyStandardDeviationMultiplier(const std::string& aStatisticMeasure)
+void MeanPlusVarianceGradient::setStandardDeviationMultiplier(const std::string& aStatisticMeasure)
 {
-    std::vector<std::string> tStringList;
-    Plato::split(aStatisticMeasure, tStringList);
-    if(tStringList.size() > 2u)
+    // tokens: mean_plus_k_std_dev
+    // index :    0    1 2   3   4
+    std::vector<std::string> tTokens;
+    Plato::split(aStatisticMeasure, tTokens);
+    if(tTokens.size() >= 2u)
     {
-        mStdDevMultiplier = this->getMyStandardDeviationMultiplier(tStringList[2]);
+        // formulation is of type mean_plus_k_std_dev, where k is the standard deviation multiplier
+        mIsMeanPlusStdDevFormulation = true;
+        mStdDevMultiplier = this->getStandardDeviationMultiplier(tTokens);
         mOutputGradientArgumentName = mCriterionGradientStatisticsToOutputName.find(aStatisticMeasure)->second;
     }
 }
 
-double MeanPlusVarianceGradient::getMyStandardDeviationMultiplier(const std::string& aInput)
+double MeanPlusVarianceGradient::getStandardDeviationMultiplier(const std::vector<std::string>& aTokens)
 {
+    // tokens: mean_plus_k_std_dev
+    // index :    0    1 2   3   4
     try
     {
-        double tMySigmaValue = std::stod(aInput);
+        auto tMySigmaValue = std::stod(aTokens[2]);
         return (tMySigmaValue);
     }
     catch(const std::invalid_argument& tErrorMsg)
@@ -427,13 +435,13 @@ double MeanPlusVarianceGradient::getMyStandardDeviationMultiplier(const std::str
     }
 }
 
-double MeanPlusVarianceGradient::getMyProbability(const Plato::InputData& aInputNode)
+double MeanPlusVarianceGradient::getProbability(const Plato::InputData& aInputNode)
 {
-    const double tProbability = Plato::Get::Double(aInputNode, "Probability");
+    const auto tProbability = Plato::Get::Double(aInputNode, "Probability");
     if(tProbability <= 0.0)
     {
-        const std::string tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
-        const std::string tError = std::string("INVALID PROBABILITY SPECIFIED FOR INPUT ARGUMENT = ")
+        const auto tArgumentName = Plato::Get::String(aInputNode, "ArgumentName");
+        const auto tError = std::string("INVALID PROBABILITY SPECIFIED FOR INPUT ARGUMENT = ")
                 + tArgumentName + ". " + "INPUT PROBABILITY WAS SET TO " + std::to_string(tProbability)
                 + " AND IT SHOULD BE A POSITIVE NUMBER (I.E. GREATER THAN ZERO).\n";
         THROWERR(tError)
@@ -458,7 +466,7 @@ std::vector<double>* MeanPlusVarianceGradient::getCriterionValueOutputData(const
     {
         THROWERR("UNDEFINED STATISTIC MEASURE " + aStatisticMeasure + ".\n")
     }
-    const std::string& tOutputArgumentMean = tIterator->second;
+    const auto& tOutputArgumentMean = tIterator->second;
     return (mPlatoApp->getValue(tOutputArgumentMean));
 }
 
@@ -471,7 +479,7 @@ double* MeanPlusVarianceGradient::getCriterionGradientOutputData(const std::stri
         THROWERR("UNDEFINED STATISTIC MEASURE " + aStatisticMeasure + ".\n")
     }
 
-    const std::string& tOutputArgumentName = tIterator->second;
+    const auto& tOutputArgumentName = tIterator->second;
     if(mCriterionGradientDataLayout == Plato::data::ELEMENT_FIELD)
     {
         return (mPlatoApp->getElementFieldData(tOutputArgumentName));
@@ -508,8 +516,8 @@ void MeanPlusVarianceGradient::computeGradientMeanPlusStandardDeviationCriterion
     }
     else
     {
-        const std::string tParsedLayout = Plato::getLayout(mCriterionGradientDataLayout);
-        const std::string tError = std::string("MEAN PLUS STANDARD DEVIATION CRITERION GRADIENT CAN ONLY BE COMPUTED FOR ")
+        const auto tParsedLayout = Plato::getLayout(mCriterionGradientDataLayout);
+        const auto tError = std::string("MEAN PLUS STANDARD DEVIATION CRITERION GRADIENT CAN ONLY BE COMPUTED FOR ")
                 + "NODAL AND ELEMENT FIELD QoIs. " + "INVALID INPUT DATA LAYOUT = " + tParsedLayout + ".\n";
         THROWERR(tError)
     }

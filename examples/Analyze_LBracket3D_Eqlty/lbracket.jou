@@ -16,6 +16,7 @@ volume all scheme tetmesh
 volume all size 0.0275
 mesh volume all
 block 1 volume all
+block 1 name "block_1"
 nodeset 1 surface 13
 nodeset 1 name "ns_1"
 sideset 1 surface 13

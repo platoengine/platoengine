@@ -84,6 +84,16 @@ private:
     std::string mMessage;
 };
 
+class TerminateSignal
+{
+public:
+    explicit TerminateSignal(const std::string & aMessage);
+    std::string message() const;
+
+private:
+    std::string mMessage;
+};
+
 /******************************************************************************/
 //!  Exception handler class.
 /*!
@@ -101,6 +111,7 @@ public:
 
     void registerException(const Plato::ParsingException & aParsingException);
     void registerException(const Plato::LogicException & aLogicException);
+    void registerException(const Plato::TerminateSignal & aTerminateSignal);
     void registerException(const std::exception& any_std_exception);
     void registerException();
 

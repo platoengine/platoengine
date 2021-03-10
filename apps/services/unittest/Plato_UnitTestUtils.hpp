@@ -56,17 +56,27 @@
 #include "Plato_Macros.hpp"
 #include "Plato_Vector.hpp"
 #include "Plato_MultiVector.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace PlatoTest
 {
 
 template<typename ScalarType, typename OrdinalType>
+void printVector(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+{
+    for (OrdinalType tIndex = 0; tIndex < aInput.size(); tIndex++)
+    {
+        std::cout << std::setprecision(10) << "X(" << tIndex << ") = " << aInput[tIndex] << "\n" << std::flush;
+    }
+}
+
+template<typename ScalarType, typename OrdinalType>
 void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
 {
-    const OrdinalType tNumVectors = aInput.getNumVectors();
-    for(size_t tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
+    auto tNumVectors = aInput.getNumVectors();
+    for(decltype(tNumVectors) tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
     {
-        for(size_t tElementIndex = 0; tElementIndex < aInput[tVectorIndex].size(); tElementIndex++)
+        for(decltype(tNumVectors) tElementIndex = 0; tElementIndex < aInput[tVectorIndex].size(); tElementIndex++)
         {
             std::cout << std::setprecision(10) << "X(" << tVectorIndex << ", " << tElementIndex << ") = "
             << aInput(tVectorIndex, tElementIndex) << "\n" << std::flush;

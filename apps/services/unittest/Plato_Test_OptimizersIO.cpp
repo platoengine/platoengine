@@ -50,6 +50,7 @@
 
 #include "Plato_Types.hpp"
 #include "Plato_OptimizersIO.hpp"
+#include <Plato_FreeFunctions.hpp>
 
 namespace PlatoTest
 {
@@ -62,7 +63,7 @@ TEST(PlatoTest, IsFileOpenExeption)
     tFile.open("MyFile.txt");
     ASSERT_NO_THROW(Plato::error::is_file_open(tFile));
     tFile.close();
-    std::system("rm -f MyFile.txt");
+    Plato::system("rm -f MyFile.txt");
 }
 
 TEST(PlatoTest, IsVectorEmpty)
@@ -88,7 +89,7 @@ TEST(PlatoTest, CheckForCCSAdiagnosticsErrors)
     tData.mConstraints.resize(tNumConstraints);
     ASSERT_NO_THROW(Plato::check_for_ccsa_diagnostics_errors(tData, tFile1));
     tFile1.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::ofstream tFile2;
     ASSERT_THROW(Plato::check_for_ccsa_diagnostics_errors(tData, tFile2), std::invalid_argument);
@@ -96,7 +97,7 @@ TEST(PlatoTest, CheckForCCSAdiagnosticsErrors)
     tFile2.open("MyFile2.txt");
     ASSERT_NO_THROW(Plato::check_for_ccsa_diagnostics_errors(tData, tFile2));
     tFile2.close();
-    std::system("rm -f MyFile2.txt");
+    Plato::system("rm -f MyFile2.txt");
 }
 
 TEST(PlatoTest, PrintCCSAdiagnosticsInvalidArguments)
@@ -110,7 +111,7 @@ TEST(PlatoTest, PrintCCSAdiagnosticsInvalidArguments)
     ASSERT_THROW(Plato::print_ccsa_diagnostics_header(tData, tFile1), std::runtime_error);
     ASSERT_THROW(Plato::print_ccsa_diagnostics(tData, tFile1), std::runtime_error);
     tFile1.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 }
 
 TEST(PlatoTest, PrintCCSAdiagnosticsHeader)
@@ -132,7 +133,7 @@ TEST(PlatoTest, PrintCCSAdiagnosticsHeader)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold("IterF-countF(X)Norm(F')H1(X)KKTNorm(S)abs(dX)abs(dF)");
     ASSERT_STREQ(tReadData.str().c_str(), tGold.str().c_str());
@@ -178,7 +179,7 @@ TEST(PlatoTest, PrintDiagnosticsOneConstraintsCCSA)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countF(X)Norm(F')H1(X)KKTNorm(S)abs(dX)abs(dF)";
@@ -229,7 +230,7 @@ TEST(PlatoTest, PrintDiagnosticsTwoConstraintsCCSA)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countF(X)Norm(F')H1(X)H2(X)KKTNorm(S)abs(dX)abs(dF)";
@@ -249,7 +250,7 @@ TEST(PlatoTest, PrintOptimalityCriteriaDiagnosticsInvalidArguments)
     ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile1), std::runtime_error);
     ASSERT_THROW(Plato::print_oc_diagnostics(tData, tFile1), std::runtime_error);
     tFile1.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::ofstream tFile2;
     ASSERT_THROW(Plato::print_oc_diagnostics_header(tData, tFile2), std::runtime_error);
@@ -292,7 +293,7 @@ TEST(PlatoTest, PrintDiagnosticsOneConstraintsOC)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold("");
     tGold << "IterF-countF(X)Norm(F')H1(X)abs(dX)abs(dF)";
@@ -339,7 +340,7 @@ TEST(PlatoTest, PrintDiagnosticsTwoConstraintsOC)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countF(X)Norm(F')H1(X)H2(X)abs(dX)abs(dF)";
@@ -404,7 +405,7 @@ TEST(PlatoTest, PrintDiagnosticsKSBC)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countF(X)Norm(F')Norm(S)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iterabs(dX)abs(dF)";
@@ -497,7 +498,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_1)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countPenaltyF(X)Norm(F')H1(X)AL-IterL(X)Norm(L')Norm(S)abs(dX)abs(dF)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iter";
@@ -599,7 +600,7 @@ TEST(PlatoTest, PrintDiagnosticsKSAL_2)
         tReadData << tInputString.c_str();
     }
     tReadFile.close();
-    std::system("rm -f MyFile1.txt");
+    Plato::system("rm -f MyFile1.txt");
 
     std::stringstream tGold;
     tGold << "IterF-countPenaltyF(X)Norm(F')H1(X)H2(X)AL-IterL(X)Norm(L')Norm(S)abs(dX)abs(dF)TR-IterLS-IterTR-RadiusARedTR-RatioPCG-Iter";

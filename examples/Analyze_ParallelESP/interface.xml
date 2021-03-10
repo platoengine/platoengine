@@ -161,6 +161,10 @@
       <SharedDataName>Upper Bound Vector</SharedDataName>
     </Output>
   </Operation>
+  <Operation>
+    <Name>Initialize Geometry</Name>
+    <PerformerName>PlatoMain</PerformerName>
+  </Operation>
   <Output>
     <SharedDataName>Design Parameters</SharedDataName>
   </Output>
@@ -269,7 +273,7 @@
     </Input>
     </For>
     <Output>
-      <ArgumentName>Constraint Sensitivity</ArgumentName>
+      <ArgumentName>Criterion Sensitivity</ArgumentName>
       <SharedDataName>Constraint Gradient</SharedDataName>
     </Output>
   </Operation>
@@ -380,7 +384,7 @@
     </Input>
     </For>
     <Output>
-      <ArgumentName>Objective Sensitivity</ArgumentName>
+      <ArgumentName>Criterion Sensitivity</ArgumentName>
       <SharedDataName>Objective 1 Gradient</SharedDataName>
     </Output>
   </Operation>

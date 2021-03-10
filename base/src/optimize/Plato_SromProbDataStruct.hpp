@@ -55,42 +55,54 @@
 namespace Plato
 {
 
-struct DistrubtionName
+enum struct SromInitialGuess
 {
-    enum type_t
-    {
-        beta = 0, normal = 1, uniform = 2, undefined = 3
-    };
+    random = 0, uniform = 1
 };
-// struct DistrubtionName
+// struct SromInitialGuess
+
+enum struct DistributionName
+{
+    beta = 0, normal = 1, uniform = 2, undefined = 3
+};
+// struct DistributionName
 
 template<typename ScalarType, typename OrdinalType = size_t>
 struct SromInputs
 {
-    DistrubtionName::type_t mDistribution; /*!< distribution type, options: beta, normal, uniform */
-    ScalarType mMean; /*!< distribution's mean */
+    Plato::SromInitialGuess mInitialGuess; /*!< initial guess type, options: random, uniform */
+    Plato::DistributionName mDistribution; /*!< distribution type, options: beta, normal, uniform */
+
+    ScalarType mMean;       /*!< distribution's mean */
+    ScalarType mVariance;   /*!< distribution's variance */
     ScalarType mLowerBound; /*!< distribution's lower bound */
     ScalarType mUpperBound; /*!< distribution's upper bound */
-    ScalarType mVariance; /*!< distribution's variance */
 
-    ScalarType mMomentErrorCriterionWeight; /*!< weight on moment misfit term in the SROM objective function */
+    ScalarType mMomentErrorCriterionWeight;            /*!< weight on moment misfit term in the SROM objective function */
+    ScalarType mCorrelationErrorCriterionWeight;       /*!< weight on correlation misfit term in the SROM objective function */
     ScalarType mCumulativeDistributionFuncErrorWeight; /*!< weight on cumulative distribution function misfit term in the SROM objective function */
 
-    OrdinalType mNumSamples; /*!< number of SROM samples */
-    OrdinalType mNumMonteCarloSamples; /*!< number of Monte Carlo samples */
-    OrdinalType mMaxNumDistributionMoments;/*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */
+    OrdinalType mDimensions = 1;            /*!< random vector dimensions */
+    OrdinalType mRandomSeed = 2;            /*!< random seed */
+    OrdinalType mNumSamples;                /*!< number of SROM samples */
+    OrdinalType mNumMonteCarloSamples;      /*!< number of Monte Carlo samples */
+    OrdinalType mMaxNumDistributionMoments; /*!< number of raw moments to match in the SROM optimization problem, if zero, then use default = 4 */
+
+    std::string mCorrelationMatrixFilename; /*!< name of the file containing the truth correlation matrix */
 
     SromInputs() :   // default Constructor
-            mDistribution(DistrubtionName::type_t::beta),
-            mMean(0.),
-            mLowerBound(0.),
-            mUpperBound(0.),
-            mVariance(0.),
-            mMomentErrorCriterionWeight(1.0),
-            mCumulativeDistributionFuncErrorWeight(1.0),
-            mNumSamples(0),
-            mNumMonteCarloSamples(1000),
-            mMaxNumDistributionMoments(4)
+        mInitialGuess(Plato::SromInitialGuess::uniform),
+        mDistribution(Plato::DistributionName::beta),
+        mMean(0.),
+        mVariance(0.),
+        mLowerBound(0.),
+        mUpperBound(0.),
+        mMomentErrorCriterionWeight(1.0),
+        mCorrelationErrorCriterionWeight(1.0),
+        mCumulativeDistributionFuncErrorWeight(1.0),
+        mNumSamples(0),
+        mNumMonteCarloSamples(1000),
+        mMaxNumDistributionMoments(4)
     {
     }
 };
@@ -99,9 +111,8 @@ struct SromInputs
 template<typename ScalarType>
 struct SromOutputs
 {
-    // Primary outputs
-    ScalarType mSampleValue; /*!< sample value */
-    ScalarType mSampleWeight; /*!< sample probability */
+    std::vector<ScalarType> mProbabilities;         /*!< SROM probabilities */
+    std::vector<std::vector<ScalarType>> mSamples;  /*!< SROM samples */
 };
 // struct UncertaintyOutputStruct
 
@@ -109,11 +120,14 @@ template<typename ScalarType>
 struct SromDiagnostics
 {
     // Diagnostics - secondary outputs
-    std::vector<ScalarType> mSromCDF; /*!< cumulative distribution function estimate */
-    std::vector<ScalarType> mTrueCDF; /*!< true cumulative distribution function */
-    std::vector<ScalarType> mSromMoments; /*!< raw moments estimates */
-    std::vector<ScalarType> mTrueMoments; /*!< true raw moments */
+    bool mOutputDiagnostics = false;       /*!< output diagnostic flag, default = false */
+
+    std::vector<ScalarType> mSromCDF;      /*!< cumulative distribution function estimate */
+    std::vector<ScalarType> mTrueCDF;      /*!< true cumulative distribution function */
+    std::vector<ScalarType> mSromMoments;  /*!< raw moments estimates */
+    std::vector<ScalarType> mTrueMoments;  /*!< true raw moments */
     std::vector<ScalarType> mMomentErrors; /*!< misfit between true and raw moment estimates */
+
     ScalarType mCumulativeDistributionFunctionError; /*!< misfit between true and cumulative distribution function estimate */
 };
 // struct SromProblemOutputStruct

@@ -84,8 +84,8 @@ public:
         mInitialSuperscript(1),
         mRandomNumLowerBound(0.05),
         mRandomNumUpperBound(0.1),
-        mHessianTestAccuracyBound(1e-5),
-        mGradientTestAccuracyBound(1e-5)
+        mLowerBoundOnHessDigitAccuracy(5),
+        mLowerBoundOnGradDigitAccuracy(5)
     {
     }
 
@@ -121,7 +121,7 @@ public:
     **********************************************************************************/
     void setHessianTestBound(const ScalarType & aInput)
     {
-        mHessianTestAccuracyBound = aInput;
+        mLowerBoundOnHessDigitAccuracy = aInput;
     }
 
     /******************************************************************************//**
@@ -131,7 +131,7 @@ public:
     **********************************************************************************/
     void setGradientTestBound(const ScalarType & aInput)
     {
-        mGradientTestAccuracyBound = aInput;
+        mLowerBoundOnGradDigitAccuracy = aInput;
     }
 
     /******************************************************************************//**
@@ -186,10 +186,11 @@ public:
      * @param [in] aUseInitialGuess used initial control guess provided by the users -
      *   default = false, i.e. controls are randomly generated.
     **********************************************************************************/
-    void checkCriterionGradient(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
-                                Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                                std::ostringstream & aOutputMsg,
-                                bool aUseInitialGuess = false)
+    void checkCriterionGradient
+    (Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
+     Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+     std::ostringstream & aOutputMsg,
+     bool aUseInitialGuess = false)
     {
         this->checkDimensions(aControl, "CONTROLS");
 
@@ -217,7 +218,8 @@ public:
         this->checkValues(*tGradient, "CRITERION GRADIENT");
 
         std::vector<ScalarType> tApproximationErrors;
-        const ScalarType tGradientDotStep = Plato::dot(*tGradient, *tStep);
+        std::vector<ScalarType> tFiniteDiffApprox;
+        const ScalarType tTruthGradientDotStep = Plato::dot(*tGradient, *tStep);
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWork = aControl.create();
         this->checkDimensions(*tWork, "CONTROL WORK");
 
@@ -258,14 +260,18 @@ public:
                     - static_cast<ScalarType>(8) * tObjectiveValueAtMinusEpsilon
                     + tObjectiveValueAtMinusTwoEpsilon) / (static_cast<ScalarType>(12) * tEpsilon);
 
-            ScalarType tAppxError = std::abs(tObjectiveAppx - tGradientDotStep);
+            ScalarType tAppxError = std::abs(tObjectiveAppx - tTruthGradientDotStep);
             tApproximationErrors.push_back(tAppxError);
+            tFiniteDiffApprox.push_back(tObjectiveAppx);
             aOutputMsg << std::right << std::scientific << std::setprecision(8) << std::setw(14) << tEpsilon << std::setw(19)
-            << tGradientDotStep << std::setw(19) << tObjectiveAppx << std::setw(19) << tAppxError << "\n";
+                << tTruthGradientDotStep << std::setw(19) << tObjectiveAppx << std::setw(19) << tAppxError << "\n";
         }
 
-        ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
-        mDidGradientTestPassed = tMinError < mGradientTestAccuracyBound ? true : false;
+        auto tMinErrorValueItr = std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
+        auto tPosition = std::distance(tApproximationErrors.begin(), tMinErrorValueItr);
+        auto tNumAccurateDigits =
+            std::floor( std::log10(std::abs(*tMinErrorValueItr)) - std::log10(std::abs(tFiniteDiffApprox[tPosition])) );
+        mDidGradientTestPassed = std::abs(tNumAccurateDigits) > mLowerBoundOnGradDigitAccuracy ? true : false;
     }
 
     /******************************************************************************//**
@@ -278,16 +284,17 @@ public:
      * @param [in] aUseInitialGuess used initial control guess provided by the users -
      *   default = false, i.e. controls are randomly generated.
     **********************************************************************************/
-    void checkCriterionHessian(Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
-                               Plato::MultiVector<ScalarType, OrdinalType> & aControl,
-                               std::ostringstream & aOutputMsg,
-                               bool aUseInitialGuess = false)
+    void checkCriterionHessian
+    (Plato::Criterion<ScalarType, OrdinalType> & aCriterion,
+     Plato::MultiVector<ScalarType, OrdinalType> & aControl,
+     std::ostringstream & aOutputMsg,
+     bool aUseInitialGuess = false)
     {
         this->checkDimensions(aControl, "CONTROL");
 
         mDidHessianTestPassed = false;
-        aOutputMsg << std::right << std::setw(18) << "\nStep Size" << std::setw(20) << "Hess*Step " << std::setw(18) << "FD Approx"
-                   << std::setw(20) << "abs(Error)" << "\n";
+        aOutputMsg << std::right << std::setw(18) << "\nStep Size" << std::setw(20) << "Hess*Step "
+            << std::setw(18) << "FD Approx" << std::setw(20) << "abs(Error)" << "\n";
 
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tStep = aControl.create();
         this->checkDimensions(*tStep, "STEP");
@@ -302,7 +309,7 @@ public:
         this->checkDimensions(*tHessianTimesStep, "HESSIAN TIMES STEP");
         aCriterion.hessian(aControl, *tStep, *tHessianTimesStep);
         this->checkValues(*tHessianTimesStep, "CRITERION HESSIAN TIMES STEP");
-        const ScalarType tNormHesianTimesStep = Plato::norm(*tHessianTimesStep);
+        const ScalarType tTruthNormHesianTimesStep = Plato::norm(*tHessianTimesStep);
 
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tGradient = aControl.create();
         this->checkDimensions(*tGradient, "GRADIENT");
@@ -311,6 +318,7 @@ public:
 
         // Compute 5-point stencil finite difference approximation
         std::vector<ScalarType> tApproximationErrors;
+        std::vector<ScalarType> tFiniteDiffApprox;
         std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> tWork = aControl.create();
         this->checkDimensions(*tWork, "CONTROL WORK");
         for(int tIndex = mInitialSuperscript; tIndex <= mFinalSuperscript; tIndex++)
@@ -353,20 +361,24 @@ public:
             tMultiplier = static_cast<ScalarType>(1) / (static_cast<ScalarType>(12) * tEpsilon);
             Plato::scale(tMultiplier, *tAppxHessianTimesStep);
             ScalarType tNormAppxHesianTimesStep = Plato::norm(*tAppxHessianTimesStep);
+            tFiniteDiffApprox.push_back(tNormAppxHesianTimesStep);
 
             // Compute error between true and finite differenced Hessian times step calculation.
             Plato::update(static_cast<ScalarType>(1), *tHessianTimesStep, static_cast<ScalarType>(-1), *tAppxHessianTimesStep);
             ScalarType tNumerator = Plato::norm(*tAppxHessianTimesStep);
-            ScalarType tDenominator = std::numeric_limits<ScalarType>::epsilon() + tNormHesianTimesStep;
+            ScalarType tDenominator = std::numeric_limits<ScalarType>::epsilon() + tTruthNormHesianTimesStep;
             ScalarType tAppxError = tNumerator / tDenominator;
             tApproximationErrors.push_back(tAppxError);
 
             aOutputMsg << std::right << std::scientific << std::setprecision(8) << std::setw(14) << tEpsilon << std::setw(19)
-            << tNormHesianTimesStep << std::setw(19) << tNormAppxHesianTimesStep << std::setw(19) << tAppxError << "\n";
+            << tTruthNormHesianTimesStep << std::setw(19) << tNormAppxHesianTimesStep << std::setw(19) << tAppxError << "\n";
         }
 
-        ScalarType tMinError = *std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
-        mDidHessianTestPassed = tMinError < mHessianTestAccuracyBound ? true : false;
+        auto tMinErrorValueItr = std::min_element(tApproximationErrors.begin(), tApproximationErrors.end());
+        auto tPosition = std::distance(tApproximationErrors.begin(), tMinErrorValueItr);
+        auto tNumAccurateDigits =
+            std::floor( std::log10(std::abs(*tMinErrorValueItr)) - std::log10(std::abs(tFiniteDiffApprox[tPosition])) );
+        mDidHessianTestPassed = std::abs(tNumAccurateDigits) > mLowerBoundOnHessDigitAccuracy ? true : false;
     }
 
 private:
@@ -458,8 +470,8 @@ private:
 
     ScalarType mRandomNumLowerBound; /*!< lower bound on random number generator */
     ScalarType mRandomNumUpperBound; /*!< upper bound on random number generator */
-    ScalarType mHessianTestAccuracyBound; /*!< tolerance on finite difference Hessian test measure - used to specify if test passed */
-    ScalarType mGradientTestAccuracyBound; /*!< tolerance on finite difference gradient test measure - used to specify if test passed */
+    ScalarType mLowerBoundOnHessDigitAccuracy; /*!< tolerance on finite difference Hessian test measure - used to specify if test passed */
+    ScalarType mLowerBoundOnGradDigitAccuracy; /*!< tolerance on finite difference gradient test measure - used to specify if test passed */
 
 private:
     Diagnostics(const Plato::Diagnostics<ScalarType, OrdinalType> & aRhs);

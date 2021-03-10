@@ -34,6 +34,9 @@ volume all scheme tetmesh
 mesh volume all
 block 1 surface 30
 block 1 element type TRI
+block 1 name "block_1"
 nodeset 2 curve 39 35
+nodeset 2 name "ns_2"
 sideset 1 curve 31
-export mesh "lbracket_2d.gen" dimension 2 overwrite
+sideset 1 name "ss_1"
+export mesh "lbracket_2d.exo" dimension 2 overwrite

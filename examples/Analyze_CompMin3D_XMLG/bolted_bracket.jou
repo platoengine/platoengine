@@ -1,0 +1,67 @@
+## /projects/cubit/claro.Lin64.15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 411343
+## Revised 2017-12-05 09:40:29 -0700 (Tue, 05 Dec 2017)
+## Running 02/11/2018 03:03:34 PM
+## Command Options:
+#{base_width=2.5}
+#{base_height=3.0}
+#{base_thickness=0.5}
+#{bracket_length=4.0}
+#{bracket_thickness=0.5}
+#{vert_fillet=0.25}
+#{base_fillet=0.375}
+#{end_fillet=0.5}
+#{face_fillet=0.1}
+#{bolt_radius=0.125}
+#{bolt_inset=0.375}
+#{mount_radius=0.5}
+#{mount_inset=0.5}
+##{mesh_size=0.08}
+#{mesh_size=0.24}
+create brick x {base_thickness} y {base_height} z {base_width}
+create brick x {bracket_length} y {base_height} z {bracket_thickness}
+move surface 10 location surface 6
+unite volume all
+tweak curve 25 26 fillet radius {vert_fillet}
+tweak curve 2 4 8 6 fillet radius {base_fillet}
+tweak curve 24 22 fillet radius {end_fillet}
+tweak curve 20 60 17 55 18 33 41 27 5 44 28 31 fillet radius {face_fillet}
+tweak curve 49 29 37 1 45 30 35 16 57 13 59 14 fillet radius {face_fillet}
+create cylinder height 1 radius {bolt_radius}
+rotate volume 3 about y angle 90
+move volume 3 y {base_height/2.0-bolt_inset} z {base_width/2.0-bolt_inset}
+volume 3 copy
+subtract volume 4 from volume 1
+move volume 3 y {-base_height+2.0*bolt_inset}
+volume 3 copy
+subtract volume 5 from volume 1
+move volume 3 z {-base_width+2.0*bolt_inset}
+volume 3 copy
+subtract volume 6 from volume 1
+move volume 3 y { base_height-2.0*bolt_inset}
+volume 3 copy
+subtract volume 7 from volume 1
+delete volume 3
+create cylinder height 1 radius {mount_radius}
+move volume 8 x {base_thickness/2.0+bracket_length-mount_radius-mount_inset}
+subtract volume 8 from volume 1
+webcut volume all with plane yplane
+webcut volume all with plane zplane
+imprint all
+merge all
+# volume all scheme tetmesh
+volume all scheme tetmesh geometry approximation angle 30
+volume all size {mesh_size}
+mesh volume all
+block 1 volume all
+sideset 2 surface 120 125
+sideset 2 name "ss_2"
+sideset 20 surface 133 144
+sideset 20 name "ss_20"
+nodeset 1 surface 53 59 71 65
+nodeset 1 name "ns_1"
+nodeset 10 surface 145 131 121 123
+nodeset 10 name "ns_10"
+block 1 name 'block_1'
+export mesh "bolted_bracket.exo" overwrite

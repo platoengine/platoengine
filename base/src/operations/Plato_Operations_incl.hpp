@@ -49,6 +49,8 @@
 #pragma once
 
 #include "Plato_Filter.hpp"
+#include "Plato_CopyField.hpp"
+#include "Plato_CopyValue.hpp"
 #include "Plato_Roughness.hpp"
 #include "Plato_SystemCall.hpp"
 #include "Plato_Aggregator.hpp"
@@ -63,12 +65,14 @@
 #include "Plato_InitializeField.hpp"
 #include "Plato_InitializeValues.hpp"
 #include "Plato_WriteGlobalValue.hpp"
+#include "Plato_CSMParameterOutput.hpp"
 #include "Plato_OperationsUtilities.hpp"
 #include "Plato_NormalizeObjectiveValue.hpp"
 #include "Plato_MeanPlusVarianceMeasure.hpp"
 #include "Plato_MeanPlusVarianceGradient.hpp"
 #include "Plato_ReciprocateObjectiveValue.hpp"
 #include "Plato_NormalizeObjectiveGradient.hpp"
+#include "Plato_OutputNodalFieldSharedData.hpp"
 #include "Plato_ReciprocateObjectiveGradient.hpp"
 
 #ifdef GEOMETRY

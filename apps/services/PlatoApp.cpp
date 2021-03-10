@@ -189,6 +189,22 @@ void PlatoApp::initialize()
                 continue;
             }
 
+            tFunctions.push_back("CopyField");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CopyField(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("CopyValue");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CopyValue(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
             tFunctions.push_back("SystemCall");
             if(tStrFunction == tFunctions.back())
             {
@@ -217,6 +233,22 @@ void PlatoApp::initialize()
             if(tStrFunction == tFunctions.back())
             {
                 mOperationMap[tStrName] = new Plato::CSMMeshOutput(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("OutputNodalFieldSharedData");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::OutputNodalFieldSharedData(this, tNode);
+                this->createLocalData(mOperationMap[tStrName]);
+                continue;
+            }
+
+            tFunctions.push_back("CSMParameterOutput");
+            if(tStrFunction == tFunctions.back())
+            {
+                mOperationMap[tStrName] = new Plato::CSMParameterOutput(this, tNode);
                 this->createLocalData(mOperationMap[tStrName]);
                 continue;
             }
@@ -549,6 +581,17 @@ DistributedVector* PlatoApp::getNodeField(const std::string & aName)
         throwParsingException(aName, mNodeFieldMap);
     }
     return tIterator->second;
+}
+
+std::string PlatoApp::getSharedDataName(const std::string & aName) const
+{
+    std::string tRetVal;
+    auto tIterator = mSharedDataNames.find(aName);
+    if(tIterator != mSharedDataNames.end())
+    {
+        tRetVal = tIterator->second;
+    }
+    return tRetVal;
 }
 
 size_t PlatoApp::getLocalNumElements() const

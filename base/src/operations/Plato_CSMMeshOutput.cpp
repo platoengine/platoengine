@@ -105,14 +105,14 @@ void CSMMeshOutput::operator()()
             std::ostringstream tTheCommand;
             tTheCommand << "cp " << this->mBaseMeshName << " Iteration" << tIterationString << ".exo";
             std::cout << "\nExecuting system call: " << tTheCommand.str() << "\n";
-            system(tTheCommand.str().c_str());
+            Plato::system(tTheCommand.str().c_str());
 
             FILE *fp = fopen("last_time_step.txt", "w");
             if(fp)
             {
                 fprintf(fp, "%s\n", tIterationString.c_str());
                 fclose(fp);
-                system("ls Iteration*.exo >> last_time_step.txt");
+                Plato::system("ls Iteration*.exo >> last_time_step.txt");
             }
         }
     }

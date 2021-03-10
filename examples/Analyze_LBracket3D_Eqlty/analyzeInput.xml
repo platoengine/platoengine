@@ -7,7 +7,6 @@
   <ParameterList name="Plato Problem">
     <Parameter name="Physics"         type="string"  value="Mechanical"/>
     <Parameter name="PDE Constraint"  type="string"  value="Elliptic"/>
-    <Parameter name="Objective"       type="string"  value="My Stress Constraint General"/>
 
     <ParameterList name="Elliptic">
       <ParameterList name="Penalty Function">
@@ -17,20 +16,33 @@
       </ParameterList>
     </ParameterList>
 
-    <ParameterList name="My Stress Constraint General">
-      <Parameter name='Type' type='string' value='Scalar Function'/> 
-      <Parameter name='Scalar Function Type' type='string' value='Stress Constraint General'/>
-      <Parameter name="Stress Limit" type="double" value="3e6"/>
-      <Parameter name="Initial Penalty" type="double" value="1"/>
-      <Parameter name="Penalty Upper Bound" type="double" value="10000"/>
-      <Parameter name="Penalty Expansion Multiplier" type="double" value="1.5"/>
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Unobtainium"/>
+        </ParameterList>
+      </ParameterList>
     </ParameterList>
 
-    <ParameterList name="Material Model">
-      <Parameter  name="Density" type="double" value="1e3"/>
-      <ParameterList name="Isotropic Linear Elastic">
-        <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
-        <Parameter  name="Youngs Modulus" type="double" value="1e9"/>
+    <ParameterList name="Criteria">
+      <ParameterList name="Stress Constraint General">
+        <Parameter name='Type' type='string' value='Scalar Function'/> 
+        <Parameter name='Scalar Function Type' type='string' value='Stress Constraint General'/>
+        <Parameter name="Stress Limit" type="double" value="3e6"/>
+        <Parameter name="Initial Penalty" type="double" value="1"/>
+        <Parameter name="Penalty Upper Bound" type="double" value="10000"/>
+        <Parameter name="Penalty Expansion Multiplier" type="double" value="1.5"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Unobtainium">
+        <Parameter  name="Density" type="double" value="1e3"/>
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
+          <Parameter  name="Youngs Modulus" type="double" value="1e9"/>
+        </ParameterList>
       </ParameterList>
     </ParameterList>
   

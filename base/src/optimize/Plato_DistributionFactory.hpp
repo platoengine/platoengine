@@ -77,17 +77,17 @@ build_distrubtion(const Plato::SromInputs<ScalarType, OrdinalType>& aInput)
     std::shared_ptr<Plato::Distribution<ScalarType, OrdinalType>> tDistribution;
     switch(aInput.mDistribution)
     {
-        case DistrubtionName::type_t::beta:
+        case Plato::DistributionName::beta:
         {
             tDistribution = std::make_shared < Plato::BetaDistribution<ScalarType, OrdinalType> > (tMin, tMax, tMean, tVariance);
             break;
         }
-        case DistrubtionName::type_t::normal:
+        case Plato::DistributionName::normal:
         {
             tDistribution = std::make_shared < Plato::NormalDistribution<ScalarType, OrdinalType> > (tMean, tStandardDeviation);
             break;
         }
-        case DistrubtionName::type_t::uniform:
+        case Plato::DistributionName::uniform:
         {
             tDistribution = std::make_shared < Plato::UniformDistribution<ScalarType, OrdinalType> > (tMin, tMax);
             break;
