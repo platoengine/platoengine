@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
@@ -105,6 +107,9 @@ class TetMeshUtilities
 
         std::vector<double> computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const;
 
+        const std::vector<std::vector<double>>& getCoordinates() const {return mCoordinates;};
+        const std::vector<std::vector<int>>& getConnectivity() const {return mConnectivity;};
+
         /***************************************************************************//**
         * @brief Find id of tet that contains each point 
          * @param [in]  aPoints 
@@ -115,7 +120,7 @@ class TetMeshUtilities
         *******************************************************************************/
         void
         getTetIDForEachPoint(const std::vector<Vector>& aPoints,
-                             std::vector<int>& aContainingTetID)
+                             std::vector<int>& aContainingTetID) const
         {
             
             constexpr int cDimension = 3;

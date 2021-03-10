@@ -70,7 +70,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 )
 
 if( AMFILTER_ENABLED )
-    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_TetMeshUtilities.cpp)
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_TetMeshUtilities.cpp PSL_Test_AMFilterUtilities.cpp)
 endif()
 
 IF( ENABLE_ROL )

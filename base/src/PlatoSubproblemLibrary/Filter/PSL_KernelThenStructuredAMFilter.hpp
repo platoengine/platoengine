@@ -14,6 +14,7 @@
 #include "PSL_Point.hpp"
 #include "PSL_TetMeshUtilities.hpp"
 #include "PSL_OrthogonalGridUtilities.hpp"
+#include "PSL_AMFilterUtilities.hpp"
 
 
 #include <vector>
@@ -58,33 +59,17 @@ public:
               const std::vector<std::vector<int>>&    aConnectivity,
               const PlatoSubproblemLibrary::Vector&   aBuildDirection)
     {
-        setCoordinates(aCoordinates);
-        setConnectivity(aConnectivity);
         setBuildDirectionAndUVWBasis(aBuildDirection);
-
-        mBuildDirection = aBuildDirection;
-        mBuildDirection.normalize();
-
-        buildStructuredGrid();
+        buildStructuredGrid(aCoordinates, aConnectivity);
     }
 
 
 private:
 
-    void buildStructuredGrid();
+    void buildStructuredGrid(const std::vector<std::vector<double>>& aCoordinates, const std::vector<std::vector<int>>& aConnectivity);
 
     void internal_apply(AbstractInterface::ParallelVector* aDensity);
     void internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const;
-
-    void setCoordinates(const std::vector<std::vector<double>>& aCoordinates)
-    {
-        mCoordinates = aCoordinates;
-    }
-
-    void setConnectivity(const std::vector<std::vector<int>>& aConnectivity)
-    {
-        mConnectivity = aConnectivity;
-    }
 
     void setBuildDirectionAndUVWBasis(const PlatoSubproblemLibrary::Vector& aVector)
     {
@@ -118,34 +103,17 @@ private:
         }
     }
 
-    double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
-
-    // void computePrintableDensity(AbstractInterface::ParallelVector* const aBlueprintDensity);
-
-    void getTetIDForEachGridPoint(std::vector<int>& aTetIDs) const;
-    int getContainingTetID(const int& i, const int& j, const int& k) const;
-
-    std::vector<std::vector<double>> mCoordinates;
-    std::vector<std::vector<int>> mConnectivity;
-
-    std::vector<int> mNumElementsInEachDirection;
-    std::vector<int> mContainingTetID;
-
     Vector mUBasisVector;
     Vector mVBasisVector;
     Vector mBuildDirection;
 
-    Vector mMaxUVWCoords;
-    Vector mMinUVWCoords;
-
-    double mTargetEdgeLength;
-
-    bool mSupportDensityHasBeenComputed = false;
     bool mFilterBuilt = false;
 
     ParameterData* mInputData;
 
-    std::unique_ptr<TetMeshUtilities> mUtilities;
+    std::unique_ptr<TetMeshUtilities> mTetUtilities;
+    std::unique_ptr<OrthogonalGridUtilities> mGridUtilities;
+    std::unique_ptr<AMFilterUtilities> mAMFilterUtilities;
 };
 
 }

@@ -24,8 +24,8 @@ set(${LIB_NAME}_HEADERS
     )
 
 if( AMFILTER_ENABLED )
-    set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PSL_KernelThenStructuredAMFilter.cpp)
-    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_KernelThenStructuredAMFilter.hpp)
+    set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PSL_KernelThenStructuredAMFilter.cpp PSL_AMFilterUtilities.cpp)
+    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_KernelThenStructuredAMFilter.hpp PSL_AMFilterUtilities.hpp)
 endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
