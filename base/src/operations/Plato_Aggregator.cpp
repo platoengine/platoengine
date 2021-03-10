@@ -203,7 +203,6 @@ void Aggregator::aggregateScalarField(const AggStruct& aAggStruct, const decltyp
         }
 
         auto tInputName = mPlatoApp->getSharedDataName(aAggStruct.mInputNames[tIval]);
-        std::stringstream tMessage;
         tMessage << "#";
         tMessage << setw(fw) << tIval;
         tMessage << setw(fw) << setprecision(pn) << tFromDataNorm[tIval];
@@ -274,7 +273,6 @@ void Aggregator::aggregateScalar(const AggStruct& aAggStruct, const decltype(mWe
         for(int tIval = 0; tIval < tNvals; tIval++)
         {
             auto tInputName = mPlatoApp->getSharedDataName(aAggStruct.mInputNames[tIval]);
-            std::stringstream tMessage;
             tMessage << "#";
             tMessage << setw(fw) << tIval;
             tMessage << setw(fw) << setprecision(pn) << tFromData[tIval][tIndex];
@@ -292,7 +290,6 @@ void Aggregator::aggregateScalar(const AggStruct& aAggStruct, const decltype(mWe
             tToData[tIndex] += tFromData[tIval][tIndex] * aWeights[tIval];
         }
 
-        std::stringstream tMessage;
         tMessage << "#";
         tMessage << setw(fw) << "Output";
         tMessage << setw(fw) << setprecision(pn) << tToData[tIndex];

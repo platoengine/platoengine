@@ -695,7 +695,7 @@ TEST(PlatoTest, SROM_AppendDeterministicMaterialProperties)
         auto tMatIndex = &tRandomMaterial - &tRandomMaterialSet[0];
         ASSERT_NEAR(tGoldProbs[tMatIndex], tRandomMaterial.probability(), tTolerance);
 
-        auto tTags = tRandomMaterial.tags();
+        tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
         for (auto &tTag : tTags)
         {
@@ -755,7 +755,7 @@ TEST(PlatoTest, SROM_BuildRandomMaterialSet)
         auto tMatIndex = &tRandomMaterial - &tRandomMaterialSet[0];
         ASSERT_NEAR(tGoldProbs[tMatIndex], tRandomMaterial.probability(), tTolerance);
 
-        auto tTags = tRandomMaterial.tags();
+        tTags = tRandomMaterial.tags();
         ASSERT_EQ(2u, tTags.size());
         for (auto &tTag : tTags)
         {
@@ -834,7 +834,7 @@ TEST(PlatoTest, SROM_InitializeRandomMaterialCases)
             ASSERT_STREQ("2", tMatID.c_str());
             ASSERT_STREQ("isotropic", tRandomMaterialCase.category(tMatID).c_str());
 
-            auto tTags = tRandomMaterialCase.tags(tMatID);
+            tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
             for (auto &tTag : tTags)
             {
@@ -958,7 +958,7 @@ TEST(PlatoTest, SROM_UpdateRandomMaterialCases)
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
             ASSERT_STREQ("isotropic", tRandomMaterialCase.category(tMatID).c_str());
 
-            auto tTags = tRandomMaterialCase.tags(tMatID);
+            tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
             for (auto &tTag : tTags)
             {
@@ -1080,7 +1080,7 @@ TEST(PlatoTest, SROM_AppendRandomMaterialSet)
             ASSERT_STREQ(tGoldMatIDs[tCaseIndex][tMatIdIndex].c_str(), tMatID.c_str());
             ASSERT_STREQ("isotropic", tRandomMaterialCase.category(tMatID).c_str());
 
-            auto tTags = tRandomMaterialCase.tags(tMatID);
+            tTags = tRandomMaterialCase.tags(tMatID);
             ASSERT_EQ(2u, tTags.size());
             for (auto &tTag : tTags)
             {
