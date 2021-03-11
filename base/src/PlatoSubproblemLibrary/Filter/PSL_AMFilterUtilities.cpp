@@ -70,11 +70,22 @@ void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVec
 // {
 // }
 
-// double AMFilterUtilities::computeGridPointPrintableDensity(const int& i, const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
-// {
-//     // use grid point support density on points below to compute printable density
-//     return 0;
-// }
+double AMFilterUtilities::computeGridPointPrintableDensity(const int& i, const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
+{
+    if(aGridSupportDensity.size() != mGridPointCoordinates.size())
+        throw(std::domain_error("AMFilterUtilities: Grid support density vector does not match grid size"));
+
+    // use grid point support density on points below to compute printable density
+    return 0;
+}
+
+double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
+{
+    if(aIndex.size() != 3u)
+        throw(std::domain_error("AMFilterUtilities: Grid point index must have 3 entries"));
+
+    return computeGridPointPrintableDensity(aIndex[0],aIndex[1],aIndex[2],aTetMeshBlueprintDensity,aGridSupportDensity);
+}
 
 // double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 
@@ -107,6 +118,11 @@ double smax(const std::vector<double>& aArguments, const double& aPNorm)
     tSmax = std::pow(tSmax,1.0/aQNorm);
 
     return tSmax;
+}
+
+double smin(const double& aArg1, const double& aArg2, double aEps)
+{
+    return 0.5*(aArg1 + aArg2 - std::pow(std::pow((aArg1 - aArg2),2) + aEps,0.5) + std::sqrt(aEps));
 }
 
 }
