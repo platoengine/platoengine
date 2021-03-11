@@ -6,6 +6,7 @@
 
 namespace XMLGen
 {
+  void determine_plato_engine_name(const XMLGen::InputData& aInputData, std::string& aPlatoEngineName);
   void generate_batch_script(const size_t& aNumPerformers,const size_t& aNumProcessorsPerNode = 6/*num gpus per node on summit*/);
   void generate_jsrun_script(const size_t& aNumPerformers, const std::string& performerName);
   void generate_engine_bash_script();
