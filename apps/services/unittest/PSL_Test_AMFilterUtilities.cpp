@@ -82,7 +82,7 @@ PSL_TEST(AMFilterUtilities,construction)
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
 
-    double tPNorm = 20;
+    double tPNorm = 200;
 
     AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
 
@@ -119,7 +119,7 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
     std::vector<Vector> tGridCoordinates;
     tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
-    double tPNorm = 20;
+    double tPNorm = 200;
 
     AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
 
@@ -144,6 +144,8 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
             }
         }
     }
+
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointBlueprintDensity({0,1},&tVector),std::domain_error);
 }
 
 PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
@@ -173,10 +175,8 @@ PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
-    std::vector<Vector> tGridCoordinates;
-    tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
-    double tPNorm = 20;
+    double tPNorm = 200;
 
     AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
 
@@ -200,7 +200,13 @@ PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
                 else
                 {
                     auto tSupportIndices = tGridUtilities.getSupportIndices(i,j,k);
-                    // EXPECT_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]
+                    std::vector<double> tSupportDensityBelow;
+                    for(auto tSupportIndex : tSupportIndices)
+                    {
+                        tSupportDensityBelow.push_back(tAMFilterUtilities.computeGridPointBlueprintDensity(tSupportIndex,&tVector));
+                    }
+                    double tSupportDensityAtIndex = smax(tSupportDensityBelow,tPNorm);
+                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)],tSupportDensityAtIndex);
                 }
             }
         }

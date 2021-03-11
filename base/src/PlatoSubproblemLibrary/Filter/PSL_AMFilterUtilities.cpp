@@ -27,6 +27,14 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
     return tGridPointDensity;
 }
 
+double AMFilterUtilities::computeGridPointBlueprintDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+{
+    if(aIndex.size() != 3u)
+        throw(std::domain_error("AMFilterUtilities: Grid point index must have 3 entries"));
+
+    return computeGridPointBlueprintDensity(aIndex[0], aIndex[1], aIndex[2], aTetMeshBlueprintDensity);
+}
+
 void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
 {
     auto tGridDimensions = mGridUtilities.getGridDimensions();
@@ -45,12 +53,13 @@ void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVec
                 }
                 else
                 {
-                    double tSupportDensity = 0;
                     auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+                    std::vector<double> tSupportDensityBelow;
                     for(auto tSupportIndex : tSupportIndices)
                     {
-                        tSupportDensity += 0;
+                        tSupportDensityBelow.push_back(computeGridPointBlueprintDensity(tSupportIndex,aTetMeshBlueprintDensity));
                     }
+                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = smax(tSupportDensityBelow,mPNorm);
                 }
             }
         }
