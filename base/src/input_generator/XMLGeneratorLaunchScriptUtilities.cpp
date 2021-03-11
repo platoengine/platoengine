@@ -215,10 +215,11 @@ namespace XMLGen
 
   void append_engine_mpirun_lines(const XMLGen::InputData& aInputData, int &aNextPerformerID, FILE*& fp)
   {
-    std::string envString, separationString, tLaunchString, tNumProcsString;
+    std::string envString, separationString, tLaunchString, tNumProcsString, tPlatoEngineName;
 
     XMLGen::determine_mpi_env_and_separation_strings(envString,separationString);
     XMLGen::determine_mpi_launch_strings(aInputData,tLaunchString,tNumProcsString);
+    XMLGen::determine_plato_engine_name(aInputData,tPlatoEngineName);
 
     std::string num_opt_procs = XMLGen::Internal::get_num_opt_processors(aInputData);
     XMLGen::assert_is_positive_integer(num_opt_procs);
@@ -234,7 +235,7 @@ namespace XMLGen
     if(aInputData.codepaths.plato_main_path.length() != 0)
       fprintf(fp, "%s plato_main_input_deck.xml \\\n", aInputData.codepaths.plato_main_path.c_str());
     else
-      fprintf(fp, "PlatoMain plato_main_input_deck.xml \\\n");
+      fprintf(fp, "%s plato_main_input_deck.xml \\\n", tPlatoEngineName.c_str());
   }
 
   void determine_mpi_env_and_separation_strings(std::string& envString, std::string& separationString)
@@ -260,6 +261,42 @@ namespace XMLGen
       aLaunchString = "mpiexec";
       aNumProcsString = "-np";
     }
+  }
+
+  void determine_plato_engine_name(const XMLGen::InputData& aInputData, std::string& aPlatoEngineName)
+  {
+      bool tAtLeastOneSierraSDPhysicsPerformer = false;
+      bool tAllPhysicsPerformersAreSierraSD = true;
+      for(auto &tCurService : aInputData.services())
+      {
+          if(tCurService.code() != "platomain")
+          {
+              if(tCurService.code() != "sierra_sd")
+              {
+                  tAllPhysicsPerformersAreSierraSD = false;
+                  break;
+              }
+              else
+              {
+                  tAtLeastOneSierraSDPhysicsPerformer = true;
+              }
+          }
+     }
+     if(tAllPhysicsPerformersAreSierraSD)
+     {
+         if(!tAtLeastOneSierraSDPhysicsPerformer)
+         {
+             tAllPhysicsPerformersAreSierraSD = false;
+         }
+     }
+     if(tAllPhysicsPerformersAreSierraSD)
+     {
+         aPlatoEngineName = "plato_main";
+     }
+     else
+     {
+         aPlatoEngineName = "PlatoMain";   
+     }
   }
 
   namespace Internal
