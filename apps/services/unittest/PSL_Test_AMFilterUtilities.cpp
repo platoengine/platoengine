@@ -261,10 +261,10 @@ PSL_TEST(AMFilterUtilities, computeGridPointPrintableDensity)
         {
             for(int k = 1; k < tGridDimensions[2]; ++k)
             {
-                // double tPrintableDensity = tAMFilterUtilities.computeGridPointPrintableDensity(i,j,k,&tVector,tGridSupportDensity);
-                // double tBluePrintDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(i,j,k,&tVector);
-                // double tGold = smin(tBluePrintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
-                // EXPECT_DOUBLE_EQ(tPrintableDensity,tGold);
+                double tPrintableDensity = tAMFilterUtilities.computeGridPointPrintableDensity(i,j,k,&tVector,tGridSupportDensity);
+                double tBluePrintDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(i,j,k,&tVector);
+                double tGold = smin(tBluePrintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
+                EXPECT_DOUBLE_EQ(tPrintableDensity,tGold);
             }
         }
     }

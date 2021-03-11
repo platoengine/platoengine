@@ -66,17 +66,15 @@ void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVec
     }
 }
 
-// double KernelThenStructuredAMFilter::getGridPointSupportDensity(const int& i, const int& j, const int&k) const
-// {
-// }
-
 double AMFilterUtilities::computeGridPointPrintableDensity(const int& i, const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
 {
     if(aGridSupportDensity.size() != mGridPointCoordinates.size())
         throw(std::domain_error("AMFilterUtilities: Grid support density vector does not match grid size"));
 
-    // use grid point support density on points below to compute printable density
-    return 0;
+    double tSupportDensity = aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)];
+    double tBluePrintDensity = computeGridPointBlueprintDensity(i,j,k,aTetMeshBlueprintDensity);
+
+    return smin(tSupportDensity,tBluePrintDensity);
 }
 
 double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
