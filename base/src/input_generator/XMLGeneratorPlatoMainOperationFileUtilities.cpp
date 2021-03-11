@@ -1066,10 +1066,13 @@ void append_fixed_blocks_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_block_ids())
+    if(aXMLMetaData.optimization_parameters().fixed_block_ids().size() > 0)
     {
         auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
-        XMLGen::append_children({"Index"}, {tID}, tFixedBlocks);
+        for(auto& tID : aXMLMetaData.optimization_parameters().fixed_block_ids())
+        {
+            XMLGen::append_children({"Index"}, {tID}, tFixedBlocks);
+        }
     }
 }
 // function append_fixed_blocks_identification_numbers_to_operation
@@ -1080,10 +1083,13 @@ void append_fixed_sidesets_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_sideset_ids())
+    if(aXMLMetaData.optimization_parameters().fixed_sideset_ids().size() > 0)
     {
         auto tFixedSideSet = aParentNode.append_child("FixedSidesets");
-        XMLGen::append_children({"Index"}, {tID}, tFixedSideSet);
+        for(auto& tID : aXMLMetaData.optimization_parameters().fixed_sideset_ids())
+        {
+            XMLGen::append_children({"Index"}, {tID}, tFixedSideSet);
+        }
     }
 }
 // function append_fixed_sidesets_identification_numbers_to_operation
@@ -1094,10 +1100,13 @@ void append_fixed_nodesets_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tID : aXMLMetaData.optimization_parameters().fixed_nodeset_ids())
+    if(aXMLMetaData.optimization_parameters().fixed_nodeset_ids().size() > 0)
     {
         auto tFixedNodeSet = aParentNode.append_child("FixedNodesets");
-        XMLGen::append_children({"Index"}, {tID}, tFixedNodeSet);
+        for(auto& tID : aXMLMetaData.optimization_parameters().fixed_nodeset_ids())
+        {
+            XMLGen::append_children({"Index"}, {tID}, tFixedNodeSet);
+        }
     }
 }
 // function append_fixed_nodesets_identification_numbers_to_operation
