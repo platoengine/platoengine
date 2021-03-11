@@ -68,14 +68,13 @@ TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
     auto tFixedBlocks = tOperation.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    tKeys = {"Index"}; tValues = {"1"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedBlocks);
+    auto tIndexNode = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "1");
 
-    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
-    ASSERT_FALSE(tFixedBlocks.empty());
-    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    tKeys = {"Index"}; tValues = {"2"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedBlocks);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "2");
 }
 
 TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
@@ -115,26 +114,24 @@ TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
     auto tFixedBlocks = tOperation.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    tKeys = {"Index"}; tValues = {"1"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedBlocks);
+    auto tIndexNode = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "1");
 
-    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
-    ASSERT_FALSE(tFixedBlocks.empty());
-    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    tKeys = {"Index"}; tValues = {"2"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedBlocks);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "2");
 
     auto tFixedSidesets = tOperation.child("FixedSidesets");
     ASSERT_FALSE(tFixedSidesets.empty());
     ASSERT_STREQ("FixedSidesets", tFixedSidesets.name());
-    tKeys = {"Index"}; tValues = {"11"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedSidesets);
+    tIndexNode = tFixedSidesets.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "11");
 
-    tFixedSidesets = tFixedSidesets.next_sibling("FixedSidesets");
-    ASSERT_FALSE(tFixedSidesets.empty());
-    ASSERT_STREQ("FixedSidesets", tFixedSidesets.name());
-    tKeys = {"Index"}; tValues = {"12"};
-    PlatoTestXMLGenerator::test_children(tKeys, tValues, tFixedSidesets);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "12");
 }
 
 TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation_NoFixedBlocks)
@@ -162,12 +159,13 @@ TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation)
     auto tFixedBlocks = tDocument.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"1"}, tFixedBlocks);
+    auto tIndexNode = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "1");
 
-    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
-    ASSERT_FALSE(tFixedBlocks.empty());
-    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"2"}, tFixedBlocks);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "2");
 }
 
 TEST(PlatoTestXMLGenerator, AppendFixedSidesetsIdentificationNumbersToOperation_NoFixedSidesets)
@@ -195,12 +193,13 @@ TEST(PlatoTestXMLGenerator, AppendFixedSidesetsIdentificationNumbersToOperation)
     auto tFixedSideSets = tDocument.child("FixedSidesets");
     ASSERT_FALSE(tFixedSideSets.empty());
     ASSERT_STREQ("FixedSidesets", tFixedSideSets.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"1"}, tFixedSideSets);
+    auto tIndexNode = tFixedSideSets.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "1");
 
-    tFixedSideSets = tFixedSideSets.next_sibling("FixedSidesets");
-    ASSERT_FALSE(tFixedSideSets.empty());
-    ASSERT_STREQ("FixedSidesets", tFixedSideSets.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"2"}, tFixedSideSets);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "2");
 }
 
 TEST(PlatoTestXMLGenerator, AppendFixedNodesetsIdentificationNumbersToOperation_NoFixedNodesets)
@@ -228,12 +227,13 @@ TEST(PlatoTestXMLGenerator, AppendFixedNodesetsIdentificationNumbersToOperation)
     auto tFixedNodesets = tDocument.child("FixedNodesets");
     ASSERT_FALSE(tFixedNodesets.empty());
     ASSERT_STREQ("FixedNodesets", tFixedNodesets.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"1"}, tFixedNodesets);
+    auto tIndexNode = tFixedNodesets.child("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "1");
 
-    tFixedNodesets = tFixedNodesets.next_sibling("FixedNodesets");
-    ASSERT_FALSE(tFixedNodesets.empty());
-    ASSERT_STREQ("FixedNodesets", tFixedNodesets.name());
-    PlatoTestXMLGenerator::test_children({"Index"}, {"2"}, tFixedNodesets);
+    tIndexNode = tIndexNode.next_sibling("Index");
+    ASSERT_FALSE(tIndexNode.empty());
+    ASSERT_STREQ(tIndexNode.child_value(), "2");
 }
 
 TEST(PlatoTestXMLGenerator, AppendComputeVolumeGradientToPlatoMainOperation)
