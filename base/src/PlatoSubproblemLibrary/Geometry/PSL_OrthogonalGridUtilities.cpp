@@ -204,50 +204,36 @@ std::vector<std::vector<int>> OrthogonalGridUtilities::getContainingGridElement(
     return tGridIndicies;
 }
 
-std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aWhichDim, const Vector& aPoint) const
+std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aDim, const Vector& aPoint) const
 {
+    if(aDim < 0 || aDim > 2)
+        throw(std::domain_error("OrthogonalGridUtilities: Provided index must be between 0 and 2"));
+
     //use cramers rule to compute change of basis for input point
     std::vector<int> tSurroundingIndices;
     double tDenominator = determinant3X3(mUBasisVector,mVBasisVector,mWBasisVector);
 
-    double tUCoordinate = determinant3X3(aPoint,mVBasisVector,mWBasisVector)/tDenominator;
-    double tVCoordinate = determinant3X3(mUBasisVector,aPoint,mWBasisVector)/tDenominator;
-    // double tWCoordinate = determinant3X3(mUBasisVector,mVBasisVector,aPoint)/tDenominator;
+    double tCoordinate;
+    if(aDim == 0)
+        tCoordinate = determinant3X3(aPoint,mVBasisVector,mWBasisVector)/tDenominator;
+    else if(aDim == 1)
+        tCoordinate = determinant3X3(mUBasisVector,aPoint,mWBasisVector)/tDenominator;
+    else
+        tCoordinate = determinant3X3(mUBasisVector,mVBasisVector,aPoint)/tDenominator;
 
     auto tDimensions = getGridDimensions();
 
-    double tULength = mMaxUVWCoords(0) - mMinUVWCoords(0);
-    double tVLength = mMaxUVWCoords(1) - mMinUVWCoords(1);
-    // double tWLength = mMaxUVWCoords(2) - mMinUVWCoords(2);
+    double tLength = mMaxUVWCoords(aDim) - mMinUVWCoords(aDim);
 
-
-    for(int i = 0; i < tDimensions[0]-1; ++i)
+    for(int i = 0; i < tDimensions[aDim]-1; ++i)
     {
-        double tFloor = mMinUVWCoords(0) + i*tULength/mNumElementsInEachDirection[0];
-        double tCeiling = mMinUVWCoords(0) + (i+1)*tULength/mNumElementsInEachDirection[0];
+        double tFloor = mMinUVWCoords(aDim) + i*tLength/mNumElementsInEachDirection[aDim];
+        double tCeiling = mMinUVWCoords(aDim) + (i+1)*tLength/mNumElementsInEachDirection[aDim];
 
-        if(tFloor <= tUCoordinate && tUCoordinate < tCeiling)
+        if(tFloor <= tCoordinate && tCoordinate < tCeiling)
         {
-            for(int j = 0; j < tDimensions[1]-1; ++j)
-            {
-                tFloor = mMinUVWCoords(1) + j*tVLength/mNumElementsInEachDirection[1];
-                tCeiling = mMinUVWCoords(1) + (j+1)*tVLength/mNumElementsInEachDirection[1];
-                if(tFloor <= tVCoordinate && tVCoordinate < tCeiling)
-                {
-                    // tGridIndicies.push_back({i,j,0});
-                    // tGridIndicies.push_back({i+1,j,0});
-                    // tGridIndicies.push_back({i,j+1,0});
-                    // tGridIndicies.push_back({i+1,j+1,0});
-                }
-                else
-                {
-                    continue;
-                }
-            }
-        }
-        else
-        {
-            continue;
+            tSurroundingIndices.push_back(i);
+            tSurroundingIndices.push_back(i+1);
         }
     }
 

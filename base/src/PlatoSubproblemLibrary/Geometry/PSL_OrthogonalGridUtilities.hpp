@@ -69,6 +69,8 @@ class OrthogonalGridUtilities
 
         std::vector<std::vector<int>> getSupportIndices(const int& i, const int& j, const int& k) const;
         std::vector<std::vector<int>> getSupportIndices(const std::vector<int>& aIndex) const;
+
+        std::vector<int> getSurroundingIndices(const int& aDim, const Vector& aPoint) const;
         
     private:
 
@@ -86,8 +88,6 @@ class OrthogonalGridUtilities
         std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
                                                            const Vector& aMinUVWCoords,
                                                            const double& aTargetEdgeLength) const;
-
-        std::vector<int> getSurroundingIndices(const int& aWhichDim, const Vector& aPoint) const;
 
         const Vector& mUBasisVector;
         const Vector& mVBasisVector;
