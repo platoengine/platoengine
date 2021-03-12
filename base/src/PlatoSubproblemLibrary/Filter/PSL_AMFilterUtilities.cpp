@@ -85,24 +85,27 @@ double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int
     return computeGridPointPrintableDensity(aIndex[0],aIndex[1],aIndex[2],aTetMeshBlueprintDensity,aGridSupportDensity);
 }
 
-// double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex,
+                                                         AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity,
+                                                         const std::vector<double>& aGridSupportDensity) const
+{
+    auto tCoordinates = mTetUtilities.getCoordinates();
+    std::vector<std::vector<int>> tGridIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
+    // use printable density at each grid point to compute tet node printable density
+    return 0;
+}
 
-// {
-//     // get grid element that tet node belongs to
-//     // use printable density at each grid point to compute tet node printable density
-//     return 0;
-// }
+void AMFilterUtilities::computePrintableDensity(AbstractInterface::ParallelVector* aDensity) const
+{
+    std::vector<double> tGridSupportDensity;
+    computeGridSupportDensity(aDensity,tGridSupportDensity);
 
-// void AMFilterUtilities::computePrintableDensity(AbstractInterface::ParallelVector* aDensity)
-// {
-//     // compute and store grid support density
+    for(size_t i = 0; i < aDensity->get_length(); ++i)
+    {
+        aDensity->set_value(i, computeTetNodePrintableDensity(i, aDensity, tGridSupportDensity));
+    }
+}
 
-//     for(size_t i = 0; i < aDensity->get_length(); ++i)
-//     {
-//         aDensity->set_value(i, computeTetNodePrintableDensity(i, aDensity));
-//     }
-// }
-//
 double smax(const std::vector<double>& aArguments, const double& aPNorm)
 {
     double tSmax = 0;

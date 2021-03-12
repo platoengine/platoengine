@@ -326,5 +326,32 @@ PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
     EXPECT_EQ(tUtilities.getSupportIndices(2,2,2).size(),3u);
 }
 
+PSL_TEST(OrthogonalGridUtilities, getContainingGridElement)
+{
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<int> tNumElements = {2,2,2};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    Vector tPoint({0.25,0.5,0.75});
+
+    std::vector<std::vector<int>> tGridIndicies = tUtilities.getContainingGridElement(tPoint);
+
+    EXPECT_EQ(tGridIndicies.size(),4u);
+    EXPECT_EQ(tGridIndicies[0],std::vector<int>({0,0,0}));
+    EXPECT_EQ(tGridIndicies[1],std::vector<int>({1,0,0}));
+    EXPECT_EQ(tGridIndicies[2],std::vector<int>({0,1,0}));
+    EXPECT_EQ(tGridIndicies[3],std::vector<int>({1,1,0}));
+    // EXPECT_EQ(tGridIndicies[4],std::vector<int>({0,0,0}));
+    // EXPECT_EQ(tGridIndicies[5],std::vector<int>({1,0,0}));
+    // EXPECT_EQ(tGridIndicies[6],std::vector<int>({0,1,0}));
+    // EXPECT_EQ(tGridIndicies[7],std::vector<int>({1,1,0}));
+}
+
 }
 }

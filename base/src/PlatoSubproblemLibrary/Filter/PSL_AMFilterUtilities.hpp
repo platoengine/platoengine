@@ -28,6 +28,10 @@ public:
         mTetUtilities.getTetIDForEachPoint(mGridPointCoordinates,mContainingTetID);
     }
 
+    void computePrintableDensity(AbstractInterface::ParallelVector* aDensity) const;
+    double computeTetNodePrintableDensity(const int& aTetNodeIndex,
+                                          AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity,
+                                          const std::vector<double>& aGridSupportDensity) const;
     double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
     double computeGridPointBlueprintDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
     void computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const;

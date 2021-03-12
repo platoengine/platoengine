@@ -59,6 +59,7 @@ class OrthogonalGridUtilities
                                                                              mNumElementsInEachDirection[2]+1});}
 
         void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const;
+        std::vector<std::vector<int>> getContainingGridElement(const Vector& aPoint) const;
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& aSerializedIndex);
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& i, const int& j, const int& k);
         // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const std::vector<int>& aIndex);
@@ -86,6 +87,8 @@ class OrthogonalGridUtilities
                                                            const Vector& aMinUVWCoords,
                                                            const double& aTargetEdgeLength) const;
 
+        std::vector<int> getSurroundingIndices(const int& aWhichDim, const Vector& aPoint) const;
+
         const Vector& mUBasisVector;
         const Vector& mVBasisVector;
         const Vector& mWBasisVector;
@@ -95,5 +98,6 @@ class OrthogonalGridUtilities
         std::vector<int> mNumElementsInEachDirection;
 
 };
+
 
 }
