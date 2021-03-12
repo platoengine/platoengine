@@ -91,7 +91,7 @@ double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeInde
 {
     auto tCoordinates = mTetUtilities.getCoordinates();
     std::vector<std::vector<int>> tGridIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
-    // use printable density at each grid point to compute tet node printable density
+    // trilinear interpolation of density at grid points gives printable density
     return 0;
 }
 
