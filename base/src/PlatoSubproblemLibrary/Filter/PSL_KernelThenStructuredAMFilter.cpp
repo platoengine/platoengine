@@ -20,12 +20,19 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     if(aDensity->get_length() != tCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    // mAMFilterUtilities->computePrintableDensity(aDensity);
+    //std::vector<double> tGridBluePrintDensity;
+    //mAMFilterUtilities->computeGridBlueprintDensity(aDensity,tGridBluePrintDensity); 
+    //std::vector<double> tGridSupportDensity;
+    //mAMFilterUtilities->computeGridSupportDensity(tGridBluePrintDensity,tGridSupportDensity);
+    //std::vector<double> tGridPrintableDensity;
+    //mAMFilterUtilities->computeGridPrintableDensity(tGridSupportDensity,tGridPrintableDensity);
+    //mAMFilterUtilities->computeTetMeshPrintableDensity(tGridPrintableDensity,aDensity);
 }
 
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
 {
-    ;
+    //apply chain rule to 3 transformations - T2G, AMFilterGrid, G2T 
+    //i.e. printableDensity = computeTetPrintableDensity(computeGridPrintableDensity(computeGridBlueprintDensity(aBlueprintDensity)))
 }
 
 void KernelThenStructuredAMFilter::buildStructuredGrid(const std::vector<std::vector<double>>& aCoordinates, const std::vector<std::vector<int>>& aConnectivity)

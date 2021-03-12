@@ -35,6 +35,24 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const std::vector<int
     return computeGridPointBlueprintDensity(aIndex[0], aIndex[1], aIndex[2], aTetMeshBlueprintDensity);
 }
 
+void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridBluePrintDensity) const
+{
+    aGridBluePrintDensity.resize(aTetMeshBlueprintDensity->get_length());
+
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                aGridBluePrintDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointBlueprintDensity(i,j,k,aTetMeshBlueprintDensity);
+            }
+        }
+    }
+}
+
 void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
 {
     auto tGridDimensions = mGridUtilities.getGridDimensions();
@@ -66,6 +84,37 @@ void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVec
     }
 }
 
+void AMFilterUtilities::computeGridSupportDensity(const std::vector<double>& aGridBluePrintDensity, std::vector<double>& aGridSupportDensity) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+
+    aGridSupportDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                if(k == 0)
+                {
+                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1;
+                }
+                else
+                {
+                    auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+                    std::vector<double> tSupportDensityBelow;
+                    for(auto tSupportIndex : tSupportIndices)
+                    {
+                        tSupportDensityBelow.push_back(aGridBluePrintDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
+                    }
+                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = smax(tSupportDensityBelow,mPNorm);
+                }
+            }
+        }
+    }
+}
+
 double AMFilterUtilities::computeGridPointPrintableDensity(const int& i, const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
 {
     if(aGridSupportDensity.size() != mGridPointCoordinates.size())
@@ -86,23 +135,20 @@ double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int
 }
 
 double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex,
-                                                         AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity,
-                                                         const std::vector<double>& aGridSupportDensity) const
+                                                         const std::vector<double>& aGridPrintableDensity,
+                                                         AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 {
     auto tCoordinates = mTetUtilities.getCoordinates();
     std::vector<std::vector<int>> tGridIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
-    // trilinear interpolation of density at grid points gives printable density
+    // trilinear interpolation of printable density at grid points gives printable density
     return 0;
 }
 
-void AMFilterUtilities::computePrintableDensity(AbstractInterface::ParallelVector* aDensity) const
+void AMFilterUtilities::computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const
 {
-    std::vector<double> tGridSupportDensity;
-    computeGridSupportDensity(aDensity,tGridSupportDensity);
-
     for(size_t i = 0; i < aDensity->get_length(); ++i)
     {
-        aDensity->set_value(i, computeTetNodePrintableDensity(i, aDensity, tGridSupportDensity));
+        aDensity->set_value(i, computeTetNodePrintableDensity(i, aGridPrintableDensity, aDensity));
     }
 }
 
