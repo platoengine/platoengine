@@ -125,8 +125,8 @@ PSL_TEST(AMFilterUtilities,computeGridBlueprintDensity)
 
     example::Interface_ParallelVector tVector({1,1,1,0});
 
-    std::vector<double> tGridBluePrintDensity;
-    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity);
+    std::vector<double> tGridBlueprintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity);
 
     for(int i = 0; i < tGridDimensions[0]; ++i)
     {
@@ -134,7 +134,7 @@ PSL_TEST(AMFilterUtilities,computeGridBlueprintDensity)
         {
             for(int k = 0; k < tGridDimensions[2]; ++k)
             {
-                double tDensity = tGridBluePrintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
+                double tDensity = tGridBlueprintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
                 if(isPointInTetrahedron(tCoordinates,tConnectivity[0],tGridCoordinates[tGridUtilities.getSerializedIndex(i,j,k)]))
                 {
                     double tGold = 1 - (k*0.1);
@@ -244,10 +244,10 @@ PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
 
     example::Interface_ParallelVector tVector({1,1,0,1});
 
-    std::vector<double> tGridBluePrintDensity;
-    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity); 
+    std::vector<double> tGridBlueprintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity); 
     std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(tGridBluePrintDensity, tGridSupportDensity);
+    tAMFilterUtilities.computeGridSupportDensity(tGridBlueprintDensity, tGridSupportDensity);
 
     EXPECT_EQ(tGridSupportDensity.size(),(unsigned int) tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
@@ -311,15 +311,17 @@ PSL_TEST(AMFilterUtilities, computeGridPointPrintableDensity)
 
     example::Interface_ParallelVector tVector({1,1,0,1});
 
-    std::vector<double> tGridBluePrintDensity;
-    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity); 
+    std::vector<double> tGridBlueprintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity); 
     std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(tGridBluePrintDensity, tGridSupportDensity);
+    tAMFilterUtilities.computeGridSupportDensity(tGridBlueprintDensity, tGridSupportDensity);
 
     // wrong dimensions of index
-    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0},&tVector,tGridSupportDensity),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0},tGridBlueprintDensity,tGridSupportDensity),std::domain_error);
     // wrong size of support density vector
-    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0,0},&tVector,{0.0,0.0}),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0,0},tGridBlueprintDensity,{0.0,0.0}),std::domain_error);
+    // wrong size of blueprint density vector
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0,0},{0.0,0.0},tGridSupportDensity),std::domain_error);
 
     for(int i = 0; i < tGridDimensions[0]; ++i)
     {
@@ -327,9 +329,9 @@ PSL_TEST(AMFilterUtilities, computeGridPointPrintableDensity)
         {
             for(int k = 1; k < tGridDimensions[2]; ++k)
             {
-                double tPrintableDensity = tAMFilterUtilities.computeGridPointPrintableDensity(i,j,k,&tVector,tGridSupportDensity);
-                double tBluePrintDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(i,j,k,&tVector);
-                double tGold = smin(tBluePrintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
+                double tPrintableDensity = tAMFilterUtilities.computeGridPointPrintableDensity(i,j,k,tGridBlueprintDensity,tGridSupportDensity);
+                double tBlueprintDensity = tGridBlueprintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
+                double tGold = smin(tBlueprintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
                 EXPECT_DOUBLE_EQ(tPrintableDensity,tGold);
             }
         }

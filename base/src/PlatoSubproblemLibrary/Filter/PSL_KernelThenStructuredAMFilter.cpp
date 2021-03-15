@@ -20,12 +20,12 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     if(aDensity->get_length() != tCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    //std::vector<double> tGridBluePrintDensity;
-    //mAMFilterUtilities->computeGridBlueprintDensity(aDensity,tGridBluePrintDensity); 
+    //std::vector<double> tGridBlueprintDensity;
+    //mAMFilterUtilities->computeGridBlueprintDensity(aDensity,tGridBlueprintDensity); 
     //std::vector<double> tGridSupportDensity;
-    //mAMFilterUtilities->computeGridSupportDensity(tGridBluePrintDensity,tGridSupportDensity);
+    //mAMFilterUtilities->computeGridSupportDensity(tGridBlueprintDensity,tGridSupportDensity);
     //std::vector<double> tGridPrintableDensity;
-    //mAMFilterUtilities->computeGridPrintableDensity(tGridSupportDensity,tGridPrintableDensity);
+    //mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
     //mAMFilterUtilities->computeTetMeshPrintableDensity(tGridPrintableDensity,aDensity);
 }
 
