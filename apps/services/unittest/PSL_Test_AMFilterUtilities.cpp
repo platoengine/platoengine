@@ -244,8 +244,10 @@ PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
 
     example::Interface_ParallelVector tVector({1,1,0,1});
 
+    std::vector<double> tGridBluePrintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity); 
     std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(&tVector, tGridSupportDensity);
+    tAMFilterUtilities.computeGridSupportDensity(tGridBluePrintDensity, tGridSupportDensity);
 
     EXPECT_EQ(tGridSupportDensity.size(),(unsigned int) tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
@@ -309,8 +311,10 @@ PSL_TEST(AMFilterUtilities, computeGridPointPrintableDensity)
 
     example::Interface_ParallelVector tVector({1,1,0,1});
 
+    std::vector<double> tGridBluePrintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity); 
     std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(&tVector, tGridSupportDensity);
+    tAMFilterUtilities.computeGridSupportDensity(tGridBluePrintDensity, tGridSupportDensity);
 
     // wrong dimensions of index
     EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0},&tVector,tGridSupportDensity),std::domain_error);

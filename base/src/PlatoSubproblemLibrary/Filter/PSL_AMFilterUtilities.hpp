@@ -28,18 +28,21 @@ public:
         mTetUtilities.getTetIDForEachPoint(mGridPointCoordinates,mContainingTetID);
     }
 
-    void computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const;
-    double computeTetNodePrintableDensity(const int& aTetNodeIndex,
-                                          const std::vector<double>& aGridPrintableDensity,
-                                          AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
     void computeGridBlueprintDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridBluePrintDensity) const;
     double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
     double computeGridPointBlueprintDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
-    void computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const;
+
+    // void computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const;
     void computeGridSupportDensity(const std::vector<double>& aGridBluePrintDensity, std::vector<double>& aGridSupportDensity) const;
 
     double computeGridPointPrintableDensity(const int& i, const int& j, const int& k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const;
     double computeGridPointPrintableDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, const std::vector<double>& aGridSupportDensity) const;
+    void computeGridPrintableDensity(const std::vector<double>& tGridSupportDensity, std::vector<double>& tGridPrintableDensity);
+
+    void computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const;
+    double computeTetNodePrintableDensity(const int& aTetNodeIndex,
+            const std::vector<double>& aGridPrintableDensity,
+            AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
 
 
 private:

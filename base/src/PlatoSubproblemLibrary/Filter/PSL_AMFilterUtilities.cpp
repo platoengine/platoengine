@@ -52,36 +52,36 @@ void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelV
     }
 }
 
-void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
-{
-    auto tGridDimensions = mGridUtilities.getGridDimensions();
+// void AMFilterUtilities::computeGridSupportDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridSupportDensity) const
+// {
+//     auto tGridDimensions = mGridUtilities.getGridDimensions();
 
-    aGridSupportDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+//     aGridSupportDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
-    {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
-        {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
-            {
-                if(k == 0)
-                {
-                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1;
-                }
-                else
-                {
-                    auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
-                    std::vector<double> tSupportDensityBelow;
-                    for(auto tSupportIndex : tSupportIndices)
-                    {
-                        tSupportDensityBelow.push_back(computeGridPointBlueprintDensity(tSupportIndex,aTetMeshBlueprintDensity));
-                    }
-                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = smax(tSupportDensityBelow,mPNorm);
-                }
-            }
-        }
-    }
-}
+//     for(int i = 0; i < tGridDimensions[0]; ++i)
+//     {
+//         for(int j = 0; j < tGridDimensions[1]; ++j)
+//         {
+//             for(int k = 0; k < tGridDimensions[2]; ++k)
+//             {
+//                 if(k == 0)
+//                 {
+//                     aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1;
+//                 }
+//                 else
+//                 {
+//                     auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+//                     std::vector<double> tSupportDensityBelow;
+//                     for(auto tSupportIndex : tSupportIndices)
+//                     {
+//                         tSupportDensityBelow.push_back(computeGridPointBlueprintDensity(tSupportIndex,aTetMeshBlueprintDensity));
+//                     }
+//                     aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = smax(tSupportDensityBelow,mPNorm);
+//                 }
+//             }
+//         }
+//     }
+// }
 
 void AMFilterUtilities::computeGridSupportDensity(const std::vector<double>& aGridBluePrintDensity, std::vector<double>& aGridSupportDensity) const
 {
