@@ -1199,5 +1199,16 @@ PSL_TEST(FreeHelpers, determinant3X3)
     EXPECT_DOUBLE_EQ(tDeterminant,-36.504);
 }
 
+PSL_TEST(FreeHelpers, interpolate1D)
+{
+    double a = 2.0;
+    double b = 5.0;
+
+    EXPECT_DOUBLE_EQ(interpolate1D(a,b,0.0),2.0);
+    EXPECT_DOUBLE_EQ(interpolate1D(a,b,1.0),5.0);
+    EXPECT_DOUBLE_EQ(interpolate1D(a,b,0.5),3.5);
+    EXPECT_DOUBLE_EQ(interpolate1D(a,b,2.0/3.0),4.0);
+}
+
 }
 }

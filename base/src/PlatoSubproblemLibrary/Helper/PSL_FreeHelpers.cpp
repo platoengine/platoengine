@@ -294,4 +294,12 @@ double determinant3X3(const Vector& aRow1,
     return tTerm1 - tTerm2 + tTerm3;
 }
 
+double interpolate1D(const double& a, const double& b, const double &t)
+{
+    if(t < 0.0 || t > 1.0)
+        throw(std::domain_error("FreeHelpers::interpolate1D: t must be between 0 and 1"));
+
+    return (1-t)*a + t*b;
+}
+
 }

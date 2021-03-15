@@ -315,6 +315,8 @@ double determinant3X3(const Vector& aRow1,
                       const Vector& aRow2,
                       const Vector& aRow3);
 
+double interpolate1D(const double& a, const double& b, const double& t);
+
 double getTimeInSeconds();
 
 std::string remove_a_filename_prefix(const std::string& full_filename);
