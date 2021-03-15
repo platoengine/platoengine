@@ -105,9 +105,22 @@ double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int
     return computeGridPointPrintableDensity(aIndex[0],aIndex[1],aIndex[2],aGridBlueprintDensity,aGridSupportDensity);
 }
 
-void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& tGridBlueprintDensity, const std::vector<double>& tGridSupportDensity, std::vector<double>& tGridPrintableDensity) const
+void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& aGridBlueprintDensity, const std::vector<double>& aGridSupportDensity, std::vector<double>& aGridPrintableDensity) const
 {
-    ;
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+
+    aGridPrintableDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                aGridPrintableDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointPrintableDensity(i,j,k,aGridBlueprintDensity,aGridSupportDensity);
+            }
+        }
+    }
 }
 
 double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex,
