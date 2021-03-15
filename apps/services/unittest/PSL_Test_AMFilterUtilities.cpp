@@ -89,6 +89,68 @@ PSL_TEST(AMFilterUtilities,construction)
     EXPECT_THROW(AMFilterUtilities(tTetUtilities,tGridUtilities, 0.5),std::domain_error);
 }
 
+PSL_TEST(AMFilterUtilities,computeGridBlueprintDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 0.1;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<Vector> tGridCoordinates;
+    tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
+
+    example::Interface_ParallelVector tVector({1,1,1,0});
+
+    std::vector<double> tGridBluePrintDensity;
+    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBluePrintDensity);
+
+    for(int i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(int j = 0; j < tGridDimensions[1]; ++j)
+        {
+            for(int k = 0; k < tGridDimensions[2]; ++k)
+            {
+                double tDensity = tGridBluePrintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
+                if(isPointInTetrahedron(tCoordinates,tConnectivity[0],tGridCoordinates[tGridUtilities.getSerializedIndex(i,j,k)]))
+                {
+                    double tGold = 1 - (k*0.1);
+                    EXPECT_DOUBLE_EQ(tDensity,tGold);
+                }
+                else
+                {
+                    EXPECT_DOUBLE_EQ(tDensity,0);
+                }
+            }
+        }
+    }
+
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointBlueprintDensity({0,1},&tVector),std::domain_error);
+}
+
 PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
 {
     // build TetMeshUtilities

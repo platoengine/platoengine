@@ -37,9 +37,8 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const std::vector<int
 
 void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridBluePrintDensity) const
 {
-    aGridBluePrintDensity.resize(aTetMeshBlueprintDensity->get_length());
-
     auto tGridDimensions = mGridUtilities.getGridDimensions();
+    aGridBluePrintDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
     for(int i = 0; i < tGridDimensions[0]; ++i)
     {
