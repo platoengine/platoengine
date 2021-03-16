@@ -59,10 +59,9 @@ class OrthogonalGridUtilities
                                                                              mNumElementsInEachDirection[2]+1});}
 
         void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const;
+        Vector computeGridPointXYZCoordinates(const std::vector<int>& aIndex) const;
+        Vector computeGridPointXYZCoordinates(const int& i, const int& j, const int& k) const;
         std::vector<std::vector<int>> getContainingGridElement(const Vector& aPoint) const;
-        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& aSerializedIndex);
-        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const int& i, const int& j, const int& k);
-        // void computeGridPointXYZCoordinates(std::vector<Vector>& aXYZCoordinates, const std::vector<int>& aIndex);
 
         int getSerializedIndex(const int& i, const int& j, const int& k) const;
         int getSerializedIndex(const std::vector<int>& aIndex) const;
@@ -71,6 +70,10 @@ class OrthogonalGridUtilities
         std::vector<std::vector<int>> getSupportIndices(const std::vector<int>& aIndex) const;
 
         std::vector<int> getSurroundingIndices(const int& aDim, const Vector& aPoint) const;
+
+        double interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
+                                 const std::vector<double>& aScalarValues,
+                                 const Vector& aPoint) const;
         
     private:
 
@@ -88,6 +91,8 @@ class OrthogonalGridUtilities
         std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
                                                            const Vector& aMinUVWCoords,
                                                            const double& aTargetEdgeLength) const;
+
+        void checkIndexFormat(const std::vector<std::vector<int>>& aContainingElementIndicies) const;
 
         const Vector& mUBasisVector;
         const Vector& mVBasisVector;

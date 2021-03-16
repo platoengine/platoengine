@@ -124,20 +124,33 @@ void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& a
 }
 
 double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex,
-                                                         const std::vector<double>& aGridPrintableDensity,
-                                                         AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
+                                                         const std::vector<double>& aGridPrintableDensity) const
 {
     auto tCoordinates = mTetUtilities.getCoordinates();
-    std::vector<std::vector<int>> tGridIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
-    // trilinear interpolation of printable density at grid points gives printable density
-    return 0;
+
+    if(aTetNodeIndex < 0 || aTetNodeIndex >= (int) tCoordinates.size())
+        throw(std::domain_error("AMFilterUtilities: Index must be between 0 and number of nodes on tet mesh"));
+
+    std::vector<std::vector<int>> tContainingElementIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
+
+    std::vector<double> tContainingElementDensities;
+
+    for(auto tIndex : tContainingElementIndicies)
+    {
+        tContainingElementDensities.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tIndex)]);
+    }
+
+    return mGridUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,Vector(tCoordinates[aTetNodeIndex]));;
 }
 
 void AMFilterUtilities::computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const
 {
+    if(aDensity->get_length() != mTetUtilities.getCoordinates().size())
+        throw(std::domain_error("AMFilterUtilities: Tet mesh density vector does not match the mesh size"));
+
     for(size_t i = 0; i < aDensity->get_length(); ++i)
     {
-        aDensity->set_value(i, computeTetNodePrintableDensity(i, aGridPrintableDensity, aDensity));
+        aDensity->set_value(i, computeTetNodePrintableDensity(i, aGridPrintableDensity));
     }
 }
 

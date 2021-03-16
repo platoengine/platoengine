@@ -10,6 +10,7 @@ set(${LIB_NAME}_SOURCES
     PSL_Vector.cpp
     PSL_Triangle.cpp
     PSL_OrthogonalGridUtilities.cpp
+    PSL_RegularHex8.cpp
     )
 
 set(${LIB_NAME}_HEADERS 
@@ -19,6 +20,7 @@ set(${LIB_NAME}_HEADERS
     PSL_Vector.hpp
     PSL_Triangle.hpp
     PSL_OrthogonalGridUtilities.hpp
+    PSL_RegularHex8.hpp
     )
 
 if( AMFILTER_ENABLED )

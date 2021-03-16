@@ -411,5 +411,102 @@ PSL_TEST(OrthogonalGridUtilities, getSurroundingIndices)
     EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
 }
 
+PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
+{
+    Vector tUBasisVector({1,0,0});
+    tUBasisVector.normalize();
+    Vector tVBasisVector({0,1,0});
+    tVBasisVector.normalize();
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMaxUVWCoords({1.0,1.0,1.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<int> tNumElements = {1,1,1};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    std::vector<std::vector<int>> tContainingElementIndicies;
+    tContainingElementIndicies.push_back(std::vector<int>({0,0,0}));
+    tContainingElementIndicies.push_back(std::vector<int>({1,0,0}));
+    tContainingElementIndicies.push_back(std::vector<int>({0,1,0}));
+    tContainingElementIndicies.push_back(std::vector<int>({1,1,0}));
+    tContainingElementIndicies.push_back(std::vector<int>({0,0,1}));
+    tContainingElementIndicies.push_back(std::vector<int>({1,0,1}));
+    tContainingElementIndicies.push_back(std::vector<int>({0,1,1}));
+    tContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
+
+    std::vector<double> tContainingElementDensities = {1, 0, 0, 0, 0, 0, 0, 0};
+
+    Vector tPoint({0,0,0});
+    EXPECT_NO_THROW(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint));
+
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({1,0,0});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({0,1,0});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({1,1,0});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({0,0,1});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({1,0,1});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    tPoint = Vector({0,1,1});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    
+    tPoint = Vector({1,1,1});
+    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+
+    // incorrect number of indices
+    std::vector<std::vector<int>> tBogusContainingElementIndicies;
+    EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
+
+    // wrong number of dimensions
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1}));
+    EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
+
+
+    // indices out of order
+    tBogusContainingElementIndicies.clear();
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
+    EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
+
+    //out of bounds
+    tBogusContainingElementIndicies.clear();
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,2,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({2,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({2,2,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({2,1,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({1,2,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<int>({2,2,2}));
+    EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::out_of_range);
+
+    // incorrect number of scalars
+    std::vector<double> tBogusContainingElementDensities = {1,0,0};
+    EXPECT_THROW(tUtilities.interpolateScalar(tContainingElementIndicies,tBogusContainingElementDensities,tPoint),std::domain_error);
+}
+
 }
 }

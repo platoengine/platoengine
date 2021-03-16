@@ -96,13 +96,6 @@ std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const s
 
 void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const
 {
-    double tULength = mMaxUVWCoords(0) - mMinUVWCoords(0);
-    double tVLength = mMaxUVWCoords(1) - mMinUVWCoords(1);
-    double tWLength = mMaxUVWCoords(2) - mMinUVWCoords(2);
-
-    std::vector<double> tLength = {tULength,tVLength,tWLength};
-    std::vector<Vector> tBasis = {mUBasisVector,mVBasisVector,mWBasisVector};
-
     auto tDimension = getGridDimensions();
 
     aXYZCoordinates.resize(tDimension[0] * tDimension[1] * tDimension[2]);
@@ -113,24 +106,40 @@ void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXY
         {
             for(int k = 0; k < tDimension[2]; ++k)
             {
-
-                Vector tXYZCoordinates({0.0,0.0,0.0});
-                Vector tUVWCoordinates({0.0,0.0,0.0});
-
-                std::vector<int> tIndex = {i,j,k};
-
-                for(int tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
-                {
-                    double tUVWCoordinate = mMinUVWCoords(tTempIndex) + tIndex[tTempIndex]*tLength[tTempIndex]/mNumElementsInEachDirection[tTempIndex]; 
-                    tUVWCoordinates.set(tTempIndex,tUVWCoordinate);
-                }
-
-                tXYZCoordinates = tUVWCoordinates(0)*mUBasisVector + tUVWCoordinates(1)*mVBasisVector + tUVWCoordinates(2)*mWBasisVector;
-
-                aXYZCoordinates[getSerializedIndex(i,j,k)] = tXYZCoordinates;
+                aXYZCoordinates[getSerializedIndex(i,j,k)] = computeGridPointXYZCoordinates(i,j,k);
             }
         }
     }
+}
+
+Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const std::vector<int>& aIndex) const
+{
+    if(aIndex.size() != 3)
+        throw(std::domain_error("OrthogonalGridUtilities::computeGridPointXYZCoordinates: Index must have 3 dimensions"));
+
+    double tULength = mMaxUVWCoords(0) - mMinUVWCoords(0);
+    double tVLength = mMaxUVWCoords(1) - mMinUVWCoords(1);
+    double tWLength = mMaxUVWCoords(2) - mMinUVWCoords(2);
+
+    std::vector<double> tLength = {tULength,tVLength,tWLength};
+
+    Vector tUVWCoordinates({0.0,0.0,0.0});
+
+    for(int tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
+    {
+        double tUVWCoordinate = mMinUVWCoords(tTempIndex) + aIndex[tTempIndex]*tLength[tTempIndex]/mNumElementsInEachDirection[tTempIndex]; 
+        tUVWCoordinates.set(tTempIndex,tUVWCoordinate);
+    }
+
+    Vector tXYZCoordinates = tUVWCoordinates(0)*mUBasisVector + tUVWCoordinates(1)*mVBasisVector + tUVWCoordinates(2)*mWBasisVector;
+
+    return tXYZCoordinates;
+}
+
+Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const int& i, const int& j, const int& k) const
+{
+    std::vector<int> tIndex({i,j,k});
+    return computeGridPointXYZCoordinates(tIndex);
 }
 
 void OrthogonalGridUtilities::checkBasis(const Vector& aUBasisVector,
@@ -238,6 +247,82 @@ std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aDim,
     }
 
     return tSurroundingIndices;
+}
+
+void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<int>>& aContainingElementIndicies) const
+{
+    if(aContainingElementIndicies.size() != 8u)
+        throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of indices provided"));
+
+    for(auto tIndex : aContainingElementIndicies)
+    {
+        if(tIndex.size() != 3)
+            throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of dimensions in provided index"));
+    }
+
+    std::vector<int> tIndex0 = aContainingElementIndicies[0];
+
+    if(tIndex0[0] < 0 || tIndex0[0] >= mNumElementsInEachDirection[0]
+       || tIndex0[1] < 0 || tIndex0[1] >= mNumElementsInEachDirection[1]
+       || tIndex0[2] < 0 || tIndex0[2] >= mNumElementsInEachDirection[2])
+    {
+        throw(std::out_of_range("OrthogonalGridUtilities: provided indices must be between zero and the number of grid elements in each dimension"));
+    }
+
+    //provided indices must have the following ordering
+    //{a,b,c};
+    //{a+1,b,c};
+    //{a,b+1,c};
+    //{a+1,b+1,c};
+    //{a,b,c+1};
+    //{a+1,b,c+1};
+    //{a,b+1,c+1};
+    //{a+1,b+1,c+1};
+    
+    std::vector<std::vector<int>> tTestIndices;
+    
+    for(auto tIndex : aContainingElementIndicies)
+    {
+        tTestIndices.push_back({tIndex[0] - tIndex0[0], tIndex[1] - tIndex0[1], tIndex[2] - tIndex0[2]});
+    }
+
+    if(tTestIndices[0][0] != 0 || tTestIndices[0][1] != 0 || tTestIndices[0][2] != 0
+    || tTestIndices[1][0] != 1 || tTestIndices[1][1] != 0 || tTestIndices[1][2] != 0
+    || tTestIndices[2][0] != 0 || tTestIndices[2][1] != 1 || tTestIndices[2][2] != 0
+    || tTestIndices[3][0] != 1 || tTestIndices[3][1] != 1 || tTestIndices[3][2] != 0
+    || tTestIndices[4][0] != 0 || tTestIndices[4][1] != 0 || tTestIndices[4][2] != 1
+    || tTestIndices[5][0] != 1 || tTestIndices[5][1] != 0 || tTestIndices[5][2] != 1
+    || tTestIndices[6][0] != 0 || tTestIndices[6][1] != 1 || tTestIndices[6][2] != 1
+    || tTestIndices[7][0] != 1 || tTestIndices[7][1] != 1 || tTestIndices[7][2] != 1)
+    {
+        throw(std::domain_error("OrthogonalGridUtilities: Indices not formatted correctly"));
+    }
+
+}
+
+double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
+                                                  const std::vector<double>& aScalarValues,
+                                                  const Vector& aPoint) const
+{
+    checkIndexFormat(aContainingElementIndicies);
+
+    if(aScalarValues.size() != 8u)
+        throw(std::domain_error("OrthogonalGridUtilities::interpolateScalar: 8 scalar values must be provided"));
+
+    // double tA0 = a0(aContainingElementIndicies,aScalarValues);
+    // double tA1 = a1(aContainingElementIndicies,aScalarValues);
+    // double tA2 = a2(aContainingElementIndicies,aScalarValues);
+    // double tA3 = a3(aContainingElementIndicies,aScalarValues);
+    // double tA4 = a4(aContainingElementIndicies,aScalarValues);
+    // double tA5 = a5(aContainingElementIndicies,aScalarValues);
+    // double tA6 = a6(aContainingElementIndicies,aScalarValues);
+    // double tA7 = a7(aContainingElementIndicies,aScalarValues);
+
+    // return tA0 + tA1*aPoint.X() + tA2*aPoint.Y() + tA3*aPoint.Z() 
+    //      + tA4*aPoint.X()*aPoint.Y() + tA5*aPoint.X()*aPoint.Z() + tA6*aPoint.Y()*aPoint.Z()
+    //      + tA7*aPoint.X()*aPoint.Y()*aPoint.Z();
+    
+    return 0;
 }
 
 }
