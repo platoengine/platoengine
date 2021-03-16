@@ -129,7 +129,9 @@ double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeInde
     auto tCoordinates = mTetUtilities.getCoordinates();
 
     if(aTetNodeIndex < 0 || aTetNodeIndex >= (int) tCoordinates.size())
-        throw(std::domain_error("AMFilterUtilities: Index must be between 0 and number of nodes on tet mesh"));
+        throw(std::out_of_range("AMFilterUtilities: Index must be between 0 and number of nodes on tet mesh"));
+    if(aGridPrintableDensity.size() != mGridPointCoordinates.size())
+        throw(std::domain_error("AMFilterUtilities: Provided grid density vector does not match grid size"));
 
     std::vector<std::vector<int>> tContainingElementIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
 

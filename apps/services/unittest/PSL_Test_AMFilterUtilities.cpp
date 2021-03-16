@@ -404,6 +404,101 @@ PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
 
 }
 
+PSL_TEST(AMFilterUtilities, computeTetNodePrintableDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({2.0,2.0,2.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 2.0;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tGridPrintableDensity({1,2,3,4,5,6,7,8});
+
+    EXPECT_THROW(tAMFilterUtilities.computeTetNodePrintableDensity(0,{0.0,0.0}),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeTetNodePrintableDensity(-1,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeTetNodePrintableDensity(4,tGridPrintableDensity),std::out_of_range);
+    EXPECT_NO_THROW(tAMFilterUtilities.computeTetNodePrintableDensity(0,tGridPrintableDensity));
+
+    EXPECT_EQ(tAMFilterUtilities.computeTetNodePrintableDensity(0,tGridPrintableDensity),1);
+    EXPECT_EQ(tAMFilterUtilities.computeTetNodePrintableDensity(1,tGridPrintableDensity),1.5);
+    EXPECT_EQ(tAMFilterUtilities.computeTetNodePrintableDensity(2,tGridPrintableDensity),2);
+    EXPECT_EQ(tAMFilterUtilities.computeTetNodePrintableDensity(3,tGridPrintableDensity),3);
+}
+
+PSL_TEST(AMFilterUtilities, computeTetMeshPrintableDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({2.0,2.0,2.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 2.0;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tGridPrintableDensity({1,2,3,4,5,6,7,8});
+    example::Interface_ParallelVector tVector({0,0,0,0});
+
+    // wrong size of output density vector
+    example::Interface_ParallelVector tBogusVector({1,1,1});
+    EXPECT_THROW(tAMFilterUtilities.computeTetMeshPrintableDensity(tGridPrintableDensity,&tBogusVector),std::domain_error);
+
+    // wrong size of grid printable density vector
+    EXPECT_THROW(tAMFilterUtilities.computeTetMeshPrintableDensity({0.0,0.0},&tVector),std::domain_error);
+
+    EXPECT_NO_THROW(tAMFilterUtilities.computeTetMeshPrintableDensity(tGridPrintableDensity,&tVector));
+
+    EXPECT_EQ(tVector.get_value(0),1);
+    EXPECT_EQ(tVector.get_value(1),1.5);
+    EXPECT_EQ(tVector.get_value(2),2);
+    EXPECT_EQ(tVector.get_value(3),3);
+}
+
 PSL_TEST(AMFilterUtilities, smoothMax)
 {
     std::vector<double> tArgs;
