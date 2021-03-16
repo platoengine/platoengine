@@ -309,20 +309,17 @@ double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<
     if(aScalarValues.size() != 8u)
         throw(std::domain_error("OrthogonalGridUtilities::interpolateScalar: 8 scalar values must be provided"));
 
-    // double tA0 = a0(aContainingElementIndicies,aScalarValues);
-    // double tA1 = a1(aContainingElementIndicies,aScalarValues);
-    // double tA2 = a2(aContainingElementIndicies,aScalarValues);
-    // double tA3 = a3(aContainingElementIndicies,aScalarValues);
-    // double tA4 = a4(aContainingElementIndicies,aScalarValues);
-    // double tA5 = a5(aContainingElementIndicies,aScalarValues);
-    // double tA6 = a6(aContainingElementIndicies,aScalarValues);
-    // double tA7 = a7(aContainingElementIndicies,aScalarValues);
+    std::vector<Vector> tElementCoordinates;
+    for(auto tIndex : aContainingElementIndicies)
+        tElementCoordinates.push_back(computeGridPointXYZCoordinates(tIndex));
 
-    // return tA0 + tA1*aPoint.X() + tA2*aPoint.Y() + tA3*aPoint.Z() 
-    //      + tA4*aPoint.X()*aPoint.Y() + tA5*aPoint.X()*aPoint.Z() + tA6*aPoint.Y()*aPoint.Z()
-    //      + tA7*aPoint.X()*aPoint.Y()*aPoint.Z();
-    
-    return 0;
+    Vector tMaxXYZCoords;
+    Vector tMinXYZCoords;
+    computeBoundingBox(tElementCoordinates,tMinXYZCoords,tMaxXYZCoords);
+
+    RegularHex8 tHex(tMinXYZCoords,tMaxXYZCoords);
+
+    return tHex.interpolateScalar(aPoint,aScalarValues);
 }
 
 }

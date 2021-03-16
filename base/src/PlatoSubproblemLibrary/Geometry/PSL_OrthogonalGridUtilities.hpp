@@ -8,8 +8,9 @@
 #include <tuple>
 #include <set>
 #include <map>
-#include <PSL_Vector.hpp>
 
+#include <PSL_Vector.hpp>
+#include <PSL_RegularHex8.hpp>
 
 namespace PlatoSubproblemLibrary
 {
@@ -74,7 +75,6 @@ class OrthogonalGridUtilities
         double interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
                                  const std::vector<double>& aScalarValues,
                                  const Vector& aPoint) const;
-        
     private:
 
         void checkBasis(const Vector& aUBasisVector,

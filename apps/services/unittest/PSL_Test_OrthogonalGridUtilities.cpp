@@ -435,33 +435,94 @@ PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
     tContainingElementIndicies.push_back(std::vector<int>({0,1,1}));
     tContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
 
-    std::vector<double> tContainingElementDensities = {1, 0, 0, 0, 0, 0, 0, 0};
+    std::vector<double> tContainingElementDensities = {1, 2, 3, 4, 5, 6, 7, 8};
 
     Vector tPoint({0,0,0});
-    EXPECT_NO_THROW(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint));
 
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    // check each corner
+    std::vector<double> tScalars({1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),1.0);
 
-    tPoint = Vector({1,0,0});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({1.0,0.0,0.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),2.0);
 
-    tPoint = Vector({0,1,0});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({0.0,1.0,0.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),3.0);
 
-    tPoint = Vector({1,1,0});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({1.0,1.0,0.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),4.0);
 
-    tPoint = Vector({0,0,1});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({0.0,0.0,1.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),5.0);
 
-    tPoint = Vector({1,0,1});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({1.0,0.0,1.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),6.0);
 
-    tPoint = Vector({0,1,1});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({0.0,1.0,1.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),7.0);
+
+    tPoint = Vector({1.0,1.0,1.0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),8.0);
+
+    // check midway on each edge
+    tPoint = Vector({0.5,0,0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),1.5);
+
+    tPoint = Vector({0,0.5,0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),2.0);
+
+    tPoint = Vector({0,0,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),3.0);
+
+    tPoint = Vector({1,0.5,0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),3.0);
+
+    tPoint = Vector({1,0,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),4.0);
+
+    tPoint = Vector({0.5,1,0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),3.5);
+
+    tPoint = Vector({0,1,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),5.0);
     
-    tPoint = Vector({1,1,1});
-    EXPECT_DOUBLE_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),0);
+    tPoint = Vector({0,0.5,1});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),6.0);
+
+    tPoint = Vector({0.5,0,1});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),5.5);
+
+    tPoint = Vector({0.5,1,1});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),7.5);
+
+    tPoint = Vector({1,0.5,1});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),7.0);
+
+    tPoint = Vector({1,1,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),6.0);
+
+    // check midpoint of each face
+    tPoint = Vector({0.5,0.5,0});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),2.5);
+
+    tPoint = Vector({0.5,0,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),3.5);
+
+    tPoint = Vector({0,0.5,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),4.0);
+
+    tPoint = Vector({0.5,0.5,1});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),6.5);
+
+    tPoint = Vector({0.5,1,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),5.5);
+
+    tPoint = Vector({1,0.5,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),5.0);
+
+    // check midpoint of hex
+    tPoint = Vector({0.5,0.5,0.5});
+    EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),4.5);
 
     // incorrect number of indices
     std::vector<std::vector<int>> tBogusContainingElementIndicies;
