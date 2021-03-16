@@ -139,6 +139,29 @@ PSL_TEST(RegularHex8,interpolateScalar)
 
     tPoint = Vector({1,1,0.5});
     EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),6.0);
+
+    // check midpoint of each face
+    tPoint = Vector({0.5,0.5,0});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),2.5);
+
+    tPoint = Vector({0.5,0,0.5});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),3.5);
+
+    tPoint = Vector({0,0.5,0.5});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),4.0);
+
+    tPoint = Vector({0.5,0.5,1});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),6.5);
+
+    tPoint = Vector({0.5,1,0.5});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),5.5);
+
+    tPoint = Vector({1,0.5,0.5});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),5.0);
+
+    // check midpoint of hex
+    tPoint = Vector({0.5,0.5,0.5});
+    EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),4.5);
 }
 
 }

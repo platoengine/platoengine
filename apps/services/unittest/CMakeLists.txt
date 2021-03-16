@@ -67,6 +67,7 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_Vector.cpp
 							 Plato_Test_TimersTree.cpp
                                                          PSL_Test_OrthogonalGridUtilities.cpp
+                                                         PSL_Test_RegularHex8.cpp
 							 )
 
 if( AMFILTER_ENABLED )
