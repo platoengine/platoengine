@@ -53,5 +53,8 @@ Vector operator *(const Vector& aVec, const double aScalar);
 Vector cross_product(const Vector& aVec1, const Vector& aVec2);
 double dot_product(const Vector& aVec1, const Vector& aVec2);
 double angle_between(const Vector& aVec1, const Vector& aVec2);
+void computeBoundingBox(const std::vector<Vector>& aPoints,
+                        Vector& aMinCoords,
+                        Vector& aMaxCoords);
 
 }

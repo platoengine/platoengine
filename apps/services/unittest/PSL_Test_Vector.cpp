@@ -285,5 +285,29 @@ PSL_TEST(Vector, operatorEqualsEquals)
     EXPECT_EQ(tVec1 == tVec2, false);
 }
 
+PSL_TEST(Vector, getBoundingBox)
+{
+    Vector tVec1({1.0,2.0,3.0});
+    Vector tVec2({-1.0,3.0,-7.0});
+    Vector tVec3({1.0,0.0,5.0});
+
+    std::vector<Vector> tVectors;
+    tVectors.push_back(tVec1);
+    tVectors.push_back(tVec2);
+    tVectors.push_back(tVec3);
+
+    Vector tMinCoords;
+    Vector tMaxCoords;
+
+    computeBoundingBox(tVectors,tMinCoords,tMaxCoords);
+
+    EXPECT_EQ(tMinCoords(0),-1.0);
+    EXPECT_EQ(tMinCoords(1),0.0);
+    EXPECT_EQ(tMinCoords(2),-7.0);
+    EXPECT_EQ(tMaxCoords(0),1.0);
+    EXPECT_EQ(tMaxCoords(1),3.0);
+    EXPECT_EQ(tMaxCoords(2),5.0);
+}
+
 }
 }

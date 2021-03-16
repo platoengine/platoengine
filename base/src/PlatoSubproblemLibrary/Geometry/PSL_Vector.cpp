@@ -197,4 +197,23 @@ std::ostream & operator<< (std::ostream &out, const Vector &aVec)
     return out;
 }
 
+void computeBoundingBox(const std::vector<Vector>& aPoints,
+                       Vector& aMinCoords,
+                       Vector& aMaxCoords)
+{
+    aMinCoords = Vector(aPoints[0]);
+    aMaxCoords = Vector(aPoints[0]);
+
+    for(auto tPoint : aPoints)
+    {
+        for(int i = 0; i < 3; ++i)
+        {
+            if(tPoint(i) > aMaxCoords(i))
+                aMaxCoords.set(i,tPoint(i));
+            else if(tPoint(i) < aMinCoords(i))
+                aMinCoords.set(i,tPoint(i));
+        }
+    }
+}
+
 }
