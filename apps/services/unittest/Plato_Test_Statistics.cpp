@@ -1504,21 +1504,23 @@ TEST(PlatoTest, SolveSromProblem_CorrelatedVars_BetaDistribution)
         for(auto& tCol : tRow)
         {
             auto tColIndex = &tCol - &tRow[0];
-            //std::cout << tCol << "\n";
-            ASSERT_NEAR(tGoldSamples[tRowIndex][tColIndex], tCol, tTol);
+	    auto tRelativeError = std::abs(tCol - tGoldSamples[tRowIndex][tColIndex]) / tGoldSamples[tRowIndex][tColIndex];
+	    //std::cout << "Sample Relative Error = " << tRelativeError << "\n";
+            ASSERT_TRUE(tRelativeError < tTol);
         }
     }
 
+    tTol = 1e-2;
     auto tSum = 0.0;
     std::vector<double> tGoldProbabilities =
         {0.3229842278588252,0.1621807059028493,0.1842816217593431,0.1876962703469281,0.1428344864216799};
-    tTol = 1e-4;
     for(auto& tProb : tOutput.mProbabilities)
     {
         tSum += tProb;
         auto tIndex = &tProb - &tOutput.mProbabilities[0];
-        //std::cout << tProb << "\n";
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tProb, tTol);
+	auto tRelativeError = std::abs(tProb - tGoldProbabilities[tIndex]) / tGoldProbabilities[tIndex];
+	//std::cout << "Prob Relative Error = " << tRelativeError << "\n";
+        ASSERT_TRUE(tRelativeError < tTol);
     }
     auto tGoldSum = std::accumulate(tGoldProbabilities.begin(), tGoldProbabilities.end(), 0.0);
     EXPECT_NEAR(tGoldSum, tSum, tTol);
