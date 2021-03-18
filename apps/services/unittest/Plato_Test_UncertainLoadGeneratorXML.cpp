@@ -354,9 +354,9 @@ TEST(PlatoTest, random_sample_initial_guess)
     Plato::StandardMultiVector<double> tUpper(tNumVectors, tNumSamples, 1.0);
     Plato::StandardMultiVector<double> tGuess(tNumVectors, tNumSamples, 0.0);
     Plato::random_sample_initial_guess(tLower, tUpper, tGuess);
-    for (decltype(tNumVectors) tDim; tDim < tNumVectors; tDim++)
+    for (decltype(tNumVectors) tDim=0; tDim < tNumVectors; tDim++)
     {
-        for (decltype(tNumSamples) tSample; tSample < tNumSamples; tSample++)
+        for (decltype(tNumSamples) tSample=0; tSample < tNumSamples; tSample++)
         {
             EXPECT_TRUE(tGuess(tDim, tSample) >= 0.0);
             EXPECT_TRUE(tGuess(tDim, tSample) <= 1.0);
