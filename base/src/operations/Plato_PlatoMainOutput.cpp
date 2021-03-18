@@ -264,8 +264,7 @@ void PlatoMainOutput::operator()()
                 if(tFile)
                 {
                     char tLastHistFileName[200] = " ";
-                    int temp = fscanf(tFile, "%s", tLastHistFileName);
-                    temp = temp;
+                    fscanf(tFile, "%s", tLastHistFileName);
                     fclose(tFile);
                     std::string tNewFilename = "Iteration";
                     std::string tIterationString = "";
