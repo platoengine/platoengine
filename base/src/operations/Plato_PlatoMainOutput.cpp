@@ -96,7 +96,7 @@ PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
         {
             mOutputMethod = 2;
         }
-        else if(!tMethod.compare("parallel write"))
+        else if(!tMethod.compare("parallel_write"))
         {
             mOutputMethod = 1;
         }
