@@ -1000,6 +1000,8 @@ void PruneMeshAPISTK::get_fixed_block_nodes(std::vector<PruneHandle> &fixed_bloc
         tCurPart = mMetaData->get_part(part_name);
         if(tCurPart != nullptr)
           sel |= *tCurPart;
+        else
+          throw std::runtime_error("Could not find STK part for the block named: " + part_name);
       }
       stk::mesh::BucketVector fixed_node_buckets;
       fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
@@ -1012,6 +1014,8 @@ void PruneMeshAPISTK::get_fixed_block_nodes(std::vector<PruneHandle> &fixed_bloc
         }
       }
     }
+    else
+      throw std::runtime_error("Could not find STK part for the block named: " + part_name);
   }
   // uniquify the list
   std::sort(fixed_block_nodes.begin(), fixed_block_nodes.end());

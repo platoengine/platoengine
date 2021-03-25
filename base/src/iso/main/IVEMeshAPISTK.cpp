@@ -1076,6 +1076,10 @@ void IVEMeshAPISTK::get_fixed_block_nodes(std::vector<IVEHandle> &fixed_block_no
         {
           sel |= *tCurPart;
         }
+        else
+        {      
+          throw std::runtime_error("Could not find STK part corresponding to name: " + part_name);
+        }
       }
       stk::mesh::BucketVector fixed_node_buckets;
       fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
@@ -1087,6 +1091,10 @@ void IVEMeshAPISTK::get_fixed_block_nodes(std::vector<IVEHandle> &fixed_block_no
           fixed_block_nodes.push_back(get_handle(cur_bucket[j]));
         }
       }
+    }
+    else
+    {      
+      throw std::runtime_error("Could not find STK part corresponding to name: " + part_name);
     }
   }
   // uniquify the list
@@ -1153,6 +1161,12 @@ void IVEMeshAPISTK::write_exodus_mesh( std::string &meshfile, int output_method,
     sel = *mFixedTriPart;
     if(mOptimizedTriPart != nullptr)
       sel |= *mOptimizedTriPart;
+    else
+      throw std::runtime_error("Could not find STK part for the optimized triangles.");
+  }
+  else
+  {      
+    throw std::runtime_error("Could not find STK part for the fixed triangles.");
   }
   if(iso_only)
   {
