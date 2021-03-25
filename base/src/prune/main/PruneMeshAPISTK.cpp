@@ -984,38 +984,40 @@ void PruneMeshAPISTK::get_output_fields(std::string &outputFieldsString)
   }
 }
 
+void convert_block_names_to_parts(const stk::mesh::MetaData& meta,
+                                  const std::vector<std::string>& blocks,
+                                  stk::mesh::PartVector& blockParts)
+{
+  blockParts.clear();
+  for(const std::string& block : blocks)
+  { 
+    std::string blockName = "block_" + block;
+    stk::mesh::Part* partPtr = meta.get_part(blockName);
+    if (partPtr != nullptr)
+    {
+      blockParts.push_back(partPtr);
+    }
+    else
+      throw std::runtime_error("Could not find STK part for the block named: " + blockName);
+  }
+}
+
 void PruneMeshAPISTK::get_fixed_block_nodes(std::vector<PruneHandle> &fixed_block_nodes)
 {
   fixed_block_nodes.clear();
   if(mFixedBlocks.size() > 0)
   {
-    std::string part_name = "block_" + mFixedBlocks[0];
-    stk::mesh::Part* tCurPart = mMetaData->get_part(part_name);
-    if(tCurPart != nullptr)
+    stk::mesh::PartVector blockParts;
+    convert_block_names_to_parts(*mMetaData, mFixedBlocks, blockParts);
+    stk::mesh::Selector sel = stk::mesh::selectUnion(blockParts);
+    const stk::mesh::BucketVector& fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
+    for(const stk::mesh::Bucket* bucket : fixed_node_buckets)
     {
-      stk::mesh::Selector sel(*tCurPart);
-      for(size_t i=1; i<mFixedBlocks.size(); ++i)
+      for(stk::mesh::Entity node : *bucket)
       {
-        part_name = "block_" + mFixedBlocks[i];
-        tCurPart = mMetaData->get_part(part_name);
-        if(tCurPart != nullptr)
-          sel |= *tCurPart;
-        else
-          throw std::runtime_error("Could not find STK part for the block named: " + part_name);
-      }
-      stk::mesh::BucketVector fixed_node_buckets;
-      fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
-      for(size_t i=0; i<fixed_node_buckets.size(); ++i) 
-      {
-        stk::mesh::Bucket &cur_bucket = *fixed_node_buckets[i];
-        for(size_t j=0; j<cur_bucket.size(); ++j)
-        {
-          fixed_block_nodes.push_back(get_handle(cur_bucket[j]));
-        }
+        fixed_block_nodes.push_back(get_handle(node));
       }
     }
-    else
-      throw std::runtime_error("Could not find STK part for the block named: " + part_name);
   }
   // uniquify the list
   std::sort(fixed_block_nodes.begin(), fixed_block_nodes.end());
