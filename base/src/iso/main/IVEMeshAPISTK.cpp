@@ -1064,21 +1064,37 @@ void IVEMeshAPISTK::get_fixed_block_nodes(std::vector<IVEHandle> &fixed_block_no
   if(mFixedBlocks.size() > 0)
   {
     std::string part_name = "block_" + mFixedBlocks[0];
-    stk::mesh::Selector sel(*mMetaData->get_part(part_name));
-    for(size_t i=1; i<mFixedBlocks.size(); ++i)
-    {
-      part_name = "block_" + mFixedBlocks[i];
-      sel |= *mMetaData->get_part(part_name);
-    }
-    stk::mesh::BucketVector fixed_node_buckets;
-    fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
-    for(size_t i=0; i<fixed_node_buckets.size(); ++i) 
-    {
-      stk::mesh::Bucket &cur_bucket = *fixed_node_buckets[i];
-      for(size_t j=0; j<cur_bucket.size(); ++j)
+    stk::mesh::Part* tCurPart = mMetaData->get_part(part_name);
+    if(tCurPart != nullptr)
+    { 
+      stk::mesh::Selector sel(*tCurPart);
+      for(size_t i=1; i<mFixedBlocks.size(); ++i)
       {
-        fixed_block_nodes.push_back(get_handle(cur_bucket[j]));
+        part_name = "block_" + mFixedBlocks[i];
+        tCurPart = mMetaData->get_part(part_name);
+        if(tCurPart != nullptr)
+        {
+          sel |= *tCurPart;
+        }
+        else
+        {      
+          throw std::runtime_error("Could not find STK part corresponding to name: " + part_name);
+        }
       }
+      stk::mesh::BucketVector fixed_node_buckets;
+      fixed_node_buckets = mBulkData->get_buckets(stk::topology::NODE_RANK, sel);
+      for(size_t i=0; i<fixed_node_buckets.size(); ++i) 
+      {
+        stk::mesh::Bucket &cur_bucket = *fixed_node_buckets[i];
+        for(size_t j=0; j<cur_bucket.size(); ++j)
+        {
+          fixed_block_nodes.push_back(get_handle(cur_bucket[j]));
+        }
+      }
+    }
+    else
+    {      
+      throw std::runtime_error("Could not find STK part corresponding to name: " + part_name);
     }
   }
   // uniquify the list
@@ -1139,8 +1155,19 @@ void IVEMeshAPISTK::write_exodus_mesh( std::string &meshfile, int output_method,
     mIoBroker->property_add(Ioss::Property("COMPOSE_RESULTS", true));
   mIoBroker->property_add(Ioss::Property("MAXIMUM_NAME_LENGTH", 256));
   size_t fh = mIoBroker->create_output_mesh(meshfile, stk::io::WRITE_RESULTS);
-  stk::mesh::Selector sel(*mFixedTriPart);
-  sel |= *mOptimizedTriPart;
+  stk::mesh::Selector sel;
+  if(mFixedTriPart != nullptr)
+  {
+    sel = *mFixedTriPart;
+    if(mOptimizedTriPart != nullptr)
+      sel |= *mOptimizedTriPart;
+    else
+      throw std::runtime_error("Could not find STK part for the optimized triangles.");
+  }
+  else
+  {      
+    throw std::runtime_error("Could not find STK part for the fixed triangles.");
+  }
   if(iso_only)
   {
     mIoBroker->set_subset_selector(fh, sel);
