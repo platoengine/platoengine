@@ -1028,16 +1028,19 @@ void PruneMeshAPISTK::get_fixed_block_nodes(std::vector<PruneHandle> &fixed_bloc
 void PruneMeshAPISTK::set_fixed_block_ids(std::string fixed_block_string)
 {
   mFixedBlocks.clear();
-  std::vector<std::string> parsed_strings;
-  size_t comma_pos = fixed_block_string.find(',');
-  while(comma_pos != std::string::npos)
+  if(fixed_block_string.length() > 0)
   {
-    std::string cur_string = fixed_block_string.substr(0,comma_pos);
-    fixed_block_string = fixed_block_string.substr(comma_pos+1);
-    mFixedBlocks.push_back(cur_string);
-    comma_pos = fixed_block_string.find(',');
+    std::vector<std::string> parsed_strings;
+    size_t comma_pos = fixed_block_string.find(',');
+    while(comma_pos != std::string::npos)
+    {
+      std::string cur_string = fixed_block_string.substr(0,comma_pos);
+      fixed_block_string = fixed_block_string.substr(comma_pos+1);
+      mFixedBlocks.push_back(cur_string);
+      comma_pos = fixed_block_string.find(',');
+    }
+    mFixedBlocks.push_back(fixed_block_string);
   }
-  mFixedBlocks.push_back(fixed_block_string);
 }
 
 void PruneMeshAPISTK::prepare_new_block()
