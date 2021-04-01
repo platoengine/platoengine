@@ -32,7 +32,7 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
 {
     //apply chain rule to 3 transformations - T2G, AMFilterGrid, G2T 
-    //i.e. printableDensity = computeTetPrintableDensity(computeGridPrintableDensity(computeGridBlueprintDensity(aBlueprintDensity)))
+    //i.e. printableDensity = computeTetMeshPrintableDensity(computeGridPrintableDensity(computeGridSupportDensity(computeGridBlueprintDensity(aBlueprintDensity))))
 }
 
 void KernelThenStructuredAMFilter::buildStructuredGrid(const std::vector<std::vector<double>>& aCoordinates, const std::vector<std::vector<int>>& aConnectivity)
