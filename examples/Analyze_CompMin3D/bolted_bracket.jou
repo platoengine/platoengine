@@ -64,4 +64,5 @@ nodeset 1 surface 53 59 71 65
 nodeset 1 name "ns_1"
 nodeset 10 surface 145 131 121 123
 nodeset 10 name "ns_10"
+block 1 name 'block_1'
 export mesh "bolted_bracket.exo" overwrite

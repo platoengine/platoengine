@@ -49,7 +49,7 @@
 #include "PSL_Random.hpp"
 
 #include <vector>
-#include <math.h>
+#include <cmath>
 
 namespace PlatoSubproblemLibrary
 {
@@ -229,9 +229,11 @@ PSL_TEST(Vector,crossProduct)
     EXPECT_DOUBLE_EQ(tVec7(2),-320.32);
 
     Vector tVec8 = cross_product(tVec6,tVec6);
-    EXPECT_EQ(tVec8(0),0);
-    EXPECT_EQ(tVec8(1),0);
-    EXPECT_EQ(tVec8(2),0);
+    EXPECT_NEAR(tVec8(0),0.0,1e-13);
+    EXPECT_NEAR(tVec8(1),0.0,1e-13);
+    EXPECT_NEAR(tVec8(2),0.0,1e-13);
+    // EXPECT_DOUBLE_EQ(tVec8(1),0.0);
+    // EXPECT_DOUBLE_EQ(tVec8(2),0.0);
 }
 
 PSL_TEST(Vector,dotProduct)

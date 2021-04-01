@@ -113,6 +113,7 @@
 <Operation>
   <Function>Aggregator</Function>
   <Name>AggregateValue</Name>
+  <Report>true</Report>
   <Aggregate>
     <Layout>Value</Layout>
     <Input><ArgumentName>Value 1</ArgumentName></Input>

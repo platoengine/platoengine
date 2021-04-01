@@ -52,6 +52,7 @@
 #include <string>
 #include <cstdlib>
 #include <stdlib.h>
+#include <fstream>
 
 #include "Plato_Interface.hpp"
 #include "Plato_InputData.hpp"
@@ -179,6 +180,13 @@ void Interface::broadcastStageIndex(int & aStageIndex)
         tMsg << "\n\n ********** PLATO ERROR: Interface::broadcastStageIndex: Invalid stage requested.\n\n";
         Plato::ParsingException tParsingException(tMsg.str());
         registerException(tParsingException);
+    } else
+    if(aStageIndex == TERMINATE_STAGE)
+    {
+        std::stringstream tMsg;
+        tMsg << "\n\n INFO: Interface::broadcastStageIndex: Terminate stage requested.  Exiting.\n\n";
+        Plato::TerminateSignal tTerminateSignal(tMsg.str());
+        registerException(tTerminateSignal);
     }
     handleExceptions();
 }
@@ -188,6 +196,20 @@ Plato::Stage*
 Interface::getStage(std::string aStageName)
 /******************************************************************************/
 {
+    // check for control file
+    std::ifstream tControlFile;
+    tControlFile.open("plato.control");
+    if(tControlFile)
+    {
+        Plato::Parser* parser = new Plato::PugiParser();
+        auto tControlData = parser->parseFile("plato.control");
+        delete parser;
+
+        auto tTerminate = Plato::Get::Bool(tControlData, "Terminate", false);
+
+        if(tTerminate) aStageName = "Terminate";
+    }
+
     // broadcast the index of the next stage
     int tStageIndex;
     if(aStageName == "Terminate")
@@ -712,6 +734,13 @@ void Interface::registerException(Plato::LogicException aLogicException)
 /******************************************************************************/
 {
     mExceptionHandler->registerException(aLogicException);
+}
+
+/******************************************************************************/
+void Interface::registerException(Plato::TerminateSignal aTerminateSignal)
+/******************************************************************************/
+{
+    mExceptionHandler->registerException(aTerminateSignal);
 }
 
 /******************************************************************************/

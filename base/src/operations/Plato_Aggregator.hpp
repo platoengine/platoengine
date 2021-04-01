@@ -48,6 +48,7 @@
 
 #pragma once
 
+#include "Plato_Console.hpp"
 #include "Plato_LocalOperation.hpp"
 
 namespace Plato
@@ -87,12 +88,50 @@ private:
         std::vector<std::string> mInputNames; /*!< input argument name */
     };
 
+    bool mReportStatus; /*!< whether to write status to Plato::Console */
     double mLimitWeight; /*!< weight's upper bound */
     std::vector<std::string> mWeightBases; /*!< weight bases */
     std::vector<std::string> mWeightNormals; /*!< weight normals */
     std::string mWeightMethod; /*!< method - basically, how are weights applied */
     std::vector<double> mWeights; /*!< weights for each component */
     std::vector<AggStruct> mAggStructs; /*!< core data for each aggregated component */
+
+    /******************************************************************************//**
+     * @brief Return aggregator weights
+    **********************************************************************************/
+    decltype(mWeights) getWeights();
+
+    /******************************************************************************//**
+     * @brief Aggregate the member scalars and scalar fields
+     * @param [in] aWeights current weights
+    **********************************************************************************/
+    void aggregate(const AggStruct& aAggStruct, decltype(mWeights) aWeights);
+
+    /******************************************************************************//**
+     * @brief Aggregate a scalar field
+     * @param [in] aAggStruct struct containing inputs and output
+     * @param [in] aWeights current weights
+    **********************************************************************************/
+    void aggregateScalarField(const AggStruct& aAggStruct, const decltype(mWeights)& aWeights);
+
+    /******************************************************************************//**
+     * @brief Aggregate a scalar
+     * @param [in] aAggStruct struct containing inputs and output
+     * @param [in] aWeights current weights
+    **********************************************************************************/
+    void aggregateScalar(const AggStruct& aAggStruct, const decltype(mWeights)& aWeights);
+
+    /******************************************************************************//**
+     * @brief Wrapper around Plato::Console::Alert()
+     * @param [in] aStream stream containing message for console
+    **********************************************************************************/
+    void reportStatus(const std::stringstream& aStream) const;
+
+    /******************************************************************************//**
+     * @brief Wrapper around Plato::Console::Alert()
+     * @param [in] aString string containing message for console
+    **********************************************************************************/
+    void reportStatus(const std::string& aStream) const;
 };
 // class Aggregator
 

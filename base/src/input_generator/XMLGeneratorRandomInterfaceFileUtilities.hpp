@@ -77,20 +77,24 @@ void append_multiperformer_topology_shared_data
  * \fn append_physics_performers_multiperformer_usecase
  * \brief Append physics performers information to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aNextPerformerID Next available performer id
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
 void append_physics_performers_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument);
+ int &aNextPerformerID,
+ pugi::xml_node& aNode);
 
 /******************************************************************************//**
  * \fn append_filter_criterion_gradient_samples_operation
  * \brief Append filter criterion gradient samples operation to PUGI XML document.
  * \param [in]     aCriterionName criterion, e.g. objective, constraint, name
+ * \param [in]     aPerformerName Performer name
  * \param [in/out] aParentNode    pugi::xml_node
 **********************************************************************************/
 void append_filter_criterion_gradient_samples_operation
 (const std::string& aCriterionName,
+ const std::string& aPerformerName,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -138,13 +142,11 @@ void append_nondeterministic_parameters
 /******************************************************************************//**
  * \fn append_sample_objective_value_operation
  * \brief Append sample objective value operation to PUGI XML document.
- * \param [in]     aPerformerName operation's performer name
  * \param [in]     aXMLMetaData   Plato problem input data
  * \param [in/out] aParentNode    pugi::xml_node
 **********************************************************************************/
 void append_sample_objective_value_operation
-(const std::string& aPerformerName,
- const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -181,5 +183,13 @@ void append_evaluate_nondeterministic_objective_gradient_operation
  const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
+/******************************************************************************//**
+ * \fn get_random_objective_service_id
+ * \brief Get the service used for the random objective.
+ * \param [in]     aXMLMetaData          Plato problem input data
+ * \param [out]    serviceID           service ID string
+**********************************************************************************/
+std::string get_random_objective_service_id
+(const XMLGen::InputData& aXMLMetaData);
 }
 // namespace XMLGen

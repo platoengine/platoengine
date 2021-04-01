@@ -42,6 +42,7 @@
 
 #include "XMLGenerator.hpp"
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorUtilities.hpp"
 #include <cstring>
 #include <mpi.h>
 #include <Kokkos_Core.hpp>

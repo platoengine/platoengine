@@ -46,7 +46,7 @@ public:
      * \param [in]     aLoad        natural boundary condition metadata
      * \param [in/out] aParentNode  pugi::xml_node
     **********************************************************************************/
-    void call(const std::string& aName, const XMLGen::Load& aLoad, pugi::xml_node& aParentNode) const;
+    void call(const std::string& aName, const XMLGen::NaturalBoundaryCondition& aLoad, pugi::xml_node& aParentNode) const;
 };
 // struct AppendNaturalBoundaryCondition
 

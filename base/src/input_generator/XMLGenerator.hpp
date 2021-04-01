@@ -56,6 +56,7 @@
 #include <fstream>
 
 #include "Plato_Parser.hpp"
+#include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorDataStruct.hpp"
 
 namespace XMLGen
@@ -67,48 +68,31 @@ class XMLGenerator
 public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
-    bool generate();
+    void generate();
     const InputData& getInputData(){ return m_InputData; }
-    bool parseService(std::istream &fin);
 
 protected:
 
     bool parseLoads(std::istream &fin);
-    bool parseLoadsBlock(std::istream &fin);
-    bool parseLoadLine(std::vector<std::string>& tokens);
-    bool parseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseAccelerationLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load);
-    bool parseMeshSetNameOrID(size_t& aTokenIndex, std::vector<std::string>& tokens, XMLGen::Load& new_load);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
-    bool parseBCs(std::istream &fin);
-    bool parseBCsBlock(std::istream &fin);
-    bool parseBCLine(std::vector<std::string>& tokens);
-    bool parseDisplacementBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
-    bool parseTemperatureBC(std::vector<std::string>& tokens, XMLGen::BC& new_bc);
+    void parseBoundaryConditions(std::istream &fin);
     bool runSROMForUncertainVariables();
     void setNumPerformers();
-    bool parseFile();
+    void parseInputFile();
     bool parseMesh(std::istream &fin);
-    bool parseOutput(std::istream &fin);
+    void parseOutput(std::istream &fin);
     bool parseCodePaths(std::istream &fin);
-    bool parseMaterials(std::istream &fin);
+    void parseMaterials(std::istream &fin);
+    void parseCriteria(std::istream &fin);
     bool parseBlocks(std::istream &fin);
-    bool parseObjectives(std::istream &fin);
-    bool fillObjectiveAndPerfomerNames();
+    void parseObjective(std::istream &fin);
+    void parseScenarios(std::istream &fin);
+    void parseServices(std::istream &fin);
     bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);
-    bool parseUncertainties(std::istream &fin);
-    bool parseTokens(char *buffer, std::vector<std::string> &tokens);
-    void getUncertaintyFlags();
-    void outputOutputToFileStageForNewUncertaintyWorkflow(pugi::xml_document &doc,
-                                 bool &aHasUncertainties,
-                                 bool &aRequestedVonMises);
+    void parseUncertainties(std::istream &fin);
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
-    bool find_tokens(std::vector<std::string> &tokens, const int &start_index, const char *str1, const char *str2);
     bool parseSingleValue(const std::vector<std::string> &aTokens,
                           const std::vector<std::string> &aInputStrings,
                           std::string &aReturnStringValue);
@@ -117,21 +101,53 @@ protected:
                                    const std::vector<std::string> &aUnLoweredTokens,
                                    const std::vector<std::string> &aInputStrings,
                                    std::string &aReturnStringValue);
-    void lookForPlatoAnalyzePerformers();
-    bool checkForNodesetSidesetNameConflicts();
 
     std::string m_InputFilename;
     XMLGen::InputData m_InputData;
+    XMLGen::InputData m_InputDataWithExpandedEBCs;
+    std::vector<XMLGen::InputData> m_PreProcessedInputData;
 private:
 
-    /******************************************************************************//**
-     * @brief Initialize Plato problem options
-     **********************************************************************************/
-    void initializePlatoProblemOptions();
+    void preProcessInputMetaData();
+    void determineIfPlatoEngineFilteringIsNeeded();
+    void expandEssentialBoundaryConditions();
+    void updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap);
+    void loadOutputData(XMLGen::InputData &aNewInputData, 
+                                  const std::string &aServiceID);
+    void loadMaterialData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID);
+    void loadObjectiveData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID,
+                                     const std::string &aShapeServiceID);
+    void loadConstraintData(XMLGen::InputData &aNewInputData,
+                                     const std::string &aScenarioID,
+                                     const std::string &aServiceID);
+    void clearInputDataLists(XMLGen::InputData &aInputData);
+    void createCopiesForMultiLoadCase();
+    void createCopiesForMultiPerformerCase(std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
+    void createCopiesForPerformerCreation();
+    void findObjectiveScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void findConstraintScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void removeDuplicateTuplesFromConstraintList(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples, 
+         std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void createInputDataCopiesForObjectivePerformers(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void createInputDataCopiesForConstraintPerformers(
+         std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+    void createObjectiveCopiesForMultiLoadCase(
+         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+    void verifyAllServicesAreTheSame();
+    bool serviceExists(std::vector<XMLGen::Service> &aServiceList, XMLGen::Service &aService);
 
-    void putLoadInLoadCase(XMLGen::Load& new_load);
-    bool putLoadInLoadCaseWithMatchingID(XMLGen::Load& new_load);
-    void createNewLoadCase(XMLGen::Load& new_load);
+
+
+
+
+
+
+
     void writeInputFiles();
 };
 

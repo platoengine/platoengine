@@ -3,6 +3,8 @@ set(LIB_NAMES)
 set(LIB_NAME Operations)
 set(LIB_NAMES ${LIB_NAMES} ${LIB_NAME})
 set(${LIB_NAME}_SOURCES Plato_Filter.cpp
+                        Plato_CopyField.cpp
+                        Plato_CopyValue.cpp
                         Plato_Roughness.cpp
                         Plato_SystemCall.cpp
                         Plato_Aggregator.cpp
@@ -24,11 +26,14 @@ set(${LIB_NAME}_SOURCES Plato_Filter.cpp
                         Plato_MeanPlusVarianceGradient.cpp
                         Plato_ReciprocateObjectiveValue.cpp
                         Plato_NormalizeObjectiveGradient.cpp
+                        Plato_OutputNodalFieldSharedData.cpp
                         Plato_ReciprocateObjectiveGradient.cpp
                         Plato_StatisticsOperationsUtilities.cpp
                         )
                         
 set(${LIB_NAME}_HEADERS Plato_Filter.hpp
+                        Plato_CopyField.hpp
+                        Plato_CopyValue.hpp
                         Plato_Roughness.hpp
                         Plato_SystemCall.hpp
                         Plato_Aggregator.hpp
@@ -49,6 +54,7 @@ set(${LIB_NAME}_HEADERS Plato_Filter.hpp
                         Plato_NormalizeObjectiveValue.hpp
                         Plato_MeanPlusVarianceMeasure.hpp
                         Plato_MeanPlusVarianceGradient.hpp
+                        Plato_OutputNodalFieldSharedData.hpp
                         Plato_NormalizeObjectiveGradient.hpp
                         Plato_ReciprocateObjectiveGradient.hpp
                         Plato_StatisticsOperationsUtilities.hpp

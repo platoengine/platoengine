@@ -1,0 +1,25 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 09/01/2020 02:07:40 PM
+## Command Options:
+create brick x 1 y 1 z 0.1
+webcut volume all with plane xplane offset -0.1
+webcut volume all with plane yplane offset -0.1
+delete volume 3
+unite volume all
+webcut volume all with plane yplane offset -0.16
+imprint all
+merge all
+volume all scheme tetmesh
+volume all size 0.01
+sideset 1 curve 76
+sideset 1 name "load"
+nodeset 1 curve 26
+nodeset 1 name "fix"
+block 1 surface 44 42
+block 1 element type tri
+block 1 name "block_1"
+mesh surface 44 42
+export mesh "lbracket.exo" overwrite

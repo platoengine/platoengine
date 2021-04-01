@@ -171,7 +171,7 @@ void append_j2_plasticity_material_to_plato_problem
     auto tMaterialModel = aParentNode.child("ParameterList");
     XMLGen::Private::append_material_property("pressure_scaling", aMaterial, tMaterialModel);
     // plastic properties
-    XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, aParentNode);
+    XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, tMaterialModel);
 }
 // function append_j2_plasticity_material_to_plato_problem
 
@@ -193,32 +193,32 @@ void AppendMaterialModelParameters::insert()
 {
     // orthotropic linear elastic material model
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_orthotropic_linear_elastic_material_to_plato_problem));
-    mMap.insert(std::make_pair("orthotropic linear elastic",
+    mMap.insert(std::make_pair("orthotropic_linear_elastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_orthotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
 
     // isotropic linear electroelastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_electroelastic_material_to_plato_problem));
-    mMap.insert(std::make_pair("isotropic linear electroelastic",
+    mMap.insert(std::make_pair("isotropic_linear_electroelastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_electroelastic_material_to_plato_problem, tFuncIndex)));
 
     // isotropic linear thermoelastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_plato_problem));
-    mMap.insert(std::make_pair("isotropic linear thermoelastic",
+    mMap.insert(std::make_pair("isotropic_linear_thermoelastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_plato_problem, tFuncIndex)));
 
     // isotropic linear thermal material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_thermal_material_to_plato_problem));
-    mMap.insert(std::make_pair("isotropic linear thermal",
+    mMap.insert(std::make_pair("isotropic_linear_thermal",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_thermal_material_to_plato_problem, tFuncIndex)));
 
     // isotropic linear elastic material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem));
-    mMap.insert(std::make_pair("isotropic linear elastic",
+    mMap.insert(std::make_pair("isotropic_linear_elastic",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_isotropic_linear_elastic_material_to_plato_problem, tFuncIndex)));
 
     // j2 plasticity material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_j2_plasticity_material_to_plato_problem));
-    mMap.insert(std::make_pair("j2 plasticity",
+    mMap.insert(std::make_pair("j2_plasticity",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_j2_plasticity_material_to_plato_problem, tFuncIndex)));
 }
 

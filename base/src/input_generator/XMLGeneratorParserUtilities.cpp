@@ -15,8 +15,23 @@
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
+const int MAX_TOKENS_PER_LINE = 5000;
+const char* const DELIMITER = " \t";
+
 namespace XMLGen
 {
+
+std::string get_concretized_criterion_identifier_string(ConcretizedCriterion aConcretizedCriterion)
+{
+    std::string tCriterionID = std::get<0>(aConcretizedCriterion);
+    std::string tServiceID = std::get<1>(aConcretizedCriterion);
+    std::string tScenarioID = std::get<2>(aConcretizedCriterion);
+
+    std::string tIdentifierString = "";
+    tIdentifierString += "criterion_" + tCriterionID + "_service_" + tServiceID + "_scenario_" + tScenarioID;
+
+    return tIdentifierString;
+}
 
 bool unique(const std::vector<std::string>& aInput)
 {
@@ -312,18 +327,6 @@ std::string check_code_keyword(const std::string& aInput)
 }
 // function check_code_keyword
 
-std::string check_criterion_category_keyword(const std::string& aInput)
-{
-    XMLGen::ValidCriterionKeys tValidKeys;
-    auto tValue = tValidKeys.value(aInput);
-    if(tValue.empty())
-    {
-        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + aInput + "' is not supported.")
-    }
-    return tValue;
-}
-// function check_criterion_category_keyword
-
 bool transform_boolean_key(const std::string& aInput)
 {
     XMLGen::ValidBoolKeys tValidKeys;
@@ -377,6 +380,36 @@ void is_metadata_block_id_valid(const std::vector<std::string>& tTokens)
         + tLowerInput + " plato_1,\n"
         + "    and 4) begin " + tLowerInput + " plato_is_the_best_optimization_based_design_tool.\n")
     }
+}
+
+bool parseTokens(char *buffer, std::vector<std::string> &tokens)
+{
+    const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
+    int n = 0;
+
+    // parse the line
+    token[0] = strtok(buffer, DELIMITER); // first token
+
+    // If there is a comment...
+    if(token[0] && strlen(token[0]) > 1 && token[0][0] == '/' && token[0][1] == '/')
+    {
+        tokens.clear();
+        return true;
+    }
+
+    if (token[0]) // zero if line is blank
+    {
+        for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
+        {
+            token[n] = strtok(0, DELIMITER); // subsequent tokens
+            if (!token[n])
+                break; // no more tokens
+        }
+    }
+    for(int i=0; i<n; ++i)
+        tokens.push_back(token[i]);
+
+    return true;
 }
 
 }

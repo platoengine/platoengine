@@ -87,7 +87,7 @@ TEST(PlatoTestXMLGenerator, AppendMeshMetadataToPlatoMainInputDeck)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
     ASSERT_NO_THROW(XMLGen::append_mesh_metadata_to_plato_main_input_deck(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -117,7 +117,7 @@ TEST(PlatoTestXMLGenerator, AppendOutputMetadataToPlatoMainInputDeck)
 TEST(PlatoTestXMLGenerator, WritePlatoMainInputDeck)
 {
     XMLGen::InputData tXMLMetaData;
-    tXMLMetaData.run_mesh_name = "dummy.exo";
+    tXMLMetaData.mesh.run_name = "dummy.exo";
     XMLGen::Block tBlock1;
     tBlock1.block_id = "1";
     tBlock1.material_id = "11";

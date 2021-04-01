@@ -52,6 +52,7 @@
 #include <iostream>
 
 #include "XMLGeneratorDataStruct.hpp"
+#include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
 
 #include "Plato_RandomLoadMetadata.hpp"
 #include "Plato_SromXMLGenHelpers.hpp"
@@ -92,142 +93,28 @@ inline bool variable_type_string_to_enum(const std::string& aStringVarType, Plat
 // function variable_type_string_to_enum
 
 /******************************************************************************//**
- * \brief Initialize counter used to set load identifiers (IDs)
- * \param [in] aLoadCases array of load cases
- * \param [in] aUniqueCounter IDs counter
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-inline bool initialize_load_id_counter(const std::vector<XMLGen::LoadCase> &aLoadCases,
-                                       Plato::UniqueCounter &aUniqueCounter)
-{
-    if(aLoadCases.empty() == true)
-    {
-        PRINTERR("INPUT SET OF LOAD CASES IS EMPTY.\n");
-        return (false);
-    }
-
-    aUniqueCounter.mark(0); // Mark 0 as true since we don't want to have a 0 ID
-    for(size_t tIndex = 0; tIndex < aLoadCases.size(); tIndex++)
-    {
-        aUniqueCounter.mark(std::stoi(aLoadCases[tIndex].id.c_str()));
-    }
-
-    return (true);
-}
-// function initialize_load_id_counter
-
-/******************************************************************************//**
- * \brief Expand set of load cases into an array of single load cases
- * \param [in] aOldLoadCase old load case metadata
- * \param [out] aNewLoadCaseList expanded set of load cases - load case is reformatted
- *               to facilitate the creation of the stochastic reduced order models
- * \param [out] aUniqueLoadIDCounter load identifiers counter
- * \param [out] aOriginalToNewLoadCaseMap map between original load case IDs and new load case IDs
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-inline bool expand_single_load_case(const XMLGen::LoadCase &aOldLoadCase,
-                                    std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
-                                    Plato::UniqueCounter &aUniqueLoadIDCounter,
-                                    std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
-{
-    if(aOldLoadCase.loads.empty() == true)
-    {
-        std::ostringstream tMsg;
-        tMsg << "Expand Single Load Case: Loads container in load case with identification number '" << aOldLoadCase.id << " is empty.\n";
-        PRINTERR(tMsg.str());
-        return (false);
-    }
-
-    auto tOriginalLoadCaseID = std::stoi(aOldLoadCase.id);
-    for(auto& tOldLoad : aOldLoadCase.loads)
-    {
-        XMLGen::LoadCase tNewLoadCase;
-        tNewLoadCase.id = aOldLoadCase.id;
-        // If this is a multi-load load case, create a new load case with a new identification number.
-        auto tLoadCaseIndex = &tOldLoad - &aOldLoadCase.loads[0];
-        if(tLoadCaseIndex > 0)
-        {
-            auto tNewLoadCaseID = aUniqueLoadIDCounter.assignNextUnique();
-            tNewLoadCase.id = std::to_string(tNewLoadCaseID);
-        }
-        aOriginalToNewLoadCaseMap[tOriginalLoadCaseID].push_back(aNewLoadCaseList.size());
-
-        tNewLoadCase.loads.push_back(tOldLoad);
-        aNewLoadCaseList.push_back(tNewLoadCase);
-    }
-
-    return (true);
-}
-// function expand_single_load_case
-
-/******************************************************************************//**
- * \brief Expand old set of load cases into an array of new load cases with one load
- *
- * \param [in] aOldLoadCase old set of load cases
- * \param [in] aNewLoadCaseList new set of load cases re-formatted to create the
- *             stochastic reduced order models (srom)
- * \param [in] aOriginalToNewLoadCaseMap map between original load case IDs and \n
- *   new load case IDs, i.e. map<old_load_case_id,new_load_case_id>
- *
- * \return error flag - function call was successful, true = no error, false = error
-**********************************************************************************/
-inline bool expand_load_cases(const std::vector<XMLGen::LoadCase> &aOldLoadCases,
-                              std::vector<XMLGen::LoadCase> &aNewLoadCaseList,
-                              std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap)
-{
-    Plato::UniqueCounter tUniqueLoadIDCounter;
-    if(Plato::srom::initialize_load_id_counter(aOldLoadCases, tUniqueLoadIDCounter) == false)
-    {
-        PRINTERR("Expand Load Cases: FAILED TO INITIALIZE ORIGINAL SET OF LOAD IDENTIFIERS.\n");
-        return (false);
-    }
-
-    for(auto& tOldLoadCase : aOldLoadCases)
-    {
-        Plato::srom::expand_single_load_case(tOldLoadCase, aNewLoadCaseList, tUniqueLoadIDCounter, aOriginalToNewLoadCaseMap);
-    }
-
-    return (true);
-}
-// function expand_load_cases
-
-/******************************************************************************//**
- * \brief Create a deterministic load from the input deterministic load case
- * \param [in] aLoadCase deterministic load case metadata (input load case has only
- *            one load, multiple loads are not expected)
+ * \brief Create a deterministic load from the input deterministic load
+ * \param [in] aLoad deterministic load metadata 
  * \param [out] aLoad deterministic load metadata
  * \return error flag - function call was successful, true = no error, false = error
 **********************************************************************************/
-inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase, Plato::srom::Load& aLoad)
+inline bool create_deterministic_load_variable(const XMLGen::NaturalBoundaryCondition &aLoad, Plato::srom::Load& aNewLoad)
 {
-    if(aLoadCase.loads.empty() == true)
+    aNewLoad.mLoadID = aLoad.id();
+    aNewLoad.mLoadType = aLoad.type();
+    aNewLoad.mAppType = aLoad.location_type();
+    aNewLoad.mAppName = aLoad.location_name();
+    aNewLoad.mAppID = aLoad.location_id().empty() ? std::numeric_limits<int>::max() : std::stoi(aLoad.location_id());
+    if(aLoad.location_id().empty() && aLoad.location_name().empty())
     {
-        std::ostringstream tMsg;
-        tMsg << "Create Deterministic Load Variable: Load container in Load Case with identification number '"
-            << aLoadCase.id << "' is empty.\n";
-        PRINTERR(tMsg.str().c_str());
-        return (false);
+        THROWERR(std::string("Create Deterministic Load Variable: Mesh set, e.g. sideset or nodeset, identification ")
+            + "number and name are not defined. One of the two mesh-set identifiers, identification number or name, "
+            + "must be define.")
     }
 
-    aLoad.mLoadID = aLoadCase.id;
-    for (auto &tLoad : aLoadCase.loads)
+    for (auto &tValue : aLoad.load_values())
     {
-        aLoad.mLoadType = tLoad.type;
-        aLoad.mAppType = tLoad.app_type;
-
-        aLoad.mAppName = tLoad.app_name;
-        aLoad.mAppID = tLoad.app_id.empty() ? std::numeric_limits<int>::max() : std::stoi(tLoad.app_id);
-        if(tLoad.app_id.empty() && tLoad.app_name.empty())
-        {
-            THROWERR(std::string("Create Deterministic Load Variable: Mesh set, e.g. sideset or nodeset, identification ")
-                + "number and name are not defined. One of the two mesh-set identifiers, identification number or name, "
-                + "must be define.")
-        }
-
-        for (auto &tValue : tLoad.values)
-        {
-            aLoad.mValues.push_back(tValue);
-        }
+        aNewLoad.mValues.push_back(tValue);
     }
 
     return (true);
@@ -235,53 +122,42 @@ inline bool create_deterministic_load_variable(const XMLGen::LoadCase &aLoadCase
 // function create_deterministic_load_variable
 
 /******************************************************************************//**
- * \brief Get or create a random load given a random load case
- * \param [in] aLoadCase random load case metadata (load case only has one load,
- *              multiple loads are not expected)
+ * \brief Get or create a random load given a random load
+ * \param [in] aLoad random load metadata
  * \param [out] aRandomLoad set of random loads
  * \return random load identification number
 **********************************************************************************/
 inline int create_random_load
-(const XMLGen::LoadCase &aLoadCase,
+(const XMLGen::NaturalBoundaryCondition &aLoad,
  std::vector<Plato::srom::Load> &aRandomLoads)
 {
-    if(aLoadCase.loads.size() > 1u)
-    {
-        THROWERR(std::string("Create Random Load: Expecting one load per load case. There are '") +
-            std::to_string(aLoadCase.loads.size()) + "' in load case with identification number '" + aLoadCase.id + "'.")
-    }
-
     for(auto& tRandomLoad : aRandomLoads)
     {
-        if(tRandomLoad.mLoadID == aLoadCase.id)
+        if(tRandomLoad.mLoadID == aLoad.id())
         {
             auto tRandomLoadIndex = &tRandomLoad - &aRandomLoads[0];
             return (tRandomLoadIndex);
         }
     }
 
-    for(auto& tLoad : aLoadCase.loads)
+    Plato::srom::Load tNewLoad;
+    tNewLoad.mLoadID = aLoad.id();
+    tNewLoad.mLoadType = aLoad.type();
+    tNewLoad.mAppType = aLoad.location_type();
+    tNewLoad.mAppName = aLoad.location_name();
+    tNewLoad.mAppID = aLoad.location_id().empty() ? std::numeric_limits<int>::max() : std::stoi(aLoad.location_id());
+    if(aLoad.location_id().empty() && aLoad.location_name().empty())
     {
-        Plato::srom::Load tNewLoad;
-        tNewLoad.mLoadID = aLoadCase.id;
-        tNewLoad.mLoadType = tLoad.type;
-        tNewLoad.mAppType = tLoad.app_type;
-
-        tNewLoad.mAppName = tLoad.app_name;
-        tNewLoad.mAppID = tLoad.app_id.empty() ? std::numeric_limits<int>::max() : std::stoi(tLoad.app_id);
-        if(tLoad.app_id.empty() && tLoad.app_name.empty())
-        {
-            THROWERR(std::string("Create Random Load: Mesh set, e.g. sideset or nodeset, identification ")
+        THROWERR(std::string("Create Random Load: Mesh set, e.g. sideset or nodeset, identification ")
                 + "number and name are not defined. One of the two mesh-set identifiers, identification "
                 + "number or name, must be define.")
-        }
-
-        for(auto& tValue : tLoad.values)
-        {
-            tNewLoad.mValues.push_back(tValue);
-        }
-        aRandomLoads.push_back(tNewLoad);
     }
+
+    for(auto& tValue : aLoad.load_values())
+    {
+        tNewLoad.mValues.push_back(tValue);
+    }
+    aRandomLoads.push_back(tNewLoad);
 
     return (aRandomLoads.size() - 1);
 }
@@ -317,14 +193,12 @@ inline void add_random_variable_to_random_load(Plato::srom::Load &aRandomLoad,
 /******************************************************************************//**
  * \brief Create a random load and append it to the set of random load cases
  * \param [in] aRandomVariable random variable metadata
- * \param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
- * \param [in] aOriginalToNewLoadCaseMap map from original load case identifier to new/expanded load case identifier
+ * \param [in] aLoads set of loads (deterministic plus random loads)
  * \param [out] aRandomLoadIDs set of random load case identifiers
  * \param [out] aRandomLoads set of random load cases
 **********************************************************************************/
 inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRandomVariable,
-                                                 const std::vector<XMLGen::LoadCase> &aNewLoadCases,
-                                                 std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
+                                                 const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
                                                  std::set<int> &aRandomLoadIDs,
                                                  std::vector<Plato::srom::Load> &aRandomLoads)
 {
@@ -332,20 +206,17 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
     {
         THROWERR("Input random load identification number (id) is empty.")
     }
-    const auto tRandomVarLoadID = std::stoi(aRandomVariable.id());
 
-    for(size_t tIndexJ = 0; tIndexJ < aOriginalToNewLoadCaseMap[tRandomVarLoadID].size(); tIndexJ++)
+    for(size_t tIndexJ = 0; tIndexJ < aLoads.size(); tIndexJ++)
     {
-        const auto tIndexIntoNewLoadCaseList = aOriginalToNewLoadCaseMap[tRandomVarLoadID][tIndexJ];
-        auto tCurLoadCaseIDString = aNewLoadCases[tIndexIntoNewLoadCaseList].id;
-        if(tCurLoadCaseIDString.empty())
+        if(aRandomVariable.id() == aLoads[tIndexJ].id())
         {
-            THROWERR("Load case identification number (id) is empty.")
+            const auto tCurLoadID = std::stoi(aLoads[tIndexJ].id());
+            aRandomLoadIDs.insert(tCurLoadID);
+            const auto tIndexOfRandomLoad = Plato::srom::create_random_load(aLoads[tIndexJ], aRandomLoads);
+            Plato::srom::add_random_variable_to_random_load(aRandomLoads[tIndexOfRandomLoad], aRandomVariable);
+            break;
         }
-        const auto tCurLoadCaseID = std::stoi(tCurLoadCaseIDString);
-        aRandomLoadIDs.insert(tCurLoadCaseID);
-        const auto tIndexOfRandomLoad = Plato::srom::create_random_load(aNewLoadCases[tIndexIntoNewLoadCaseList], aRandomLoads);
-        Plato::srom::add_random_variable_to_random_load(aRandomLoads[tIndexOfRandomLoad], aRandomVariable);
     }
 }
 // function create_random_loads_from_uncertainty
@@ -353,14 +224,12 @@ inline void create_random_loads_from_uncertainty(const XMLGen::Uncertainty& aRan
 /******************************************************************************//**
  * \brief Create set of random loads
  * \param [in] aRandomVariable random variable metadata
- * \param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
- * \param [in] aOriginalToNewLoadCaseMap map from original load case identifier to new/expanded load case identifier
+ * \param [in] aLoads set of load (deterministic plus random loads)
  * \param [out] aRandomLoadIDs set of random load case identifiers
  * \param [out] aRandomLoads set of random load cases
 **********************************************************************************/
 inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> &aRandomVariables,
-                                         const std::vector<XMLGen::LoadCase> &aNewLoadCases,
-                                         std::map<int, std::vector<int> > &aOriginalToNewLoadCaseMap,
+                                         const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
                                          std::set<int> &aRandomLoadIDs,
                                          std::vector<Plato::srom::Load> &aRandomLoads)
 {
@@ -370,7 +239,7 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
         Plato::srom::variable_type_string_to_enum(tRandomVar.category(), tVarType);
         if(tVarType == Plato::srom::VariableType::LOAD)
         {
-            Plato::srom::create_random_loads_from_uncertainty(tRandomVar, aNewLoadCases, aOriginalToNewLoadCaseMap, aRandomLoadIDs, aRandomLoads);
+            Plato::srom::create_random_loads_from_uncertainty(tRandomVar, aLoads, aRandomLoadIDs, aRandomLoads);
         }
     }
 }
@@ -378,25 +247,25 @@ inline void create_random_load_variables(const std::vector<XMLGen::Uncertainty> 
 
 /******************************************************************************//**
  * \brief Create set of deterministic loads
- * \param [in] aNewLoadCases set of load cases (deterministic plus random load cases)
+ * \param [in] aLoads set of loads (deterministic plus random loads)
  * \param [in] aRandomLoadIDs set of random load case identifiers
  * \param [out] aDeterministicLoads set of deterministic load cases
 **********************************************************************************/
-inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCase> &aNewLoadCases,
+inline void create_deterministic_load_variables(const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
                                                 const std::set<int> & aRandomLoadIDs,
                                                 std::vector<Plato::srom::Load> &aDeterministicLoads)
 {
-    for(auto& tNewLoadCase : aNewLoadCases)
+    for(auto& tLoad : aLoads)
     {
-        if(tNewLoadCase.id.empty())
+        if(tLoad.id().empty())
         {
-            THROWERR("Load case identification number (id) is empty.")
+            THROWERR("Load identification number (id) is empty.")
         }
-        auto tCurLoadCaseID = std::stoi(tNewLoadCase.id);
-        if(aRandomLoadIDs.find(tCurLoadCaseID) == aRandomLoadIDs.end())
+        auto tCurLoadID = std::stoi(tLoad.id());
+        if(aRandomLoadIDs.find(tCurLoadID) == aRandomLoadIDs.end())
         {
             Plato::srom::Load tNewLoad;
-            Plato::srom::create_deterministic_load_variable(tNewLoadCase, tNewLoad);
+            Plato::srom::create_deterministic_load_variable(tLoad, tNewLoad);
             aDeterministicLoads.push_back(tNewLoad);
         }
     }
@@ -406,7 +275,7 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
 /******************************************************************************//**
  * \brief Generate array of deterministic and random loads in the format expected \n
  * by the stochastic reduced order model application programming interface.
- * \param [in] aInputLoadCases set of load cases created by the XML generator
+ * \param [in] aInputLoads set of loads created by the XML generator
  * \param [in] aUncertainties set of random variables created by the XML generator
  * \param [out] aLoads set of deterministic and random loads in the format expected \n
  *   by the Stochastic Reduced Order Model (SROM) interface
@@ -414,18 +283,14 @@ inline void create_deterministic_load_variables(const std::vector<XMLGen::LoadCa
 **********************************************************************************/
 inline std::vector<Plato::srom::Load>
 generate_srom_load_inputs
-(const std::vector<XMLGen::LoadCase> &aInputLoadCases,
+(const std::vector<XMLGen::NaturalBoundaryCondition> &aInputLoads,
  const std::vector<XMLGen::Uncertainty> &aUncertainties)
 {
-    std::vector<XMLGen::LoadCase> tNewSetLoadCases;
-    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    Plato::srom::expand_load_cases(aInputLoadCases, tNewSetLoadCases, tOriginalToNewLoadCaseMap);
-
     std::set<int> tRandomLoadIDs;
     std::vector<Plato::srom::Load> tAllLoads;
     Plato::srom::create_random_load_variables
-        (aUncertainties, tNewSetLoadCases, tOriginalToNewLoadCaseMap, tRandomLoadIDs, tAllLoads);
-    Plato::srom::create_deterministic_load_variables(tNewSetLoadCases, tRandomLoadIDs, tAllLoads);
+        (aUncertainties, aInputLoads, tRandomLoadIDs, tAllLoads);
+    Plato::srom::create_deterministic_load_variables(aInputLoads, tRandomLoadIDs, tAllLoads);
 
     return (tAllLoads);
 }
@@ -435,40 +300,41 @@ generate_srom_load_inputs
  * \fn preprocess_srom_problem_load_inputs
  * \brief Pre-process Stochastic Reduced Order Model (SROM) problem inputs.
  * \param [in/out] aInputMetadata Plato problem input metadata
- * \param [in/out] aLoadCases     set of load case metadata
+ * \param [in/out] aLoads         set of load metadata
  * \param [in/out] aUncertainties set of uncertainty metadata
 **********************************************************************************/
-inline std::vector<XMLGen::LoadCase>
+inline std::vector<XMLGen::NaturalBoundaryCondition>
 preprocess_srom_problem_load_inputs
 (const XMLGen::InputData& aInputMetadata)
 {
-    if(aInputMetadata.objectives.empty())
+    if(aInputMetadata.objective.scenarioIDs.empty())
     {
         THROWERR("Pre-Process SROM Problem Load Inputs: Objective block is empty; hence, it is not defined.")
     }
 
-    if(aInputMetadata.objectives.size() > 1u)
+    if(aInputMetadata.objective.scenarioIDs.size() > 1u)
     {
         THROWERR(std::string("Pre-Process SROM Problem Load Inputs: Only one objective block is allowed to be defined") +
             "in stochastic use cases. Meaning, there cannot be more than one objective block defined in the Plato input file.")
     }
 
-    std::vector<XMLGen::LoadCase> tLoadCases;
-    for (auto& tObjective : aInputMetadata.objectives)
+    std::vector<XMLGen::NaturalBoundaryCondition> tLoads;
+    for (auto &tScenarioID : aInputMetadata.objective.scenarioIDs)
     {
-        for (auto& tID : tObjective.load_case_ids)
+        auto &tScenario = aInputMetadata.scenario(tScenarioID);
+        for(auto &tLoadID : tScenario.loadIDs())
         {
-            for (auto& tLoadCase : aInputMetadata.load_cases)
+            for(auto &tLoad : aInputMetadata.loads)
             {
-                if (tLoadCase.id == tID)
+                if(tLoad.id() == tLoadID)
                 {
-                    tLoadCases.push_back(tLoadCase);
+                    tLoads.push_back(tLoad);
                     break;
                 }
             }
         }
     }
-    return tLoadCases;
+    return tLoads;
 }
 // function preprocess_srom_problem_load_inputs
 
@@ -483,11 +349,12 @@ return_load_identification_numbers
 (const XMLGen::InputData& aInputMetadata)
 {
     std::vector<std::string> tOutput;
-    for(auto& tLoadCase : aInputMetadata.load_cases)
+    for(auto& tScenarioID : aInputMetadata.objective.scenarioIDs)
     {
-        for(auto& tLoad : tLoadCase.loads)
+        auto &tScenario = aInputMetadata.scenario(tScenarioID);
+        for(auto &tLoadID : tScenario.loadIDs())
         {
-            tOutput.push_back(tLoad.load_id);
+            tOutput.push_back(tLoadID);
         }
     }
     return tOutput;
@@ -560,8 +427,8 @@ inline void preprocess_load_inputs
             + "is associated with a load identification number.")
     }
 
-    auto tActiveLoadCases = Plato::srom::preprocess_srom_problem_load_inputs(aInputMetadata);
-    auto tLoads = Plato::srom::generate_srom_load_inputs(tActiveLoadCases, tIterator->second);
+    auto tActiveLoads = Plato::srom::preprocess_srom_problem_load_inputs(aInputMetadata);
+    auto tLoads = Plato::srom::generate_srom_load_inputs(tActiveLoads, tIterator->second);
     aSromInputs.loads(tLoads);
 }
 // function preprocess_load_inputs
@@ -576,7 +443,7 @@ inline void postprocess_load_outputs
 (const Plato::srom::OutputMetaData& aSromOutputs,
  XMLGen::InputData& aXMLGenMetaData)
 {
-    if(aXMLGenMetaData.objectives.size() > 1u)
+    if(aXMLGenMetaData.objective.scenarioIDs.size() > 1u)
     {
         THROWERR("Post-Process SROM Problem Load Outputs: Only one objective function block is expected in a stochastic use case.")
     }
@@ -590,26 +457,29 @@ inline void postprocess_load_outputs
         tNewLoadCase.id = std::to_string(tLoadCaseID);
         for (size_t tLoadIndex = 0; tLoadIndex < tLoadCase.numLoads(); ++tLoadIndex)
         {
-            XMLGen::Load tNewLoad;
-            tNewLoad.mIsRandom = tLoadCase.isRandom(tLoadIndex);
-            tNewLoad.type = tLoadCase.loadType(tLoadIndex);
-            tNewLoad.app_id = tLoadCase.applicationID(tLoadIndex);
-            tNewLoad.app_type = tLoadCase.applicationType(tLoadIndex);
-            tNewLoad.app_name = tLoadCase.applicationName(tLoadIndex);
+            XMLGen::NaturalBoundaryCondition tNewLoad;
+            tNewLoad.is_random((tLoadCase.isRandom(tLoadIndex) ? "true" : "false"));
+            tNewLoad.type(tLoadCase.loadType(tLoadIndex));
+            tNewLoad.location_id(tLoadCase.applicationID(tLoadIndex));
+            tNewLoad.location_type(tLoadCase.applicationType(tLoadIndex));
+            tNewLoad.location_name(tLoadCase.applicationName(tLoadIndex));
+            std::vector<std::string> tValues;
             for (size_t tDim = 0; tDim < tLoadCase.numLoadValues(tLoadIndex); ++tDim)
             {
-                tNewLoad.values.push_back(Plato::to_string(tLoadCase.loadValue(tLoadIndex, tDim)));
+                tValues.push_back(Plato::to_string(tLoadCase.loadValue(tLoadIndex, tDim)));
             }
-            tNewLoad.load_id = tLoadCase.loadID(tLoadIndex);
+            tNewLoad.load_values(tValues);
+            tNewLoad.id(tLoadCase.loadID(tLoadIndex));
             tNewLoadCase.loads.push_back(tNewLoad);
         }
 
         auto tNewLoadSet = std::make_pair(tLoadCase.probability(), tNewLoadCase);
         aXMLGenMetaData.mRandomMetaData.append(tNewLoadSet);
-        aXMLGenMetaData.objectives[0].load_case_ids.push_back(tNewLoadCase.id);
-        aXMLGenMetaData.objectives[0].load_case_weights.push_back("1");
+//        aXMLGenMetaData.objectives[0].load_case_ids.push_back(tNewLoadCase.id);
+//        aXMLGenMetaData.objectives[0].load_case_weights.push_back("1");
     }
 }
+
 // function postprocess_load_outputs
 
 /******************************************************************************//**
@@ -625,16 +495,17 @@ inline void check_output_load_set_types
         auto tLoadUseCase = aMetaData.sample(tSampleIndex).loadcase();
         for(auto& tLoad : tLoadUseCase.loads)
         {
-            if(tLoad.type != "traction")
+            if(tLoad.type() != "traction")
             {
                 auto tLoadIndex = &tLoad - &tLoadUseCase.loads[0];
                 THROWERR(std::string("Check Output Load Set Application Name: Error with Sample '") + std::to_string(tSampleIndex)
                     + "'. Uncertainty workflow only supports load cases that all have the same format. Load '"
-                    + std::to_string(tLoadIndex) + "' has its type set to '" + tLoad.type + "' and expected 'traction'.")
+                    + std::to_string(tLoadIndex) + "' has its type set to '" + tLoad.type() + "' and expected 'traction'.")
             }
         }
     }
 }
+
 // function check_output_load_set_types
 
 /******************************************************************************//**
@@ -653,17 +524,18 @@ inline void check_output_load_set_application_name
         for(auto& tLoad : tLoadUseCaseOne.loads)
         {
             auto tLoadIndex = &tLoad - &tLoadUseCaseOne.loads[0];
-            if(tLoad.app_name != tLoadUseCaseTwo.loads[tLoadIndex].app_name)
+            if(tLoad.location_name() != tLoadUseCaseTwo.loads[tLoadIndex].location_name())
             {
                 std::ostringstream tMsg;
                 tMsg << "Check Output Load Set Application Name: Uncertainty workflow only supports load cases that all have the same mesh set format. "
-                    << "Sample '" << std::to_string(tIndex) << "' has its application name set to '" << tLoad.app_name << "' and Sample '"
-                    << std::to_string(tIndex + 1u) << "' has its application name set to '" << tLoadUseCaseTwo.loads[tLoadIndex].app_name << "'.";
+                    << "Sample '" << std::to_string(tIndex) << "' has its application name set to '" << tLoad.location_name() << "' and Sample '"
+                    << std::to_string(tIndex + 1u) << "' has its application name set to '" << tLoadUseCaseTwo.loads[tLoadIndex].location_name() << "'.";
                 THROWERR(tMsg.str())
             }
         }
     }
 }
+
 // function check_output_load_set_application_name
 
 /******************************************************************************//**

@@ -51,6 +51,26 @@ void append_filter_options_to_operation
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
+ * \fn append_initialize_data_for_shape_problem
+ * \brief Append initialize data operations for shape optimizatino problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_initialize_data_for_shape_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_initialize_data_for_topology_problem
+ * \brief Append initialize data operations for topology optimizatino problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_initialize_data_for_topology_problem
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
  * \fn append_filter_options_to_plato_main_operation
  * \brief Append filter operation to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -151,17 +171,6 @@ void append_output_to_plato_main_operation
  pugi::xml_document &aDocument);
 
 /******************************************************************************//**
- * \fn append_aggregator_operation
- * \brief Append Plato main aggregator operation to PUGI XML document.
- * \param [in]     aXMLMetaData Plato problem input data
- * \param [in/out] aDocument    pugi::xml_document
-**********************************************************************************/
-void append_aggregator_operation
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document &aDocument);
-
-
-/******************************************************************************//**
  * \fn append_stochastic_objective_value_to_plato_main_operation
  * \brief Append stochastic objective value operation to PUGI XML document.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -223,18 +232,52 @@ void append_update_problem_to_plato_main_operation
 /******************************************************************************//**
  * \fn append_filter_control_to_plato_main_operation
  * \brief Append filter control operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument  pugi::xml_document
 **********************************************************************************/
 void append_filter_control_to_plato_main_operation
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_filter_gradient_to_plato_main_operation
  * \brief Append filter gradient operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aDocument  pugi::xml_document
 **********************************************************************************/
 void append_filter_gradient_to_plato_main_operation
-(pugi::xml_document& aDocument);
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_csm_mesh_output_to_plato_main_operation
+ * \brief Append operation for outputing an intermediate csm mesh result file
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument  pugi::xml_document
+**********************************************************************************/
+void append_csm_mesh_output_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_initialize_geometry_operation_to_plato_main_operation
+ * \brief Append operation for initializing csm geometry
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument  pugi::xml_document
+**********************************************************************************/
+void append_initialize_geometry_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_update_geometry_on_change_operation_to_plato_main_operation
+ * \brief Append operation for updating csm geometry
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument  pugi::xml_document
+**********************************************************************************/
+void append_update_geometry_on_change_operation_to_plato_main_operation
+ (const XMLGen::InputData& aXMLMetaData,
+  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
  * \fn append_initialize_density_field_operation
@@ -395,6 +438,66 @@ void append_set_lower_bounds_to_plato_main_operation
 void append_set_upper_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_aggregate_data_to_plato_main_operation
+ * \brief Append aggregate data operation to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_aggregate_data_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_copy_value_to_plato_main_operation
+ * \brief Append operation for copying a value from one shared data to another
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_copy_value_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_copy_field_to_plato_main_operation
+ * \brief Append operation for copying a field from one shared data to another
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_copy_field_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument);
+
+/******************************************************************************//**
+ * \fn append_enforce_bounds_operation_to_plato_main_operation
+ * \brief Append operation for enforcing bounds on the control
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_enforce_bounds_operation_to_plato_main_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document &aDocument);
+
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_output_operation_for_non_multi_load_case
+ * \brief Append qoi to output operation for non multi load case problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_deterministic_qoi_to_output_operation_for_non_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn append_deterministic_qoi_to_output_operation_for_multi_load_case
+ * \brief Append qoi to output operation for multi load case problems
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void append_deterministic_qoi_to_output_operation_for_multi_load_case
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
 
 }
 // namespace XMLGen

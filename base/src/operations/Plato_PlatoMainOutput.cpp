@@ -82,7 +82,7 @@ PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     mOutputMethod = 2;
     mWriteRestart = Plato::Get::Bool(aNode, "WriteRestart");
     Plato::InputData tSurfaceExtractionNode = Plato::Get::InputData(aNode, "SurfaceExtraction");
-    mRestartFieldName = "optimizationdofs";
+    mRestartFieldName = "control";
     if(aNode.size<std::string>("RestartFieldName"))
         mRestartFieldName = Plato::Get::String(aNode, "RestartFieldName");
     if(aNode.size<std::string>("OutputFrequency"))
@@ -96,7 +96,7 @@ PlatoMainOutput::PlatoMainOutput(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
         {
             mOutputMethod = 2;
         }
-        else if(!tMethod.compare("parallel write"))
+        else if(!tMethod.compare("parallel_write"))
         {
             mOutputMethod = 1;
         }
@@ -264,8 +264,7 @@ void PlatoMainOutput::operator()()
                 if(tFile)
                 {
                     char tLastHistFileName[200] = " ";
-                    int temp = fscanf(tFile, "%s", tLastHistFileName);
-                    temp = temp;
+                    fscanf(tFile, "%s", tLastHistFileName);
                     fclose(tFile);
                     std::string tNewFilename = "Iteration";
                     std::string tIterationString = "";

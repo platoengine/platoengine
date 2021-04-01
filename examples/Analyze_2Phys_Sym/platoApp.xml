@@ -114,8 +114,9 @@
 </Operation>
 
 <Operation>
+  <Name>Aggregate Value</Name>
   <Function>Aggregator</Function>
-  <Name>Aggregate</Name>
+  <Report>true</Report>
   <Aggregate>
     <Layout>Value</Layout>
     <Input>
@@ -128,6 +129,18 @@
       <ArgumentName>Value</ArgumentName>
     </Output>
   </Aggregate>
+  <Weighting>
+    <Weight> <Value>0.25</Value> </Weight>
+    <Weight> <Value>0.75</Value> </Weight>
+    <Normals>
+      <Input><ArgumentName>Normal 1</ArgumentName></Input>
+      <Input><ArgumentName>Normal 2</ArgumentName></Input>
+    </Normals>
+  </Weighting>
+</Operation>
+<Operation>
+  <Name>Aggregate Gradient</Name>
+  <Function>Aggregator</Function>
   <Aggregate>
     <Layout>Nodal Field</Layout>
     <Input>

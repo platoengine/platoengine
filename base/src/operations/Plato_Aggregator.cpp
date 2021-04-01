@@ -58,6 +58,8 @@ namespace Plato
 Aggregator::Aggregator(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
         Plato::LocalOp(aPlatoApp)
 {
+    mReportStatus = Get::Bool(aNode, "Report", false);
+
     Plato::InputData tWeightNode = Plato::Get::InputData(aNode, "Weighting");
     for(auto tNode : tWeightNode.getByName<Plato::InputData>("Weight"))
     {
@@ -104,6 +106,20 @@ Aggregator::Aggregator(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     }
 }
 
+void Aggregator::reportStatus(const std::stringstream& aStream) const
+{
+    reportStatus(aStream.str());
+}
+
+void Aggregator::reportStatus(const std::string& aString) const
+{
+    if(mReportStatus)
+    {
+        Plato::Console::Alert(aString);
+    }
+}
+
+
 void Aggregator::operator()()
 {
     // begin timer if timing
@@ -112,7 +128,198 @@ void Aggregator::operator()()
         mPlatoApp->getTimersTree()->begin_partition(Plato::timer_partition_t::timer_partition_t::aggregator);
     }
 
-    std::vector<double> tWeights(mWeights);
+    auto tWeights = getWeights();
+
+    reportStatus("#--- Aggregator ----------------------------------------------------------------");
+    for(AggStruct& tMyAggStruct : mAggStructs)
+    {
+        aggregate(tMyAggStruct, tWeights);
+    }
+    reportStatus("#-------------------------------------------------------------------------------");
+
+    // end: "aggregator"
+    if(mPlatoApp->getTimersTree())
+    {
+        mPlatoApp->getTimersTree()->end_partition();
+    }
+
+    return;
+}
+
+void Aggregator::aggregateScalarField(const AggStruct& aAggStruct, const decltype(mWeights)& aWeights)
+{
+    using std::setw;
+    using std::setprecision;
+
+    const int fw = 10; // field width
+    const int pn = 4;  // precision
+
+    std::stringstream tMessage;
+    tMessage << "# Scalar Field";
+    reportStatus(tMessage.str());
+    tMessage.str(std::string());
+    tMessage << "#";
+    tMessage << setw(fw) << "Input";
+    tMessage << setw(fw) << "Norm";
+    tMessage << setw(fw) << "Weight";
+    if(!mWeightNormals.empty())
+    {
+        tMessage << setw(fw) << "Normal";
+        tMessage << setw(fw) << "Adj Wt";
+    }
+    tMessage << setw(fw) << "Weighted";
+    tMessage << setw(fw) << "Name";
+    reportStatus(tMessage.str());
+
+    auto& tField = *(mPlatoApp->getNodeField(aAggStruct.mOutputName));
+    double* tToData;
+    tField.ExtractView(&tToData);
+    int tDataLength = tField.MyLength();
+
+    int tNvals = aAggStruct.mInputNames.size();
+    std::vector<double*> tFromData(tNvals);
+    for(int tIval = 0; tIval < tNvals; tIval++)
+    {
+        auto tPfield = mPlatoApp->getNodeField(aAggStruct.mInputNames[tIval]);
+        tPfield->ExtractView(&tFromData[tIval]);
+
+    }
+
+    std::vector<double> tFromDataNorm(tNvals, 0.0);
+    for(int tIndex = 0; tIndex < tDataLength; tIndex++)
+    {
+        tToData[tIndex] = 0.0;
+        for(int tIval = 0; tIval < tNvals; tIval++)
+        {
+            tToData[tIndex] += tFromData[tIval][tIndex] * aWeights[tIval];
+            tFromDataNorm[tIval] += tFromData[tIval][tIndex]*tFromData[tIval][tIndex];
+        }
+    }
+    for(int tIval = 0; tIval < tNvals; tIval++)
+    {
+        if(tFromDataNorm[tIval] != 0.0)
+        {
+            tFromDataNorm[tIval] = sqrt(tFromDataNorm[tIval]);
+        }
+
+        auto tInputName = mPlatoApp->getSharedDataName(aAggStruct.mInputNames[tIval]);
+        tMessage << "#";
+        tMessage << setw(fw) << tIval;
+        tMessage << setw(fw) << setprecision(pn) << tFromDataNorm[tIval];
+        tMessage << setw(fw) << setprecision(pn) << mWeights[tIval];
+        if(!mWeightNormals.empty())
+        {
+            std::vector<double>* data = mPlatoApp->getValue(mWeightNormals[tIval]);
+            tMessage << setw(fw) << setprecision(pn) << *(data->data());
+            tMessage << setw(fw) << setprecision(pn) << aWeights[tIval];
+        }
+        tMessage << setw(fw) << setprecision(pn) << tFromDataNorm[tIval]*aWeights[tIval];
+        tMessage << "      " << tInputName;
+        reportStatus(tMessage.str());
+    }
+}
+
+void Aggregator::aggregateScalar(const AggStruct& aAggStruct, const decltype(mWeights)& aWeights)
+{
+    using std::setw;
+    using std::setprecision;
+
+    const int fw = 10;
+    const int pn = 4;
+
+    std::stringstream tMessage;
+    tMessage << "# Scalar";
+    reportStatus(tMessage.str());
+    tMessage.str(std::string());
+    tMessage << "#";
+    tMessage << setw(fw) << "Input";
+    tMessage << setw(fw) << "Value";
+    tMessage << setw(fw) << "Weight";
+    if(!mWeightNormals.empty())
+    {
+        tMessage << setw(fw) << "Normal";
+        tMessage << setw(fw) << "Adj Wt";
+    }
+    tMessage << setw(fw) << "Weighted";
+    tMessage << setw(fw) << "Name";
+    reportStatus(tMessage.str());
+
+    std::vector<double>& tToData = *(mPlatoApp->getValue(aAggStruct.mOutputName));
+
+    unsigned int tDataLength = 0;
+    int tNvals = aAggStruct.mInputNames.size();
+    std::vector<double*> tFromData(tNvals);
+
+    // read first input value
+    std::vector<double>* tMyValue = mPlatoApp->getValue(aAggStruct.mInputNames[0]);
+    tFromData[0] = tMyValue->data();
+    tDataLength = tMyValue->size();
+
+    // read remaining input values
+    for(int tIval = 1; tIval < tNvals; tIval++)
+    {
+        tMyValue = mPlatoApp->getValue(aAggStruct.mInputNames[tIval]);
+        tFromData[tIval] = tMyValue->data();
+        if(tMyValue->size() != tDataLength)
+        {
+            throw ParsingException("PlatoApp::Aggregator: attempted to aggregate vectors of differing lengths.");
+        }
+    }
+
+    tToData.resize(tDataLength);
+    std::fill(tToData.begin(), tToData.end(), 0.0);
+    for(unsigned int tIndex = 0; tIndex < tDataLength; tIndex++)
+    {
+        for(int tIval = 0; tIval < tNvals; tIval++)
+        {
+            auto tInputName = mPlatoApp->getSharedDataName(aAggStruct.mInputNames[tIval]);
+            tMessage << "#";
+            tMessage << setw(fw) << tIval;
+            tMessage << setw(fw) << setprecision(pn) << tFromData[tIval][tIndex];
+            tMessage << setw(fw) << setprecision(pn) << mWeights[tIval];
+            if(!mWeightNormals.empty())
+            {
+                std::vector<double>* data = mPlatoApp->getValue(mWeightNormals[tIval]);
+                tMessage << setw(fw) << setprecision(pn) << *(data->data());
+                tMessage << setw(fw) << setprecision(pn) << aWeights[tIval];
+            }
+            tMessage << setw(fw) << setprecision(pn) << tFromData[tIval][tIndex]*aWeights[tIval];
+            tMessage << "      " << tInputName;
+            reportStatus(tMessage);
+
+            tToData[tIndex] += tFromData[tIval][tIndex] * aWeights[tIval];
+        }
+
+        tMessage << "#";
+        tMessage << setw(fw) << "Output";
+        tMessage << setw(fw) << setprecision(pn) << tToData[tIndex];
+        reportStatus(tMessage);
+    }
+}
+
+void Aggregator::aggregate(const AggStruct& aAggStruct, decltype(mWeights) aWeights)
+{
+    if(aAggStruct.mLayout == Plato::data::layout_t::SCALAR_FIELD)
+    {
+        aggregateScalarField(aAggStruct, aWeights);
+    }
+    else if(aAggStruct.mLayout == Plato::data::layout_t::SCALAR)
+    {
+        aggregateScalar(aAggStruct, aWeights);
+    }
+    else
+    {
+        std::stringstream tMessage;
+        tMessage << "Unknown 'Layout' (" << aAggStruct.mLayout << ") specified in PlatoApp::Aggregator."
+                 << std::endl;
+        Plato::ParsingException tParsingException(tMessage.str());
+        throw tParsingException;
+    }
+}
+
+decltype(Aggregator::mWeights) Aggregator::getWeights()
+{
+    decltype(mWeights) tWeights(mWeights);
     if(!mWeightBases.empty())
     {
         int tNvals = mWeightBases.size();
@@ -171,90 +378,7 @@ void Aggregator::operator()()
             }
         }
     }
-
-    for(AggStruct& tMyAggStruct : mAggStructs)
-    {
-
-        if(tMyAggStruct.mLayout == Plato::data::layout_t::SCALAR_FIELD)
-        {
-
-            auto& tField = *(mPlatoApp->getNodeField(tMyAggStruct.mOutputName));
-            double* tToData;
-            tField.ExtractView(&tToData);
-            int tDataLength = tField.MyLength();
-
-            int tNvals = tMyAggStruct.mInputNames.size();
-            std::vector<double*> tFromData(tNvals);
-            for(int tIval = 0; tIval < tNvals; tIval++)
-            {
-                auto tPfield = mPlatoApp->getNodeField(tMyAggStruct.mInputNames[tIval]);
-                tPfield->ExtractView(&tFromData[tIval]);
-            }
-
-            for(int tIndex = 0; tIndex < tDataLength; tIndex++)
-            {
-                tToData[tIndex] = 0.0;
-                for(int j = 0; j < tNvals; j++)
-                {
-                    tToData[tIndex] += tFromData[j][tIndex] * tWeights[j];
-                }
-            }
-
-        }
-        else if(tMyAggStruct.mLayout == Plato::data::layout_t::SCALAR)
-        {
-
-            std::vector<double>& tToData = *(mPlatoApp->getValue(tMyAggStruct.mOutputName));
-
-            unsigned int tDataLength = 0;
-            int tNvals = tMyAggStruct.mInputNames.size();
-            std::vector<double*> tFromData(tNvals);
-
-            // read first input value
-            std::vector<double>* tMyValue = mPlatoApp->getValue(tMyAggStruct.mInputNames[0]);
-            tFromData[0] = tMyValue->data();
-            tDataLength = tMyValue->size();
-
-            // read remaining input values
-            for(int tIval = 1; tIval < tNvals; tIval++)
-            {
-                tMyValue = mPlatoApp->getValue(tMyAggStruct.mInputNames[tIval]);
-                tFromData[tIval] = tMyValue->data();
-                if(tMyValue->size() != tDataLength)
-                {
-                    throw ParsingException("PlatoApp::Aggregator: attempted to aggregate vectors of differing lengths.");
-                }
-            }
-
-            tToData.resize(tDataLength);
-            for(unsigned int tIndex = 0; tIndex < tDataLength; tIndex++)
-            {
-                tToData[tIndex] = 0.0;
-                for(int j = 0; j < tNvals; j++)
-                {
-                    tToData[tIndex] += tFromData[j][tIndex] * tWeights[j];
-                }
-            }
-
-        }
-        else
-        {
-
-            std::stringstream tMessage;
-            tMessage << "Unknown 'Layout' (" << tMyAggStruct.mLayout << ") specified in PlatoApp::Aggregator."
-                     << std::endl;
-            Plato::ParsingException tParsingException(tMessage.str());
-            throw tParsingException;
-        }
-    }
-
-    // end: "aggregator"
-    if(mPlatoApp->getTimersTree())
-    {
-        mPlatoApp->getTimersTree()->end_partition();
-    }
-
-    return;
+    return tWeights;
 }
 
 void Aggregator::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)

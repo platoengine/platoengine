@@ -24,21 +24,8 @@ namespace XMLGen
 namespace Analyze
 {
 
-/******************************************************************************//**
- * \fn is_robust_optimization_problem
- * \brief Write input files needed to solve optimization problems with Plato Analyze.
- * \param [in] aInputData input metadata
-**********************************************************************************/
-inline bool is_robust_optimization_problem
-(const XMLGen::InputData& aMetaData)
-{
-    if(aMetaData.mRandomMetaData.empty())
-        return false;
-    else
-        return true;
-}
-// function is_robust_optimization_problem
 
+#if 0
 /******************************************************************************//**
  * \fn write_optimization_problem
  * \brief Write input files needed to solve optimization problems with Plato Analyze.
@@ -55,9 +42,10 @@ inline void write_optimization_problem
     XMLGen::write_plato_analyze_operation_xml_file(aMetaData);
     XMLGen::write_plato_main_input_deck_file(aMetaData);
     XMLGen::write_plato_analyze_input_deck_file(aMetaData);
-    XMLGen::write_amgx_input_file(aMetaData.service(0u));
+    XMLGen::write_amgx_input_file(aMetaData);
     XMLGen::generate_launch_script(aMetaData);
 }
+#endif
 
 }
 // namespace Analyze

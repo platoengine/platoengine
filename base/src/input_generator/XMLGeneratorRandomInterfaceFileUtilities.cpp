@@ -40,19 +40,32 @@ void append_multiperformer_criterion_shared_data
         THROWERR("Append Criterion Shared Data For Nondeterministic Use Case: Services list is empty.")
     }
 
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
     // shared data - nondeterministic criterion value
     for (auto &tService : aXMLMetaData.services())
     {
-        auto tOwnerName = tService.performer() + "_{PerformerIndex}";
-        auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-        std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
-        std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, "platomain" };
-        XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+        if(tService.performer() != tFirstPlatoMainPerformer)
+        {
+            auto tOwnerName = tService.performer() + "_{PerformerIndex}";
+            auto tTag = aCriterion + " Value {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+            std::vector<std::string> tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName" };
+            std::vector<std::string> tValues = { tTag, "Scalar", "Global", "1", tOwnerName, tFirstPlatoMainPerformer };
+            XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
 
         // shared data - nondeterministic criterion gradient
-        tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-        tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, "platomain" };
-        XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+            {
+                tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+                tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
+                XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            }
+            else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+            {
+                tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+                tValues = { tTag, "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tOwnerName, tFirstPlatoMainPerformer };
+                XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
+            }
+        }
     }
 }
 //function append_multiperformer_criterion_shared_data
@@ -63,18 +76,20 @@ void append_qoi_statistics_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    auto tOutputDataIDs = aXMLMetaData.mOutputMetaData.randomIDs();
+    const XMLGen::Output &tOutputMetadata = aXMLMetaData.mOutputMetaData[0];
+    auto tOutputDataIDs = tOutputMetadata.randomIDs();
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
     for(auto& tOutputDataID : tOutputDataIDs)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tOutputDataID);
+        auto tLayout = tOutputMetadata.randomLayout(tOutputDataID);
         auto tMeanSharedData = tOutputDataID + " mean";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
+        std::vector<std::string> tValues = {tMeanSharedData, "Scalar", tLayout, "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
         auto tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
 
         auto tStdDevSharedData = tOutputDataID + " standard deviation";
-        tValues = {tStdDevSharedData, "Scalar", tLayout, "IGNORE", "platomain", "platomain"};
+        tValues = {tStdDevSharedData, "Scalar", tLayout, "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
         tSharedDataNode = aDocument.append_child("SharedData");
         XMLGen::append_children(tKeys, tValues, tSharedDataNode);
     }
@@ -93,15 +108,17 @@ void append_multiperformer_qoi_shared_data
     }
 
     // TODO: LOOP OVER OUTPUT METADATA. FIRST, OUTPUT METADATA NEEDS TO BE REFACTORED TO SUPPORT MULTIPLE serviceS - I.E. SUPPORT STD::VECTOR
-    auto tIDs = aXMLMetaData.mOutputMetaData.randomIDs();
-    auto tServiceID = aXMLMetaData.mOutputMetaData.serviceID();
+    const XMLGen::Output &tOutputMetadata = aXMLMetaData.mOutputMetaData[0];
+    auto tIDs = tOutputMetadata.randomIDs();
+    auto tServiceID = tOutputMetadata.serviceID();
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
     for(auto& tID : tIDs)
     {
-        auto tLayout = aXMLMetaData.mOutputMetaData.randomLayout(tID);
-        auto tSharedDataName = aXMLMetaData.mOutputMetaData.randomSharedDataName(tID);
+        auto tLayout = tOutputMetadata.randomLayout(tID);
+        auto tSharedDataName = tOutputMetadata.randomSharedDataName(tID);
         auto tOwnerName = aXMLMetaData.service(tServiceID).performer() + "_{PerformerIndex}";
         std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, "platomain"};
+        std::vector<std::string> tValues = {tSharedDataName, "Scalar", tLayout, "IGNORE", tOwnerName, tFirstPlatoMainPerformer};
         XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
     }
 }
@@ -113,6 +130,10 @@ void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    {
+        return;
+    }
     if(aXMLMetaData.services().empty())
     {
         THROWERR("Append Topology Shared Data for a Nondeterministic Use Case: Services list is empty.")
@@ -120,15 +141,19 @@ void append_multiperformer_topology_shared_data
 
     auto tSharedData = aDocument.append_child("SharedData");
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName"};
-    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", "platomain", "platomain"};
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    std::vector<std::string> tValues = {"Topology", "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer};
     XMLGen::append_children(tKeys, tValues, tSharedData);
 
     for(auto& tService : aXMLMetaData.services())
     {
-        auto tForNode = tSharedData.append_child("For");
-        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tUserName = tService.performer() + "_{PerformerIndex}";
-        XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
+        if(tService.performer() != tFirstPlatoMainPerformer) // don't add platomain performer twice
+        {
+            auto tForNode = tSharedData.append_child("For");
+            XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+            auto tUserName = tService.performer() + "_{PerformerIndex}";
+            XMLGen::append_children( { "UserName" }, { tUserName }, tForNode);
+        }
     }
 }
 //function append_multiperformer_topology_shared_data
@@ -137,7 +162,8 @@ void append_multiperformer_topology_shared_data
 /******************************************************************************/
 void append_physics_performers_multiperformer_usecase
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_document& aDocument)
+ int &aNextPerformerID,
+ pugi::xml_node& aNode)
 {
     if(aXMLMetaData.services().empty())
     {
@@ -146,13 +172,22 @@ void append_physics_performers_multiperformer_usecase
 
     for(auto& tService : aXMLMetaData.services())
     {
-        const int tID = (&tService - &aXMLMetaData.services()[0]) + 1;
-        auto tPerformerNode = aDocument.append_child("Performer");
-        XMLGen::append_children( { "PerformerID" }, { std::to_string(tID) }, tPerformerNode);
-        auto tForNode = tPerformerNode.append_child("For");
-        XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
-        auto tPerformerName = tService.performer() + "_{PerformerIndex}";
-        XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tService.code() }, tForNode);
+        if(tService.code() != "plato_esp")  
+        {
+            const int tID = (&tService - &aXMLMetaData.services()[0]);
+            // The PlatoMain optimizer should always be the first service in the list
+            // so skip it.
+            if(tID > 0)
+            {
+                auto tPerformerNode = aNode.append_child("Performer");
+                XMLGen::append_children( { "PerformerID" }, { std::to_string(aNextPerformerID) }, tPerformerNode);
+                aNextPerformerID++;
+                auto tForNode = tPerformerNode.append_child("For");
+                XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
+                auto tPerformerName = tService.performer() + "_{PerformerIndex}";
+                XMLGen::append_children( { "Name", "Code" }, { tPerformerName, tService.code() }, tForNode);
+            }
+        }
     }
 }
 // function append_physics_performers_multiperformer_usecase
@@ -161,10 +196,11 @@ void append_physics_performers_multiperformer_usecase
 /******************************************************************************/
 void append_filter_criterion_gradient_samples_operation
 (const std::string& aCriterionName,
+ const std::string& aPerformerName,
  pugi::xml_node& aParentNode)
 {
     auto tOperationNode = aParentNode.append_child("Operation");
-    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", "platomain"}, tOperationNode);
+    XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", aPerformerName}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Control"}, tInputNode);
 
@@ -262,17 +298,17 @@ void append_nondeterministic_parameters
 
 /******************************************************************************/
 void append_sample_objective_value_operation
-(const std::string& aPerformerName,
- const XMLGen::InputData& aXMLMetaData,
+(const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    XMLGen::Service tService = aXMLMetaData.service(aXMLMetaData.objective.serviceIDs[0]);
     auto tForNode = aParentNode.append_child("For");
     XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
     auto tOperationNode = tForNode.append_child("Operation");
     tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
     tOperationNode = tForNode.append_child("Operation");
-    auto tPerformerName = aPerformerName + "_{PerformerIndex}";
+    auto tPerformerName = tService.performer() + "_{PerformerIndex}";
     XMLGen::append_children( { "Name", "PerformerName" }, { "Compute Objective Value", tPerformerName }, tOperationNode);
 
     auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
@@ -298,7 +334,8 @@ void append_evaluate_nondeterministic_objective_value_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Compute Non-Deterministic Objective Value");
-    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "platomain"}, tOperationNode);
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tFirstPlatoMainPerformer}, tOperationNode);
 
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
@@ -310,10 +347,31 @@ void append_evaluate_nondeterministic_objective_value_operation
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
-    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.objective_number_standard_deviations + " StdDev";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev";
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, aOutputSharedDataName }, tOutputNode);
 }
 // function append_evaluate_nondeterministic_objective_value_operation
+/******************************************************************************/
+
+/******************************************************************************/
+std::string get_random_objective_service_id
+(const XMLGen::InputData& aXMLMetaData)
+{
+    std::set<std::string> tServiceIDs;
+    for(auto &tCurID : aXMLMetaData.objective.serviceIDs)
+    {
+        tServiceIDs.insert(tCurID);
+    }
+    if(tServiceIDs.size() == 0)
+    {
+        THROWERR("Get Random Objective Service ID: No services were specified for random objective.")
+    }
+    if(tServiceIDs.size() > 1)
+    {
+        THROWERR("Get Random Objective Service ID: More than one service is being used for random objective.")
+    }
+    return *(tServiceIDs.begin());
+}
 /******************************************************************************/
 
 /******************************************************************************/
@@ -321,8 +379,11 @@ void append_sample_objective_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    for(auto& tObjective : aXMLMetaData.objectives)
-    {
+    auto tServiceID = get_random_objective_service_id(aXMLMetaData);
+
+//    for(auto& tServiceID : aXMLMetaData.objective.serviceIDs)
+//    {
+        auto &tService = aXMLMetaData.service(tServiceID);
         auto tForNode = aParentNode.append_child("For");
         XMLGen::append_attributes( { "var", "in" }, { "PerformerSampleIndex", "PerformerSamples" }, tForNode);
         auto tOperationNode = tForNode.append_child("Operation");
@@ -330,7 +391,7 @@ void append_sample_objective_gradient_operation
         XMLGen::append_attributes( { "var", "in" }, { "PerformerIndex", "Performers" }, tForNode);
         tOperationNode = tForNode.append_child("Operation");
         auto tOperationName = std::string("Compute Objective Gradient");
-        auto tPerformerName = tObjective.mPerformerName + "_{PerformerIndex}";
+        auto tPerformerName = tService.performer() + "_{PerformerIndex}";
         XMLGen::append_children( { "Name", "PerformerName" }, { tOperationName, tPerformerName }, tOperationNode);
 
         auto tLoadTags = XMLGen::return_random_tractions_tags_for_define_xml_file(aXMLMetaData.mRandomMetaData);
@@ -344,7 +405,7 @@ void append_sample_objective_gradient_operation
         auto tArgumentName = std::string("Objective Gradient");
         auto tSharedDataName = tArgumentName + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
         XMLGen::append_children( { "ArgumentName", "SharedDataName" }, { tArgumentName, tSharedDataName }, tOutputNode);
-    }
+  //  }
 }
 // function append_sample_objective_gradient_operation
 /******************************************************************************/
@@ -357,7 +418,8 @@ void append_evaluate_nondeterministic_objective_gradient_operation
 {
     auto tOperationNode = aParentNode.append_child("Operation");
     auto tOperationName = std::string("Compute Non-Deterministic Objective Gradient");
-    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, "platomain"}, tOperationNode);
+    auto tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+    XMLGen::append_children({"Name", "PerformerName"}, {tOperationName, tFirstPlatoMainPerformer}, tOperationNode);
     auto tForNode = tOperationNode.append_child("For");
     XMLGen::append_attributes({"var", "in"}, {"PerformerIndex", "Performers"}, tForNode);
     tForNode = tForNode.append_child("For");
@@ -371,7 +433,7 @@ void append_evaluate_nondeterministic_objective_gradient_operation
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tDataName, tDataName }, tInputNode);
 
     auto tOutputNode = tOperationNode.append_child("Output");
-    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.objective_number_standard_deviations + " StdDev Gradient";
+    auto tArgumentName = std::string("Objective Mean Plus ") + aXMLMetaData.optimization_parameters().objective_number_standard_deviations() + " StdDev Gradient";
     XMLGen::append_children({ "ArgumentName", "SharedDataName" }, { tArgumentName, aOutputSharedDataName }, tOutputNode);
 }
 // function append_evaluate_nondeterministic_objective_gradient_operation
