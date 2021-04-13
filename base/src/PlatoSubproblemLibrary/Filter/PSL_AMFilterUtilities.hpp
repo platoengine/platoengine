@@ -38,7 +38,9 @@ public:
 
     void computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const;
     double computeTetNodePrintableDensity(const int& aTetNodeIndex,
-            const std::vector<double>& aGridPrintableDensity) const;
+                                          const std::vector<double>& aGridPrintableDensity) const;
+
+    const std::vector<Vector>& getGridPointCoordinates() const {return mGridPointCoordinates;}
 
 
 private:

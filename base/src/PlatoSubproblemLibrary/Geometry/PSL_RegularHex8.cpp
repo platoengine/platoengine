@@ -17,9 +17,11 @@ double RegularHex8::interpolateScalar(const Vector& aPoint, const std::vector<do
     double tA6 = a6(aPoint,aScalars);
     double tA7 = a7(aPoint,aScalars);
 
-    return tA0 + tA1*aPoint.X() + tA2*aPoint.Y() + tA3*aPoint.Z() 
+    double tVal = tA0 + tA1*aPoint.X() + tA2*aPoint.Y() + tA3*aPoint.Z() 
          + tA4*aPoint.X()*aPoint.Y() + tA5*aPoint.X()*aPoint.Z() + tA6*aPoint.Y()*aPoint.Z()
          + tA7*aPoint.X()*aPoint.Y()*aPoint.Z();
+
+    return tVal;
 }
 
 double RegularHex8::a0(const Vector& aPoint, const std::vector<double>& aScalars) const
@@ -126,12 +128,12 @@ double RegularHex8::a5(const Vector& aPoint, const std::vector<double>& aScalars
 {
     std::vector<double> tTerms;
     tTerms.push_back(-aScalars[0] * mMaxCoords(1));
-    tTerms.push_back(aScalars[4]  * mMinCoords(1));
-    tTerms.push_back(aScalars[2]  * mMaxCoords(1));
+    tTerms.push_back(aScalars[4]  * mMaxCoords(1));
+    tTerms.push_back(aScalars[2]  * mMinCoords(1));
     tTerms.push_back(-aScalars[6] * mMinCoords(1));
     tTerms.push_back(aScalars[1]  * mMaxCoords(1));
-    tTerms.push_back(-aScalars[5] * mMinCoords(1));
-    tTerms.push_back(-aScalars[3] * mMaxCoords(1));
+    tTerms.push_back(-aScalars[5] * mMaxCoords(1));
+    tTerms.push_back(-aScalars[3] * mMinCoords(1));
     tTerms.push_back(aScalars[7]  * mMinCoords(1));
 
     double tNumerator = 0;
@@ -146,12 +148,12 @@ double RegularHex8::a6(const Vector& aPoint, const std::vector<double>& aScalars
 {
     std::vector<double> tTerms;
     tTerms.push_back(-aScalars[0] * mMaxCoords(0));
-    tTerms.push_back(aScalars[4]  * mMinCoords(0));
+    tTerms.push_back(aScalars[4]  * mMaxCoords(0));
     tTerms.push_back(aScalars[2]  * mMaxCoords(0));
-    tTerms.push_back(-aScalars[6] * mMinCoords(0));
-    tTerms.push_back(aScalars[1]  * mMaxCoords(0));
+    tTerms.push_back(-aScalars[6] * mMaxCoords(0));
+    tTerms.push_back(aScalars[1]  * mMinCoords(0));
     tTerms.push_back(-aScalars[5] * mMinCoords(0));
-    tTerms.push_back(-aScalars[3] * mMaxCoords(0));
+    tTerms.push_back(-aScalars[3] * mMinCoords(0));
     tTerms.push_back(aScalars[7]  * mMinCoords(0));
 
     double tNumerator = 0;

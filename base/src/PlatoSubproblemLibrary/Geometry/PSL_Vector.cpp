@@ -16,7 +16,6 @@ namespace PlatoSubproblemLibrary
 Vector::Vector() :
         m_data()
 {
-    m_data.resize(3);
 }
 
 Vector::Vector(const std::vector<double>& data)
@@ -24,15 +23,15 @@ Vector::Vector(const std::vector<double>& data)
     if(data.size() != 3)
         throw(std::length_error("PSL vectors must be of length 3"));
 
-    m_data = data;
+    m_data[0] = data[0];
+    m_data[1] = data[1];
+    m_data[2] = data[2];
 }
 
 Vector::Vector(const Point& aPoint)
 {
     if(aPoint.dimension() != 3)
         throw(std::length_error("PSL vectors must be of length 3"));
-
-    m_data.resize(3);
 
     for(int i = 0; i < 3; ++i)
         m_data[i] = aPoint(i);
@@ -47,7 +46,9 @@ void Vector::set(const std::vector<double>& data)
      if(data.size() != 3)
          throw(std::length_error("PSL vectors must be of length 3"));
 
-     m_data = data;
+    m_data[0] = data[0];
+    m_data[1] = data[1];
+    m_data[2] = data[2];
 }
 
 void Vector::set(size_t index, double value)

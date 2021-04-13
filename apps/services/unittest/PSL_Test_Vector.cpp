@@ -311,5 +311,33 @@ PSL_TEST(Vector, getBoundingBox)
     EXPECT_EQ(tMaxCoords(2),5.0);
 }
 
+// PSL_TEST(Vector, performance)
+// {
+//     // add 1000000000 vectors
+    
+//     // Vector tVec;
+//     double tVec[3] = {0.0,0.0,0.0};
+
+//     for(int i = 0; i < 1000000000; ++i)
+//     {
+//         double* tTemp = new double[3];
+//         tTemp[0] = 1.0;
+//         tTemp[1] = 0.0;
+//         tTemp[2] = 0.0;
+//         tVec[0] += tTemp[0];
+//         tVec[1] = tTemp[1];
+//         tVec[2] = tTemp[2];
+//         delete[] tTemp;
+//     }
+
+// //     EXPECT_EQ(tVec(0),1000000000.0);
+// //     EXPECT_EQ(tVec(1),0.0);
+// //     EXPECT_EQ(tVec(2),0.0);
+
+//     EXPECT_EQ(tVec[0],1000000000.0);
+//     EXPECT_EQ(tVec[1],0.0);
+//     EXPECT_EQ(tVec[2],0.0);
+// }
+
 }
 }

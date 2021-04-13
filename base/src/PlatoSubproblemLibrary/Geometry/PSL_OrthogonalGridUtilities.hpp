@@ -18,12 +18,12 @@ namespace PlatoSubproblemLibrary
 class OrthogonalGridUtilities
 {
     public:
-        OrthogonalGridUtilities(const Vector& aUBasisVector,
-                                const Vector& aVBasisVector,
-                                const Vector& aWBasisVector,
-                                const Vector& aMaxUVWCoords,
-                                const Vector& aMinUVWCoords,
-                                const double& aTargetEdgeLength)
+        OrthogonalGridUtilities(const Vector aUBasisVector,
+                                const Vector aVBasisVector,
+                                const Vector aWBasisVector,
+                                const Vector aMaxUVWCoords,
+                                const Vector aMinUVWCoords,
+                                const double aTargetEdgeLength)
             :mUBasisVector(aUBasisVector),
              mVBasisVector(aVBasisVector),
              mWBasisVector(aWBasisVector),
@@ -75,6 +75,9 @@ class OrthogonalGridUtilities
         double interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
                                  const std::vector<double>& aScalarValues,
                                  const Vector& aPoint) const;
+
+        void tempFunction(std::vector<double>& aTemp);
+
     private:
 
         void checkBasis(const Vector& aUBasisVector,
@@ -94,11 +97,11 @@ class OrthogonalGridUtilities
 
         void checkIndexFormat(const std::vector<std::vector<int>>& aContainingElementIndicies) const;
 
-        const Vector& mUBasisVector;
-        const Vector& mVBasisVector;
-        const Vector& mWBasisVector;
-        const Vector& mMaxUVWCoords;
-        const Vector& mMinUVWCoords;
+        const Vector mUBasisVector;
+        const Vector mVBasisVector;
+        const Vector mWBasisVector;
+        const Vector mMaxUVWCoords;
+        const Vector mMinUVWCoords;
 
         std::vector<int> mNumElementsInEachDirection;
 

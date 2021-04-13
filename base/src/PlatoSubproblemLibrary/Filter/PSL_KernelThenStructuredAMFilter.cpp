@@ -15,18 +15,63 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     if(!mFilterBuilt)
         throw(std::runtime_error("KernelThenStructuredAMFilter: Filter not built before attempting to apply filter"));
 
-    auto tCoordinates = mTetUtilities->getCoordinates();
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities->getCoordinates();
 
     if(aDensity->get_length() != tCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
+    std::cout << "Compute Grid Blueprint Density" << std::endl;
     std::vector<double> tGridBlueprintDensity;
     mAMFilterUtilities->computeGridBlueprintDensity(aDensity,tGridBlueprintDensity); 
-    std::vector<double> tGridSupportDensity;
-    mAMFilterUtilities->computeGridSupportDensity(tGridBlueprintDensity,tGridSupportDensity);
-    std::vector<double> tGridPrintableDensity;
-    mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
-    mAMFilterUtilities->computeTetMeshPrintableDensity(tGridPrintableDensity,aDensity);
+
+    // std::cout << "Grid Density: " << std::endl;
+
+    // for(auto val : tGridBlueprintDensity)
+    // {
+    //     std::cout << " " << val;
+    //     if(val < 0 - 1e-14 || val > 1 + 1e-14)
+    //         throw(std::runtime_error("Bad value"));
+    // }
+    // std::cout << std::endl;
+
+    // std::cout << "Compute Grid Support Density" << std::endl;
+    // std::vector<double> tGridSupportDensity;
+    // mAMFilterUtilities->computeGridSupportDensity(tGridBlueprintDensity,tGridSupportDensity);
+    // std::cout << "Compute Grid Printable Density" << std::endl;
+    // std::vector<double> tGridPrintableDensity;
+    // mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
+    // std::cout << "Compute Tet Mesh Printable Density" << std::endl;
+    // mAMFilterUtilities->computeTetMeshPrintableDensity(tGridPrintableDensity,aDensity);
+
+    // mGridUtilities->tempFunction(tTest);
+
+    // std::cout << "Printable Densities: ";
+    // for(auto value : tTest)
+    //     std::cout << " " << value;
+    // std::cout << std::endl;
+
+    // std::cin.get();
+
+    // std::fill(tTest.begin(),tTest.end(),1);
+    //
+    // std::vector<int> tGridDimensions = mGridUtilities->getGridDimensions();
+   
+    // std::vector<double> tTest(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+    // for(int i = 0; i < tGridDimensions[0]; ++i)
+    // {
+    //     for(int j = 0; j < tGridDimensions[1]; ++j)
+    //     {
+    //         for(int k = 0; k < tGridDimensions[2]; ++k)
+    //         {
+    //             // aGridBlueprintDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointBlueprintDensity(i,j,k,aTetMeshBlueprintDensity);
+    //             tTest[mGridUtilities->getSerializedIndex(i,j,k)] = (double) k / (double) (tGridDimensions[2]-1);
+    //         }
+    //     }
+    // }
+
+    // mAMFilterUtilities->computeTetMeshPrintableDensity(tTest,aDensity);
+
+    mAMFilterUtilities->computeTetMeshPrintableDensity(tGridBlueprintDensity,aDensity);
 }
 
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const

@@ -6,7 +6,9 @@ namespace PlatoSubproblemLibrary
 
 double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const
 {
-    auto tConnectivity = mTetUtilities.getConnectivity();
+
+
+    const std::vector<std::vector<int>>& tConnectivity = mTetUtilities.getConnectivity();
 
     int tContainingTetID = mContainingTetID[mGridUtilities.getSerializedIndex(i,j,k)];
     
@@ -17,6 +19,13 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
     Vector tGridPoint = mGridPointCoordinates[mGridUtilities.getSerializedIndex(i,j,k)];
 
     std::vector<double> tBaryCentricCoordinates = mTetUtilities.computeBarycentricCoordinates(tTet, tGridPoint);
+
+    if(tBaryCentricCoordinates.size() != 4)
+        throw(std::runtime_error("Incorrect barycentric coordinates"));
+
+    for(auto tCoordinate : tBaryCentricCoordinates)
+        if(tCoordinate > 1 + 1e-14 || tCoordinate < 0 - 1e-14)
+            throw(std::runtime_error("Grid point outside of TET"));
 
     double tGridPointDensity = 0;
     for(int tNodeIndex = 0; tNodeIndex < (int) tTet.size(); ++tNodeIndex)
@@ -126,7 +135,7 @@ void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& a
 double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeIndex,
                                                          const std::vector<double>& aGridPrintableDensity) const
 {
-    auto tCoordinates = mTetUtilities.getCoordinates();
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities.getCoordinates();
 
     if(aTetNodeIndex < 0 || aTetNodeIndex >= (int) tCoordinates.size())
         throw(std::out_of_range("AMFilterUtilities: Index must be between 0 and number of nodes on tet mesh"));
@@ -142,17 +151,21 @@ double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeInde
         tContainingElementDensities.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tIndex)]);
     }
 
-    return mGridUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,Vector(tCoordinates[aTetNodeIndex]));;
+    double tVal = mGridUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,Vector(tCoordinates[aTetNodeIndex]));
+
+    return tVal;
 }
 
 void AMFilterUtilities::computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const
 {
-    if(aDensity->get_length() != mTetUtilities.getCoordinates().size())
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities.getCoordinates();
+    if(aDensity->get_length() != tCoordinates.size())
         throw(std::domain_error("AMFilterUtilities: Tet mesh density vector does not match the mesh size"));
 
     for(size_t i = 0; i < aDensity->get_length(); ++i)
     {
-        aDensity->set_value(i, computeTetNodePrintableDensity(i, aGridPrintableDensity));
+        double tVal = computeTetNodePrintableDensity(i, aGridPrintableDensity);
+        aDensity->set_value(i, tVal);
     }
 }
 

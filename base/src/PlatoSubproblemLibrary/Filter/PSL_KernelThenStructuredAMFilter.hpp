@@ -51,8 +51,12 @@ public:
     virtual ~KernelThenStructuredAMFilter()
     {
         mInputData = NULL;
-        // delete mUtilities;
-        // mUtilities = NULL;
+        // delete mAMFilterUtilities;
+        // mAMFilterUtilities = NULL;
+        // delete mGridUtilities;
+        // mGridUtilities = NULL;
+        // delete mTetUtilities;
+        // mTetUtilities = NULL;
     }
 
     void init(const std::vector<std::vector<double>>& aCoordinates,
@@ -114,6 +118,9 @@ private:
     std::unique_ptr<TetMeshUtilities> mTetUtilities;
     std::unique_ptr<OrthogonalGridUtilities> mGridUtilities;
     std::unique_ptr<AMFilterUtilities> mAMFilterUtilities;
+    // TetMeshUtilities* mTetUtilities;
+    // OrthogonalGridUtilities* mGridUtilities;
+    // AMFilterUtilities* mAMFilterUtilities;
 };
 
 }

@@ -86,8 +86,8 @@ bool isPointInTetrahedron(const std::vector<std::vector<double>>& aCoordinates,c
 class TetMeshUtilities
 {
     public:
-        TetMeshUtilities(const std::vector<std::vector<double>>& aCoordinates,
-                           const std::vector<std::vector<int>>& aConnectivity)
+        TetMeshUtilities(const std::vector<std::vector<double>> aCoordinates,
+                         const std::vector<std::vector<int>> aConnectivity)
             :mCoordinates(aCoordinates),
              mConnectivity(aConnectivity)
         {
@@ -220,8 +220,8 @@ class TetMeshUtilities
 
 
     private:
-        const std::vector<std::vector<double>>& mCoordinates;
-        const std::vector<std::vector<int>>& mConnectivity;
+        const std::vector<std::vector<double>> mCoordinates;
+        const std::vector<std::vector<int>> mConnectivity;
 };
 
 }

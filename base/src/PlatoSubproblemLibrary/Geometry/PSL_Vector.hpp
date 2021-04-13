@@ -44,7 +44,7 @@ public:
     double Z() const {return m_data[2];}
 
 private:
-    std::vector<double> m_data;
+    double m_data[3];
 };
 
 Vector operator *(const double aScalar, const Vector& aVec);

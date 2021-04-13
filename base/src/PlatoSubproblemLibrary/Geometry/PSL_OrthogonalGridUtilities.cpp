@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <cmath>
+#include <iterator>
 
 namespace PlatoSubproblemLibrary
 {
@@ -29,7 +30,7 @@ int OrthogonalGridUtilities::getSerializedIndex(const int& i, const int& j, cons
 {
     if(i < 0 || j < 0 || k < 0 || i > mNumElementsInEachDirection[0] || j > mNumElementsInEachDirection[1] || k > mNumElementsInEachDirection[2])
     {
-        throw(std::out_of_range("OrthogonalGridUtilities: Index in each direction must be between zero and number of grid points"));
+        throw(std::out_of_range("OrthogonalGridUtilities: Index in each direction must be between zero and number of grid elements"));
     }
 
     return i + j*(mNumElementsInEachDirection[0]+1) + k*(mNumElementsInEachDirection[0]+1)*(mNumElementsInEachDirection[1]+1);
@@ -209,6 +210,8 @@ std::vector<std::vector<int>> OrthogonalGridUtilities::getContainingGridElement(
         tGridIndicies.push_back({tUIndices[0],tVIndices[1],tWIndices[1]});
         tGridIndicies.push_back({tUIndices[1],tVIndices[1],tWIndices[1]});
     }
+    else
+        throw(std::domain_error("Didn't find point"));
 
     return tGridIndicies;
 }
@@ -234,17 +237,23 @@ std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aDim,
 
     double tLength = mMaxUVWCoords(aDim) - mMinUVWCoords(aDim);
 
+    bool found_point = false;
     for(int i = 0; i < tDimensions[aDim]-1; ++i)
     {
         double tFloor = mMinUVWCoords(aDim) + i*tLength/mNumElementsInEachDirection[aDim];
         double tCeiling = mMinUVWCoords(aDim) + (i+1)*tLength/mNumElementsInEachDirection[aDim];
 
-        if(tFloor <= tCoordinate && tCoordinate < tCeiling)
+        if(tFloor <= tCoordinate && tCoordinate <= tCeiling)
         {
             tSurroundingIndices.push_back(i);
             tSurroundingIndices.push_back(i+1);
+            found_point = true;
+            break;
         }
     }
+
+    if(!found_point)
+        throw(std::runtime_error("didn't find point"));
 
     return tSurroundingIndices;
 }
@@ -319,7 +328,26 @@ double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<
 
     RegularHex8 tHex(tMinXYZCoords,tMaxXYZCoords);
 
-    return tHex.interpolateScalar(aPoint,aScalarValues);
+    double tVal = tHex.interpolateScalar(aPoint,aScalarValues);
+
+    return tVal;
+}
+
+void OrthogonalGridUtilities::tempFunction(std::vector<double>& aTemp)
+{
+    auto tDimension = getGridDimensions();
+    aTemp.resize(tDimension[0] * tDimension[1] * tDimension[2]);
+
+    for(int i = 0; i < tDimension[0]; ++i)
+    {
+        for(int j = 0; j < tDimension[1]; ++j)
+        {
+            for(int k = 0; k < tDimension[2]; ++k)
+            {
+                aTemp[getSerializedIndex(i,j,k)] = ((double)k)/(double)(tDimension[2]-1);
+            }
+        }
+    }
 }
 
 }
