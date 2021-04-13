@@ -15,6 +15,68 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendDeterministicQoIToOutputOperation_non_multi_load_case)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tMetaData.append(tService);
+    tService.id("2");
+    tService.code("platomain");
+    tMetaData.append(tService);
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_deterministic_qoi_to_output_operation_for_non_multi_load_case(tMetaData, tDocument);
+    //tDocument.save_file("xml.txt", " ");
+
+    auto tInput = tDocument.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    std::vector<std::string> tKeys = {"ArgumentName", "Layout"};
+    std::vector<std::string> tValues = {"dispx_plato_analyze_1", "Nodal Field"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendDeterministicQoIToOutputOperation_multi_load_case)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("plato_analyze");
+    tMetaData.append(tService);
+    tService.id("2");
+    tService.code("platomain");
+    tMetaData.append(tService);
+    XMLGen::Output tOutputMetadata;
+    tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
+    tMetaData.mOutputMetaData.push_back(tOutputMetadata);
+    tMetaData.objective.multi_load_case = "true";
+    tMetaData.objective.scenarioIDs.push_back("5");
+    tMetaData.objective.scenarioIDs.push_back("6");
+
+    pugi::xml_document tDocument;
+    XMLGen::append_deterministic_qoi_to_output_operation_for_multi_load_case(tMetaData, tDocument);
+    //tDocument.save_file("xml.txt", " ");
+
+    auto tInput = tDocument.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    std::vector<std::string> tKeys = {"ArgumentName", "Layout"};
+    std::vector<std::string> tValues = {"dispx_plato_analyze_1_scenario_5", "Nodal Field"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    tInput = tInput.next_sibling("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tValues = {"dispx_plato_analyze_1_scenario_6", "Nodal Field"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+}
+
 TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
 {
     XMLGen::InputData tXMLMetaData;
@@ -33,6 +95,160 @@ TEST(PlatoTestXMLGenerator, AppendQoiStatisticsToOutputOperation)
     ASSERT_FALSE(tInput.empty());
     ASSERT_STREQ("Input", tInput.name());
     PlatoTestXMLGenerator::test_children({"ArgumentName", "Layout"}, {"vonmises standard deviation", "Element Field"}, tInput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendAggregateDataToPlatoMainOperation_non_multi_load_case)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.criteriaIDs.push_back("3");
+    tObjective.criteriaIDs.push_back("4");
+    tObjective.weights.push_back("1.0");
+    tObjective.weights.push_back("2.0");
+    tObjective.multi_load_case = "false";
+    tMetaData.objective = tObjective;
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_aggregate_data_to_plato_main_operation(tMetaData, tDocument));
+    //tDocument.save_file("xml.txt", " ");
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Name", "Function", "Aggregate", "Aggregate", "Weighting"};
+    std::vector<std::string> tValues = {"Aggregate Data", "Aggregator", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tAggregate = tOperation.child("Aggregate");
+    ASSERT_FALSE(tAggregate.empty());
+    ASSERT_STREQ("Aggregate", tAggregate.name());
+    tKeys = {"Layout","Input","Input","Output"};
+    tValues = {"Value","","",""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tAggregate);
+    auto tInput = tAggregate.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Value 1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    tInput = tInput.next_sibling("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Value 2"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    auto tOutput = tAggregate.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Value"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+    tAggregate = tAggregate.next_sibling("Aggregate");
+    ASSERT_FALSE(tAggregate.empty());
+    ASSERT_STREQ("Aggregate", tAggregate.name());
+    tKeys = {"Layout","Input","Input","Output"};
+    tValues = {"Nodal Field","","",""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tAggregate);
+    tInput = tAggregate.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Field 1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    tInput = tInput.next_sibling("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Field 2"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    tOutput = tAggregate.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Field"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+    auto tWeighting = tOperation.child("Weighting");
+    ASSERT_FALSE(tWeighting.empty());
+    ASSERT_STREQ("Weighting", tWeighting.name());
+    auto tWeight = tWeighting.child("Weight");
+    ASSERT_FALSE(tWeight.empty());
+    ASSERT_STREQ("Weight", tWeight.name());
+    tKeys = {"Value"};
+    tValues = {"1.0"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tWeight);
+    tWeight = tWeight.next_sibling("Weight");
+    ASSERT_FALSE(tWeight.empty());
+    ASSERT_STREQ("Weight", tWeight.name());
+    tKeys = {"Value"};
+    tValues = {"2.0"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tWeight);
+}
+
+TEST(PlatoTestXMLGenerator, AppendAggregateDataToPlatoMainOperation_multi_load_case)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::Objective tObjective;
+    tObjective.criteriaIDs.push_back("3");
+    tObjective.criteriaIDs.push_back("4");
+    tObjective.weights.push_back("1.0");
+    tObjective.weights.push_back("2.0");
+    tObjective.multi_load_case = "true";
+    tMetaData.objective = tObjective;
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_aggregate_data_to_plato_main_operation(tMetaData, tDocument));
+    //tDocument.save_file("xml.txt", " ");
+
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Name", "Function", "Aggregate", "Aggregate", "Weighting"};
+    std::vector<std::string> tValues = {"Aggregate Data", "Aggregator", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+    auto tAggregate = tOperation.child("Aggregate");
+    ASSERT_FALSE(tAggregate.empty());
+    ASSERT_STREQ("Aggregate", tAggregate.name());
+    tKeys = {"Layout","Input","Output"};
+    tValues = {"Value","",""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tAggregate);
+    auto tInput = tAggregate.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Value 1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    auto tOutput = tAggregate.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Value"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+    tAggregate = tAggregate.next_sibling("Aggregate");
+    ASSERT_FALSE(tAggregate.empty());
+    ASSERT_STREQ("Aggregate", tAggregate.name());
+    tKeys = {"Layout","Input","Output"};
+    tValues = {"Nodal Field","",""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tAggregate);
+    tInput = tAggregate.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Field 1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tInput);
+    tOutput = tAggregate.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    tKeys = {"ArgumentName"};
+    tValues = {"Field"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
+    auto tWeighting = tOperation.child("Weighting");
+    ASSERT_FALSE(tWeighting.empty());
+    ASSERT_STREQ("Weighting", tWeighting.name());
+    auto tWeight = tWeighting.child("Weight");
+    ASSERT_FALSE(tWeight.empty());
+    ASSERT_STREQ("Weight", tWeight.name());
+    tKeys = {"Value"};
+    tValues = {"1.0"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tWeight);
 }
 
 TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
