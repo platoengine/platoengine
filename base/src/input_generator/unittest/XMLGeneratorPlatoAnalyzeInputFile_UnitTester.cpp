@@ -1144,6 +1144,146 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendPlasticityNaturalBoundaryConditionsToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("traction");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    tLoad.load_values(tValues);
+    tXMLMetaData.loads.push_back(tLoad);
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("plasticity");
+    std::vector<std::string> tLoadIDs = {"1"};
+    tScenario.setLoadIDs(tLoadIDs);
+    tXMLMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Natural Boundary Conditions"}, tLoadParamList);
+
+    auto tMechanicalNBCParamList = tLoadParamList.child("ParameterList");
+    ASSERT_FALSE(tMechanicalNBCParamList.empty());
+    ASSERT_STREQ("ParameterList", tMechanicalNBCParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Mechanical Natural Boundary Conditions"}, tMechanicalNBCParamList);
+
+    auto tTraction = tMechanicalNBCParamList.child("ParameterList");
+    ASSERT_FALSE(tTraction.empty());
+    ASSERT_STREQ("ParameterList", tTraction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition with ID 1"}, tTraction);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPlatoAnalyzeInputDeck)
+{
+    XMLGen::InputData tXMLMetaData;
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("traction");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    tLoad.load_values(tValues);
+    tXMLMetaData.loads.push_back(tLoad);
+
+    XMLGen::NaturalBoundaryCondition tLoad2;
+    tLoad2.type("uniform_surface_flux");
+    tLoad2.id("2");
+    tLoad2.location_name("ss_2");
+    std::vector<std::string> tValues2 = {"10.0"};
+    tLoad2.load_values(tValues2);
+    tXMLMetaData.loads.push_back(tLoad2);
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("thermoplasticity");
+    std::vector<std::string> tLoadIDs = {"1","2"};
+    tScenario.setLoadIDs(tLoadIDs);
+    tXMLMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Natural Boundary Conditions"}, tLoadParamList);
+
+    auto tMechanicalNBCParamList = tLoadParamList.child("ParameterList");
+    ASSERT_FALSE(tMechanicalNBCParamList.empty());
+    ASSERT_STREQ("ParameterList", tMechanicalNBCParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Mechanical Natural Boundary Conditions"}, tMechanicalNBCParamList);
+
+    auto tThermalNBCParamList = tMechanicalNBCParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tThermalNBCParamList.empty());
+    ASSERT_STREQ("ParameterList", tThermalNBCParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Natural Boundary Conditions"}, tThermalNBCParamList);
+
+    auto tTraction = tMechanicalNBCParamList.child("ParameterList");
+    ASSERT_FALSE(tTraction.empty());
+    ASSERT_STREQ("ParameterList", tTraction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Traction Vector Boundary Condition with ID 1"}, tTraction);
+
+    auto tHeatFlux = tThermalNBCParamList.child("ParameterList");
+    ASSERT_FALSE(tHeatFlux.empty());
+    ASSERT_STREQ("ParameterList", tHeatFlux.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Surface Flux Boundary Condition with ID 2"}, tHeatFlux);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    tGoldKeys = {"name", "type", "value"};
+    tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Value", "double", "10.0"}, {"Sides", "string", "ss_2"} };
+    tGoldValuesItr = tGoldValues.begin();
+    tParameter = tHeatFlux.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_RandomUseCase)
 {
     XMLGen::InputData tXMLMetaData;
@@ -1449,7 +1589,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_OneBlockOn
     tMaterial.id("1");
     tMaterial.code("plato_analyze");
     tMaterial.name("adamantium");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "1e9");
     tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -1493,7 +1633,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_OneBlockTw
     tMaterial1.id("1");
     tMaterial1.code("plato_analyze");
     tMaterial1.name("adamantium");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.materialModel("isotropic linear elastic");
     tMaterial1.property("youngs_modulus", "1e9");
     tMaterial1.property("poissons_ratio", "0.3");
 
@@ -1501,7 +1641,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_OneBlockTw
     tMaterial2.id("2");
     tMaterial2.code("plato_analyze");
     tMaterial2.name("carbonadium");
-    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.materialModel("isotropic linear elastic");
     tMaterial2.property("youngs_modulus", "1e91");
     tMaterial2.property("poissons_ratio", "0.29");
 
@@ -1556,7 +1696,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksO
     tMaterial.id("1");
     tMaterial.code("plato_analyze");
     tMaterial.name("adamantium");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "1e9");
     tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -1620,7 +1760,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     tMaterial1.id("1");
     tMaterial1.code("plato_analyze");
     tMaterial1.name("adamantium");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1e9");
     tMaterial1.property("poissons_ratio", "0.3");
 
@@ -1628,7 +1768,7 @@ TEST(PlatoTestXMLGenerator, AppendSpatialModelToPlatoAnalyzeInputDeck_TwoBlocksT
     tMaterial2.id("2");
     tMaterial2.code("plato_analyze");
     tMaterial2.name("carbonadium");
-    tMaterial2.category("isotropic_linear_elastic");
+    tMaterial2.materialModel("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1e91");
     tMaterial2.property("poissons_ratio", "0.29");
 
@@ -1692,7 +1832,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ErrorInva
     XMLGen::InputData tXMLMetaData;
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
-    tMaterial.category("isotropic_linear_viscoelastic");
+    tMaterial.materialModel("isotropic_linear_viscoelastic");
     tXMLMetaData.materials.push_back(tMaterial);
     ASSERT_THROW(XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
 }
@@ -1715,7 +1855,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("unobtainium");
-    tMaterial.category("isotropic_linear_elastic");
+    tMaterial.materialModel("isotropic_linear_elastic");
     tMaterial.property("youngs_modulus", "1e9");
     tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -1753,7 +1893,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("adamantium");
-    tMaterial.category("isotropic_linear_thermal");
+    tMaterial.materialModel("isotropic_linear_thermal");
     tMaterial.property("thermal_conductivity", "10");
     tMaterial.property("mass_density", "200");
     tMaterial.property("specific_heat", "20");
@@ -1792,7 +1932,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Orthotrop
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("vibranium");
-    tMaterial.category("orthotropic_linear_elastic");
+    tMaterial.materialModel("orthotropic_linear_elastic");
     tMaterial.property("youngs_modulus_x", "1.0");
     tMaterial.property("youngs_modulus_y", "2.0");
     tMaterial.property("youngs_modulus_z", "3.0");
@@ -1839,7 +1979,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("kryptonite");
-    tMaterial.category("isotropic_linear_thermoelastic");
+    tMaterial.materialModel("isotropic_linear_thermoelastic");
     tMaterial.property("thermal_conductivity", "1.0");
     tMaterial.property("youngs_modulus", "2.3");
     tMaterial.property("poissons_ratio", "0.3");
@@ -1883,7 +2023,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("mithril");
-    tMaterial.category("j2_plasticity");
+    tMaterial.materialModel("j2_plasticity");
     tMaterial.property("youngs_modulus", "2.3");
     tMaterial.property("poissons_ratio", "0.3");
     tMaterial.property("pressure_scaling", "1.0");
@@ -1944,7 +2084,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_Isotropic
     XMLGen::Material tMaterial;
     tMaterial.code("plato_analyze");
     tMaterial.name("bavarium");
-    tMaterial.category("isotropic_linear_electroelastic");
+    tMaterial.materialModel("isotropic_linear_electroelastic");
     tMaterial.property("youngs_modulus", "2.3");
     tMaterial.property("poissons_ratio", "0.3");
     tMaterial.property("dielectric_permittivity_11", "1.0");
@@ -1997,7 +2137,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     XMLGen::Material tMaterial;
     tMaterial.id("1");
     tMaterial.name("carbonadium");
-    tMaterial.category("isotropic_linear_elastic");
+    tMaterial.materialModel("isotropic_linear_elastic");
     tMaterial.property("youngs_modulus", "1");
     tMaterial.property("poissons_ratio", "0.3");
     tXMLMetaData.materials.push_back(tMaterial);
@@ -2005,7 +2145,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::MaterialSet tMaterialSetOne;
@@ -2015,7 +2155,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
     // POSE MATERIAL SET 2
     XMLGen::Material tMaterial2;
     tMaterial2.id("1");
-    tMaterial2.category("isotropic_linear_elastic");
+    tMaterial2.materialModel("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1.1");
     tMaterial2.property("poissons_ratio", "0.33");
     XMLGen::MaterialSet tMaterialSetTwo;
@@ -2029,7 +2169,7 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
 
     // CALL FUNCTION WITH RANDOM MATERIAL
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_problem(tXMLMetaData.materials, tDocument));
+    ASSERT_NO_THROW(XMLGen::append_material_model_to_plato_problem(tXMLMetaData.materials, tXMLMetaData, tDocument));
 
     auto tMaterialModelsList = tDocument.child("ParameterList");
     ASSERT_FALSE(tMaterialModelsList.empty());
@@ -2048,6 +2188,186 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_RandomIso
         { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "1.0"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tMyMaterialModel.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPressureScalingToPlatoAnalyzeMaterialModels_Plasticity)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+
+    // CREATE MATERIAL
+    XMLGen::Material tMaterial;
+    tMaterial.id("1");
+    tMaterial.name("carbonadium");
+    tMaterial.materialModel("j2_plasticity");
+    tMaterial.property("youngs_modulus", "2.7");
+    tMaterial.property("poissons_ratio", "0.3");
+    tMaterial.property("initial_yield_stress", "1.5");
+    tMaterial.property("hardening_modulus_isotropic", "2.0");
+    tMaterial.property("hardening_modulus_kinematic", "2.0");
+    tMaterial.property("elastic_properties_penalty_exponent", "2.0");
+    tMaterial.property("elastic_properties_minimum_ersatz", "2.0");
+    tMaterial.property("plastic_properties_penalty_exponent", "2.0");
+    tMaterial.property("plastic_properties_minimum_ersatz", "2.0");
+    tXMLMetaData.materials.push_back(tMaterial);
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("plasticity");
+    tScenario.pressureScaling("2.5");
+    tXMLMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_material_model_to_plato_problem(tXMLMetaData.materials, tXMLMetaData, tDocument);
+ 
+    // TEST STARTS
+    auto tMaterialModelsList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelsList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
+
+    // CHECK PRESSURE SCALING
+    auto tParameter = tMaterialModelsList.child("Parameter");
+    std::vector<std::string> tGoldKeys   = {"name", "type", "value"};
+    std::vector<std::string> tGoldValues = {"Pressure Scaling", "double", "2.5"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
+
+    // CHECK MATERIAL SPECIFIC PROPERTIES
+    auto tMaterialModelParamList = tMaterialModelsList.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"carbonadium"}, tMaterialModelParamList);
+    auto tMyMaterialModel1 = tMaterialModelParamList.child("Isotropic Linear Elastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Elastic"}, tMyMaterialModel1);
+    auto tMyMaterialModel2 = tMyMaterialModel1.next_sibling("J2 Plasticity");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"J2 Plasticity"}, tMyMaterialModel2);
+
+    tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValuesVector =
+        { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "2.7"} };
+    auto tGoldValuesItr = tGoldValuesVector.begin();
+    tParameter = tMyMaterialModel1.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    tGoldKeys = {"name", "type", "value"};
+    tGoldValuesVector =
+        { {"Initial Yield Stress", "double", "1.5"}, {"Hardening Modulus Isotropic", "double", "2.0"},
+          {"Hardening Modulus Kinematic", "double", "2.1"}, {"Elastic Properties Penalty Exponent", "double", "2.2"},
+          {"Elastic Properties Minimum Ersatz", "double", "2.3"}, {"Plastic Properties Penalty Exponent", "double", "2.4"},
+          {"Plastic Properties Minimum Ersatz", "double", "2.5"} };
+    tGoldValuesItr = tGoldValuesVector.begin();
+    tParameter = tMyMaterialModel2.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
+TEST(PlatoTestXMLGenerator, AppendPressureAndTemperatureScalingToPlatoAnalyzeMaterialModels_Thermoplasticity)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+
+    // CREATE MATERIAL
+    XMLGen::Material tMaterial;
+    tMaterial.id("1");
+    tMaterial.name("carbonadium");
+    tMaterial.materialModel("thermoplasticity");
+    tMaterial.property("youngs_modulus", "2.7");
+    tMaterial.property("poissons_ratio", "0.3");
+    tMaterial.property("thermal_conductivity", "2.1");
+    tMaterial.property("thermal_expansivity", "2.2");
+    tMaterial.property("reference_temperature", "2.3");
+    tMaterial.property("initial_yield_stress", "1.5");
+    tMaterial.property("hardening_modulus_isotropic", "2.0");
+    tMaterial.property("hardening_modulus_kinematic", "2.0");
+    tMaterial.property("elastic_properties_penalty_exponent", "2.0");
+    tMaterial.property("elastic_properties_minimum_ersatz", "2.0");
+    tMaterial.property("plastic_properties_penalty_exponent", "2.0");
+    tMaterial.property("plastic_properties_minimum_ersatz", "2.0");
+    tXMLMetaData.materials.push_back(tMaterial);
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("thermoplasticity");
+    tScenario.pressureScaling("2.5");
+    tScenario.temperatureScaling("20.5");
+    tXMLMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_material_model_to_plato_problem(tXMLMetaData.materials, tXMLMetaData, tDocument);
+ 
+    // TEST STARTS
+    auto tMaterialModelsList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelsList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
+
+    // CHECK PRESSURE SCALING
+    auto tParameter = tMaterialModelsList.child("Parameter");
+    std::vector<std::string> tGoldKeys   = {"name", "type", "value"};
+    std::vector<std::string> tGoldValues = {"Pressure Scaling", "double", "2.5"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
+
+    // CHECK TEMPERATURE SCALING
+    tParameter = tParameter.next_sibling("Parameter");
+    tGoldKeys   = {"name", "type", "value"};
+    tGoldValues = {"Temperature Scaling", "double", "20.5"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
+
+    // CHECK MATERIAL SPECIFIC PROPERTIES
+    auto tMaterialModelParamList = tParameter.next_sibling("ParameterList");
+    ASSERT_FALSE(tMaterialModelParamList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"carbonadium"}, tMaterialModelParamList);
+    auto tMyMaterialModel1 = tMaterialModelParamList.child("Isotropic Linear Thermoelastic");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Isotropic Linear Thermoelastic"}, tMyMaterialModel1);
+    auto tMyMaterialModel2 = tMyMaterialModel1.next_sibling("J2 Plasticity");
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"J2 Plasticity"}, tMyMaterialModel2);
+
+    tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValuesVector =
+        { {"Poissons Ratio", "double", "0.3"}, {"Youngs Modulus", "double", "2.7"},
+          {"Thermal Conductivity Coefficient", "double", "2.1"}, {"Thermal Expansion Coefficient", "double", "2.2"},
+          {"Reference Temperature", "double", "2.3"} };
+    auto tGoldValuesItr = tGoldValuesVector.begin();
+    tParameter = tMyMaterialModel1.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    tGoldKeys = {"name", "type", "value"};
+    tGoldValuesVector =
+        { {"Initial Yield Stress", "double", "1.5"}, {"Hardening Modulus Isotropic", "double", "2.0"},
+          {"Hardening Modulus Kinematic", "double", "2.1"}, {"Elastic Properties Penalty Exponent", "double", "2.2"},
+          {"Elastic Properties Minimum Ersatz", "double", "2.3"}, {"Plastic Properties Penalty Exponent", "double", "2.4"},
+          {"Plastic Properties Minimum Ersatz", "double", "2.5"} };
+    tGoldValuesItr = tGoldValuesVector.begin();
+    tParameter = tMyMaterialModel2.child("Parameter");
     while(!tParameter.empty())
     {
         ASSERT_FALSE(tParameter.empty());

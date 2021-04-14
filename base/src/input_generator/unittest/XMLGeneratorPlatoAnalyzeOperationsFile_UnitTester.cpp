@@ -26,7 +26,6 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_J2Plasticity)
     {
       {"youngs_modulus_block_id_1", "youngs_modulus"},
       {"poissons_ratio_block_id_1", "poissons_ratio"},
-      {"pressure_scaling_block_id_1", "pressure_scaling"},
       {"hardening_modulus_isotropic_block_id_1", "hardening_modulus_isotropic"},
       {"hardening_modulus_kinematic_block_id_1", "hardening_modulus_kinematic"},
       {"initial_yield_stress_yz_block_id_1", "initial_yield_stress"},
@@ -50,7 +49,6 @@ TEST(PlatoTestXMLGenerator, MaterialFunctionInterface_J2Plasticity)
         {
           {"youngs_modulus_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Youngs Modulus", "0.0"},
           {"poissons_ratio_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Poissons Ratio", "0.0"},
-          {"pressure_scaling_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Pressure Scaling", "0.0"},
           {"hardening_modulus_isotropic_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Hardening Modulus Isotropic", "0.0"},
           {"hardening_modulus_kinematic_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Hardening Modulus Kinematic", "0.0"},
           {"initial_yield_stress_yz_block_id_1", "[Plato Problem]:[Material Models]:[dummy_name]:[Plasticity Model]:[J2 Plasticity]:Initial Yield Stress", "0.0"},
@@ -167,7 +165,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::MaterialSet tMaterialSetOne;
@@ -178,7 +176,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_elastic");
+    tMaterial2.materialModel("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1.1");
     tMaterial2.property("poissons_ratio", "0.33");
     XMLGen::MaterialSet tMaterialSetTwo;
@@ -407,13 +405,13 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_elastic");
+    tMaterial2.materialModel("isotropic_linear_elastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
 
@@ -426,13 +424,13 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_elastic");
+    tMaterial4.materialModel("isotropic_linear_elastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
 
@@ -558,13 +556,13 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_thermoelastic");
+    tMaterial2.materialModel("isotropic_linear_thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -580,13 +578,13 @@ TEST(PlatoTestXMLGenerator, AppendMaterialPropertiesToPlatoAnalyzeOperation)
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_thermoelastic");
+    tMaterial4.materialModel("isotropic_linear_thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");
@@ -818,12 +816,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.materialModel("isotropic linear elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
-    tMaterial2.category("isotropic linear thermoelastic");
+    tMaterial2.materialModel("isotropic linear thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -838,12 +836,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertyTagsForPlatoAnalyzeOperationXm
     // POSE MATERIAL SET 2
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
-    tMaterial3.category("isotropic linear elastic");
+    tMaterial3.materialModel("isotropic linear elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
-    tMaterial4.category("isotropic linear thermoelastic");
+    tMaterial4.materialModel("isotropic linear thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");
@@ -1206,13 +1204,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_thermoelastic");
+    tMaterial2.materialModel("isotropic_linear_thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -1228,13 +1226,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintValueToPlatoAnalyzeOper
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_thermoelastic");
+    tMaterial4.materialModel("isotropic_linear_thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");
@@ -1379,13 +1377,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_thermoelastic");
+    tMaterial2.materialModel("isotropic_linear_thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -1401,13 +1399,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomConstraintGradientToPlatoAnalyzeO
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_thermoelastic");
+    tMaterial4.materialModel("isotropic_linear_thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");
@@ -1547,13 +1545,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_thermoelastic");
+    tMaterial2.materialModel("isotropic_linear_thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -1569,13 +1567,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveValueToPlatoAnalyzeOpera
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_thermoelastic");
+    tMaterial4.materialModel("isotropic_linear_thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");
@@ -1713,13 +1711,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::Material tMaterial1;
     tMaterial1.id("1");
     tMaterial1.name("material_1");
-    tMaterial1.category("isotropic_linear_elastic");
+    tMaterial1.materialModel("isotropic_linear_elastic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
     tMaterial2.name("material_2");
-    tMaterial2.category("isotropic_linear_thermoelastic");
+    tMaterial2.materialModel("isotropic_linear_thermoelastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMaterial2.property("Thermal_Expansivity", "1.0e-8");
@@ -1735,13 +1733,13 @@ TEST(PlatoTestXMLGenerator, AppendComputeRandomObjectiveGradientToPlatoAnalyzeOp
     XMLGen::Material tMaterial3;
     tMaterial3.id("3");
     tMaterial3.name("material_3");
-    tMaterial3.category("isotropic_linear_elastic");
+    tMaterial3.materialModel("isotropic_linear_elastic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("4");
     tMaterial4.name("material_4");
-    tMaterial4.category("isotropic_linear_thermoelastic");
+    tMaterial4.materialModel("isotropic_linear_thermoelastic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
     tMaterial4.property("Thermal_Expansivity", "1.0e-8");

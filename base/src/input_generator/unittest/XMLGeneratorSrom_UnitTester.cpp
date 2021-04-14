@@ -196,7 +196,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialSet)
         if(tPair.first == "0")
         {
             ASSERT_STREQ("10", tPair.second.id().c_str());
-            ASSERT_STREQ("isotropic linear elastic", tPair.second.category().c_str());
+            ASSERT_STREQ("isotropic linear elastic", tPair.second.materialModel().c_str());
             auto tTags = tPair.second.tags();
             for(auto& tTag : tTags)
             {
@@ -207,7 +207,7 @@ TEST(PlatoTestXMLGenerator, BuildMaterialSet)
         else
         {
             ASSERT_STREQ("11", tPair.second.id().c_str());
-            ASSERT_STREQ("isotropic linear elastic", tPair.second.category().c_str());
+            ASSERT_STREQ("isotropic linear elastic", tPair.second.materialModel().c_str());
             auto tTags = tPair.second.tags();
             for(auto& tTag : tTags)
             {
@@ -292,7 +292,7 @@ TEST(PlatoTestXMLGenerator, PostprocessMaterialOutputs)
             auto tBlockIndex = &tBlockID - &tBlockIDs[0];
             auto tMaterial = tRandomSample.material(tBlockID);
             ASSERT_STREQ(tGoldMatIDs[tSampleIndex][tBlockIndex].c_str(), tMaterial.id().c_str());
-            ASSERT_STREQ(tGoldCategoryIDs[tSampleIndex][tBlockIndex].c_str(), tMaterial.category().c_str());
+            ASSERT_STREQ(tGoldCategoryIDs[tSampleIndex][tBlockIndex].c_str(), tMaterial.materialModel().c_str());
             auto tTags = tMaterial.tags();
             for(auto& tTag : tTags)
             {
@@ -336,7 +336,7 @@ TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedCategory)
     XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
     tMaterial.id("2");
-    tMaterial.category("");
+    tMaterial.materialModel("");
     XMLGen::MaterialSet tMaterialMap;
     tMaterialMap.insert({"1", tMaterial});
     auto tRandomMaterialCase = std::make_pair(0.5, tMaterialMap);
@@ -348,7 +348,7 @@ TEST(PlatoTestXMLGenerator, RandomMetaData_Append_ErrorUndefinedProperties)
     XMLGen::RandomMetaData tMetaData;
     XMLGen::Material tMaterial;
     tMaterial.id("2");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     XMLGen::MaterialSet tMaterialMap;
     tMaterialMap.insert({"1", tMaterial});
     auto tRandomMaterialCase = std::make_pair(0.5, tMaterialMap);
@@ -436,7 +436,7 @@ TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap_Error2)
 {
     XMLGen::Material tMaterial;
     tMaterial.id("30");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "0.5");
     tMaterial.property("poissons_ratio", "0.3");
 
@@ -451,13 +451,13 @@ TEST(PlatoTestXMLGenerator, BuildBlockIDtoMaterialIDmap)
     // BUILD MATERIALS AND BLOCKS
     XMLGen::Material tMaterial1;
     tMaterial1.id("30");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.materialModel("isotropic linear elastic");
     tMaterial1.property("youngs_modulus", "0.5");
     tMaterial1.property("poissons_ratio", "0.3");
 
     XMLGen::Material tMaterial2;
     tMaterial2.id("3");
-    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.materialModel("isotropic linear elastic");
     tMaterial2.property("youngs_modulus", "0.5");
     tMaterial2.property("poissons_ratio", "0.3");
 
@@ -511,7 +511,7 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs_Error2)
 
     XMLGen::Material tMaterial;
     tMaterial.id("30");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "0.5");
     tMaterial.property("poissons_ratio", "0.3");
 
@@ -571,14 +571,14 @@ TEST(PlatoTestXMLGenerator, PreprocessNondeterministicMaterialInputs)
     // 2. POSE MATERIAL DATA
     XMLGen::Material tMaterial1;
     tMaterial1.id("30");
-    tMaterial1.category("isotropic linear elastic");
+    tMaterial1.materialModel("isotropic linear elastic");
     tMaterial1.property("youngs_modulus", "0.5");
     tMaterial1.property("poissons_ratio", "0.3");
     tMetadata.materials.push_back(tMaterial1);
 
     XMLGen::Material tMaterial2;
     tMaterial2.id("3");
-    tMaterial2.category("isotropic linear elastic");
+    tMaterial2.materialModel("isotropic linear elastic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
     tMetadata.materials.push_back(tMaterial2);
@@ -681,7 +681,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_DeterministicMaterialCase)
     // 3. BUILD DETERMINISTIC MATERIAL METADATA
     XMLGen::Material tMaterial;
     tMaterial.id("30");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "0.5");
     tMaterial.property("poissons_ratio", "0.3");
 
@@ -742,7 +742,7 @@ TEST(PlatoTestXMLGenerator, AppendRandomMaterial_RandomMaterialCase)
     // 2. BUILD MATERIAL METADATA
     XMLGen::Material tMaterial;
     tMaterial.id("30");
-    tMaterial.category("isotropic linear elastic");
+    tMaterial.materialModel("isotropic linear elastic");
     tMaterial.property("youngs_modulus", "0.5");
     tMaterial.property("poissons_ratio", "0.3");
 

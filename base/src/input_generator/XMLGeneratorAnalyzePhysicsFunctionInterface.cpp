@@ -356,6 +356,30 @@ inline void append_elliptic_plasticity_pde_to_analyze_input_deck
     XMLGen::Private::append_newton_raphson_solver_option(aScenario, aParentNode);
 }
 
+/******************************************************************************//**
+ * \fn append_elliptic_thermoplasticity_pde_to_analyze_input_deck
+ * \brief Append elliptic thermoplasticity partial differential equation (PDE) inputs.
+ * \param [in]     aScenario    Scenario metadata
+ * \param [in]     aOutput      Output metadata
+ * \param [in/out] aParentNode  parent xml node
+**********************************************************************************/
+inline void append_elliptic_thermoplasticity_pde_to_analyze_input_deck
+(const XMLGen::Scenario& aScenario,
+ const XMLGen::Output& aOutput,
+ pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    XMLGen::Private::append_plottable_option(aOutput, tPhysicsNode);
+    XMLGen::Private::append_simp_penalty_function(aScenario, tPhysicsNode);
+    XMLGen::Private::append_state_gradient_projection_residual_to_analyze_input_deck(aScenario, aParentNode);
+    XMLGen::Private::append_plasticity_pseudo_time_step_option(aScenario, aParentNode);
+    XMLGen::Private::append_newton_raphson_solver_option(aScenario, aParentNode);
+}
+
 }
 // namespace Private
 
@@ -401,6 +425,10 @@ void AnalyzePhysicsFunctionInterface::insertPlasticityPhysics()
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("plasticity",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck, tFuncIndex)));
+
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck));
+    mMap.insert(std::make_pair("thermoplasticity",
+      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertStabilizedEllipticPhysics()

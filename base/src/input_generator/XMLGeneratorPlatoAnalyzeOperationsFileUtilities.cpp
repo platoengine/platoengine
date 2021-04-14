@@ -398,8 +398,8 @@ return_random_material_metadata_for_plato_analyze_operation_xml_file
     {
         auto tMaterial = tSample.material(tID);
         auto tMaterialPropertiesTags = tMaterial.tags();
-        tMap[tID] = std::make_tuple(tMaterial.name(), tMaterial.category(), std::vector<std::pair<std::string, std::string>>());
-        //tMap[tID] = std::make_pair(tMaterial.category(), std::vector<std::pair<std::string, std::string>>());
+        tMap[tID] = std::make_tuple(tMaterial.name(), tMaterial.materialModel(), std::vector<std::pair<std::string, std::string>>());
+        //tMap[tID] = std::make_pair(tMaterial.materialModel(), std::vector<std::pair<std::string, std::string>>());
         for(auto& tTag : tMaterialPropertiesTags)
         {
             auto tMaterialPropertyTag = Plato::tolower(tTag);
