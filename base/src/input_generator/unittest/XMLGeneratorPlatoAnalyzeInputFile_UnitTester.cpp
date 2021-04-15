@@ -823,6 +823,40 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryZeroValue)
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryTimeFunction)
+{
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("degree_of_freedom", "temp");
+    tBC.property("location_name", "ss_2");
+    tBC.property("type", "time_function");
+    tBC.property("value", "100*t+300");
+    pugi::xml_document tDocument;
+
+    XMLGen::AppendEssentialBoundaryCondition tInterface;
+    ASSERT_NO_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "thermoplasticity", tBC, tDocument));
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Time Dependent"}, {"Index", "int", "3"}, {"Sides", "string", "ss_2"}, {"Function", "string", "100*t+300"}};
+
+    auto tParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParamList.empty());
+    ASSERT_STREQ("ParameterList", tParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Boundary Condition with ID 1 applied to Dof with tag TEMP"}, tParamList);
+
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryFixedValue_ErrorInvalidPhysics)
 {
     XMLGen::EssentialBoundaryCondition tBC;
@@ -1131,7 +1165,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1185,7 +1219,7 @@ TEST(PlatoTestXMLGenerator, AppendPlasticityNaturalBoundaryConditionsToPlatoAnal
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1208,7 +1242,7 @@ TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPla
     tLoad.type("traction");
     tLoad.id("1");
     tLoad.location_name("ss_1");
-    std::vector<std::string> tValues = {"1.0", "2.0", "3.0"};
+    std::vector<std::string> tValues = {"1.0*t", "2.0*t", "3.0*t"};
     tLoad.load_values(tValues);
     tXMLMetaData.loads.push_back(tLoad);
 
@@ -1216,7 +1250,7 @@ TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPla
     tLoad2.type("uniform_surface_flux");
     tLoad2.id("2");
     tLoad2.location_name("ss_2");
-    std::vector<std::string> tValues2 = {"10.0"};
+    std::vector<std::string> tValues2 = {"10.0*t"};
     tLoad2.load_values(tValues2);
     tXMLMetaData.loads.push_back(tLoad2);
 
@@ -1257,7 +1291,7 @@ TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPla
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0*t,2.0*t,3.0*t}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1271,7 +1305,7 @@ TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPla
 
     tGoldKeys = {"name", "type", "value"};
     tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Value", "double", "10.0"}, {"Sides", "string", "ss_2"} };
+        { {"Type", "string", "Uniform"}, {"Value", "string", "10.0*t"}, {"Sides", "string", "ss_2"} };
     tGoldValuesItr = tGoldValues.begin();
     tParameter = tHeatFlux.child("Parameter");
     while(!tParameter.empty())
@@ -1343,7 +1377,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDe
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1383,7 +1417,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1415,7 +1449,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformPressure)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Value", "string", "1.0"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1447,7 +1481,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfacePotenti
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Value", "string", "1.0"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -1479,7 +1513,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformSurfaceFlux)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Value", "double", "1.0"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Value", "string", "1.0"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
