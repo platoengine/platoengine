@@ -173,6 +173,7 @@ private:
         "total_work", 
         "elastic_work",
         "plastic_work",
+        "thermoplasticity_thermal_energy",
         "volume", 
         "mass", 
         "CG_x", 
@@ -1163,8 +1164,10 @@ struct ValidAnalyzeCriteriaKeys
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
         { "volume", { "Volume", false } },
-        { "elastic_work", { "Elastic Work", true } },
+        { "elastic_work", { "Elastic Work", false } },
         { "plastic_work", { "Plastic Work", false } },
+        { "total_work", { "Total Work", false } },
+        { "thermoplasticity_thermal_energy", { "Thermal Energy", false } },
         { "mechanical_compliance", { "Internal Elastic Energy", true } },
         { "local_stress", { "Stress Constraint Quadratic", false } },
         { "stress_p-norm", { "Stress P-Norm", false } },

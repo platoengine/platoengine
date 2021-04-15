@@ -77,6 +77,22 @@ void append_isotropic_linear_elastic_material_to_plato_problem
 }
 // function append_isotropic_linear_elastic_material_to_plato_problem
 
+void append_isotropic_linear_thermoelastic_material_to_thermoplasticity_in_plato_problem
+(const XMLGen::Material& aMaterial,
+ pugi::xml_node& aParentNode)
+{
+    auto tElasticModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {aMaterial.name()}, tElasticModel);
+    auto tIsotropicLinearThermoelasticModel = tElasticModel.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Isotropic Linear Thermoelastic"}, tIsotropicLinearThermoelasticModel);
+    XMLGen::Private::append_material_property("poissons_ratio", aMaterial, tIsotropicLinearThermoelasticModel);
+    XMLGen::Private::append_material_property("youngs_modulus", aMaterial, tIsotropicLinearThermoelasticModel);
+    XMLGen::Private::append_material_property("thermal_expansivity", aMaterial, tIsotropicLinearThermoelasticModel);
+    XMLGen::Private::append_material_property("thermal_conductivity", aMaterial, tIsotropicLinearThermoelasticModel);
+    XMLGen::Private::append_material_property("reference_temperature", aMaterial, tIsotropicLinearThermoelasticModel);
+}
+// function append_isotropic_linear_elastic_material_to_plato_problem
+
 void append_isotropic_linear_thermal_material_to_plato_problem
 (const XMLGen::Material& aMaterial,
  pugi::xml_node& aParentNode)
@@ -179,7 +195,7 @@ void append_thermoplasticity_material_to_plato_problem
  pugi::xml_node& aParentNode)
 {
     // thermoelastic properties
-    XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_plato_problem(aMaterial, aParentNode);
+    XMLGen::Private::append_isotropic_linear_thermoelastic_material_to_thermoplasticity_in_plato_problem(aMaterial, aParentNode);
     auto tMaterialModel = aParentNode.child("ParameterList");
     // plastic properties
     XMLGen::Private::append_j2_plasticity_material_properties(aMaterial, tMaterialModel);
