@@ -222,23 +222,6 @@
     <Name>Output To File</Name>
 
     <Operation>
-      <Name>Write Output</Name>
-      <PerformerName>Alexa</PerformerName>
-      <Output>
-        <ArgumentName>Solution X</ArgumentName>
-        <SharedDataName>Displacement X</SharedDataName>
-      </Output>
-      <Output>
-        <ArgumentName>Solution Y</ArgumentName>
-        <SharedDataName>Displacement Y</SharedDataName>
-      </Output>
-      <Output>
-        <ArgumentName>Solution Z</ArgumentName>
-        <SharedDataName>Displacement Z</SharedDataName>
-      </Output>
-    </Operation>
-
-    <Operation>
       <Name>PlatoMainOutput</Name>
       <PerformerName>PlatoMain</PerformerName>
       <Input>
