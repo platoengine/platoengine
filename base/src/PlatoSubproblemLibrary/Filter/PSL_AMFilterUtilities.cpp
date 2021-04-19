@@ -33,6 +33,9 @@ double AMFilterUtilities::computeGridPointBlueprintDensity(const int& i, const i
        tGridPointDensity += tBaryCentricCoordinates[tNodeIndex]*(aTetMeshBlueprintDensity->get_value(tTet[tNodeIndex])); 
     }
 
+    if(tGridPointDensity < 0)
+        tGridPointDensity = 0;
+
     return tGridPointDensity;
 }
 
@@ -85,7 +88,10 @@ void AMFilterUtilities::computeGridSupportDensity(const std::vector<double>& aGr
                     {
                         tSupportDensityBelow.push_back(aGridBlueprintDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
                     }
-                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = smax(tSupportDensityBelow,mPNorm);
+
+                    double tVal = smax(tSupportDensityBelow,mPNorm);
+
+                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = tVal;
                 }
             }
         }
@@ -176,6 +182,8 @@ double smax(const std::vector<double>& aArguments, const double& aPNorm)
 
     for(auto tArgument : aArguments)
     {
+        if(tArgument < 0)
+            throw(std::domain_error("AMFilterUtilities: Smooth max arguments must be positive"));
         tSmax += std::pow(std::abs(tArgument),aPNorm);
     }
 
@@ -186,7 +194,9 @@ double smax(const std::vector<double>& aArguments, const double& aPNorm)
 
 double smin(const double& aArg1, const double& aArg2, double aEps)
 {
-    return 0.5*(aArg1 + aArg2 - std::pow(std::pow((aArg1 - aArg2),2) + aEps,0.5) + std::sqrt(aEps));
+    double tVal = 0.5*(aArg1 + aArg2 - std::pow(std::pow((aArg1 - aArg2),2) + aEps,0.5) + std::sqrt(aEps));
+
+    return tVal;
 }
 
 }

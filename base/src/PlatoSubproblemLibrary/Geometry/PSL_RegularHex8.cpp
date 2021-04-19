@@ -8,6 +8,14 @@ double RegularHex8::interpolateScalar(const Vector& aPoint, const std::vector<do
     if(aScalars.size() != 8u)
         throw(std::domain_error("RegularHex8::interpolateScalar: Incorrect number of scalar values provided"));
 
+    for(int i = 0; i < 3; ++i)
+    {
+        if(aPoint(i) < mMinCoords(i) || aPoint(i) > mMaxCoords(i))
+        {
+            throw(std::domain_error("RegularHex8::interpolateScalar: Point is not inside hex element"));
+        }
+    }
+
     double tA0 = a0(aPoint,aScalars);
     double tA1 = a1(aPoint,aScalars);
     double tA2 = a2(aPoint,aScalars);

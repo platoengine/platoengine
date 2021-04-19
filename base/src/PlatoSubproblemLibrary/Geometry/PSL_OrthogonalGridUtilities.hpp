@@ -62,6 +62,9 @@ class OrthogonalGridUtilities
         void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const;
         Vector computeGridPointXYZCoordinates(const std::vector<int>& aIndex) const;
         Vector computeGridPointXYZCoordinates(const int& i, const int& j, const int& k) const;
+        Vector computeGridPointUVWCoordinates(const std::vector<int>& aIndex) const;
+        Vector computeGridPointUVWCoordinates(const int& i, const int& j, const int& k) const;
+        Vector computePointUVWCoordinates(const Vector& aPoint) const;
         std::vector<std::vector<int>> getContainingGridElement(const Vector& aPoint) const;
 
         int getSerializedIndex(const int& i, const int& j, const int& k) const;
@@ -75,8 +78,6 @@ class OrthogonalGridUtilities
         double interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
                                  const std::vector<double>& aScalarValues,
                                  const Vector& aPoint) const;
-
-        void tempFunction(std::vector<double>& aTemp);
 
     private:
 

@@ -16,7 +16,7 @@ class AMFilterUtilities
 public:
     AMFilterUtilities(const TetMeshUtilities& aTetUtilities,
                       const OrthogonalGridUtilities& aGridUtilities,
-                      const double& aPNorm)
+                      double aPNorm)
                     :mTetUtilities(aTetUtilities),
                      mGridUtilities(aGridUtilities),
                      mPNorm(aPNorm)
@@ -47,7 +47,7 @@ private:
 
     const TetMeshUtilities& mTetUtilities;
     const OrthogonalGridUtilities& mGridUtilities;
-    const double& mPNorm;
+    const double mPNorm;
 
     std::vector<int> mContainingTetID;
     std::vector<Vector> mGridPointCoordinates;

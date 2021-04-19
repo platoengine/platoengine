@@ -569,5 +569,108 @@ PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
     EXPECT_THROW(tUtilities.interpolateScalar(tContainingElementIndicies,tBogusContainingElementDensities,tPoint),std::domain_error);
 }
 
+PSL_TEST(OrthogonalGridUtilities, computePointUVWCoordinates)
+{
+    Vector tUBasisVector({1,1,0});
+    tUBasisVector.normalize();
+    Vector tVBasisVector({-1,1,0});
+    tVBasisVector.normalize();
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({1.0,1.0,1.0});
+
+    std::vector<int> tNumElements = {1,1,1};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    Vector tXYZPoint({1.0/sqrt(2),1.0/sqrt(2),0});
+    Vector tUVWCoords = tUtilities.computePointUVWCoordinates(tXYZPoint);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tXYZPoint = Vector({-1.0/sqrt(2),1.0/sqrt(2),0});
+    tUVWCoords = tUtilities.computePointUVWCoordinates(tXYZPoint);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tXYZPoint = Vector({0.0,0.0,1.0});
+    tUVWCoords = tUtilities.computePointUVWCoordinates(tXYZPoint);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),1.0);
+}
+
+PSL_TEST(OrthogonalGridUtilities, computeGridPointUVWCoordinates)
+{
+    Vector tUBasisVector({1,1,0});
+    tUBasisVector.normalize();
+    Vector tVBasisVector({-1,1,0});
+    tVBasisVector.normalize();
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+
+    std::vector<int> tNumElements = {1,1,1};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+    
+    // out of range 
+    std::vector<int> tIndex({2,0,0});
+    EXPECT_THROW(tUtilities.computeGridPointUVWCoordinates(tIndex),std::out_of_range);
+
+    tIndex = {-1,0,0};
+    EXPECT_THROW(tUtilities.computeGridPointUVWCoordinates(tIndex),std::out_of_range);
+
+    tIndex = {0,0,0};
+    Vector tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tIndex = {1,0,0};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tIndex = {0,1,0};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),2.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tIndex = {0,0,1};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
+
+    tIndex = {1,1,0};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),2.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),0.0);
+
+    tIndex = {1,0,1};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
+
+    tIndex = {0,1,1};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),0.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),2.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
+
+    tIndex = {1,1,1};
+    tUVWCoords = tUtilities.computeGridPointUVWCoordinates(tIndex);
+    EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(1),2.0);
+    EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
+}
+
 }
 }

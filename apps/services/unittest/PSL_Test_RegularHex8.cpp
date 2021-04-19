@@ -77,9 +77,13 @@ PSL_TEST(RegularHex8,interpolateScalar)
     // incorrect number of scalar values to interpolate
     std::vector<double> tBogusScalars({0.0,0.0});
     EXPECT_THROW(tHex.interpolateScalar(tPoint,tBogusScalars),std::domain_error);
+    
+    // point is not inside hex
+    Vector tBogusPoint({-1.0,0,0});
+    std::vector<double> tScalars({1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0});
+    EXPECT_THROW(tHex.interpolateScalar(tBogusPoint,tScalars),std::domain_error);
 
     // check each corner
-    std::vector<double> tScalars({1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0});
     EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),1.0);
 
     tPoint = Vector({1.0,0.0,0.0});
