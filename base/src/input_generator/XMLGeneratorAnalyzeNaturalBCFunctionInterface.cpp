@@ -39,7 +39,10 @@ void append_uniform_vector_valued_load_to_plato_problem
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
 
     auto tVecValues = XMLGen::Private::return_natural_boundary_condition_vector_values(aLoad);
-    tValues = {"Values", "Array(string)", tVecValues};
+    if (aLoad.is_random())
+        tValues = {"Values", "Array(double)", tVecValues};
+    else
+        tValues = {"Values", "Array(string)", tVecValues};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
     tValues = {"Sides", "string", aLoad.location_name()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tVecValuedLoad);
@@ -62,7 +65,10 @@ void append_uniform_single_valued_load_to_plato_problem
             + " are expected to have one value. However uniform load with name '" + aName + "' has '"
             + std::to_string(aLoad.load_values().size()) + "' values.");
     }
-    tValues = {"Value", "string", aLoad.load_values()[0]};
+    if (aLoad.is_random())
+        tValues = {"Value", "double", aLoad.load_values()[0]};
+    else
+        tValues = {"Value", "string", aLoad.load_values()[0]};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tUniformSingleValuedLoad);
     tValues = {"Sides", "string", aLoad.location_name()};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tUniformSingleValuedLoad);
