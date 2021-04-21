@@ -10,7 +10,7 @@ double RegularHex8::interpolateScalar(const Vector& aPoint, const std::vector<do
 
     for(size_t i = 0; i < 3; ++i)
     {
-        if(aPoint(i) < mMinCoords(i) || aPoint(i) > mMaxCoords(i))
+        if(aPoint(i) < mMinCoords(i) - 1e-14 || aPoint(i) > mMaxCoords(i) + 1e-14)
         {
             throw(std::domain_error("RegularHex8::interpolateScalar: Point is not inside hex element"));
         }

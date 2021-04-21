@@ -227,67 +227,52 @@ std::vector<size_t> OrthogonalGridUtilities::getSurroundingIndices(const size_t&
         throw(std::domain_error("OrthogonalGridUtilities: Provided index must be between 0 and 2"));
 
     Vector tUVWCoordinates = computePointUVWCoordinates(aXYZPoint);
-
     double tCoordinate = tUVWCoordinates(aDim);
-
-    auto tDimensions = getGridDimensions();
-
     double tLength = mMaxUVWCoords(aDim) - mMinUVWCoords(aDim);
-
-    double tGridSegmentLength = tLength/mNumElementsInEachDirection[aDim];
-
+    size_t tMaxIndex = mNumElementsInEachDirection[aDim];
+    double tGridSegmentLength = tLength/tMaxIndex;
     double tModifiedCoordinate = tCoordinate - mMinUVWCoords(aDim);
 
-    size_t tIndex = std::floor(tModifiedCoordinate / tGridSegmentLength);
-    size_t tNextIndex = std::ceil(tModifiedCoordinate / tGridSegmentLength);
+    // guess value for tIndex
+    size_t tIndex, tNextIndex;
+    double tIndexGuess = std::floor(tModifiedCoordinate / tGridSegmentLength);
 
-    if(tIndex == tNextIndex)
+    bool found_point = false;
+
+    if(tIndexGuess <= 0.0)
     {
-        if(tIndex == 0)
-            ++tNextIndex;
-        else
-            --tIndex;
+        tIndex = 0u;
+        tNextIndex = 1u;
     }
-
-    double tFloor = mMinUVWCoords(aDim) + (tIndex*tLength)/mNumElementsInEachDirection[aDim];
-    double tCeiling = mMinUVWCoords(aDim) + (tNextIndex*tLength)/mNumElementsInEachDirection[aDim];
-
-    if(tCoordinate < tFloor)
+    else if(tIndexGuess >= ((double) tMaxIndex) - 1.0)
     {
-        --tIndex;
-        --tNextIndex;
+        tNextIndex = tMaxIndex;
+        tIndex = tMaxIndex - 1u;
     }
-    else if(tCoordinate > tCeiling)
+    else
     {
-        ++tIndex;
-        ++tNextIndex;
+        size_t tStart = ((size_t) tIndexGuess) - 1u;
+        for(size_t i = tStart; i < tStart + 3u; ++i)
+        {
+            double tFloor = mMinUVWCoords(aDim) + (double) (i*tLength) / (double) tMaxIndex;
+            double tCeiling = mMinUVWCoords(aDim) + (double) ((i+1)*tLength) / (double) tMaxIndex;
+
+            if(tFloor <= tCoordinate && tCoordinate <= tCeiling)
+            {
+                tIndex = i;
+                tNextIndex = i + 1u;
+                found_point = true;
+                break;
+            }
+        }
+
+        if(!found_point)
+            throw(std::runtime_error("OrthogonalGridUtilities::getSurroundingIndices: Couldn't find surrounding grid indices"));
     }
 
     std::vector<size_t> tSurroundingIndices;
     tSurroundingIndices.push_back(tIndex);
     tSurroundingIndices.push_back(tNextIndex);
-
-    if(tIndex < 0 || tIndex + 1 > mNumElementsInEachDirection[aDim])
-        throw(std::runtime_error("how'd I get this index"));
-
-    // bool found_point = false;
-    // // performance improvement - don't do a loop here, just compute the numbers
-    // for(size_t i = 0; i < tDimensions[aDim]-1; ++i)
-    // {
-    //     double tFloor = mMinUVWCoords(aDim) + i*tLength/mNumElementsInEachDirection[aDim];
-    //     double tCeiling = mMinUVWCoords(aDim) + (i+1)*tLength/mNumElementsInEachDirection[aDim];
-
-    //     if(tFloor <= tCoordinate && tCoordinate <= tCeiling)
-    //     {
-    //         tSurroundingIndices.push_back(i);
-    //         tSurroundingIndices.push_back(i+1);
-    //         found_point = true;
-    //         break;
-    //     }
-    // }
-
-    // if(!found_point)
-    //     throw(std::runtime_error("didn't find point"));
 
     return tSurroundingIndices;
 }

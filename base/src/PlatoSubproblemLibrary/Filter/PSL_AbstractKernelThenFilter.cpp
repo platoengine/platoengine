@@ -124,7 +124,7 @@ void AbstractKernelThenFilter::build()
 
 void AbstractKernelThenFilter::apply(AbstractInterface::ParallelVector* field)
 {
-    // m_kernel->apply(field);
+    m_kernel->apply(field);
 
     // apply post filter
     internal_apply(field);

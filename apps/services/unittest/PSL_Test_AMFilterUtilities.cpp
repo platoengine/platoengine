@@ -1364,10 +1364,10 @@ PSL_TEST(AMFilterUtilities, computeTetMeshPrintableDensity_manyElements)
     tGoldDensity.push_back(9.99999999999999778e-01);
     tGoldDensity.push_back(0.00000000000000000e+00);
     tGoldDensity.push_back(0.00000000000000000e+00);
-    tGoldDensity.push_back(-1.38777878078144568e-17);
     tGoldDensity.push_back(0.00000000000000000e+00);
     tGoldDensity.push_back(0.00000000000000000e+00);
-    tGoldDensity.push_back(1.38777878078144568e-17);
+    tGoldDensity.push_back(0.00000000000000000e+00);
+    tGoldDensity.push_back(0.00000000000000000e+00);
     tGoldDensity.push_back(1.00000000000000000e+00);
     tGoldDensity.push_back(0.00000000000000000e+00);
     tGoldDensity.push_back(0.00000000000000000e+00);
