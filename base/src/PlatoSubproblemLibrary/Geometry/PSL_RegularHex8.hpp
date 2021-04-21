@@ -41,14 +41,14 @@ public:
 
 private:
 
-    double a0(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a1(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a2(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a3(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a4(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a5(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a6(const Vector& aPoint, const std::vector<double>& aScalars) const;
-    double a7(const Vector& aPoint, const std::vector<double>& aScalars) const;
+    double a0(const std::vector<double>& aScalars) const;
+    double a1(const std::vector<double>& aScalars) const;
+    double a2(const std::vector<double>& aScalars) const;
+    double a3(const std::vector<double>& aScalars) const;
+    double a4(const std::vector<double>& aScalars) const;
+    double a5(const std::vector<double>& aScalars) const;
+    double a6(const std::vector<double>& aScalars) const;
+    double a7(const std::vector<double>& aScalars) const;
 
     const Vector& mMinCoords;
     const Vector& mMaxCoords;
