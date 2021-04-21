@@ -302,6 +302,24 @@ function( Plato_add_xmlgen_test TEST_NAME XMLGEN_COMMAND NUM_PROCS IO_COMM_INDEX
 endfunction( Plato_add_xmlgen_test )
 
 ###############################################################################
+## Plato_add_single_test( 
+##    TEST_NAME    == test name
+##    TEST_COMMAND == command string to be passed to shell
+## )
+###############################################################################
+
+function( Plato_add_single_test RUN_COMMAND TEST_NAME )
+
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
+
+    add_test( NAME ${TEST_NAME}
+              COMMAND ${CMAKE_COMMAND}
+              -DTEST_COMMAND=${RUN_COMMAND}
+              -P ${CMAKE_SOURCE_DIR}/base/config/runsingletest.cmake )
+
+endfunction( Plato_add_single_test )
+
+###############################################################################
 ## Plato_add_simple_test( 
 ##    TEST_NAME      == test name
 ##    NUM_PROCS      == number of processors to use for test

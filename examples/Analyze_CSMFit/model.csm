@@ -1,0 +1,14 @@
+# model.csm written by ocsmSave (v1.17)
+
+# Constant, Design, and Output Parameters:
+despmtr   Cyl1Rad       0.850000 lbound 0.6 ubound 0.9 initial 0.8
+despmtr   Cyl1Len       5.00000 lbound 4.0 ubound 6.0 initial 5.0
+
+# Global Attributes:
+
+set       MeshLength 0.25
+
+# Branches:
+cylinder  -Cyl1Len/2   0   0   Cyl1Len/2   0   0   Cyl1Rad
+
+end
