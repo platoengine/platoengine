@@ -30,9 +30,9 @@ public:
     double euclideanNorm() const;
     void normalize();
 
-    Vector operator +(const Vector& aVec) const;
-
-    Vector operator -(const Vector& aVec) const;
+    void add(const Vector& aInputVector);
+    void subtract(const Vector& aInputVector);
+    void multiply(const double scalar);
 
     Vector& operator =(const Vector& aVec);
     bool operator ==(const Vector& aVec) const;
@@ -46,9 +46,6 @@ public:
 private:
     double m_data[3];
 };
-
-Vector operator *(const double aScalar, const Vector& aVec);
-Vector operator *(const Vector& aVec, const double aScalar);
 
 Vector cross_product(const Vector& aVec1, const Vector& aVec2);
 double dot_product(const Vector& aVec1, const Vector& aVec2);

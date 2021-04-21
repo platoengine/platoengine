@@ -157,26 +157,26 @@ PSL_TEST(Vector,normalize)
     EXPECT_DOUBLE_EQ(tVec.euclideanNorm(),1);
 }
 
-PSL_TEST(Vector,operatorPlus)
+PSL_TEST(Vector,add)
 {
     Vector tVec1({1.0,0,2.3});
     Vector tVec2({2.3,1.0,1.6});
 
-    Vector tVec3 = tVec1 + tVec2;
-    EXPECT_DOUBLE_EQ(tVec3(0),3.3);
-    EXPECT_DOUBLE_EQ(tVec3(1),1.0);
-    EXPECT_DOUBLE_EQ(tVec3(2),3.9);
+    tVec1.add(tVec2);
+    EXPECT_DOUBLE_EQ(tVec1(0),3.3);
+    EXPECT_DOUBLE_EQ(tVec1(1),1.0);
+    EXPECT_DOUBLE_EQ(tVec1(2),3.9);
 }
 
-PSL_TEST(Vector,operatorMinus)
+PSL_TEST(Vector,subtract)
 {
     Vector tVec1({1.0,0,2.3});
     Vector tVec2({2.3,1.0,1.6});
 
-    Vector tVec3 = tVec1 - tVec2;
-    EXPECT_DOUBLE_EQ(tVec3(0),-1.3);
-    EXPECT_DOUBLE_EQ(tVec3(1),-1.0);
-    EXPECT_DOUBLE_EQ(tVec3(2),0.7);
+    tVec1.subtract(tVec2);
+    EXPECT_DOUBLE_EQ(tVec1(0),-1.3);
+    EXPECT_DOUBLE_EQ(tVec1(1),-1.0);
+    EXPECT_DOUBLE_EQ(tVec1(2),0.7);
 }
 
 PSL_TEST(Vector,operatorEquals)
@@ -189,20 +189,15 @@ PSL_TEST(Vector,operatorEquals)
     EXPECT_EQ(tVec2(2),1.6);
 }
 
-PSL_TEST(Vector,operatorMultiply)
+PSL_TEST(Vector,multiply)
 {
     double tScalar = 2.3;
     Vector tVec2({0,1.0,1.6});
 
-    Vector tVec3 = tScalar * tVec2;
-    EXPECT_DOUBLE_EQ(tVec3(0),0.0);
-    EXPECT_DOUBLE_EQ(tVec3(1),2.3);
-    EXPECT_DOUBLE_EQ(tVec3(2),3.68);
-    
-    Vector tVec4 = tVec2 * tScalar;
-    EXPECT_DOUBLE_EQ(tVec4(0),0.0);
-    EXPECT_DOUBLE_EQ(tVec4(1),2.3);
-    EXPECT_DOUBLE_EQ(tVec4(2),3.68);
+    tVec2.multiply(tScalar);
+    EXPECT_DOUBLE_EQ(tVec2(0),0.0);
+    EXPECT_DOUBLE_EQ(tVec2(1),2.3);
+    EXPECT_DOUBLE_EQ(tVec2(2),3.68);
 }
 
 PSL_TEST(Vector,crossProduct)

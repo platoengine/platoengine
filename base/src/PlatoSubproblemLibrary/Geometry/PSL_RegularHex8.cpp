@@ -8,7 +8,7 @@ double RegularHex8::interpolateScalar(const Vector& aPoint, const std::vector<do
     if(aScalars.size() != 8u)
         throw(std::domain_error("RegularHex8::interpolateScalar: Incorrect number of scalar values provided"));
 
-    for(int i = 0; i < 3; ++i)
+    for(size_t i = 0; i < 3; ++i)
     {
         if(aPoint(i) < mMinCoords(i) || aPoint(i) > mMaxCoords(i))
         {

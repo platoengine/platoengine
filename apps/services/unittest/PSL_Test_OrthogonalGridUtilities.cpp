@@ -73,7 +73,9 @@ PSL_TEST(OrthogonalGridUtilities, constructor)
     EXPECT_THROW(OrthogonalGridUtilities(tVBasisVector,tUBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 
     // Basis not unit length
-    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,2*tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
+    Vector tBogusVector(tWBasisVector);
+    tBogusVector.multiply(2);
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tBogusVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength),std::domain_error);
 
     // Max not strictly greater than min
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMinUVWCoords,tMaxUVWCoords,tTargetEdgeLength),std::domain_error);
@@ -83,14 +85,14 @@ PSL_TEST(OrthogonalGridUtilities, constructor)
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,-tTargetEdgeLength),std::domain_error);
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,0),std::domain_error);
 
-    std::vector<int> aNumElementsInEachDirection({5,5,5});
+    std::vector<size_t> aNumElementsInEachDirection({5,5,5});
     EXPECT_NO_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,aNumElementsInEachDirection));
 
     // Wrong size vector
-    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<int>({5,5})),std::domain_error);
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<size_t>({5,5})),std::domain_error);
 
     // Non-positive number of elements
-    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<int>({5,5,0})),std::domain_error);
+    EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<size_t>({5,5,0})),std::domain_error);
 }
 
 PSL_TEST(OrthogonalGridUtilities, getGridDimensions)
@@ -105,28 +107,28 @@ PSL_TEST(OrthogonalGridUtilities, getGridDimensions)
     double tTargetEdgeLength = 0.1;
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     auto tDimensions = tUtilities.getGridDimensions();
-    EXPECT_EQ(tDimensions, std::vector<int>({11,21,31}));
+    EXPECT_EQ(tDimensions, std::vector<size_t>({11,21,31}));
 
     tTargetEdgeLength = 0.11;
     OrthogonalGridUtilities tUtilities2(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     tDimensions = tUtilities2.getGridDimensions();
-    EXPECT_EQ(tDimensions, std::vector<int>({10,19,28}));
+    EXPECT_EQ(tDimensions, std::vector<size_t>({10,19,28}));
 
     tTargetEdgeLength = 0.105;
     OrthogonalGridUtilities tUtilities3(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     tDimensions = tUtilities3.getGridDimensions();
-    EXPECT_EQ(tDimensions, std::vector<int>({10,20,29}));
+    EXPECT_EQ(tDimensions, std::vector<size_t>({10,20,29}));
 
     // // target length larger than bounding box
     tTargetEdgeLength = 1.1;
     OrthogonalGridUtilities tUtilities4(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
     tDimensions = tUtilities4.getGridDimensions();
-    EXPECT_EQ(tDimensions, std::vector<int>({2,2,3}));
+    EXPECT_EQ(tDimensions, std::vector<size_t>({2,2,3}));
 
-    std::vector<int> tNumElements({5,6,7});
+    std::vector<size_t> tNumElements({5,6,7});
     OrthogonalGridUtilities tUtilities5(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
     tDimensions = tUtilities5.getGridDimensions();
-    EXPECT_EQ(tDimensions, std::vector<int>({6,7,8}));
+    EXPECT_EQ(tDimensions, std::vector<size_t>({6,7,8}));
 }
 
 PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
@@ -135,7 +137,7 @@ PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
     Vector tVBasisVector(std::vector<double>({0.0,1.0,0.0}));
     Vector tWBasisVector(std::vector<double>({0.0,0.0,1.0}));
 
-    std::vector<int> tNumElements({10,20,30});
+    std::vector<size_t> tNumElements({10,20,30});
 
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
@@ -145,7 +147,7 @@ PSL_TEST(OrthogonalGridUtilities, computeGridXYZCoordinates)
     std::vector<Vector> tCoordinates;
 
     tUtilities.computeGridXYZCoordinates(tCoordinates);
-    std::vector<int> tIndex = {1,1,1};
+    std::vector<size_t> tIndex = {1,1,1};
     Vector tGridPointCoordinate = tCoordinates[tUtilities.getSerializedIndex(tIndex)];
     EXPECT_DOUBLE_EQ(tGridPointCoordinate(0),0.1);
     EXPECT_DOUBLE_EQ(tGridPointCoordinate(1),0.1);
@@ -225,15 +227,15 @@ PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
-    std::vector<int> tNumElements = {2,2,2};
+    std::vector<size_t> tNumElements = {2,2,2};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
     // tIndex wrong dimension
-    std::vector<int> tIndex = {0,0};
+    std::vector<size_t> tIndex = {0,0};
     EXPECT_THROW(tUtilities.getSerializedIndex(tIndex), std::domain_error);
 
     // tIndex out of range
-    tIndex = {-1,0,0};
+    tIndex = {10000,0,0};
     EXPECT_THROW(tUtilities.getSerializedIndex(tIndex), std::out_of_range);
 
     // tIndex out of range
@@ -241,32 +243,32 @@ PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
     EXPECT_THROW(tUtilities.getSerializedIndex(tIndex), std::out_of_range);
 
     tIndex = {0,0,0};
-    int tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,0);
+    size_t tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
+    EXPECT_EQ(tSerializedIndex,0u);
 
     tIndex = {1,0,0};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,1);
+    EXPECT_EQ(tSerializedIndex,1u);
 
     tIndex = {2,0,0};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,2);
+    EXPECT_EQ(tSerializedIndex,2u);
     
     tIndex = {0,1,0};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,3);
+    EXPECT_EQ(tSerializedIndex,3u);
 
     tIndex = {0,1,1};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,12);
+    EXPECT_EQ(tSerializedIndex,12u);
 
     tIndex = {1,1,1};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,13);
+    EXPECT_EQ(tSerializedIndex,13u);
 
     tIndex = {1,1,2};
     tSerializedIndex = tUtilities.getSerializedIndex(tIndex);
-    EXPECT_EQ(tSerializedIndex,22);
+    EXPECT_EQ(tSerializedIndex,22u);
 }
 
 PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
@@ -278,7 +280,7 @@ PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
-    std::vector<int> tNumElements = {2,2,2};
+    std::vector<size_t> tNumElements = {2,2,2};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
     auto tDimensions = tUtilities.getGridDimensions();
@@ -296,16 +298,16 @@ PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
     // a couple example support sets
     EXPECT_EQ(tUtilities.getSupportIndices(0,0,1).size(),3u);
     auto tSupportIndices = tUtilities.getSupportIndices(0,0,1);
-    EXPECT_EQ(tSupportIndices[0],std::vector<int>({0,0,0}));
-    EXPECT_EQ(tSupportIndices[1],std::vector<int>({0,1,0}));
-    EXPECT_EQ(tSupportIndices[2],std::vector<int>({1,0,0}));
+    EXPECT_EQ(tSupportIndices[0],std::vector<size_t>({0,0,0}));
+    EXPECT_EQ(tSupportIndices[1],std::vector<size_t>({0,1,0}));
+    EXPECT_EQ(tSupportIndices[2],std::vector<size_t>({1,0,0}));
 
     EXPECT_EQ(tUtilities.getSupportIndices(1,0,1).size(),4u);
     tSupportIndices = tUtilities.getSupportIndices(1,0,1);
-    EXPECT_EQ(tSupportIndices[0],std::vector<int>({1,0,0}));
-    EXPECT_EQ(tSupportIndices[1],std::vector<int>({1,1,0}));
-    EXPECT_EQ(tSupportIndices[2],std::vector<int>({0,0,0}));
-    EXPECT_EQ(tSupportIndices[3],std::vector<int>({2,0,0}));
+    EXPECT_EQ(tSupportIndices[0],std::vector<size_t>({1,0,0}));
+    EXPECT_EQ(tSupportIndices[1],std::vector<size_t>({1,1,0}));
+    EXPECT_EQ(tSupportIndices[2],std::vector<size_t>({0,0,0}));
+    EXPECT_EQ(tSupportIndices[3],std::vector<size_t>({2,0,0}));
 
     EXPECT_EQ(tUtilities.getSupportIndices(2,0,1).size(),3u);
     EXPECT_EQ(tUtilities.getSupportIndices(0,1,1).size(),4u);
@@ -335,22 +337,22 @@ PSL_TEST(OrthogonalGridUtilities, getContainingGridElement)
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
-    std::vector<int> tNumElements = {2,2,2};
+    std::vector<size_t> tNumElements = {2,2,2};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
     Vector tPoint({0.25,0.5,0.75});
 
-    std::vector<std::vector<int>> tGridIndicies = tUtilities.getContainingGridElement(tPoint);
+    std::vector<std::vector<size_t>> tGridIndicies = tUtilities.getContainingGridElement(tPoint);
 
     EXPECT_EQ(tGridIndicies.size(),8u);
-    EXPECT_EQ(tGridIndicies[0],std::vector<int>({0,0,0}));
-    EXPECT_EQ(tGridIndicies[1],std::vector<int>({1,0,0}));
-    EXPECT_EQ(tGridIndicies[2],std::vector<int>({0,1,0}));
-    EXPECT_EQ(tGridIndicies[3],std::vector<int>({1,1,0}));
-    EXPECT_EQ(tGridIndicies[4],std::vector<int>({0,0,1}));
-    EXPECT_EQ(tGridIndicies[5],std::vector<int>({1,0,1}));
-    EXPECT_EQ(tGridIndicies[6],std::vector<int>({0,1,1}));
-    EXPECT_EQ(tGridIndicies[7],std::vector<int>({1,1,1}));
+    EXPECT_EQ(tGridIndicies[0],std::vector<size_t>({0,0,0}));
+    EXPECT_EQ(tGridIndicies[1],std::vector<size_t>({1,0,0}));
+    EXPECT_EQ(tGridIndicies[2],std::vector<size_t>({0,1,0}));
+    EXPECT_EQ(tGridIndicies[3],std::vector<size_t>({1,1,0}));
+    EXPECT_EQ(tGridIndicies[4],std::vector<size_t>({0,0,1}));
+    EXPECT_EQ(tGridIndicies[5],std::vector<size_t>({1,0,1}));
+    EXPECT_EQ(tGridIndicies[6],std::vector<size_t>({0,1,1}));
+    EXPECT_EQ(tGridIndicies[7],std::vector<size_t>({1,1,1}));
 }
 
 PSL_TEST(OrthogonalGridUtilities, getSurroundingIndices)
@@ -364,26 +366,26 @@ PSL_TEST(OrthogonalGridUtilities, getSurroundingIndices)
     Vector tMaxUVWCoords({1.0,2.0,3.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
-    std::vector<int> tNumElements = {2,2,2};
+    std::vector<size_t> tNumElements = {2,2,2};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
     Vector tPoint({0.25,0.5,0.75});
 
-    std::vector<int> tSurroundingIndices = tUtilities.getSurroundingIndices(0,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    std::vector<size_t> tSurroundingIndices = tUtilities.getSurroundingIndices(0,tPoint);
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
     tSurroundingIndices = tUtilities.getSurroundingIndices(1,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
     tSurroundingIndices = tUtilities.getSurroundingIndices(2,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
 
     tPoint = Vector({0.75,0.5,1.7});
 
     tSurroundingIndices = tUtilities.getSurroundingIndices(0,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({1,2}));
     tSurroundingIndices = tUtilities.getSurroundingIndices(1,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
     tSurroundingIndices = tUtilities.getSurroundingIndices(2,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({1,2}));
 
     tUBasisVector = Vector({1,1,0});
     tUBasisVector.normalize();
@@ -395,20 +397,20 @@ PSL_TEST(OrthogonalGridUtilities, getSurroundingIndices)
     tPoint = Vector({sqrt(2)/7 - sqrt(2)/3 ,sqrt(2)/7 + sqrt(2)/3 ,1});
 
     tSurroundingIndices = tUtilities2.getSurroundingIndices(0,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
     tSurroundingIndices = tUtilities2.getSurroundingIndices(1,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
     tSurroundingIndices = tUtilities2.getSurroundingIndices(2,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({0,1}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({0,1}));
 
-    tPoint = 2*tPoint;
+    tPoint.multiply(2);
 
     tSurroundingIndices = tUtilities2.getSurroundingIndices(0,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({1,2}));
     tSurroundingIndices = tUtilities2.getSurroundingIndices(1,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({1,2}));
     tSurroundingIndices = tUtilities2.getSurroundingIndices(2,tPoint);
-    EXPECT_EQ(tSurroundingIndices,std::vector<int>({1,2}));
+    EXPECT_EQ(tSurroundingIndices,std::vector<size_t>({1,2}));
 }
 
 PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
@@ -422,18 +424,18 @@ PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
     Vector tMaxUVWCoords({1.0,1.0,1.0});
     Vector tMinUVWCoords({0.0,0.0,0.0});
 
-    std::vector<int> tNumElements = {1,1,1};
+    std::vector<size_t> tNumElements = {1,1,1};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
-    std::vector<std::vector<int>> tContainingElementIndicies;
-    tContainingElementIndicies.push_back(std::vector<int>({0,0,0}));
-    tContainingElementIndicies.push_back(std::vector<int>({1,0,0}));
-    tContainingElementIndicies.push_back(std::vector<int>({0,1,0}));
-    tContainingElementIndicies.push_back(std::vector<int>({1,1,0}));
-    tContainingElementIndicies.push_back(std::vector<int>({0,0,1}));
-    tContainingElementIndicies.push_back(std::vector<int>({1,0,1}));
-    tContainingElementIndicies.push_back(std::vector<int>({0,1,1}));
-    tContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
+    std::vector<std::vector<size_t>> tContainingElementIndicies;
+    tContainingElementIndicies.push_back(std::vector<size_t>({0,0,0}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({1,0,0}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({0,1,0}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({1,1,0}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({0,0,1}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({1,0,1}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({0,1,1}));
+    tContainingElementIndicies.push_back(std::vector<size_t>({1,1,1}));
 
     std::vector<double> tContainingElementDensities = {1, 2, 3, 4, 5, 6, 7, 8};
 
@@ -525,43 +527,43 @@ PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
     EXPECT_EQ(tUtilities.interpolateScalar(tContainingElementIndicies,tContainingElementDensities,tPoint),4.5);
 
     // incorrect number of indices
-    std::vector<std::vector<int>> tBogusContainingElementIndicies;
+    std::vector<std::vector<size_t>> tBogusContainingElementIndicies;
     EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
 
     // wrong number of dimensions
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1}));
     EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
 
 
     // indices out of order
     tBogusContainingElementIndicies.clear();
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,0}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,0,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,0,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({0,1,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,0,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1,0}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,0,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({0,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1,1}));
     EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::domain_error);
 
     //out of bounds
     tBogusContainingElementIndicies.clear();
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,2,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({2,1,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({2,2,1}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,1,2}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({2,1,2}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({1,2,2}));
-    tBogusContainingElementIndicies.push_back(std::vector<int>({2,2,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,2,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({2,1,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({2,2,1}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,1,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({2,1,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({1,2,2}));
+    tBogusContainingElementIndicies.push_back(std::vector<size_t>({2,2,2}));
     EXPECT_THROW(tUtilities.interpolateScalar(tBogusContainingElementIndicies,tContainingElementDensities,tPoint),std::out_of_range);
 
     // incorrect number of scalars
@@ -580,7 +582,7 @@ PSL_TEST(OrthogonalGridUtilities, computePointUVWCoordinates)
     Vector tMinUVWCoords({0.0,0.0,0.0});
     Vector tMaxUVWCoords({1.0,1.0,1.0});
 
-    std::vector<int> tNumElements = {1,1,1};
+    std::vector<size_t> tNumElements = {1,1,1};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
 
     Vector tXYZPoint({1.0/sqrt(2),1.0/sqrt(2),0});
@@ -613,14 +615,14 @@ PSL_TEST(OrthogonalGridUtilities, computeGridPointUVWCoordinates)
     Vector tMinUVWCoords({0.0,0.0,0.0});
     Vector tMaxUVWCoords({1.0,2.0,3.0});
 
-    std::vector<int> tNumElements = {1,1,1};
+    std::vector<size_t> tNumElements = {1,1,1};
     OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
     
     // out of range 
-    std::vector<int> tIndex({2,0,0});
+    std::vector<size_t> tIndex({2,0,0});
     EXPECT_THROW(tUtilities.computeGridPointUVWCoordinates(tIndex),std::out_of_range);
 
-    tIndex = {-1,0,0};
+    tIndex = {10000,0,0};
     EXPECT_THROW(tUtilities.computeGridPointUVWCoordinates(tIndex),std::out_of_range);
 
     tIndex = {0,0,0};

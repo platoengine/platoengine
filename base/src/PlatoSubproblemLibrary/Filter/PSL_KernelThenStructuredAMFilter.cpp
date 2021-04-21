@@ -20,16 +20,13 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
     if(aDensity->get_length() != tCoordinates.size())
         throw(std::domain_error("Provided density field does not match the mesh size"));
 
-    std::cout << "Compute Grid Blueprint Density" << std::endl;
+    // std::cout << "Compute Grid Blueprint Density" << std::endl;
     std::vector<double> tGridBlueprintDensity;
     mAMFilterUtilities->computeGridBlueprintDensity(aDensity,tGridBlueprintDensity); 
-    std::cout << "Compute Grid Support Density" << std::endl;
-    std::vector<double> tGridSupportDensity;
-    mAMFilterUtilities->computeGridSupportDensity(tGridBlueprintDensity,tGridSupportDensity);
-    std::cout << "Compute Grid Printable Density" << std::endl;
+    // std::cout << "Compute Grid Printable Density" << std::endl;
     std::vector<double> tGridPrintableDensity;
-    mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
-    std::cout << "Compute Tet Mesh Printable Density" << std::endl;
+    mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity);
+    // std::cout << "Compute Tet Mesh Printable Density" << std::endl;
     mAMFilterUtilities->computeTetMeshPrintableDensity(tGridPrintableDensity,aDensity);
 }
 
@@ -45,7 +42,7 @@ void KernelThenStructuredAMFilter::buildStructuredGrid(const std::vector<std::ve
 
     Vector aMaxUVWCoords, aMinUVWCoords;
     mTetUtilities->computeBoundingBox(mUBasisVector,mVBasisVector,mBuildDirection,aMaxUVWCoords,aMinUVWCoords);
-    double aTargetEdgeLength = mTetUtilities->computeMinEdgeLength()/2.0;
+    double aTargetEdgeLength = mTetUtilities->computeMinEdgeLength()/4.0;
 
     std::cout << "TargetEdgeLength: " << aTargetEdgeLength << std::endl;
 

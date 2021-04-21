@@ -115,7 +115,7 @@ PSL_TEST(AMFilterUtilities,computeGridBlueprintDensity_oneElement)
     double tTargetEdgeLength = 0.1;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
     std::vector<Vector> tGridCoordinates;
     tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
@@ -128,11 +128,11 @@ PSL_TEST(AMFilterUtilities,computeGridBlueprintDensity_oneElement)
     std::vector<double> tGridBlueprintDensity;
     tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity);
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
     {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
         {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
+            for(size_t k = 0; k < tGridDimensions[2]; ++k)
             {
                 double tDensity = tGridBlueprintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
                 if(isPointInTetrahedron(tCoordinates,tConnectivity[0],tGridCoordinates[tGridUtilities.getSerializedIndex(i,j,k)]))
@@ -637,7 +637,7 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
     double tTargetEdgeLength = 0.1;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
     std::vector<Vector> tGridCoordinates;
     tGridUtilities.computeGridXYZCoordinates(tGridCoordinates);
 
@@ -647,11 +647,11 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
 
     example::Interface_ParallelVector tVector({1,1,1,0});
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
     {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
         {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
+            for(size_t k = 0; k < tGridDimensions[2]; ++k)
             {
                 double tDensity = tAMFilterUtilities.computeGridPointBlueprintDensity(i,j,k,&tVector);
                 if(isPointInTetrahedron(tCoordinates,tConnectivity[0],tGridCoordinates[tGridUtilities.getSerializedIndex(i,j,k)]))
@@ -668,135 +668,6 @@ PSL_TEST(AMFilterUtilities,computeGridPointBlueprintDensity)
     }
 
     EXPECT_THROW(tAMFilterUtilities.computeGridPointBlueprintDensity({0,1},&tVector),std::domain_error);
-}
-
-PSL_TEST(AMFilterUtilities,computeGridSupportDensity)
-{
-    // build TetMeshUtilities
-    std::vector<std::vector<double>> tCoordinates;
-    std::vector<std::vector<int>> tConnectivity;
-
-    tCoordinates.push_back({0.0,0.0,0.0});
-    tCoordinates.push_back({1.0,0.0,0.0});
-    tCoordinates.push_back({0.0,1.0,0.0});
-    tCoordinates.push_back({0.0,0.0,1.0});
-
-    tConnectivity.push_back({0,1,2,3});
-
-    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
-
-    // build OrthogonalGridUtilities
-    Vector tUBasisVector({1.0,0.0,0.0});
-    Vector tVBasisVector({0.0,1.0,0.0});
-    Vector tWBasisVector({0.0,0.0,1.0});
-
-    Vector tMaxUVWCoords({1.0,2.0,3.0});
-    Vector tMinUVWCoords({0.0,0.0,0.0});
-
-    double tTargetEdgeLength = 0.1;
-
-    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
-
-    double tPNorm = 200;
-
-    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
-
-    example::Interface_ParallelVector tVector({1,1,0,1});
-
-    std::vector<double> tGridBlueprintDensity;
-    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity); 
-    std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(tGridBlueprintDensity, tGridSupportDensity);
-
-    EXPECT_EQ(tGridSupportDensity.size(),(unsigned int) tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
-
-    for(int i = 0; i < tGridDimensions[0]; ++i)
-    {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
-        {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
-            {
-                if(k == 0)
-                {
-                    EXPECT_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)],1);
-                }
-                else
-                {
-                    auto tSupportIndices = tGridUtilities.getSupportIndices(i,j,k);
-                    std::vector<double> tSupportDensityBelow;
-                    for(auto tSupportIndex : tSupportIndices)
-                    {
-                        tSupportDensityBelow.push_back(tAMFilterUtilities.computeGridPointBlueprintDensity(tSupportIndex,&tVector));
-                    }
-                    double tSupportDensityAtIndex = smax(tSupportDensityBelow,tPNorm);
-                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)],tSupportDensityAtIndex);
-                }
-            }
-        }
-    }
-}
-
-PSL_TEST(AMFilterUtilities, computeGridPointPrintableDensity)
-{
-    // build TetMeshUtilities
-    std::vector<std::vector<double>> tCoordinates;
-    std::vector<std::vector<int>> tConnectivity;
-
-    tCoordinates.push_back({0.0,0.0,0.0});
-    tCoordinates.push_back({1.0,0.0,0.0});
-    tCoordinates.push_back({0.0,1.0,0.0});
-    tCoordinates.push_back({0.0,0.0,1.0});
-
-    tConnectivity.push_back({0,1,2,3});
-
-    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
-
-    // build OrthogonalGridUtilities
-    Vector tUBasisVector({1.0,0.0,0.0});
-    Vector tVBasisVector({0.0,1.0,0.0});
-    Vector tWBasisVector({0.0,0.0,1.0});
-
-    Vector tMaxUVWCoords({1.0,2.0,3.0});
-    Vector tMinUVWCoords({0.0,0.0,0.0});
-
-    double tTargetEdgeLength = 0.1;
-
-    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
-
-    double tPNorm = 200;
-
-    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
-
-    example::Interface_ParallelVector tVector({1,1,0,1});
-
-    std::vector<double> tGridBlueprintDensity;
-    tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity); 
-    std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(tGridBlueprintDensity, tGridSupportDensity);
-
-    // wrong dimensions of index
-    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0},tGridBlueprintDensity,tGridSupportDensity),std::domain_error);
-    // wrong size of support density vector
-    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0,0},tGridBlueprintDensity,{0.0,0.0}),std::domain_error);
-    // wrong size of blueprint density vector
-    EXPECT_THROW(tAMFilterUtilities.computeGridPointPrintableDensity({0,0,0},{0.0,0.0},tGridSupportDensity),std::domain_error);
-
-    for(int i = 0; i < tGridDimensions[0]; ++i)
-    {
-        for(int j = 1; j < tGridDimensions[1]; ++j)
-        {
-            for(int k = 1; k < tGridDimensions[2]; ++k)
-            {
-                double tPrintableDensity = tAMFilterUtilities.computeGridPointPrintableDensity(i,j,k,tGridBlueprintDensity,tGridSupportDensity);
-                double tBlueprintDensity = tGridBlueprintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
-                double tGold = smin(tBlueprintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
-                EXPECT_DOUBLE_EQ(tPrintableDensity,tGold);
-            }
-        }
-    }
-
 }
 
 PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
@@ -825,7 +696,7 @@ PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
     double tTargetEdgeLength = 0.1;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
 
     double tPNorm = 200;
 
@@ -835,33 +706,48 @@ PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
 
     std::vector<double> tGridBlueprintDensity;
     tAMFilterUtilities.computeGridBlueprintDensity(&tVector,tGridBlueprintDensity); 
-    std::vector<double> tGridSupportDensity;
-    tAMFilterUtilities.computeGridSupportDensity(tGridBlueprintDensity, tGridSupportDensity);
-    std::vector<double> tGridPrintableDensity;
 
-    // wrong size of support density vector
-    EXPECT_THROW(tAMFilterUtilities.computeGridPrintableDensity(tGridBlueprintDensity,{0.0,0.0},tGridPrintableDensity),std::domain_error);
-    // wrong size of blueprint density vector
-    EXPECT_THROW(tAMFilterUtilities.computeGridPrintableDensity({0.0,0.0},tGridSupportDensity,tGridPrintableDensity),std::domain_error);
+    std::vector<double> tGridSupportDensity(tGridBlueprintDensity.size());
+    std::vector<double> tGridPrintableDensity(tGridBlueprintDensity.size());
 
-    tAMFilterUtilities.computeGridPrintableDensity(tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
+    // wrong size vectors
+    std::vector<double> tBogusVector(3);
+    EXPECT_THROW(tAMFilterUtilities.computeGridLayerSupportDensity(0,tBogusVector,tGridSupportDensity),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeGridLayerSupportDensity(0,tGridPrintableDensity,tBogusVector),std::domain_error);
 
-    EXPECT_EQ(tGridPrintableDensity.size(),tGridBlueprintDensity.size());
+    EXPECT_THROW(tAMFilterUtilities.computeGridLayerPrintableDensity(0,tBogusVector,tGridSupportDensity,tGridPrintableDensity),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeGridLayerPrintableDensity(0,tGridBlueprintDensity,tBogusVector,tGridPrintableDensity),std::domain_error);
+    EXPECT_THROW(tAMFilterUtilities.computeGridLayerPrintableDensity(0,tGridBlueprintDensity,tGridSupportDensity,tBogusVector),std::domain_error);
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    for(size_t k = 0; k < tGridDimensions[2]; ++k)
     {
-        for(int j = 1; j < tGridDimensions[1]; ++j)
+        tAMFilterUtilities.computeGridLayerSupportDensity(k,tGridPrintableDensity,tGridSupportDensity);
+        tAMFilterUtilities.computeGridLayerPrintableDensity(k,tGridBlueprintDensity,tGridSupportDensity,tGridPrintableDensity);
+
+        for(size_t i = 0; i < tGridDimensions[0]; ++i)
         {
-            for(int k = 1; k < tGridDimensions[2]; ++k)
+            for(size_t j = 0; j < tGridDimensions[1]; ++j)
             {
-                double tPrintableDensity = tGridPrintableDensity[tGridUtilities.getSerializedIndex(i,j,k)];
-                double tBlueprintDensity = tGridBlueprintDensity[tGridUtilities.getSerializedIndex(i,j,k)];
-                double tGold = smin(tBlueprintDensity,tGridSupportDensity[tGridUtilities.getSerializedIndex(i,j,k)]);
-                EXPECT_DOUBLE_EQ(tPrintableDensity,tGold);
+                size_t tSerializedIndex = tGridUtilities.getSerializedIndex(i,j,k);
+                if(k == 0)
+                {
+                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],1.0);
+                }
+                else
+                {
+                    std::vector<std::vector<size_t>> tSupportIndices = tGridUtilities.getSupportIndices(i,j,k);
+                    std::vector<double> tSupportDensities;
+                    for(auto tSupportIndex : tSupportIndices)
+                    {
+                        size_t tSupportSerializedIndex = tGridUtilities.getSerializedIndex(tSupportIndex);
+                        tSupportDensities.push_back(tGridPrintableDensity[tSupportSerializedIndex]);
+                    }
+                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],smax(tSupportDensities,tPNorm));
+                }
+                EXPECT_DOUBLE_EQ(tGridPrintableDensity[tSerializedIndex],smin(tGridBlueprintDensity[tSerializedIndex],tGridSupportDensity[tSerializedIndex]));
             }
         }
     }
-
 }
 
 PSL_TEST(AMFilterUtilities, computeTetNodePrintableDensity)
@@ -890,7 +776,7 @@ PSL_TEST(AMFilterUtilities, computeTetNodePrintableDensity)
     double tTargetEdgeLength = 2.0;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
 
     double tPNorm = 200;
 
@@ -935,7 +821,7 @@ PSL_TEST(AMFilterUtilities, computeTetMeshPrintableDensity_oneElement)
     double tTargetEdgeLength = 2.0;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
 
     double tPNorm = 200;
 
@@ -985,7 +871,7 @@ PSL_TEST(AMFilterUtilities, computeTetMeshPrintableDensity_oneElement_differentB
     double tTargetEdgeLength = 2.0;
 
     OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
-    std::vector<int> tGridDimensions = tGridUtilities.getGridDimensions();
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
 
     double tPNorm = 200;
 

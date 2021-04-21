@@ -54,12 +54,18 @@ double TetMeshUtilities::computeMinEdgeLength() const
         Vector tNode2(mCoordinates[tElement[2]]);
         Vector tNode3(mCoordinates[tElement[3]]);
 
-        Vector tEdge0 = tNode1 - tNode0;
-        Vector tEdge1 = tNode2 - tNode0;
-        Vector tEdge2 = tNode3 - tNode0;
-        Vector tEdge3 = tNode1 - tNode2;
-        Vector tEdge4 = tNode3 - tNode2;
-        Vector tEdge5 = tNode3 - tNode1;
+        Vector tEdge0(tNode1);
+        tEdge0.subtract(tNode0);
+        Vector tEdge1(tNode2);
+        tEdge1.subtract(tNode0);
+        Vector tEdge2(tNode3);
+        tEdge2.subtract(tNode0);
+        Vector tEdge3(tNode1);
+        tEdge3.subtract(tNode2);
+        Vector tEdge4(tNode3);
+        tEdge4.subtract(tNode2);
+        Vector tEdge5(tNode3);
+        tEdge5.subtract(tNode1);
 
         std::vector<Vector> tEdges;
 
@@ -119,7 +125,8 @@ std::vector<double> TetMeshUtilities::computeBarycentricCoordinates(const std::v
     Vector tR3(mCoordinates[aTet[2]]);
     Vector tR4(mCoordinates[aTet[3]]);
 
-    Vector tRightHandSide = aPoint - tR4;
+    Vector tRightHandSide(aPoint);
+    tRightHandSide.subtract(tR4);
 
     // matrix
     Vector tColumn1({tR1(0) - tR4(0), tR1(1) - tR4(1), tR1(2) - tR4(2)});
@@ -151,10 +158,16 @@ bool sameSide(const std::vector<std::vector<double>>& aCoordinates, const int& v
     Vector tVec3(aCoordinates[v3]);
     Vector tVec4(aCoordinates[v4]);
 
-    Vector tNormal = cross_product(tVec2 - tVec1, tVec3 - tVec1);
+    tVec2.subtract(tVec1);
+    tVec3.subtract(tVec1);
+    tVec4.subtract(tVec1);
+    Vector tTemp(aPoint);
+    tTemp.subtract(tVec1);
 
-    double tDot1 = dot_product(tNormal, tVec4 - tVec1);
-    double tDot2 = dot_product(tNormal, aPoint - tVec1);
+    Vector tNormal = cross_product(tVec2, tVec3);
+
+    double tDot1 = dot_product(tNormal, tVec4);
+    double tDot2 = dot_product(tNormal, tTemp);
 
     return tDot1*tDot2 >= 0.0;
 }

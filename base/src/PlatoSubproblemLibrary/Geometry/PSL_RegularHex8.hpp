@@ -13,7 +13,7 @@ public:
                 mMinCoords(aMinCoords),
                 mMaxCoords(aMaxCoords)
             {
-                for(int i = 0; i < 3; ++i)
+                for(size_t i = 0; i < 3; ++i)
                 {
                     if(mMaxCoords(i) < mMinCoords(i))
                         throw(std::domain_error("RegularHex8: Minimum provided coordinate greater than maximum provided coordinate"));

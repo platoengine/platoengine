@@ -8,7 +8,7 @@
 namespace PlatoSubproblemLibrary
 {
 
-std::vector<int> OrthogonalGridUtilities::computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, const Vector& aMinUVWCoords, const double& aTargetEdgeLength) const
+std::vector<size_t> OrthogonalGridUtilities::computeNumElementsInEachDirection(const Vector& aMaxUVWCoords, const Vector& aMinUVWCoords, const double& aTargetEdgeLength) const
 {
     double tULength = aMaxUVWCoords(0) - aMinUVWCoords(0);
     double tVLength = aMaxUVWCoords(1) - aMinUVWCoords(1);
@@ -17,16 +17,16 @@ std::vector<int> OrthogonalGridUtilities::computeNumElementsInEachDirection(cons
     if(aTargetEdgeLength <= 0.0)
         throw(std::domain_error("OrthogonalGridUtilities: target edge length must be greater than zero"));
 
-    std::vector<int> tNumElements;
+    std::vector<size_t> tNumElements;
 
-    tNumElements.push_back(aTargetEdgeLength > tULength ? 1 : (int) tULength/aTargetEdgeLength);
-    tNumElements.push_back(aTargetEdgeLength > tVLength ? 1 : (int) tVLength/aTargetEdgeLength);
-    tNumElements.push_back(aTargetEdgeLength > tWLength ? 1 : (int) tWLength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tULength ? 1 : (size_t) tULength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tVLength ? 1 : (size_t) tVLength/aTargetEdgeLength);
+    tNumElements.push_back(aTargetEdgeLength > tWLength ? 1 : (size_t) tWLength/aTargetEdgeLength);
 
     return tNumElements;
 }
 
-int OrthogonalGridUtilities::getSerializedIndex(const int& i, const int& j, const int& k) const
+size_t OrthogonalGridUtilities::getSerializedIndex(const size_t& i, const size_t& j, const size_t& k) const
 {
     if(i < 0 || j < 0 || k < 0 || i > mNumElementsInEachDirection[0] || j > mNumElementsInEachDirection[1] || k > mNumElementsInEachDirection[2])
     {
@@ -36,7 +36,7 @@ int OrthogonalGridUtilities::getSerializedIndex(const int& i, const int& j, cons
     return i + j*(mNumElementsInEachDirection[0]+1) + k*(mNumElementsInEachDirection[0]+1)*(mNumElementsInEachDirection[1]+1);
 }
 
-int OrthogonalGridUtilities::getSerializedIndex(const std::vector<int>& aIndex) const
+size_t OrthogonalGridUtilities::getSerializedIndex(const std::vector<size_t>& aIndex) const
 {
     if(aIndex.size() != 3)
     {
@@ -46,14 +46,14 @@ int OrthogonalGridUtilities::getSerializedIndex(const std::vector<int>& aIndex) 
     return getSerializedIndex(aIndex.at(0), aIndex.at(1), aIndex.at(2));
 }    
 
-std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const int& i, const int& j, const int& k) const
+std::vector<std::vector<size_t>> OrthogonalGridUtilities::getSupportIndices(const size_t& i, const size_t& j, const size_t& k) const
 {
     auto tDimensions = getGridDimensions();
-    std::vector<std::vector<int>> tIndices;
+    std::vector<std::vector<size_t>> tIndices;
 
-    std::vector<int> tFirstIndexSupports;
-    std::vector<int> tSecondIndexSupports;
-    std::vector<int> tThirdIndexSupports;
+    std::vector<size_t> tFirstIndexSupports;
+    std::vector<size_t> tSecondIndexSupports;
+    std::vector<size_t> tThirdIndexSupports;
 
         tFirstIndexSupports.push_back(i);
         if(i > 0)
@@ -85,7 +85,7 @@ std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const i
     return tIndices;
 }
 
-std::vector<std::vector<int>> OrthogonalGridUtilities::getSupportIndices(const std::vector<int>& aIndex) const
+std::vector<std::vector<size_t>> OrthogonalGridUtilities::getSupportIndices(const std::vector<size_t>& aIndex) const
 {
     if(aIndex.size() != 3)
     {
@@ -101,11 +101,11 @@ void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXY
 
     aXYZCoordinates.resize(tDimension[0] * tDimension[1] * tDimension[2]);
 
-    for(int i = 0; i < tDimension[0]; ++i)
+    for(size_t i = 0; i < tDimension[0]; ++i)
     {
-        for(int j = 0; j < tDimension[1]; ++j)
+        for(size_t j = 0; j < tDimension[1]; ++j)
         {
-            for(int k = 0; k < tDimension[2]; ++k)
+            for(size_t k = 0; k < tDimension[2]; ++k)
             {
                 aXYZCoordinates[getSerializedIndex(i,j,k)] = computeGridPointXYZCoordinates(i,j,k);
             }
@@ -113,7 +113,7 @@ void OrthogonalGridUtilities::computeGridXYZCoordinates(std::vector<Vector>& aXY
     }
 }
 
-Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const std::vector<int>& aIndex) const
+Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const std::vector<size_t>& aIndex) const
 {
     if(aIndex.size() != 3)
         throw(std::domain_error("OrthogonalGridUtilities::computeGridPointXYZCoordinates: Index must have 3 dimensions"));
@@ -124,22 +124,27 @@ Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const std::vector
 
     std::vector<double> tLength = {tULength,tVLength,tWLength};
 
-    Vector tUVWCoordinates({0.0,0.0,0.0});
+    std::vector<Vector> tBasis;
+    tBasis.push_back(mUBasisVector);
+    tBasis.push_back(mVBasisVector);
+    tBasis.push_back(mWBasisVector);
 
-    for(int tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
+    Vector tXYZCoordinates({0.0,0.0,0.0});
+
+    for(size_t tTempIndex = 0; tTempIndex < 3; ++tTempIndex)
     {
         double tUVWCoordinate = mMinUVWCoords(tTempIndex) + aIndex[tTempIndex]*tLength[tTempIndex]/mNumElementsInEachDirection[tTempIndex]; 
-        tUVWCoordinates.set(tTempIndex,tUVWCoordinate);
+        tXYZCoordinates.set(0,tXYZCoordinates(0)+tUVWCoordinate*tBasis[tTempIndex](0));
+        tXYZCoordinates.set(1,tXYZCoordinates(1)+tUVWCoordinate*tBasis[tTempIndex](1));
+        tXYZCoordinates.set(2,tXYZCoordinates(2)+tUVWCoordinate*tBasis[tTempIndex](2));
     }
-
-    Vector tXYZCoordinates = tUVWCoordinates(0)*mUBasisVector + tUVWCoordinates(1)*mVBasisVector + tUVWCoordinates(2)*mWBasisVector;
 
     return tXYZCoordinates;
 }
 
-Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const int& i, const int& j, const int& k) const
+Vector OrthogonalGridUtilities::computeGridPointXYZCoordinates(const size_t& i, const size_t& j, const size_t& k) const
 {
-    std::vector<int> tIndex({i,j,k});
+    std::vector<size_t> tIndex({i,j,k});
     return computeGridPointXYZCoordinates(tIndex);
 }
 
@@ -166,7 +171,7 @@ void OrthogonalGridUtilities::checkBasis(const Vector& aUBasisVector,
 void OrthogonalGridUtilities::checkBounds(const Vector& aMaxUVWCoords,
                                           const Vector& aMinUVWCoords) const
 {
-    for(int i = 0; i < 3; ++i)
+    for(size_t i = 0; i < 3; ++i)
     {
         if(aMaxUVWCoords(i) <= aMinUVWCoords(i))
             throw(std::domain_error("OrthogonalGridUtilities: Max coordinates not strictly greater than min coordinates"));
@@ -179,25 +184,25 @@ void OrthogonalGridUtilities::checkTargetEdgeLength(const double& aTargetEdgeLen
         throw(std::domain_error("OrthogonalGridUtilities: Target edge length is not positive"));
 }
 
-void OrthogonalGridUtilities::checkNumElementsInEachDirection(const std::vector<int>& aNumElementsInEachDirection) const
+void OrthogonalGridUtilities::checkNumElementsInEachDirection(const std::vector<size_t>& aNumElementsInEachDirection) const
 {
     if(aNumElementsInEachDirection.size() != 3u)
         throw(std::domain_error("OrthogonalGridUtilities: Grid dimension must be 3"));
 
-    for(int i = 0; i < 3; ++i)
+    for(size_t i = 0; i < 3; ++i)
     {
         if(aNumElementsInEachDirection[i] <= 0)
             throw(std::domain_error("OrthogonalGridUtilities: Number of elements in each direction must be positive"));
     }
 }
 
-std::vector<std::vector<int>> OrthogonalGridUtilities::getContainingGridElement(const Vector& aPoint) const
+std::vector<std::vector<size_t>> OrthogonalGridUtilities::getContainingGridElement(const Vector& aPoint) const
 {
-    std::vector<std::vector<int>> tGridIndicies;
+    std::vector<std::vector<size_t>> tGridIndicies;
 
-    std::vector<int> tUIndices = getSurroundingIndices(0,aPoint);
-    std::vector<int> tVIndices = getSurroundingIndices(1,aPoint);
-    std::vector<int> tWIndices = getSurroundingIndices(2,aPoint);
+    std::vector<size_t> tUIndices = getSurroundingIndices(0,aPoint);
+    std::vector<size_t> tVIndices = getSurroundingIndices(1,aPoint);
+    std::vector<size_t> tWIndices = getSurroundingIndices(2,aPoint);
 
     if(tUIndices.size() == 2u && tVIndices.size() == 2u && tWIndices.size() == 2)
     {
@@ -216,7 +221,7 @@ std::vector<std::vector<int>> OrthogonalGridUtilities::getContainingGridElement(
     return tGridIndicies;
 }
 
-std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aDim, const Vector& aXYZPoint) const
+std::vector<size_t> OrthogonalGridUtilities::getSurroundingIndices(const size_t& aDim, const Vector& aXYZPoint) const
 {
     if(aDim < 0 || aDim > 2)
         throw(std::domain_error("OrthogonalGridUtilities: Provided index must be between 0 and 2"));
@@ -229,24 +234,60 @@ std::vector<int> OrthogonalGridUtilities::getSurroundingIndices(const int& aDim,
 
     double tLength = mMaxUVWCoords(aDim) - mMinUVWCoords(aDim);
 
-    std::vector<int> tSurroundingIndices;
-    bool found_point = false;
-    for(int i = 0; i < tDimensions[aDim]-1; ++i)
-    {
-        double tFloor = mMinUVWCoords(aDim) + i*tLength/mNumElementsInEachDirection[aDim];
-        double tCeiling = mMinUVWCoords(aDim) + (i+1)*tLength/mNumElementsInEachDirection[aDim];
+    double tGridSegmentLength = tLength/mNumElementsInEachDirection[aDim];
 
-        if(tFloor <= tCoordinate && tCoordinate <= tCeiling)
-        {
-            tSurroundingIndices.push_back(i);
-            tSurroundingIndices.push_back(i+1);
-            found_point = true;
-            break;
-        }
+    double tModifiedCoordinate = tCoordinate - mMinUVWCoords(aDim);
+
+    size_t tIndex = std::floor(tModifiedCoordinate / tGridSegmentLength);
+    size_t tNextIndex = std::ceil(tModifiedCoordinate / tGridSegmentLength);
+
+    if(tIndex == tNextIndex)
+    {
+        if(tIndex == 0)
+            ++tNextIndex;
+        else
+            --tIndex;
     }
 
-    if(!found_point)
-        throw(std::runtime_error("didn't find point"));
+    double tFloor = mMinUVWCoords(aDim) + (tIndex*tLength)/mNumElementsInEachDirection[aDim];
+    double tCeiling = mMinUVWCoords(aDim) + (tNextIndex*tLength)/mNumElementsInEachDirection[aDim];
+
+    if(tCoordinate < tFloor)
+    {
+        --tIndex;
+        --tNextIndex;
+    }
+    else if(tCoordinate > tCeiling)
+    {
+        ++tIndex;
+        ++tNextIndex;
+    }
+
+    std::vector<size_t> tSurroundingIndices;
+    tSurroundingIndices.push_back(tIndex);
+    tSurroundingIndices.push_back(tNextIndex);
+
+    if(tIndex < 0 || tIndex + 1 > mNumElementsInEachDirection[aDim])
+        throw(std::runtime_error("how'd I get this index"));
+
+    // bool found_point = false;
+    // // performance improvement - don't do a loop here, just compute the numbers
+    // for(size_t i = 0; i < tDimensions[aDim]-1; ++i)
+    // {
+    //     double tFloor = mMinUVWCoords(aDim) + i*tLength/mNumElementsInEachDirection[aDim];
+    //     double tCeiling = mMinUVWCoords(aDim) + (i+1)*tLength/mNumElementsInEachDirection[aDim];
+
+    //     if(tFloor <= tCoordinate && tCoordinate <= tCeiling)
+    //     {
+    //         tSurroundingIndices.push_back(i);
+    //         tSurroundingIndices.push_back(i+1);
+    //         found_point = true;
+    //         break;
+    //     }
+    // }
+
+    // if(!found_point)
+    //     throw(std::runtime_error("didn't find point"));
 
     return tSurroundingIndices;
 }
@@ -263,7 +304,7 @@ Vector OrthogonalGridUtilities::computePointUVWCoordinates(const Vector& aXYZPoi
     return Vector({tU,tV,tW});
 }
 
-void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<int>>& aContainingElementIndicies) const
+void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<size_t>>& aContainingElementIndicies) const
 {
     if(aContainingElementIndicies.size() != 8u)
         throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of indices provided"));
@@ -274,7 +315,7 @@ void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<int
             throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of dimensions in provided index"));
     }
 
-    std::vector<int> tIndex0 = aContainingElementIndicies[0];
+    std::vector<size_t> tIndex0 = aContainingElementIndicies[0];
 
     if(tIndex0[0] < 0 || tIndex0[0] >= mNumElementsInEachDirection[0]
        || tIndex0[1] < 0 || tIndex0[1] >= mNumElementsInEachDirection[1]
@@ -293,7 +334,7 @@ void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<int
     //{a,b+1,c+1};
     //{a+1,b+1,c+1};
     
-    std::vector<std::vector<int>> tTestIndices;
+    std::vector<std::vector<size_t>> tTestIndices;
     
     for(auto tIndex : aContainingElementIndicies)
     {
@@ -314,7 +355,7 @@ void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<int
 
 }
 
-double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
+double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<size_t>>& aContainingElementIndicies,
                                                   const std::vector<double>& aScalarValues,
                                                   const Vector& aPoint) const
 {
@@ -340,11 +381,11 @@ double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<
     return tVal;
 }
 
-Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const std::vector<int>& aIndex) const
+Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const std::vector<size_t>& aIndex) const
 {
-    std::vector<int> tDimensions = getGridDimensions();
+    std::vector<size_t> tDimensions = getGridDimensions();
     
-    for(int i = 0; i < 3; ++i)
+    for(size_t i = 0; i < 3; ++i)
     {
         if(aIndex[i] < 0 || aIndex[i] > tDimensions[i] - 1)
             throw(std::out_of_range("OrthogonalGridUtilities::computeGridPointUVWCoordinates: Index must be between zero and number of elements in each direction"));
@@ -363,9 +404,9 @@ Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const std::vector
     return tUVWCoordinates;
 }
 
-Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const int& i, const int& j, const int& k) const
+Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const size_t& i, const size_t& j, const size_t& k) const
 {
-    std::vector<int> tIndex({i,j,k});
+    std::vector<size_t> tIndex({i,j,k});
     return computeGridPointUVWCoordinates(tIndex);
 }
 

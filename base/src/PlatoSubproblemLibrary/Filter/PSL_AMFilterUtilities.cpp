@@ -52,11 +52,11 @@ void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelV
     auto tGridDimensions = mGridUtilities.getGridDimensions();
     aGridBlueprintDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
     {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
         {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
+            for(size_t k = 0; k < tGridDimensions[2]; ++k)
             {
                 aGridBlueprintDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointBlueprintDensity(i,j,k,aTetMeshBlueprintDensity);
             }
@@ -64,77 +64,73 @@ void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelV
     }
 }
 
-void AMFilterUtilities::computeGridSupportDensity(const std::vector<double>& aGridBlueprintDensity, std::vector<double>& aGridSupportDensity) const
+void AMFilterUtilities::computeGridLayerSupportDensity(const int& k,
+                                                       const std::vector<double>& aGridPrintableDensity,
+                                                       std::vector<double>& aGridSupportDensity) const
 {
     auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tGridSize = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
 
-    aGridSupportDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
+    if(aGridPrintableDensity.size() != tGridSize || aGridSupportDensity.size() != tGridSize)
+        throw(std::domain_error("AMFilterUtilities::computeGridLayerSupportDensity: Density vectors do not match grid size"));
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
     {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
         {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
+            if(k == 0)
             {
-                if(k == 0)
+                aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1.0;
+            }
+            else
+            {
+                auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+                std::vector<double> tSupportDensityBelow;
+                for(auto tSupportIndex : tSupportIndices)
                 {
-                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1;
+                    tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
                 }
-                else
-                {
-                    auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
-                    std::vector<double> tSupportDensityBelow;
-                    for(auto tSupportIndex : tSupportIndices)
-                    {
-                        tSupportDensityBelow.push_back(aGridBlueprintDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
-                    }
 
-                    double tVal = smax(tSupportDensityBelow,mPNorm);
+                double tVal = smax(tSupportDensityBelow,mPNorm);
 
-                    aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = tVal;
-                }
+                aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = tVal;
             }
         }
     }
 }
 
-double AMFilterUtilities::computeGridPointPrintableDensity(const int& i, const int& j, const int& k, const std::vector<double>& aGridBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
+void AMFilterUtilities::computeGridLayerPrintableDensity(const int& k,
+                                                         const std::vector<double>& aGridBlueprintDensity,
+                                                         const std::vector<double>& aGridSupportDensity,
+                                                         std::vector<double>& aGridPrintableDensity) const
 {
-    if(aGridSupportDensity.size() != mGridPointCoordinates.size())
-        throw(std::domain_error("AMFilterUtilities: Grid support density vector does not match grid size"));
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tGridSize = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
 
-    if(aGridBlueprintDensity.size() != mGridPointCoordinates.size())
-        throw(std::domain_error("AMFilterUtilities: Grid blueprint density vector does not match grid size"));
+    if(aGridBlueprintDensity.size() != tGridSize || aGridPrintableDensity.size() != tGridSize || aGridSupportDensity.size() != tGridSize)
+        throw(std::domain_error("AMFilterUtilities::computeGridLayerPrintableDensity: Density vectors do not match grid size"));
 
-    double tSupportDensity = aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)];
-    double tBlueprintDensity = aGridBlueprintDensity[mGridUtilities.getSerializedIndex(i,j,k)];
-
-    return smin(tSupportDensity,tBlueprintDensity);
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
+        {
+            size_t tSerializedIndex = mGridUtilities.getSerializedIndex(i,j,k);
+            aGridPrintableDensity[tSerializedIndex] = smin(aGridBlueprintDensity[tSerializedIndex],aGridSupportDensity[tSerializedIndex]);
+        }
+    }
 }
 
-double AMFilterUtilities::computeGridPointPrintableDensity(const std::vector<int>& aIndex, const std::vector<double>& aGridBlueprintDensity, const std::vector<double>& aGridSupportDensity) const
-{
-    if(aIndex.size() != 3u)
-        throw(std::domain_error("AMFilterUtilities: Grid point index must have 3 entries"));
-
-    return computeGridPointPrintableDensity(aIndex[0],aIndex[1],aIndex[2],aGridBlueprintDensity,aGridSupportDensity);
-}
-
-void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& aGridBlueprintDensity, const std::vector<double>& aGridSupportDensity, std::vector<double>& aGridPrintableDensity) const
+void AMFilterUtilities::computeGridPrintableDensity(const std::vector<double>& aGridBlueprintDensity, std::vector<double>& aGridPrintableDensity) const
 {
     auto tGridDimensions = mGridUtilities.getGridDimensions();
 
     aGridPrintableDensity.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
 
-    for(int i = 0; i < tGridDimensions[0]; ++i)
+    std::vector<double> tGridSupportDensity(aGridPrintableDensity.size());
+    for(size_t k = 0; k < tGridDimensions[2]; ++k)
     {
-        for(int j = 0; j < tGridDimensions[1]; ++j)
-        {
-            for(int k = 0; k < tGridDimensions[2]; ++k)
-            {
-                aGridPrintableDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointPrintableDensity(i,j,k,aGridBlueprintDensity,aGridSupportDensity);
-            }
-        }
+        computeGridLayerSupportDensity(k,aGridPrintableDensity,tGridSupportDensity);
+        computeGridLayerPrintableDensity(k,aGridBlueprintDensity,tGridSupportDensity,aGridPrintableDensity);
     }
 }
 
@@ -148,7 +144,7 @@ double AMFilterUtilities::computeTetNodePrintableDensity(const int& aTetNodeInde
     if(aGridPrintableDensity.size() != mGridPointCoordinates.size())
         throw(std::domain_error("AMFilterUtilities: Provided grid density vector does not match grid size"));
 
-    std::vector<std::vector<int>> tContainingElementIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
+    std::vector<std::vector<size_t>> tContainingElementIndicies = mGridUtilities.getContainingGridElement(tCoordinates[aTetNodeIndex]);
 
     std::vector<double> tContainingElementDensities;
 

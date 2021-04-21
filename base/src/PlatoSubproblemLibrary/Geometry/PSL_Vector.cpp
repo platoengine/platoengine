@@ -95,29 +95,34 @@ void Vector::normalize()
     }
 }
 
-Vector Vector::operator +(const Vector& aInputVector) const
+void Vector::add(const Vector& aInputVector)
 {
     // add data
-    std::vector<double> combined_data(3);
     for(size_t i = 0u; i < 3; i++)
     {
-        combined_data[i] = (*this)(i) + aInputVector(i);
+        m_data[i] += aInputVector(i);
     }
-
-    return Vector(combined_data);
 }
 
-Vector Vector::operator -(const Vector& aInputVector) const
+void Vector::subtract(const Vector& aInputVector)
 {
     // add data
-    std::vector<double> combined_data(3);
     for(size_t i = 0u; i < 3; i++)
     {
-        combined_data[i] = (*this)(i) - aInputVector(i);
+        m_data[i] -= aInputVector(i);
     }
-
-    return Vector(combined_data);
 }
+
+// Vector& Vector::operator =(const Vector& aInputVector)
+// {
+//     // add data
+//     for(size_t i = 0u; i < 3; i++)
+//     {
+//         this->set(i,aInputVector(i));
+//     }
+
+//     return *this;
+// }
 
 Vector& Vector::operator =(const Vector& aInputVector)
 {
@@ -138,21 +143,12 @@ bool Vector::operator ==(const Vector& aVec) const
         return false;
 }
 
-Vector operator *(const double scalar, const Vector& aInputVector)
+void Vector::multiply(const double scalar)
 {
-    std::vector<double> tVec(3);
-
     for(size_t i = 0u; i < 3; i++)
     {
-        tVec[i] = scalar*aInputVector(i);
+        m_data[i] *= scalar;
     }
-
-    return Vector(tVec);
-}
-
-Vector operator *(const Vector& aVec, const double scalar)
-{
-    return scalar * aVec;
 }
 
 Vector cross_product(const Vector& aVec1, const Vector& aVec2)

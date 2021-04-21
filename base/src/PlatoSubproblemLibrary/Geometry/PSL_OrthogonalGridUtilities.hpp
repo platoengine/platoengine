@@ -42,7 +42,7 @@ class OrthogonalGridUtilities
                                 const Vector& aWBasisVector,
                                 const Vector& aMaxUVWCoords,
                                 const Vector& aMinUVWCoords,
-                                const std::vector<int>& aNumElementsInEachDirection)
+                                const std::vector<size_t>& aNumElementsInEachDirection)
             :mUBasisVector(aUBasisVector),
              mVBasisVector(aVBasisVector),
              mWBasisVector(aWBasisVector),
@@ -55,27 +55,27 @@ class OrthogonalGridUtilities
             checkNumElementsInEachDirection(aNumElementsInEachDirection);
         }
 
-        std::vector<int> getGridDimensions() const {return std::vector<int>({mNumElementsInEachDirection[0]+1,
-                                                                             mNumElementsInEachDirection[1]+1,
-                                                                             mNumElementsInEachDirection[2]+1});}
+        std::vector<size_t> getGridDimensions() const {return std::vector<size_t>({mNumElementsInEachDirection[0]+1,
+                                                                                   mNumElementsInEachDirection[1]+1,
+                                                                                   mNumElementsInEachDirection[2]+1});}
 
         void computeGridXYZCoordinates(std::vector<Vector>& aXYZCoordinates) const;
-        Vector computeGridPointXYZCoordinates(const std::vector<int>& aIndex) const;
-        Vector computeGridPointXYZCoordinates(const int& i, const int& j, const int& k) const;
-        Vector computeGridPointUVWCoordinates(const std::vector<int>& aIndex) const;
-        Vector computeGridPointUVWCoordinates(const int& i, const int& j, const int& k) const;
+        Vector computeGridPointXYZCoordinates(const std::vector<size_t>& aIndex) const;
+        Vector computeGridPointXYZCoordinates(const size_t& i, const size_t& j, const size_t& k) const;
+        Vector computeGridPointUVWCoordinates(const std::vector<size_t>& aIndex) const;
+        Vector computeGridPointUVWCoordinates(const size_t& i, const size_t& j, const size_t& k) const;
         Vector computePointUVWCoordinates(const Vector& aPoint) const;
-        std::vector<std::vector<int>> getContainingGridElement(const Vector& aPoint) const;
+        std::vector<std::vector<size_t>> getContainingGridElement(const Vector& aPoint) const;
 
-        int getSerializedIndex(const int& i, const int& j, const int& k) const;
-        int getSerializedIndex(const std::vector<int>& aIndex) const;
+        size_t getSerializedIndex(const size_t& i, const size_t& j, const size_t& k) const;
+        size_t getSerializedIndex(const std::vector<size_t>& aIndex) const;
 
-        std::vector<std::vector<int>> getSupportIndices(const int& i, const int& j, const int& k) const;
-        std::vector<std::vector<int>> getSupportIndices(const std::vector<int>& aIndex) const;
+        std::vector<std::vector<size_t>> getSupportIndices(const size_t& i, const size_t& j, const size_t& k) const;
+        std::vector<std::vector<size_t>> getSupportIndices(const std::vector<size_t>& aIndex) const;
 
-        std::vector<int> getSurroundingIndices(const int& aDim, const Vector& aPoint) const;
+        std::vector<size_t> getSurroundingIndices(const size_t& aDim, const Vector& aPoint) const;
 
-        double interpolateScalar(const std::vector<std::vector<int>>& aContainingElementIndicies,
+        double interpolateScalar(const std::vector<std::vector<size_t>>& aContainingElementIndicies,
                                  const std::vector<double>& aScalarValues,
                                  const Vector& aPoint) const;
 
@@ -90,13 +90,13 @@ class OrthogonalGridUtilities
 
         void checkTargetEdgeLength(const double& aTargetEdgeLength) const;
 
-        void checkNumElementsInEachDirection(const std::vector<int>& aNumElementsInEachDirection) const;
+        void checkNumElementsInEachDirection(const std::vector<size_t>& aNumElementsInEachDirection) const;
 
-        std::vector<int> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
+        std::vector<size_t> computeNumElementsInEachDirection(const Vector& aMaxUVWCoords,
                                                            const Vector& aMinUVWCoords,
                                                            const double& aTargetEdgeLength) const;
 
-        void checkIndexFormat(const std::vector<std::vector<int>>& aContainingElementIndicies) const;
+        void checkIndexFormat(const std::vector<std::vector<size_t>>& aContainingElementIndicies) const;
 
         const Vector mUBasisVector;
         const Vector mVBasisVector;
@@ -104,7 +104,7 @@ class OrthogonalGridUtilities
         const Vector mMaxUVWCoords;
         const Vector mMinUVWCoords;
 
-        std::vector<int> mNumElementsInEachDirection;
+        std::vector<size_t> mNumElementsInEachDirection;
 
 };
 
