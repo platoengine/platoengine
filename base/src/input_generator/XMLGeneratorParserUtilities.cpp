@@ -15,8 +15,23 @@
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
 
+const int MAX_TOKENS_PER_LINE = 5000;
+const char* const DELIMITER = " \t";
+
 namespace XMLGen
 {
+
+std::string get_concretized_criterion_identifier_string(ConcretizedCriterion aConcretizedCriterion)
+{
+    std::string tCriterionID = std::get<0>(aConcretizedCriterion);
+    std::string tServiceID = std::get<1>(aConcretizedCriterion);
+    std::string tScenarioID = std::get<2>(aConcretizedCriterion);
+
+    std::string tIdentifierString = "";
+    tIdentifierString += "criterion_" + tCriterionID + "_service_" + tServiceID + "_scenario_" + tScenarioID;
+
+    return tIdentifierString;
+}
 
 bool unique(const std::vector<std::string>& aInput)
 {
@@ -255,108 +270,86 @@ void split(const std::string& aInput, std::vector<std::string>& aOutput, bool aT
 std::string check_data_layout_keyword(const std::string& aInput)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Data Layout Keyword: data layout keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Data Layout Keyword: data layout keyword '" + aInput + "' is not supported.")
     }
-    return tItr->second;
+    return tValue;
 }
 // check_data_layout_keyword
 
 std::string check_output_keyword(const std::string& aInput)
 {
     XMLGen::ValidOutputToLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.key(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Output Keyword: output keyword '" + aInput + "' is not supported.")
     }
-    return tItr->first;
+    return tValue;
 }
 // check_output_keyword
 
 std::string return_output_qoi_data_layout(const std::string& aInput)
 {
     XMLGen::ValidOutputToLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR("Check Output Keyword: output keyword '" + tLowerKey + "' is not supported.")
+        THROWERR("Check Output Keyword: output keyword '" + aInput + "' is not supported.")
     }
-    return tItr->second;
+    return tValue;
 }
 // return_output_qoi_data_layout
 
 std::string check_data_layout(const std::string& aInput)
 {
     XMLGen::ValidLayoutKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aInput);
-    auto tValidLayoutItr = tValidKeys.mKeys.find(tLowerKey);
-    if(tValidLayoutItr == tValidKeys.mKeys.end())
+    auto tValidLayout = tValidKeys.value(aInput);
+    if(tValidLayout.empty())
     {
-        THROWERR("Is Data Layout Supported: data layout '" + tLowerKey + "' is not supported.")
+        THROWERR("Data layout '" + aInput + "' is not supported by Plato Engine.")
     }
-    return tValidLayoutItr->second;
+    return tValidLayout;
 }
 // function check_data_layout
 
 std::string check_code_keyword(const std::string& aInput)
 {
-    auto tLowerInput = aInput;
-    XMLGen::to_lower(tLowerInput);
     XMLGen::ValidCodeKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Code Keyword: keyword 'code' with tag '") + tLowerInput + "' is not supported.")
+        THROWERR(std::string("Keyword 'code' with tag '") + tValue + "' is not supported by Plato Engine.")
     }
-    return (tItr.operator*());
+    return (tValue);
 }
 // function check_code_keyword
 
-std::string check_criterion_category_keyword(const std::string& aInput)
-{
-    auto tLowerInput = aInput;
-    XMLGen::to_lower(tLowerInput);
-    XMLGen::ValidCriterionKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
-    {
-        THROWERR(std::string("Check Criterion Category Keyword: keyword 'category' with tag '") + tLowerInput + "' is not supported.")
-    }
-    return (tItr.operator*());
-}
-// function check_criterion_category_keyword
-
 bool transform_boolean_key(const std::string& aInput)
 {
-    auto tLowerInput = XMLGen::to_lower(aInput);
     XMLGen::ValidBoolKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
         THROWERR(std::string("Check Boolean Keyword: boolean keyword with value '")
-            + tLowerInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
+            + aInput + "' is not supported. " + "Supported values are 'true' or 'false'.")
     }
-    auto tFlag = tLowerInput.compare("true") == 0 ? true : false;
+    auto tFlag = tValue.compare("true") == 0 ? true : false;
     return tFlag;
 }
 // function transform_boolean_key
 
 std::string check_physics_keyword(const std::string& aInput)
 {
-    auto tLowerInput = XMLGen::to_lower(aInput);
     XMLGen::ValidPhysicsKeys tValidKeys;
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerInput);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aInput);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + tLowerInput + "' is not supported.")
+        THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + aInput + "' is not supported.")
     }
-    return (tItr.operator*());
+    return tValue;
 }
 // function check_physics_keyword
 
@@ -387,6 +380,36 @@ void is_metadata_block_id_valid(const std::vector<std::string>& tTokens)
         + tLowerInput + " plato_1,\n"
         + "    and 4) begin " + tLowerInput + " plato_is_the_best_optimization_based_design_tool.\n")
     }
+}
+
+bool parseTokens(char *buffer, std::vector<std::string> &tokens)
+{
+    const char* token[MAX_TOKENS_PER_LINE] = {}; // initialize to 0
+    int n = 0;
+
+    // parse the line
+    token[0] = strtok(buffer, DELIMITER); // first token
+
+    // If there is a comment...
+    if(token[0] && strlen(token[0]) > 1 && token[0][0] == '/' && token[0][1] == '/')
+    {
+        tokens.clear();
+        return true;
+    }
+
+    if (token[0]) // zero if line is blank
+    {
+        for (n = 1; n < MAX_TOKENS_PER_LINE; n++)
+        {
+            token[n] = strtok(0, DELIMITER); // subsequent tokens
+            if (!token[n])
+                break; // no more tokens
+        }
+    }
+    for(int i=0; i<n; ++i)
+        tokens.push_back(token[i]);
+
+    return true;
 }
 
 }

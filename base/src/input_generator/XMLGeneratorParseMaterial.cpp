@@ -16,13 +16,12 @@ std::string check_material_model_key
 (const std::string& aKeyword)
 {
     XMLGen::ValidMaterialModelKeys tValidKeys;
-    auto tLowerKey = XMLGen::to_lower(aKeyword);
-    auto tItr = std::find(tValidKeys.mKeys.begin(), tValidKeys.mKeys.end(), tLowerKey);
-    if(tItr == tValidKeys.mKeys.end())
+    auto tValue = tValidKeys.value(aKeyword);
+    if(tValue.empty())
     {
-        THROWERR(std::string("Check Material Model Key: Material model keyword '") + tLowerKey + "' is not supported.")
+        THROWERR(std::string("Check Material Model Key: Material model keyword '") + aKeyword + "' is not supported.")
     }
-    return tLowerKey;
+    return tValue;
 }
 
 void ParseMaterial::insertCoreProperties()
@@ -134,7 +133,9 @@ void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
 void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 {
     XMLGen::ValidMaterialPropertyKeys tValidKeys;
-    for(auto& tKeyword : tValidKeys.mKeys)
+    auto tMaterialModel = aMetadata.category();
+    auto tPropertyTags = tValidKeys.properties(tMaterialModel);
+    for(auto& tKeyword : tPropertyTags)
     {
         auto tItr = mTags.find(tKeyword);
         if(tItr == mTags.end())
@@ -210,7 +211,6 @@ void ParseMaterial::checkNames()
     {
         if (tMaterial.name().empty())
         {
-            auto tIndex = &tMaterial - &mData[0] + 1u;
             auto tName = "material_" + tMaterial.id();
             tMaterial.name(tName);
         }
@@ -233,7 +233,7 @@ void ParseMaterial::checkMaterialProperties(XMLGen::Material& aMetadata)
     if(aMetadata.tags().empty())
     {
         auto tID = aMetadata.id().empty() ? std::string("UNDEFINED") : aMetadata.id();
-        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty, i.e. not defined.")
+        THROWERR("Parse Material: Material properties for material block with identification number '" + tID + "' are empty.")
     }
 }
 

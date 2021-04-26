@@ -93,8 +93,9 @@ inline void write_matrix_to_file
         {
             tMyFile << tCol;
             auto tColIndex = &tCol - &tRow[0];
-            if (tColIndex != tRow.size() - 1u)  // No comma at end of line
+            if (tColIndex != static_cast<int>(tRow.size() - 1u))
             {
+                // No comma at end of line
                 tMyFile << aMetaData.mDelimiter;
             }
         }

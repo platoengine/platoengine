@@ -1,56 +1,112 @@
+begin service 1  
+  code platomain
+  number_processors 1
+end service
+
+begin service 2
+  code plato_analyze
+  number_processors 1
+end service
+
+begin service 3
+  code plato_esp
+  number_processors 5
+end service
+
+begin criterion 1
+  type mechanical_compliance
+  //minimum_ersatz_material_value 1e-9
+end criterion
+
+begin criterion 2
+  type volume
+  minimum_ersatz_material_value 0
+end criterion
+
+begin scenario 1
+  physics steady_state_mechanics
+  dimensions 3
+  loads 1 2
+  boundary_conditions 1
+  material 1
+//  minimum_ersatz_material_value 1e-3
+  tolerance 1e-6
+end scenario
+
 begin objective
-   type maximize stiffness
-   load ids 1 2
-   boundary condition ids 1 
-   code plato_analyze
-   number processors 1
-   output for plotting dispx dispy dispz 
+  type weighted_sum
+  criteria 1
+  services 2
+  shape_services 3
+  scenarios 1
+  weights 1
 end objective
 
-begin boundary conditions
-   fixed displacement nodeset name ns_4 bc id 1
-end boundary conditions
+begin output
+    service 2
+   output_data true
+   data dispx dispy dispz
+end output
 
-begin loads
-    traction sideset name ss_2 value 0 2e3 0 load id 1
-    traction sideset name ss_3 value 0 1e3 0 load id 2
-end loads
+begin boundary_condition 1
+    type fixed_value
+    location_type sideset
+    location_name center_axis
+    degree_of_freedom dispx dispz dispy
+    value 0 0 0
+end boundary_condition
+
+begin load 1
+    type traction
+    location_type sideset
+    location_name left_axis
+    value 0 2e3 0
+end load
+
+begin load 2
+    type traction
+    location_type sideset
+    location_name right_axis
+    value 0 1e3 0
+end load
       
-begin constraint
-   type volume
-   volume absolute 17.5
+begin constraint 1
+  criterion 2
+  absolute_target 17.5
+  type less_than
+  service 2
+  scenario 1
 end constraint
-
-begin material 1
-   poissons ratio .33
-   youngs modulus 1e9
-end material
 
 begin block 1
    material 1
-   element type tet4
 end block
-   
-begin optimization parameters
-   algorithm mma
-   number processors 1
-   filter radius scale 1.5
-   max iterations 2
-   output frequency 1
-   optimization type shape
-   prune mesh false
-   number buffer layers 2
-   number refines 0
-   write restart file false
-   csm file rocker.csm
-end optimization parameters
 
-begin paths
-   code plato_analyze analyze_MPMD
-   code PlatoMain PlatoMain
-end paths
+begin material 1
+   material_model isotropic_linear_elastic 
+   poissons_ratio .33
+   youngs_modulus 1e9
+end material
+
+begin optimization_parameters
+//   filter_radius_scale 4.48
+   max_iterations 2 
+   output_frequency 1
+   optimization_algorithm mma
+//   discretization density 
+//   initial_density_value .5
+   normalize_in_aggregator false
+   csm_file rocker.csm
+   num_shape_design_variables 5
+   optimization_type shape
+//   verbose true
+end optimization_parameters
 
 begin mesh
    name rocker.exo
 end mesh
 
+begin paths
+code PlatoMain PlatoMain
+code plato_analyze analyze_MPMD
+end paths

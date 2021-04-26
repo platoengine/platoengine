@@ -18,6 +18,20 @@ namespace XMLGen
  * i.e. map< input_keyword_string, pair< pair<tokens,input_keyword_value>, input_keyword_default_value > > */
 using MetaDataTags = std::unordered_map<std::string, std::pair<std::pair<std::vector<std::string>,std::string>, std::string>>;
 
+// a "concretized criterion" is a criterion paired with a service and a scenario.
+// each concretized criterion will require a shared data, and can be used in
+// stage operations
+// order is criterionID, serviceID, scenarioID
+using ConcretizedCriterion = std::tuple<std::string,std::string,std::string>;
+
+/******************************************************************************//**
+ * \fn get_concretized_criterion_identifier_string
+ * \brief Returns the identifier for a concretized criterion.
+ * \param [in] aConcretizedCriterion input concretized criterion 
+ * \return identifier string
+**********************************************************************************/
+std::string get_concretized_criterion_identifier_string(ConcretizedCriterion aConcretizedCriterion);
+
 /******************************************************************************//**
  * \fn unique
  * \brief Returns true if each string element is unique.
@@ -126,7 +140,7 @@ void parse_tag_values(const std::vector<std::string>& aTokens, XMLGen::MetaDataT
 bool is_integer(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn is_integer
+ * \fn split
  * \brief Split input string into list of tokens
  * \param [in]      aInput   input string
  * \param [in/out]  aOutput  list of tokens
@@ -176,14 +190,6 @@ std::string check_data_layout(const std::string& aInput);
 std::string check_code_keyword(const std::string& aInput);
 
 /******************************************************************************//**
- * \fn check_criterion_category_keyword
- * \brief Throw error if criterion 'category' keyword value is not supported.
- * \param [in] aInput 'category' keyword
- * \return valid 'category' keyword value
-**********************************************************************************/
-std::string check_criterion_category_keyword(const std::string& aInput);
-
-/******************************************************************************//**
  * \fn transform_boolean_key
  * \brief Throw error if conversion from string to boolean fails.
  * \param [in] aInput input string
@@ -213,6 +219,14 @@ std::string check_spatial_dimensions_keyword(const std::string& aInput);
  * \param [in] aTokens list of tokens
 **********************************************************************************/
 void is_metadata_block_id_valid(const std::vector<std::string>& aTokens);
+
+/******************************************************************************//**
+ * \fn parseTokens
+ * \brief split a string up into space delimited tokens
+ * \param [in] buffer input string
+ * \param [in] aTokens list of tokens
+**********************************************************************************/
+bool parseTokens(char *buffer, std::vector<std::string> &tokens);
 
 }
 // namespace XMLGen

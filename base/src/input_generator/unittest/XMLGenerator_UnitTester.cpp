@@ -48,6 +48,7 @@
  */
 
 #include "XMLGenerator_UnitTester.hpp"
+#include "XMLGeneratorParserUtilities.hpp"
 
 /******************************************************************************/
 XMLGenerator_UnitTester::XMLGenerator_UnitTester()
@@ -81,38 +82,10 @@ bool XMLGenerator_UnitTester::publicParseSingleUnLoweredValue(const std::vector<
 }
 
 /******************************************************************************/
-void XMLGenerator_UnitTester::publicGetUncertaintyFlags()
-/******************************************************************************/
-{
-    return getUncertaintyFlags();
-}
-
-/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseTokens(char *buffer, std::vector<std::string> &tokens)
 /******************************************************************************/
 {
-    return parseTokens(buffer, tokens);
-}
-
-/******************************************************************************/
-void XMLGenerator_UnitTester::publicLookForPlatoAnalyzePerformers()
-/******************************************************************************/
-{
-    return lookForPlatoAnalyzePerformers();
-}
-
-/******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseObjectives(std::istream &sin)
-/******************************************************************************/
-{
-    return parseObjectives(sin);
-}
-
-/******************************************************************************/
-void XMLGenerator_UnitTester::publicParseService(std::istream &sin)
-/******************************************************************************/
-{
-    parseService(sin);
+    return XMLGen::parseTokens(buffer, tokens);
 }
 
 /******************************************************************************/
@@ -123,38 +96,45 @@ bool XMLGenerator_UnitTester::publicParseLoads(std::istream &sin)
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseTractionLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+void XMLGenerator_UnitTester::publicParseObjective(std::istream &sin)
 /******************************************************************************/
 {
-    return parseTractionLoad(tokens,new_load);
+    parseObjective(sin);
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParsePressureLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+void XMLGenerator_UnitTester::publicParseCriteria(std::istream &sin)
 /******************************************************************************/
 {
-    return parsePressureLoad(tokens,new_load);
+    parseCriteria(sin);
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseHeatFluxLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+void XMLGenerator_UnitTester::publicParseServices(std::istream &sin)
 /******************************************************************************/
 {
-    return parseHeatFluxLoad(tokens,new_load);
+    parseServices(sin);
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseForceLoad(std::vector<std::string>& tokens, XMLGen::Load& new_load)
+void XMLGenerator_UnitTester::publicParseScenarios(std::istream &sin)
 /******************************************************************************/
 {
-    return parseForceLoad(tokens,new_load);
+    parseScenarios(sin);
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
+void XMLGenerator_UnitTester::publicParseBCs(std::istream &sin)
 /******************************************************************************/
 {
-    return parseBCs(sin);
+    parseBoundaryConditions(sin);
+}
+
+/******************************************************************************/
+void XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
+/******************************************************************************/
+{
+    parseUncertainties(sin);
 }
 
 /******************************************************************************/
@@ -165,10 +145,10 @@ bool XMLGenerator_UnitTester::publicParseBlocks(std::istream &sin)
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseMaterials(std::istream &sin)
+void XMLGenerator_UnitTester::publicParseMaterials(std::istream &sin)
 /******************************************************************************/
 {
-    return parseMaterials(sin);
+    parseMaterials(sin);
 }
 
 /******************************************************************************/
@@ -179,31 +159,10 @@ bool XMLGenerator_UnitTester::publicParseCodePaths(std::istream &sin)
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseConstraints(std::istream &sin)
-/******************************************************************************/
-{
-    return parseConstraints(sin);
-}
-
-/******************************************************************************/
 bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
 /******************************************************************************/
 {
     return parseMesh(sin);
-}
-
-/******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &sin)
-/******************************************************************************/
-{
-    return parseOptimizationParameters(sin);
-}
-
-/******************************************************************************/
-bool XMLGenerator_UnitTester::publicParseUncertainties(std::istream &sin)
-/******************************************************************************/
-{
-    return parseUncertainties(sin);
 }
 
 /******************************************************************************/
@@ -214,75 +173,32 @@ bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables()
 }
 
 /******************************************************************************/
+bool XMLGenerator_UnitTester::publicParseOptimizationParameters(std::istream &sin)
+/******************************************************************************/
+{
+    return parseOptimizationParameters(sin);
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::clearInputData()
 /******************************************************************************/
 {
-    m_InputData.bcs.clear();
-    m_InputData.load_cases.clear();
-    m_InputData.objectives.clear();
-    m_InputData.constraints.clear();
-    m_InputData.materials.clear();
+    m_InputData.mesh.name="";
+    m_InputData.mesh.name_without_extension="";
     m_InputData.blocks.clear();
-    m_InputData.levelset_nodesets.clear();
-    m_InputData.fixed_block_ids.clear();
-    m_InputData.fixed_sideset_ids.clear();
-    m_InputData.fixed_nodeset_ids.clear();
-    m_InputData.filter_radius_scale="";
-    m_InputData.filter_radius_absolute="";
-    m_InputData.filter_power="";
-    m_InputData.num_opt_processors="";
-    m_InputData.output_frequency="";
-    m_InputData.output_method="";
-    m_InputData.max_iterations="";
-    m_InputData.discretization="";
-    m_InputData.volume_fraction="";
-    m_InputData.mesh_name="";
-    m_InputData.mesh_name_without_extension="";
-    m_InputData.plato_main_path="";
-    m_InputData.lightmp_path="";
-    m_InputData.sierra_sd_path="";
-    m_InputData.albany_path="";
-    m_InputData.optimization_algorithm="";
-    m_InputData.check_gradient="";
-    m_InputData.check_hessian="";
-    m_InputData.restart_iteration="";
-    m_InputData.initial_density_value="";
-    m_InputData.create_levelset_spheres="";
-    m_InputData.levelset_sphere_radius="";
-    m_InputData.levelset_sphere_packing_factor="";
-    m_InputData.levelset_initialization_method="";
-    m_InputData.levelset_material_box_min="";
-    m_InputData.levelset_material_box_max="";
-    m_InputData.mInnerKKTtoleranceGCMMA="";
-    m_InputData.mOuterKKTtoleranceGCMMA="";
-    m_InputData.mInnerControlStagnationToleranceGCMMA="";
-    m_InputData.mOuterControlStagnationToleranceGCMMA="";
-    m_InputData.mOuterObjectiveStagnationToleranceGCMMA="";
-    m_InputData.mMaxInnerIterationsGCMMA="";
-    m_InputData.mOuterStationarityToleranceGCMMA="";
-    m_InputData.mInitialMovingAsymptotesScaleFactorGCMMA="";
-    m_InputData.mMaxTrustRegionIterations="";
-    m_InputData.mTrustRegionExpansionFactor="";
-    m_InputData.mTrustRegionContractionFactor="";
-    m_InputData.mOuterGradientToleranceKS="";
-    m_InputData.mOuterStationarityToleranceKS="";
-    m_InputData.mOuterStagnationToleranceKS="";
-    m_InputData.mOuterControlStagnationToleranceKS="";
-    m_InputData.mOuterActualReductionToleranceKS="";
-    m_InputData.mTrustRegionRatioLowKS="";
-    m_InputData.mTrustRegionRatioMidKS="";
-    m_InputData.mTrustRegionRatioUpperKS="";
-    m_InputData.mDisablePostSmoothingKS="";
-    m_InputData.uncertainties.clear();
+    m_InputData.codepaths.plato_main_path="";
+    m_InputData.codepaths.lightmp_path="";
+    m_InputData.codepaths.sierra_sd_path="";
+    m_InputData.codepaths.albany_path="";
 }
 
 std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].app_type;
+            return m_InputData.ebcs[j].value("location_type");
         }
     }
     return "";
@@ -290,11 +206,11 @@ std::string XMLGenerator_UnitTester::getBCApplicationType(const std::string &aBC
 
 std::string XMLGenerator_UnitTester::getBCApplicationID(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].app_id;
+            return m_InputData.ebcs[j].value("location_name");
         }
     }
     return "";
@@ -302,87 +218,27 @@ std::string XMLGenerator_UnitTester::getBCApplicationID(const std::string &aBCID
 
 std::string XMLGenerator_UnitTester::getBCApplicationDOF(const std::string &aBCID)
 {
-    for(size_t j=0; j<m_InputData.bcs.size(); ++j)
+    for(size_t j=0; j<m_InputData.ebcs.size(); ++j)
     {
-        if(m_InputData.bcs[j].bc_id == aBCID)
+        if(m_InputData.ebcs[j].id() == aBCID)
         {
-            return m_InputData.bcs[j].dof;
+            return m_InputData.ebcs[j].value("degree_of_freedom");
         }
     }
     return "";
 }
 
-std::string XMLGenerator_UnitTester::getLoadType(const std::string &aLoadID, const int &aLoadIndex)
+std::string XMLGenerator_UnitTester::getNumberProcessors()
 {
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
+    std::string tReturn = "";
+    for(auto tService : m_InputData.services())
     {
-        if(m_InputData.load_cases[j].id == aLoadID)
+        // find the first platomain service
+        if(tService.code() == "platomain")
         {
-            return m_InputData.load_cases[j].loads[aLoadIndex].type;
+            tReturn = tService.numberProcessors();
+            break;
         }
     }
-    return "";
+    return tReturn;
 }
-
-std::string XMLGenerator_UnitTester::getLoadApplicationType(const std::string &aLoadID, const int &aLoadIndex)
-{
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
-    {
-        if(m_InputData.load_cases[j].id == aLoadID)
-        {
-            return m_InputData.load_cases[j].loads[aLoadIndex].app_type;
-        }
-    }
-    return "";
-}
-
-std::string XMLGenerator_UnitTester::getLoadApplicationID(const std::string &aLoadID, const int &aLoadIndex)
-{
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
-    {
-        if(m_InputData.load_cases[j].id == aLoadID)
-        {
-            return m_InputData.load_cases[j].loads[aLoadIndex].app_id;
-        }
-    }
-    return "";
-}
-
-std::string XMLGenerator_UnitTester::getLoadDirectionX(const std::string &aLoadID, const int &aLoadIndex)
-{
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
-    {
-        if(m_InputData.load_cases[j].id == aLoadID)
-        {
-            return m_InputData.load_cases[j].loads[aLoadIndex].values[0];
-        }
-    }
-    return "";
-}
-
-std::string XMLGenerator_UnitTester::getLoadDirectionY(const std::string &aLoadID, const int &aLoadIndex)
-{
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
-    {
-        if(m_InputData.load_cases[j].id == aLoadID)
-        {
-            return m_InputData.load_cases[j].loads[aLoadIndex].values[1];
-        }
-    }
-    return "";
-}
-
-std::string XMLGenerator_UnitTester::getLoadDirectionZ(const std::string &aLoadID, const int &aLoadIndex)
-{
-    for(size_t j=0; j<m_InputData.load_cases.size(); ++j)
-    {
-        if(m_InputData.load_cases[j].id == aLoadID)
-        {
-            return m_InputData.load_cases[j].loads[aLoadIndex].values[2];
-        }
-    }
-    return "";
-}
-
-
-

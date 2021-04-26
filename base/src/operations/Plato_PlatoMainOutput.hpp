@@ -106,6 +106,7 @@ private:
     int mOutputMethod; /*!< epu output data - distributed or serial */
     std::string mDiscretization; /*!< topology representation, density or levelset */
     bool mWriteRestart; /*!< flag - write restart file */
+    std::string mRestartFieldName; /*!< name of field to put in restart file */
     std::string mBaseName; /*!< output file base name */
     bool mAppendIterationCount; /*!< flag - append optimization iteration count */
     std::vector<std::string> mRequestedFormats; /*!< names of formats to write */

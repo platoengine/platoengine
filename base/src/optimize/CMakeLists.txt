@@ -139,6 +139,8 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_Vector.hpp
                         Plato_Diagnostics.hpp
                         Plato_DiagnosticsInterface.hpp
+                        Plato_SOParameterStudies.hpp
+                        Plato_SOParameterStudiesInterface.hpp
                         Plato_DistributedVector.hpp
                         Plato_OptimizerInterface.hpp
                         Plato_EpetraSerialDenseVector.hpp
@@ -155,10 +157,10 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         Plato_SromObjective.hpp
                         Plato_SromStatistics.hpp
                         Plato_SromLoadUtils.hpp
-                        Plato_SromXMLGenLoad.hpp
-                        Plato_SromXMLGenMaterial.hpp
-                        Plato_SromXMLGenTools.hpp
-                        Plato_SromXMLGenHelpers.hpp
+                        # Plato_SromXMLGenLoad.hpp
+                        # Plato_SromXMLGenMaterial.hpp
+                        # Plato_SromXMLGenTools.hpp
+                        # Plato_SromXMLGenHelpers.hpp
                         Plato_SromMaterialUtils.hpp
                         Plato_SromMetadata.hpp
                         Plato_SromProbDataStruct.hpp

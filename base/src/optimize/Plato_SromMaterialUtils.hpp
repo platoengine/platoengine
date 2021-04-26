@@ -52,6 +52,7 @@ inline void define_deterministic_material
     aOutMaterial.probability(1.0);
     aOutMaterial.blockID(aInMaterial.blockID());
     aOutMaterial.category(aInMaterial.category());
+    aOutMaterial.name(aInMaterial.name());
     aOutMaterial.materialID(aInMaterial.materialID());
     auto tDeterministicVars = aInMaterial.deterministicVars();
     for (auto& tVariable : tDeterministicVars)
@@ -145,6 +146,7 @@ inline void initialize_random_material_set
         Plato::srom::RandomMaterial tRandomMaterial;
         tRandomMaterial.blockID(aMaterial.blockID());
         tRandomMaterial.category(aMaterial.category());
+        tRandomMaterial.name(aMaterial.name());
         tRandomMaterial.materialID(aMaterial.materialID());
 
         auto tIndex = &tSample - &aSromVariable.mSampleProbPairs.mSamples[0];
@@ -189,6 +191,7 @@ inline void update_random_material_set
             Plato::srom::RandomMaterial tNewRandomMaterial;
             tNewRandomMaterial.blockID(aMaterial.blockID());
             tNewRandomMaterial.category(aMaterial.category());
+            tNewRandomMaterial.name(aMaterial.name());
             tNewRandomMaterial.materialID(aMaterial.materialID());
 
             auto tIndex = std::distance(tBeginItr, tItr);
@@ -201,7 +204,7 @@ inline void update_random_material_set
             auto tOriginalTags = tOriginalRandomMaterial.tags();
             for(auto& tTag : tOriginalTags)
             {
-                auto tValue = tOriginalRandomMaterial.value(tTag);
+                tValue = tOriginalRandomMaterial.value(tTag);
                 auto tAttribute = tOriginalRandomMaterial.attribute(tTag);
                 tNewRandomMaterial.append(tTag, tAttribute, tValue);
             }
@@ -351,7 +354,7 @@ inline void update_random_material_cases
             auto tOriginalMaterials = tOriginalRandomMaterialCase.materials();
             for(auto& tMaterial : tOriginalMaterials)
             {
-                auto tID = tMaterial.materialID();
+                tID = tMaterial.materialID();
                 tNewRandomMaterialCase.append(tID, tMaterial);
             }
 

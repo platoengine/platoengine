@@ -83,24 +83,34 @@ std::string Service::code() const
     return (this->getValue("code"));
 }
 
-void Service::performer(const std::string& aInput)
+void Service::deviceIDs(const std::vector<std::string>& aInput)
 {
-    mMetaData["performer"] = aInput;
+    mDeviceIDs = aInput;
 }
 
-std::string Service::performer() const
+std::vector<std::string> Service::deviceIDs() const
 {
-    return (this->getValue("performer"));
+    return mDeviceIDs;
 }
 
-void Service::physics(const std::string& aInput)
+void Service::numberRanks(const std::string& aInput)
 {
-    mMetaData["physics"] = aInput;
+    mMetaData["number_ranks"] = aInput;
 }
 
-std::string Service::physics() const
+std::string Service::numberRanks() const
 {
-    return (this->getValue("physics"));
+    return (this->getValue("number_ranks"));
+}
+
+void Service::numberProcessors(const std::string& aInput)
+{
+    mMetaData["number_processors"] = aInput;
+}
+
+std::string Service::numberProcessors() const
+{
+    return (this->getValue("number_processors"));
 }
 
 void Service::dimensions(const std::string& aInput)
@@ -143,26 +153,6 @@ std::string Service::additiveContinuation() const
     return (this->getValue("additive_continuation"));
 }
 
-void Service::timeStep(const std::string& aInput)
-{
-    mMetaData["time_step"] = aInput;
-}
-
-std::string Service::timeStep() const
-{
-    return (this->getValue("time_step"));
-}
-
-void Service::numTimeSteps(const std::string& aInput)
-{
-    mMetaData["number_time_steps"] = aInput;
-}
-
-std::string Service::numTimeSteps() const
-{
-    return (this->getValue("number_time_steps"));
-}
-
 void Service::maxNumTimeSteps(const std::string& aInput)
 {
     mMetaData["max_number_time_steps"] = aInput;
@@ -183,34 +173,24 @@ std::string Service::timeStepExpansion() const
     return (this->getValue("time_step_expansion_multiplier"));
 }
 
-void Service::newmarkBeta(const std::string& aInput)
+void Service::newtonSolverTolerance(const std::string& aInput)
 {
-    mMetaData["newmark_beta"] = aInput;
+    mMetaData["newton_solver_tolerance"] = aInput;
 }
 
-std::string Service::newmarkBeta() const
+std::string Service::newtonSolverTolerance() const
 {
-    return (this->getValue("newmark_beta"));
+    return (this->getValue("newton_solver_tolerance"));
 }
 
-void Service::newmarkGamma(const std::string& aInput)
+void Service::linearSolverTolerance(const std::string& aInput)
 {
-    mMetaData["newmark_gamma"] = aInput;
+    mMetaData["linear_solver_tolerance"] = aInput;
 }
 
-std::string Service::newmarkGamma() const
+std::string Service::linearSolverTolerance() const
 {
-    return (this->getValue("newmark_gamma"));
-}
-
-void Service::solverTolerance(const std::string& aInput)
-{
-    mMetaData["tolerance"] = aInput;
-}
-
-std::string Service::solverTolerance() const
-{
-    return (this->getValue("tolerance"));
+    return (this->getValue("linear_solver_tolerance"));
 }
 
 void Service::solverConvergenceCriterion(const std::string& aInput)
@@ -233,6 +213,11 @@ std::string Service::solverMaxNumIterations() const
     return (this->getValue("max_number_iterations"));
 }
 
+std::string Service::performer() const
+{
+    return (code() + "_" + id());
+}
+
 void Service::cacheState(const std::string& aInput)
 {
     mMetaData["cache_state"] = aInput;
@@ -251,16 +236,6 @@ void Service::updateProblem(const std::string& aInput)
 bool Service::updateProblem() const
 {
     return (this->getBool("update_problem"));
-}
-
-void Service::useNewAnalyzeUQWorkflow(const std::string& aInput)
-{
-    mMetaData["use_new_analyze_uq_workflow"] = aInput;
-}
-
-bool Service::useNewAnalyzeUQWorkflow() const
-{
-    return (this->getBool("use_new_analyze_uq_workflow"));
 }
 
 }

@@ -1,0 +1,30 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 09/24/2020 11:39:27 AM
+## Command Options:
+#{height=1.2}
+#{width=3.0}
+#{thick=0.5}
+#{mesh_size=0.1}
+create brick x {width} y {height} z {thick}
+create cylinder height {height} radius {thick/6.0}
+rotate volume 2 about x angle 90
+move volume 2 x {3.0*width/8.0}
+webcut volume 1 with tool volume 2
+move volume 2 x {-3.0*width/4.0}
+webcut volume 1 with tool volume 2
+delete volume 2
+imprint volume all
+merge volume all
+volume all scheme tetmesh
+volume all size {mesh_size}
+mesh volume all
+block 1 volume all
+block 1 name "design_volume"
+sideset 1 surface 14 20
+sideset 1 name "fixed"
+sideset 2 surface 18 21 15
+sideset 2 name "load"
+export mesh "arch.exo" overwrite

@@ -26,7 +26,7 @@
       <Parameter name='Newmark Gamma' type='double' value='0.5'/>
       <Parameter name='Newmark Beta' type='double' value='0.25'/>
       <Parameter name="Number Time Steps" type="int" value="10"/>
-      <Parameter name="Time Step" type="double" value="2.0e-6"/>
+      <Parameter name="Time Step" type="double" value="5.0e-6"/>
     </ParameterList>
 
     <ParameterList name="Hyperbolic">

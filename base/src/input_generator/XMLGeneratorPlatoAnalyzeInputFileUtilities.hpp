@@ -132,6 +132,18 @@ void append_self_adjoint_parameter_to_plato_problem
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn get_ebc_vector_for_scenario
+ * \brief Utility function to retrieve the ebcs used in a scenario
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aScenario The scenario of interest
+ * \param [out]    aEBCVector  EBC vector to populate
+**********************************************************************************/
+void get_ebc_vector_for_scenario
+(const XMLGen::InputData& aXMLMetaData,
+ const XMLGen::Scenario &aScenario,
+ std::vector<XMLGen::EssentialBoundaryCondition> &aEBCVector);
+
+/******************************************************************************//**
  * \fn append_weighted_sum_objective_to_plato_problem
  * \brief Append weighted sum objective function to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
@@ -146,10 +158,12 @@ void append_weighted_sum_objective_to_plato_problem
  * \brief Append criterion function parameters to weighted sum objective parameter \n
  * list inside the plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aObjectiveFunctions list of objective criterion function names
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_functions_to_weighted_sum_objective
 (const XMLGen::InputData& aXMLMetaData,
+ const std::vector<std::string> &aObjectiveFunctions,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -169,7 +183,7 @@ void append_weights_to_weighted_sum_objective
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_objective_criteria_to_plato_problem
+pugi::xml_node append_objective_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -199,7 +213,7 @@ void append_criteria_list_to_plato_analyze_input_deck
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_constraint_criteria_to_plato_problem
+pugi::xml_node append_constraint_criteria_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
@@ -218,10 +232,12 @@ void append_weighted_sum_constraint_to_plato_problem
  * \brief Append criterion function parameters to weighted sum constraint parameter \n
  * list inside the plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in]     aConstraintFunctions list of contraint functions
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_functions_to_weighted_sum_constraint
 (const XMLGen::InputData& aXMLMetaData,
+ const std::vector<std::string> &aConstraintFunctions,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -256,13 +272,23 @@ void append_physics_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
- * \fn append_material_model_to_plato_problem
- * \brief Append material model to plato problem parameter list.
+ * \fn append_spatial_model_to_plato_problem
+ * \brief Append spatial model to plato problem parameter list.
  * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
-void append_material_model_to_plato_problem
+void append_spatial_model_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_material_model_to_plato_problem
+ * \brief Append material model to plato problem parameter list.
+ * \param [in]     aMaterials List of materials
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_material_model_to_plato_problem
+(const std::vector<XMLGen::Material>& aMaterials,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -286,13 +312,25 @@ void append_spatial_model_to_plato_analyze_input_deck
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
+ * \fn append_material_model_to_plato_analyze_input_deck
+ * \brief Append material model to problem parameter list.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_material_model_to_plato_analyze_input_deck
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
  * \fn append_natural_boundary_conditions_to_plato_problem
  * \brief Append natural boundary condition to plato problem parameter list.
- * \param [in]     aLoadCase    load case metadata
+ * \param [in]     aPhysics     name of the current physics
+ * \param [in]     aLoadCase    loads relating to the current scenario
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_natural_boundary_conditions_to_plato_problem
-(const XMLGen::LoadCase& aLoadCase,
+(const std::string &aPhysics,
+ const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
  pugi::xml_node& aParentNode);
 
 /******************************************************************************//**
@@ -343,5 +381,55 @@ void append_essential_boundary_conditions_to_plato_analyze_input_deck
 void write_plato_analyze_input_deck_file
 (const XMLGen::InputData& aXMLMetaData);
 
+/******************************************************************************//**
+ * \fn get_nbc_parent_node
+ * \brief get the appropiate nbc parent node	
+ * \param [in] aPhysics String indicating the physics
+ * \param [in] aLoad Current load/NBC being added
+ * \param [in] aParentNodes List of potential parent nodes
+**********************************************************************************/
+void get_nbc_parent_node
+(const std::string &aPhysics,
+ const XMLGen::NaturalBoundaryCondition &aLoad,
+ const std::vector<pugi::xml_node> &aParentNodes,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
+ * \fn create_natural_boundary_condition_parent_nodes
+ * \brief create the natural boundary condition parent nodes for the current physics
+ * \param [in] tScenario The current scenario
+ * \param [in] aParentNode Parent node that will contain the NBC blocks
+ * \param [in/out] tParentNodes List of parent nodes created by this function
+**********************************************************************************/
+void create_natural_boundary_condition_parent_nodes
+(const XMLGen::Scenario &aScenario,
+ pugi::xml_node &aParentNode,
+ std::vector<pugi::xml_node> &aParentNodes);
+
+/******************************************************************************//**
+ * \fn get_plato_analyze_service_id
+ * \brief get the id of the service for the performer used in objective or constraint
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+std::string get_plato_analyze_service_id
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn get_scenario_list_from_objectives_and_constraints
+ * \brief get the list of scenarios relevant to this plato analyze performer
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void get_scenario_list_from_objectives_and_constraints
+(const XMLGen::InputData& aXMLMetaData,
+ std::vector<XMLGen::Scenario>& aScenarioList);
+
+/******************************************************************************//**
+ * \fn get_essential_boundary_condition_block_title
+ * \brief get the title for the essential boundary condition block based on the physics
+ * \param [in] aScenario Scenario input data
+**********************************************************************************/
+std::string get_essential_boundary_condition_block_title(XMLGen::Scenario &aScenario);
+
 }
+
 // namespace XMLGen

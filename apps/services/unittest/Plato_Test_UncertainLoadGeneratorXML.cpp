@@ -354,9 +354,9 @@ TEST(PlatoTest, random_sample_initial_guess)
     Plato::StandardMultiVector<double> tUpper(tNumVectors, tNumSamples, 1.0);
     Plato::StandardMultiVector<double> tGuess(tNumVectors, tNumSamples, 0.0);
     Plato::random_sample_initial_guess(tLower, tUpper, tGuess);
-    for (decltype(tNumVectors) tDim; tDim < tNumVectors; tDim++)
+    for (decltype(tNumVectors) tDim=0; tDim < tNumVectors; tDim++)
     {
-        for (decltype(tNumSamples) tSample; tSample < tNumSamples; tSample++)
+        for (decltype(tNumSamples) tSample=0; tSample < tNumSamples; tSample++)
         {
             EXPECT_TRUE(tGuess(tDim, tSample) >= 0.0);
             EXPECT_TRUE(tGuess(tDim, tSample) <= 1.0);
@@ -2516,147 +2516,5 @@ TEST(PlatoTest, generate_load_sroms_only_random_loads)
     Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
-TEST(PlatoTest, expand_load_cases)
-{
-    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    std::vector<XMLGen::LoadCase> tLoadCases;
-    XMLGen::LoadCase tLC1;
-    XMLGen::Load tL1;
-    tLC1.id = "2";
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL1);
-    tLoadCases.push_back(tLC1);
-    tLC1.id = "4";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL1);
-    tLoadCases.push_back(tLC1);
-    tLC1.id = "6";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL1);
-    tLoadCases.push_back(tLC1);
-    tLC1.id = "10";
-    tLC1.loads.clear();
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL1);
-    tLoadCases.push_back(tLC1);
-    std::vector<XMLGen::LoadCase> tNewLoadCases;
-    Plato::srom::expand_load_cases(tLoadCases, tNewLoadCases, tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCases.size(), 9u);
-    ASSERT_STREQ(tNewLoadCases[0].id.c_str(), "2");
-    ASSERT_STREQ(tNewLoadCases[1].id.c_str(), "1");
-    ASSERT_STREQ(tNewLoadCases[2].id.c_str(), "3");
-    ASSERT_STREQ(tNewLoadCases[3].id.c_str(), "4");
-    ASSERT_STREQ(tNewLoadCases[4].id.c_str(), "5");
-    ASSERT_STREQ(tNewLoadCases[5].id.c_str(), "7");
-    ASSERT_STREQ(tNewLoadCases[6].id.c_str(), "6");
-    ASSERT_STREQ(tNewLoadCases[7].id.c_str(), "10");
-    ASSERT_STREQ(tNewLoadCases[8].id.c_str(), "8");
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 0);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 2);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][0], 3);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][1], 4);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[4][2], 5);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[6][0], 6);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[10][0], 7);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[10][1], 8);
-}
-
-TEST(PlatoTest, initialize_load_id_counter)
-{
-    std::vector<XMLGen::LoadCase> tLoadCases;
-    XMLGen::LoadCase tLC1;
-    tLC1.id = "3";
-    tLoadCases.push_back(tLC1);
-    Plato::UniqueCounter tUniqueLoadIDCounter;
-    Plato::srom::initialize_load_id_counter(tLoadCases, tUniqueLoadIDCounter);
-    int tID = tUniqueLoadIDCounter.assignNextUnique();
-    ASSERT_EQ(tID, 1);
-    tID = tUniqueLoadIDCounter.assignNextUnique();
-    ASSERT_EQ(tID, 2);
-    tID = tUniqueLoadIDCounter.assignNextUnique();
-    ASSERT_EQ(tID, 4);
-}
-
-TEST(PlatoTest, expand_single_load_case)
-{
-    // Check case of single load case with single load
-    std::map<int, std::vector<int> > tOriginalToNewLoadCaseMap;
-    XMLGen::LoadCase tOldLoadCase;
-    tOldLoadCase.id = "88";
-    XMLGen::Load tLoad1;
-    tLoad1.app_id = "34";
-    tLoad1.app_type = "nodeset";
-    tLoad1.type = "traction";
-    tLoad1.values.push_back("0.0");
-    tLoad1.values.push_back("1.0");
-    tLoad1.values.push_back("33");
-    tLoad1.load_id = "89";
-    tOldLoadCase.loads.push_back(tLoad1);
-    Plato::UniqueCounter tUniqueLoadIDCounter;
-    tUniqueLoadIDCounter.mark(0);
-    tUniqueLoadIDCounter.mark(88);
-    std::vector<XMLGen::LoadCase> tNewLoadCaseList;
-    Plato::srom::expand_single_load_case(tOldLoadCase,tNewLoadCaseList,tUniqueLoadIDCounter,
-                                   tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCaseList.size(), 1u);
-    ASSERT_STREQ(tNewLoadCaseList[0].id.c_str(), "88");
-    ASSERT_EQ(tNewLoadCaseList[0].loads.size(), 1u);
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].load_id.c_str(), "89");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].values[1].c_str(), "1.0");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].values[0].c_str(), "0.0");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].values[2].c_str(), "33");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].type.c_str(), "traction");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_type.c_str(), "nodeset");
-    ASSERT_STREQ(tNewLoadCaseList[0].loads[0].app_id.c_str(), "34");
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][0], 0);
-    // Check the case where a load case has more than one load
-    XMLGen::Load tLoad2;
-    tLoad2.app_id = "21";
-    tLoad2.app_type = "sideset";
-    tLoad2.type = "pressure";
-    tLoad2.values.push_back("44");
-    tLoad2.values.push_back("55");
-    tLoad2.values.push_back("66");
-    tLoad2.load_id = "101";
-    tOldLoadCase.loads.push_back(tLoad2);
-    std::vector<XMLGen::LoadCase> tNewLoadCaseList2;
-    tOriginalToNewLoadCaseMap.clear();
-    Plato::srom::expand_single_load_case(tOldLoadCase,tNewLoadCaseList2,tUniqueLoadIDCounter,
-                                   tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewLoadCaseList2.size(), 2u);
-    ASSERT_STREQ(tNewLoadCaseList2[1].id.c_str(), "1");
-    ASSERT_STREQ(tNewLoadCaseList2[0].id.c_str(), "88");
-    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].values[1].c_str(), "55");
-    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].values[0].c_str(), "44");
-    ASSERT_STREQ(tNewLoadCaseList2[1].loads[0].values[2].c_str(), "66");
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][0], 0);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[88][1], 1);
-    // Check case where load case with multiple loads is is split and the ids of the resulting
-    // load cases have to "straddle" original load case id
-    XMLGen::LoadCase tLC1;
-    tLC1.id = "2";
-    XMLGen::Load tL1, tL2, tL3;
-    tLC1.loads.push_back(tL1);
-    tLC1.loads.push_back(tL2);
-    tLC1.loads.push_back(tL3);
-    Plato::UniqueCounter tIDCounter;
-    tIDCounter.mark(0);
-    tIDCounter.mark(2);
-    std::vector<XMLGen::LoadCase> tNewList;
-    tOriginalToNewLoadCaseMap.clear();
-    Plato::srom::expand_single_load_case(tLC1,tNewList,tIDCounter,
-                                   tOriginalToNewLoadCaseMap);
-    ASSERT_EQ(tNewList.size(), 3u);
-    ASSERT_STREQ(tNewList[0].id.c_str(), "2");
-    ASSERT_STREQ(tNewList[1].id.c_str(), "1");
-    ASSERT_STREQ(tNewList[2].id.c_str(), "3");
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][0], 0);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][1], 1);
-    ASSERT_EQ(tOriginalToNewLoadCaseMap[2][2], 2);
-}
 
 }

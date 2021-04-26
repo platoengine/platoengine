@@ -43,7 +43,7 @@ public:
      * \param [in] aBC essential boundary condition metadata
      * \return essential boundary condition tag
     **********************************************************************************/
-    std::string call(const XMLGen::BC& aBC) const;
+    std::string call(const XMLGen::EssentialBoundaryCondition& aBC) const;
 };
 // struct EssentialBoundaryConditionTag
 

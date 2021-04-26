@@ -24,26 +24,26 @@ void ParseOutput::allocate()
     mTags.insert({ "output_samples", { { {"output_samples"}, ""}, "false" } });
 }
 
-void ParseOutput::setParameters()
+void ParseOutput::setParameters(XMLGen::Output &aOutput)
 {
     for(auto& tTag : mTags)
     {
         if(tTag.second.first.second.empty())
         {
             auto tDefaultValue = tTag.second.second;
-            mData.appendParam(tTag.first, tDefaultValue);
+            aOutput.appendParam(tTag.first, tDefaultValue);
         }
         else
         {
             auto tInputValue = tTag.second.first.second;
-            mData.appendParam(tTag.first, tInputValue);
+            aOutput.appendParam(tTag.first, tInputValue);
         }
     }
 }
 
-void ParseOutput::checkOutputData()
+void ParseOutput::checkOutputData(XMLGen::Output &aOutput)
 {
-    if(!mData.isDeterministicMapEmpty() && !mData.isRandomMapEmpty())
+    if(!aOutput.isDeterministicMapEmpty() && !aOutput.isRandomMapEmpty())
     {
         THROWERR("Parse Output: Invalid use case - 'statistics' and 'data' keywords cannot be used simultaneously.")
     }
@@ -59,64 +59,62 @@ void ParseOutput::checkService()
     }
 }
 
-void ParseOutput::checkMetaData()
+void ParseOutput::checkMetaData(XMLGen::Output &aOutput)
 {
     this->checkService();
-    this->checkOutputData();
+    this->checkOutputData(aOutput);
 }
 
-void ParseOutput::setRandomQoI()
+void ParseOutput::setRandomQoI(XMLGen::Output &aOutput)
 {
     auto tItr = mTags.find("statistics");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputToLayoutKeys tValidKeys;
-        std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.first.second, tTokens);
-        for (auto &tToken : tTokens)
+        std::vector<std::string> tOutputQoIs;
+        XMLGen::split(tItr->second.first.second, tOutputQoIs);
+        for (auto& tOutputQoI : tOutputQoIs)
         {
-            auto tLowerToken = Plato::tolower(tToken);
-            auto tItr = tValidKeys.mKeys.find(tLowerToken);
-            if(tItr == tValidKeys.mKeys.end())
+            auto tLayout = tValidKeys.value(tOutputQoI);
+            if(tLayout.empty())
             {
-                THROWERR(std::string("Parse Output: Output random quantity of interest with tag '")
-                    + tLowerToken + "' is not supported.")
+                THROWERR(std::string("Parse Output: Output random quantity of interest with tag '") + tOutputQoI + "' is not supported.")
             }
-            mData.appendRandomQoI(tItr->first, tItr->second);
+            auto tLowertOutputQoI = Plato::tolower(tOutputQoI);
+            aOutput.appendRandomQoI(tLowertOutputQoI, tLayout);
         }
     }
 }
 
-void ParseOutput::setDeterministicQoI()
+void ParseOutput::setDeterministicQoI(XMLGen::Output &aOutput)
 {
     auto tItr = mTags.find("data");
     if (tItr != mTags.end() && !tItr->second.first.second.empty())
     {
         XMLGen::ValidOutputToLayoutKeys tValidKeys;
-        std::vector<std::string> tTokens;
-        XMLGen::split(tItr->second.first.second, tTokens);
-        for (auto &tToken : tTokens)
+        std::vector<std::string> tOutputQoIs;
+        XMLGen::split(tItr->second.first.second, tOutputQoIs);
+        for (auto& tOutputQoI : tOutputQoIs)
         {
-            auto tLowerToken = Plato::tolower(tToken);
-            auto tItr = tValidKeys.mKeys.find(tLowerToken);
-            if(tItr == tValidKeys.mKeys.end())
+            auto tLayout = tValidKeys.value(tOutputQoI);
+            if(tLayout.empty())
             {
-                THROWERR(std::string("Parse Output: Output quantity of interest with tag '")
-                    + tLowerToken + "' is not supported.")
+                THROWERR(std::string("Parse Output: Output quantity of interest with tag '") + tOutputQoI + "' is not supported.")
             }
-            mData.appendDeterminsiticQoI(tItr->first, tItr->second);
+            auto tLowerToken = Plato::tolower(tOutputQoI);
+            aOutput.appendDeterminsiticQoI(tLowerToken, tLayout);
         }
     }
 }
 
-void ParseOutput::setMetaData()
+void ParseOutput::setMetaData(XMLGen::Output &aOutput)
 {
-    this->setParameters();
-    this->setRandomQoI();
-    this->setDeterministicQoI();
+    this->setParameters(aOutput);
+    this->setRandomQoI(aOutput);
+    this->setDeterministicQoI(aOutput);
 }
 
-XMLGen::Output ParseOutput::data() const
+std::vector<XMLGen::Output> ParseOutput::data() const
 {
     return mData;
 }
@@ -137,9 +135,11 @@ void ParseOutput::parse(std::istream &aInputFile)
         std::string tTag;
         if (XMLGen::parse_single_value(tTokens, { "begin", "output" }, tTag))
         {
+            XMLGen::Output tOutput;
             XMLGen::parse_input_metadata( { "end", "output" }, aInputFile, mTags);
-            this->setMetaData();
-            this->checkMetaData();
+            this->setMetaData(tOutput);
+            this->checkMetaData(tOutput);
+            mData.push_back(tOutput);
         }
     }
 }

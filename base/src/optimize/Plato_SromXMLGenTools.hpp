@@ -22,7 +22,7 @@ namespace srom
 **********************************************************************************/
 inline void check_output(const XMLGen::RandomMetaData& aMetaData)
 {
-    Plato::srom::check_output_load_set_size(aMetaData);
+//    Plato::srom::check_output_load_set_size(aMetaData);
     Plato::srom::check_output_load_set_types(aMetaData);
     Plato::srom::check_output_load_set_application_name(aMetaData);
 }

@@ -4,68 +4,65 @@
 
 <Operation>
   <Name>Compute Constraint Sensitivity</Name>
-  <Function>MapConstraintGradientX</Function>
-  <Input>
-    <Argument>Gradient</ArgumentName>
-    <ArgumentName>Criterion Gradient</ArgumentName>
-  </Input>
+  <Function>MapCriterionGradientX</Function>
+  <Criterion>Volume</Criterion>
   <For var="I" in="Parameters">
   <Input>
     <ArgumentName>Parameter Sensitivity {I}</ArgumentName>
   </Input>
   </For>
   <Output>
-    <ArgumentName>Constraint Sensitivity</ArgumentName>
+    <ArgumentName>Criterion Sensitivity</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
   <Name>Compute Objective Sensitivity</Name>
-  <Function>MapObjectiveGradientX</Function>
+  <Function>MapCriterionGradientX</Function>
+  <Criterion>Internal Energy</Criterion>
   <For var="I" in="Parameters">
   <Input>
     <ArgumentName>Parameter Sensitivity {I}</ArgumentName>
   </Input>
   </For>
   <Output>
-    <ArgumentName>Objective Sensitivity</ArgumentName>
+    <ArgumentName>Criterion Sensitivity</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
   <Name>Compute Objective Value</Name>
-  <Function>ComputeObjectiveValue</Function>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Internal Energy</Criterion>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Objective Value</ArgumentName>
   </Output>
 </Operation>
 
 <Operation>
   <Name>Compute Constraint Gradient</Name>
-  <Function>ComputeConstraintX</Function>
+  <Function>ComputeCriterionX</Function>
+  <Criterion>Volume</Criterion>
   <!-- no output needed -->
 </Operation>
 
 <Operation>
   <Name>Compute Objective Gradient</Name>
-  <Function>ComputeObjectiveX</Function>
+  <Function>ComputeCriterionX</Function>
+  <Criterion>Internal Energy</Criterion>
   <!-- no output needed -->
 </Operation>
 
 <Operation>
   <Name>Compute Constraint Value</Name>
-  <Function>ComputeConstraintValue</Function>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Volume</Criterion>
   <Output>
+    <Argument>Value</Argument>
     <ArgumentName>Constraint Value</ArgumentName>
   </Output>
 </Operation>
-
-<!--
-<Operation>
-  <Name>Compute Constraint Gradient</Name>
-  <Function>ComputeConstraintGradientP</Function>
-</Operation>
--->
 
 <Operation>
   <Name>Reinitialize on Change</Name>
@@ -77,10 +74,3 @@
   </Input>
 </Operation>
 
-<!--
-<ESP>
-  <Name>Design Geometry</Name>
-  <ModelFileName>rocker.csm</ModelFileName>
-  <TessFileName>rocker.eto</TessFileName>
-</ESP>
--->

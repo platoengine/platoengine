@@ -58,8 +58,8 @@ namespace ServicesPython
 
 class SharedData {
   public:
-    SharedData(Plato::data::layout_t layout, int size, double initVal=0.0 ) :
-      m_data(size,initVal), m_layout(layout){}
+    SharedData(Plato::data::layout_t layout, int size, double initVal=0.0, std::string name=std::string() ) :
+      m_data(size,initVal), m_layout(layout), m_name(name) {}
 
     void setData(const std::vector<double> & aData)
     {
@@ -72,6 +72,10 @@ class SharedData {
     int size() const
     {
       return m_data.size();
+    }
+    std::string myName() const
+    {
+      return m_name;
     }
 
     std::string myContext() const {return m_context;}
@@ -88,6 +92,7 @@ class SharedData {
     std::vector<double> m_data;
     Plato::data::layout_t m_layout;
     std::string m_context;
+    std::string m_name;
 };
 class NodeField : public SharedData
 {

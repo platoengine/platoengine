@@ -93,20 +93,20 @@ std::string Output::serviceID() const
 
 void Output::appendRandomQoI(const std::string& aID, const std::string& aDataLayout)
 {
-    auto tLowerID = XMLGen::check_output_keyword(aID);
+    auto tLowerOutputID = XMLGen::check_output_keyword(aID);
     auto tLowerLayout = XMLGen::check_data_layout_keyword(aDataLayout);
-    auto tArgumentName = tLowerID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    auto tSharedDataName = tLowerID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
-    mRandomQoIs[tLowerID] =
+    auto tArgumentName = tLowerOutputID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    auto tSharedDataName = tLowerOutputID + " {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
+    mRandomQoIs[tLowerOutputID] =
         { {"ArgumentName", tArgumentName}, {"SharedDataName", tSharedDataName}, {"DataLayout", tLowerLayout} };
 }
 
 void Output::appendDeterminsiticQoI(const std::string& aID, const std::string& aDataLayout)
 {
-    auto tValidOutputKeyword = XMLGen::check_output_keyword(aID);
+    auto tValidOutputID = XMLGen::check_output_keyword(aID);
     auto tValidLayout = XMLGen::check_data_layout_keyword(aDataLayout);
-    mDeterministicQoIs[tValidOutputKeyword] =
-        { {"ArgumentName", tValidOutputKeyword}, {"SharedDataName", tValidOutputKeyword}, {"DataLayout", tValidLayout} };
+    mDeterministicQoIs[tValidOutputID] =
+        { {"ArgumentName", tValidOutputID}, {"SharedDataName", tValidOutputID}, {"DataLayout", tValidLayout} };
 }
 
 std::string Output::randomLayout(const std::string& aID) const
