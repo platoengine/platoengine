@@ -515,6 +515,29 @@ void write_plato_analyze_operation_xml_file
 /******************************************************************************/
 void write_amgx_input_file(const XMLGen::InputData& aMetaData)
 {
+    std::vector<XMLGen::Scenario> tScenarios = aMetaData.scenarios();
+    bool tAtLeastOneScenarioIncludesPlasticity       = false;
+    bool tAtLeastOneScenarioIncludesThermoplasticity = false;
+    for (unsigned int tIndex = 0; tIndex < tScenarios.size(); ++tIndex)
+    {
+        if (tScenarios[tIndex].physics() == "plasticity")
+            tAtLeastOneScenarioIncludesPlasticity = true;
+        else if (tScenarios[tIndex].physics() == "thermoplasticity")
+            tAtLeastOneScenarioIncludesThermoplasticity = true;
+    }
+    
+    if (tAtLeastOneScenarioIncludesThermoplasticity)
+        XMLGen::write_amgx_input_file_for_thermoplasticity(aMetaData);
+    else if (tAtLeastOneScenarioIncludesPlasticity)
+        XMLGen::write_amgx_input_file_for_plasticity(aMetaData);
+    else
+        XMLGen::write_default_amgx_input_file(aMetaData);
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void write_default_amgx_input_file(const XMLGen::InputData& aMetaData)
+{
     FILE *tFilePointer = fopen("amgx.json", "w");
     if(tFilePointer)
     {
@@ -550,6 +573,130 @@ void write_amgx_input_file(const XMLGen::InputData& aMetaData)
         fprintf(tFilePointer, "\"cycle\": \"W\"\n");
         fprintf(tFilePointer, "},\n");
         fprintf(tFilePointer, "\"solver\": \"PBICGSTAB\",\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0,\n");
+        fprintf(tFilePointer, "\"obtain_timings\": 0,\n");
+        fprintf(tFilePointer, "\"max_iters\": 1000,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 1,\n");
+        fprintf(tFilePointer, "\"convergence\": \"ABSOLUTE\",\n");
+        fprintf(tFilePointer, "\"scope\": \"main\",\n");
+
+        std::string tTolerance = "1e-12";
+        std::string tScenarioID = aMetaData.objective.scenarioIDs[0];
+        auto &tScenario = aMetaData.scenario(tScenarioID);
+        if(tScenario.solverTolerance().length() > 0)
+            tTolerance = tScenario.solverTolerance();
+
+        fprintf(tFilePointer, "\"tolerance\": %s,\n", tTolerance.c_str());
+        fprintf(tFilePointer, "\"norm\": \"L2\"\n");
+        fprintf(tFilePointer, "}\n");
+        fprintf(tFilePointer, "}\n");
+        fclose(tFilePointer);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void write_amgx_input_file_for_plasticity(const XMLGen::InputData& aMetaData)
+{
+    FILE *tFilePointer = fopen("amgx.json", "w");
+    if(tFilePointer)
+    {
+        fprintf(tFilePointer, "{\n");
+        fprintf(tFilePointer, "\"config_version\": 2,\n");
+        fprintf(tFilePointer, "\"solver\": {\n");
+        fprintf(tFilePointer, "\"preconditioner\": {\n");
+        fprintf(tFilePointer, "\"print_grid_stats\": 1,\n");
+        fprintf(tFilePointer, "\"algorithm\": \"AGGREGATION\",\n");
+        fprintf(tFilePointer, "\"print_vis_data\": 0,\n");
+        fprintf(tFilePointer, "\"max_matching_iterations\": 50,\n");
+        fprintf(tFilePointer, "\"max_unassigned_percentage\": 0.01,\n");
+        fprintf(tFilePointer, "\"solver\": \"AMG\",\n");
+        fprintf(tFilePointer, "\"smoother\": {\n");
+        fprintf(tFilePointer, "\"relaxation_factor\": 0.78,\n");
+        fprintf(tFilePointer, "\"scope\": \"jacobi\",\n");
+        fprintf(tFilePointer, "\"solver\": \"MULTICOLOR_GS\",\n");
+        fprintf(tFilePointer, "\"symmetric_GS\": 1,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 0,\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0\n");
+        fprintf(tFilePointer, "},\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0,\n");
+        fprintf(tFilePointer, "\"dense_lu_num_rows\": 128,\n");
+        fprintf(tFilePointer, "\"presweeps\": 1,\n");
+        fprintf(tFilePointer, "\"selector\": \"SIZE_8\",\n");
+        fprintf(tFilePointer, "\"coarse_solver\": \"DENSE_LU_SOLVER\",\n");
+        fprintf(tFilePointer, "\"coarsest_sweeps\": 2,\n");
+        fprintf(tFilePointer, "\"max_iters\": 1,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 0,\n");
+        fprintf(tFilePointer, "\"store_res_history\": 0,\n");
+        fprintf(tFilePointer, "\"scope\": \"amg\",\n");
+        fprintf(tFilePointer, "\"max_levels\": 100,\n");
+        fprintf(tFilePointer, "\"postsweeps\": 1,\n");
+        fprintf(tFilePointer, "\"cycle\": \"W\"\n");
+        fprintf(tFilePointer, "},\n");
+        fprintf(tFilePointer, "\"solver\": \"FGMRES\",\n");
+        fprintf(tFilePointer, "\"gmres_n_restart\": 1000,\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0,\n");
+        fprintf(tFilePointer, "\"obtain_timings\": 0,\n");
+        fprintf(tFilePointer, "\"max_iters\": 1000,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 1,\n");
+        fprintf(tFilePointer, "\"convergence\": \"ABSOLUTE\",\n");
+        fprintf(tFilePointer, "\"scope\": \"main\",\n");
+
+        std::string tTolerance = "1e-12";
+        std::string tScenarioID = aMetaData.objective.scenarioIDs[0];
+        auto &tScenario = aMetaData.scenario(tScenarioID);
+        if(tScenario.solverTolerance().length() > 0)
+            tTolerance = tScenario.solverTolerance();
+
+        fprintf(tFilePointer, "\"tolerance\": %s,\n", tTolerance.c_str());
+        fprintf(tFilePointer, "\"norm\": \"L2\"\n");
+        fprintf(tFilePointer, "}\n");
+        fprintf(tFilePointer, "}\n");
+        fclose(tFilePointer);
+    }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void write_amgx_input_file_for_thermoplasticity(const XMLGen::InputData& aMetaData)
+{
+    FILE *tFilePointer = fopen("amgx.json", "w");
+    if(tFilePointer)
+    {
+        fprintf(tFilePointer, "{\n");
+        fprintf(tFilePointer, "\"config_version\": 2,\n");
+        fprintf(tFilePointer, "\"solver\": {\n");
+        fprintf(tFilePointer, "\"preconditioner\": {\n");
+        fprintf(tFilePointer, "\"print_grid_stats\": 1,\n");
+        fprintf(tFilePointer, "\"algorithm\": \"AGGREGATION\",\n");
+        fprintf(tFilePointer, "\"print_vis_data\": 0,\n");
+        fprintf(tFilePointer, "\"max_matching_iterations\": 50,\n");
+        fprintf(tFilePointer, "\"max_unassigned_percentage\": 0.01,\n");
+        fprintf(tFilePointer, "\"solver\": \"AMG\",\n");
+        fprintf(tFilePointer, "\"smoother\": {\n");
+        fprintf(tFilePointer, "\"relaxation_factor\": 0.78,\n");
+        fprintf(tFilePointer, "\"scope\": \"jacobi\",\n");
+        fprintf(tFilePointer, "\"solver\": \"MULTICOLOR_GS\",\n");
+        fprintf(tFilePointer, "\"symmetric_GS\": 0,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 0,\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0\n");
+        fprintf(tFilePointer, "},\n");
+        fprintf(tFilePointer, "\"print_solve_stats\": 0,\n");
+        fprintf(tFilePointer, "\"dense_lu_num_rows\": 128,\n");
+        fprintf(tFilePointer, "\"presweeps\": 1,\n");
+        fprintf(tFilePointer, "\"selector\": \"SIZE_8\",\n");
+        fprintf(tFilePointer, "\"coarse_solver\": \"DENSE_LU_SOLVER\",\n");
+        fprintf(tFilePointer, "\"coarsest_sweeps\": 2,\n");
+        fprintf(tFilePointer, "\"max_iters\": 1,\n");
+        fprintf(tFilePointer, "\"monitor_residual\": 0,\n");
+        fprintf(tFilePointer, "\"store_res_history\": 0,\n");
+        fprintf(tFilePointer, "\"scope\": \"amg\",\n");
+        fprintf(tFilePointer, "\"max_levels\": 100,\n");
+        fprintf(tFilePointer, "\"postsweeps\": 1,\n");
+        fprintf(tFilePointer, "\"cycle\": \"W\"\n");
+        fprintf(tFilePointer, "},\n");
+        fprintf(tFilePointer, "\"solver\": \"FGMRES\",\n");
+        fprintf(tFilePointer, "\"gmres_n_restart\": 1000,\n");
         fprintf(tFilePointer, "\"print_solve_stats\": 0,\n");
         fprintf(tFilePointer, "\"obtain_timings\": 0,\n");
         fprintf(tFilePointer, "\"max_iters\": 1000,\n");

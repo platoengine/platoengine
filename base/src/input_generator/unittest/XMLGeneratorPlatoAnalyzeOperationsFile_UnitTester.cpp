@@ -896,6 +896,7 @@ TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
     XMLGen::InputData tInputData;
     XMLGen::Scenario tScenario;
     tScenario.id("1");
+    tScenario.physics("steady_state_mechanics");
     tInputData.append(tScenario);
     tInputData.objective.scenarioIDs.push_back("1");
     XMLGen::write_amgx_input_file(tInputData);
@@ -904,6 +905,44 @@ TEST(PlatoTestXMLGenerator, WriteAmgxInputFile)
         +"\"max_unassigned_percentage\":0.01,\"solver\":\"AMG\",\"smoother\":{\"relaxation_factor\":0.78,\"scope\":\"jacobi\",\"solver\":\"BLOCK_JACOBI\",\"monitor_residual\":0,\"print_solve_stats\":0}"
         +",\"print_solve_stats\":0,\"dense_lu_num_rows\":64,\"presweeps\":1,\"selector\":\"SIZE_8\",\"coarse_solver\":\"DENSE_LU_SOLVER\",\"coarsest_sweeps\":2,\"max_iters\":1,\"monitor_residual\":0,"
         +"\"store_res_history\":0,\"scope\":\"amg\",\"max_levels\":100,\"postsweeps\":1,\"cycle\":\"W\"},\"solver\":\"PBICGSTAB\",\"print_solve_stats\":0,\"obtain_timings\":0,\"max_iters\":1000,"
+        +"\"monitor_residual\":1,\"convergence\":\"ABSOLUTE\",\"scope\":\"main\",\"tolerance\":1e-12,\"norm\":\"L2\"}}";
+    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    Plato::system("rm -f amgx.json");
+}
+
+TEST(PlatoTestXMLGenerator, WriteAmgxInputFilePlasticity)
+{
+    XMLGen::InputData tInputData;
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("plasticity");
+    tInputData.append(tScenario);
+    tInputData.objective.scenarioIDs.push_back("1");
+    XMLGen::write_amgx_input_file(tInputData);
+    auto tData = XMLGen::read_data_from_file("amgx.json");
+    auto tGold = std::string("{\"config_version\":2,\"solver\":{\"preconditioner\":{\"print_grid_stats\":1,\"algorithm\":\"AGGREGATION\",\"print_vis_data\":0,\"max_matching_iterations\":50,")
+        +"\"max_unassigned_percentage\":0.01,\"solver\":\"AMG\",\"smoother\":{\"relaxation_factor\":0.78,\"scope\":\"jacobi\",\"solver\":\"MULTICOLOR_GS\",\"symmetric_GS\":1,\"monitor_residual\":0,\"print_solve_stats\":0}"
+        +",\"print_solve_stats\":0,\"dense_lu_num_rows\":128,\"presweeps\":1,\"selector\":\"SIZE_8\",\"coarse_solver\":\"DENSE_LU_SOLVER\",\"coarsest_sweeps\":2,\"max_iters\":1,\"monitor_residual\":0,"
+        +"\"store_res_history\":0,\"scope\":\"amg\",\"max_levels\":100,\"postsweeps\":1,\"cycle\":\"W\"},\"solver\":\"FGMRES\",\"gmres_n_restart\":1000,\"print_solve_stats\":0,\"obtain_timings\":0,\"max_iters\":1000,"
+        +"\"monitor_residual\":1,\"convergence\":\"ABSOLUTE\",\"scope\":\"main\",\"tolerance\":1e-12,\"norm\":\"L2\"}}";
+    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    Plato::system("rm -f amgx.json");
+}
+
+TEST(PlatoTestXMLGenerator, WriteAmgxInputFileThermoplasticity)
+{
+    XMLGen::InputData tInputData;
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("thermoplasticity");
+    tInputData.append(tScenario);
+    tInputData.objective.scenarioIDs.push_back("1");
+    XMLGen::write_amgx_input_file(tInputData);
+    auto tData = XMLGen::read_data_from_file("amgx.json");
+    auto tGold = std::string("{\"config_version\":2,\"solver\":{\"preconditioner\":{\"print_grid_stats\":1,\"algorithm\":\"AGGREGATION\",\"print_vis_data\":0,\"max_matching_iterations\":50,")
+        +"\"max_unassigned_percentage\":0.01,\"solver\":\"AMG\",\"smoother\":{\"relaxation_factor\":0.78,\"scope\":\"jacobi\",\"solver\":\"MULTICOLOR_GS\",\"symmetric_GS\":0,\"monitor_residual\":0,\"print_solve_stats\":0}"
+        +",\"print_solve_stats\":0,\"dense_lu_num_rows\":128,\"presweeps\":1,\"selector\":\"SIZE_8\",\"coarse_solver\":\"DENSE_LU_SOLVER\",\"coarsest_sweeps\":2,\"max_iters\":1,\"monitor_residual\":0,"
+        +"\"store_res_history\":0,\"scope\":\"amg\",\"max_levels\":100,\"postsweeps\":1,\"cycle\":\"W\"},\"solver\":\"FGMRES\",\"gmres_n_restart\":1000,\"print_solve_stats\":0,\"obtain_timings\":0,\"max_iters\":1000,"
         +"\"monitor_residual\":1,\"convergence\":\"ABSOLUTE\",\"scope\":\"main\",\"tolerance\":1e-12,\"norm\":\"L2\"}}";
     ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
     Plato::system("rm -f amgx.json");

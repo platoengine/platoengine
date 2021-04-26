@@ -237,6 +237,36 @@ void write_plato_analyze_operation_xml_file
 void write_amgx_input_file(const XMLGen::InputData& aMetaData);
 
 /******************************************************************************//**
+ * \fn write_default_amgx_input_file
+ * \brief Write AMGX input .json file. This file is used to assign values for the \n
+ * linear solver parameters. Interested readers can find more information on AMGX \n
+ * in \see{https://github.com/NVIDIA/AMGX}.
+ * \param [in]     aMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void write_default_amgx_input_file(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
+ * \fn write_amgx_input_file_for_plasticity
+ * \brief Write AMGX input .json file. This file is used to assign values for the \n
+ * linear solver parameters. Interested readers can find more information on AMGX \n
+ * in \see{https://github.com/NVIDIA/AMGX}.
+ * \param [in]     aMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void write_amgx_input_file_for_plasticity(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
+ * \fn write_amgx_input_file_for_thermoplasticity
+ * \brief Write AMGX input .json file. This file is used to assign values for the \n
+ * linear solver parameters. Interested readers can find more information on AMGX \n
+ * in \see{https://github.com/NVIDIA/AMGX}.
+ * \param [in]     aMetaData Plato problem input data
+ * \param [in/out] aDocument    pugi::xml_document
+**********************************************************************************/
+void write_amgx_input_file_for_thermoplasticity(const XMLGen::InputData& aMetaData);
+
+/******************************************************************************//**
  * \fn append_mesh_map_data
  * \brief Append mesh map data plato_analyze_operation.xml.
  * \param [in]     aMetaData   Plato problem input data
