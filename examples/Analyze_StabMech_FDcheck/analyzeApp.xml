@@ -49,18 +49,3 @@
     <ArgumentName>Objective Gradient</ArgumentName>
   </Output>
 </Operation>
-
-<Operation>
-  <Function>WriteOutput</Function>
-  <Name>Write Output</Name>
-  <Output>
-    <ArgumentName>Solution X</ArgumentName>
-  </Output>
-  <Output>
-    <ArgumentName>Solution Y</ArgumentName>
-  </Output>
-  <Output>
-    <ArgumentName>Solution Z</ArgumentName>
-  </Output>
-</Operation>
-
