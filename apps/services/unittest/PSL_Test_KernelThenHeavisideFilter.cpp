@@ -79,7 +79,6 @@
 #include <string>
 #include <cstddef>
 #include <sstream>
-#include <math.h>
 #include <cmath>
 
 namespace PlatoSubproblemLibrary

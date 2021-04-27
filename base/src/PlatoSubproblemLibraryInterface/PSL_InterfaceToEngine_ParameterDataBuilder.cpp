@@ -30,6 +30,7 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     double heaviside_min=-1.;
     double heaviside_update=-1.;
     double heaviside_max=-1;
+
     if( m_inputData.size<Plato::InputData>("Filter") )
     {
         auto tFilterNode = m_inputData.get<Plato::InputData>("Filter");
@@ -57,6 +58,31 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
         {
             heaviside_max = Plato::Get::Double(tFilterNode, "HeavisideMax");
         }
+        if(tFilterNode.size<std::string>("SmoothMaxPNorm") > 0)
+        {
+            result->set_smooth_max_p_norm(Plato::Get::Double(tFilterNode, "SmoothMaxPNorm"));
+        }
+        if(tFilterNode.size<std::string>("CriticalPrintAngle") > 0)
+        {
+            result->set_critical_print_angle(Plato::Get::Double(tFilterNode, "CriticalPrintAngle"));
+        }
+        if(tFilterNode.size<std::string>("BaseLayerSideSetName") > 0)
+        {
+            result->set_base_layer_side_set_name(Plato::Get::String(tFilterNode, "BaseLayerSideSetName"));
+        }
+        if(tFilterNode.size<std::string>("BuildDirectionX") > 0)
+        {
+            result->set_build_direction_x(Plato::Get::Double(tFilterNode, "BuildDirectionX"));
+        }
+        if(tFilterNode.size<std::string>("BuildDirectionY") > 0)
+        {
+            result->set_build_direction_y(Plato::Get::Double(tFilterNode, "BuildDirectionY"));
+        }
+        if(tFilterNode.size<std::string>("BuildDirectionZ") > 0)
+        {
+            result->set_build_direction_z(Plato::Get::Double(tFilterNode, "BuildDirectionZ"));
+        }
+
     }
 
     // decide if input was meaningful
@@ -68,6 +94,8 @@ PlatoSubproblemLibrary::ParameterData* InterfaceToEngine_ParameterDataBuilder::b
     const bool meaningful_HeavisideMax = (heaviside_max > 0);
 
     // if not meaningful, use defaults
+    // TODO: This is bad behavior, should either throw an error if the input is not meaningful
+    // or do nothing and let the algorithm that uses the data worry about error checking
     if(meaningful_absolute)
     {
         result->set_absolute(absolute);

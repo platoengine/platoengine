@@ -10,5 +10,6 @@ option( STK_ENABLED   "Flag to indicate STK is available"                  OFF )
 option( GEOMETRY      "Flag to turn on Plato Geometry"                     OFF )
 option( EXPY          "Build exodus python API"                            OFF )
 option( SEACAS        "Seacas tools"                                       OFF )
+option( AMFILTER_ENABLED        "Build with AMFilter and ArborX"           OFF )
 
 option(PLATO_ENABLE_SERVICES_PYTHON "Enable the Plato Python interface"    OFF)

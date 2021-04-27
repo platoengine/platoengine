@@ -21,6 +21,11 @@ set(${LIB_NAME}_HEADERS
     PlatoEngine_IdentityFilter.hpp
     )
 
+if( AMFILTER_ENABLED )
+    set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PlatoEngine_KernelThenStructuredAMFilter.cpp)
+    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PlatoEngine_KernelThenStructuredAMFilter.hpp)
+endif()
+
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface)

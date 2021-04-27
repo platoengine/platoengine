@@ -1172,5 +1172,43 @@ PSL_TEST(FreeHelpers, filenamePrefix)
     EXPECT_EQ(expected_all_output3, actual_all_output3);
 }
 
+PSL_TEST(FreeHelpers, determinant3X3)
+{
+    Vector tRow1({1.0,0.0,0.0});
+    Vector tRow2({0.0,1.0,0.0});
+    Vector tRow3({0.0,0.0,1.0});
+    double tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,1.0);
+
+    tRow1 = Vector({1.0,2.0,0.0});
+    tRow2 = Vector({6.3,1.0,-8.4});
+    tRow3 = Vector({9.21,0.0,1.0});
+    tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,-166.328);
+
+    tRow1 = Vector({1.0,2.0,0.0});
+    tRow2 = Vector({2.0,4.0,0.0});
+    tRow3 = Vector({9.21,0.0,1.0});
+    tDeterminant = determinant3X3(tRow1,tRow2,tRow3);
+    EXPECT_DOUBLE_EQ(tDeterminant,0.0);
+
+    Vector tColumn1({3.9, 4.6, -2.8});
+    Vector tColumn2({1.2, 3.6, -1.7});
+    Vector tColumn3({5.4, -7.6, -2.8});
+    tDeterminant = determinant3X3(tColumn1,tColumn2,tColumn3);
+    EXPECT_DOUBLE_EQ(tDeterminant,-36.504);
+}
+
+PSL_TEST(FreeHelpers, linearInterpolation)
+{
+    double a = 2.0;
+    double b = 5.0;
+
+    EXPECT_DOUBLE_EQ(linearInterpolation(a,b,0.0),2.0);
+    EXPECT_DOUBLE_EQ(linearInterpolation(a,b,1.0),5.0);
+    EXPECT_DOUBLE_EQ(linearInterpolation(a,b,0.5),3.5);
+    EXPECT_DOUBLE_EQ(linearInterpolation(a,b,2.0/3.0),4.0);
+}
+
 }
 }
