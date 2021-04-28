@@ -30,8 +30,8 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 Plato_Test_UniqueCounter.cpp
 							 Plato_Test_SimpleRocketOptimization.cpp
 							 Plato_Test_UncertainLoadGeneratorXML.cpp
-						         Plato_Test_UncertainMaterial.cpp
-						         Plato_Test_Srom.cpp
+                                                         Plato_Test_UncertainMaterial.cpp
+                                                         Plato_Test_Srom.cpp
 							 Plato_Test_LocalStatisticsOperations.cpp
 							 Plato_Test_MethodMovingAsymptotes.cpp
 							 PSL_Test_Triangle.cpp  
@@ -63,13 +63,18 @@ SET(PlatoMainUnitTester_SRCS UnitMain.cpp
 							 PSL_Test_BasicDenseVectorOperations.cpp
 							 PSL_Test_AbstractAuthority.cpp
 							 PSL_Test_Point.cpp
+							 PSL_Test_Vector.cpp
 							 Plato_Test_TimersTree.cpp
+                                                         PSL_Test_OrthogonalGridUtilities.cpp
+                                                         PSL_Test_RegularHex8.cpp
 							 )
 
+if( AMFILTER_ENABLED )
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} PSL_Test_TetMeshUtilities.cpp PSL_Test_AMFilterUtilities.cpp)
+endif()
+
 IF( ENABLE_ROL )
-SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS}
-							   Plato_Test_ROL.cpp
-                                                         )
+    SET(PlatoMainUnitTester_SRCS ${PlatoMainUnitTester_SRCS} Plato_Test_ROL.cpp)
 ENDIF()
 
 ###############################################################################

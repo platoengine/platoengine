@@ -3,6 +3,8 @@
 
 #include "PSL_Abstract_ParallelVector.hpp"
 
+#include <iostream>
+
 namespace PlatoSubproblemLibrary
 {
 
@@ -16,7 +18,12 @@ Filter::~Filter()
 
 void Filter::advance_continuation()
 {
-    // intentional do nothing
+    // intentionally do nothing
+}
+
+void Filter::additive_advance_continuation()
+{
+    // intentionally do nothing
 }
 
 }

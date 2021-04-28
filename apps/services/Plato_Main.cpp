@@ -66,7 +66,7 @@
 #endif
 
 void safeExit(){
-#ifdef GEOMETRY
+#if defined(GEOMETRY) || defined(AMFILTER_ENABLED)
     Kokkos::finalize();
 #endif
     MPI_Finalize();
@@ -86,7 +86,7 @@ int main(int aArgc, char *aArgv[])
 
     MPI_Init(&aArgc, (char***) &aArgv);
 
-#ifdef GEOMETRY
+#if defined(GEOMETRY) || defined(AMFILTER_ENABLED)
     Kokkos::initialize(aArgc, aArgv);
 #endif
 

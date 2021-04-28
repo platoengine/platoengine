@@ -4,16 +4,15 @@
 #include "PSL_Random.hpp"
 #include "PSL_Point.hpp"
 
-#include <stdlib.h>
 #include <sys/time.h>
 #include <cstdlib>
 #include <ctime>
 #include <cstddef>
 #include <string>
 #include <cmath>
-#include <math.h>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 namespace PlatoSubproblemLibrary
 {
@@ -278,6 +277,29 @@ std::string remove_all_filename_prefix(const std::string& full_filename)
         return full_filename.substr(loc + 1u);
     }
     return full_filename;
+}
+
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3)
+{
+    // rows may actually be columns instead because the
+    // determinant of a matrix is equal to the determinant
+    // of its transpose
+    
+    double tTerm1 = aRow1(0)*(aRow2(1)*aRow3(2) - aRow2(2)*aRow3(1));
+    double tTerm2 = aRow1(1)*(aRow2(0)*aRow3(2) - aRow2(2)*aRow3(0));
+    double tTerm3 = aRow1(2)*(aRow2(0)*aRow3(1) - aRow2(1)*aRow3(0));
+
+    return tTerm1 - tTerm2 + tTerm3;
+}
+
+double linearInterpolation(const double& a, const double& b, const double &t)
+{
+    if(t < 0.0 || t > 1.0)
+        throw(std::domain_error("FreeHelpers::interpolate1D: t must be between 0 and 1"));
+
+    return (1-t)*a + t*b;
 }
 
 }

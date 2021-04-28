@@ -20,6 +20,7 @@ public:
     virtual void apply(AbstractInterface::ParallelVector* field) = 0;
     virtual void apply(AbstractInterface::ParallelVector* base_field, AbstractInterface::ParallelVector* gradient) = 0;
     virtual void advance_continuation();
+    virtual void additive_advance_continuation();
 
 protected:
 

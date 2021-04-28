@@ -8,7 +8,7 @@
 */
 
 #include "PSL_Filter.hpp"
-#include "PSL_AbstractKernelThenFilter.hpp"
+#include "PSL_AbstractKernelThenProjection.hpp"
 #include "PSL_ParameterDataEnums.hpp"
 
 #include <vector>
@@ -27,14 +27,14 @@ class ParameterData;
 class AbstractAuthority;
 class KernelFilter;
 
-class KernelThenHeavisideFilter : public AbstractKernelThenFilter
+class KernelThenHeavisideFilter : public AbstractKernelThenProjection
 {
 public:
     KernelThenHeavisideFilter(AbstractAuthority* authority,
                               ParameterData* data,
                               AbstractInterface::PointCloud* points,
                               AbstractInterface::ParallelExchanger* exchanger)
-                            : AbstractKernelThenFilter(authority, data, points, exchanger)
+                            : AbstractKernelThenProjection(authority, data, points, exchanger)
 {
 }
 
@@ -42,8 +42,8 @@ public:
 
 private:
 
-    double projection_apply(const double& beta, const double& input);
-    double projection_gradient(const double& beta, const double& input);
+    void projection_apply(const double& beta, AbstractInterface::ParallelVector* field) const;
+    void projection_gradient(const double& beta, AbstractInterface::ParallelVector* const field, AbstractInterface::ParallelVector* gradient) const;
 
 };
 

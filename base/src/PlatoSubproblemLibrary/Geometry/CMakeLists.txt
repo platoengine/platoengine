@@ -7,15 +7,26 @@ set(${LIB_NAME}_SOURCES
     PSL_AxisAlignedBoundingBox.cpp
     PSL_PointCloud.cpp
     PSL_Point.cpp
+    PSL_Vector.cpp
     PSL_Triangle.cpp
+    PSL_OrthogonalGridUtilities.cpp
+    PSL_RegularHex8.cpp
     )
 
 set(${LIB_NAME}_HEADERS 
     PSL_AxisAlignedBoundingBox.hpp
     PSL_PointCloud.hpp
     PSL_Point.hpp
+    PSL_Vector.hpp
     PSL_Triangle.hpp
+    PSL_OrthogonalGridUtilities.hpp
+    PSL_RegularHex8.hpp
     )
+
+if( AMFILTER_ENABLED )
+    set(${LIB_NAME}_SOURCES ${${LIB_NAME}_SOURCES} PSL_TetMeshUtilities.cpp)
+    set(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS} PSL_TetMeshUtilities.hpp)
+endif()
 
 INCLUDE_DIRECTORIES(${PLATO_INCLUDES})
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/base/src/PlatoSubproblemLibraryInterface)

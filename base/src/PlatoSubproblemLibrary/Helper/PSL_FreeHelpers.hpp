@@ -1,4 +1,5 @@
 #pragma once
+#include "PSL_Vector.hpp"
 
 #include <vector>
 #include <cstddef>
@@ -7,7 +8,6 @@
 #include <cassert>
 #include <functional>
 #include <cmath>
-#include <math.h>
 #include <string>
 #include <set>
 
@@ -311,9 +311,14 @@ void invert_vector_to_map(const std::vector<T>& in_, std::map<T,int>& out_)
     }
 }
 
+double determinant3X3(const Vector& aRow1,
+                      const Vector& aRow2,
+                      const Vector& aRow3);
+
+double linearInterpolation(const double& a, const double& b, const double& t);
+
 double getTimeInSeconds();
 
 std::string remove_a_filename_prefix(const std::string& full_filename);
 std::string remove_all_filename_prefix(const std::string& full_filename);
-
 }

@@ -26,10 +26,6 @@ set( BLAS_SEARCH_PATH /System/Library/Frameworks/Accelerate.framework/Versions/C
 set( LAPACK_SEARCH_PATH /System/Library/Frameworks/Accelerate.framework/Versions/Current/Frameworks/vecLib.framework/Versions/Current
      CACHE STRING "Lapack search directory" )
 
-set( CMAKE_CXX_FLAGS "-Wall -fno-strict-aliasing -fPIC -std=c++11" )
-set( CMAKE_CXX_FLAGS_DEBUG "-g" )
-set( CMAKE_CXX_FLAGS_RELEASE "-O3" )
-
 ############################  Trilinos Setup  #################################
 ###############################################################################
 IF (DEFINED TRILINOS_INSTALL_DIR)

@@ -41,8 +41,6 @@ public:
     virtual void build();
     virtual void apply(AbstractInterface::ParallelVector* field);
     virtual void apply(AbstractInterface::ParallelVector* base_field, AbstractInterface::ParallelVector* gradient);
-    virtual void advance_continuation();
-    virtual void additive_advance_continuation();
 
 private:
 
@@ -53,14 +51,9 @@ private:
     AbstractInterface::PointCloud* m_original_points;
     AbstractInterface::ParallelExchanger* m_parallel_exchanger;
     KernelFilter* m_kernel;
-    double m_current_heaviside_parameter;
-    double m_heaviside_parameter_continuation_scale;
-    double m_max_heaviside_parameter;
 
-    void check_input_data();
-
-    virtual double projection_apply(const double& beta, const double& input) = 0;
-    virtual double projection_gradient(const double& beta, const double& input) = 0;
+    virtual void internal_apply(AbstractInterface::ParallelVector* field) = 0;
+    virtual void internal_gradient(AbstractInterface::ParallelVector* const density_field, AbstractInterface::ParallelVector* gradient) const = 0;
 };
 
 }
