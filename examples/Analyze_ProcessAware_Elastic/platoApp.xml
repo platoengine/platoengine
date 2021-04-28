@@ -1,0 +1,146 @@
+<Operation>
+    <Function>SetLowerBounds</Function>
+    <Name>Calculate Lower Bounds</Name>
+    <Input>
+        <ArgumentName>Lower Bound Value</ArgumentName>
+    </Input>
+    <Output>
+        <ArgumentName>Lower Bound Vector</ArgumentName>
+    </Output>
+    <FixedBlocks>
+        <Index>2</Index>
+    </FixedBlocks>
+    <Discretization>density</Discretization>
+</Operation>
+<Operation>
+    <Function>SetUpperBounds</Function>
+    <Name>Calculate Upper Bounds</Name>
+    <Input>
+        <ArgumentName>Upper Bound Value</ArgumentName>
+    </Input>
+    <Output>
+        <ArgumentName>Upper Bound Vector</ArgumentName>
+    </Output>
+    <FixedBlocks>
+        <Index>2</Index>
+    </FixedBlocks>
+    <Discretization>density</Discretization>
+</Operation>
+<Filter>
+    <Name>Kernel</Name>
+    <Scale>2.48</Scale>
+    <Absolute>-1</Absolute>
+</Filter>
+<Operation>
+    <Function>Filter</Function>
+    <Name>FilterControl</Name>
+    <Input>
+        <ArgumentName>Field</ArgumentName>
+    </Input>
+    <Output>
+        <ArgumentName>Filtered Field</ArgumentName>
+    </Output>
+    <Gradient>False</Gradient>
+</Operation>
+<Operation>
+    <Function>Filter</Function>
+    <Name>FilterGradient</Name>
+    <Input>
+        <ArgumentName>Gradient</ArgumentName>
+    </Input>
+    <Output>
+        <ArgumentName>Filtered Gradient</ArgumentName>
+    </Output>
+    <Gradient>True</Gradient>
+</Operation>
+<Operation>
+    <Function>Aggregator</Function>
+    <Name>AggregateValue</Name>
+    <Aggregate>
+        <Layout>Value</Layout>
+        <Input>
+            <ArgumentName>Value 1</ArgumentName>
+        </Input>
+        <Input>
+            <ArgumentName>Value 2</ArgumentName>
+        </Input>
+        <Output>
+            <ArgumentName>Value</ArgumentName>
+        </Output>
+    </Aggregate>
+    <Weighting>
+        <Normals>
+            <Input>
+                <ArgumentName>Normal 1</ArgumentName>
+            </Input>
+            <Input>
+                <ArgumentName>Normal 2</ArgumentName>
+            </Input>
+        </Normals>
+        <Weight>
+            <Value>0.5</Value>
+        </Weight>
+        <Weight>
+            <Value>0.5</Value>
+        </Weight>
+    </Weighting>
+</Operation>
+<Operation>
+    <Function>Aggregator</Function>
+    <Name>AggregateField</Name>
+    <Aggregate>
+        <Layout>Nodal Field</Layout>
+        <Input>
+            <ArgumentName>Field 1</ArgumentName>
+        </Input>
+        <Input>
+            <ArgumentName>Field 2</ArgumentName>
+        </Input>
+        <Output>
+            <ArgumentName>Field</ArgumentName>
+        </Output>
+    </Aggregate>
+    <Weighting>
+        <Normals>
+            <Input>
+                <ArgumentName>Normal 1</ArgumentName>
+            </Input>
+            <Input>
+                <ArgumentName>Normal 2</ArgumentName>
+            </Input>
+        </Normals>
+        <Weight>
+            <Value>0.5</Value>
+        </Weight>
+        <Weight>
+            <Value>0.5</Value>
+        </Weight>
+    </Weighting>
+</Operation>
+<Operation>
+    <Function>InitializeField</Function>
+    <Name>Initialize Field</Name>
+    <Method>Uniform</Method>
+    <Output>
+        <ArgumentName>Initialized Field</ArgumentName>
+    </Output>
+    <Uniform>
+        <Value>0.4</Value>
+    </Uniform>
+</Operation>
+<Operation>
+    <Function>DesignVolume</Function>
+    <Name>Design Volume</Name>
+    <Output>
+        <ArgumentName>Design Volume</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>PlatoMainOutput</Function>
+    <OutputFrequency>1000</OutputFrequency>
+    <Name>PlatoMainOutput</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+        <Alias>Topology</Alias>
+    </Input>
+</Operation>

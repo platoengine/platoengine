@@ -15,4 +15,4 @@ PlatoESP PlatoESP.xml \
 -x PLATO_PERFORMER_ID=2 \
 -x PLATO_INTERFACE_FILE=interface.xml \
 -x PLATO_APP_FILE=plato_analyze_operations_1.xml \
-LGR_MPMD --input-config=plato_analyze_input_deck_1.xml
+analyze_MPMD --input-config=plato_analyze_input_deck_1.xml

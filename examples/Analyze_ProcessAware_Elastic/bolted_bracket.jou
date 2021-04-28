@@ -1,0 +1,74 @@
+## /home/jrobbin/opt/cubit/15.3/bin/cubitx
+## Cubit Version 15.3
+## Cubit Build 413520
+## Revised 2018-09-20 09:38:41 -0600 (Thu, 20 Sep 2018)
+## Running 12/07/2020 11:14:41 AM
+## Command Options:
+#{base_width=2.5}
+#{base_height=3.0}
+#{base_thickness=0.5}
+#{bracket_length=4.0}
+#{bracket_thickness=0.5}
+#{vert_fillet=0.25}
+#{base_fillet=0.375}
+#{end_fillet=0.5}
+#{face_fillet=0.1}
+#{bolt_radius=0.125}
+#{bolt_inset=0.375}
+#{mount_radius=0.5}
+#{mount_inset=0.5}
+#{mesh_size=0.12}
+#{baseplate_mesh_size=0.35}
+create brick x {base_thickness} y {base_height} z {base_width}
+create brick x {bracket_length} y {base_height} z {bracket_thickness}
+move surface 10 location surface 6
+unite volume all
+tweak curve 25 26 fillet radius {vert_fillet}
+tweak curve 2 4 8 6 fillet radius {base_fillet}
+tweak curve 24 22 fillet radius {end_fillet}
+tweak curve 20 60 17 55 18 33 41 27 5 44 28 31 fillet radius {face_fillet}
+tweak curve 49 29 37 1 45 30 35 16 57 13 59 14 fillet radius {face_fillet}
+create cylinder height 1 radius {bolt_radius}
+rotate volume 3 about y angle 90
+move volume 3 y {base_height/2.0-bolt_inset} z {base_width/2.0-bolt_inset}
+volume 3 copy
+subtract volume 4 from volume 1
+move volume 3 y {-base_height+2.0*bolt_inset}
+volume 3 copy
+subtract volume 5 from volume 1
+move volume 3 z {-base_width+2.0*bolt_inset}
+volume 3 copy
+subtract volume 6 from volume 1
+move volume 3 y { base_height-2.0*bolt_inset}
+volume 3 copy
+subtract volume 7 from volume 1
+delete volume 3
+create cylinder height 1 radius {mount_radius}
+move volume 8 x {base_thickness/2.0+bracket_length-mount_radius-mount_inset}
+subtract volume 8 from volume 1
+webcut volume all with plane yplane
+webcut volume all with plane zplane
+rotate volume all about y angle -90
+move surface 131 location z 0
+move surface 121 123 145 location z 0
+create brick x 8 y 8 z 0.7
+move surface 146 location z 0
+imprint all
+merge all
+volume all scheme tetmesh
+volume all except volume 12 size {mesh_size}
+mesh volume all except volume 12
+volume 12 size {baseplate_mesh_size}
+mesh volume 12
+block 1 volume all except volume 12
+block 1 name "design_volume"
+block 2 volume 12
+block 2 name "buildplate"
+sideset 1 surface 125 120 144 133
+sideset 1 name "load"
+sideset 2 surface 59 53 65 71
+sideset 2 name "fix"
+sideset 3 surface 150
+sideset 3 name "base_fix"
+transform mesh output scale 1e-2 ## cm to m
+export mesh "bolted_bracket.exo" overwrite

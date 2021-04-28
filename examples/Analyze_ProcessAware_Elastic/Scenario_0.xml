@@ -1,0 +1,116 @@
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver"/>
+  <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
+
+  <Parameter name="Input Mesh" type="string" value="bolted_bracket.exo"/>
+
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics"         type="string"  value="Mechanical"/>
+    <Parameter name="PDE Constraint"  type="string"  value="Updated Lagrangian Elliptic"/>
+
+    <Parameter name="Self-Adjoint"       type="bool"    value="false"/>
+
+    <ParameterList name="Criteria">
+      <ParameterList name="Design Volume">
+        <Parameter name="Type" type="string" value="Scalar Function"/>
+        <Parameter name="Linear" type="bool" value="true"/>
+        <Parameter name="Scalar Function Type" type="string" value="Volume"/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="0.0"/>
+          <Parameter name="Minimum Value" type="double" value="1.0"/>
+        </ParameterList>
+      </ParameterList>
+      <ParameterList name="My Volume">
+        <Parameter name="Type" type="string" value="Scalar Function"/>
+        <Parameter name="Linear" type="bool" value="true"/>
+        <Parameter name="Scalar Function Type" type="string" value="Volume"/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="1.0"/>
+          <Parameter name="Minimum Value" type="double" value="0.0"/>
+        </ParameterList>
+      </ParameterList>
+      <ParameterList name="Internal Elastic Energy">
+        <Parameter name="Type" type="string" value="Scalar Function"/>
+        <Parameter name='Scalar Function Type' type='string' value='Internal Elastic Energy'/>
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP"/>
+          <Parameter name="Exponent" type="double" value="3.0"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Updated Lagrangian Elliptic">
+      <Parameter name="Plottable" type="Array(string)" value="{stress}"/>
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="SIMP"/>
+        <Parameter name="Exponent" type="double" value="3.0"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Substrate">
+          <Parameter name="Element Block" type="string" value="buildplate"/>
+          <Parameter name="Material Model" type="string" value="Billet Ti64"/>
+        </ParameterList>
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="design_volume"/>
+          <Parameter name="Material Model" type="string" value="Billet Ti64"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Billet Ti64">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter  name="Poissons Ratio" type="double" value="0.3"/>
+          <Parameter  name="Youngs Modulus" type="double" value="104.0e9"/>
+          <Parameter  name="e11" type="double" value="0.0"/>
+          <Parameter  name="e22" type="double" value="0.0"/>
+          <Parameter  name="e33" type="double" value="0.0"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Sequence">
+      <Parameter name="Sequence Type" type="string" value="Explicit"/>
+      <ParameterList name="Steps">
+        <ParameterList name="Remove">
+          <ParameterList name="Mask">
+            <Parameter name="Mask Type" type="string" value="Brick"/>
+            <Parameter name="Minimum Z" type="double" value="0.0"/>
+          </ParameterList>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+  
+    <ParameterList  name="Natural Boundary Conditions">
+      <ParameterList  name="Traction Vector Boundary Condition">
+        <Parameter  name="Type"     type="string"        value="Uniform"/>
+        <Parameter  name="Values"   type="Array(double)" value="{0.0, 0.0, 1.0e6}"/>
+        <Parameter  name="Sides"    type="string"        value="load"/>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList  name="Essential Boundary Conditions">
+       <ParameterList  name="X Fixed Displacement Boundary Condition 1">
+         <Parameter  name="Type"     type="string" value="Zero Value"/>
+         <Parameter  name="Index"    type="int"    value="0"/>
+         <Parameter  name="Sides"    type="string" value="fix"/>
+       </ParameterList>
+       <ParameterList  name="Y Fixed Displacement Boundary Condition 1">
+         <Parameter  name="Type"     type="string" value="Zero Value"/>
+         <Parameter  name="Index"    type="int"    value="1"/>
+         <Parameter  name="Sides"    type="string" value="fix"/>
+       </ParameterList>
+       <ParameterList  name="Z Fixed Displacement Boundary Condition 1">
+         <Parameter  name="Type"     type="string" value="Zero Value"/>
+         <Parameter  name="Index"    type="int"    value="2"/>
+         <Parameter  name="Sides"    type="string" value="fix"/>
+       </ParameterList>
+     </ParameterList>
+  </ParameterList>
+</ParameterList>
+

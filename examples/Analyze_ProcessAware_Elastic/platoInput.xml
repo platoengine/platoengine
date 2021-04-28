@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<mesh>
+    <type>unstructured</type>
+    <format>exodus</format>
+    <mesh>bolted_bracket.exo</mesh>
+    <ignore_node_map>true</ignore_node_map>
+    <ignore_element_map>true</ignore_element_map>
+    <block>
+        <index>1</index>
+        <integration>
+            <type>gauss</type>
+            <order>2</order>
+        </integration>
+    </block>
+    <block>
+        <index>2</index>
+        <integration>
+            <type>gauss</type>
+            <order>2</order>
+        </integration>
+    </block>
+</mesh>
+<output>
+    <file>platomain</file>
+    <format>exodus</format>
+</output>
