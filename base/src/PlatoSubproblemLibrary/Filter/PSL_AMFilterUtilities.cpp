@@ -171,6 +171,11 @@ void AMFilterUtilities::computeTetMeshPrintableDensity(const std::vector<double>
     }
 }
 
+void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* aGradient) const
+{
+    ;
+}
+
 double smax(const std::vector<double>& aArguments, const double& aPNorm)
 {
     double tSmax = 0;

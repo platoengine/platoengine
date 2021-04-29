@@ -24,14 +24,8 @@ public:
         if(aPNorm < 1)
             throw(std::domain_error("AMFilterUtilities: P norm must be greater than 1"));
 
-         // std::cout << "Computing grid XYZ coordinates" << std::endl;
          mGridUtilities.computeGridXYZCoordinates(mGridPointCoordinates);
-         // std::cout << "Finding containing tet for each point" << std::endl;
          mTetUtilities.getTetIDForEachPoint(mGridPointCoordinates,mContainingTetID);
-         // std::cout << "AMFilterUtilities initialized" << std::endl;
-        
-        auto tGridDimensions = mGridUtilities.getGridDimensions();
-        mGridPointCoordinates.resize(tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2]);
     }
 
     void computeGridBlueprintDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridBlueprintDensity) const;
@@ -46,6 +40,7 @@ public:
                                           std::vector<double>& aGridPrintableDensity) const;
     void computeGridPrintableDensity(const std::vector<double>& aGridBlueprintDensity, std::vector<double>& aGridPrintableDensity) const;
     void computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const;
+    void postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* aGradient) const;
     double computeTetNodePrintableDensity(const int& aTetNodeIndex,
                                           const std::vector<double>& aGridPrintableDensity) const;
 

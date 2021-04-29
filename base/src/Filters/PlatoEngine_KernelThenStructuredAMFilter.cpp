@@ -73,7 +73,6 @@ namespace Plato
         double tBuildDirectionX = m_input_data->get_build_direction_x();
         double tBuildDirectionY = m_input_data->get_build_direction_y();
         double tBuildDirectionZ = m_input_data->get_build_direction_z();
-        // double tCriticalPrintAngle = m_input_data->get_critical_print_angle();
 
         tFilter->init(mCoordinates,mConnectivity,PlatoSubproblemLibrary::Vector({tBuildDirectionX,tBuildDirectionY,tBuildDirectionZ}));
     }
