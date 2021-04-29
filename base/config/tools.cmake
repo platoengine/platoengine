@@ -313,7 +313,7 @@ function( Plato_add_single_test RUN_COMMAND TEST_NAME )
     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/mpirun.source ${RUN_COMMAND})
 
     add_test( NAME ${TEST_NAME}
-              COMMAND ${CMAKE_COMMAND} 
+              COMMAND ${CMAKE_COMMAND}
               -DTEST_COMMAND=${RUN_COMMAND}
               -P ${CMAKE_SOURCE_DIR}/base/config/runsingletest.cmake )
 

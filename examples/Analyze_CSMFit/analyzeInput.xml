@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver" />
+  <Parameter name="Spatial Dimension" type="int" value="3" />
+  <Parameter name="Input Mesh" type="string" value="model.exo" />
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics" type="string" value="Mechanical" />
+    <Parameter name="PDE Constraint" type="string" value="Elliptic" />
+    <Parameter name="Self-Adjoint" type="bool" value="false" />
+
+    <ParameterList name="Criteria">
+      <ParameterList name="Volume">
+        <Parameter name="Type" type="string" value="Scalar Function" />
+        <Parameter name="Linear" type="bool" value="true" />
+        <Parameter name="Scalar Function Type" type="string" value="Volume" />
+        <ParameterList name="Penalty Function">
+          <Parameter name="Type" type="string" value="SIMP" />
+          <Parameter name="Exponent" type="double" value="1.0" />
+          <Parameter name="Minimum Value" type="double" value="0.0" />
+        </ParameterList>
+      </ParameterList>
+      <ParameterList name="Geometry Misfit">
+        <Parameter name="Type" type="string" value="Scalar Function" />
+        <Parameter name="Linear" type="bool" value="true" />
+        <Parameter name="Scalar Function Type" type="string" value="Geometry Misfit" />
+        <Parameter name="Misfit Type" type="string" value="Normal Distance Magnitude" />
+        <Parameter name="Point Cloud File Name" type="string" value="points.xyz" />
+        <Parameter name="Sides" type="string" value="surface" />
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Design Volume">
+          <Parameter name="Element Block" type="string" value="block_1"/>
+          <Parameter name="Material Model" type="string" value="Notrealium"/>
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Elliptic">
+      <ParameterList name="Penalty Function">
+        <Parameter name="Type" type="string" value="SIMP" />
+        <Parameter name="Exponent" type="double" value="1.0" />
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Material Models">
+      <ParameterList name="Notrealium">
+        <ParameterList name="Isotropic Linear Elastic">
+          <Parameter name="Poissons Ratio" type="double" value=".33" />
+          <Parameter name="Youngs Modulus" type="double" value="1.0e9" />
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+    <ParameterList name="Essential Boundary Conditions">
+      <ParameterList name="X Fixed Displacement Boundary Condition 1">
+        <Parameter name="Index" type="int" value="0" />
+        <Parameter name="Sides" type="string" value="surface" />
+        <Parameter name="Type" type="string" value="Zero Value" />
+      </ParameterList>
+      <ParameterList name="Y Fixed Displacement Boundary Condition 2">
+        <Parameter name="Index" type="int" value="1" />
+        <Parameter name="Sides" type="string" value="surface" />
+        <Parameter name="Type" type="string" value="Zero Value" />
+      </ParameterList>
+      <ParameterList name="Z Fixed Displacement Boundary Condition 3">
+        <Parameter name="Index" type="int" value="2" />
+        <Parameter name="Sides" type="string" value="surface" />
+        <Parameter name="Type" type="string" value="Zero Value" />
+      </ParameterList>
+    </ParameterList>
+  </ParameterList>
+</ParameterList>

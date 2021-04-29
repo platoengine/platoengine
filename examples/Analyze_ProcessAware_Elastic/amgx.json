@@ -29,7 +29,7 @@
         "solver": "PCG",
         "print_solve_stats": 0,
         "obtain_timings": 1,
-        "max_iters": 500,
+        "max_iters": 1000,
         "monitor_residual": 1,
         "convergence": "ABSOLUTE",
         "scope": "main",
