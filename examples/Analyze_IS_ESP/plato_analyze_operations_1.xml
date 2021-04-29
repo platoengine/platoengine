@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<Operation>
+  <Function>ComputeSolution</Function>
+  <Name>Compute Displacement Solution</Name>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective Gradient</Name>
+  <Function>ComputeCriterionP</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <ESPName>Design Geometry</ESPName>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Objective</Name>
+  <Function>ComputeCriterionP</Function>
+  <Criterion>Internal Elastic Energy</Criterion>
+  <ESPName>Design Geometry</ESPName>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Objective Value</ArgumentName>
+  </Output>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Objective Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint Value</Name>
+  <Function>ComputeCriterionValue</Function>
+  <Criterion>Volume</Criterion>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint Gradient</Name>
+  <Function>ComputeCriterionGradientP</Function>
+  <Criterion>Volume</Criterion>
+  <ESPName>Design Geometry</ESPName>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Constraint Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>Compute Constraint</Name>
+  <Function>ComputeCriterionP</Function>
+  <Criterion>Volume</Criterion>
+  <ESPName>Design Geometry</ESPName>
+  <Output>
+    <Argument>Value</Argument>
+    <ArgumentName>Constraint Value</ArgumentName>
+  </Output>
+  <Output>
+    <Argument>Gradient</Argument>
+    <ArgumentName>Constraint Gradient</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Function>ReinitializeESP</Function>
+  <Name>Reinitialize on Change</Name>
+  <OnChange>true</OnChange>
+  <Input>
+    <ArgumentName>Parameters</ArgumentName>
+  </Input>
+  <ESPName>Design Geometry</ESPName>
+  <Parameter>
+    <ArgumentName>Input Mesh</ArgumentName>
+    <Target>Input Mesh</Target>
+    <InitialValue>brick.exo</InitialValue>
+  </Parameter>
+</Operation>
+
+<ESP>
+  <Name>Design Geometry</Name>
+  <ModelFileName>brick_opt.csm</ModelFileName>
+  <TessFileName>brick.eto</TessFileName>
+</ESP>
+

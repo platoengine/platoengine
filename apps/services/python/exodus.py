@@ -60,6 +60,7 @@ class ElementBlock:
     self.coordinates = []
     self.ElemTriMap = []
     self.ElemVolumes = []
+    self.name = ""
 
 
   def Initialize(self, blk_id, elem_type, num_dim, num_elem, num_nodes, num_attr, connect, coord):
@@ -441,6 +442,8 @@ class ExodusDB:
                                    block.numNodesPerElement, block.numAttr)
       connect_numbered_from_one = [block.connectivity[i]+1 for i in range(len(block.connectivity)) ]
       expy.put_elem_conn(self.outFileId, block.Id, connect_numbered_from_one)
+    blockNames = [(block.name if block.name != "" else "block_"+str(block.Id)) for block in self.elementBlocks]
+    expy.put_names(self.outFileId, "e", blockNames)
 
     # write sidesets
     sideSetNames = []
