@@ -587,6 +587,7 @@ void append_spatial_model_to_plato_problem
 /**********************************************************************************/
 void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
+ const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
     if(aMaterials.empty())
@@ -596,6 +597,9 @@ void append_material_model_to_plato_problem
 
     auto tMaterialModels = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Material Models"}, tMaterialModels);
+
+    XMLGen::append_pressure_and_temperature_scaling_to_material_models(aXMLMetaData, tMaterialModels);
+
     XMLGen::AppendMaterialModelParameters tMaterialInterface;
     for(auto& tMaterial : aMaterials)
     {
@@ -606,6 +610,40 @@ void append_material_model_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
+/**********************************************************************************/
+void append_pressure_and_temperature_scaling_to_material_models
+(const XMLGen::InputData& aXMLMetaData,
+       pugi::xml_node&    aMaterialModels)
+{
+    auto tScenarios = aXMLMetaData.scenarios();
+    if (tScenarios.size() == 1)
+    {
+        std::string tPhysics = tScenarios[0].physics();
+        if (tPhysics == "plasticity")
+        {
+            std::string tPressureScaling = tScenarios[0].pressureScaling();
+            std::vector<std::string> tKeys = {"name", "type", "value"};
+            std::vector<std::string> tValues = {"Pressure Scaling", "double", tPressureScaling};
+            XMLGen::append_parameter_plus_attributes(tKeys, tValues, aMaterialModels);
+        }
+        else if (tPhysics == "thermoplasticity")
+        {
+            std::string tPressureScaling = tScenarios[0].pressureScaling();
+            std::string tTemperatureScaling = tScenarios[0].temperatureScaling();
+            
+            std::vector<std::string> tKeys = {"name", "type", "value"};
+            std::vector<std::string> tValuesPressureScaling = {"Pressure Scaling", "double", tPressureScaling};
+            XMLGen::append_parameter_plus_attributes(tKeys, tValuesPressureScaling, aMaterialModels);
+
+            std::vector<std::string> tValuesTemperatureScaling = {"Temperature Scaling", "double", tTemperatureScaling};
+            XMLGen::append_parameter_plus_attributes(tKeys, tValuesTemperatureScaling, aMaterialModels);
+        }
+    }
+}
+// function append_pressure_and_temperature_scaling_to_material_models
+/**********************************************************************************/
+
+/**********************************************************************************/
 void append_material_models_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
@@ -613,11 +651,11 @@ void append_material_models_to_plato_analyze_input_deck
     if(!aXMLMetaData.mRandomMetaData.empty() && aXMLMetaData.mRandomMetaData.materialSamplesDrawn())
     {
         auto tRandomMaterials = aXMLMetaData.mRandomMetaData.materials();
-        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aParentNode);
+        XMLGen::append_material_model_to_plato_problem(tRandomMaterials, aXMLMetaData, aParentNode);
     }
     else
     {
-        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aParentNode);
+        XMLGen::append_material_model_to_plato_problem(aXMLMetaData.materials, aXMLMetaData, aParentNode);
     }
 }
 // function append_material_models_to_plato_analyze_input_deck
@@ -660,10 +698,10 @@ void get_nbc_parent_node
  pugi::xml_node &aParentNode)
 {
     XMLGen::ValidPhysicsNBCCombinations tPhysicsNBCMap;
-    std::string tParentName = tPhysicsNBCMap.get_parent_nbc_node_name(aPhysics, aLoad.type()); 
+    std::vector<std::string> tParentNames = tPhysicsNBCMap.get_parent_nbc_node_names(aPhysics, aLoad.type()); 
     for(auto &tCurParentNode : aParentNodes)
     {
-        if(tParentName.compare(tCurParentNode.attribute("name").value()) == 0)
+        if(tParentNames[tParentNames.size() - 1].compare(tCurParentNode.attribute("name").value()) == 0)
         {
             aParentNode = tCurParentNode;
             return;
@@ -734,15 +772,38 @@ void create_natural_boundary_condition_parent_nodes
  std::vector<pugi::xml_node> &aParentNodes)
 {
     XMLGen::ValidPhysicsNBCCombinations tPhysicsToNBCMap;
-    std::set<std::string> tParentNames;
+    std::set<std::vector<std::string>> tParentNames;
     tPhysicsToNBCMap.get_parent_names(aScenario.physics(), tParentNames);
+    size_t tParentCounter = 0;
+    pugi::xml_node tCurrentParent;
     auto tItr = tParentNames.begin();
     while(tItr != tParentNames.end())
     {
-        auto tNaturalBCParent = aParentNode.append_child("ParameterList");
-        XMLGen::append_attributes({"name"}, {*tItr}, tNaturalBCParent);
-        aParentNodes.push_back(tNaturalBCParent);
+        std::vector<std::string> tCurrentNames = *tItr;
+        if (tCurrentNames.size() == 1)
+        {
+            auto tNaturalBCParent = aParentNode.append_child("ParameterList");
+            XMLGen::append_attributes({"name"}, {tCurrentNames[0]}, tNaturalBCParent);
+            aParentNodes.push_back(tNaturalBCParent);
+        }
+        else if (tCurrentNames.size() == 2)
+        {
+            if (tParentCounter == 0)// Need to create the first parameter list
+            {
+                tCurrentParent = aParentNode.append_child("ParameterList");
+                XMLGen::append_attributes({"name"}, {tCurrentNames[0]}, tCurrentParent);
+            }
+            // Append to the parent that was previously created
+            auto tNaturalBCParent = tCurrentParent.append_child("ParameterList");
+            XMLGen::append_attributes({"name"}, {tCurrentNames[1]}, tNaturalBCParent);
+            aParentNodes.push_back(tNaturalBCParent);
+        }
+        else
+        {
+            THROWERR("Only two levels of natural boundary condition parent parameter lists are allowed.")
+        }
         tItr++;
+        tParentCounter++;
     }
 }
 /**********************************************************************************/
