@@ -5,17 +5,18 @@ if(ANALYZE)
 Plato_new_test(TEST_NAME)
 
 # Copy Input files from source to binary dir
-set( testFiles "interface.xml;Scenario_0.xml;Scenario_1.xml;analyzeApp.xml;platoApp.xml;platoInput.xml;amgx.json;bolted_bracket.exo")
+set( testFiles "interface.xml;Scenario_0.xml;Scenario_1.xml;analyzeApp_0.xml;analyzeApp_1.xml;platoApp.xml;platoInput.xml;amgx.json;bolted_bracket.exo")
 Plato_add_test_files("${testFiles}")
 
 # Set number of processors for PlatoMain comm
 set( PLATOMAIN_NP 1 )
 
 # Set number of processors for Performer comms
-set( ANALYZE_NP 1 )
+set( ANALYZE_1_NP 1 )
+set( ANALYZE_2_NP 1 )
 
 # Create list of comm sizes 
-set( NUM_PROCS "${PLATOMAIN_NP} ${ANALYZE_NP}" )
+set( NUM_PROCS "${PLATOMAIN_NP} ${ANALYZE_1_NP} ${ANALYZE_2_NP}" )
 
 # Specify which comm will provide the output for comparison
 set( IO_COMM_INDEX 0 )
@@ -30,9 +31,15 @@ Plato_create_test(PLATO_NEW_TEST ${PLATOMAIN_BINARY} ${PLATOMAIN_NP} ${INTERFACE
 
 # Define/add a performer
 set( LOCAL_COMM_ID 1 )
-set(APP_FILE analyzeApp.xml)
+set(APP_FILE analyzeApp_0.xml)
 set(INPUT_FILE --input-config=Scenario_0.xml)
-Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
+Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_1_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
+
+# Define/add a performer
+set( LOCAL_COMM_ID 2 )
+set(APP_FILE analyzeApp_1.xml)
+set(INPUT_FILE --input-config=Scenario_1.xml)
+Plato_add_performer(PLATO_NEW_TEST ${ANALYZE_BINARY} ${ANALYZE_2_NP} ${LOCAL_COMM_ID} ${INTERFACE_FILE} ${APP_FILE} ${INPUT_FILE})
 
 # Add the test
 set(INPUT_MESH bolted_bracket.exo)

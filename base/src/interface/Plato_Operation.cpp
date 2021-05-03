@@ -89,8 +89,8 @@ addArgument(const std::string & tArgumentName,
             if(std::count(aLocalData.begin(), aLocalData.end(), tSharedData) == 0)
             {
                 aLocalData.push_back(tSharedData);
-                tFoundData = true;
             }
+            tFoundData = true;
             break;
         }
     }
