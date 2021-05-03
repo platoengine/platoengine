@@ -1,0 +1,89 @@
+<Operation>
+    <Function>ComputeCriterionValue</Function>
+    <Criterion>Internal Elastic Energy</Criterion>
+    <Name>Compute Scenario 0:Internal Elastic Energy Value</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Value</Argument>
+        <ArgumentName>Scenario 0:Internal Elastic Energy Value</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterionGradient</Function>
+    <Criterion>Internal Elastic Energy</Criterion>
+    <Name>Compute Scenario 0:Internal Elastic Energy Gradient</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Gradient</Argument>
+        <ArgumentName>Scenario 0:Internal Elastic Energy Gradient</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterion</Function>
+    <Criterion>Internal Elastic Energy</Criterion>
+    <Name>Compute Scenario 0:Internal Elastic Energy</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Gradient</Argument>
+        <ArgumentName>Scenario 0:Internal Elastic Energy Gradient</ArgumentName>
+    </Output>
+    <Output>
+        <Argument>Value</Argument>
+        <ArgumentName>Scenario 0:Internal Elastic Energy Value</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterionValue</Function>
+    <Criterion>Design Volume</Criterion>
+    <Name>Design Volume</Name>
+    <Output>
+        <Argument>Value</Argument>
+        <ArgumentName>Design Volume</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterionValue</Function>
+    <Criterion>My Volume</Criterion>
+    <Name>Compute Scenario 0:My Volume Value</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Value</Argument>
+        <ArgumentName>Scenario 0:My Volume Value</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterionGradient</Function>
+    <Criterion>My Volume</Criterion>
+    <Name>Compute Scenario 0:My Volume Gradient</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Gradient</Argument>
+        <ArgumentName>Scenario 0:My Volume Gradient</ArgumentName>
+    </Output>
+</Operation>
+<Operation>
+    <Function>ComputeCriterion</Function>
+    <Criterion>My Volume</Criterion>
+    <Name>Compute Scenario 0:My Volume</Name>
+    <Input>
+        <ArgumentName>Topology</ArgumentName>
+    </Input>
+    <Output>
+        <Argument>Gradient</Argument>
+        <ArgumentName>Scenario 0:My Volume Gradient</ArgumentName>
+    </Output>
+    <Output>
+        <Argument>Value</Argument>
+        <ArgumentName>Scenario 0:My Volume Value</ArgumentName>
+    </Output>
+</Operation>
