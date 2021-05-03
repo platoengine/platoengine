@@ -197,7 +197,10 @@ private:
         "flux", 
         "frf_mismatch", 
         "limit_stress",
-        "compliance_and_volume_min"
+        "compliance_and_volume_min",
+        "average_surface_pressure",
+        "average_surface_temperature",
+        "flow_rate"
     };
 
 public:
@@ -1088,6 +1091,7 @@ private:
         {
             { "steady_state_mechanics", {"Mechanical", "Elliptic"} },
             { "transient_mechanics", {"Mechanical", "Hyperbolic"} },
+            { "steady_state_incompressible_fluids", {"Incompressible Fluids", "Hyperbolic"} },
             { "steady_state_thermal", {"Thermal", "Elliptic"} },
             { "transient_thermal", {"Thermal", "Parabolic"} },
             { "steady_state_electrical", {"Electrical", "Elliptic"} },
@@ -1149,7 +1153,9 @@ struct ValidAnalyzeCriteriaKeys
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
-
+        { "average_surface_temperature", { "Average Surface Temperature", false } },
+        { "average_surface_pressure", { "Average Surface Pressure", false } },
+        { "flow_rate", { "Flow Rate", false } },
     };
 };
 // ValidAnalyzeCriteriaKeys
@@ -1193,7 +1199,8 @@ private:
             {"steady_state_electrical", { {"potential", "0"} } },
             {"steady_state_thermomechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
             {"transient_thermomechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"temp", "3"} } },
-            {"steady_state_electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } }
+            {"steady_state_electromechanics", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"}, {"potential", "3"} } },
+            {"steady_state_incompressible_fluids", { {"velx", "0"}, {"vely", "1"}, {"velz", "2"}, {"press", "0"}, {"temp", "0"} } }
             // not sure of DOFs {"plasticity", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } }
             // not sure of DOFs {"thermoplasticity", { {"dispx", "0"}, {"dispy", "1"}, {"dispz", "2"} } }
         };

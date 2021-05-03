@@ -945,6 +945,25 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated_E
     ASSERT_THROW(tInterface.call("Thermal Boundary Condition with ID 1", "steady_state_thermal", tBC, tDocument), std::runtime_error);
 }
 
+TEST(PlatoTestXMLGenerator, PhysicsToDofEssentialBCBlockPair)
+{
+    // TODO: FINISH
+    std::unordered_map<std::string, std::unordered_map<std::string,std::string>> tMap = 
+    { 
+        { "steady_state_incompressible_fluids", { {"velx", "Velocity Essential Boundary Conditions"}, {"vely", "Velocity Essential Boundary Conditions"}, {"velz", "Velocity Essential Boundary Conditions"}, {"press", "Pressure Essential Boundary Conditions"}, {"temp", "Temperature Essential Boundary Conditions"} } },
+        { "steady_state_mechanics", { {"dispx", "Essential Boundary Conditions"}, {"dispy", "Essential Boundary Conditions"}, {"dispz", "Essential Boundary Conditions"} } },
+        { "transient_mechanics", { {"dispx", "Displacement Boundary Conditions"}, {"dispy", "Displacement Boundary Conditions"}, {"dispz", "Displacement Boundary Conditions"} } },
+        { "steady_state_thermal", { {"temp", "Essential Boundary Conditions"} } },
+        { "transient_thermal", { {"temp", "Essential Boundary Conditions"} } },
+        { "steady_state_electrical", { {"potential", "Essential Boundary Conditions"} } },
+        { "steady_state_thermomechanics", { {"dispx", "Essential Boundary Conditions"}, {"dispy", "Essential Boundary Conditions"}, {"dispz", "Essential Boundary Conditions"}, {"temp", "Essential Boundary Conditions"} } },
+        { "transient_thermomechanics", { {"dispx", "Essential Boundary Conditions"}, {"dispy", "Essential Boundary Conditions"}, {"dispz", "Essential Boundary Conditions"}, {"temp", "Essential Boundary Conditions"} } },
+        { "transient_thermomechanics", { {"dispx", "Essential Boundary Conditions"}, {"dispy", "Essential Boundary Conditions"}, {"dispz", "Essential Boundary Conditions"}, {"temp", "Essential Boundary Conditions"} } },
+    };
+
+    //tDocument.save_file("dummy.xml");
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryCondition_CategoryInsulated)
 {
     XMLGen::EssentialBoundaryCondition tBC;

@@ -702,7 +702,7 @@ void get_scenario_list_from_objectives_and_constraints
 /**********************************************************************************/
 std::string get_essential_boundary_condition_block_title(XMLGen::Scenario &aScenario)
 {
-    ValidEssentialBoundaryConditionBlockTitleKeys tValidTitleMap;
+    XMLGen::ValidEssentialBoundaryConditionBlockTitleKeys tValidTitleMap;
     std::string tReturnValue = tValidTitleMap.value(aScenario.physics());
     return tReturnValue;
 }
