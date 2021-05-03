@@ -434,6 +434,36 @@ inline void preprocess_load_inputs
 // function preprocess_load_inputs
 
 /******************************************************************************//**
+ * \fn load_value_to_string
+ * \brief Take a load value and convert it to a string that is acceptable in a Teuchos MathExor
+ * \param [in] aLoadValue Numeric value of the load
+ * \return  string representation of the load
+**********************************************************************************/
+inline std::string load_value_to_string(const double aLoadValue)
+{
+    if (aLoadValue == 0.0)
+        return std::string("0.0");
+
+    std::string tLoadString = Plato::to_string(aLoadValue);
+    size_t tIndexOfE = tLoadString.find('e');
+    if (tIndexOfE == std::string::npos)
+        return tLoadString;
+    
+    size_t tNumCharsToErase = 0;
+    for (size_t tStringIndex = tIndexOfE + 1; tStringIndex < tLoadString.size(); ++tStringIndex)
+    {
+        if ( (tLoadString[tStringIndex] == '0') || (tLoadString[tStringIndex] == '+') )
+            ++tNumCharsToErase;
+        else
+            break;
+    }
+    if (tNumCharsToErase > 0)
+        tLoadString.erase(tIndexOfE + 1, tNumCharsToErase);
+    
+    return tLoadString;
+}
+
+/******************************************************************************//**
  * \fn postprocess_load_outputs
  * \brief Post-process non-deterministic load outputs.
  * \param [in/out] aSromOutputs     SROM problem output metadata
@@ -466,7 +496,7 @@ inline void postprocess_load_outputs
             std::vector<std::string> tValues;
             for (size_t tDim = 0; tDim < tLoadCase.numLoadValues(tLoadIndex); ++tDim)
             {
-                tValues.push_back(Plato::to_string(tLoadCase.loadValue(tLoadIndex, tDim)));
+                tValues.push_back(Plato::srom::load_value_to_string(tLoadCase.loadValue(tLoadIndex, tDim)));
             }
             tNewLoad.load_values(tValues);
             tNewLoad.id(tLoadCase.loadID(tLoadIndex));

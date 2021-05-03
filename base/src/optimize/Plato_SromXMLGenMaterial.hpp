@@ -67,7 +67,7 @@ inline void append_material_properties
 
     auto tMatID = aMaterial.id();
     aRandomMaterial.materialID(tMatID);
-    aRandomMaterial.category(aMaterial.category());
+    aRandomMaterial.category(aMaterial.materialModel());
     aRandomMaterial.name(aMaterial.name());
     auto tTags = aMaterial.tags();
 
@@ -294,7 +294,7 @@ inline XMLGen::RandomMaterialCase build_material_set
     {
         XMLGen::Material tNewMaterial;
         tNewMaterial.id(tRandomMaterial.materialID());
-        tNewMaterial.category(tRandomMaterial.category());
+        tNewMaterial.materialModel(tRandomMaterial.category());
         tNewMaterial.name(tRandomMaterial.name());
         auto tTags = tRandomMaterial.tags();
         for(auto& tTag : tTags)

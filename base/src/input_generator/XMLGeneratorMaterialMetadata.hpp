@@ -86,21 +86,21 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn category
+     * \fn materialModel
      * \brief Return material category.
      * \return category
     **********************************************************************************/
-    std::string category() const
+    std::string materialModel() const
     {
         return mCategory;
     }
 
     /******************************************************************************//**
-     * \fn category
+     * \fn materialModel
      * \brief Set material category.
      * \param [in] aCategory category
     **********************************************************************************/
-    void category(const std::string& aCategory)
+    void materialModel(const std::string& aCategory)
     {
         mCategory = aCategory;
     }

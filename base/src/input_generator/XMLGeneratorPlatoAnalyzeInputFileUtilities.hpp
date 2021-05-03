@@ -285,11 +285,23 @@ void append_spatial_model_to_plato_problem
  * \fn append_material_model_to_plato_problem
  * \brief Append material model to plato problem parameter list.
  * \param [in]     aMaterials List of materials
+ * \param [in]     aXMLMetaData Plato problem input data
  * \param [in/out] aParentNode  pugi::xml_node
 **********************************************************************************/
 void append_material_model_to_plato_problem
 (const std::vector<XMLGen::Material>& aMaterials,
+ const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_pressure_and_temperature_scaling_to_material_models
+ * \brief Append material model to plato problem parameter list.
+ * \param [in]     aXMLMetaData     Plato problem input data
+ * \param [in/out] aMaterialModels  pugi::xml_node
+**********************************************************************************/
+void append_pressure_and_temperature_scaling_to_material_models
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aMaterialModels);
 
 /******************************************************************************//**
  * \fn append_material_models_to_plato_analyze_input_deck
