@@ -270,7 +270,7 @@ public:
 
     bool needToDoWeightingInAggregator() const
     {
-        return (objective.type == "weighted_sum");
+        return (objective.type == "weighted_sum") || (objective.criteriaIDs.size() > 1);
         //return !allSubObjectivesOnOnePlatoAnalyzePerformer();
     }
 
