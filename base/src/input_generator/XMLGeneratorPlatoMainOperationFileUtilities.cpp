@@ -562,7 +562,6 @@ void append_aggregate_data_to_plato_main_operation
     auto tOperation = aDocument.append_child("Operation");
     XMLGen::append_children({"Name", "Function"}, {"Aggregate Data", "Aggregator"}, tOperation);
     XMLGen::Objective tObjective = aXMLMetaData.objective;
-
     // Aggregate values
     auto tAggregateNode = tOperation.append_child("Aggregate");
     XMLGen::append_children({"Layout"}, {"Value"}, tAggregateNode);

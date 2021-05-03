@@ -1318,6 +1318,55 @@ TEST(PlatoTestXMLGenerator, AppendThermoplasticityNaturalBoundaryConditionsToPla
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_pressure)
+{
+    XMLGen::InputData tXMLMetaData;
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
+    XMLGen::NaturalBoundaryCondition tLoad;
+    tLoad.type("pressure");
+    tLoad.id("1");
+    tLoad.location_name("ss_1");
+    std::vector<std::string> tValues = {"1.0"};
+    tLoad.load_values(tValues);
+    tXMLMetaData.loads.push_back(tLoad);
+
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("steady_state_mechanics");
+    std::vector<std::string> tLoadIDs = {"1"};
+    tScenario.setLoadIDs(tLoadIDs);
+    tXMLMetaData.append(tScenario);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+
+    auto tLoadParamList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tLoadParamList.empty());
+    ASSERT_STREQ("ParameterList", tLoadParamList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Natural Boundary Conditions"}, tLoadParamList);
+
+    auto tTraction = tLoadParamList.child("ParameterList");
+    ASSERT_FALSE(tTraction.empty());
+    ASSERT_STREQ("ParameterList", tTraction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Pressure Boundary Condition with ID 1"}, tTraction);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Values", "Array(double)", "{1.0}"}, {"Sides", "string", "ss_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tLoadParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+}
+
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck_RandomUseCase)
 {
     XMLGen::InputData tXMLMetaData;
@@ -1433,7 +1482,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_UniformPressure)
 {
     XMLGen::NaturalBoundaryCondition tLoad;
-    tLoad.type("uniform_pressure");
+    tLoad.type("pressure");
     tLoad.id("1");
     tLoad.location_name("ss_1");
     std::vector<std::string> tValues = {"1.0"};
@@ -1551,7 +1600,7 @@ TEST(PlatoTestXMLGenerator, NaturalBoundaryConditionTag)
 
     // PRESSURE TEST
     tLoad.is_random("false");
-    tLoad.type("uniform_pressure");
+    tLoad.type("pressure");
     tName = tInterface.call(tLoad);
     ASSERT_STREQ("Uniform Pressure Boundary Condition with ID 1", tName.c_str());
 

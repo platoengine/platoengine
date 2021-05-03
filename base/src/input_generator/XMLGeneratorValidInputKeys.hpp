@@ -829,7 +829,8 @@ struct ValidPhysicsNBCCombinations
     {
         {"steady_state_mechanics", 
             {
-                {"traction", {"Natural Boundary Conditions"}}
+                {"traction", {"Natural Boundary Conditions"}},
+                {"pressure", {"Natural Boundary Conditions"}}
             }
         },
         {"steady_state_thermal", 
@@ -840,12 +841,14 @@ struct ValidPhysicsNBCCombinations
         { "steady_state_thermomechanics", 
             {
                 {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}},
-                {"traction", {"Mechanical Natural Boundary Conditions"}} 
+                {"traction", {"Mechanical Natural Boundary Conditions"}}, 
+                {"pressure", {"Mechanical Natural Boundary Conditions"}} 
             }
         },
         {"transient_mechanics", 
             {
-                {"traction", {"Natural Boundary Conditions"}}
+                {"traction", {"Natural Boundary Conditions"}},
+                {"pressure", {"Natural Boundary Conditions"}}
             }
         },
         {"plasticity", 
