@@ -73,7 +73,6 @@ void ParseMaterial::insertThermalProperties()
 
 void ParseMaterial::insertPlasticProperties()
 {
-    mTags.insert({ "pressure_scaling", { { {"pressure_scaling"}, ""}, "" } });
     mTags.insert({ "initial_yield_stress", { { {"initial_yield_stress"}, ""}, "" } });
     mTags.insert({ "hardening_modulus_isotropic", { { {"hardening_modulus_isotropic"}, ""}, "" } });
     mTags.insert({ "hardening_modulus_kinematic", { { {"hardening_modulus_kinematic"}, ""}, "" } });
@@ -126,14 +125,14 @@ void ParseMaterial::setMaterialModel(XMLGen::Material& aMetadata)
     else
     {
         auto tValidMatModel = XMLGen::check_material_model_key(tItr->second.first.second);
-        aMetadata.category(tValidMatModel);
+        aMetadata.materialModel(tValidMatModel);
     }
 }
 
 void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 {
     XMLGen::ValidMaterialPropertyKeys tValidKeys;
-    auto tMaterialModel = aMetadata.category();
+    auto tMaterialModel = aMetadata.materialModel();
     auto tPropertyTags = tValidKeys.properties(tMaterialModel);
     for(auto& tKeyword : tPropertyTags)
     {

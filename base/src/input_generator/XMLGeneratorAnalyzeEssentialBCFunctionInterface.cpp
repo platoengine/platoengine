@@ -118,6 +118,35 @@ void append_fixed_value_essential_boundary_condition_to_plato_problem
 }
 // function append_fixed_value_essential_boundary_condition_to_plato_problem
 
+void append_time_function_essential_boundary_condition_to_plato_problem
+(const std::string& aName,
+ const std::string& aPhysics,
+ const XMLGen::EssentialBoundaryCondition& aBC,
+ pugi::xml_node &aParentNode)
+{
+    auto tBCName = aName + " applied to Dof with tag " + Plato::toupper(aBC.value("degree_of_freedom"));
+    auto tEssentialBoundaryCondParentNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tBCName}, tEssentialBoundaryCondParentNode);
+
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Type", "string", "Time Dependent"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    XMLGen::ValidDofsKeys tValidDofs;
+    auto tDofInteger = tValidDofs.dof(aPhysics, aBC.value("degree_of_freedom"));
+    tValues = {"Index", "int", tDofInteger};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    auto tSetName = XMLGen::Private::check_essential_boundary_condition_application_name_keyword(aBC);
+    tValues = {"Sides", "string", tSetName};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+
+    XMLGen::Private::check_essential_boundary_condition_value_keyword(aBC);
+    tValues = {"Function", "string", aBC.value("value")};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tEssentialBoundaryCondParentNode);
+}
+// function append_fixed_value_essential_boundary_condition_to_plato_problem
+
 }
 // namespace Private
 
@@ -152,6 +181,11 @@ void AppendEssentialBoundaryCondition::insert()
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_zero_value_essential_boundary_condition_to_plato_problem));
     mMap.insert(std::make_pair("insulated",
       std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_zero_value_essential_boundary_condition_to_plato_problem, tFuncIndex)));
+    
+    // time_function
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_time_function_essential_boundary_condition_to_plato_problem));
+    mMap.insert(std::make_pair("time_function",
+      std::make_pair((XMLGen::Analyze::EssentialBCFunc)XMLGen::Private::append_time_function_essential_boundary_condition_to_plato_problem, tFuncIndex)));
 }
 
 void AppendEssentialBoundaryCondition::call

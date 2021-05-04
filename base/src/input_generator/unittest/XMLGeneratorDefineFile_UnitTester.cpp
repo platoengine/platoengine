@@ -766,12 +766,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
-    tMaterial1.category("isotropic");
+    tMaterial1.materialModel("isotropic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
-    tMaterial2.category("isotropic");
+    tMaterial2.materialModel("isotropic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
 
@@ -783,12 +783,12 @@ TEST(PlatoTestXMLGenerator, ReturnMaterialPropertiesTagsForDefineXmlFile)
     // POSE MATERIAL SET 2
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
-    tMaterial3.category("isotropic");
+    tMaterial3.materialModel("isotropic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
-    tMaterial4.category("isotropic");
+    tMaterial4.materialModel("isotropic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
 
@@ -969,12 +969,12 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     // POSE MATERIAL SET 1
     XMLGen::Material tMaterial1;
     tMaterial1.id("2");
-    tMaterial1.category("isotropic");
+    tMaterial1.materialModel("isotropic");
     tMaterial1.property("youngs_modulus", "1");
     tMaterial1.property("poissons_ratio", "0.3");
     XMLGen::Material tMaterial2;
     tMaterial2.id("2");
-    tMaterial2.category("isotropic");
+    tMaterial2.materialModel("isotropic");
     tMaterial2.property("youngs_modulus", "1");
     tMaterial2.property("poissons_ratio", "0.3");
 
@@ -986,12 +986,12 @@ TEST(PlatoTestXMLGenerator, PrepareRandomMaterialPropertiesForDefineXmlFile)
     // POSE MATERIAL SET 2
     XMLGen::Material tMaterial3;
     tMaterial3.id("2");
-    tMaterial3.category("isotropic");
+    tMaterial3.materialModel("isotropic");
     tMaterial3.property("youngs_modulus", "1.1");
     tMaterial3.property("poissons_ratio", "0.33");
     XMLGen::Material tMaterial4;
     tMaterial4.id("2");
-    tMaterial4.category("isotropic");
+    tMaterial4.materialModel("isotropic");
     tMaterial4.property("youngs_modulus", "1");
     tMaterial4.property("poissons_ratio", "0.3");
 

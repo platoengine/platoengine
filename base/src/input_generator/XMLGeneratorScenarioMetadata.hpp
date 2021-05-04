@@ -346,10 +346,45 @@ public:
 
     /******************************************************************************//**
      * \fn weightMassScaleFactor
+     * \brief Set string value for Sierra/SD weight/mass scale factor
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void weightMassScaleFactor(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn weightMassScaleFactor
      * \brief Return string value Sierra/SD weight/mass scale factor
      * \return value
     **********************************************************************************/
     std::string weightMassScaleFactor() const;
+
+    /******************************************************************************//**
+     * \fn pressureScaling
+     * \brief Set string value for keyword 'pressure_scaling'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void pressureScaling(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn pressureScaling
+     * \brief Return string value for keyword 'pressure_scaling'.
+     * \return value
+    **********************************************************************************/
+    std::string pressureScaling() const;
+
+    /******************************************************************************//**
+     * \fn temperatureScaling
+     * \brief Set string value for keyword 'temperature_scaling'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void temperatureScaling(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn temperatureScaling
+     * \brief Return string value for keyword 'temperature_scaling'.
+     * \return value
+    **********************************************************************************/
+    std::string temperatureScaling() const;
     
     std::string frequency_min() const {return this->getValue("frequency_min"); }
     std::string frequency_max() const {return this->getValue("frequency_max"); }

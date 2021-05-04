@@ -162,7 +162,7 @@ private:
         {
             THROWERR("Random Use Case: Material identification number is empty, i.e. material id is not defined.")
         }
-        if(aMaterial.category().empty())
+        if(aMaterial.materialModel().empty())
         {
             THROWERR("Random Use Case: Material category is empty, i.e. category is not defined.")
         }

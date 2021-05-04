@@ -425,7 +425,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_OneMaterial)
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
     ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
     ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
-    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].materialModel().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
@@ -460,7 +460,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     ASSERT_STREQ("plato_analyze", tMaterialMetaData[0].code().c_str());
     ASSERT_STREQ("0.33", tMaterialMetaData[0].property("poissons_ratio").c_str());
     ASSERT_STREQ("200e9", tMaterialMetaData[0].property("youngs_modulus").c_str());
-    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[0].materialModel().c_str());
 
     tTags = tMaterialMetaData[1].tags();
     ASSERT_EQ(3u, tTags.size());
@@ -468,7 +468,7 @@ TEST(PlatoTestXMLGenerator, ParseMaterial_TwoMaterial)
     ASSERT_STREQ("0.35", tMaterialMetaData[1].property("poissons_ratio").c_str());
     ASSERT_STREQ("100e9", tMaterialMetaData[1].property("youngs_modulus").c_str());
     ASSERT_STREQ("3.0", tMaterialMetaData[1].property("penalty_exponent").c_str());
-    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[1].category().c_str());
+    ASSERT_STREQ("isotropic_linear_elastic", tMaterialMetaData[1].materialModel().c_str());
 }
 
 TEST(PlatoTestXMLGenerator, ParseConstraint_ErrorEmptyConstraintMetadata)
