@@ -361,8 +361,8 @@ decltype(Aggregator::mWeights) Aggregator::getWeights()
             }
         }
     }
-    else
-    {
+//    else
+//    {
         if(!mWeightNormals.empty())
         {
             int tNvals = mWeightNormals.size();
@@ -377,7 +377,7 @@ decltype(Aggregator::mWeights) Aggregator::getWeights()
                 tWeights[tIval] /= N[tIval];
             }
         }
-    }
+//    }
     return tWeights;
 }
 

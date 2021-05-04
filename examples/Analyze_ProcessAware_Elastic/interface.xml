@@ -1,12 +1,20 @@
+<Console>
+    <Enabled>true</Enabled>
+</Console>
 <Performer>
     <Name>PlatoMain</Name>
     <Code>Plato_Main</Code>
     <PerformerID>0</PerformerID>
 </Performer>
 <Performer>
-    <Name>Analyze</Name>
+    <Name>Analyze_0</Name>
     <Code>Analyze</Code>
     <PerformerID>1</PerformerID>
+</Performer>
+<Performer>
+    <Name>Analyze_1</Name>
+    <Code>Analyze</Code>
+    <PerformerID>2</PerformerID>
 </Performer>
 <SharedData>
     <Name>Topology</Name>
@@ -14,7 +22,8 @@
     <Layout>Nodal Field</Layout>
     <OwnerName>PlatoMain</OwnerName>
     <UserName>PlatoMain</UserName>
-    <UserName>Analyze</UserName>
+    <UserName>Analyze_0</UserName>
+    <UserName>Analyze_1</UserName>
 </SharedData>
 <SharedData>
     <Name>Optimization DOFs</Name>
@@ -22,7 +31,8 @@
     <Layout>Nodal Field</Layout>
     <OwnerName>PlatoMain</OwnerName>
     <UserName>PlatoMain</UserName>
-    <UserName>Analyze</UserName>
+    <UserName>Analyze_0</UserName>
+    <UserName>Analyze_1</UserName>
 </SharedData>
 <SharedData>
     <Name>Lower Bound Value</Name>
@@ -98,14 +108,14 @@
     <Name>Scenario 0:Internal Elastic Energy</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <SharedData>
     <Name>Scenario 1:Internal Elastic Energy</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_1</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <Stage>
@@ -127,7 +137,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 0:Internal Elastic Energy Value</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -139,7 +149,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 1:Internal Elastic Energy Value</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_1</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -157,11 +167,19 @@
             <SharedDataName>Scenario 0:Internal Elastic Energy</SharedDataName>
         </Input>
         <Input>
+            <ArgumentName>Basis 1</ArgumentName>
+            <SharedDataName>Scenario 0:Internal Elastic Energy</SharedDataName>
+        </Input>
+        <Input>
             <ArgumentName>Normal 1</ArgumentName>
             <SharedDataName>Initial Scenario 0:Internal Elastic Energy Value</SharedDataName>
         </Input>
         <Input>
             <ArgumentName>Value 2</ArgumentName>
+            <SharedDataName>Scenario 1:Internal Elastic Energy</SharedDataName>
+        </Input>
+        <Input>
+            <ArgumentName>Basis 2</ArgumentName>
             <SharedDataName>Scenario 1:Internal Elastic Energy</SharedDataName>
         </Input>
         <Input>
@@ -188,14 +206,14 @@
     <Name>Scenario 0:Internal Elastic Energy Gradient</Name>
     <Type>Scalar</Type>
     <Layout>Nodal Field</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <SharedData>
     <Name>Scenario 1:Internal Elastic Energy Gradient</Name>
     <Type>Scalar</Type>
     <Layout>Nodal Field</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_1</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <Stage>
@@ -217,7 +235,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 0:Internal Elastic Energy Gradient</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -229,7 +247,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 1:Internal Elastic Energy Gradient</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_1</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -247,12 +265,20 @@
             <SharedDataName>Scenario 0:Internal Elastic Energy Gradient</SharedDataName>
         </Input>
         <Input>
+            <ArgumentName>Basis 1</ArgumentName>
+            <SharedDataName>Scenario 0:Internal Elastic Energy</SharedDataName>
+        </Input>
+        <Input>
             <ArgumentName>Normal 1</ArgumentName>
             <SharedDataName>Initial Scenario 0:Internal Elastic Energy Value</SharedDataName>
         </Input>
         <Input>
             <ArgumentName>Field 2</ArgumentName>
             <SharedDataName>Scenario 1:Internal Elastic Energy Gradient</SharedDataName>
+        </Input>
+        <Input>
+            <ArgumentName>Basis 2</ArgumentName>
+            <SharedDataName>Scenario 1:Internal Elastic Energy</SharedDataName>
         </Input>
         <Input>
             <ArgumentName>Normal 2</ArgumentName>
@@ -309,7 +335,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 0:My Volume Value</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -327,7 +353,7 @@
     <Name>Scenario 0:My Volume</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <Stage>
@@ -349,7 +375,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 0:My Volume Gradient</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -390,21 +416,21 @@
     <Name>Unfiltered Scenario 0:My Volume Gradient</Name>
     <Type>Scalar</Type>
     <Layout>Nodal Field</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <SharedData>
     <Name>Initial Scenario 0:Internal Elastic Energy Value</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <SharedData>
     <Name>Initial Scenario 1:Internal Elastic Energy Value</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_1</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <Stage>
@@ -434,7 +460,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 0:Internal Elastic Energy Value</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -446,7 +472,7 @@
     </Operation>
     <Operation>
         <Name>Compute Scenario 1:Internal Elastic Energy Value</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_1</PerformerName>
         <Input>
             <ArgumentName>Topology</ArgumentName>
             <SharedDataName>Topology</SharedDataName>
@@ -461,14 +487,14 @@
     <Name>Design Volume</Name>
     <Type>Scalar</Type>
     <Layout>Global</Layout>
-    <OwnerName>Analyze</OwnerName>
+    <OwnerName>Analyze_0</OwnerName>
     <UserName>PlatoMain</UserName>
 </SharedData>
 <Stage>
     <Name>Design Volume</Name>
     <Operation>
         <Name>Design Volume</Name>
-        <PerformerName>Analyze</PerformerName>
+        <PerformerName>Analyze_0</PerformerName>
         <Output>
             <ArgumentName>Design Volume</ArgumentName>
             <SharedDataName>Design Volume</SharedDataName>
@@ -495,7 +521,7 @@
 <Optimizer>
     <Package>OC</Package>
     <Convergence>
-        <MaxIterations>3</MaxIterations>
+        <MaxIterations>5</MaxIterations>
     </Convergence>
     <Output>
         <OutputStage>Output To File</OutputStage>
