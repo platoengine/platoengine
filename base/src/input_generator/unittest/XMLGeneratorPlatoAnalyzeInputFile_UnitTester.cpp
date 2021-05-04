@@ -1152,6 +1152,42 @@ TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInput
     }
 }
 
+TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInputDeck_Error_UnsuportedDOF)
+{
+    // POSE PROBLEM
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::EssentialBoundaryCondition tBC;
+    tBC.property("id", "1");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "dispz");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    tBC.property("id", "2");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "dispy");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    tBC.property("id", "3");
+    tBC.property("location_name", "ss_1");
+    tBC.property("type", "zero_value");
+    tBC.property("degree_of_freedom", "velx");
+    tBC.property("value", "0");
+    tXMLMetaData.ebcs.push_back(tBC);
+    XMLGen::Scenario tScenario;
+    tScenario.id("1");
+    tScenario.physics("steady_state_mechanics");
+    std::vector<std::string> bcIDs = {{"1"},{"2"},{"3"}};
+    tScenario.setBCIDs(bcIDs);
+    tXMLMetaData.append(tScenario);
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+
+    // CALL FUNCTION
+    pugi::xml_document tDocument;
+    ASSERT_THROW(XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(tXMLMetaData, tDocument), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, AppendEssentialBoundaryConditionsToPlatoAnalyzeInputDeck_Mechanics)
 {
     // POSE PROBLEM
