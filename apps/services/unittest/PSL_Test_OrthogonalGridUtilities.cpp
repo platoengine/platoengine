@@ -672,7 +672,7 @@ PSL_TEST(OrthogonalGridUtilities, computeGridPointUVWCoordinates)
     EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
 }
 
-PSL_TEST(OrthogonalGridUtilities, computeGradientOfTetNodeDensityWRTGridDensity)
+PSL_TEST(OrthogonalGridUtilities, computeGradientOfDensityWRTGridDensity)
 {
     Vector tUBasisVector({1,0,0});
     Vector tVBasisVector({0,1,0});
@@ -688,7 +688,7 @@ PSL_TEST(OrthogonalGridUtilities, computeGradientOfTetNodeDensityWRTGridDensity)
 
     std::vector<std::vector<size_t>> tContainingGridElement;
     std::vector<double> tLocalGradientValues;
-    tUtilities.computeGradientOfTetNodeDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
+    tUtilities.computeGradientOfDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
 
     std::vector<std::vector<size_t>> tGoldGridElement;
     tGoldGridElement.push_back({0,0,0});

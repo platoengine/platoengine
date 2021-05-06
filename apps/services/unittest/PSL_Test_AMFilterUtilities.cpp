@@ -1539,9 +1539,187 @@ PSL_TEST(AMFilterUtilities, postMultiplyTetMeshPrintableDensityGradient)
     example::Interface_ParallelVector tBogusInputGradient({1,1,1});
     EXPECT_THROW(tAMFilterUtilities.postMultiplyTetMeshPrintableDensityGradient(&tBogusInputGradient,tOutputGradient),std::domain_error);
 
-    // tAMFilterUtilities.postMultiplyTetMeshPrintableDensityGradient(tGridPrintableDensity,&tInputGradient);
+    tAMFilterUtilities.postMultiplyTetMeshPrintableDensityGradient(&tInputGradient,tOutputGradient);
+
+
+    // manually calculate gradient of trilinear interpolation for the above geometry
+
+    double dA0dG0 = 1;
+    double dA0dG1 = 0;
+    double dA0dG2 = 0;
+    double dA0dG3 = 0;
+    double dA0dG4 = 0;
+    double dA0dG5 = 0;
+    double dA0dG6 = 0;
+    double dA0dG7 = 0;
+
+    double dA1dG0 = -4.0/8.0;
+    double dA1dG1 = 0;
+    double dA1dG2 = 0;
+    double dA1dG3 = 0;
+    double dA1dG4 = 4.0/8.0;
+    double dA1dG5 = 0;
+    double dA1dG6 = 0;
+    double dA1dG7 = 0;
+
+    double dA2dG0 = -4.0/8.0;
+    double dA2dG1 = 0;
+    double dA2dG2 = 4.0/8.0;
+    double dA2dG3 = 0;
+    double dA2dG4 = 0;
+    double dA2dG5 = 0;
+    double dA2dG6 = 0;
+    double dA2dG7 = 0;
+
+    double dA3dG0 = -4.0/8.0;
+    double dA3dG1 = 4.0/8.0;
+    double dA3dG2 = 0;
+    double dA3dG3 = 0;
+    double dA3dG4 = 0;
+    double dA3dG5 = 0;
+    double dA3dG6 = 0;
+    double dA3dG7 = 0;
+
+    double dT0dG0 = dA0dG0;
+    double dT1dG0 = dA0dG0 + dA1dG0;
+    double dT2dG0 = dA0dG0 + dA2dG0;
+    double dT3dG0 = dA0dG0 + dA3dG0;
+
+    double dT0dG1 = dA0dG1;
+    double dT1dG1 = dA0dG1 + dA1dG1;
+    double dT2dG1 = dA0dG1 + dA2dG1;
+    double dT3dG1 = dA0dG1 + dA3dG1;
+
+    double dT0dG2 = dA0dG2;
+    double dT1dG2 = dA0dG2 + dA1dG2;
+    double dT2dG2 = dA0dG2 + dA2dG2;
+    double dT3dG2 = dA0dG2 + dA3dG2;
+
+    double dT0dG3 = dA0dG3;
+    double dT1dG3 = dA0dG3 + dA1dG3;
+    double dT2dG3 = dA0dG3 + dA2dG3;
+    double dT3dG3 = dA0dG3 + dA3dG3;
+
+    double dT0dG4 = dA0dG4;
+    double dT1dG4 = dA0dG4 + dA1dG4;
+    double dT2dG4 = dA0dG4 + dA2dG4;
+    double dT3dG4 = dA0dG4 + dA3dG4;
+
+    double dT0dG5 = dA0dG5;
+    double dT1dG5 = dA0dG5 + dA1dG5;
+    double dT2dG5 = dA0dG5 + dA2dG5;
+    double dT3dG5 = dA0dG5 + dA3dG5;
+
+    double dT0dG6 = dA0dG6;
+    double dT1dG6 = dA0dG6 + dA1dG6;
+    double dT2dG6 = dA0dG6 + dA2dG6;
+    double dT3dG6 = dA0dG6 + dA3dG6;
+
+    double dT0dG7 = dA0dG7;
+    double dT1dG7 = dA0dG7 + dA1dG7;
+    double dT2dG7 = dA0dG7 + dA2dG7;
+    double dT3dG7 = dA0dG7 + dA3dG7;
+
+    double tGold0 = dT0dG0 + dT1dG0 + dT2dG0 + dT3dG0;
+    double tGold1 = dT0dG1 + dT1dG1 + dT2dG1 + dT3dG1;
+    double tGold2 = dT0dG2 + dT1dG2 + dT2dG2 + dT3dG2;
+    double tGold3 = dT0dG3 + dT1dG3 + dT2dG3 + dT3dG3;
+    double tGold4 = dT0dG4 + dT1dG4 + dT2dG4 + dT3dG4;
+    double tGold5 = dT0dG5 + dT1dG5 + dT2dG5 + dT3dG5;
+    double tGold6 = dT0dG6 + dT1dG6 + dT2dG6 + dT3dG6;
+    double tGold7 = dT0dG7 + dT1dG7 + dT2dG7 + dT3dG7;
+
+    EXPECT_EQ(tOutputGradient.size(),8u);
+    EXPECT_DOUBLE_EQ(tOutputGradient[0],tGold0);
+    EXPECT_DOUBLE_EQ(tOutputGradient[1],tGold1);
+    EXPECT_DOUBLE_EQ(tOutputGradient[2],tGold2);
+    EXPECT_DOUBLE_EQ(tOutputGradient[3],tGold3);
+    EXPECT_DOUBLE_EQ(tOutputGradient[4],tGold4);
+    EXPECT_DOUBLE_EQ(tOutputGradient[5],tGold5);
+    EXPECT_DOUBLE_EQ(tOutputGradient[6],tGold6);
+    EXPECT_DOUBLE_EQ(tOutputGradient[7],tGold7);
+}
+
+PSL_TEST(AMFilterUtilities, postMultiplyGridBlueprintDensityGradient)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({0.25,0.25,0.25});
+
+    double tTargetEdgeLength = 0.26;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    example::Interface_ParallelVector tOutputGradient(std::vector<double>(4u));
+    std::vector<double> tInputGridGradient = {1.1,2.3,4.0,1.0,6.0,0.5,1.0,1.3};
+
+    example::Interface_ParallelVector tBogusOutputGradient(std::vector<double>(9));
+    std::vector<double> tBogusInputGradient(3);
+
+    // input gradient wrong size
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyGridBlueprintDensityGradient(tBogusInputGradient,&tOutputGradient),std::domain_error);
+
+    // output gradient wrong size
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyGridBlueprintDensityGradient(tInputGridGradient,&tBogusOutputGradient),std::domain_error);
+
+    tAMFilterUtilities.postMultiplyGridBlueprintDensityGradient(tInputGridGradient,&tOutputGradient);
+
+    // calculate gradient manually
+    std::vector<double> dG0dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0   ,0   ,0   }));
+    std::vector<double> dG1dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0.25,0   ,0   }));
+    std::vector<double> dG2dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0   ,0.25,0   }));
+    std::vector<double> dG3dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0.25,0.25,0   }));
+    std::vector<double> dG4dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0   ,0   ,0.25}));
+    std::vector<double> dG5dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0.25,0   ,0.25}));
+    std::vector<double> dG6dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0   ,0.25,0.25}));
+    std::vector<double> dG7dT = tTetUtilities.computeBarycentricCoordinates(tConnectivity[0],Vector({0.25,0.25,0.25}));
+
+    double tGold0 = tInputGridGradient[0]*dG0dT[0] + tInputGridGradient[1]*dG1dT[0] 
+                  + tInputGridGradient[2]*dG2dT[0] + tInputGridGradient[3]*dG3dT[0]
+                  + tInputGridGradient[4]*dG4dT[0] + tInputGridGradient[5]*dG5dT[0]
+                  + tInputGridGradient[6]*dG6dT[0] + tInputGridGradient[7]*dG7dT[0];
+
+    double tGold1 = tInputGridGradient[0]*dG0dT[1] + tInputGridGradient[1]*dG1dT[1] 
+                  + tInputGridGradient[2]*dG2dT[1] + tInputGridGradient[3]*dG3dT[1]
+                  + tInputGridGradient[4]*dG4dT[1] + tInputGridGradient[5]*dG5dT[1]
+                  + tInputGridGradient[6]*dG6dT[1] + tInputGridGradient[7]*dG7dT[1];
+
+    double tGold2 = tInputGridGradient[0]*dG0dT[2] + tInputGridGradient[1]*dG1dT[2] 
+                  + tInputGridGradient[2]*dG2dT[2] + tInputGridGradient[3]*dG3dT[2]
+                  + tInputGridGradient[4]*dG4dT[2] + tInputGridGradient[5]*dG5dT[2]
+                  + tInputGridGradient[6]*dG6dT[2] + tInputGridGradient[7]*dG7dT[2];
+
+    double tGold3 = tInputGridGradient[0]*dG0dT[3] + tInputGridGradient[1]*dG1dT[3] 
+                  + tInputGridGradient[2]*dG2dT[3] + tInputGridGradient[3]*dG3dT[3]
+                  + tInputGridGradient[4]*dG4dT[3] + tInputGridGradient[5]*dG5dT[3]
+                  + tInputGridGradient[6]*dG6dT[3] + tInputGridGradient[7]*dG7dT[3];
+
+    EXPECT_DOUBLE_EQ(tOutputGradient.get_value(0),tGold0);
+    EXPECT_DOUBLE_EQ(tOutputGradient.get_value(1),tGold1);
+    EXPECT_DOUBLE_EQ(tOutputGradient.get_value(2),tGold2);
+    EXPECT_DOUBLE_EQ(tOutputGradient.get_value(3),tGold3);
 }
 
 }
-
 }

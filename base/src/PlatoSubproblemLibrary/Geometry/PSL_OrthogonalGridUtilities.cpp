@@ -395,7 +395,7 @@ Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const size_t& i, 
     return computeGridPointUVWCoordinates(tIndex);
 }
 
-void OrthogonalGridUtilities::computeGradientOfTetNodeDensityWRTGridDensity(const Vector& aPoint,
+void OrthogonalGridUtilities::computeGradientOfDensityWRTGridDensity(const Vector& aPoint,
                                                            std::vector<double>& aLocalGradientValues,
                                                            std::vector<std::vector<size_t>>& aContainingGridElement) const
 {

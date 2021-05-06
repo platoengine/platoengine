@@ -107,8 +107,11 @@ class TetMeshUtilities
 
         std::vector<double> computeBarycentricCoordinates(const std::vector<int>& aTet, const Vector& aPoint) const;
 
+        std::vector<double> computeGradientOfDensityWRTTetNodeDensity(const Vector& aGridPoint, const int& tContainingTetID) const;
+
         const std::vector<std::vector<double>>& getCoordinates() const {return mCoordinates;};
         const std::vector<std::vector<int>>& getConnectivity() const {return mConnectivity;};
+        std::vector<int> getTet(const int& i) const;
 
         /***************************************************************************//**
         * @brief Find id of tet that contains each point 

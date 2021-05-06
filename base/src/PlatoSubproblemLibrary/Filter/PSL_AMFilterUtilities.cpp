@@ -189,7 +189,7 @@ void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInte
         Vector tPoint(tCoordinates[tTetIndex]);
         std::vector<std::vector<size_t>> tContainingGridElement;
         std::vector<double> tLocalGradientValues;
-        mGridUtilities.computeGradientOfTetNodeDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
+        mGridUtilities.computeGradientOfDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
 
         for(size_t tLocalIndex = 0u; tLocalIndex < 8u; ++tLocalIndex)
         {
@@ -202,7 +202,34 @@ void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInte
 void AMFilterUtilities::postMultiplyGridBlueprintDensityGradient(const std::vector<double>& aInputGridGradient,
                                                                  AbstractInterface::ParallelVector* aOutputGradient) const
 {
-    ;
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities.getCoordinates();
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aOutputGradient->get_length() != tCoordinates.size())
+        throw(std::domain_error("AMFilterUtilities::postMultiplyGridBlueprintDensityGradient: Output gradient does not match tet mesh size"));
+
+    if(aInputGridGradient.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyGridBlueprintDensityGradient: Input gradient does not match grid size"));
+
+    for(size_t tGridIndex = 0u; tGridIndex < tNumGridElements; ++tGridIndex)
+    {
+        Vector tGridPoint = mGridPointCoordinates[tGridIndex];
+        int tContainingTetID = mContainingTetID[tGridIndex];
+
+        if(tContainingTetID == -1)
+            continue;
+
+        std::vector<double> tLocalGradientValues = mTetUtilities.computeGradientOfDensityWRTTetNodeDensity(tGridPoint,tContainingTetID);
+
+        for(size_t tLocalIndex = 0u; tLocalIndex < 4u; ++tLocalIndex)
+        {
+            auto tTet = mTetUtilities.getTet(tContainingTetID);
+            double tVal = aOutputGradient->get_value(tTet[tLocalIndex]);
+            tVal += aInputGridGradient.at(tGridIndex)*tLocalGradientValues[tLocalIndex];
+            aOutputGradient->set_value(tTet[tLocalIndex], tVal);
+        }
+    }
 }
 
 double smax(const std::vector<double>& aArguments, const double& aPNorm)

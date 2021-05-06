@@ -411,5 +411,70 @@ PSL_TEST(TetMeshUtilities, getTetIDForEachPoint)
     EXPECT_EQ(tContainingTetID,std::vector<int>({ 0, 2, 1, 0, 2, 3, 4, 5 }));
 }
 
+PSL_TEST(TetMeshUtilities, getTet)
+{
+    std::vector<std::vector<double>> tCoordinates;
+
+     tCoordinates.push_back({1,0,1}); //0
+     tCoordinates.push_back({1,1,1}); //1
+     tCoordinates.push_back({0,1,1}); //2
+     tCoordinates.push_back({0,0,1}); //3
+     tCoordinates.push_back({1,1,0}); //4
+     tCoordinates.push_back({1,0,0}); //5
+     tCoordinates.push_back({0,0,0}); //6
+     tCoordinates.push_back({0,1,0}); //7
+    
+    std::vector<std::vector<int>> tConnectivity;
+
+     tConnectivity.push_back({0,2,7,6}); //0
+     tConnectivity.push_back({0,2,6,3}); //1
+     tConnectivity.push_back({0,4,5,6}); //2
+     tConnectivity.push_back({0,4,6,7}); //3
+     tConnectivity.push_back({0,1,4,7}); //4
+     tConnectivity.push_back({0,1,7,2}); //5
+    
+    TetMeshUtilities tUtilities(tCoordinates,tConnectivity);
+    
+    // index out of range
+    EXPECT_THROW(tUtilities.getTet(-1),std::out_of_range);
+    EXPECT_THROW(tUtilities.getTet(6),std::out_of_range);
+
+    EXPECT_EQ(tUtilities.getTet(0),std::vector<int>({0,2,7,6}));
+    EXPECT_EQ(tUtilities.getTet(1),std::vector<int>({0,2,6,3}));
+    EXPECT_EQ(tUtilities.getTet(2),std::vector<int>({0,4,5,6}));
+    EXPECT_EQ(tUtilities.getTet(3),std::vector<int>({0,4,6,7}));
+    EXPECT_EQ(tUtilities.getTet(4),std::vector<int>({0,1,4,7}));
+    EXPECT_EQ(tUtilities.getTet(5),std::vector<int>({0,1,7,2}));
+}
+
+PSL_TEST(TetMeshUtilities, computeGradientOfDensityWRTTetNodeDensity)
+{
+    std::vector<std::vector<double>> tCoordinates;
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    std::vector<std::vector<int>> tConnectivity;
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tUtilities(tCoordinates,tConnectivity);
+
+    Vector tPoint({0.1,0.1,0.1});
+
+    // index out of range
+    EXPECT_THROW(tUtilities.computeGradientOfDensityWRTTetNodeDensity(tPoint,1),std::out_of_range);
+    EXPECT_THROW(tUtilities.computeGradientOfDensityWRTTetNodeDensity(tPoint,-2),std::out_of_range);
+    EXPECT_THROW(tUtilities.computeGradientOfDensityWRTTetNodeDensity(tPoint,-1),std::out_of_range);
+
+    auto tBarycentricCoordinates = tUtilities.computeBarycentricCoordinates(tConnectivity[0], tPoint);
+    auto tLocalGradientValues = tUtilities.computeGradientOfDensityWRTTetNodeDensity(tPoint,0);
+    EXPECT_EQ(tLocalGradientValues.size(),4u);
+    EXPECT_DOUBLE_EQ(tLocalGradientValues[0], tBarycentricCoordinates[0]);
+    EXPECT_DOUBLE_EQ(tLocalGradientValues[1], tBarycentricCoordinates[1]);
+    EXPECT_DOUBLE_EQ(tLocalGradientValues[2], tBarycentricCoordinates[2]);
+    EXPECT_DOUBLE_EQ(tLocalGradientValues[3], tBarycentricCoordinates[3]);
+}
+
 }
 }

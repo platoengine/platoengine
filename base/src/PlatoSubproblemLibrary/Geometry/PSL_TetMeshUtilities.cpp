@@ -210,4 +210,28 @@ void TetMeshUtilities::checkInput() const
     }
 }
 
+std::vector<double> TetMeshUtilities::computeGradientOfDensityWRTTetNodeDensity(const Vector& aGridPoint,
+                                                                                const int& tContainingTetID) const
+{
+    if(tContainingTetID < 0 || tContainingTetID >= (int) mConnectivity.size())
+        throw(std::out_of_range("TetMeshUtilities::computeGradientOfDensityWRTTetNodeDensity: Index out of range"));
+
+    std::vector<int> tTet = mConnectivity[tContainingTetID];
+
+    if(!isPointInTetrahedron(mCoordinates,tTet,aGridPoint))
+        throw(std::runtime_error("TetMeshUtilities::computeGradientOfDensityWRTTetNodeDensity: Point is not inside tet"));
+
+    std::vector<double> tBarycentricCoordinates = computeBarycentricCoordinates(tTet, aGridPoint);
+    return tBarycentricCoordinates;
+}
+
+std::vector<int> TetMeshUtilities::getTet(const int& i) const
+{
+    if(i < 0 || i >= (int) mConnectivity.size())
+        throw(std::out_of_range("TetMeshUtilities::getTet: Index out of range"));
+
+    std::vector<int> tTet = mConnectivity[i];
+    return tTet;
+}
+
 }
