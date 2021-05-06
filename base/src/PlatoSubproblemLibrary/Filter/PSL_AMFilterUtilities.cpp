@@ -171,7 +171,36 @@ void AMFilterUtilities::computeTetMeshPrintableDensity(const std::vector<double>
     }
 }
 
-void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* aGradient) const
+void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* const aInputGradient,
+                                                                    std::vector<double>& aGridGradient) const
+{
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities.getCoordinates();
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    aGridGradient.resize(tNumGridElements);
+    std::fill(aGridGradient.begin(), aGridGradient.end(), 0.0);
+
+    if(aInputGradient->get_length() != tCoordinates.size())
+        throw(std::domain_error("AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient: Input gradient does not match tet mesh size"));
+
+    for(size_t tTetIndex = 0u; tTetIndex < tCoordinates.size(); ++tTetIndex)
+    {
+        Vector tPoint(tCoordinates[tTetIndex]);
+        std::vector<std::vector<size_t>> tContainingGridElement;
+        std::vector<double> tLocalGradientValues;
+        mGridUtilities.computeGradientOfTetNodeDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
+
+        for(size_t tLocalIndex = 0u; tLocalIndex < 8u; ++tLocalIndex)
+        {
+            auto tIndex = tContainingGridElement[tLocalIndex];
+            aGridGradient[mGridUtilities.getSerializedIndex(tIndex)] += aInputGradient->get_value(tTetIndex)*tLocalGradientValues[tLocalIndex];
+        }
+    }
+}
+
+void AMFilterUtilities::postMultiplyGridBlueprintDensityGradient(const std::vector<double>& aInputGridGradient,
+                                                                 AbstractInterface::ParallelVector* aOutputGradient) const
 {
     ;
 }

@@ -168,5 +168,25 @@ PSL_TEST(RegularHex8,interpolateScalar)
     EXPECT_EQ(tHex.interpolateScalar(tPoint,tScalars),4.5);
 }
 
+PSL_TEST(RegularHex8, gradientWRTScalar)
+{
+    Vector tMinCoords({0.0,0.0,0.0});
+    Vector tMaxCoords({1.0,1.0,1.0});
+
+    RegularHex8 tHex(tMinCoords,tMaxCoords);
+
+    Vector tPoint({0.234,0.756,0.182});
+
+    // argument out of range
+    EXPECT_THROW(tHex.gradientWRTScalar(tPoint,8),std::out_of_range);
+
+    for(size_t i = 0; i < 8u; ++i)
+    {
+        std::vector<double> tScalars(8u,0.0);
+        tScalars[i] = 1.0;
+        EXPECT_EQ(tHex.gradientWRTScalar(tPoint,i),tHex.interpolateScalar(tPoint,tScalars));
+    }
+}
+
 }
 }

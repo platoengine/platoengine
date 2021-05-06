@@ -29,6 +29,7 @@ public:
     ~RegularHex8(){}
 
     double interpolateScalar(const Vector& aPoint, const std::vector<double>& aScalars) const;
+    double gradientWRTScalar(const Vector& aPoint, const size_t aArgument) const;
     // interpolateScalar associates scalars to Hex nodes via the following ordering
     // (i  ,j  ,k  )
     // (i+1,j  ,k  )

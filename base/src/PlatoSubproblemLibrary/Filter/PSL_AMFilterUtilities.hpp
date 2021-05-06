@@ -29,18 +29,30 @@ public:
     }
 
     void computeGridBlueprintDensity(AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity, std::vector<double>& aGridBlueprintDensity) const;
+
     double computeGridPointBlueprintDensity(const int& i, const int& j, const int&k, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
+
     double computeGridPointBlueprintDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
+
     void computeGridLayerSupportDensity(const int& k,
                                         const std::vector<double>& aGridPrintableDensity,
                                         std::vector<double>& aGridSupportDensity) const;
+
     void computeGridLayerPrintableDensity(const int& k,
                                           const std::vector<double>& aGridBlueprintDensity,
                                           const std::vector<double>& aGridSupportDensity,
                                           std::vector<double>& aGridPrintableDensity) const;
+
     void computeGridPrintableDensity(const std::vector<double>& aGridBlueprintDensity, std::vector<double>& aGridPrintableDensity) const;
+
     void computeTetMeshPrintableDensity(const std::vector<double>& aGridPrintableDensity, AbstractInterface::ParallelVector* aDensity) const;
-    void postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* aGradient) const;
+
+    void postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* const aGradient,
+                                                     std::vector<double>& aGridGradient) const;
+
+    void postMultiplyGridBlueprintDensityGradient(const std::vector<double>& aInputGridGradient,
+                                                  AbstractInterface::ParallelVector* aOutputGradient) const;
+
     double computeTetNodePrintableDensity(const int& aTetNodeIndex,
                                           const std::vector<double>& aGridPrintableDensity) const;
 

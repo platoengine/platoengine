@@ -1499,6 +1499,49 @@ PSL_TEST(AMFilterUtilities, smin)
     EXPECT_DOUBLE_EQ(smin(-2,-1),-1.9999999925494194);
 }
 
+PSL_TEST(AMFilterUtilities, postMultiplyTetMeshPrintableDensityGradient)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({2.0,2.0,2.0});
+
+    double tTargetEdgeLength = 2.0;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+
+    example::Interface_ParallelVector tInputGradient({1,1,1,1});
+
+    std::vector<double> tOutputGradient;
+
+    // wrong size gradient vector
+    example::Interface_ParallelVector tBogusInputGradient({1,1,1});
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyTetMeshPrintableDensityGradient(&tBogusInputGradient,tOutputGradient),std::domain_error);
+
+    // tAMFilterUtilities.postMultiplyTetMeshPrintableDensityGradient(tGridPrintableDensity,&tInputGradient);
+}
+
 }
 
 }

@@ -289,18 +289,18 @@ Vector OrthogonalGridUtilities::computePointUVWCoordinates(const Vector& aXYZPoi
     return Vector({tU,tV,tW});
 }
 
-void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<size_t>>& aContainingElementIndicies) const
+void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<size_t>>& aContainingElementIndices) const
 {
-    if(aContainingElementIndicies.size() != 8u)
+    if(aContainingElementIndices.size() != 8u)
         throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of indices provided"));
 
-    for(auto tIndex : aContainingElementIndicies)
+    for(auto tIndex : aContainingElementIndices)
     {
         if(tIndex.size() != 3)
             throw(std::domain_error("OrthogonalGridUtilities: Incorrect number of dimensions in provided index"));
     }
 
-    std::vector<size_t> tIndex0 = aContainingElementIndicies[0];
+    std::vector<size_t> tIndex0 = aContainingElementIndices[0];
 
     if(tIndex0[0] < 0 || tIndex0[0] >= mNumElementsInEachDirection[0]
        || tIndex0[1] < 0 || tIndex0[1] >= mNumElementsInEachDirection[1]
@@ -321,7 +321,7 @@ void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<siz
     
     std::vector<std::vector<size_t>> tTestIndices;
     
-    for(auto tIndex : aContainingElementIndicies)
+    for(auto tIndex : aContainingElementIndices)
     {
         tTestIndices.push_back({tIndex[0] - tIndex0[0], tIndex[1] - tIndex0[1], tIndex[2] - tIndex0[2]});
     }
@@ -340,17 +340,17 @@ void OrthogonalGridUtilities::checkIndexFormat(const std::vector<std::vector<siz
 
 }
 
-double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<size_t>>& aContainingElementIndicies,
+double OrthogonalGridUtilities::interpolateScalar(const std::vector<std::vector<size_t>>& aContainingElementIndices,
                                                   const std::vector<double>& aScalarValues,
                                                   const Vector& aPoint) const
 {
-    checkIndexFormat(aContainingElementIndicies);
+    checkIndexFormat(aContainingElementIndices);
 
     if(aScalarValues.size() != 8u)
         throw(std::domain_error("OrthogonalGridUtilities::interpolateScalar: 8 scalar values must be provided"));
 
     std::vector<Vector> tElementCoordinates;
-    for(auto tIndex : aContainingElementIndicies)
+    for(auto tIndex : aContainingElementIndices)
         tElementCoordinates.push_back(computeGridPointUVWCoordinates(tIndex));
 
     Vector tMaxUVWCoords;
@@ -393,6 +393,31 @@ Vector OrthogonalGridUtilities::computeGridPointUVWCoordinates(const size_t& i, 
 {
     std::vector<size_t> tIndex({i,j,k});
     return computeGridPointUVWCoordinates(tIndex);
+}
+
+void OrthogonalGridUtilities::computeGradientOfTetNodeDensityWRTGridDensity(const Vector& aPoint,
+                                                           std::vector<double>& aLocalGradientValues,
+                                                           std::vector<std::vector<size_t>>& aContainingGridElement) const
+{
+    aContainingGridElement = getContainingGridElement(aPoint);
+    aLocalGradientValues.resize(0);
+
+    std::vector<Vector> tElementCoordinates;
+    for(auto tIndex : aContainingGridElement)
+        tElementCoordinates.push_back(computeGridPointUVWCoordinates(tIndex));
+
+    Vector tMaxUVWCoords;
+    Vector tMinUVWCoords;
+    computeBoundingBox(tElementCoordinates,tMinUVWCoords,tMaxUVWCoords);
+
+    RegularHex8 tHex(tMinUVWCoords,tMaxUVWCoords);
+
+    Vector tUVWPoint = computePointUVWCoordinates(Vector(aPoint));
+
+    for(size_t tElementIndex = 0; tElementIndex < aContainingGridElement.size(); ++tElementIndex)
+    {
+        aLocalGradientValues.push_back(tHex.gradientWRTScalar(tUVWPoint, tElementIndex));
+    }
 }
 
 }

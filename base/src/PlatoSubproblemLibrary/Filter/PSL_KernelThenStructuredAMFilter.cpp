@@ -30,26 +30,23 @@ void KernelThenStructuredAMFilter::internal_apply(AbstractInterface::ParallelVec
 
 void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::ParallelVector* const aBlueprintDensity, AbstractInterface::ParallelVector* aGradient) const
 {
-    throw(std::runtime_error("KernelThenStructuredAMFilter::internal_gradient: Function not yet implemented!"));
-    //apply chain rule to 3 transformations - T2G, AMFilterGrid, G2T 
-    //i.e. printableDensity = computeTetMeshPrintableDensity(computeGridPrintableDensity(computeGridBlueprintDensity(aBlueprintDensity)))
-    
-    // stash blueprint field
-    // example::Interface_ParallelVector tBlueprintDensity(std::vector<double>(aBlueprintDensity->get_length()));
+    const std::vector<std::vector<double>>& tCoordinates = mTetUtilities->getCoordinates();
 
-    // for(size_t i = 0; i < aBlueprintDensity->get_length(); ++i)
-    // {
-    //     tBlueprintDensity.set_value(i,aBlueprintDensity->get_value(i));
-    // }
-    
+    if(aBlueprintDensity->get_length() != tCoordinates.size())
+        throw(std::domain_error("KernelThenStructuredAMFilter::internal_gradient: Provided blueprint density field does not match the mesh size"));
 
-    // transfer topology to grid 
+    if(aGradient->get_length() != tCoordinates.size())
+        throw(std::domain_error("KernelThenStructuredAMFilter::internal_gradient: Provided gradient does not match the mesh size"));
+
     std::vector<double> tGridBlueprintDensity;
     mAMFilterUtilities->computeGridBlueprintDensity(aBlueprintDensity,tGridBlueprintDensity); 
+    // std::vector<double> tGridPrintableDensity;
+    // mAMFilterUtilities->computeGridPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity);
 
-    // mAMFilterUtilities->postMultiplyTetMeshPrintableDensityGradient(aGradient);
-    // mAMFilterUtilities->postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,aGradient);
-    // mAMFilterUtilities->postMultiplyGridBlueprintDensityGradient(aGradient);
+    std::vector<double> tGridGradient;
+    mAMFilterUtilities->postMultiplyTetMeshPrintableDensityGradient(aGradient,tGridGradient);
+    // mAMFilterUtilities->postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient);
+    mAMFilterUtilities->postMultiplyGridBlueprintDensityGradient(tGridGradient,aGradient);
 }
 
 void KernelThenStructuredAMFilter::buildStructuredGrid(const std::vector<std::vector<double>>& aCoordinates, const std::vector<std::vector<int>>& aConnectivity)

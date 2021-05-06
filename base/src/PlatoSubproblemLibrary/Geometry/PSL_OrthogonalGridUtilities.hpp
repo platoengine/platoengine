@@ -79,6 +79,10 @@ class OrthogonalGridUtilities
                                  const std::vector<double>& aScalarValues,
                                  const Vector& aPoint) const;
 
+        void computeGradientOfTetNodeDensityWRTGridDensity(const Vector& aPoint,
+                                                           std::vector<double>& aLocalGradientValues,
+                                                           std::vector<std::vector<size_t>>& aContainingGridElement) const;
+
     private:
 
         void checkBasis(const Vector& aUBasisVector,

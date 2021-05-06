@@ -416,9 +416,7 @@ PSL_TEST(OrthogonalGridUtilities, getSurroundingIndices)
 PSL_TEST(OrthogonalGridUtilities, interpolateScalar)
 {
     Vector tUBasisVector({1,0,0});
-    tUBasisVector.normalize();
     Vector tVBasisVector({0,1,0});
-    tVBasisVector.normalize();
     Vector tWBasisVector({0,0,1});
 
     Vector tMaxUVWCoords({1.0,1.0,1.0});
@@ -672,6 +670,45 @@ PSL_TEST(OrthogonalGridUtilities, computeGridPointUVWCoordinates)
     EXPECT_DOUBLE_EQ(tUVWCoords(0),1.0);
     EXPECT_DOUBLE_EQ(tUVWCoords(1),2.0);
     EXPECT_DOUBLE_EQ(tUVWCoords(2),3.0);
+}
+
+PSL_TEST(OrthogonalGridUtilities, computeGradientOfTetNodeDensityWRTGridDensity)
+{
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMaxUVWCoords({1.0,1.0,1.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<size_t> tNumElements = {1,1,1};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    std::vector<double> tPoint({0.5,0.5,0.5});
+
+    std::vector<std::vector<size_t>> tContainingGridElement;
+    std::vector<double> tLocalGradientValues;
+    tUtilities.computeGradientOfTetNodeDensityWRTGridDensity(tPoint,tLocalGradientValues,tContainingGridElement);
+
+    std::vector<std::vector<size_t>> tGoldGridElement;
+    tGoldGridElement.push_back({0,0,0});
+    tGoldGridElement.push_back({1,0,0});
+    tGoldGridElement.push_back({0,1,0});
+    tGoldGridElement.push_back({1,1,0});
+    tGoldGridElement.push_back({0,0,1});
+    tGoldGridElement.push_back({1,0,1});
+    tGoldGridElement.push_back({0,1,1});
+    tGoldGridElement.push_back({1,1,1});
+
+    EXPECT_EQ(tContainingGridElement,tGoldGridElement);
+
+    for(size_t i = 0; i < 8u; ++i)
+    {
+        std::vector<double> tModifiedDensities(8u, 0.0);
+        tModifiedDensities[i] = 1.0;
+        double tGold = tUtilities.interpolateScalar(tContainingGridElement,tModifiedDensities,tPoint);
+        EXPECT_EQ(tLocalGradientValues[i],tGold);
+    }
 }
 
 }

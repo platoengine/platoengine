@@ -32,6 +32,20 @@ double RegularHex8::interpolateScalar(const Vector& aPoint, const std::vector<do
     return tVal;
 }
 
+double RegularHex8::gradientWRTScalar(const Vector& aPoint, const size_t aArgument) const
+{
+    if(aArgument < 0u || aArgument > 7u)
+        throw(std::out_of_range("RegularHex8::gradientWRTScalar: Argument must be between 0 and 7"));
+
+    // the transformation is linear so we can take the ith derivative
+    // by evaluating our functions with a 1.0 in the ith spot and
+    // a zero everywhere else
+    std::vector<double> tModifiedScalars(8u,0.0);
+    tModifiedScalars[aArgument] = 1.0;
+
+    return interpolateScalar(aPoint,tModifiedScalars);
+}
+
 double RegularHex8::a0(const std::vector<double>& aScalars) const
 {
     std::vector<double> tTerms;
