@@ -23,6 +23,13 @@ std::vector<size_t> OrthogonalGridUtilities::computeNumElementsInEachDirection(c
     tNumElements.push_back(aTargetEdgeLength > tVLength ? 1 : (size_t) tVLength/aTargetEdgeLength);
     tNumElements.push_back(aTargetEdgeLength > tWLength ? 1 : (size_t) tWLength/aTargetEdgeLength);
 
+    if(tNumElements[0] == 0)
+        tNumElements[0] = 1;
+    if(tNumElements[1] == 0)
+        tNumElements[1] = 1;
+    if(tNumElements[2] == 0)
+        tNumElements[2] = 1;
+
     return tNumElements;
 }
 

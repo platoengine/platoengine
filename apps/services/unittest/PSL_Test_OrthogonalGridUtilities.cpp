@@ -93,6 +93,23 @@ PSL_TEST(OrthogonalGridUtilities, constructor)
 
     // Non-positive number of elements
     EXPECT_THROW(OrthogonalGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,std::vector<size_t>({5,5,0})),std::domain_error);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector2({1.0,0.0,0.0});
+    Vector tVBasisVector2({0.0,1.0,0.0});
+    Vector tWBasisVector2({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords2({0.0,0.0,0.0});
+    Vector tMaxUVWCoords2({0.25,0.25,0.25});
+
+    double tTargetEdgeLength2 = 0.24;
+
+    OrthogonalGridUtilities tGridUtilities2(tUBasisVector2,tVBasisVector2,tWBasisVector2,tMaxUVWCoords2,tMinUVWCoords2,tTargetEdgeLength2);
+
+    auto tDimensions = tGridUtilities2.getGridDimensions();
+    EXPECT_EQ(tDimensions[0],2u);
+    EXPECT_EQ(tDimensions[1],2u);
+    EXPECT_EQ(tDimensions[2],2u);
 }
 
 PSL_TEST(OrthogonalGridUtilities, getGridDimensions)
