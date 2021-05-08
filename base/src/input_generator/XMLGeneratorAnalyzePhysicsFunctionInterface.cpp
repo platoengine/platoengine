@@ -510,59 +510,59 @@ void AnalyzePhysicsFunctionInterface::insertEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_thermal",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_thermomechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_electromechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertParabolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_thermal",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_thermomechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertHyperbolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_incompressible_fluids",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_hyperbolic_incompressible_cfd_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_hyperbolic_incompressible_cfd_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertPlasticityPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("plasticity",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("thermoplasticity",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertStabilizedEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("stabilized_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insert()
