@@ -22,6 +22,145 @@
 namespace PlatoTestXMLGenerator
 {
 
+TEST(PlatoTestXMLGenerator, AppendPhysics_IncompressibleFluids)
+{
+    XMLGen::Output tOutput;
+    XMLGen::Scenario tScenario;
+    tScenario.physics("steady_state_incompressible_fluids");
+    tScenario.append("output_frequency","1");
+    tScenario.append("discretization","density");
+    tScenario.append("max_steady_state_iterations","500");
+    tScenario.append("steady_state_tolerance","1e-5");
+    tScenario.append("time_step_safety_factor","0.7");
+    tScenario.append("heat_transfer","none");
+    tScenario.append("momentum_damping","0.31");
+    
+    pugi::xml_document tDocument;
+    XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
+    tPhysics.call(tScenario, tOutput, tDocument);
+    tDocument.save_file("dummy.xml");
+
+    // TEST HYPERBOLIC BLOCK
+    auto tHyperbolic = tDocument.child("ParameterList");
+    ASSERT_FALSE(tHyperbolic.empty());
+    ASSERT_STREQ("ParameterList", tHyperbolic.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Hyperbolic"}, tHyperbolic);
+
+    auto tParameter = tHyperbolic.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Scenario", "string", "Density-Based Topology Optimization"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Heat Transfer", "string", "none"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // TEST HYPERBOLIC -> MASS CONSERVATION BLOCK
+    auto tConservationEqn = tHyperbolic.child("ParameterList");
+    ASSERT_FALSE(tConservationEqn.empty());
+    ASSERT_STREQ("ParameterList", tConservationEqn.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Mass Conservation"}, tConservationEqn);
+    tParameter = tConservationEqn.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Surface Momentum Damping", "double", "0.31"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // TEST HYPERBOLIC -> ENERGY CONSERVATION BLOCK
+    tConservationEqn = tConservationEqn.next_sibling("ParameterList");
+    ASSERT_FALSE(tConservationEqn.empty());
+    ASSERT_STREQ("ParameterList", tConservationEqn.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Energy Conservation"}, tConservationEqn);
+    auto tPenaltyFunction = tConservationEqn.child("ParameterList");
+    ASSERT_FALSE(tPenaltyFunction.empty());
+    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+    tParameter = tPenaltyFunction.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Heat Source Penalty Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Thermal Diffusion Penalty Exponent", "double", "3.0"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+    tPenaltyFunction = tPenaltyFunction.next_sibling("ParameterList");
+    ASSERT_TRUE(tPenaltyFunction.empty());
+    tConservationEqn = tConservationEqn.next_sibling("ParameterList");
+    ASSERT_TRUE(tConservationEqn.empty());
+
+    // TEST TIME INTEGRATION BLOCK
+    auto tTimeIntegration = tHyperbolic.next_sibling("ParameterList");
+    ASSERT_FALSE(tTimeIntegration.empty());
+    ASSERT_STREQ("ParameterList", tTimeIntegration.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Time Integration"}, tTimeIntegration);
+    tParameter = tTimeIntegration.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Safety Factor", "double", "0.7"};
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // TEST CONVERGENCE BLOCK
+    auto tConvergence = tTimeIntegration.next_sibling("ParameterList");
+    ASSERT_FALSE(tConvergence.empty());
+    ASSERT_STREQ("ParameterList", tConvergence.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Convergence"}, tConvergence);
+    tParameter = tConvergence.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Output Frequency", "int", "1"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Maximum Steady State Iterations", "int", "500"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Steady State Tolerance", "double", "1e-5"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    // TEST LINEAR SOLVER BLOCK
+    auto tLinearSolver = tConvergence.next_sibling("ParameterList");
+    ASSERT_FALSE(tLinearSolver.empty());
+    ASSERT_STREQ("ParameterList", tLinearSolver.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Linear Solver"}, tLinearSolver);
+    tParameter = tLinearSolver.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Iterations", "int", "1000"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Tolerance", "double", "1e-12"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Solver Stack", "string", "Amgx"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+
+    tLinearSolver = tLinearSolver.next_sibling("ParameterList");
+    ASSERT_TRUE(tLinearSolver.empty());
+}
+
 TEST(PlatoTestXMLGenerator, AppendPhysicsMechanical)
 {
     XMLGen::Output tOutput;
@@ -458,6 +597,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPlasticity)
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
+    //tDocument.save_file("dummy.txt");
 
     // TEST RESULTS
     // global residual
