@@ -995,6 +995,22 @@ private:
                 { "plastic_properties_penalty_exponent", {"Plastic Properties Penalty Exponent", "double"} },
                 { "plastic_properties_minimum_ersatz", {"Plastic Properties Minimum Ersatz", "double"} }
             }
+        },
+
+        { "incompressible_fluid",
+            {
+                { "reynolds_number", {"Reynolds Number", "double"} },
+                { "impermeability_number", {"Impermeability Number", "double"} },
+                { "dimensionless_viscocity", { "Dimensionless Viscocity", "double" } },
+                { "prandtl_number", { "Prandtl Number", "double" } }, 
+                { "reference_temperature", { "Reference Temperature", "double" } },
+                { "characteristic_length", { "Characteristic Length", "double" } },
+                { "grashof_number", { "Grashof Number", "Array(double)" } },
+                { "richardson_number", {"Richardson Number", "Array(double)"} },
+                { "rayleigh_number", {"Rayleigh Number", "Array(double)"} },
+                { "thermal_diffusivity_ratio", {"Thermal Diffusivity Ratio", "double"} },
+                { "thermal_conductivity", {"Thermal Conductivity", "double"} }
+            }
         }
     };
 

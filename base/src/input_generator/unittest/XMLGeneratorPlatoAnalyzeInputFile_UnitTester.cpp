@@ -38,7 +38,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysics_IncompressibleFluids)
     pugi::xml_document tDocument;
     XMLGen::AnalyzePhysicsFunctionInterface tPhysics;
     tPhysics.call(tScenario, tOutput, tDocument);
-    tDocument.save_file("dummy.xml");
+    //tDocument.save_file("dummy.xml");
 
     // TEST HYPERBOLIC BLOCK
     auto tHyperbolic = tDocument.child("ParameterList");
@@ -2469,6 +2469,127 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_J2Plastic
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Hardening Modulus Kinematic", "double", "1.25"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_FluidsMatModel_Test1)
+{
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.code("plato_analyze");
+    tMaterial.name("Water");
+    tMaterial.materialModel("incompressible_fluid");
+    tMaterial.property("reynolds_number", "400");
+    tMaterial.property("impermeability_number", "100");
+    tMaterial.property("dimensionless_viscocity", "1");
+    tMaterial.property("prandtl_number", "17");
+    tMaterial.property("reference_temperature", "10");
+    tMaterial.property("characteristic_length", "1");
+    tMaterial.property("grashof_number", std::vector<std::string>{"10", "10"} );
+    tMaterial.property("richardson_number", std::vector<std::string>{"20", "20"} );
+    tMaterial.property("rayleigh_number", std::vector<std::string>{"30", "30"} );
+    tMaterial.property("thermal_diffusivity_ratio", "3.0");
+    tMaterial.property("thermal_conductivity", "1.0e-6");
+    tXMLMetaData.materials.push_back(tMaterial);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    //tDocument.save_file("dummy.xml");
+
+    // TEST MATERIAL MODEL BLOCK
+    auto tMaterialModelsList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelsList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
+
+    // TEST WATER BLOCK
+    auto tWater = tMaterialModelsList.child("ParameterList");
+    ASSERT_FALSE(tWater.empty());
+    ASSERT_STREQ("ParameterList", tWater.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Water"}, tWater);
+    // TEST WATER BLOCK PARAMETERS
+    auto tParameter = tWater.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Reynolds Number", "double", "400"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Impermeability Number", "double", "100"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Dimensionless Viscocity", "double", "1"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Prandtl Number", "double", "17"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Reference Temperature", "double", "10"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Characteristic Length", "double", "1"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Thermal Diffusivity Ratio", "double", "3.0"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Thermal Conductivity", "double", "1.0e-6"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Grashof Number", "Array(double)", "{10, 10}"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Rayleigh Number", "Array(double)", "{30, 30}"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Richardson Number", "Array(double)", "{20, 20}"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+    // TEST WATER BLOCK END
+    tWater = tWater.next_sibling("ParameterList");
+    ASSERT_TRUE(tWater.empty());
+    //TEST MATERIAL MODEL BLOCK END
+    tMaterialModelsList = tMaterialModelsList.next_sibling("ParameterList");
+    ASSERT_TRUE(tMaterialModelsList.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_FluidsMatModel_Test2)
+{
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::Material tMaterial;
+    tMaterial.code("plato_analyze");
+    tMaterial.name("Water");
+    tMaterial.materialModel("incompressible_fluid");
+    tMaterial.property("reynolds_number", "400");
+    tMaterial.property("impermeability_number", "100");
+    tMaterial.property("prandtl_number", "17");
+    tMaterial.property("grashof_number", std::vector<std::string>{"10", "10"} );
+    tXMLMetaData.materials.push_back(tMaterial);
+
+    pugi::xml_document tDocument;
+    XMLGen::append_material_models_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
+    //tDocument.save_file("dummy.xml");
+
+    // TEST MATERIAL MODEL BLOCK
+    auto tMaterialModelsList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tMaterialModelsList.empty());
+    ASSERT_STREQ("ParameterList", tMaterialModelsList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Material Models"}, tMaterialModelsList);
+
+    // TEST WATER BLOCK
+    auto tWater = tMaterialModelsList.child("ParameterList");
+    ASSERT_FALSE(tWater.empty());
+    ASSERT_STREQ("ParameterList", tWater.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Water"}, tWater);
+    // TEST WATER BLOCK PARAMETERS
+    auto tParameter = tWater.child("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Reynolds Number", "double", "400"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Impermeability Number", "double", "100"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Prandtl Number", "double", "17"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Grashof Number", "Array(double)", "{10, 10}"}, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_TRUE(tParameter.empty());
+    // TEST WATER BLOCK END
+    tWater = tWater.next_sibling("ParameterList");
+    ASSERT_TRUE(tWater.empty());
+    //TEST MATERIAL MODEL BLOCK END
+    tMaterialModelsList = tMaterialModelsList.next_sibling("ParameterList");
+    ASSERT_TRUE(tMaterialModelsList.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_ThermoplasticityMatModel)
