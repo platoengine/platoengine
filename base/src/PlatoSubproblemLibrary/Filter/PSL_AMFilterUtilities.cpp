@@ -91,7 +91,7 @@ void AMFilterUtilities::computeGridLayerSupportDensity(const int& k,
                     tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
                 }
 
-                double tVal = smax(tSupportDensityBelow,mPNorm);
+                double tVal = smax(tSupportDensityBelow,mPNorm,mX0);
 
                 aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = tVal;
             }
@@ -232,10 +232,10 @@ void AMFilterUtilities::postMultiplyGridBlueprintDensityGradient(const std::vect
     }
 }
 
-double smax(const std::vector<double>& aArguments, const double& aPNorm)
+double smax(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0)
 {
     double tSmax = 0;
-    double aQNorm = aPNorm + std::log(aArguments.size())/std::log(0.5);
+    double aQNorm = aPNorm + std::log(aArguments.size())/std::log(aX0);
 
     for(auto tArgument : aArguments)
     {
@@ -249,11 +249,37 @@ double smax(const std::vector<double>& aArguments, const double& aPNorm)
     return tSmax;
 }
 
+void smax_gradient(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0, std::vector<double>& aGradient)
+{
+    aGradient.resize(aArguments.size());
+
+    double tQ = aPNorm + std::log(aArguments.size()) / std::log(aX0);
+
+    for(size_t i = 0; i < aArguments.size(); ++i)
+    {
+        double tSum = 0;
+        for(size_t j = 0; j < aArguments.size(); ++j)
+            tSum += std::pow(aArguments.at(j),aPNorm);
+        tSum = std::pow(tSum,1/tQ - 1);
+        aGradient[i] = aPNorm*std::pow(aArguments.at(i),aPNorm - 1)/tQ * tSum;
+    }
+}
+
 double smin(const double& aArg1, const double& aArg2, double aEps)
 {
     double tVal = 0.5*(aArg1 + aArg2 - std::pow(std::pow((aArg1 - aArg2),2) + aEps,0.5) + std::sqrt(aEps));
 
     return tVal;
+}
+
+double smin_gradient1(const double& aArg1, const double& aArg2, double aEps)
+{
+    return 0.5*(1.0-(aArg1 - aArg2)*std::pow((std::pow(aArg1 - aArg2,2.0) + aEps),-0.5));
+}
+
+double smin_gradient2(const double& aArg1, const double& aArg2, double aEps)
+{
+    return 1.0 - smin_gradient1(aArg1,aArg2,aEps);
 }
 
 }

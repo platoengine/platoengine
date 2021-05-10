@@ -67,9 +67,14 @@ private:
 
     std::vector<int> mContainingTetID;
     std::vector<Vector> mGridPointCoordinates;
+
+    double mX0 = 0.5;
 };
 
-double smax(const std::vector<double>& aArguments, const double& aPNorm);
+double smax(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0);
+void smax_gradient(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0, std::vector<double>& aGradient);
 double smin(const double& aArg1, const double& aArg2, double aEps = std::numeric_limits<double>::epsilon());
+double smin_gradient1(const double& aArg1, const double& aArg2, double aEps = std::numeric_limits<double>::epsilon());
+double smin_gradient2(const double& aArg1, const double& aArg2, double aEps = std::numeric_limits<double>::epsilon());
 
 }

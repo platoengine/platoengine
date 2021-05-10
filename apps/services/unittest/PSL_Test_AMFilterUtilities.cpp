@@ -742,7 +742,7 @@ PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
                         size_t tSupportSerializedIndex = tGridUtilities.getSerializedIndex(tSupportIndex);
                         tSupportDensities.push_back(tGridPrintableDensity[tSupportSerializedIndex]);
                     }
-                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],smax(tSupportDensities,tPNorm));
+                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],smax(tSupportDensities,tPNorm,0.5));
                 }
                 EXPECT_DOUBLE_EQ(tGridPrintableDensity[tSerializedIndex],smin(tGridBlueprintDensity[tSerializedIndex],tGridSupportDensity[tSerializedIndex]));
             }
@@ -1451,8 +1451,9 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(0.9);
 
     double tPNorm = 200;
+    double tX0 = 0.5;
     
-    double tSmax = smax(tArgs,tPNorm);
+    double tSmax = smax(tArgs,tPNorm,tX0);
     EXPECT_DOUBLE_EQ(tSmax,0.89839982193243095);
 
     tArgs.clear();
@@ -1468,7 +1469,7 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(1.0);
     tArgs.push_back(0.336);
 
-    tSmax = smax(tArgs,tPNorm);
+    tSmax = smax(tArgs,tPNorm,tX0);
 
     EXPECT_DOUBLE_EQ(tSmax,1.0);
 
@@ -1486,7 +1487,7 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(0.336);
 
     // negative argument
-    EXPECT_THROW(smax(tArgs,tPNorm),std::domain_error);
+    EXPECT_THROW(smax(tArgs,tPNorm,tX0),std::domain_error);
 }
 
 PSL_TEST(AMFilterUtilities, smin)
@@ -1719,6 +1720,66 @@ PSL_TEST(AMFilterUtilities, postMultiplyGridBlueprintDensityGradient)
     EXPECT_DOUBLE_EQ(tOutputGradient.get_value(1),tGold1);
     EXPECT_DOUBLE_EQ(tOutputGradient.get_value(2),tGold2);
     EXPECT_DOUBLE_EQ(tOutputGradient.get_value(3),tGold3);
+}
+
+PSL_TEST(AMFilterUtilities, smin_gradient1)
+{
+    EXPECT_DOUBLE_EQ(smin_gradient1(0.0,1.0),1.0);
+    EXPECT_DOUBLE_EQ(smin_gradient1(1.0,0.0),5.5511151231257827e-17);
+    EXPECT_DOUBLE_EQ(smin_gradient1(0.5,0.4982),1.713312824946911e-11);
+    EXPECT_DOUBLE_EQ(smin_gradient1(0.5,0.5),0.5);
+    EXPECT_DOUBLE_EQ(smin_gradient1(-1.0,1.0),1.0);
+    EXPECT_DOUBLE_EQ(smin_gradient1(-2.0,-1.3),1.0-1.1102230246251565e-16);
+}
+
+PSL_TEST(AMFilterUtilities, smin_gradient2)
+{
+    EXPECT_DOUBLE_EQ(smin_gradient2(0.0,1.0),0.0);
+    EXPECT_DOUBLE_EQ(smin_gradient2(1.0,0.0),1.0-5.5511151231257827e-17);
+    EXPECT_DOUBLE_EQ(smin_gradient2(0.5,0.4982),1.0-1.713312824946911e-11);
+    EXPECT_DOUBLE_EQ(smin_gradient2(0.5,0.5),0.5);
+    EXPECT_DOUBLE_EQ(smin_gradient2(-1.0,1.0),0.0);
+    EXPECT_DOUBLE_EQ(smin_gradient2(-2.0,-1.3),1.1102230246251565e-16);
+}
+
+PSL_TEST(AMFilterUtilities, smax_gradient)
+{
+    std::vector<double> tArgs;
+
+    tArgs.push_back(0);
+    tArgs.push_back(0.1);
+    tArgs.push_back(0.2);
+    tArgs.push_back(0.3);
+    tArgs.push_back(0.4);
+    tArgs.push_back(0.5);
+    tArgs.push_back(0.6);
+    tArgs.push_back(0.7);
+    tArgs.push_back(0.8);
+    tArgs.push_back(0.9);
+
+    double tPNorm = 200;
+    double tX0 = 0.5;
+    
+    std::vector<double> tGradient;
+    smax_gradient(tArgs, tPNorm, tX0, tGradient);
+
+    EXPECT_EQ(tGradient.size(), tArgs.size());
+
+    double tQ = tPNorm + std::log(tArgs.size()) / std::log(tX0);
+
+    std::vector<double> tGold(tArgs.size());
+
+    for(size_t i = 0; i < tArgs.size(); ++i)
+    {
+        double tSum = 0;
+        for(size_t j = 0; j < tArgs.size(); ++j)
+            tSum += std::pow(tArgs[j],tPNorm);
+        tSum = std::pow(tSum,1/tQ - 1);
+        tGold[i] = tPNorm*std::pow(tArgs[i],tPNorm - 1)/tQ * tSum;
+    }
+
+    for(size_t i = 0; i < tArgs.size(); ++i)
+        EXPECT_DOUBLE_EQ(tGradient[i],tGold[i]);
 }
 
 }
