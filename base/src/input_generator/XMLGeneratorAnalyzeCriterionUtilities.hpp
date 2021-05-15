@@ -82,6 +82,40 @@ void append_simp_penalty_function
 }
 
 /******************************************************************************//**
+ * \fn append_surface_scalar_function_criterion
+ * \tparam Criterion criterion metadata
+ * \brief Append surface scalar function to criterion parameter list. Surface scalar 
+*         functions are integrated along surfaces. 
+ * \param [in]  aCriterion   criterion metadata
+ * \param [out] aParentNode  pugi::xml_node
+ **********************************************************************************/
+template<typename Criterion>
+pugi::xml_node append_surface_scalar_function_criterion
+(const Criterion& aCriterion,
+ pugi::xml_node& aParentNode)
+{
+    auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
+
+    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
+    //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
+    auto tCriterion = aParentNode.append_child("ParameterList");
+    std::vector<std::string> tKeys = {"name"};
+    std::vector<std::string> tValues = {tName};
+    XMLGen::append_attributes(tKeys, tValues, tCriterion);
+
+    tKeys = {"name", "type", "value"}; tValues = {"Type", "string", "Scalar Function"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
+
+    tValues = {"Scalar Function Type", "string", tDesignCriterionName};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
+
+    tValues = {"Sides", "Array(string)", aCriterion.value("location_name")};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
+
+    return tCriterion;
+}
+
+/******************************************************************************//**
  * \fn append_scalar_function_criterion
  * \tparam Criterion criterion metadata
  * \brief Append scalar function parameters to criterion parameter list.

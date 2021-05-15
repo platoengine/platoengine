@@ -12,7 +12,41 @@
 namespace XMLGen
 {
 
+namespace Private
+{
+
+template<typename CriterionT>
+void append_incompressible_fluids_scalar_functions
+(XMLGen::Analyze::CriterionFuncMap & aMap)
+{
+    // inlet pressure
+    auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
+    aMap.insert(std::make_pair("inlet_pressure",
+    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+
+    // outlet pressure
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
+    aMap.insert(std::make_pair("outlet_pressure",
+    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+
+    // inlet temperature
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
+    aMap.insert(std::make_pair("inlet_temperature",
+    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+
+    // outlet temperature
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
+    aMap.insert(std::make_pair("outlet_temperature",
+    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+}
+// function append_incompressible_fluids_scalar_functions
+
+}
+// namespace Private
+
 /******************************************************************************//**
+ * \tparam CriterionType criterion metadata type (e.g. objective or constraint)
+ * 
  * \struct The goal of this C++ struct is to provide an interface for the \n
  * functions used to append design criteria paraemters to plato_analyze_input_deck.xml. \n
  * This interface reduces cyclomatic complexity due to having multiple design \n
@@ -101,6 +135,9 @@ private:
         tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionType>));
         mMap.insert(std::make_pair("thermoplasticity_thermal_energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
+        
+        // incompressible fluids
+        XMLGen::Private::append_incompressible_fluids_scalar_functions<CriterionType>(mMap);
     }
 
 public:

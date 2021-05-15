@@ -199,8 +199,10 @@ private:
         "frf_mismatch", 
         "limit_stress",
         "compliance_and_volume_min",
-        "average_surface_pressure",
-        "average_surface_temperature",
+        "inlet_pressure",
+        "outlet_pressure",
+        "inlet_temperature",
+        "outlet_temperature",
         "flow_rate"
     };
 
@@ -1201,8 +1203,10 @@ struct ValidAnalyzeCriteriaKeys
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
-        { "average_surface_temperature", { "Average Surface Temperature", false } },
-        { "average_surface_pressure", { "Average Surface Pressure", false } },
+        { "inlet_temperature", { "Average Surface Temperature", false } },
+        { "outlet_temperature", { "Average Surface Temperature", false } },
+        { "inlet_pressure", { "Average Surface Pressure", false } },
+        { "outlet_pressure", { "Average Surface Pressure", false } },
         { "flow_rate", { "Flow Rate", false } },
     };
 };

@@ -3163,6 +3163,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
     pugi::xml_document tDocument;
     auto tCriteriaList = tDocument.append_child("ParameterList");
     XMLGen::append_objective_criteria_to_criteria_list(tXMLMetaData, tCriteriaList);
+    //tDocument.save_file("dummy.xml");
 
     // TEST MY OBJECTIVE
     auto tParamList = tCriteriaList.child("ParameterList");
@@ -3259,6 +3260,45 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
         tChild = tChild.next_sibling();
         std::advance(tGoldValuesItr, 1);
     }
+}
+
+TEST(PlatoTestXMLGenerator, AppendObjectivePressureMisfitCriteriaToCriteriaList)
+{
+    XMLGen::InputData tXMLMetaData;
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.type("inlet_pressure");
+    tCriterion.id("1");
+    tCriterion.append("location_name", "inlet");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.type("outlet_pressure");
+    tCriterion.id("2");
+    tXMLMetaData.append(tCriterion);
+    tCriterion.append("location_name", "outlet");
+
+    XMLGen::Service tService;
+    tService.code("plato_analyze");
+    tService.id("1");
+    tXMLMetaData.append(tService);
+
+    XMLGen::Scenario tScenario;
+    tScenario.physics("incompressible_fluids");
+    tScenario.id("1");
+    tXMLMetaData.append(tScenario);
+
+    tXMLMetaData.objective.scenarioIDs.push_back("1");
+    tXMLMetaData.objective.criteriaIDs.push_back("1");
+    tXMLMetaData.objective.criteriaIDs.push_back("2");
+    tXMLMetaData.objective.serviceIDs.push_back("1");
+    tXMLMetaData.objective.weights.push_back("1.0");
+    tXMLMetaData.objective.weights.push_back("-1.0");
+
+    pugi::xml_document tDocument;
+    auto tCriteriaList = tDocument.append_child("ParameterList");
+    XMLGen::append_objective_criteria_to_criteria_list(tXMLMetaData, tCriteriaList);
+    tDocument.save_file("dummy.xml");
+
+    // TEST MY OBJECTIVE
 }
 
 TEST(PlatoTestXMLGenerator, AppendConstraintCriteriaToCriteriaList)
