@@ -109,7 +109,8 @@ pugi::xml_node append_surface_scalar_function_criterion
     tValues = {"Scalar Function Type", "string", tDesignCriterionName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
 
-    tValues = {"Sides", "Array(string)", aCriterion.value("location_name")};
+    auto tSideSetNames = XMLGen::transform_tokens_for_plato_analyze_input_deck(aCriterion.values("location_name"));
+    tValues = {"Sides", "Array(string)", tSideSetNames};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
 
     return tCriterion;

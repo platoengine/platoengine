@@ -282,7 +282,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_Volume)
     tInputSS.str(tStringInput);
 
     XMLGen::ParseCriteria tCriteriaParser;
-    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    tCriteriaParser.parse(tInputSS);
 
     auto tCriterionMetaData = tCriteriaParser.data();
     ASSERT_EQ(1u, tCriterionMetaData.size());

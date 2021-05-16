@@ -83,6 +83,7 @@ struct ValidCriterionParameterKeys
         "criterion_weights",
         "relative_stress_limit",
         "relaxed_stress_ramp_factor",
+        "location_name",
         /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
         "volume_misfit_target",
         "limit_power_min",

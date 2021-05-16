@@ -25,7 +25,7 @@ struct Criterion
 private:
     std::string mID; /*!< criterion identification number */
     std::string mType;  /*!< criterion type */
-    std::unordered_map<std::string, std::string> mMetaData; /*!< Scenario metadata, map< tag, value > */
+    std::unordered_map<std::string, std::vector<std::string> > mMetaData; /*!< Scenario metadata, map< tag, vector<values> > */
     std::vector<std::string> mCriterionWeights;
     std::vector<std::string> mCriterionIDs;
 
@@ -73,15 +73,32 @@ public:
     /******************************************************************************//**
      * \fn value
      * \brief If criterion metadata is defined, return its value; else, return an empty string.
-     * \param [in]  aTag    criterion metadata
-     * \return criterion metadata value
+     * \param [in]  aTag     parameter tag
+     * \param [in] aPosition parameter position in array
+     * \return parameter value
     **********************************************************************************/
-    std::string value(const std::string& aTag) const
+    std::string value(const std::string& aTag, size_t aPosition = 0) const
     {
         auto tTag = Plato::tolower(aTag);
         auto tItr = mMetaData.find(tTag);
-        auto tOutput = tItr == mMetaData.end() ? "" : tItr->second;
-        return tOutput;
+        if(tItr == mMetaData.end())
+        {
+            return "";
+        }
+        return tItr->second[aPosition];
+    }
+
+    /******************************************************************************//**
+     * \fn values
+     * \brief Return values.
+     * \param [in] aTag parameter tag
+     * \return parameter values, return empty array if tag is not defined.
+    **********************************************************************************/
+    std::vector<std::string> values(const std::string& aTag) const
+    {
+        auto tTag = Plato::tolower(aTag);
+        auto tItr = mMetaData.find(tTag);
+        return ( tItr == mMetaData.end() ? std::vector<std::string>() : tItr->second );
     }
 
     /******************************************************************************//**
@@ -97,7 +114,7 @@ public:
             THROWERR(std::string("XML Generator Scenario Metadata: Parameter with tag '") + aTag + "' is empty.")
         }
         auto tTag = Plato::tolower(aTag);
-        mMetaData[aTag] = aValue;
+        mMetaData[aTag].push_back(aValue);
     }
 
     /******************************************************************************//**
