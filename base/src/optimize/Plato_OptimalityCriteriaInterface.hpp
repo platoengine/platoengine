@@ -123,12 +123,15 @@ public:
         std::shared_ptr<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>> tDataMng =
                 std::make_shared<Plato::OptimalityCriteriaDataMng<ScalarType, OrdinalType>>(tDataFactory);
 
+        // ********* SET INITIAL GUESS *********
+        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
+
         // ********* SET LOWER AND UPPER BOUNDS FOR CONTROLS *********
         this->setLowerBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
         this->setUpperBounds(tLinearAlgebraFactory, *tDataFactory, *tDataMng);
 
         // ********* SET INITIAL GUESS *********
-        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
+//        this->setInitialGuess(tLinearAlgebraFactory, *tDataMng);
 
         // ********* SOLVE OPTIMIZATION PROBLEM *********
         this->solveOptimizationProblem(tDataMng, tDataFactory);
@@ -283,6 +286,9 @@ private:
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
+        aAlgorithm.setControlStagnationTolerance(mInputData.getOCControlStagnationTolerance());
+        aAlgorithm.setObjectiveStagnationTolerance(mInputData.getOCObjectiveStagnationTolerance());
+        aAlgorithm.setObjectiveGradientTolerance(mInputData.getOCGradientTolerance());
     }
 
 private:

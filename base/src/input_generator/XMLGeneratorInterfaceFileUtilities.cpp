@@ -706,16 +706,22 @@ void append_aggregate_objective_gradient_operation
     XMLGen::Objective tObjective = aXMLMetaData.objective;
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
 
+    std::string tType;
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        tType = "Value";
+    else
+        tType = "Field";
+
     auto tOperationNode = tParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Aggregate Data", tFirstPlatoMainPerformer}, tOperationNode);
     
     if(tObjective.multi_load_case == "true")
     {
-        append_aggregate_objective_gradient_operation_for_multi_load_case(aXMLMetaData, tOperationNode);
+        append_aggregate_objective_gradient_operation_for_multi_load_case(aXMLMetaData, tOperationNode, tType);
     }
     else
     {
-        append_aggregate_objective_gradient_operation_for_non_multi_load_case(aXMLMetaData, tOperationNode);
+        append_aggregate_objective_gradient_operation_for_non_multi_load_case(aXMLMetaData, tOperationNode, tType);
     }
 }
 /******************************************************************************/
@@ -723,7 +729,8 @@ void append_aggregate_objective_gradient_operation
 /******************************************************************************/
 void append_aggregate_objective_gradient_operation_for_non_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node &aParentNode)
+ pugi::xml_node &aParentNode,
+ std::string &aType)
 {
     XMLGen::Objective tObjective = aXMLMetaData.objective;
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
@@ -737,7 +744,7 @@ void append_aggregate_objective_gradient_operation_for_non_multi_load_case
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         auto tOperationInput = aParentNode.append_child("Input");
-        auto tArgName = std::string("Field ") + std::to_string(i+1);
+        auto tArgName = aType + " " + std::to_string(i+1);
         auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
         if(aXMLMetaData.normalizeInAggregator())
@@ -750,14 +757,15 @@ void append_aggregate_objective_gradient_operation_for_non_multi_load_case
     }
 
     auto tOperationOutput = aParentNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Field", "Objective Gradient"}, tOperationOutput);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {aType, "Objective Gradient"}, tOperationOutput);
 }
 /******************************************************************************/
 
 /******************************************************************************/
 void append_aggregate_objective_gradient_operation_for_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node &aParentNode)
+ pugi::xml_node &aParentNode,
+ std::string &aType)
 {
     XMLGen::Objective tObjective = aXMLMetaData.objective;
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
@@ -771,7 +779,7 @@ void append_aggregate_objective_gradient_operation_for_multi_load_case
         auto tIdentifierString = XMLGen::get_concretized_criterion_identifier_string(tConcretizedCriterion);
 
         auto tOperationInput = aParentNode.append_child("Input");
-        std::string tArgName = "Field 1";
+        std::string tArgName = aType + " 1";
         auto tOutputSharedData = std::string("Criterion Gradient - ") + tIdentifierString;
         XMLGen::append_children({"ArgumentName", "SharedDataName"}, {tArgName, tOutputSharedData}, tOperationInput);
         if(aXMLMetaData.normalizeInAggregator())
@@ -784,7 +792,7 @@ void append_aggregate_objective_gradient_operation_for_multi_load_case
     }
 
     auto tOperationOutput = aParentNode.append_child("Output");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {"Field", "Objective Gradient"}, tOperationOutput);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"}, {aType, "Objective Gradient"}, tOperationOutput);
 }
 /******************************************************************************/
 
@@ -2467,6 +2475,20 @@ void append_optimality_criteria_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    std::vector<std::string> tKeys = {"OCControlStagnationTolerance", 
+                                      "OCObjectiveStagnationTolerance",
+                                      "OCGradientTolerance"};
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().oc_control_stagnation_tolerance(), 
+                                        aXMLMetaData.optimization_parameters().oc_objective_stagnation_tolerance(),
+                                        aXMLMetaData.optimization_parameters().oc_gradient_tolerance()};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.child("Options");
+    if(tOptionsNode.empty())
+    {
+        tOptionsNode = aParentNode.append_child("Options");
+    }
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+
     auto tConvergenceNode = aParentNode.append_child("Convergence");
     XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.optimization_parameters().max_iterations()}, tConvergenceNode);
 }
