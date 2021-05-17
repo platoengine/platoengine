@@ -1641,6 +1641,51 @@ PSL_TEST(AMFilterUtilities, postMultiplyTetMeshPrintableDensityGradient)
     EXPECT_DOUBLE_EQ(tOutputGradient[7],tGold7);
 }
 
+PSL_TEST(AMFilterUtilities, postMultiplyGridPrintableDensityGradient)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({1.0,1.0,1.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 1.0;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
+
+    std::vector<double> tGridBlueprintDensity = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+    std::vector<double> tGridGradient(tGridBlueprintDensity.size());
+
+    // wrong size density
+    std::vector<double> tBogusGridBlueprintDensity = {1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tBogusGridBlueprintDensity,tGridGradient),std::domain_error);
+
+    // wrong size gradient
+    std::vector<double> tBogusGradient(9u);
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tBogusGradient),std::domain_error);
+
+    EXPECT_NO_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient));
+}
+
 PSL_TEST(AMFilterUtilities, postMultiplyGridBlueprintDensityGradient)
 {
     // build TetMeshUtilities
@@ -1780,6 +1825,130 @@ PSL_TEST(AMFilterUtilities, smax_gradient)
 
     for(size_t i = 0; i < tArgs.size(); ++i)
         EXPECT_DOUBLE_EQ(tGradient[i],tGold[i]);
+}
+
+PSL_TEST(AMFilterUtilities, computeLambda)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({0.25,0.25,0.25});
+
+    double tTargetEdgeLength = 0.26;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tLambda;
+    std::vector<double> tGridBlueprintDensity = {7.0,6.0,5.0,4.0,3.0,2.0,1.0,0.0};
+    std::vector<double> tGridPrintableDensity = {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    std::vector<double> tGridGradient = {0.0,2.0,4.0,6.0,8.0,10.0,12.0,14.0};
+    size_t tLayerIndex = 1;
+
+    // Layer index out of range
+    size_t tBogusLayerIndex = 100;
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,tBogusLayerIndex,tLambda),std::out_of_range);
+
+    // Wrong size blueprint density vector
+    std::vector<double> tBogusVector(7u);
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tBogusVector,tGridPrintableDensity,tGridGradient,tLayerIndex,tLambda),std::domain_error);
+
+    // Wrong size printable density vector
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tBogusVector,tGridGradient,tLayerIndex,tLambda),std::domain_error);
+
+    // Wrong size gradient
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tBogusVector,tLayerIndex,tLambda),std::domain_error);
+
+    tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,tLayerIndex,tLambda);
+
+    EXPECT_EQ(tLambda.size(),4u);
+
+    auto tGridDimensions = tGridUtilities.getGridDimensions();
+
+    // for top layer tLamba should equal tGridGradient
+    EXPECT_DOUBLE_EQ(tLambda[0],8.0);
+    EXPECT_DOUBLE_EQ(tLambda[1],10.0);
+    EXPECT_DOUBLE_EQ(tLambda[2],12.0);
+    EXPECT_DOUBLE_EQ(tLambda[3],14.0);
+
+    // Wrong size lambda
+    std::vector<double> tBogusLambda(5u);
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tBogusVector,tLayerIndex,tBogusLambda),std::domain_error);
+
+    // layer below takes previous value of tLambda as input
+    tLayerIndex = 0;
+    tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,tLayerIndex,tLambda);
+}
+
+PSL_TEST(AMFilterUtilities, postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({0.25,0.25,0.25});
+
+    double tTargetEdgeLength = 0.26;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tLambda = {10.0,9.0,8.0,7.0};
+    std::vector<double> tGridBlueprintDensity = {7.0,6.0,5.0,4.0,3.0,2.0,1.0,0.0};
+    std::vector<double> tGridPrintableDensity = {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    size_t tLayerIndex = 1;
+
+    // Wrong size blueprint density vector
+    std::vector<double> tBogusVector = {1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tBogusVector,tGridPrintableDensity,tLayerIndex,tLambda),std::domain_error);
+
+    // Wrong size printable density vector
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tGridBlueprintDensity,tBogusVector,tLayerIndex,tLambda),std::domain_error);
+
+    // Layer index out of range
+    size_t tBogusLayerIndex = 100;
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity,tBogusLayerIndex,tLambda),std::out_of_range);
+
+    // Wrong size lambda 
+    std::vector<double> tBogusLambda = {2.0,3.0,4.0,5.0,6.0,7.0};
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity,tLayerIndex,tBogusLambda),std::domain_error);
 }
 
 }

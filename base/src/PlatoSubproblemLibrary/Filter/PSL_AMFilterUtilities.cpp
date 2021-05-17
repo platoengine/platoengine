@@ -64,7 +64,7 @@ void AMFilterUtilities::computeGridBlueprintDensity(AbstractInterface::ParallelV
     }
 }
 
-void AMFilterUtilities::computeGridLayerSupportDensity(const int& k,
+void AMFilterUtilities::computeGridLayerSupportDensity(const size_t& k,
                                                        const std::vector<double>& aGridPrintableDensity,
                                                        std::vector<double>& aGridSupportDensity) const
 {
@@ -75,31 +75,42 @@ void AMFilterUtilities::computeGridLayerSupportDensity(const int& k,
         throw(std::domain_error("AMFilterUtilities::computeGridLayerSupportDensity: Density vectors do not match grid size"));
 
     for(size_t i = 0; i < tGridDimensions[0]; ++i)
-    {
         for(size_t j = 0; j < tGridDimensions[1]; ++j)
+            aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = computeGridPointSupportDensity(i,j,k,aGridPrintableDensity);
+}
+
+double AMFilterUtilities::computeGridPointSupportDensity(const size_t& i,
+                                                         const size_t& j,
+                                                         const size_t& k,
+                                                         const std::vector<double>& aGridPrintableDensity) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tGridSize = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aGridPrintableDensity.size() != tGridSize)
+        throw(std::domain_error("AMFilterUtilities::computeGridPointSupportDensity: Density vector does not match grid size"));
+
+    if(i < 0 || j < 0 || k < 0 || i >= tGridDimensions[0] || j >= tGridDimensions[1] || k >= tGridDimensions[2])
+        throw(std::out_of_range("AMFilterUtilities::computeGridPointSupportDensity: Index out of range"));
+
+    if(k == 0)
+        return 1.0;
+    else
+    {
+        auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
+        std::vector<double> tSupportDensityBelow;
+        for(auto tSupportIndex : tSupportIndices)
         {
-            if(k == 0)
-            {
-                aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = 1.0;
-            }
-            else
-            {
-                auto tSupportIndices = mGridUtilities.getSupportIndices(i,j,k);
-                std::vector<double> tSupportDensityBelow;
-                for(auto tSupportIndex : tSupportIndices)
-                {
-                    tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
-                }
-
-                double tVal = smax(tSupportDensityBelow,mPNorm,mX0);
-
-                aGridSupportDensity[mGridUtilities.getSerializedIndex(i,j,k)] = tVal;
-            }
+            tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
         }
+
+        double tVal = smax(tSupportDensityBelow,mPNorm,mX0);
+
+        return tVal;
     }
 }
 
-void AMFilterUtilities::computeGridLayerPrintableDensity(const int& k,
+void AMFilterUtilities::computeGridLayerPrintableDensity(const size_t& k,
                                                          const std::vector<double>& aGridBlueprintDensity,
                                                          const std::vector<double>& aGridSupportDensity,
                                                          std::vector<double>& aGridPrintableDensity) const
@@ -197,6 +208,159 @@ void AMFilterUtilities::postMultiplyTetMeshPrintableDensityGradient(AbstractInte
             aGridGradient[mGridUtilities.getSerializedIndex(tIndex)] += aInputGradient->get_value(tTetIndex)*tLocalGradientValues[tLocalIndex];
         }
     }
+}
+
+void AMFilterUtilities::postMultiplyGridPrintableDensityGradient(const std::vector<double>& aGridBlueprintDensity, std::vector<double>& aGridGradient) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aGridBlueprintDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyGridPrintableDensityGradient: Input density vector does not match grid size"));
+    if(aGridGradient.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyGridPrintableDensityGradient: Input gradient does not match grid size"));
+
+    std::vector<double> aGridPrintableDensity;
+    computeGridPrintableDensity(aGridBlueprintDensity,aGridPrintableDensity);
+
+    std::vector<double> tLambda;
+
+    for(size_t tAuxiliaryIndex = 1; tAuxiliaryIndex <= tGridDimensions[2]; ++tAuxiliaryIndex)
+    {
+        size_t tLayerIndex = tGridDimensions[2] - tAuxiliaryIndex;
+
+        computeLambda(aGridBlueprintDensity,aGridPrintableDensity,aGridGradient,tLayerIndex,tLambda);
+        postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(aGridBlueprintDensity,aGridPrintableDensity,tLayerIndex,tLambda,aGridGradient);
+    }
+}
+
+void AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(const std::vector<double>& aGridBlueprintDensity,
+                                                                                    const std::vector<double>& aGridPrintableDensity,
+                                                                                    const size_t& tLayerIndex,
+                                                                                    const std::vector<double>& aLambda,
+                                                                                    std::vector<double>& aGridGradient) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aGridBlueprintDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input density vector does not match grid size"));
+    if(aGridPrintableDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input density vector does not match grid size"));
+    if(aGridGradient.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input gradient does not match grid size"));
+
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
+        {
+            double tSupportDensity = computeGridPointSupportDensity(i,j,tLayerIndex,aGridPrintableDensity);
+            double tSminGradientWRTBlueprintDensity = smin_gradient1(aGridBlueprintDensity[mGridUtilities.getSerializedIndex(i,j,tLayerIndex)], tSupportDensity);
+            aGridGradient[mGridUtilities.getSerializedIndex(i,j,tLayerIndex)] = aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)]*tSminGradientWRTBlueprintDensity;
+        }
+    }
+}
+
+void AMFilterUtilities::computeLambda(const std::vector<double>& aGridBlueprintDensity,
+                                      const std::vector<double>& aGridPrintableDensity,
+                                      const std::vector<double>& aGridGradient,
+                                      const size_t aLayerIndex,
+                                      std::vector<double>& aLambda) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aGridBlueprintDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::computeLambda: Input density vector does not match grid size"));
+    if(aGridPrintableDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::computeLambda: Input density vector does not match grid size"));
+    if(aGridGradient.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::computeLambda: Input gradient does not match grid size"));
+    if(aLayerIndex >= tGridDimensions[2])
+        throw(std::out_of_range("AMFilterUtilities::computeLambda: Grid layer index out of range"));
+
+
+    if(aLayerIndex == tGridDimensions[2] - 1)
+    {
+        aLambda.resize(tGridDimensions[0]*tGridDimensions[1]);
+        for(size_t i = 0; i < tGridDimensions[0]; ++i)
+        {
+            for(size_t j = 0; j < tGridDimensions[1]; ++j)
+            {
+                aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)] = aGridGradient[mGridUtilities.getSerializedIndex(i,j,aLayerIndex)];
+            }
+        }
+    }
+    else
+    {
+        if(aLambda.size() != tGridDimensions[0]*tGridDimensions[1])
+            throw(std::domain_error("AMFilterUtilities::computeLambda: input Lambda value incorrect size"));
+
+        for(size_t i = 0; i < tGridDimensions[0]; ++i)
+        {
+            for(size_t j = 0; j < tGridDimensions[1]; ++j)
+            {
+                postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(aGridBlueprintDensity,aGridPrintableDensity,aLayerIndex,aLambda); 
+                aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)] += aGridGradient[mGridUtilities.getSerializedIndex(i,j,aLayerIndex)];
+            }
+        }
+    }
+}
+
+void AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(const std::vector<double>& aGridBlueprintDensity,
+                                                                                     const std::vector<double>& aGridPrintableDensity,
+                                                                                     const size_t aLayerIndex,
+                                                                                     std::vector<double>& aLambda) const
+{
+    auto tGridDimensions = mGridUtilities.getGridDimensions();
+    size_t tNumGridElements = tGridDimensions[0]*tGridDimensions[1]*tGridDimensions[2];
+
+    if(aGridBlueprintDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity: Input density vector does not match grid size"));
+    if(aGridPrintableDensity.size() != tNumGridElements)
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity: Input density vector does not match grid size"));
+    if(aLayerIndex >= tGridDimensions[2])
+        throw(std::out_of_range("AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity: Grid layer index out of range"));
+    if(aLambda.size() != tGridDimensions[0]*tGridDimensions[1])
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity: input Lambda value incorrect size"));
+
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
+        {
+            double tSupportDensity = computeGridPointSupportDensity(i,j,aLayerIndex,aGridPrintableDensity);
+            double tSminGradientWRTSupportDensity = smin_gradient2(aGridBlueprintDensity[mGridUtilities.getSerializedIndex(i,j,aLayerIndex)], tSupportDensity);
+            aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)] *= tSminGradientWRTSupportDensity;
+        }
+    }
+
+    std::vector<double> tNewLambda(aLambda.size(),0.0);
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
+    {
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
+        {
+            double tCurrentLambda = aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)];
+
+            std::vector<std::vector<size_t>> tSupportIndices = mGridUtilities.getSupportIndices(i,j,aLayerIndex);
+            std::vector<double> tSupportSetPrintableDensities;
+            for(auto tSupportIndex : tSupportIndices)
+            {
+                tSupportSetPrintableDensities.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
+            }
+
+            std::vector<double> tSupportDensityGradientWRTPreviousLayer;
+            smax_gradient(tSupportSetPrintableDensities,mPNorm,mX0,tSupportDensityGradientWRTPreviousLayer);
+            
+            for(size_t tSumIndex = 0; tSumIndex < tSupportIndices.size(); ++tSumIndex)
+            {
+                size_t tSupportIndexI = tSupportIndices[tSumIndex][0];
+                size_t tSupportIndexJ = tSupportIndices[tSumIndex][1];
+                tNewLambda[mGridUtilities.getSerializedIndexWithinLayer(tSupportIndexI,tSupportIndexJ)] += tCurrentLambda * tSupportDensityGradientWRTPreviousLayer[tSumIndex];
+            }
+        }
+    }
+
+    aLambda = tNewLambda;
 }
 
 void AMFilterUtilities::postMultiplyGridBlueprintDensityGradient(const std::vector<double>& aInputGridGradient,

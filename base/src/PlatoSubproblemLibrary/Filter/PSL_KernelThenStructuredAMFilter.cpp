@@ -43,7 +43,7 @@ void KernelThenStructuredAMFilter::internal_gradient(AbstractInterface::Parallel
 
     std::vector<double> tGridGradient;
     mAMFilterUtilities->postMultiplyTetMeshPrintableDensityGradient(aGradient,tGridGradient);
-    // mAMFilterUtilities->postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient);
+    mAMFilterUtilities->postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient);
     mAMFilterUtilities->postMultiplyGridBlueprintDensityGradient(tGridGradient,aGradient);
 }
 

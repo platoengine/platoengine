@@ -3,6 +3,11 @@
 #include "PSL_TetMeshUtilities.hpp"
 #include "PSL_OrthogonalGridUtilities.hpp"
 
+// This class implements the AM filter functions from the 2016 paper
+// "An additive manufacturing filter for topology optimization of print-ready designs"
+// by Matthajs Langelaar along with functions to transfer topology between 
+// a tetrahedral mesh onto a regular grid as well as corresponding gradients
+
 namespace PlatoSubproblemLibrary
 {
 
@@ -34,11 +39,16 @@ public:
 
     double computeGridPointBlueprintDensity(const std::vector<int>& aIndex, AbstractInterface::ParallelVector* const aTetMeshBlueprintDensity) const;
 
-    void computeGridLayerSupportDensity(const int& k,
+    void computeGridLayerSupportDensity(const size_t& k,
                                         const std::vector<double>& aGridPrintableDensity,
                                         std::vector<double>& aGridSupportDensity) const;
 
-    void computeGridLayerPrintableDensity(const int& k,
+    double computeGridPointSupportDensity(const size_t& i,
+                                          const size_t& j,
+                                          const size_t& k,
+                                          const std::vector<double>& aGridPrintableDensity) const;
+
+    void computeGridLayerPrintableDensity(const size_t& k,
                                           const std::vector<double>& aGridBlueprintDensity,
                                           const std::vector<double>& aGridSupportDensity,
                                           std::vector<double>& aGridPrintableDensity) const;
@@ -50,6 +60,8 @@ public:
     void postMultiplyTetMeshPrintableDensityGradient(AbstractInterface::ParallelVector* const aGradient,
                                                      std::vector<double>& aGridGradient) const;
 
+    void postMultiplyGridPrintableDensityGradient(const std::vector<double>& tGridBlueprintDensity, std::vector<double>& tGridGradient) const;
+
     void postMultiplyGridBlueprintDensityGradient(const std::vector<double>& aInputGridGradient,
                                                   AbstractInterface::ParallelVector* aOutputGradient) const;
 
@@ -58,6 +70,22 @@ public:
 
     const std::vector<Vector>& getGridPointCoordinates() const {return mGridPointCoordinates;}
 
+    void computeLambda(const std::vector<double>& aGridBlueprintDensity,
+                       const std::vector<double>& aGridPrintableDensity,
+                       const std::vector<double>& aGridGradient,
+                       const size_t aLayerIndex,
+                       std::vector<double>& aLambda) const;
+
+    void postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(const std::vector<double>& aGridBlueprintDensity,
+                                                                      const std::vector<double>& aGridPrintableDensity,
+                                                                      const size_t aLayerIndex,
+                                                                      std::vector<double>& aLambda) const;
+
+    void postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(const std::vector<double>& aGridBlueprintDensity,
+                                                                     const std::vector<double>& aGridPrintableDensity,
+                                                                     const size_t& tLayerIndex,
+                                                                     const std::vector<double>& aLambda,
+                                                                     std::vector<double>& aGridGradient) const;
 
 private:
 

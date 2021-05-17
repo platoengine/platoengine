@@ -69,6 +69,7 @@ class OrthogonalGridUtilities
 
         size_t getSerializedIndex(const size_t& i, const size_t& j, const size_t& k) const;
         size_t getSerializedIndex(const std::vector<size_t>& aIndex) const;
+        size_t getSerializedIndexWithinLayer(const size_t& i, const size_t& j) const;
 
         std::vector<std::vector<size_t>> getSupportIndices(const size_t& i, const size_t& j, const size_t& k) const;
         std::vector<std::vector<size_t>> getSupportIndices(const std::vector<size_t>& aIndex) const;

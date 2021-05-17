@@ -288,6 +288,44 @@ PSL_TEST(OrthogonalGridUtilities, getSerializedIndex)
     EXPECT_EQ(tSerializedIndex,22u);
 }
 
+PSL_TEST(OrthogonalGridUtilities, getSerializedIndexWithinLayer)
+{
+    Vector tUBasisVector({1,0,0});
+    Vector tVBasisVector({0,1,0});
+    Vector tWBasisVector({0,0,1});
+
+    Vector tMaxUVWCoords({1.0,2.0,3.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    std::vector<size_t> tNumElements = {2,2,2};
+    OrthogonalGridUtilities tUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tNumElements);
+
+    // tIndex out of range
+    EXPECT_THROW(tUtilities.getSerializedIndexWithinLayer(100000,0), std::out_of_range);
+    EXPECT_THROW(tUtilities.getSerializedIndexWithinLayer(0,10000), std::out_of_range);
+
+    size_t tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(0,0);
+    EXPECT_EQ(tSerializedIndex,0u);
+
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(1,0);
+    EXPECT_EQ(tSerializedIndex,1u);
+
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(2,0);
+    EXPECT_EQ(tSerializedIndex,2u);
+    
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(0,1);
+    EXPECT_EQ(tSerializedIndex,3u);
+
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(1,1);
+    EXPECT_EQ(tSerializedIndex,4u);
+
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(1,2);
+    EXPECT_EQ(tSerializedIndex,7u);
+
+    tSerializedIndex = tUtilities.getSerializedIndexWithinLayer(2,2);
+    EXPECT_EQ(tSerializedIndex,8u);
+}
+
 PSL_TEST(OrthogonalGridUtilities, getSupportIndices)
 {
     Vector tUBasisVector({1,0,0});

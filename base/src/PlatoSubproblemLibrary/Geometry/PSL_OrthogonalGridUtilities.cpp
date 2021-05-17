@@ -23,14 +23,21 @@ std::vector<size_t> OrthogonalGridUtilities::computeNumElementsInEachDirection(c
     tNumElements.push_back(aTargetEdgeLength > tVLength ? 1 : (size_t) tVLength/aTargetEdgeLength);
     tNumElements.push_back(aTargetEdgeLength > tWLength ? 1 : (size_t) tWLength/aTargetEdgeLength);
 
-    if(tNumElements[0] == 0)
-        tNumElements[0] = 1;
-    if(tNumElements[1] == 0)
-        tNumElements[1] = 1;
-    if(tNumElements[2] == 0)
-        tNumElements[2] = 1;
+    for(int i = 0; i < 3; ++i)
+    {
+        if(tNumElements[i] == 0)
+            tNumElements[i] = 1;
+    }
 
     return tNumElements;
+}
+
+size_t OrthogonalGridUtilities::getSerializedIndexWithinLayer(const size_t& i, const size_t& j) const
+{
+    if(i < 0 || j < 0 || i > mNumElementsInEachDirection[0] || j > mNumElementsInEachDirection[1])
+        throw(std::out_of_range("OrthogonalGridUtilities: Index in each direction must be between zero and number of grid elements"));
+
+    return i + j*(mNumElementsInEachDirection[0]+1);
 }
 
 size_t OrthogonalGridUtilities::getSerializedIndex(const size_t& i, const size_t& j, const size_t& k) const
