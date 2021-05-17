@@ -290,6 +290,10 @@ public:
     std::string csm_tesselation_file() const {return value("csm_tesselation_file");}
     std::string csm_opt_file() const {return value("csm_opt_file");}
     std::string enforce_bounds() const {return value("enforce_bounds");}
+    std::string oc_control_stagnation_tolerance() const {return value("oc_control_stagnation_tolerance");}
+    std::string oc_objective_stagnation_tolerance() const {return value("oc_objective_stagnation_tolerance");}
+    std::string oc_gradient_tolerance() const {return value("oc_gradient_tolerance");}
+
 
 };
 // struct OptimizationParameters

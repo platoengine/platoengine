@@ -1600,6 +1600,22 @@ void parseOptimizerOptions(const Plato::InputData & aOptimizerNode, Plato::Optim
             double tAugLagPenaltyScaleParameter = Plato::Get::Double(tOptionsNode, "AugLagPenaltyParamScaleFactor");
             aOptimizerEngineStageData.setAugLagPenaltyScaleParameter(tAugLagPenaltyScaleParameter);
         }
+        if(tOptionsNode.size<std::string>("OCControlStagnationTolerance"))
+        {
+            double tOCControlStagnationTolerance = Plato::Get::Double(tOptionsNode, "OCControlStagnationTolerance");
+            aOptimizerEngineStageData.setOCControlStagnationTolerance(tOCControlStagnationTolerance);
+        }
+        if(tOptionsNode.size<std::string>("OCObjectiveStagnationTolerance"))
+        {
+            double tOCObjectiveStagnationTolerance = Plato::Get::Double(tOptionsNode, "OCObjectiveStagnationTolerance");
+            aOptimizerEngineStageData.setOCObjectiveStagnationTolerance(tOCObjectiveStagnationTolerance);
+        }
+        if(tOptionsNode.size<std::string>("OCGradientTolerance"))
+        {
+            double tOCGradientTolerance = Plato::Get::Double(tOptionsNode, "OCGradientTolerance");
+            aOptimizerEngineStageData.setOCGradientTolerance(tOCGradientTolerance);
+        }
+
     }
 }
 

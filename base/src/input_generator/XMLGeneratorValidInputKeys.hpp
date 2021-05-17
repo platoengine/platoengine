@@ -1166,6 +1166,7 @@ struct ValidAnalyzeCriteriaKeys
      **/
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
+        { "composite", { "Composite", false } },
         { "volume", { "Volume", false } },
         { "elastic_work", { "Elastic Work", false } },
         { "plastic_work", { "Plastic Work", false } },
@@ -1308,6 +1309,9 @@ struct ValidOptimizationParameterKeys
      "mma_max_sub_problem_iterations",
      "mma_control_stagnation_tolerance",
      "mma_objective_stagnation_tolerance",
+     "oc_control_stagnation_tolerance",
+     "oc_objective_stagnation_tolerance",
+     "oc_gradient_tolerance",
      "initial_guess_file_name",
      "initial_guess_field_name",
      "normalize_in_aggregator",

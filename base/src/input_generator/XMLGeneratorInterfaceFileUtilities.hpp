@@ -882,20 +882,24 @@ void append_aggregate_objective_value_operation_for_non_multi_load_case
  * \brief Append the aggregate objective gradient operation for multi-load case problems
  * \param [in]     aXMLMetaData  Plato problem input data
  * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aType type of data being aggregated
 **********************************************************************************/
 void append_aggregate_objective_gradient_operation_for_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node &aParentNode);
+ pugi::xml_node &aParentNode,
+ std::string &aType);
 
 /******************************************************************************//**
  * \fn append_aggregate_objective_gradient_operation_for_non_multi_load_case
  * \brief Append the aggregate objective gradient operation for non multi-load case problems
  * \param [in]     aXMLMetaData  Plato problem input data
  * \param [in]     aParentNode Parent to add data to
+ * \param [in]     aType type of data being aggregated
 **********************************************************************************/
 void append_aggregate_objective_gradient_operation_for_non_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node &aParentNode);
+ pugi::xml_node &aParentNode,
+ std::string &aType);
 
 /******************************************************************************//**
  * \fn getCompoundScenarioID
