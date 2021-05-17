@@ -9,7 +9,7 @@
 #define ISO_PRUNE_MAIN_MESHPRUNE_HPP_
 
 #include "MeshManager.hpp"
-#include <percept/PerceptMesh.hpp>
+#include <PerceptMesh.hpp>
 #include "PerceptPrune.hpp"
 
 class MeshPrune
