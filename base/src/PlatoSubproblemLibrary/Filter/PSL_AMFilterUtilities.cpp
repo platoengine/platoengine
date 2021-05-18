@@ -104,9 +104,7 @@ double AMFilterUtilities::computeGridPointSupportDensity(const size_t& i,
             tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
         }
 
-        double tVal = smax(tSupportDensityBelow,mPNorm);
-
-        return tVal;
+        return smax(tSupportDensityBelow,mPNorm);
     }
 }
 
@@ -249,6 +247,10 @@ void AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDens
         throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input density vector does not match grid size"));
     if(aGridGradient.size() != tNumGridElements)
         throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input gradient does not match grid size"));
+    if(aLambda.size() != tGridDimensions[0]*tGridDimensions[1])
+        throw(std::domain_error("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input lagrange multiplier does not match grid layer size"));
+    if(tLayerIndex >= tGridDimensions[2])
+        throw(std::out_of_range("AMFilterUtilities::postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity: Input layer index out of range"));
 
     for(size_t i = 0; i < tGridDimensions[0]; ++i)
     {

@@ -2014,5 +2014,88 @@ PSL_TEST(AMFilterUtilities, postMultiplyLambdaByGradientWRTPreviousLayerPrintabl
     EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity,tLayerIndex,tBogusLambda),std::domain_error);
 }
 
+PSL_TEST(AMFilterUtilities, postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+    Vector tMaxUVWCoords({0.25,0.25,0.25});
+
+    double tTargetEdgeLength = 0.26;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tLambda = {10.0,9.0,8.0,7.0};
+    std::vector<double> tGridBlueprintDensity = {7.0,6.0,5.0,4.0,3.0,2.0,1.0,0.0};
+    std::vector<double> tGridPrintableDensity = {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    std::vector<double> tGridGradient = {0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    size_t tLayerIndex = 1;
+    // 0 0 0
+    // 1 0 0
+    // 0 1 0
+    // 1 1 0
+    // 0 0 1
+    // 1 0 1
+    // 0 1 1
+    // 1 1 1
+
+    // Wrong size blueprint density vector
+    std::vector<double> tBogusVector = {1.0,2.0,3.0,4.0,5.0,6.0,7.0};
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tBogusVector,tGridPrintableDensity,tLayerIndex,tLambda,tGridGradient),std::domain_error);
+
+    // Wrong size printable density vector
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tBogusVector,tLayerIndex,tLambda,tGridGradient),std::domain_error);
+
+    // Layer index out of range
+    size_t tBogusLayerIndex = 100;
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,tBogusLayerIndex,tLambda,tGridGradient),std::out_of_range);
+
+    // Wrong size lambda 
+    std::vector<double> tBogusLambda = {2.0,3.0,4.0,5.0,6.0,7.0};
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,tLayerIndex,tBogusLambda,tGridGradient),std::domain_error);
+
+    // wrong size gradient
+    EXPECT_THROW(tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,tLayerIndex,tLambda,tBogusVector),std::domain_error);
+
+    std::vector<double> tSupportDensity = {1.0,1.0,1.0,1.0,smax({0.0,1.0,2.0},tPNorm),smax({0.0,1.0,3.0},tPNorm),smax({0.0,2.0,3.0},tPNorm),smax({1.0,2.0,3.0},tPNorm)};
+    std::vector<double> tGrad;
+    for(size_t i = 0; i < tSupportDensity.size(); ++i)
+    {
+        tGrad.push_back(smin_gradient1(tGridBlueprintDensity[i],tSupportDensity[i]));
+    }
+
+    tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,0,tLambda,tGridGradient);
+    tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,1,tLambda,tGridGradient);
+
+    EXPECT_DOUBLE_EQ(tGridGradient[0],tLambda[0]*tGrad[0]);
+    EXPECT_DOUBLE_EQ(tGridGradient[1],tLambda[1]*tGrad[1]);
+    EXPECT_DOUBLE_EQ(tGridGradient[2],tLambda[2]*tGrad[2]);
+    EXPECT_DOUBLE_EQ(tGridGradient[3],tLambda[3]*tGrad[3]);
+    EXPECT_DOUBLE_EQ(tGridGradient[4],tLambda[0]*tGrad[4]);
+    EXPECT_DOUBLE_EQ(tGridGradient[5],tLambda[1]*tGrad[5]);
+    EXPECT_DOUBLE_EQ(tGridGradient[6],tLambda[2]*tGrad[6]);
+    EXPECT_DOUBLE_EQ(tGridGradient[7],tLambda[3]*tGrad[7]);
+}
+
 }
 }
