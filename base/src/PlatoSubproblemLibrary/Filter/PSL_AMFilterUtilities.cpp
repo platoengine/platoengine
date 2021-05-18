@@ -90,7 +90,7 @@ double AMFilterUtilities::computeGridPointSupportDensity(const size_t& i,
     if(aGridPrintableDensity.size() != tGridSize)
         throw(std::domain_error("AMFilterUtilities::computeGridPointSupportDensity: Density vector does not match grid size"));
 
-    if(i < 0 || j < 0 || k < 0 || i >= tGridDimensions[0] || j >= tGridDimensions[1] || k >= tGridDimensions[2])
+    if(i >= tGridDimensions[0] || j >= tGridDimensions[1] || k >= tGridDimensions[2])
         throw(std::out_of_range("AMFilterUtilities::computeGridPointSupportDensity: Index out of range"));
 
     if(k == 0)
@@ -104,7 +104,7 @@ double AMFilterUtilities::computeGridPointSupportDensity(const size_t& i,
             tSupportDensityBelow.push_back(aGridPrintableDensity[mGridUtilities.getSerializedIndex(tSupportIndex)]);
         }
 
-        double tVal = smax(tSupportDensityBelow,mPNorm,mX0);
+        double tVal = smax(tSupportDensityBelow,mPNorm);
 
         return tVal;
     }
@@ -349,7 +349,7 @@ void AMFilterUtilities::postMultiplyLambdaByGradientWRTPreviousLayerPrintableDen
             }
 
             std::vector<double> tSupportDensityGradientWRTPreviousLayer;
-            smax_gradient(tSupportSetPrintableDensities,mPNorm,mX0,tSupportDensityGradientWRTPreviousLayer);
+            smax_gradient(tSupportSetPrintableDensities,mPNorm,tSupportDensityGradientWRTPreviousLayer);
             
             for(size_t tSumIndex = 0; tSumIndex < tSupportIndices.size(); ++tSumIndex)
             {
@@ -396,10 +396,10 @@ void AMFilterUtilities::postMultiplyGridBlueprintDensityGradient(const std::vect
     }
 }
 
-double smax(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0)
+double smax(const std::vector<double>& aArguments, const double& aPNorm)
 {
     double tSmax = 0;
-    double aQNorm = aPNorm + std::log(aArguments.size())/std::log(aX0);
+    double aQNorm = aPNorm + std::log(aArguments.size())/std::log(0.5);
 
     for(auto tArgument : aArguments)
     {
@@ -413,11 +413,11 @@ double smax(const std::vector<double>& aArguments, const double& aPNorm, const d
     return tSmax;
 }
 
-void smax_gradient(const std::vector<double>& aArguments, const double& aPNorm, const double& aX0, std::vector<double>& aGradient)
+void smax_gradient(const std::vector<double>& aArguments, const double& aPNorm, std::vector<double>& aGradient)
 {
     aGradient.resize(aArguments.size());
 
-    double tQ = aPNorm + std::log(aArguments.size()) / std::log(aX0);
+    double tQ = aPNorm + std::log(aArguments.size()) / std::log(0.5);
 
     for(size_t i = 0; i < aArguments.size(); ++i)
     {

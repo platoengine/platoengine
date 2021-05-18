@@ -742,12 +742,77 @@ PSL_TEST(AMFilterUtilities, computeGridPrintableDensity)
                         size_t tSupportSerializedIndex = tGridUtilities.getSerializedIndex(tSupportIndex);
                         tSupportDensities.push_back(tGridPrintableDensity[tSupportSerializedIndex]);
                     }
-                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],smax(tSupportDensities,tPNorm,0.5));
+                    EXPECT_DOUBLE_EQ(tGridSupportDensity[tSerializedIndex],smax(tSupportDensities,tPNorm));
                 }
                 EXPECT_DOUBLE_EQ(tGridPrintableDensity[tSerializedIndex],smin(tGridBlueprintDensity[tSerializedIndex],tGridSupportDensity[tSerializedIndex]));
             }
         }
     }
+}
+
+PSL_TEST(AMFilterUtilities, computeGridPointSupportDensity)
+{
+    // build TetMeshUtilities
+    std::vector<std::vector<double>> tCoordinates;
+    std::vector<std::vector<int>> tConnectivity;
+
+    tCoordinates.push_back({0.0,0.0,0.0});
+    tCoordinates.push_back({1.0,0.0,0.0});
+    tCoordinates.push_back({0.0,1.0,0.0});
+    tCoordinates.push_back({0.0,0.0,1.0});
+
+    tConnectivity.push_back({0,1,2,3});
+
+    TetMeshUtilities tTetUtilities(tCoordinates,tConnectivity);
+
+    // build OrthogonalGridUtilities
+    Vector tUBasisVector({1.0,0.0,0.0});
+    Vector tVBasisVector({0.0,1.0,0.0});
+    Vector tWBasisVector({0.0,0.0,1.0});
+
+    Vector tMaxUVWCoords({2.0,2.0,2.0});
+    Vector tMinUVWCoords({0.0,0.0,0.0});
+
+    double tTargetEdgeLength = 2.0;
+
+    OrthogonalGridUtilities tGridUtilities(tUBasisVector,tVBasisVector,tWBasisVector,tMaxUVWCoords,tMinUVWCoords,tTargetEdgeLength);
+    std::vector<size_t> tGridDimensions = tGridUtilities.getGridDimensions();
+
+    double tPNorm = 200;
+
+    AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities,tPNorm);
+
+    std::vector<double> tGridPrintableDensity = {0.3,0.4,0.26,0.07,0.12,0.47,0.81,0.09};
+    // 0 0 0
+    // 1 0 0
+    // 0 1 0
+    // 1 1 0
+    // 0 0 1
+    // 1 0 1
+    // 0 1 1
+    // 1 1 1
+
+    // Wrong printable density vector size
+    std::vector<double> tBogusVector(7u);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(0,0,0,tBogusVector),std::domain_error);
+
+    // Index out of range
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(-1,0,0,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(0,-1,0,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(0,0,-1,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(2,0,0,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(0,2,0,tGridPrintableDensity),std::out_of_range);
+    EXPECT_THROW(tAMFilterUtilities.computeGridPointSupportDensity(0,0,2,tGridPrintableDensity),std::out_of_range);
+
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(0,0,0,tGridPrintableDensity),1.0);
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(1,0,0,tGridPrintableDensity),1.0);
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(0,1,0,tGridPrintableDensity),1.0);
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(1,1,0,tGridPrintableDensity),1.0);
+
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(0,0,1,tGridPrintableDensity),smax({0.3,0.4,0.26},tPNorm));
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(1,0,1,tGridPrintableDensity),smax({0.4,0.3,0.07},tPNorm));
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(0,1,1,tGridPrintableDensity),smax({0.26,0.3,0.07},tPNorm));
+    EXPECT_DOUBLE_EQ(tAMFilterUtilities.computeGridPointSupportDensity(1,1,1,tGridPrintableDensity),smax({0.07,0.4,0.26},tPNorm));
 }
 
 PSL_TEST(AMFilterUtilities, computeTetNodePrintableDensity)
@@ -1451,9 +1516,8 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(0.9);
 
     double tPNorm = 200;
-    double tX0 = 0.5;
     
-    double tSmax = smax(tArgs,tPNorm,tX0);
+    double tSmax = smax(tArgs,tPNorm);
     EXPECT_DOUBLE_EQ(tSmax,0.89839982193243095);
 
     tArgs.clear();
@@ -1469,7 +1533,7 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(1.0);
     tArgs.push_back(0.336);
 
-    tSmax = smax(tArgs,tPNorm,tX0);
+    tSmax = smax(tArgs,tPNorm);
 
     EXPECT_DOUBLE_EQ(tSmax,1.0);
 
@@ -1487,7 +1551,7 @@ PSL_TEST(AMFilterUtilities, smoothMax)
     tArgs.push_back(0.336);
 
     // negative argument
-    EXPECT_THROW(smax(tArgs,tPNorm,tX0),std::domain_error);
+    EXPECT_THROW(smax(tArgs,tPNorm),std::domain_error);
 }
 
 PSL_TEST(AMFilterUtilities, smin)
@@ -1803,14 +1867,13 @@ PSL_TEST(AMFilterUtilities, smax_gradient)
     tArgs.push_back(0.9);
 
     double tPNorm = 200;
-    double tX0 = 0.5;
     
     std::vector<double> tGradient;
-    smax_gradient(tArgs, tPNorm, tX0, tGradient);
+    smax_gradient(tArgs, tPNorm, tGradient);
 
     EXPECT_EQ(tGradient.size(), tArgs.size());
 
-    double tQ = tPNorm + std::log(tArgs.size()) / std::log(tX0);
+    double tQ = tPNorm + std::log(tArgs.size()) / std::log(0.5);
 
     std::vector<double> tGold(tArgs.size());
 
