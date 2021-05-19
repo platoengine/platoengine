@@ -69,7 +69,7 @@ public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     void generate();
-    const InputData& getInputData(){ return m_InputData; }
+    const XMLGen::InputData& getInputData(){ return m_InputData; }
 
 protected:
 

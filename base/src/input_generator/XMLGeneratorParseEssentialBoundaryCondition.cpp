@@ -51,7 +51,7 @@ void ParseEssentialBoundaryCondition::setType(XMLGen::EssentialBoundaryCondition
         auto tItr = mTags.find("type");
         if(tItr->second.first.second.empty())
         {
-            THROWERR("Parse EssentialBoundaryCondition: essential boundary condition type is empty.")
+            THROWERR("Parse EssentialBoundaryCondition: 'type' keyword in essential boundary condition block with id '" + aMetadata.id() + "' is empty.")
         }
         aMetadata.property("type", tItr->second.first.second);
     }
@@ -64,7 +64,7 @@ void ParseEssentialBoundaryCondition::setLocationType(XMLGen::EssentialBoundaryC
         auto tItr = mTags.find("location_type");
         if(tItr->second.first.second.empty())
         {
-            THROWERR("Parse EssentialBoundaryCondition: essential boundary condition location_type is empty.")
+            THROWERR("Parse EssentialBoundaryCondition: 'location_type' keyword in essential boundary condition block with id '" + aMetadata.id() + "' is empty.")
         }
         aMetadata.property("location_type", tItr->second.first.second);
     }
@@ -101,7 +101,7 @@ void ParseEssentialBoundaryCondition::setDegreeOfFreedom(XMLGen::EssentialBounda
         auto tItr = mTags.find("degree_of_freedom");
         if(tItr->second.first.second.empty())
         {
-            THROWERR("Parse EssentialBoundaryCondition: essential boundary condition degree_of_freedom is empty.")
+            THROWERR("Parse EssentialBoundaryCondition: 'degree_of_freedom' keyword in essential boundary condition block with id '" + aMetadata.id() + "' is empty.")
         }
         aMetadata.property("degree_of_freedom", tItr->second.first.second);
     }
@@ -109,12 +109,16 @@ void ParseEssentialBoundaryCondition::setDegreeOfFreedom(XMLGen::EssentialBounda
 
 void ParseEssentialBoundaryCondition::setValue(XMLGen::EssentialBoundaryCondition& aMetadata)
 {
-    if(aMetadata.value("value").empty())
+    auto tType = aMetadata.value("type");
+    auto tLowerType = Plato::tolower(tType);
+
+    aMetadata.property("value", "0");
+    if (tLowerType.compare("zero_value") != 0)
     {
         auto tItr = mTags.find("value");
-        if(tItr->second.first.second.empty())
+        if (tItr->second.first.second.empty())
         {
-            THROWERR("Parse EssentialBoundaryCondition: essential boundary condition value is empty.")
+            THROWERR("Parse EssentialBoundaryCondition: 'value' keyword in essential boundary condition block with id '" + aMetadata.id() + "' is empty.")
         }
         aMetadata.property("value", tItr->second.first.second);
     }

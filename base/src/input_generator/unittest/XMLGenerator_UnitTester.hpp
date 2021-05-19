@@ -70,6 +70,7 @@ public:
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
     bool publicParseLoads(std::istream &sin);
+    void publicParseConstraints(std::istream &sin);
     void publicParseObjective(std::istream &sin);
     void publicParseMaterials(std::istream &sin);
     void publicParseServices(std::istream &sin);

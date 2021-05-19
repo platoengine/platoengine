@@ -502,7 +502,8 @@ private:
         "steady_state_electromechanics",
         "plasticity", 
         "thermoplasticity",
-        "frequency_response_function"
+        "frequency_response_function",
+        "steady_state_incompressible_fluids"
     };
 
 
@@ -534,7 +535,8 @@ private:
         "isotropic_linear_thermal",
         "isotropic_linear_thermoelastic",
         "j2_plasticity",
-        "thermoplasticity"};
+        "thermoplasticity",
+        "incompressible_fluid"};
 
 public:
     /******************************************************************************//**

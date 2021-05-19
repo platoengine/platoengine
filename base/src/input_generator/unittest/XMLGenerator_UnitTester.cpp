@@ -103,6 +103,13 @@ void XMLGenerator_UnitTester::publicParseObjective(std::istream &sin)
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicParseConstraints(std::istream &sin)
+/******************************************************************************/
+{
+    parseConstraints(sin);
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::publicParseCriteria(std::istream &sin)
 /******************************************************************************/
 {

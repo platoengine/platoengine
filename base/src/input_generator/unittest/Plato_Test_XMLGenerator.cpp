@@ -2021,5 +2021,146 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     Plato::system("rm -f plato_ksal_algorithm_diagnostics.txt");
 }
 
+TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
+{
+    // POSE INPUT DATA
+    XMLGenerator_UnitTester tTester;
+    std::istringstream tIss;
+    std::string tStringInput =
+        "begin service 1\n"
+        "  code platomain\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin service 2\n"
+        "  code plato_analyze\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin criterion 1\n"
+        "  type composite\n"
+        "  criterion_ids 2 3\n"
+        "  criterion_weights 1.0 -1.0"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "  type inlet_pressure\n"
+        "  location_name inlet\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "  type outlet_pressure\n"
+        "  location_name outlet\n"
+        "end criterion\n"
+        "begin criterion 4\n"
+        "   type volume\n"
+        "end criterion\n"
+        "begin scenario 1\n"
+        "  physics steady_state_incompressible_fluids\n"
+        "  dimensions 2\n"
+        "  loads 10 1\n"
+        "  boundary_conditions 1 2 3 4\n"
+        "  material 1\n"
+        "end scenario\n"
+        "begin objective\n"
+        "  scenarios 1\n"
+        "  criteria 1\n"
+        "  services 2\n"
+        "  type weighted_sum\n"
+        "  weights 1\n"
+        "end objective\n"
+        "begin constraint 1\n"
+        "  criterion 3\n"
+        "  relative_target 0.25\n"
+        "  type less_than\n"
+        "  service 1\n"
+        "  scenario 1\n"
+        "end constraint\n"
+        "begin boundary_condition 1\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom velx\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 2\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom vely\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 3\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom velx\n"
+        "  value 1.5\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 4\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom vely\n"
+        "  value 0\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 5\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name outlet\n"
+        "  degree_of_freedom press\n"
+        "end boundary_condition\n"
+        "begin block 1\n"
+        "  material 1\n"
+        "end block\n"
+        "begin material 1\n"
+        "  material_model incompressible_fluid\n"
+        "  reynolds_number 100\n"
+        "  impermeability_number 100\n"
+        "end material\n"
+        "begin optimization_parameters\n"
+        "  optimization_algorithm mma\n"
+        "  discretization density\n"
+        "  max_iterations 50\n"
+        "  filter_radius_scale 1.75\n"
+        "end optimization_parameters\n"
+        "begin mesh\n"
+        "  name bolted_bracket.exo\n"
+        "end mesh\n"
+        "begin paths\n"
+        "  code PlatoMain PlatoMain\n"
+        "  code plato_analyze analyze_MPMD\n"
+        "end paths\n";
+
+    // do parse
+    tIss.str(tStringInput);
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseObjective(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseConstraints(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseBCs(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseOptimizationParameters(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCodePaths(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
+}
 
 } // end PlatoTestXMLGenerator namespace

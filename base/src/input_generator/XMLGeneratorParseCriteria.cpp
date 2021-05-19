@@ -112,7 +112,7 @@ void ParseCriteria::setCriterionWeights(XMLGen::Criterion &aMetadata)
         }
         else
         {
-            THROWERR("Criterion Weights are not defined for composite criterion");
+            THROWERR("Criterion Weights ('criterion_weights' keyword) are not defined for composite criterion with criterion block id '" + aMetadata.id() + "'.");
         }
     }
 }
@@ -133,7 +133,7 @@ void ParseCriteria::setCriterionIDs(XMLGen::Criterion &aMetadata)
         }
         else
         {
-            THROWERR("Criterion IDs are not defined for composite criterion");
+            THROWERR("Criterion IDs ('criterion_ids' keyword) are not defined for composite criterion with criterion block id '" + aMetadata.id() + "'.");
         }
     }
 }
