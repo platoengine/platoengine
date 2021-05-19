@@ -1941,6 +1941,10 @@ PSL_TEST(AMFilterUtilities, computeLambda)
     // Wrong size gradient
     EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tBogusVector,tLayerIndex,tLambda),std::domain_error);
 
+    // Wrong size lambda
+    std::vector<double> tBogusLambda(5u);
+    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,0,tBogusLambda),std::domain_error);
+
     tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,tLayerIndex,tLambda);
 
     EXPECT_EQ(tLambda.size(),4u);
@@ -1953,13 +1957,21 @@ PSL_TEST(AMFilterUtilities, computeLambda)
     EXPECT_DOUBLE_EQ(tLambda[2],12.0);
     EXPECT_DOUBLE_EQ(tLambda[3],14.0);
 
-    // Wrong size lambda
-    std::vector<double> tBogusLambda(5u);
-    EXPECT_THROW(tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tBogusVector,tLayerIndex,tBogusLambda),std::domain_error);
-
     // layer below takes previous value of tLambda as input
     tLayerIndex = 0;
     tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGridGradient,tLayerIndex,tLambda);
+
+    std::vector<double> tGold = tLambda;
+    tAMFilterUtilities.postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity,tLayerIndex,tGold); 
+
+    for(size_t i = 0; i < tGridDimensions[0]; ++i)
+        for(size_t j = 0; j < tGridDimensions[1]; ++j)
+            tGold[tGridUtilities.getSerializedIndexWithinLayer(i,j)] += tGridGradient[tGridUtilities.getSerializedIndex(i,j,tLayerIndex)];
+
+    EXPECT_DOUBLE_EQ(tLambda[0],tGold[0]);
+    EXPECT_DOUBLE_EQ(tLambda[1],tGold[1]);
+    EXPECT_DOUBLE_EQ(tLambda[2],tGold[2]);
+    EXPECT_DOUBLE_EQ(tLambda[3],tGold[3]);
 }
 
 PSL_TEST(AMFilterUtilities, postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity)

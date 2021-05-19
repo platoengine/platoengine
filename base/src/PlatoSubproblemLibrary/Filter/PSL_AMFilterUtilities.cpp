@@ -286,26 +286,19 @@ void AMFilterUtilities::computeLambda(const std::vector<double>& aGridBlueprintD
     {
         aLambda.resize(tGridDimensions[0]*tGridDimensions[1]);
         for(size_t i = 0; i < tGridDimensions[0]; ++i)
-        {
             for(size_t j = 0; j < tGridDimensions[1]; ++j)
-            {
                 aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)] = aGridGradient[mGridUtilities.getSerializedIndex(i,j,aLayerIndex)];
-            }
-        }
     }
     else
     {
         if(aLambda.size() != tGridDimensions[0]*tGridDimensions[1])
             throw(std::domain_error("AMFilterUtilities::computeLambda: input Lambda value incorrect size"));
 
+        postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(aGridBlueprintDensity,aGridPrintableDensity,aLayerIndex,aLambda); 
+
         for(size_t i = 0; i < tGridDimensions[0]; ++i)
-        {
             for(size_t j = 0; j < tGridDimensions[1]; ++j)
-            {
-                postMultiplyLambdaByGradientWRTPreviousLayerPrintableDensity(aGridBlueprintDensity,aGridPrintableDensity,aLayerIndex,aLambda); 
                 aLambda[mGridUtilities.getSerializedIndexWithinLayer(i,j)] += aGridGradient[mGridUtilities.getSerializedIndex(i,j,aLayerIndex)];
-            }
-        }
     }
 }
 
