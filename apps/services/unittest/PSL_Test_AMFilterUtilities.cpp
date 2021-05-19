@@ -1736,18 +1736,55 @@ PSL_TEST(AMFilterUtilities, postMultiplyGridPrintableDensityGradient)
 
     AMFilterUtilities tAMFilterUtilities(tTetUtilities,tGridUtilities, tPNorm);
 
-    std::vector<double> tGridBlueprintDensity = {1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0};
-    std::vector<double> tGridGradient(tGridBlueprintDensity.size());
+    std::vector<double> tGridBlueprintDensity = {0.34,0.021,0.89,0.92,0.99,0.012,0.64,0.245};
+    std::vector<double> tGridGradient = {1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0};
+    std::vector<double> tInputGridGradient = tGridGradient;
 
     // wrong size density
-    std::vector<double> tBogusGridBlueprintDensity = {1.0,1.0,1.0,1.0,1.0,1.0,1.0};
+    std::vector<double> tBogusGridBlueprintDensity = {0.34,0.021,0.89,0.92,0.99,0.012,0.64};
     EXPECT_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tBogusGridBlueprintDensity,tGridGradient),std::domain_error);
 
     // wrong size gradient
     std::vector<double> tBogusGradient(9u);
     EXPECT_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tBogusGradient),std::domain_error);
 
-    EXPECT_NO_THROW(tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient));
+    tAMFilterUtilities.postMultiplyGridPrintableDensityGradient(tGridBlueprintDensity,tGridGradient);
+
+    // check values
+    std::vector<double> tGoldGradient = tGridGradient;
+    std::vector<double> tGridPrintableDensity;
+    tAMFilterUtilities.computeGridPrintableDensity(tGridBlueprintDensity,tGridPrintableDensity);
+
+    std::vector<double> tLambda;
+    tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGoldGradient,1,tLambda);
+    tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,1,tLambda,tGoldGradient);
+
+    EXPECT_NEAR(tGridGradient[0],tGoldGradient[0],1e-13);
+    EXPECT_NEAR(tGridGradient[1],tGoldGradient[1],1e-13);
+    EXPECT_NEAR(tGridGradient[2],tGoldGradient[2],1e-13);
+    EXPECT_NEAR(tGridGradient[3],tGoldGradient[3],1e-13);
+
+    EXPECT_NEAR(tGridGradient[0],tInputGridGradient[0],1e-13);
+    EXPECT_NEAR(tGridGradient[1],tInputGridGradient[1],1e-13);
+    EXPECT_NEAR(tGridGradient[2],tInputGridGradient[2],1e-13);
+    EXPECT_NEAR(tGridGradient[3],tInputGridGradient[3],1e-13);
+
+    tAMFilterUtilities.computeLambda(tGridBlueprintDensity,tGridPrintableDensity,tGoldGradient,0,tLambda);
+    tAMFilterUtilities.postMultiplyLambdaByGradientWRTCurrentLayerBlueprintDensity(tGridBlueprintDensity,tGridPrintableDensity,0,tLambda,tGoldGradient);
+
+    EXPECT_NEAR(tGridGradient[0],tGoldGradient[0],1e-13);
+    EXPECT_NEAR(tGridGradient[1],tGoldGradient[1],1e-13);
+    EXPECT_NEAR(tGridGradient[2],tGoldGradient[2],1e-13);
+    EXPECT_NEAR(tGridGradient[3],tGoldGradient[3],1e-13);
+    EXPECT_NEAR(tGridGradient[4],tGoldGradient[4],1e-13);
+    EXPECT_NEAR(tGridGradient[5],tGoldGradient[5],1e-13);
+    EXPECT_NEAR(tGridGradient[6],tGoldGradient[6],1e-13);
+    EXPECT_NEAR(tGridGradient[7],tGoldGradient[7],1e-13);
+
+    EXPECT_NEAR(tGridGradient[0],tInputGridGradient[0],1e-13);
+    EXPECT_NEAR(tGridGradient[1],tInputGridGradient[1],1e-13);
+    EXPECT_NEAR(tGridGradient[2],tInputGridGradient[2],1e-13);
+    EXPECT_NEAR(tGridGradient[3],tInputGridGradient[3],1e-13);
 }
 
 PSL_TEST(AMFilterUtilities, postMultiplyGridBlueprintDensityGradient)
@@ -1839,6 +1876,9 @@ PSL_TEST(AMFilterUtilities, smin_gradient1)
     EXPECT_DOUBLE_EQ(smin_gradient1(0.5,0.5),0.5);
     EXPECT_DOUBLE_EQ(smin_gradient1(-1.0,1.0),1.0);
     EXPECT_DOUBLE_EQ(smin_gradient1(-2.0,-1.3),1.0-1.1102230246251565e-16);
+    EXPECT_DOUBLE_EQ(smin_gradient1(0.32,1.0),1.0);
+    EXPECT_DOUBLE_EQ(smin_gradient1(0.54,1.0),1.0);
+    EXPECT_NEAR(smin_gradient1(0.69,1.0),1.0,1e-15);
 }
 
 PSL_TEST(AMFilterUtilities, smin_gradient2)
