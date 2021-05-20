@@ -552,7 +552,8 @@ TEST(PlatoTestXMLGenerator, AppendAggregateObjectiveGradientOperation_non_multi_
     tMetaData.objective = tObjective;
 
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_aggregate_objective_gradient_operation_for_non_multi_load_case(tMetaData, tDocument));
+    std::string tType = "Field";
+    ASSERT_NO_THROW(XMLGen::append_aggregate_objective_gradient_operation_for_non_multi_load_case(tMetaData, tDocument, tType));
     //tDocument.save_file("xml.txt", " ");
 
     auto tInput = tDocument.child("Input");
@@ -587,7 +588,8 @@ TEST(PlatoTestXMLGenerator, AppendAggregateObjectiveGradientOperation_multi_load
     tMetaData.objective = tObjective;
 
     pugi::xml_document tDocument;
-    ASSERT_NO_THROW(XMLGen::append_aggregate_objective_gradient_operation_for_multi_load_case(tMetaData, tDocument));
+    std::string tType = "Field";
+    ASSERT_NO_THROW(XMLGen::append_aggregate_objective_gradient_operation_for_multi_load_case(tMetaData, tDocument, tType));
     //tDocument.save_file("xml.txt", " ");
 
     auto tInput = tDocument.child("Input");

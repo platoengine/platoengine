@@ -89,6 +89,9 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mMaxTrustRegionRadius(1e2),
         mAugLagPenaltyParameter(0.05),
         mAugLagPenaltyScaleParameter(1.2),
+        mOCControlStagnationTolerance(1e-2),
+        mOCObjectiveStagnationTolerance(1e-5),
+        mOCGradientTolerance(1e-8),
         mMaxNumIterations(500),
         mLimitedMemoryStorage(8),
         mProblemUpdateFrequency(0),
@@ -1471,5 +1474,40 @@ void OptimizerEngineStageData::setKSTrustRegionRatioUpper(const double& aInput)
 {
     mKSTrustRegionRatioUpper = aInput;
 }
+double OptimizerEngineStageData::getOCControlStagnationTolerance() const
+{
+    return (mOCControlStagnationTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCControlStagnationTolerance(const double & aInput)
+{
+    mOCControlStagnationTolerance = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getOCObjectiveStagnationTolerance() const
+{
+    return (mOCObjectiveStagnationTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCObjectiveStagnationTolerance(const double & aInput)
+{
+    mOCObjectiveStagnationTolerance = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getOCGradientTolerance() const
+{
+    return (mOCGradientTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCGradientTolerance(const double & aInput)
+{
+    mOCGradientTolerance = aInput;
+}
+
 
 } //namespace Plato

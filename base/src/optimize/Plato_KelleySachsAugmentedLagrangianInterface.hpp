@@ -131,12 +131,12 @@ public:
         std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> tDataMng =
                 std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(tDataFactory);
 
+        // ********* SET INITIAL GUESS ********* //
+        this->setInitialGuess(tAlgebraFactory, *tDataMng);
+
         // ********* SET UPPER AND LOWER BOUNDS ********* //
         this->setLowerBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
         this->setUpperBounds(tAlgebraFactory, *tDataFactory, *tDataMng);
-
-        // ********* SET INITIAL GUESS ********* //
-        this->setInitialGuess(tAlgebraFactory, *tDataMng);
 
         // ********* SOLVE OPTIMIZATION PROBLEM ********* //
         this->solveOptimizationProblem(tDataFactory, tDataMng);
