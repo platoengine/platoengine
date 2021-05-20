@@ -92,7 +92,7 @@ void append_incompressible_cfd_conservation_equations_options(
     XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::unordered_map<std::string, std::string> tCFDScenarioMap =
-        {{"density", "Density-Based Topology Optimization"}, {"levelset", "Level Set Topology Optimization"}, {"analysis", "Analysis"}};
+        {{"density", "Density-Based Topology Optimization"}, {"levelset", "Level Set Topology Optimization"}, {"cad", "Analysis"}};
     auto tDiscretization = aScenario.value("discretization");
     auto tItr = tCFDScenarioMap.find(tDiscretization);
     if (tItr == tCFDScenarioMap.end())
