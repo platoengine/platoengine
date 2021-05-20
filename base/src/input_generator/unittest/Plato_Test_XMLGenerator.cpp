@@ -58,6 +58,7 @@
 #include "XMLGenerator_UnitTester.hpp"
 #include "XML_GoldValues.hpp"
 
+#include "Plato_Utils.hpp"
 #include "XMLG_Macros.hpp"
 
 const int MAX_CHARS_PER_LINE = 512;
@@ -2038,17 +2039,17 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
         "  number_processors 1\n"
         "end service\n"
         "begin criterion 1\n"
+        "  type composite\n"
+        "  criterion_ids 2 3\n"
+        "  criterion_weights 1.0 -1.0\n"
+        "end criterion\n"
+        "begin criterion 2\n"
         "  type inlet_pressure\n"
         "  location_name inlet\n"
         "end criterion\n"
-        "begin criterion 2\n"
+        "begin criterion 3\n"
         "  type outlet_pressure\n"
         "  location_name outlet\n"
-        "end criterion\n"
-        "begin criterion 3\n"
-        "  type composite\n"
-        "  criterion_ids 1 2\n"
-        "  criterion_weights 1.0 -1.0\n"
         "end criterion\n"
         "begin criterion 4\n"
         "   type volume\n"
@@ -2062,7 +2063,7 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
         "end scenario\n"
         "begin objective\n"
         "  scenarios 1\n"
-        "  criteria 3\n"
+        "  criteria 1\n"
         "  services 2\n"
         "  type weighted_sum\n"
         "  weights 1\n"
@@ -2165,8 +2166,16 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
     tIss.seekg(0);
     ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
 
+    // CALL GENERATE
     auto tXMLGenMetadata = tTester.getInputData();
     tTester.generate(tXMLGenMetadata);
+
+    auto tReadData = XMLGen::read_data_from_file("plato_analyze_2_input_deck.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><ParameterListname=\"Problem\"><Parametername=\"Physics\"type=\"string\"value=\"PlatoDriver\"/><Parametername=\"SpatialDimension\"type=\"int\"value=\"2\"/><Parametername=\"InputMesh\"type=\"string\"value=\"bolted_bracket.exo\"/><ParameterListname=\"PlatoProblem\"><Parametername=\"Physics\"type=\"string\"value=\"IncompressibleFluids\"/><Parametername=\"PDEConstraint\"type=\"string\"value=\"Hyperbolic\"/><Parametername=\"Self-Adjoint\"type=\"bool\"value=\"false\"/><ParameterListname=\"Criteria\"><ParameterListname=\"MyObjective\"><Parametername=\"Type\"type=\"string\"value=\"WeightedSum\"/><Parametername=\"Functions\"type=\"Array(string)\"value=\"{myinlet_pressure,myoutlet_pressure}\"/><Parametername=\"Weights\"type=\"Array(double)\"value=\"{1.0,-1.0}\"/></ParameterList><ParameterListname=\"myinlet_pressure\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"AverageSurfacePressure\"/><Parametername=\"Sides\"type=\"Array(string)\"value=\"{inlet}\"/></ParameterList><ParameterListname=\"myoutlet_pressure\"><Parametername=\"Type\"type=\"string\"value=\"ScalarFunction\"/><Parametername=\"ScalarFunctionType\"type=\"string\"value=\"AverageSurfacePressure\"/><Parametername=\"Sides\"type=\"Array(string)\"value=\"{outlet}\"/></ParameterList></ParameterList><ParameterListname=\"Hyperbolic\"><Parametername=\"Scenario\"type=\"string\"value=\"Density-BasedTopologyOptimization\"/><Parametername=\"HeatTransfer\"type=\"string\"value=\"none\"/></ParameterList><ParameterListname=\"TimeIntegration\"><Parametername=\"SafetyFactor\"type=\"double\"value=\"0.7\"/></ParameterList><ParameterListname=\"Convergence\"><Parametername=\"OutputFrequency\"type=\"int\"value=\"1\"/><Parametername=\"MaximumSteadyStateIterations\"type=\"int\"value=\"500\"/><Parametername=\"SteadyStateTolerance\"type=\"double\"value=\"1e-4\"/></ParameterList><ParameterListname=\"LinearSolver\"><Parametername=\"Iterations\"type=\"int\"value=\"1000\"/><Parametername=\"Tolerance\"type=\"double\"value=\"1e-12\"/><Parametername=\"SolverStack\"type=\"string\"value=\"Amgx\"/></ParameterList><ParameterListname=\"SpatialModel\"><ParameterListname=\"Domains\"><ParameterListname=\"Block1\"><Parametername=\"ElementBlock\"type=\"string\"value=\"block_1\"/><Parametername=\"MaterialModel\"type=\"string\"value=\"material_1\"/></ParameterList></ParameterList></ParameterList><ParameterListname=\"MaterialModels\"><ParameterListname=\"material_1\"><Parametername=\"ReynoldsNumber\"type=\"double\"value=\"100\"/><Parametername=\"ImpermeabilityNumber\"type=\"double\"value=\"100\"/></ParameterList></ParameterList><ParameterListname=\"NaturalBoundaryConditions\"/><ParameterListname=\"PressureEssentialBoundaryConditions\"><ParameterListname=\"PressureBoundaryConditionwithID5appliedtoDofwithtagPRESS\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"outlet\"/></ParameterList></ParameterList><ParameterListname=\"VelocityEssentialBoundaryConditions\"><ParameterListname=\"VelocityBoundaryConditionwithID1appliedtoDofwithtagVELX\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"no_slip\"/></ParameterList><ParameterListname=\"VelocityBoundaryConditionwithID2appliedtoDofwithtagVELY\"><Parametername=\"Type\"type=\"string\"value=\"ZeroValue\"/><Parametername=\"Index\"type=\"int\"value=\"1\"/><Parametername=\"Sides\"type=\"string\"value=\"no_slip\"/></ParameterList><ParameterListname=\"VelocityBoundaryConditionwithID3appliedtoDofwithtagVELX\"><Parametername=\"Type\"type=\"string\"value=\"FixedValue\"/><Parametername=\"Index\"type=\"int\"value=\"0\"/><Parametername=\"Sides\"type=\"string\"value=\"inlet\"/><Parametername=\"Value\"type=\"double\"value=\"1.5\"/></ParameterList><ParameterListname=\"VelocityBoundaryConditionwithID4appliedtoDofwithtagVELY\"><Parametername=\"Type\"type=\"string\"value=\"FixedValue\"/><Parametername=\"Index\"type=\"int\"value=\"1\"/><Parametername=\"Sides\"type=\"string\"value=\"inlet\"/><Parametername=\"Value\"type=\"double\"value=\"0\"/></ParameterList></ParameterList></ParameterList></ParameterList>");
+    EXPECT_STREQ(tReadData.str().c_str(),tGold.c_str());
+
+    auto tTrash = std::system("rm -rf *.xml amgx.json mpirun.source");
+    Plato::Utils::ignore_unused(tTrash);
 }
 
 } // end PlatoTestXMLGenerator namespace

@@ -58,6 +58,7 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "Plato_Utils.hpp"
 #include "Plato_Macros.hpp"
 #include "Plato_Criterion.hpp"
 #include "Plato_MultiVector.hpp"
@@ -128,18 +129,21 @@ public:
         FILE *fp = fopen("CalculateObjectiveInput.txt", "r");
         if(fp)
         {
-            fscanf(fp, "%d %d\n", &aNumTotalVars, &aNumChangingVars); 
+            auto tTrash = fscanf(fp, "%d %d\n", &aNumTotalVars, &aNumChangingVars);
+            Plato::Utils::ignore_unused(tTrash); 
             for(int i=0; i<aNumTotalVars; ++i)
             {
                 double tVal;
-                fscanf(fp, "%lf", &tVal);
+                tTrash = fscanf(fp, "%lf", &tVal);
+                Plato::Utils::ignore_unused(tTrash);
                 aDefaultValues.push_back(tVal);
             }
             for(int i=0; i<aNumChangingVars; ++i)
             {
                 int tIndex;
                 double tBegin, tEnd, tStep;
-                fscanf(fp, "%d %lf %lf %lf", &tIndex, &tBegin, &tEnd, &tStep);
+                tTrash = fscanf(fp, "%d %lf %lf %lf", &tIndex, &tBegin, &tEnd, &tStep);
+                Plato::Utils::ignore_unused(tTrash);
                 aVariableIndices.push_back(tIndex);
                 aVariableRangeBegin.push_back(tBegin);
                 aVariableRangeEnd.push_back(tEnd);

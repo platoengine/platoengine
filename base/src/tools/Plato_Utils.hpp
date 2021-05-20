@@ -42,12 +42,21 @@
 
 namespace Plato
 {
+
 namespace Utils
 {
+
 template<typename T>
 T* byName(const std::vector<T*> & aArgumentVector, const std::string & aName);
+
+template<typename Type>
+void ignore_unused(Type& aInput);
+
 }
+// namespace Utils
+
 }
+// namespace Plato
 
 template <typename T>
 T* Plato::Utils::byName(const std::vector<T*> & aArgumentVector, const std::string & aName)
@@ -60,3 +69,6 @@ T* Plato::Utils::byName(const std::vector<T*> & aArgumentVector, const std::stri
   return nullptr;
 }
 
+template<typename Type>
+void Plato::Utils::ignore_unused(Type& aInput)
+{ return; }
