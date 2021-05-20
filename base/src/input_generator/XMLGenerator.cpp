@@ -57,6 +57,7 @@
 #include <utility>
 #include <string>
 #include <map>
+#include <tuple>
 
 #include "XMLGenerator.hpp"
 
@@ -116,33 +117,48 @@ XMLGenerator::~XMLGenerator()
 //  * \fn writeInputFiles
 //  * \brief Write input files, i.e. write all the XML files needed by Plato.
 // **********************************************************************************/
-void XMLGenerator::writeInputFiles()
+void XMLGenerator::writeInputFiles
+(XMLGen::InputData& aInputData)
 {
-    //XMLGen::Analyze::write_optimization_problem(m_InputData);
-    XMLGen::Problem::write_optimization_problem(m_InputData, m_PreProcessedInputData);
+    XMLGen::Problem::write_optimization_problem(aInputData, m_PreProcessedInputData);
 }
 
 /******************************************************************************/
 void XMLGenerator::generate()
 /******************************************************************************/
 {
-    parseInputFile();
+    this->parseInputFile();
+    this->finalize(m_InputData);
 
-    if(!runSROMForUncertainVariables())
+    if(!this->runSROMForUncertainVariables(m_InputData))
     {
-        PRINTERR("Failed to expand uncertainties in file generation.")
+        PRINTERR("Failed to expand uncertainties in input file generation.")
     }
 
-    preProcessInputMetaData();
-
-    writeInputFiles();
+    this->preProcessInputMetaData(m_InputData);
+    this->writeInputFiles(m_InputData);
 }
 
 /******************************************************************************/
-void XMLGenerator::expandEssentialBoundaryConditions()
+void XMLGenerator::generate
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
-    m_InputDataWithExpandedEBCs = m_InputData;
+    this->finalize(aInputData);
+    if(!this->runSROMForUncertainVariables(aInputData))
+    {
+        PRINTERR("Failed to expand uncertainties in input file generation.")
+    }
+    this->preProcessInputMetaData(aInputData);
+    this->writeInputFiles(aInputData);
+}
+
+/******************************************************************************/
+void XMLGenerator::expandEssentialBoundaryConditions
+(XMLGen::InputData& aInputData)
+/******************************************************************************/
+{
+    m_InputDataWithExpandedEBCs = aInputData;
     std::vector<XMLGen::EssentialBoundaryCondition> tNewEBCs;
     std::map<int, std::vector<int> > tOldIDToNewIDMap;
     int tNewID = 1;
@@ -217,12 +233,13 @@ void XMLGenerator::updateScenariosWithExpandedBoundaryConditions(std::map<int, s
 }
 
 /******************************************************************************/
-void XMLGenerator::preProcessInputMetaData()
+void XMLGenerator::preProcessInputMetaData
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
-    expandEssentialBoundaryConditions();
+    this->expandEssentialBoundaryConditions(aInputData);
     determineIfPlatoEngineFilteringIsNeeded();
-    createCopiesForPerformerCreation();
+    this->createCopiesForPerformerCreation(aInputData);
 }
 
 /******************************************************************************/
@@ -244,11 +261,13 @@ void XMLGenerator::clearInputDataLists(XMLGen::InputData &aInputData)
 }
 
 /******************************************************************************/
-void XMLGenerator::loadMaterialData(XMLGen::InputData &aNewInputData, 
-                                     const std::string &aScenarioID)
+void XMLGenerator::loadMaterialData
+(XMLGen::InputData &aNewInputData,
+ const XMLGen::InputData &aOriginalInputData,
+ const std::string &aScenarioID)
 /******************************************************************************/
 {
-    for(auto &tMaterial : m_InputData.materials)
+    for(auto &tMaterial : aOriginalInputData.materials)
     {
         bool tFound = false;
         for(auto &tExistingMaterial : aNewInputData.materials)
@@ -267,26 +286,28 @@ void XMLGenerator::loadMaterialData(XMLGen::InputData &aNewInputData,
 }
 
 /******************************************************************************/
-void XMLGenerator::loadObjectiveData(XMLGen::InputData &aNewInputData, 
-                                     const std::string &aScenarioID,
-                                     const std::string &aServiceID,
-                                     const std::string &aShapeServiceID)
+void XMLGenerator::loadObjectiveData
+(XMLGen::InputData &aNewInputData,
+ const XMLGen::InputData &aOriginalInputData,
+ const std::string &aScenarioID,
+ const std::string &aServiceID,
+ const std::string &aShapeServiceID)
 /******************************************************************************/
 {
-    for(size_t j=0; j<m_InputData.objective.scenarioIDs.size(); j++)
+    for(size_t j=0; j<aOriginalInputData.objective.scenarioIDs.size(); j++)
     {
-        std::string tTempScenarioID = m_InputData.objective.scenarioIDs[j];
-        std::string tTempServiceID = m_InputData.objective.serviceIDs[j];
+        std::string tTempScenarioID = aOriginalInputData.objective.scenarioIDs[j];
+        std::string tTempServiceID = aOriginalInputData.objective.serviceIDs[j];
         std::string tTempShapeServiceID = "";
-        if(m_InputData.objective.scenarioIDs.size() == m_InputData.objective.shapeServiceIDs.size())
+        if(aOriginalInputData.objective.scenarioIDs.size() == aOriginalInputData.objective.shapeServiceIDs.size())
         {
-            tTempShapeServiceID = m_InputData.objective.shapeServiceIDs[j];
+            tTempShapeServiceID = aOriginalInputData.objective.shapeServiceIDs[j];
         }
         if(tTempScenarioID == aScenarioID && tTempServiceID == aServiceID &&
            tTempShapeServiceID == aShapeServiceID)
         {
-            std::string tTempCriterionID = m_InputData.objective.criteriaIDs[j];
-            std::string tWeight = m_InputData.objective.weights[j];
+            std::string tTempCriterionID = aOriginalInputData.objective.criteriaIDs[j];
+            std::string tWeight = aOriginalInputData.objective.weights[j];
             aNewInputData.objective.serviceIDs.push_back(tTempServiceID);
             if(aShapeServiceID != "")
             {
@@ -300,12 +321,14 @@ void XMLGenerator::loadObjectiveData(XMLGen::InputData &aNewInputData,
 }
 
 /******************************************************************************/
-void XMLGenerator::loadConstraintData(XMLGen::InputData &aNewInputData, 
-                                     const std::string &aScenarioID,
-                                     const std::string &aServiceID)
+void XMLGenerator::loadConstraintData
+(XMLGen::InputData &aNewInputData,
+ const XMLGen::InputData &aOriginalInputData,
+ const std::string &aScenarioID,
+ const std::string &aServiceID)
 /******************************************************************************/
 {
-    for(auto &tConstraint : m_InputData.constraints)
+    for(auto &tConstraint : aOriginalInputData.constraints)
     {
         std::string tTempScenarioID = tConstraint.scenario();
         std::string tTempServiceID = tConstraint.service();
@@ -318,11 +341,13 @@ void XMLGenerator::loadConstraintData(XMLGen::InputData &aNewInputData,
 }
 
 /******************************************************************************/
-void XMLGenerator::loadOutputData(XMLGen::InputData &aNewInputData, 
-                                  const std::string &aServiceID)
+void XMLGenerator::loadOutputData
+(XMLGen::InputData &aNewInputData,
+ const XMLGen::InputData &aOriginalInputData,
+ const std::string &aServiceID)
 /******************************************************************************/
 {
-    for(auto &tOutput : m_InputData.mOutputMetaData)
+    for(auto &tOutput : aOriginalInputData.mOutputMetaData)
     {
         if(tOutput.serviceID() == aServiceID)
         {
@@ -334,7 +359,8 @@ void XMLGenerator::loadOutputData(XMLGen::InputData &aNewInputData,
 
 /******************************************************************************/
 void XMLGenerator::createCopiesForMultiPerformerCase
-(std::set<std::tuple<std::string,std::string,std::string>> &aObjectiveScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>> &aObjectiveScenarioServiceTuples)
 /******************************************************************************/
 {
     for(auto &tTuple : aObjectiveScenarioServiceTuples)
@@ -357,7 +383,7 @@ void XMLGenerator::createCopiesForMultiPerformerCase
         clearInputDataLists(tNewInputData);
 
         // Add back in relevant materials
-        loadMaterialData(tNewInputData, tScenarioID);
+        this->loadMaterialData(tNewInputData, aInputData, tScenarioID);
 
         // Add back in relevant scenario and serivce data.
         tNewInputData.append(tCurScenario);
@@ -368,31 +394,32 @@ void XMLGenerator::createCopiesForMultiPerformerCase
         }
         
         // Add back in the relevant objective data.
-        loadObjectiveData(tNewInputData, tScenarioID, tServiceID, tShapeServiceID);
+        this->loadObjectiveData(tNewInputData, aInputData, tScenarioID, tServiceID, tShapeServiceID);
 
         // Add back in the relevant constraint data.
-        loadConstraintData(tNewInputData, tScenarioID, tServiceID);
+        this->loadConstraintData(tNewInputData, aInputData, tScenarioID, tServiceID);
 
         // Add output block data
-        loadOutputData(tNewInputData, tServiceID);
+        this->loadOutputData(tNewInputData, aInputData, tServiceID);
 
         m_PreProcessedInputData.push_back(tNewInputData);
 
-        m_InputData.mPerformerServices.push_back(m_InputData.service(tServiceID));
+        aInputData.mPerformerServices.push_back(aInputData.service(tServiceID));
         if(tShapeServiceID != "")
         {
-            m_InputData.mPerformerServices.push_back(m_InputData.service(tShapeServiceID));
+            aInputData.mPerformerServices.push_back(aInputData.service(tShapeServiceID));
         }
     }
 }
 
 /******************************************************************************/
-void XMLGenerator::verifyAllServicesAreTheSame()
+void XMLGenerator::verifyAllServicesAreTheSame
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
     int tCntr = 0;
     std::string tFirstServiceID = "";
-    for(auto tServiceID : m_InputData.objective.serviceIDs)
+    for(auto tServiceID : aInputData.objective.serviceIDs)
     {
         if(tCntr == 0)
         {
@@ -425,10 +452,12 @@ bool XMLGenerator::serviceExists(std::vector<XMLGen::Service> &aServiceList, XML
 
 /******************************************************************************/
 void XMLGenerator::createObjectiveCopiesForMultiLoadCase
-(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
 /******************************************************************************/
 {
-    verifyAllServicesAreTheSame();
+    this->verifyAllServicesAreTheSame(aInputData);
+
     XMLGen::InputData tNewInputData = m_InputDataWithExpandedEBCs;
     clearInputDataLists(tNewInputData);
     for(auto &tTuple : aObjectiveScenarioServiceTuples)
@@ -446,7 +475,7 @@ void XMLGenerator::createObjectiveCopiesForMultiLoadCase
         }
 
         // Add back in relevant materials
-        loadMaterialData(tNewInputData, tScenarioID);
+        this->loadMaterialData(tNewInputData, aInputData, tScenarioID);
 
         // Add back in relevant scenario and serivce data.
         tNewInputData.append_unique(tCurScenario);
@@ -457,23 +486,23 @@ void XMLGenerator::createObjectiveCopiesForMultiLoadCase
         }
         
         // Add back in the relevant objective data.
-        loadObjectiveData(tNewInputData, tScenarioID, tServiceID, tShapeServiceID);
+        this->loadObjectiveData(tNewInputData, aInputData, tScenarioID, tServiceID, tShapeServiceID);
 
         // Add back in the relevant constraint data.
-        loadConstraintData(tNewInputData, tScenarioID, tServiceID);
+        this->loadConstraintData(tNewInputData, aInputData, tScenarioID, tServiceID);
 
         // Add output block data
-        loadOutputData(tNewInputData, tServiceID);
+        this->loadOutputData(tNewInputData, aInputData, tServiceID);
 
-        if(!serviceExists(m_InputData.mPerformerServices, tCurService))
+        if(!serviceExists(aInputData.mPerformerServices, tCurService))
         {
-            m_InputData.mPerformerServices.push_back(tCurService);
+            aInputData.mPerformerServices.push_back(tCurService);
         }
         if(tShapeServiceID != "")
         {
-            if(!serviceExists(m_InputData.mPerformerServices, tCurShapeService))
+            if(!serviceExists(aInputData.mPerformerServices, tCurShapeService))
             {
-                m_InputData.mPerformerServices.push_back(tCurService);
+                aInputData.mPerformerServices.push_back(tCurService);
             }
         }
     }
@@ -482,18 +511,19 @@ void XMLGenerator::createObjectiveCopiesForMultiLoadCase
 
 /******************************************************************************/
 void XMLGenerator::findObjectiveScenarioServiceTuples
-(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
 /******************************************************************************/
 {
-    for(size_t i=0; i<m_InputData.objective.scenarioIDs.size(); i++)
+    for(size_t i=0; i<aInputData.objective.scenarioIDs.size(); i++)
     {
-        std::string tScenarioID = m_InputData.objective.scenarioIDs[i];
-        std::string tServiceID = m_InputData.objective.serviceIDs[i];
-        std::string tCriterionID = m_InputData.objective.criteriaIDs[i];
+        std::string tScenarioID = aInputData.objective.scenarioIDs[i];
+        std::string tServiceID = aInputData.objective.serviceIDs[i];
+        std::string tCriterionID = aInputData.objective.criteriaIDs[i];
         std::string tShapeServiceID = "";
-        if(m_InputData.objective.shapeServiceIDs.size() == m_InputData.objective.scenarioIDs.size())
+        if(aInputData.objective.shapeServiceIDs.size() == aInputData.objective.scenarioIDs.size())
         {
-            tShapeServiceID = m_InputData.objective.shapeServiceIDs[i];
+            tShapeServiceID = aInputData.objective.shapeServiceIDs[i];
         }
 
         std::tuple<std::string,std::string,std::string> tCurTuple = std::make_tuple(tScenarioID,tServiceID,tShapeServiceID);
@@ -506,13 +536,14 @@ void XMLGenerator::findObjectiveScenarioServiceTuples
 
 /******************************************************************************/
 void XMLGenerator::findConstraintScenarioServiceTuples
-(std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples)
 /******************************************************************************/
 {
-    for(auto &tConstraint : m_InputData.constraints)
+    for(auto &tConstraint : aInputData.constraints)
     {
         std::string tServiceID = tConstraint.service();
-        auto &tService = m_InputData.service(tServiceID);
+        auto &tService = aInputData.service(tServiceID);
         if(tService.code() != "platomain") // platomain will be added elsewhere
         {
             std::string tScenarioID = tConstraint.scenario();
@@ -530,25 +561,27 @@ void XMLGenerator::findConstraintScenarioServiceTuples
 
 /******************************************************************************/
 void XMLGenerator::createInputDataCopiesForObjectivePerformers
-(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples)
 /******************************************************************************/
 {
-    if(m_InputData.objective.multi_load_case == "true")
+    if(aInputData.objective.multi_load_case == "true")
     {
-        createObjectiveCopiesForMultiLoadCase(aObjectiveScenarioServiceTuples);
+        createObjectiveCopiesForMultiLoadCase(aInputData, aObjectiveScenarioServiceTuples);
     }
     else
     {
-        createCopiesForMultiPerformerCase(aObjectiveScenarioServiceTuples);
+        this->createCopiesForMultiPerformerCase(aInputData, aObjectiveScenarioServiceTuples);
     }
 }
 
 /******************************************************************************/
 void XMLGenerator::createInputDataCopiesForConstraintPerformers
-(std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples)
+(XMLGen::InputData& aInputData,
+ std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples)
 /******************************************************************************/
 {
-    createCopiesForMultiPerformerCase(aConstraintScenarioServiceTuples);
+    this->createCopiesForMultiPerformerCase(aInputData, aConstraintScenarioServiceTuples);
 }
 
 /******************************************************************************/
@@ -584,39 +617,42 @@ void XMLGenerator::removeDuplicateTuplesFromConstraintList
 }
 
 /******************************************************************************/
-void XMLGenerator::createCopiesForPerformerCreation()
+void XMLGenerator::createCopiesForPerformerCreation
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
     std::set<std::tuple<std::string,std::string,std::string>> tObjectiveScenarioServiceTuples;
     std::set<std::tuple<std::string,std::string,std::string>> tConstraintScenarioServiceTuples;
-    findObjectiveScenarioServiceTuples(tObjectiveScenarioServiceTuples);
-    findConstraintScenarioServiceTuples(tConstraintScenarioServiceTuples);
-    removeDuplicateTuplesFromConstraintList(tObjectiveScenarioServiceTuples, tConstraintScenarioServiceTuples);
-    createInputDataCopiesForObjectivePerformers(tObjectiveScenarioServiceTuples);
-    createInputDataCopiesForConstraintPerformers(tConstraintScenarioServiceTuples);
+    this->findObjectiveScenarioServiceTuples(aInputData, tObjectiveScenarioServiceTuples);
+    this->findConstraintScenarioServiceTuples(aInputData, tConstraintScenarioServiceTuples);
+    this->removeDuplicateTuplesFromConstraintList(tObjectiveScenarioServiceTuples, tConstraintScenarioServiceTuples);
+    this->createInputDataCopiesForObjectivePerformers(aInputData, tObjectiveScenarioServiceTuples);
+    this->createInputDataCopiesForConstraintPerformers(aInputData, tConstraintScenarioServiceTuples);
 }
 
 /******************************************************************************/
-bool XMLGenerator::runSROMForUncertainVariables()
+bool XMLGenerator::runSROMForUncertainVariables
+(XMLGen::InputData &aInputData)
 /******************************************************************************/
 {
-    if(m_InputData.uncertainties.size() > 0)
+    if(aInputData.uncertainties.size() > 0)
     {
-        Plato::srom::solve(m_InputData);
-        this->setNumPerformers();
+        Plato::srom::solve(aInputData);
+        this->setNumPerformers(aInputData);
     }
 
     return true;
 }
 
 /******************************************************************************/
-void XMLGenerator::setNumPerformers()
+void XMLGenerator::setNumPerformers
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
-    auto &tService = m_InputData.service(m_InputData.objective.serviceIDs[0]); 
-    m_InputData.m_UncertaintyMetaData.numPerformers = std::stoi(tService.numberProcessors());
+    auto &tService = aInputData.service(aInputData.objective.serviceIDs[0]);
+    aInputData.m_UncertaintyMetaData.numPerformers = std::stoi(tService.numberProcessors());
 
-    if (m_InputData.mRandomMetaData.numSamples() % m_InputData.m_UncertaintyMetaData.numPerformers != 0)
+    if (aInputData.mRandomMetaData.numSamples() % aInputData.m_UncertaintyMetaData.numPerformers != 0)
     {
         THROWERR("Set Number for Performers: Number of samples must divide evenly into number of ranks.");
     }
@@ -2102,25 +2138,49 @@ void XMLGenerator::parseInputFile()
   tInputFile.open(m_InputFilename.c_str()); // open a file
   this->parseScenarios(tInputFile);
   tInputFile.close();
+}
 
+void XMLGenerator::finalize
+(XMLGen::InputData& aInputData)
+{
+  this->finalizeScenarios(aInputData);
+  this->finalizeMeshMetaData(aInputData);
+}
+
+void XMLGenerator::finalizeScenarios
+(XMLGen::InputData& aInputData)
+{
+  auto tDiscretization = aInputData.optimization_parameters().discretization();
+
+  for(auto& tScenario : aInputData.mScenarios)
+  {
+    tScenario.append("discretization", tDiscretization);
+  }
+}
+
+void XMLGenerator::finalizeMeshMetaData
+(XMLGen::InputData& aInputData)
+{
     // If we will need to run the prune_and_refine executable for any
     // reason we need to have our "run" mesh name not be the same
     // as the input mesh name.
     int tNumRefines = 0;
-    if(m_InputData.optimization_parameters().number_refines() != "")
-        tNumRefines = std::atoi(m_InputData.optimization_parameters().number_refines().c_str());
-    if(tNumRefines > 0 ||
-        (m_InputData.optimization_parameters().initial_guess_file_name() != "" && m_InputData.optimization_parameters().initial_guess_field_name() != ""))
+    if(aInputData.optimization_parameters().number_refines() != "")
     {
-        m_InputData.mesh.run_name_without_extension = m_InputData.mesh.name_without_extension + "_mod";
-        m_InputData.mesh.run_name = m_InputData.mesh.run_name_without_extension;
-        if(m_InputData.mesh.file_extension != "")
-            m_InputData.mesh.run_name += m_InputData.mesh.file_extension;
+        tNumRefines = std::atoi(aInputData.optimization_parameters().number_refines().c_str());
+    }
+    if(tNumRefines > 0 ||
+        (aInputData.optimization_parameters().initial_guess_file_name() != "" && aInputData.optimization_parameters().initial_guess_field_name() != ""))
+    {
+        aInputData.mesh.run_name_without_extension = aInputData.mesh.name_without_extension + "_mod";
+        aInputData.mesh.run_name = aInputData.mesh.run_name_without_extension;
+        if(aInputData.mesh.file_extension != "")
+            aInputData.mesh.run_name += aInputData.mesh.file_extension;
     }
     else
     {
-        m_InputData.mesh.run_name = m_InputData.mesh.name;
-        m_InputData.mesh.run_name_without_extension = m_InputData.mesh.name_without_extension;
+        aInputData.mesh.run_name = aInputData.mesh.name;
+        aInputData.mesh.run_name_without_extension = aInputData.mesh.name_without_extension;
     }
 }
 

@@ -93,25 +93,37 @@ void append_incompressible_cfd_conservation_equations_options(
     std::vector<std::string> tKeys = {"name", "type", "value"};
     std::unordered_map<std::string, std::string> tCFDScenarioMap =
         {{"density", "Density-Based Topology Optimization"}, {"levelset", "Level Set Topology Optimization"}, {"analysis", "Analysis"}};
-    auto tItr = tCFDScenarioMap.find(aScenario.value("discretization"));
+    auto tDiscretization = aScenario.value("discretization");
+    auto tItr = tCFDScenarioMap.find(tDiscretization);
     if (tItr == tCFDScenarioMap.end())
     {
         THROWERR(std::string("Scenario 'discretization' key value '") + aScenario.value("discretization") + "' is not supported.");
     }
+
     std::vector<std::string> tValues = {"Scenario", "string", tItr->second};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPhysicsNode);
-    tValues = {"Heat Transfer", "string", aScenario.value("heat_transfer")};
+    XMLGen::ValidHeatTransferMechanisms tValidHeatTransferKeys;
+    auto tHeatTransferItr = tValidHeatTransferKeys.mKeys.find(aScenario.value("heat_transfer"));
+    if(tHeatTransferItr == tValidHeatTransferKeys.mKeys.end())
+    {
+        THROWERR(std::string("'heat_transfer' keyword with value '") + aScenario.value("heat_transfer") 
+            + "' in Scenario with id '" + aScenario.id() + "' is not supported.")
+    }
+    tValues = { "Heat Transfer", "string", (*tHeatTransferItr) };
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPhysicsNode);
 
-    auto tMassConservation = tPhysicsNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Mass Conservation"}, tMassConservation);
-    tValues = {"Surface Momentum Damping", "double", aScenario.value("momentum_damping")};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tMassConservation);
-
-    auto tEnergyConservation = tPhysicsNode.append_child("ParameterList");
-    XMLGen::append_attributes({"name"}, {"Energy Conservation"}, tEnergyConservation);
-    if (aScenario.value("discretization") == "density")
+    if (!aScenario.value("momentum_damping").empty())
     {
+        auto tMassConservation = tPhysicsNode.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Mass Conservation"}, tMassConservation);
+        tValues = {"Surface Momentum Damping", "double", aScenario.value("momentum_damping")};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tMassConservation);
+    }
+
+    if (tDiscretization == "density" && (*tHeatTransferItr) != "none")
+    {
+        auto tEnergyConservation = tPhysicsNode.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Energy Conservation"}, tEnergyConservation);
         auto tPenaltyFunction = tEnergyConservation.append_child("ParameterList");
         XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
         tValues = {"Heat Source Penalty Exponent", "double", "3.0"};

@@ -869,6 +869,11 @@ struct ValidPhysicsNBCCombinations
                 {"uniform_surface_flux", {"Natural Boundary Conditions","Thermal Natural Boundary Conditions"}},
                 {"traction", {"Natural Boundary Conditions","Mechanical Natural Boundary Conditions"}}
             }
+        },
+        {"steady_state_incompressible_fluids", 
+            {
+                {"traction", {"Natural Boundary Conditions"}}
+            }
         }
     };
 public:
@@ -1467,5 +1472,15 @@ struct ValidOptimizationParameterKeys
      "filter_type_kernel_then_tanh_generator_name"
     };
 };
+
+/******************************************************************************/ /**
+* \struct ValidHeatTransferMechanisms
+* \brief Set of valid Plato Analyze's heat transfer mechanisms.
+**********************************************************************************/
+struct ValidHeatTransferMechanisms
+{
+    std::unordered_set<std::string> mKeys = { "none", "natural", "forced", "mixed" };
+};
+
 }
 // namespace XMLGen

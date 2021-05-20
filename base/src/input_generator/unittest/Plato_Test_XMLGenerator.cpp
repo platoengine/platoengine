@@ -1652,13 +1652,14 @@ TEST(PlatoTestXMLGenerator, SROM_SolveSromProblem_ReadSampleProbPairsFromFile)
     iss.clear();
     iss.seekg(0);
     ASSERT_NO_THROW(tTester.publicParseScenarios(iss));
-    EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
 
     auto tXMLGenMetadata = tTester.getInputData();
+    EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(tXMLGenMetadata), true);
+
     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-    size_t numPerformers = tTester.getNumPerformers();
+    auto tNumPerformers = tXMLGenMetadata.m_UncertaintyMetaData.numPerformers;
     EXPECT_EQ(tNumSamples,2u);
-    EXPECT_EQ(numPerformers,1u);
+    EXPECT_EQ(tNumPerformers,1u);
 
     // TEST SAMPLES
     std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
@@ -1796,13 +1797,14 @@ TEST(PlatoTestXMLGenerator, uncertainty_analyzeNewWorkflow)
     iss.clear();
     iss.seekg(0);
     ASSERT_NO_THROW(tTester.publicParseScenarios(iss));
-  EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
 
   auto tXMLGenMetadata = tTester.getInputData();
+  EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(tXMLGenMetadata), true);
+
   auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
-  size_t numPerformers = tTester.getNumPerformers();
+  size_t tNumPerformers = tXMLGenMetadata.m_UncertaintyMetaData.numPerformers;
   EXPECT_EQ(tNumSamples,2u);
-  EXPECT_EQ(numPerformers,1u);
+  EXPECT_EQ(tNumPerformers,1u);
 
   // TEST SAMPLES
   std::vector<std::string> tGoldLoadCaseProbabilities = { "0.36112468067266207", "0.63887286897558715" };
@@ -1948,13 +1950,14 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
     tIss.clear();
     tIss.seekg(0);
     ASSERT_NO_THROW(tTester.publicParseScenarios(tIss));
-    EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(), true);
+
+    auto tXMLGenMetadata = tTester.getInputData();
+    EXPECT_EQ(tTester.publicRunSROMForUncertainVariables(tXMLGenMetadata), true);
 
     // TEST DATA
-    auto tXMLGenMetadata = tTester.getInputData();
     auto tNumSamples = tXMLGenMetadata.mRandomMetaData.numSamples();
     EXPECT_EQ(tNumSamples,10u);
-    size_t tNumPerformers = tTester.getNumPerformers();
+    size_t tNumPerformers = tXMLGenMetadata.m_UncertaintyMetaData.numPerformers;
     EXPECT_EQ(tNumPerformers,5u);
 
     // POSE GOLD VALUES
@@ -2024,7 +2027,6 @@ TEST(PlatoTestXMLGenerator,uncertainty_analyzeNewWorkflow_randomPlusDeterministi
 TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
 {
     // POSE INPUT DATA
-    XMLGenerator_UnitTester tTester;
     std::istringstream tIss;
     std::string tStringInput =
         "begin service 1\n"
@@ -2036,17 +2038,17 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
         "  number_processors 1\n"
         "end service\n"
         "begin criterion 1\n"
-        "  type composite\n"
-        "  criterion_ids 2 3\n"
-        "  criterion_weights 1.0 -1.0"
-        "end criterion\n"
-        "begin criterion 2\n"
         "  type inlet_pressure\n"
         "  location_name inlet\n"
         "end criterion\n"
-        "begin criterion 3\n"
+        "begin criterion 2\n"
         "  type outlet_pressure\n"
         "  location_name outlet\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "  type composite\n"
+        "  criterion_ids 1 2\n"
+        "  criterion_weights 1.0 -1.0\n"
         "end criterion\n"
         "begin criterion 4\n"
         "   type volume\n"
@@ -2055,18 +2057,18 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
         "  physics steady_state_incompressible_fluids\n"
         "  dimensions 2\n"
         "  loads 10 1\n"
-        "  boundary_conditions 1 2 3 4\n"
+        "  boundary_conditions 1 2 3 4 5\n"
         "  material 1\n"
         "end scenario\n"
         "begin objective\n"
         "  scenarios 1\n"
-        "  criteria 1\n"
+        "  criteria 3\n"
         "  services 2\n"
         "  type weighted_sum\n"
         "  weights 1\n"
         "end objective\n"
         "begin constraint 1\n"
-        "  criterion 3\n"
+        "  criterion 4\n"
         "  relative_target 0.25\n"
         "  type less_than\n"
         "  service 1\n"
@@ -2127,6 +2129,7 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
         "end paths\n";
 
     // do parse
+    XMLGenerator_UnitTester tTester;
     tIss.str(tStringInput);
     tIss.clear();
     tIss.seekg(0);
@@ -2161,6 +2164,9 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
     tIss.clear();
     tIss.seekg(0);
     ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
+
+    auto tXMLGenMetadata = tTester.getInputData();
+    tTester.generate(tXMLGenMetadata);
 }
 
 } // end PlatoTestXMLGenerator namespace

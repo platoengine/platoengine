@@ -1529,25 +1529,28 @@ void append_plato_main_output_stage
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.mOutputMetaData[0].isOutputDisabled())
+    if (!aXMLMetaData.mOutputMetaData.empty())
     {
-        return;
-    }
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
-    {
-        auto tOutputStage = aDocument.append_child("Stage");
-        XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
-        XMLGen::append_write_ouput_operation(aXMLMetaData, tOutputStage);
-        XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
-        XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
-    }
-    else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
-    {
-        std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
-        auto tOutputStage = aDocument.append_child("Stage");
-        XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
-        auto tOperation = tOutputStage.append_child("Operation");
-        XMLGen::append_children({"Name", "PerformerName"}, {"CSMMeshOutput", tFirstPlatoMainPerformer}, tOperation);
+        if (aXMLMetaData.mOutputMetaData[0].isOutputDisabled())
+        {
+            return;
+        }
+        if (aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        {
+            auto tOutputStage = aDocument.append_child("Stage");
+            XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+            XMLGen::append_write_ouput_operation(aXMLMetaData, tOutputStage);
+            XMLGen::append_compute_qoi_statistics_operation(aXMLMetaData, tOutputStage);
+            XMLGen::append_platomain_output_operation(aXMLMetaData, tOutputStage);
+        }
+        else if (aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        {
+            std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+            auto tOutputStage = aDocument.append_child("Stage");
+            XMLGen::append_children({"Name"}, {"Output To File"}, tOutputStage);
+            auto tOperation = tOutputStage.append_child("Operation");
+            XMLGen::append_children({"Name", "PerformerName"}, {"CSMMeshOutput", tFirstPlatoMainPerformer}, tOperation);
+        }
     }
 }
 // function append_plato_main_output_stage
