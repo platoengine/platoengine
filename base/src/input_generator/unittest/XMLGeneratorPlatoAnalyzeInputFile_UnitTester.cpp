@@ -32,6 +32,7 @@ TEST(PlatoTestXMLGenerator, AppendPhysics_IncompressibleFluids)
     tScenario.append("max_steady_state_iterations","500");
     tScenario.append("steady_state_tolerance","1e-5");
     tScenario.append("time_step_safety_factor","0.7");
+    tScenario.append("critical_time_step_damping","1e-2");
     tScenario.append("heat_transfer","none");
     tScenario.append("momentum_damping","0.31");
     
@@ -72,30 +73,6 @@ TEST(PlatoTestXMLGenerator, AppendPhysics_IncompressibleFluids)
     PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
-
-    // TEST HYPERBOLIC -> ENERGY CONSERVATION BLOCK
-    tConservationEqn = tConservationEqn.next_sibling("ParameterList");
-    ASSERT_FALSE(tConservationEqn.empty());
-    ASSERT_STREQ("ParameterList", tConservationEqn.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Energy Conservation"}, tConservationEqn);
-    auto tPenaltyFunction = tConservationEqn.child("ParameterList");
-    ASSERT_FALSE(tPenaltyFunction.empty());
-    ASSERT_STREQ("ParameterList", tPenaltyFunction.name());
-    PlatoTestXMLGenerator::test_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
-    tParameter = tPenaltyFunction.child("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"Heat Source Penalty Exponent", "double", "3.0"};
-    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_FALSE(tParameter.empty());
-    ASSERT_STREQ("Parameter", tParameter.name());
-    tValues = {"Thermal Diffusion Penalty Exponent", "double", "3.0"};
-    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
-    tParameter = tParameter.next_sibling("Parameter");
-    ASSERT_TRUE(tParameter.empty());
-    tPenaltyFunction = tPenaltyFunction.next_sibling("ParameterList");
-    ASSERT_TRUE(tPenaltyFunction.empty());
     tConservationEqn = tConservationEqn.next_sibling("ParameterList");
     ASSERT_TRUE(tConservationEqn.empty());
 
@@ -108,6 +85,12 @@ TEST(PlatoTestXMLGenerator, AppendPhysics_IncompressibleFluids)
     ASSERT_FALSE(tParameter.empty());
     ASSERT_STREQ("Parameter", tParameter.name());
     tValues = {"Safety Factor", "double", "0.7"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
+    tParameter = tParameter.next_sibling("Parameter");
+    ASSERT_FALSE(tParameter.empty());
+    ASSERT_STREQ("Parameter", tParameter.name());
+    tValues = {"Critical Time Step Damping", "double", "1e-2"};
+    PlatoTestXMLGenerator::test_attributes(tKeys, tValues, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
 

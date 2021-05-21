@@ -70,8 +70,13 @@ void append_incompressible_cfd_time_integration_options(
     auto tTimeIntegration = aParentNode.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Time Integration"}, tTimeIntegration);
     std::vector<std::string> tKeys = {"name", "type", "value"};
+    
     auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("time_step_safety_factor"));
     std::vector<std::string> tValues = {"Safety Factor", "double", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeIntegration);
+
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("critical_time_step_damping"));
+    tValues = {"Critical Time Step Damping", "double", tPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeIntegration);
 }
 

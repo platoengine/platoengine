@@ -114,6 +114,7 @@ void ParseScenario::allocate()
     mTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
     mTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
     mTags.insert({ "time_step_safety_factor", { { {"time_step_safety_factor"}, ""}, "0.7" } });
+    mTags.insert({ "critical_time_step_damping", { { {"critical_time_step_damping"}, ""}, "" } });
     mTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
 
     mTags.insert({ "tolerance", { { {"tolerance"}, ""}, "1e-8" } });
