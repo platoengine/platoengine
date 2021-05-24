@@ -1003,5 +1003,43 @@ void append_deterministic_qoi_to_plato_main_output_stage_for_multi_load_case
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode);
 
+/******************************************************************************//**
+ * \fn generate_rol_input_file
+ * \brief Create the ROL input xml file
+ * \param [in]     aXMLMetaData  Plato problem input data
+**********************************************************************************/
+void generate_rol_input_file
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
+ * \fn append_rol_input_file
+ * \brief Append the name of the ROL input xml file
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_rol_input_file
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_reset_algorithm_on_update_option
+ * \brief Append option specifying whether to reset the algorithm at the update frequency
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_reset_algorithm_on_update_option
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_reset_algorithm_on_update_option
+ * \brief Append option specifying whether to reset the algorithm at the update frequency
+ * \param [in]     aXMLMetaData  Plato problem input data
+ * \param [in]     aParentNode Parent to add data to
+**********************************************************************************/
+void append_rol_step_block
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParent);
+
 }
 // namespace XMLGen

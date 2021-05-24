@@ -179,8 +179,10 @@ set(${LIB_NAME}_HEADERS Plato_BoundsBase.hpp
                         
 IF( ENABLE_ROL )
 SET(${LIB_NAME}_HEADERS ${${LIB_NAME}_HEADERS}
-                                                Plato_ROLKSALInterface.hpp
-                                                Plato_ROLKSBCInterface.hpp
+                                                Plato_ROLBoundConstrainedInterface.hpp
+                                                Plato_ROLAugmentedLagrangianInterface.hpp
+                                                Plato_ROLLinearConstraintInterface.hpp
+                                                Plato_ROLSPGInterface.hpp
 						Plato_SerialEpetraVectorROL.hpp
 						Plato_DistributedVectorROL.hpp
 						Plato_ReducedConstraintROL.hpp

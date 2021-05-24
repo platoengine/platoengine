@@ -62,6 +62,7 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mOutputControlToFile(false),
         mOutputDiagnosticsToFile(false),
         mDisablePostSmoothing(false),
+        mResetAlgorithmOnUpdate(false),
         mGCMMAMaxInnerIterations(5),
         mInitialMovingAsymptoteScaleFactor(0.5),
         mGCMMAInnerKKTTolerance(5e-4),
@@ -89,6 +90,9 @@ OptimizerEngineStageData::OptimizerEngineStageData() :
         mMaxTrustRegionRadius(1e2),
         mAugLagPenaltyParameter(0.05),
         mAugLagPenaltyScaleParameter(1.2),
+        mOCControlStagnationTolerance(1e-2),
+        mOCObjectiveStagnationTolerance(1e-5),
+        mOCGradientTolerance(1e-8),
         mMaxNumIterations(500),
         mLimitedMemoryStorage(8),
         mProblemUpdateFrequency(0),
@@ -571,6 +575,42 @@ double OptimizerEngineStageData::getAugLagPenaltyParameter() const
 void OptimizerEngineStageData::setAugLagPenaltyParameter(const double & aInput)
 {
     mAugLagPenaltyParameter = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getOCControlStagnationTolerance() const
+{
+    return (mOCControlStagnationTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCControlStagnationTolerance(const double & aInput)
+{
+    mOCControlStagnationTolerance = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getOCObjectiveStagnationTolerance() const
+{
+    return (mOCObjectiveStagnationTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCObjectiveStagnationTolerance(const double & aInput)
+{
+    mOCObjectiveStagnationTolerance = aInput;
+}
+
+/******************************************************************************/
+double OptimizerEngineStageData::getOCGradientTolerance() const
+{
+    return (mOCGradientTolerance);
+}
+
+/******************************************************************************/
+void OptimizerEngineStageData::setOCGradientTolerance(const double & aInput)
+{
+    mOCGradientTolerance = aInput;
 }
 
 /******************************************************************************/
@@ -1470,6 +1510,14 @@ double OptimizerEngineStageData::getKSTrustRegionRatioUpper() const
 void OptimizerEngineStageData::setKSTrustRegionRatioUpper(const double& aInput)
 {
     mKSTrustRegionRatioUpper = aInput;
+}
+bool OptimizerEngineStageData::getResetAlgorithmOnUpdate() const
+{
+    return mResetAlgorithmOnUpdate;
+}
+void OptimizerEngineStageData::setResetAlgorithmOnUpdate(const bool& aInput)
+{
+    mResetAlgorithmOnUpdate = aInput;
 }
 
 } //namespace Plato

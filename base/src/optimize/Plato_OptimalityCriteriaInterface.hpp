@@ -283,6 +283,9 @@ private:
 
         aAlgorithm.setMaxNumIterations(tMaxNumIterations);
         aAlgorithm.setProblemUpdateFrequency(tProblemUpdateFrequency);
+        aAlgorithm.setControlStagnationTolerance(mInputData.getOCControlStagnationTolerance());
+        aAlgorithm.setObjectiveStagnationTolerance(mInputData.getOCObjectiveStagnationTolerance());
+        aAlgorithm.setObjectiveGradientTolerance(mInputData.getOCGradientTolerance());
     }
 
 private:

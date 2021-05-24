@@ -63,8 +63,9 @@
 #include "Plato_GloballyConvergentMethodMovingAsymptotesInterface.hpp"
 
 #ifdef ENABLE_ROL
-#include "Plato_ROLKSALInterface.hpp"
-#include "Plato_ROLKSBCInterface.hpp"
+#include "Plato_ROLAugmentedLagrangianInterface.hpp"
+#include "Plato_ROLBoundConstrainedInterface.hpp"
+#include "Plato_ROLLinearConstraintInterface.hpp"
 #endif
 
 namespace Plato
@@ -166,16 +167,22 @@ public:
          } catch(...){aInterface->Catch();}
        }
 #ifdef ENABLE_ROL
-       else if( tOptPackage == "ROL KSAL" )
+       else if( tOptPackage == "ROL AugmentedLagrangian" )
        {
          try {
-           tOptimizer = new Plato::ROLKSALInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+           tOptimizer = new Plato::ROLAugmentedLagrangianInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
-       else if( tOptPackage == "ROL KSBC" )
+       else if( tOptPackage == "ROL BoundConstrained" )
        {
          try {
-           tOptimizer = new Plato::ROLKSBCInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+           tOptimizer = new Plato::ROLBoundConstrainedInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
+         } catch(...){aInterface->Catch();}
+       }
+       else if( tOptPackage == "ROL LinearConstraint" )
+       {
+         try {
+           tOptimizer = new Plato::ROLLinearConstraintInterface<ScalarType, OrdinalType>(aInterface, aLocalComm);
          } catch(...){aInterface->Catch();}
        }
 #endif
@@ -207,8 +214,9 @@ public:
            << "\t DerivativeChecker ... Derivative Checker Toolkit\n"
            << "\t SOParameterStudies ... Shape Optimization Parameter Study Toolkit\n"
 #ifdef ENABLE_ROL
-           << "\t ROL KSAL... Rapid Optimization Library Kelley Sachs Augmented Lagrangian\n"
-           << "\t ROL KSBC... Rapid Optimization Library Kelley Sachs Bound Constrained\n"
+           << "\t ROL AugmentedLagrangian... Rapid Optimization Library Augmented Lagrangian\n"
+           << "\t ROL BoundConstrained... Rapid Optimization Library Bound Constrained\n"
+           << "\t ROL LinearConstraint... Rapid Optimization Library LinearConstraint\n"
 #endif
            << std::endl;
            throw Plato::ParsingException(tStringStream.str());

@@ -1136,6 +1136,7 @@ struct ValidAnalyzeCriteriaKeys
      **/
     std::unordered_map<std::string, std::pair<std::string, bool>> mKeys =
     {
+        { "composite", { "Composite", false } },
         { "volume", { "Volume", false } },
         { "elastic_work", { "Elastic Work", true } },
         { "plastic_work", { "Plastic Work", false } },
@@ -1276,6 +1277,9 @@ struct ValidOptimizationParameterKeys
      "mma_max_sub_problem_iterations",
      "mma_control_stagnation_tolerance",
      "mma_objective_stagnation_tolerance",
+     "oc_control_stagnation_tolerance",
+     "oc_objective_stagnation_tolerance",
+     "oc_gradient_tolerance",
      "initial_guess_file_name",
      "initial_guess_field_name",
      "normalize_in_aggregator",
@@ -1351,7 +1355,9 @@ struct ValidOptimizationParameterKeys
      "filter_type_identity_generator_name",
      "filter_type_kernel_generator_name",
      "filter_type_kernel_then_heaviside_generator_name",
-     "filter_type_kernel_then_tanh_generator_name"
+     "filter_type_kernel_then_tanh_generator_name",
+     "reset_algorithm_on_update",
+     "rol_subproblem_model"
     };
 };
 }

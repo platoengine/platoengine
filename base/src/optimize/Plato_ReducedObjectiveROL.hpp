@@ -55,6 +55,7 @@
 #include <algorithm>
 
 #include "ROL_Objective.hpp"
+#include "ROL_UpdateType.hpp"
 
 #include "Plato_Interface.hpp"
 #include "Plato_DistributedVectorROL.hpp"
@@ -86,9 +87,12 @@ public:
             mLastIteration(-1),
             mUpdateFrequency(0),
             mStateComputed(false),
-            mGradientComputed(false)
+            mGradientComputed(false),
+            mDebugOutput(false)
     {
         this->initialize();
+        if(mDebugOutput)
+            mFile.open("obj_output.txt", ios::out);
     }
 
     /******************************************************************************//**
@@ -96,6 +100,8 @@ public:
     **********************************************************************************/
     virtual ~ReducedObjectiveROL()
     {
+        if(mDebugOutput)
+            mFile.close();
     }
 
     /******************************************************************************//**
@@ -104,19 +110,42 @@ public:
      * \param [in] aFlag indicates if vector of design variables was updated
      * \param [in] aIteration outer loop optimization iteration
     **********************************************************************************/
-    void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
+    void update(const ROL::Vector<ScalarType> & aControl, ROL::UpdateType aUpdateType, int aIteration = -1)
+    //void update(const ROL::Vector<ScalarType> & aControl, bool aFlag, int aIteration = -1)
     {
-        mStateComputed = false;
+//std::cout << "Update called with aUpdateType: " << tUpdateTypeString << " and aIteration: " << aIteration << std::endl;
+        if(aUpdateType != ROL::UpdateType::Accept)
+            mStateComputed = false;
         mGradientComputed = false;
 
         bool tNewIteration = aIteration != mLastIteration && aIteration != -1;
         bool tUpdateIteration = mUpdateFrequency > 0 && tNewIteration && aIteration > 0 && aIteration % mUpdateFrequency == 0;
 
+std::string tUpdateTypeString;
+if(aUpdateType == ROL::UpdateType::Initial)
+    tUpdateTypeString = "Initial";
+else if(aUpdateType == ROL::UpdateType::Accept)
+    tUpdateTypeString = "Accept";
+else if(aUpdateType == ROL::UpdateType::Revert)
+    tUpdateTypeString = "Revert";
+else if(aUpdateType == ROL::UpdateType::Trial)
+    tUpdateTypeString = "Trial";
+else if(aUpdateType == ROL::UpdateType::Temp)
+    tUpdateTypeString = "Temp";
+if(mDebugOutput)
+    mFile << "update() called with aUpdateType: " << tUpdateTypeString << " and aIteration: " << aIteration << std::endl;
+//std::cout << "Called update: freq=" << mUpdateFrequency << ", iter=" << aIteration << ", last_iter=" << mLastIteration << std::endl << std::flush;
         if(tNewIteration)
+        {
+//          std::cout << "Calling output stage." << std::endl << std::flush;
           callOutputStage();
+        }
 
         if(tUpdateIteration)
+        {
+//          std::cout << "Calling update stage." << std::endl << std::flush;
           callUpdateStage();
+        }
 
         mLastIteration = aIteration;
     }
@@ -129,6 +158,8 @@ public:
     **********************************************************************************/
     ScalarType value(const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
+if(mDebugOutput)
+    mFile << "value() called" << std::endl;
         if(!mStateComputed)
             computeValue(aControl);
 
@@ -143,6 +174,8 @@ public:
     **********************************************************************************/
     void gradient(ROL::Vector<ScalarType> & aGradient, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
     {
+if(mDebugOutput)
+    mFile << "gradient() called" << std::endl;
         if(!mStateComputed)
             computeValue(aControl);
 
@@ -154,6 +187,30 @@ public:
                 dynamic_cast<Plato::DistributedVectorROL<ScalarType>&>(aGradient);
         std::vector<ScalarType> & tOutputGradientData = tOutputGradient.vector();
         this->copy(mGradient, tOutputGradientData);
+    }
+    /******************************************************************************//**
+     * \brief Returns current hessian applied to a vector
+     * \param [out] aHessVec objective function Hessian applied to a vector
+     * \param [in] aVector design variable direction vector
+     * \param [in] aControl design variables
+     * \param [in] aTolerance inexactness tolerance
+     **********************************************************************************/
+    void hessVec(ROL::Vector<ScalarType> & aHessVec, const ROL::Vector<ScalarType> & aVector, const ROL::Vector<ScalarType> & aControl, ScalarType & aTolerance)
+    {
+if(mDebugOutput)
+    mFile << "hessVec() called" << std::endl;
+        if(mHessianType == "zero")
+        {
+            aHessVec.zero(); // Zero
+        }
+        else if(mHessianType == "finite_difference")
+        {
+            ROL::Objective<ScalarType>::hessVec(aHessVec,aVector,aControl,aTolerance); // Finite differences
+        }
+        else
+        {
+            std::cout << "Error: Unexpected hessian type!" << std::endl;
+        }
     }
 
 private:
@@ -171,6 +228,7 @@ private:
         mControl.resize(tNumDesignVariables);
         mGradient.resize(tNumDesignVariables);
         mUpdateFrequency = mEngineInputData.getProblemUpdateFrequency();
+        mHessianType = mEngineInputData.getHessianType();
     }
 
     /******************************************************************************//**
@@ -189,6 +247,8 @@ private:
 
     void computeValue(const ROL::Vector<ScalarType> & aControl)
     {
+if(mDebugOutput)
+    mFile << "  computeValue() called" << std::endl;
       // ********* Set view to control vector ********* //
       const Plato::DistributedVectorROL<ScalarType> & tControl =
               dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
@@ -214,6 +274,8 @@ private:
 
     void computeGradient(const ROL::Vector<ScalarType> & aControl)
     {
+if(mDebugOutput)
+    mFile << "  computeGradient() called" << std::endl;
       // ********* Set view to control vector ********* //
       const Plato::DistributedVectorROL<ScalarType> & tControl =
               dynamic_cast<const Plato::DistributedVectorROL<ScalarType>&>(aControl);
@@ -251,6 +313,8 @@ private:
 
     void callUpdateStage()
     {
+if(mDebugOutput)
+    mFile << "  callUpdateStage() called" << std::endl;
       std::vector<std::string> tStageNames;
       std::string tUpdateStageName = mEngineInputData.getUpdateProblemStageName();
       if(tUpdateStageName.empty() == false)
@@ -262,6 +326,8 @@ private:
 
     void cacheState()
     {
+if(mDebugOutput)
+    mFile << "  cacheState() called" << std::endl;
         std::vector<std::string> tStageNames;
         std::string tCacheStageName = mEngineInputData.getCacheStageName();
         if(tCacheStageName.empty() == false)
@@ -287,10 +353,13 @@ private:
 
     bool mStateComputed;
     bool mGradientComputed;
+    bool mDebugOutput;
+    std::string mHessianType;
 
 private:
     ReducedObjectiveROL(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);
     Plato::ReducedObjectiveROL<ScalarType> & operator=(const Plato::ReducedObjectiveROL<ScalarType> & aRhs);
+    ofstream mFile;
 };
 // class ReducedObjectiveROL
 

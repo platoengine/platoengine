@@ -16,6 +16,7 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorParseOptimizationParameters.hpp"
 
 namespace PlatoTestXMLGenerator
 {
@@ -1045,6 +1046,210 @@ TEST(PlatoTestXMLGenerator, Split)
         auto tIndex = &tValue - &tOutput[0];
         ASSERT_STREQ(tGold[tIndex].c_str(), tValue.c_str());
     }
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_1)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   rol_subproblem_model lin_more\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("lin_more", tOptimizationParametersMetadata[0].rol_subproblem_model().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_2)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_linear_constraint\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("lin_more", tOptimizationParametersMetadata[0].rol_subproblem_model().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_3)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_bound_constrained\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("kelley_sachs", tOptimizationParametersMetadata[0].rol_subproblem_model().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_4)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_augmented_lagrangian\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("kelley_sachs", tOptimizationParametersMetadata[0].rol_subproblem_model().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_5)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_augmented_lagrangian\n"
+        "   rol_subproblem_model dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_6)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_bound_constrained\n"
+        "   rol_subproblem_model dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_subproblem_model_7)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_linear_constraint\n"
+        "   rol_subproblem_model dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_1)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   hessian_type zero\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("zero", tOptimizationParametersMetadata[0].hessian_type().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_2)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_linear_constraint\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("zero", tOptimizationParametersMetadata[0].hessian_type().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_3)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_bound_constrained\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("zero", tOptimizationParametersMetadata[0].hessian_type().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_4)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_augmented_lagrangian\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_NO_THROW(tOptimizationParametersParser.parse(tInputSS));
+    auto tOptimizationParametersMetadata = tOptimizationParametersParser.data();
+    ASSERT_STREQ("zero", tOptimizationParametersMetadata[0].hessian_type().c_str());
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_5)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_linear_constraint\n"
+        "   hessian_type dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_6)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_bound_constrained\n"
+        "   hessian_type dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
+}
+
+TEST(PlatoTestXMLGenerator, ParseOptimizationParameters_rol_hessian_type_7)
+{
+    std::string tStringInput =
+        "begin optimization_parameters\n"
+        "   optimization_algorithm rol_augmented_lagrangian\n"
+        "   hessian_type dummy\n"
+        "end optimization_parameters\n";
+    std::istringstream tInputSS;
+    tInputSS.str(tStringInput);
+
+    XMLGen::ParseOptimizationParameters tOptimizationParametersParser;
+    ASSERT_THROW(tOptimizationParametersParser.parse(tInputSS), std::runtime_error);
 }
 
 }

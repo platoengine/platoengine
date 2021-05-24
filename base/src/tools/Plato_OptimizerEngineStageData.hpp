@@ -173,6 +173,15 @@ public:
     double getKSOuterActualReductionTolerance() const;
     void setKSOuterActualReductionTolerance(const double & aInput);
 
+    double getOCControlStagnationTolerance() const;
+    void setOCControlStagnationTolerance(const double & aInput);
+
+    double getOCObjectiveStagnationTolerance() const;
+    void setOCObjectiveStagnationTolerance(const double & aInput);
+
+    double getOCGradientTolerance() const;
+    void setOCGradientTolerance(const double & aInput);
+  
     /******************************************************************************//**
      * @brief Return limited memory storage capacity for LBFG Hessian method
      * @return limited memory storage capacity
@@ -479,6 +488,9 @@ public:
     double getKSTrustRegionRatioUpper() const;
     void setKSTrustRegionRatioUpper(const double& aInput);
 
+    bool getResetAlgorithmOnUpdate() const;
+    void setResetAlgorithmOnUpdate(const bool& aInput);
+
 private:
     bool mMeanNorm;
     bool mCheckGradient;
@@ -487,6 +499,7 @@ private:
     bool mOutputControlToFile;
     bool mOutputDiagnosticsToFile;
     bool mDisablePostSmoothing;
+    bool mResetAlgorithmOnUpdate;
 
     int mGCMMAMaxInnerIterations;
     double mInitialMovingAsymptoteScaleFactor;
@@ -517,6 +530,10 @@ private:
     double mMaxTrustRegionRadius;
     double mAugLagPenaltyParameter;
     double mAugLagPenaltyScaleParameter;
+
+    double mOCControlStagnationTolerance;
+    double mOCObjectiveStagnationTolerance;
+    double mOCGradientTolerance;
 
     size_t mMaxNumIterations;
     size_t mLimitedMemoryStorage;
