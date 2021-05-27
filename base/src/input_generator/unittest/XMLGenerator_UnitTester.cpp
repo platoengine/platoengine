@@ -103,6 +103,13 @@ void XMLGenerator_UnitTester::publicParseObjective(std::istream &sin)
 }
 
 /******************************************************************************/
+void XMLGenerator_UnitTester::publicParseConstraints(std::istream &sin)
+/******************************************************************************/
+{
+    parseConstraints(sin);
+}
+
+/******************************************************************************/
 void XMLGenerator_UnitTester::publicParseCriteria(std::istream &sin)
 /******************************************************************************/
 {
@@ -166,10 +173,11 @@ bool XMLGenerator_UnitTester::publicParseMesh(std::istream &sin)
 }
 
 /******************************************************************************/
-bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables()
+bool XMLGenerator_UnitTester::publicRunSROMForUncertainVariables
+(XMLGen::InputData& aInputData)
 /******************************************************************************/
 {
-    return runSROMForUncertainVariables();
+    return runSROMForUncertainVariables(aInputData);
 }
 
 /******************************************************************************/

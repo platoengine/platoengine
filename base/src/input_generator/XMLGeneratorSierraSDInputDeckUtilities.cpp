@@ -227,10 +227,10 @@ void append_material_blocks
     {
         fprintf(aFilePtr, "MATERIAL %s\n", tMaterial.id().c_str());
         fprintf(aFilePtr, "  isotropic\n");
-        fprintf(aFilePtr, "  E = %s\n", tMaterial.value("youngs_modulus").c_str());
-        fprintf(aFilePtr, "  nu = %s\n", tMaterial.value("poissons_ratio").c_str());
-        if(tMaterial.value("mass_density").empty() == false)
-            fprintf(aFilePtr, "  density = %s\n", tMaterial.value("mass_density").c_str());
+        fprintf(aFilePtr, "  E = %s\n", tMaterial.property("youngs_modulus").c_str());
+        fprintf(aFilePtr, "  nu = %s\n", tMaterial.property("poissons_ratio").c_str());
+        if(tMaterial.property("mass_density").empty() == false)
+            fprintf(aFilePtr, "  density = %s\n", tMaterial.property("mass_density").c_str());
         fprintf(aFilePtr, "  material_penalty_model = simp\n");
         if(aMetaData.optimization_parameters().discretization().compare("density") == 0)
         {

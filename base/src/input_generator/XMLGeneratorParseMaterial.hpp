@@ -69,6 +69,13 @@ private:
     void insertElasticOrthoProperties();
 
     /******************************************************************************//**
+     * \fn insertIncompressibleFluidProperties
+     * \brief Insert valid incompressible fluids material properties, e.g. identifiers, \n
+     * to map from plato input file tags to valid tokens-value pairs
+    **********************************************************************************/
+    void insertIncompressibleFluidProperties();
+
+    /******************************************************************************//**
      * \fn setCode
      * \brief Set 'code' keyword, default = 'plato_analyze'.
      * \param [in/out] aInputFile parsed input metadata

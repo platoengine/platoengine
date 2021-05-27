@@ -16,6 +16,146 @@ namespace Private
 {
 
 /******************************************************************************//**
+ * \fn void append_linear_solver_options
+ * \brief Append linear solver options to analyze input deck.
+ * \param [out] aParentNode  parent xml node
+**********************************************************************************/
+void append_linear_solver_options(pugi::xml_node &aParentNode)
+{
+    auto tLinearSolver = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Linear Solver"}, tLinearSolver);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Iterations", "int", "1000"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tLinearSolver);
+    tValues = {"Tolerance", "double", "1e-12"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tLinearSolver);
+    tValues = {"Solver Stack", "string", "Amgx"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tLinearSolver);
+}
+
+/******************************************************************************//**
+ * \fn void append_incompressible_cfd_convergence_options
+ * \brief Append incompressible fluids convergence options to analyze input deck.
+ * \param [in]  aScenario    Scenario metadata
+ * \param [out] aParentNode  parent xml node
+**********************************************************************************/
+void append_incompressible_cfd_convergence_options(
+    const XMLGen::Scenario &aScenario,
+    pugi::xml_node &aParentNode)
+{
+    auto tConvergence = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Convergence"}, tConvergence);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("output_frequency"));
+    std::vector<std::string> tValues = {"Output Frequency", "int", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tConvergence);
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("max_steady_state_iterations"));
+    tValues = {"Maximum Steady State Iterations", "int", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tConvergence);
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("steady_state_tolerance"));
+    tValues = {"Steady State Tolerance", "double", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tConvergence);
+}
+
+/******************************************************************************//**
+ * \fn void append_incompressible_cfd_time_integration_options
+ * \brief Append incompressible fluids time integration options to analyze input deck.
+ * \param [in]  aScenario    Scenario metadata
+ * \param [out] aParentNode  parent xml node
+**********************************************************************************/
+void append_incompressible_cfd_time_integration_options(
+    const XMLGen::Scenario &aScenario,
+    pugi::xml_node &aParentNode)
+{
+    auto tTimeIntegration = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Time Integration"}, tTimeIntegration);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    
+    auto tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("time_step_safety_factor"));
+    std::vector<std::string> tValues = {"Safety Factor", "double", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeIntegration);
+
+    tPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aScenario.value("critical_time_step_damping"));
+    tValues = {"Critical Time Step Damping", "double", tPropertyValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tTimeIntegration);
+}
+
+/******************************************************************************//**
+ * \fn void append_incompressible_cfd_conservation_equations_options
+ * \brief Append incompressible fluids conservation equations options to analyze input deck.
+ * \param [in]  aScenario    Scenario metadata
+ * \param [out] aParentNode  parent xml node
+**********************************************************************************/
+void append_incompressible_cfd_conservation_equations_options(
+    const XMLGen::Scenario &aScenario,
+    pugi::xml_node &aParentNode)
+{
+    auto tPhysicsTag = aScenario.physics();
+    XMLGen::ValidAnalyzePhysicsKeys tValidKeys;
+    auto tPDECategory = tValidKeys.pde(tPhysicsTag);
+    auto tPhysicsNode = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tPDECategory}, tPhysicsNode);
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::unordered_map<std::string, std::string> tCFDScenarioMap =
+        {{"density", "Density-Based Topology Optimization"}, {"levelset", "Level Set Topology Optimization"}, {"cad", "Analysis"}};
+    auto tDiscretization = aScenario.value("discretization");
+    auto tItr = tCFDScenarioMap.find(tDiscretization);
+    if (tItr == tCFDScenarioMap.end())
+    {
+        THROWERR(std::string("Scenario 'discretization' key value '") + aScenario.value("discretization") + "' is not supported.");
+    }
+
+    std::vector<std::string> tValues = {"Scenario", "string", tItr->second};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPhysicsNode);
+    XMLGen::ValidHeatTransferMechanisms tValidHeatTransferKeys;
+    auto tHeatTransferItr = tValidHeatTransferKeys.mKeys.find(aScenario.value("heat_transfer"));
+    if(tHeatTransferItr == tValidHeatTransferKeys.mKeys.end())
+    {
+        THROWERR(std::string("'heat_transfer' keyword with value '") + aScenario.value("heat_transfer") 
+            + "' in Scenario with id '" + aScenario.id() + "' is not supported.")
+    }
+    tValues = { "Heat Transfer", "string", (*tHeatTransferItr) };
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPhysicsNode);
+
+    if (!aScenario.value("momentum_damping").empty())
+    {
+        auto tMassConservation = tPhysicsNode.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Mass Conservation"}, tMassConservation);
+        tValues = {"Surface Momentum Damping", "double", aScenario.value("momentum_damping")};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tMassConservation);
+    }
+
+    if (tDiscretization == "density" && (*tHeatTransferItr) != "none")
+    {
+        auto tEnergyConservation = tPhysicsNode.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Energy Conservation"}, tEnergyConservation);
+        auto tPenaltyFunction = tEnergyConservation.append_child("ParameterList");
+        XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
+        tValues = {"Heat Source Penalty Exponent", "double", "3.0"};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+        tValues = {"Thermal Diffusion Penalty Exponent", "double", "3.0"};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+    }
+}
+
+/******************************************************************************//**
+ * \fn void append_incompressible_cfd_conservation_equations_options
+ * \brief Append incompressible fluids conservation equations options to analyze input deck.
+ * \param [in]  aScenario    Scenario metadata
+ * \param [out] aParentNode  parent xml node
+**********************************************************************************/
+void append_hyperbolic_incompressible_cfd_pde_to_analyze_input_deck(
+    const XMLGen::Scenario &aScenario,
+    const XMLGen::Output &aOutput,
+    pugi::xml_node &aParentNode)
+{
+    XMLGen::Private::append_incompressible_cfd_conservation_equations_options(aScenario, aParentNode);
+    XMLGen::Private::append_incompressible_cfd_time_integration_options(aScenario, aParentNode);
+    XMLGen::Private::append_incompressible_cfd_convergence_options(aScenario, aParentNode);
+    XMLGen::Private::append_linear_solver_options(aParentNode);
+}
+
+/******************************************************************************//**
  * \fn append_simp_penalty_function
  * \brief Append Solid Isotropic Material with Penalization function inputs.
  * \param [in]     aMetadata    Service metadata
@@ -387,55 +527,59 @@ void AnalyzePhysicsFunctionInterface::insertEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_thermal",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_thermomechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("steady_state_electromechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertParabolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_thermal",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_parabolic_residual_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_thermomechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_parabolic_residual_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertHyperbolicPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("transient_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck, tFuncIndex)));
+
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_hyperbolic_pde_to_analyze_input_deck));
+    mMap.insert(std::make_pair("steady_state_incompressible_fluids",
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_hyperbolic_incompressible_cfd_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertPlasticityPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("plasticity",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_plasticity_pde_to_analyze_input_deck, tFuncIndex)));
 
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("thermoplasticity",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_elliptic_thermoplasticity_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insertStabilizedEllipticPhysics()
 {
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck));
     mMap.insert(std::make_pair("stabilized_mechanics",
-      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
+      std::make_pair((XMLGen::Analyze::PhysicsFunc)XMLGen::Private::append_stabilized_elliptic_pde_to_analyze_input_deck, tFuncIndex)));
 }
 
 void AnalyzePhysicsFunctionInterface::insert()

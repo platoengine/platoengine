@@ -740,7 +740,7 @@ void get_scenario_list_from_objectives_and_constraints
 /**********************************************************************************/
 std::string get_essential_boundary_condition_block_title(XMLGen::Scenario &aScenario)
 {
-    ValidEssentialBoundaryConditionBlockTitleKeys tValidTitleMap;
+    XMLGen::ValidEssentialBoundaryConditionBlockTitleKeys tValidTitleMap;
     std::string tReturnValue = tValidTitleMap.value(aScenario.physics());
     return tReturnValue;
 }
@@ -867,29 +867,72 @@ void append_natural_boundary_conditions_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_essential_boundary_conditions_to_plato_analyze_input_deck
-(const XMLGen::InputData& aXMLMetaData,
- pugi::xml_node& aParentNode)
+// Return map from supported essential boundary condition block name to list of 
+// essential boundary conditions.
+std::unordered_map<std::string, std::vector<XMLGen::EssentialBoundaryCondition>>
+get_map_from_essential_bcs_block_name_to_essential_bcs_list(
+    const XMLGen::InputData &tXMLMetaData,
+    const XMLGen::Scenario &tScenario)
+{
+    XMLGen::ValidEssentialBoundaryConditionBlockNames tMap;
+    std::unordered_map<std::string, std::vector<XMLGen::EssentialBoundaryCondition>> tEssBCsBlockNameToEssBCs;
+
+    auto tPhysics = tScenario.physics();
+
+    for (auto &tbcID : tScenario.bcIDs())
+    {
+        for (auto &tEBC : tXMLMetaData.ebcs)
+        {
+            if (tEBC.value("id") == tbcID)
+            {
+                auto tDofName = tEBC.degree_of_freedom();
+                auto tBlockName = tMap.blockName(tPhysics, tDofName);
+                tEssBCsBlockNameToEssBCs[tBlockName].push_back(tEBC);
+                break;
+            }
+        }
+    }
+
+    return tEssBCsBlockNameToEssBCs;
+}
+//function get_map_from_essential_bcs_block_name_to_essential_bcs_list
+/**********************************************************************************/
+
+/**********************************************************************************/
+// Append each set of essential boundary conditions to the plato analyze input deck.
+void append_analyze_essential_boundary_conditions(
+    const std::unordered_map<std::string, std::vector<XMLGen::EssentialBoundaryCondition>> &aMap,
+    const XMLGen::Scenario &aScenario,
+    pugi::xml_node &aParentNode)
 {
     XMLGen::EssentialBoundaryConditionTag tTagInterface;
     XMLGen::AppendEssentialBoundaryCondition tFuncInterface;
-
-    std::vector<XMLGen::Scenario> tScenarioList;
-    get_scenario_list_from_objectives_and_constraints(aXMLMetaData, tScenarioList);
-    for (auto &tScenario : tScenarioList)
+    for (auto &tPair : aMap)
     {
         auto tEssentialBC = aParentNode.append_child("ParameterList");
-        auto tBlockTitle = get_essential_boundary_condition_block_title(tScenario);
-     
-        XMLGen::append_attributes({"name"}, {tBlockTitle}, tEssentialBC);
+        XMLGen::append_attributes({"name"}, {tPair.first}, tEssentialBC);
 
-        std::vector<XMLGen::EssentialBoundaryCondition> tEBCVector;
-        get_ebc_vector_for_scenario(aXMLMetaData, tScenario, tEBCVector);
-        for (auto &tBC : tEBCVector)
+        for (auto &tBC : tPair.second)
         {
             auto tName = tTagInterface.call(tBC);
-            tFuncInterface.call(tName, tScenario.physics(), tBC, tEssentialBC);
+            tFuncInterface.call(tName, aScenario.physics(), tBC, tEssentialBC);
         }
+    }
+}
+//function append_analyze_essential_boundary_conditions
+/**********************************************************************************/
+
+/**********************************************************************************/
+void append_essential_boundary_conditions_to_plato_analyze_input_deck(
+    const XMLGen::InputData& aXMLMetaData,
+    pugi::xml_node& aParentNode)
+{
+    std::vector<XMLGen::Scenario> tScenarioList;
+    XMLGen::get_scenario_list_from_objectives_and_constraints(aXMLMetaData, tScenarioList);
+    for (auto &tScenario : tScenarioList)
+    {
+        auto tEssBCsBlockNameToEssBCs = XMLGen::get_map_from_essential_bcs_block_name_to_essential_bcs_list(aXMLMetaData, tScenario);
+        XMLGen::append_analyze_essential_boundary_conditions(tEssBCsBlockNameToEssBCs, tScenario, aParentNode);
     }
 }
 // function append_essential_boundary_conditions_to_plato_analyze_input_deck

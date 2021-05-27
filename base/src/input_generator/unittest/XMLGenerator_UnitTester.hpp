@@ -70,6 +70,7 @@ public:
                                          const std::vector<std::string> &aInputStrings,
                                          std::string &aReturnStringValue);
     bool publicParseLoads(std::istream &sin);
+    void publicParseConstraints(std::istream &sin);
     void publicParseObjective(std::istream &sin);
     void publicParseMaterials(std::istream &sin);
     void publicParseServices(std::istream &sin);
@@ -81,7 +82,8 @@ public:
     bool publicParseMesh(std::istream &sin);
     bool publicParseCodePaths(std::istream &sin);
     bool publicParseBlocks(std::istream &sin);
-    bool publicRunSROMForUncertainVariables();
+    bool publicRunSROMForUncertainVariables(XMLGen::InputData& aInputData);
+
     std::string getBlockID(const int &aIndex) {return m_InputData.blocks[aIndex].block_id;}
     std::string getBlockMaterialID(const int &aIndex) {return m_InputData.blocks[aIndex].material_id;}
     std::string getBCApplicationType(const std::string &aBCID);
@@ -133,9 +135,7 @@ public:
     std::string getPlatoMainPath() {return m_InputData.codepaths.plato_main_path;}
     void clearInputData();
     XMLGen::InputData* exposeInputData() {return &m_InputData;}
-    size_t      getNumPerformers() {return m_InputData.m_UncertaintyMetaData.numPerformers;}
-
-
+    
 };
 
 

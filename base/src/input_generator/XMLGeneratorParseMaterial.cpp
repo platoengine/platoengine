@@ -82,6 +82,21 @@ void ParseMaterial::insertPlasticProperties()
     mTags.insert({ "plastic_properties_minimum_ersatz", { { {"plastic_properties_minimum_ersatz"}, ""}, "" } });
 }
 
+void ParseMaterial::insertIncompressibleFluidProperties()
+{
+    mTags.insert({ "prandtl_number", { { {"prandtl_number"}, ""}, "" } });
+    mTags.insert({ "grashof_number", { { {"grashof_number"}, ""}, "" } });   
+    mTags.insert({ "reynolds_number", { { {"reynolds_number"}, ""}, "" } });
+    mTags.insert({ "rayleigh_number", { { {"rayleigh_number"}, ""}, "" } });
+    mTags.insert({ "richardson_number", { { {"richardson_number"}, ""}, "" } });
+    mTags.insert({ "thermal_conductivity", { { {"thermal_conductivity"}, ""}, "" } });
+    mTags.insert({ "reference_temperature", { { {"reference_temperature"}, ""}, "" } });
+    mTags.insert({ "characteristic_length", { { {"characteristic_length"}, ""}, "" } });    
+    mTags.insert({ "impermeability_number", { { {"impermeability_number"}, ""}, "100" } });
+    mTags.insert({ "dimensionless_viscocity", { { {"dimensionless_viscocity"}, ""}, "" } });
+    mTags.insert({ "thermal_diffusivity_ratio", { { {"thermal_diffusivity_ratio"}, ""}, "" } });
+}
+
 void ParseMaterial::allocate()
 {
     mTags.clear();
@@ -92,6 +107,7 @@ void ParseMaterial::allocate()
     this->insertPlasticProperties();
     this->insertElectricProperties();
     this->insertElasticOrthoProperties();
+    this->insertIncompressibleFluidProperties();
 }
 
 void ParseMaterial::setCode(XMLGen::Material& aMetadata)

@@ -95,6 +95,12 @@ void ParseScenario::allocate()
     mTags.insert({ "physics", { { {"physics"}, ""}, "" } });
     mTags.insert({ "dimensions", { { {"dimensions"}, ""}, "" } });
 
+    mTags.insert({ "heat_transfer", { { {"heat_transfer"}, ""}, "none" } });
+    mTags.insert({ "momentum_damping", { { {"momentum_damping"}, ""}, "" } });
+    mTags.insert({ "output_frequency", { { {"output_frequency"}, ""}, "1" } });
+    mTags.insert({ "steady_state_tolerance", { { {"steady_state_tolerance"}, ""}, "1e-4" } });
+    mTags.insert({ "max_steady_state_iterations", { { {"max_steady_state_iterations"}, ""}, "500" } });
+
     mTags.insert({ "material", { { {"material"}, ""}, "" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
@@ -107,6 +113,8 @@ void ParseScenario::allocate()
     mTags.insert({ "newmark_gamma", { { {"newmark_gamma"}, ""}, "0.5" } });
     mTags.insert({ "number_time_steps", { { {"number_time_steps"}, ""}, "40" } });
     mTags.insert({ "max_number_time_steps", { { {"max_number_time_steps"}, ""}, "160" } });
+    mTags.insert({ "time_step_safety_factor", { { {"time_step_safety_factor"}, ""}, "0.7" } });
+    mTags.insert({ "critical_time_step_damping", { { {"critical_time_step_damping"}, ""}, "" } });
     mTags.insert({ "time_step_expansion_multiplier", { { {"time_step_expansion_multiplier"}, ""}, "1.25" } });
 
     mTags.insert({ "tolerance", { { {"tolerance"}, ""}, "1e-8" } });

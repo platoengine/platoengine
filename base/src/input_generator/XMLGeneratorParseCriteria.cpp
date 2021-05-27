@@ -71,6 +71,7 @@ void ParseCriteria::allocate()
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "" } });
     mTags.insert({ "criterion_ids", { { {"criterion_ids"}, ""}, "" } });
     mTags.insert({ "criterion_weights", { { {"criterion_weights"}, ""}, "" } });
+    mTags.insert({ "location_name", { { {"location_name"}, ""}, "" } });
     /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
     mTags.insert({ "volume_misfit_target", { { {"volume_misfit_target"}, ""}, "" } });
     mTags.insert({ "relative_stress_limit", { { {"relative_stress_limit"}, ""}, "" } });
@@ -111,7 +112,7 @@ void ParseCriteria::setCriterionWeights(XMLGen::Criterion &aMetadata)
         }
         else
         {
-            THROWERR("Criterion Weights are not defined for composite criterion");
+            THROWERR("Criterion Weights ('criterion_weights' keyword) are not defined for composite criterion with criterion block id '" + aMetadata.id() + "'.");
         }
     }
 }
@@ -132,7 +133,7 @@ void ParseCriteria::setCriterionIDs(XMLGen::Criterion &aMetadata)
         }
         else
         {
-            THROWERR("Criterion IDs are not defined for composite criterion");
+            THROWERR("Criterion IDs ('criterion_ids' keyword) are not defined for composite criterion with criterion block id '" + aMetadata.id() + "'.");
         }
     }
 }

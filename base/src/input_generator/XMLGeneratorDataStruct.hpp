@@ -180,7 +180,6 @@ struct UncertaintyMetaData
 struct InputData
 {
 private:
-    std::vector<XMLGen::Scenario> mScenarios;
     std::vector<XMLGen::Service> mServices;
     std::vector<XMLGen::Criterion> mCriteria;
     XMLGen::OptimizationParameters mOptimizationParameters;
@@ -394,6 +393,10 @@ public:
     {
         return mScenarios;
     }
+    std::vector<XMLGen::Scenario>& scenarios()
+    {
+        return mScenarios;
+    }
     void set(const std::vector<XMLGen::Scenario>& aScenarios)
     {
         mScenarios = aScenarios;
@@ -537,6 +540,7 @@ public:
     }
 
     XMLGen::Objective objective;
+    std::vector<XMLGen::Scenario> mScenarios;
     std::vector<XMLGen::Constraint> constraints;
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;

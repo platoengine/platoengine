@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <map>
 #include <vector>
 #include <string>
+#include <map>
 
 #include "Plato_FreeFunctions.hpp"
 #include "XMLG_Macros.hpp"
@@ -27,7 +27,7 @@ private:
     std::string mCode = "plato_analyze";  /*!< performer/owner of material model, default: plato_analyze */
     std::string mCategory = "isotropic linear elastic";  /*!< material category, default: isotropic linear elastic */
     std::string mName;  /*!< material name, default: material_mID */
-    std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
+    std::map< std::string, std::pair<std::string, std::vector<std::string>> > mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:
     /******************************************************************************//**
@@ -126,34 +126,33 @@ public:
     }
 
     /******************************************************************************//**
-     * \fn value
-     * \brief If material property is defined, return its value; else, return an empty string.
-     * \param [in]  aTag    material property tag
-     * \return material property value
+     * \fn std::vector<std::string> properties
+     * 
+     * \brief If list of material properties is defined, return list; else, return empty list.
+     * \param [in] aTag material property tag
+     * \return list of material properties, returns empty list if not defined.
     **********************************************************************************/
-    std::string value(const std::string& aTag) const
+    std::vector<std::string> properties(const std::string& aTag) const
     {
         auto tTag = Plato::tolower(aTag);
         auto tItr = mProperties.find(tTag);
-        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second;
-        return tOutput;
+        auto tOutput = tItr == mProperties.end() ? std::vector<std::string>{""} : tItr->second.second;
+        return (tOutput);
     }
 
     /******************************************************************************//**
-     * \fn property
+     * \fn std::string property
+     * 
      * \brief If material property is defined, return its value; else, throw an error.
      * \param [in] aTag material property tag
-     * \return material property value
+     * \return material property value, returns empty string if the material property is not defined.
     **********************************************************************************/
     std::string property(const std::string& aTag) const
     {
         auto tTag = Plato::tolower(aTag);
         auto tItr = mProperties.find(tTag);
-        if(tItr == mProperties.end())
-        {
-            THROWERR(std::string("XML Generator Material: Material property '") + aTag + "' is not defined.")
-        }
-        return (tItr->second.second);
+        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second[0];
+        return (tOutput);
     }
 
     /******************************************************************************//**
@@ -164,6 +163,23 @@ public:
      * \param [in] aAttribute material attribute
     **********************************************************************************/
     void property(const std::string& aTag, const std::string& aValue, std::string aAttribute = "homogeneous")
+    {
+        if(aTag.empty()) { THROWERR("XML Generator Material: Material property tag is empty.") }
+        if(aValue.empty()) { THROWERR("XML Generator Material: Material property value is empty.") }
+        if(aAttribute.empty()) { THROWERR("XML Generator Material: Material property attribute is empty.") }
+        auto tTag = Plato::tolower(aTag);
+        std::vector<std::string> tValue = {aValue};
+        mProperties[aTag] = std::make_pair(aAttribute, tValue);
+    }
+
+    /******************************************************************************//**
+     * \fn property
+     * \brief Set material property value.
+     * \param [in] aTag       material property tag
+     * \param [in] aValue     material property list
+     * \param [in] aAttribute material attribute
+    **********************************************************************************/
+    void property(const std::string& aTag, const std::vector<std::string>& aValue, std::string aAttribute = "homogeneous")
     {
         if(aTag.empty()) { THROWERR("XML Generator Material: Material property tag is empty.") }
         if(aValue.empty()) { THROWERR("XML Generator Material: Material property value is empty.") }
@@ -198,6 +214,19 @@ public:
             THROWERR(std::string("XML Generator Material: Material with identification (id) '")
                 + mID + "' is empty, i.e. " + "material properties are not defined.")
         }
+    }
+
+    /******************************************************************************//**
+     * \fn isdefined
+     * \brief Return true if material property is defined.
+     * \param [in] aTag material property identification tag
+     * \return boolean flag
+    **********************************************************************************/
+    bool isdefined(const std::string& aTag) const
+    {
+        auto tItr = mProperties.find(aTag);
+        auto tDefined = tItr == mProperties.end() ? false : true;
+        return tDefined;
     }
 };
 // struct Material

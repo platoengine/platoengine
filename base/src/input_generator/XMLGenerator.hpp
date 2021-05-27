@@ -54,6 +54,7 @@
 #include <map>
 #include <vector>
 #include <fstream>
+#include <tuple>
 
 #include "Plato_Parser.hpp"
 #include "XMLGeneratorUtilities.hpp"
@@ -69,15 +70,16 @@ public:
     XMLGenerator(const std::string &input_filename = "", bool use_launch = false, const XMLGen::Arch& arch = XMLGen::Arch::CEE);
     ~XMLGenerator();
     void generate();
-    const InputData& getInputData(){ return m_InputData; }
+    void generate(XMLGen::InputData& aInputData);
+    const XMLGen::InputData& getInputData(){ return m_InputData; }
 
 protected:
 
     bool parseLoads(std::istream &fin);
     void getTokensFromLine(std::istream &fin, std::vector<std::string>& tokens);
     void parseBoundaryConditions(std::istream &fin);
-    bool runSROMForUncertainVariables();
-    void setNumPerformers();
+    bool runSROMForUncertainVariables(XMLGen::InputData& aInputData);
+    void setNumPerformers(XMLGen::InputData& aInputData);
     void parseInputFile();
     bool parseMesh(std::istream &fin);
     void parseOutput(std::istream &fin);
@@ -91,6 +93,11 @@ protected:
     bool parseConstraints(std::istream &fin);
     bool parseOptimizationParameters(std::istream &fin);
     void parseUncertainties(std::istream &fin);
+
+    void finalize(XMLGen::InputData& aInputData);
+    void finalizeScenarios(XMLGen::InputData& aInputData);
+    void finalizeMeshMetaData(XMLGen::InputData& aInputData);
+    
     std::string toLower(const std::string &s);
     std::string toUpper(const std::string &s);
     bool parseSingleValue(const std::vector<std::string> &aTokens,
@@ -108,47 +115,74 @@ protected:
     std::vector<XMLGen::InputData> m_PreProcessedInputData;
 private:
 
-    void preProcessInputMetaData();
+    void preProcessInputMetaData(XMLGen::InputData& aInputData);
     void determineIfPlatoEngineFilteringIsNeeded();
-    void expandEssentialBoundaryConditions();
+
+    void expandEssentialBoundaryConditions(XMLGen::InputData& aInputData);
+
     void updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap);
-    void loadOutputData(XMLGen::InputData &aNewInputData, 
-                                  const std::string &aServiceID);
-    void loadMaterialData(XMLGen::InputData &aNewInputData,
-                                     const std::string &aScenarioID);
-    void loadObjectiveData(XMLGen::InputData &aNewInputData,
-                                     const std::string &aScenarioID,
-                                     const std::string &aServiceID,
-                                     const std::string &aShapeServiceID);
-    void loadConstraintData(XMLGen::InputData &aNewInputData,
-                                     const std::string &aScenarioID,
-                                     const std::string &aServiceID);
+
+    void loadOutputData
+    (XMLGen::InputData &aNewInputData,
+     const XMLGen::InputData &aOriginalInputData,
+     const std::string &aServiceID);
+
+    void loadMaterialData
+    (XMLGen::InputData &aNewInputData,
+     const XMLGen::InputData &aOriginalInputData,
+     const std::string &aScenarioID);
+
+    void loadObjectiveData
+    (XMLGen::InputData &aNewInputData,
+     const XMLGen::InputData &aOriginalInputData,
+     const std::string &aScenarioID,
+     const std::string &aServiceID,
+     const std::string &aShapeServiceID);
+
+    void loadConstraintData
+    (XMLGen::InputData &aNewInputData,
+     const XMLGen::InputData &aOriginalInputData,
+     const std::string &aScenarioID,
+     const std::string &aServiceID);
+
     void clearInputDataLists(XMLGen::InputData &aInputData);
     void createCopiesForMultiLoadCase();
-    void createCopiesForMultiPerformerCase(std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
-    void createCopiesForPerformerCreation();
-    void findObjectiveScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
-    void findConstraintScenarioServiceTuples(std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+
+    void createCopiesForMultiPerformerCase
+    (XMLGen::InputData& aInputData,
+     std::set<std::tuple<std::string,std::string,std::string>> &aScenarioServiceTuples);
+
+    void createCopiesForPerformerCreation(XMLGen::InputData& aInputData);
+
+    void findObjectiveScenarioServiceTuples
+    (XMLGen::InputData& aInputData,
+     std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+
+    void findConstraintScenarioServiceTuples
+    (XMLGen::InputData& aInputData,
+     std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+
     void removeDuplicateTuplesFromConstraintList(
          std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples, 
          std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
-    void createInputDataCopiesForObjectivePerformers(
-         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
-    void createInputDataCopiesForConstraintPerformers(
-         std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
-    void createObjectiveCopiesForMultiLoadCase(
-         std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
-    void verifyAllServicesAreTheSame();
+
+    void createInputDataCopiesForObjectivePerformers
+    (XMLGen::InputData& aInputData,
+     std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+
+    void createInputDataCopiesForConstraintPerformers
+    (XMLGen::InputData& aInputData,
+    std::set<std::tuple<std::string,std::string,std::string>>& aConstraintScenarioServiceTuples);
+
+    void createObjectiveCopiesForMultiLoadCase
+    (XMLGen::InputData& aInputData,
+     std::set<std::tuple<std::string,std::string,std::string>>& aObjectiveScenarioServiceTuples);
+
+    void verifyAllServicesAreTheSame(XMLGen::InputData& aInputData);
+
     bool serviceExists(std::vector<XMLGen::Service> &aServiceList, XMLGen::Service &aService);
 
-
-
-
-
-
-
-
-    void writeInputFiles();
+    void writeInputFiles(XMLGen::InputData& aInputData);
 };
 
 }
