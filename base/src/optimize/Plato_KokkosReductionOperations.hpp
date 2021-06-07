@@ -92,15 +92,7 @@ public:
         const ScalarType* tInputData = aInput.data();
 
         ScalarType tOutput;
-#ifdef BUILD_IN_SIERRA
         Kokkos::Max<ScalarType> tMaxReducer(tOutput);
-#else
-#ifdef NEW_TRILINOS_INTEGRATION
-        Kokkos::Max<ScalarType> tMaxReducer(tOutput);
-#else
-        Kokkos::Experimental::Max<ScalarType> tMaxReducer(tOutput);
-#endif
-#endif
         Kokkos::parallel_reduce("KokkosReductionOperations::max",
                                 Kokkos::RangePolicy<>(0, tSize),
                                 KOKKOS_LAMBDA(const OrdinalType & aIndex, ScalarType & aValue){
@@ -128,7 +120,7 @@ public:
 #ifdef NEW_TRILINOS_INTEGRATION
         Kokkos::Min<ScalarType> tMinReducer(tOutput);
 #else
-        Kokkos::Experimental::Min<ScalarType> tMinReducer(tOutput);
+        Kokkos::Min<ScalarType> tMinReducer(tOutput);
 #endif
 #endif
         Kokkos::parallel_reduce("KokkosReductionOperations::min",
