@@ -106,14 +106,45 @@ void append_filter_options_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::vector<std::string> tKeys = {"Scale", "Absolute", "StartIteration", "UpdateInterval",
-        "UseAdditiveContinuation", "Power", "HeavisideMin", "HeavisideUpdate", "HeavisideMax"};
+    std::string tRadiusScale = aXMLMetaData.optimization_parameters().filter_radius_scale();
+    std::string tRadiusAbsolute = aXMLMetaData.optimization_parameters().filter_radius_absolute();
+    std::string tFilterPower = aXMLMetaData.optimization_parameters().filter_power();
+    std::string tFilterType = aXMLMetaData.optimization_parameters().filter_type();
 
-    auto tScale = aXMLMetaData.optimization_parameters().filter_radius_scale().empty() ? std::string("2.0") : aXMLMetaData.optimization_parameters().filter_radius_scale();
-    std::vector<std::string> tValues = {tScale, aXMLMetaData.optimization_parameters().filter_radius_absolute(),
-        aXMLMetaData.optimization_parameters().filter_projection_start_iteration(), aXMLMetaData.optimization_parameters().filter_projection_update_interval(),
-        aXMLMetaData.optimization_parameters().filter_use_additive_continuation(), aXMLMetaData.optimization_parameters().filter_power(), aXMLMetaData.optimization_parameters().filter_heaviside_min(),
-        aXMLMetaData.optimization_parameters().filter_heaviside_update(), aXMLMetaData.optimization_parameters().filter_heaviside_max()};
+    std::vector<std::string> tKeys;
+    std::vector<std::string> tValues;
+
+    if(!tRadiusScale.empty())
+    {
+        tKeys.push_back("Scale");
+        tValues.push_back(tRadiusScale);
+    }
+    if(!tRadiusAbsolute.empty())
+    {
+        tKeys.push_back("Absolute");
+        tValues.push_back(tRadiusAbsolute);
+    }
+    if(!tFilterPower.empty())
+    {
+        tKeys.push_back("Power");
+        tValues.push_back(tFilterPower);
+    }
+    if(tFilterType == "kernel_then_heaviside" ||
+       tFilterType == "kernel_then_tanh")
+    {
+        tKeys.push_back("StartIteration");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_projection_start_iteration());
+        tKeys.push_back("UpdateInterval");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_projection_update_interval());
+        tKeys.push_back("UseAdditiveContinuation");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_use_additive_continuation());
+        tKeys.push_back("HeavisideMin");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_heaviside_min());
+        tKeys.push_back("HeavisideUpdate");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_heaviside_update());
+        tKeys.push_back("HeavisideMax");
+        tValues.push_back(aXMLMetaData.optimization_parameters().filter_heaviside_max());
+    } 
 
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     XMLGen::append_children(tKeys, tValues, aParentNode);
@@ -126,8 +157,8 @@ void append_filter_options_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().filter_in_engine() == "true" &&
-       aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    if(aXMLMetaData.optimization_parameters().filterInEngine() &&
+       aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         XMLGen::ValidFilterKeys tValidKeys;
         auto tValue = tValidKeys.value(aXMLMetaData.optimization_parameters().filter_type());
@@ -145,7 +176,7 @@ void append_enforce_bounds_operation_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().enforce_bounds() == "true")
+    if(aXMLMetaData.optimization_parameters().enforceBounds())
     {
         auto tOperationNode = aDocument.append_child("Operation");
         XMLGen::append_children({"Name","Function"}, {"EnforceBounds","EnforceBounds"}, tOperationNode);
@@ -372,12 +403,13 @@ void append_surface_extraction_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    if (!aXMLMetaData.optimization_parameters().output_method().empty())
+    std::string tOutputMethod = aXMLMetaData.optimization_parameters().output_method();
+    if (!tOutputMethod.empty())
     {
         auto tSurfaceExtraction = aParentNode.append_child("SurfaceExtraction");
         std::vector<std::string> tKeys = { "OutputMethod", "Discretization" };
         auto tDiscretization = aXMLMetaData.optimization_parameters().discretization().empty() ? "density" : aXMLMetaData.optimization_parameters().discretization();
-        std::vector<std::string> tValues = { aXMLMetaData.optimization_parameters().output_method(), tDiscretization };
+        std::vector<std::string> tValues = { tOutputMethod, tDiscretization };
         XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
         XMLGen::append_children(tKeys, tValues, tSurfaceExtraction);
 
@@ -393,7 +425,7 @@ void append_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document &aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         return;
     }
@@ -608,7 +640,7 @@ void append_aggregate_data_to_plato_main_operation
             XMLGen::append_children({"Value"}, {"1.0"}, tWeight);
         }
     }
-    if(aXMLMetaData.normalizeInAggregator())
+    if(aXMLMetaData.optimization_parameters().normalizeInAggregator())
     {
         auto tNormals = tWeightingNode.append_child("Normals");
         for (int i=0; i<tNumEntries; ++i)
@@ -650,7 +682,7 @@ void append_filter_control_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Control", "False"}, tOperation);
@@ -668,7 +700,7 @@ void append_initialize_geometry_operation_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         pugi::xml_node tmp_node = aDocument.append_child("Operation");
         addChild(tmp_node, "Function", "SystemCall");
@@ -688,7 +720,7 @@ void append_update_geometry_on_change_operation_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         pugi::xml_node tmp_node = aDocument.append_child("Operation");
         addChild(tmp_node, "Function", "SystemCall");
@@ -713,7 +745,7 @@ void append_csm_mesh_output_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         pugi::xml_node tmp_node = aDocument.append_child("Operation");
         addChild(tmp_node, "Function", "CSMMeshOutput");
@@ -731,7 +763,7 @@ void append_filter_gradient_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         auto tOperation = aDocument.append_child("Operation");
         XMLGen::append_children({"Function", "Name", "Gradient"}, {"Filter", "Filter Gradient", "True"}, tOperation);
@@ -931,11 +963,11 @@ void append_initialize_field_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         append_initialize_data_for_shape_problem(aXMLMetaData, aDocument);
     }
-    else if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    else if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         append_initialize_data_for_topology_problem(aXMLMetaData, aDocument);
     }
@@ -948,7 +980,7 @@ void append_initialize_data_for_topology_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().initial_guess_file_name().empty())
+    if(!aXMLMetaData.optimization_parameters().isARestartRun())
     {
         XMLGen::append_initialize_field_operation(aXMLMetaData, aDocument);
     }
@@ -1116,7 +1148,7 @@ void append_set_lower_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         auto tOperation = aDocument.append_child("Operation");
         std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
@@ -1177,7 +1209,7 @@ void append_set_upper_bounds_to_plato_main_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
         auto tOperation = aDocument.append_child("Operation");
         std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};

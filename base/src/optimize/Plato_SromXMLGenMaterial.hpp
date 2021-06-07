@@ -299,7 +299,7 @@ inline XMLGen::RandomMaterialCase build_material_set
         auto tTags = tRandomMaterial.tags();
         for(auto& tTag : tTags)
         {
-            tNewMaterial.property(tTag, tRandomMaterial.value(tTag), tRandomMaterial.attribute(tTag));
+            tNewMaterial.property(tTag, tRandomMaterial.value(tTag), false, tRandomMaterial.attribute(tTag));
         }
         tBlockIDtoMaterialMap.insert({tRandomMaterial.blockID(), tNewMaterial});
     }

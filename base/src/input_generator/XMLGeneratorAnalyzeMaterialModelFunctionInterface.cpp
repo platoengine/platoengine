@@ -39,6 +39,13 @@ void append_material_property
     auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
     std::vector<std::string> tKeys = {"name", "type", "value"};
     auto tMaterialPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMaterial.property(aMaterialPropertyTag));
+/*
+    if(tMaterialPropertyValue == "IGNORE")
+    {
+        std::string tContextString = "Material ID: " + aMaterial.id() + ", Material Model: " + tMaterialModelTag + "\n";
+        PRINTIGNOREINFO(aMaterialPropertyTag, tContextString);
+    }
+*/
     std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tMaterialPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }

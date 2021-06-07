@@ -840,6 +840,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
   tOptimizationParameters.append("number_prune_and_refine_processors", "2");
   tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
   tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tOptimizationParameters.isARestartRun(true);
   tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
   fp = fopen("decomp.txt", "w");
@@ -855,6 +856,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine)
   tOptimizationParameters.append("number_prune_and_refine_processors", "2");
   tOptimizationParameters.append("initial_guess_file_name", "");
   tOptimizationParameters.append("initial_guess_field_name", "");
+  tOptimizationParameters.isARestartRun(true);
   tInputData.set(tOptimizationParameters);
   tInputData.mesh.name = "dummy.exo";
   fp = fopen("decomp.txt", "w");
@@ -874,6 +876,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPruneAndRefine_missingMeshName)
   XMLGen::OptimizationParameters tOptimizationParameters;
   tOptimizationParameters.append("number_refines", "2");
   tOptimizationParameters.append("number_prune_and_refine_processors", "2");
+  tOptimizationParameters.isARestartRun(true);
   tInputData.set(tOptimizationParameters);
   FILE* fp = fopen("decomp.txt", "w");
   EXPECT_THROW(XMLGen::append_decomp_lines_for_prune_and_refine(tInputData, fp),std::runtime_error);
@@ -892,6 +895,7 @@ TEST(PlatoTestXMLGenerator, appendPruneAndRefineLinesToMPIRunLaunchScript)
   tOptimizationParameters.append("number_prune_and_refine_processors", "10");
   tOptimizationParameters.append("initial_guess_file_name", "dummy_guess.exo");
   tOptimizationParameters.append("initial_guess_field_name", "badGuess");
+  tOptimizationParameters.isARestartRun(true);
   tInputData.set(tOptimizationParameters);
   tInputData.codepaths.prune_and_refine_path = "path/to/some/executable";
   tInputData.mesh.name = "dummy.exo";

@@ -22,11 +22,11 @@ void append_compute_objective_value_to_plato_analyze_operation
 {
     if(XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData))
     {
-        if(aMetaData.optimization_parameters().optimization_type() == "topology")
+        if(aMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
         {
             append_compute_objective_value_operation_for_topology_problem(aMetaData, aDocument);
         }
-        else if(aMetaData.optimization_parameters().optimization_type() == "shape")
+        else if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
         {
             append_compute_objective_value_operation_for_shape_problem(aMetaData, aDocument);
         }
@@ -225,7 +225,7 @@ void append_reinit_on_change_data
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         pugi::xml_node tmp_node = aDocument.append_child("Operation");
         addChild(tmp_node, "Name", "Reinitialize on Change");
@@ -266,11 +266,11 @@ void append_compute_objective_gradient_to_plato_analyze_operation
 {
     if(XMLGen::is_any_objective_computed_by_plato_analyze(aMetaData))
     {
-        if(aMetaData.optimization_parameters().optimization_type() == "topology")
+        if(aMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
         {
             append_compute_objective_gradient_operation_for_topology_problem(aMetaData, aDocument);
         }
-        else if(aMetaData.optimization_parameters().optimization_type() == "shape")
+        else if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
         {
             append_compute_objective_gradient_operation_for_shape_problem(aMetaData, aDocument);
         }
@@ -292,11 +292,11 @@ void append_compute_constraint_value_to_plato_analyze_operation
 {
     if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData))
     {
-        if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
         {
             append_compute_constraint_value_operation_for_topology_problem(aXMLMetaData, aDocument);
         }
-        else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        else if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
         {
             append_compute_constraint_value_operation_for_shape_problem(aXMLMetaData, aDocument);
         }
@@ -315,11 +315,11 @@ void append_compute_constraint_gradient_to_plato_analyze_operation
 {
     if(XMLGen::is_any_constraint_computed_by_plato_analyze(aXMLMetaData))
     {
-        if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+        if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
         {
             append_compute_constraint_gradient_operation_for_topology_problem(aXMLMetaData, aDocument);
         }
-        else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+        else if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
         {
             append_compute_constraint_gradient_operation_for_shape_problem(aXMLMetaData, aDocument);
         }
@@ -336,7 +336,7 @@ void append_update_problem_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         return;
     }
@@ -465,7 +465,7 @@ void append_write_output_to_plato_analyze_operation
     {
         return;
     }
-    if(aMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         return;
     }
@@ -475,7 +475,7 @@ void append_write_output_to_plato_analyze_operation
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Function", "Name"}, {"WriteOutput", "Write Output"}, tOperationNode);
 
-    if(aMetaData.optimization_parameters().filter_in_engine() == "false")
+    if(!aMetaData.optimization_parameters().filterInEngine())
     {
         auto tOutput = tOperationNode.append_child("Output");
         XMLGen::append_children({"ArgumentName"}, {"Topology"}, tOutput);

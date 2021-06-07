@@ -19,7 +19,7 @@ std::string OptimizationParameters::getValue(const std::string& aTag) const
     {
         return "";
     }
-    return tItr->second;
+    return tItr->second.mValue;
 }
 
 bool OptimizationParameters::getBool(const std::string& aTag) const
@@ -29,18 +29,29 @@ bool OptimizationParameters::getBool(const std::string& aTag) const
     {
         THROWERR(std::string("XML Generator OptimizationParameters Metadata: '") + aTag + "' keyword is not defined.")
     }
-    return (XMLGen::transform_boolean_key(tItr->second));
+    return (XMLGen::transform_boolean_key(tItr->second.mValue));
 }
 
 std::string OptimizationParameters::value(const std::string& aTag) const
 {
+    std::string tOutput = "";
     auto tTag = Plato::tolower(aTag);
     auto tItr = mMetaData.find(tTag);
-    if(tItr == mMetaData.end())
+
+    if(tItr == mMetaData.end() || tItr->second.mValue.empty())
     {
-        return "";
+        PRINTEMPTYINFO(aTag, "Optimization Parameters");
     }
-    return (tItr->second);
+    else
+    {
+        tOutput = tItr->second.mValue;
+        if(tItr->second.mIsDefault)
+        {
+            PRINTDEFAULTINFO(aTag, tOutput, "Optimization Parameters");
+        }
+    }
+
+    return tOutput;
 }
 
 std::vector<std::string> OptimizationParameters::tags() const
@@ -53,14 +64,17 @@ std::vector<std::string> OptimizationParameters::tags() const
     return tTags;
 }
 
-void OptimizationParameters::append(const std::string& aTag, const std::string& aValue)
+void OptimizationParameters::append(const std::string& aTag, const std::string& aValue, const bool& aIsDefault)
 {
     if (aTag.empty())
     {
         THROWERR(std::string("XML Generator OptimizationParameters Metadata: Parameter with tag '") + aTag + "' is empty.")
     }
     auto tTag = Plato::tolower(aTag);
-    mMetaData[aTag] = aValue;
+    ValueData tValueData;
+    tValueData.mValue = aValue;
+    tValueData.mIsDefault = aIsDefault;
+    mMetaData[aTag] = tValueData;
 }
 
 bool OptimizationParameters::needsMeshMap() const

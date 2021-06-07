@@ -729,6 +729,7 @@ TEST(PlatoTestXMLGenerator, AppendInitializeFieldToPlatoMainOperation_ReadFileKe
     tOptimizationParameters.append("initial_guess_file_name", "dummy.exo");
     tOptimizationParameters.append("initial_guess_field_name", "Control");
     tOptimizationParameters.append("optimization_type", "topology");
+    tOptimizationParameters.isARestartRun(true);
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_initialize_field_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());

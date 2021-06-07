@@ -1440,7 +1440,7 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage_TypeNotEqualToplogy)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("optimization_type", "inverse");
+    tOptimizationParameters.optimizationType(XMLGen::OT_UNKNOWN);
     tInputData.set(tOptimizationParameters);
     XMLGen::append_lower_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1508,7 +1508,7 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage_TypeNotEqualToplogy)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("optimization_type", "inverse");
+    tOptimizationParameters.optimizationType(XMLGen::OT_UNKNOWN);
     tInputData.set(tOptimizationParameters);
     XMLGen::append_upper_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());

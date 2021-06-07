@@ -57,6 +57,8 @@
 #include "XMLGeneratorParseUncertainty.hpp"
 #include "XMLGenerator_UnitTester.hpp"
 #include "XML_GoldValues.hpp"
+#include "XMLGeneratorInterfaceFileUtilities.hpp"
+#include "XMLGenerator_UnitTester_Tools.hpp"
 
 #include "Plato_Utils.hpp"
 #include "XMLG_Macros.hpp"
@@ -1203,6 +1205,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     tester.clearInputData();
     ASSERT_THROW(tester.publicParseOptimizationParameters(iss), std::runtime_error);
     stringInput = "begin optimization_parameters\n"
+            "filter_type kernel_then_heaviside\n"
             "filter_heaviside_scale 1.526\n"
             "end optimization_parameters\n";
     iss.str(stringInput);
@@ -1215,6 +1218,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
 
     // filter heaviside various
     stringInput = "begin optimization_parameters\n"
+            "filter_type kernel_then_heaviside\n"
             "filter_heaviside_update 4.4\n"
             "filter_heaviside_scale 1.2\n"
             "filter_heaviside_min 0.5\n"
@@ -1225,6 +1229,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     tester.clearInputData();
     ASSERT_THROW(tester.publicParseOptimizationParameters(iss), std::runtime_error);
     stringInput = "begin optimization_parameters\n"
+            "filter_type kernel_then_heaviside\n"
             "filter_heaviside_update 4.4\n"
             "filter_heaviside_scale 1.2\n"
             "end optimization_parameters\n";
@@ -1237,6 +1242,7 @@ TEST(PlatoTestXMLGenerator, parseOptimizationParameters)
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().filter_heaviside_update(),"4.4");
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().filter_heaviside_max(),"1.2");
     stringInput = "begin optimization_parameters\n"
+            "filter_type kernel_then_heaviside\n"
             "filter_heaviside_update 4.4\n"
             "filter_heaviside_min 0.5\n"
             "end optimization_parameters\n";
@@ -2176,6 +2182,534 @@ TEST(PlatoTestXMLGenerator, IncompressibleFluidsWorkFlow)
 
     auto tTrash = std::system("rm -rf *.xml amgx.json mpirun.source");
     Plato::Utils::ignore_unused(tTrash);
+}
+
+TEST(PlatoTestXMLGenerator, appendMMAOptions_topology)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    // material_box
+    stringInput = "begin optimization_parameters\n"
+            "optimization_algorithm mma\n"
+            "end optimization_parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    ASSERT_NO_THROW(tester.publicParseOptimizationParameters(iss));
+
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_move_limit(), "0.5");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_asymptote_expansion(), "1.2");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_asymptote_contraction(), "0.7");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_max_sub_problem_iterations(), "50");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_control_stagnation_tolerance(), "1e-6");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_objective_stagnation_tolerance(), "1e-8");
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_method_moving_asymptotes_options(*(tester.exposeInputData()), tDocument));
+    auto tOptionsNode = tDocument.child("Options");
+    std::vector<std::string> tKeys = {"MoveLimit", "AsymptoteExpansion", "AsymptoteContraction", 
+                   "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
+    std::vector<std::string> tValues = {"0.5", "1.2", "0.7", "50", "1e-6", "1e-8"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOptionsNode);
+}
+
+TEST(PlatoTestXMLGenerator, appendMMAOptions_shape)
+{
+    XMLGenerator_UnitTester tester;
+    std::istringstream iss;
+    std::string stringInput;
+
+    // material_box
+    stringInput = "begin optimization_parameters\n"
+            "optimization_algorithm mma\n"
+            "optimization_type shape\n"
+            "end optimization_parameters\n";
+    iss.str(stringInput);
+    iss.clear();
+    iss.seekg (0);
+    tester.clearInputData();
+    ASSERT_NO_THROW(tester.publicParseOptimizationParameters(iss));
+
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_move_limit(), "0.5");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_asymptote_expansion(), "1.2");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_asymptote_contraction(), "0.7");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_max_sub_problem_iterations(), "50");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_control_stagnation_tolerance(), "-1");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_objective_stagnation_tolerance(), "-1");
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_method_moving_asymptotes_options(*(tester.exposeInputData()), tDocument));
+    auto tOptionsNode = tDocument.child("Options");
+    std::vector<std::string> tKeys = {"MoveLimit", "AsymptoteExpansion", "AsymptoteContraction", 
+                   "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
+    std::vector<std::string> tValues = {"0.5", "1.2", "0.7", "50", "-1", "-1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOptionsNode);
+}
+
+TEST(PlatoTestXMLGenerator, ShapeOptimization_num_shape_design_varibles_good_1)
+{
+    // POSE INPUT DATA
+    std::istringstream tIss;
+    std::string tStringInput =
+        "begin service 1\n"
+        "  code platomain\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin service 2\n"
+        "  code plato_esp\n"
+        "  number_processors 4\n"
+        "end service\n"
+        "begin service 3\n"
+        "  code plato_analyze\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin criterion 1\n"
+        "  type composite\n"
+        "  criterion_ids 2 3\n"
+        "  criterion_weights 1.0 -1.0\n"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "  type inlet_pressure\n"
+        "  location_name inlet\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "  type outlet_pressure\n"
+        "  location_name outlet\n"
+        "end criterion\n"
+        "begin criterion 4\n"
+        "   type volume\n"
+        "end criterion\n"
+        "begin scenario 1\n"
+        "  physics steady_state_incompressible_fluids\n"
+        "  dimensions 2\n"
+        "  loads 10 1\n"
+        "  boundary_conditions 1 2 3 4 5\n"
+        "  material 1\n"
+        "end scenario\n"
+        "begin objective\n"
+        "  scenarios 1\n"
+        "  criteria 1\n"
+        "  services 3\n"
+        "  shape_services 2\n"
+        "  type weighted_sum\n"
+        "  weights 1\n"
+        "end objective\n"
+        "begin constraint 1\n"
+        "  criterion 4\n"
+        "  relative_target 0.25\n"
+        "  type less_than\n"
+        "  service 1\n"
+        "  scenario 1\n"
+        "end constraint\n"
+        "begin boundary_condition 1\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom velx\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 2\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom vely\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 3\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom velx\n"
+        "  value 1.5\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 4\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom vely\n"
+        "  value 0\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 5\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name outlet\n"
+        "  degree_of_freedom press\n"
+        "end boundary_condition\n"
+        "begin block 1\n"
+        "  material 1\n"
+        "end block\n"
+        "begin material 1\n"
+        "  material_model incompressible_fluid\n"
+        "  reynolds_number 100\n"
+        "  impermeability_number 100\n"
+        "end material\n"
+        "begin optimization_parameters\n"
+        "  optimization_algorithm mma\n"
+        "  discretization density\n"
+        "  max_iterations 50\n"
+        "  filter_radius_scale 1.75\n"
+        "  optimization_type shape\n"
+        "  num_shape_design_variables 4\n"
+        "end optimization_parameters\n"
+        "begin mesh\n"
+        "  name bolted_bracket.exo\n"
+        "end mesh\n"
+        "begin paths\n"
+        "  code PlatoMain PlatoMain\n"
+        "  code plato_analyze analyze_MPMD\n"
+        "end paths\n";
+
+    // do parse
+    XMLGenerator_UnitTester tTester;
+    tIss.str(tStringInput);
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseObjective(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseConstraints(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseBCs(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseOptimizationParameters(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCodePaths(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
+
+    // CALL GENERATE
+    auto tXMLGenMetadata = tTester.getInputData();
+    ASSERT_NO_THROW(tTester.generate(tXMLGenMetadata));
+    auto tTrash = std::system("rm -rf *.xml amgx.json mpirun.source");
+    Plato::Utils::ignore_unused(tTrash);
+}
+
+TEST(PlatoTestXMLGenerator, ShapeOptimization_num_shape_design_varibles_good_2)
+{
+    // POSE INPUT DATA
+    std::istringstream tIss;
+    std::string tStringInput =
+        "begin service 1\n"
+        "  code platomain\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin service 2\n"
+        "  code plato_esp\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin service 3\n"
+        "  code plato_analyze\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin criterion 1\n"
+        "  type composite\n"
+        "  criterion_ids 2 3\n"
+        "  criterion_weights 1.0 -1.0\n"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "  type inlet_pressure\n"
+        "  location_name inlet\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "  type outlet_pressure\n"
+        "  location_name outlet\n"
+        "end criterion\n"
+        "begin criterion 4\n"
+        "   type volume\n"
+        "end criterion\n"
+        "begin scenario 1\n"
+        "  physics steady_state_incompressible_fluids\n"
+        "  dimensions 2\n"
+        "  loads 10 1\n"
+        "  boundary_conditions 1 2 3 4 5\n"
+        "  material 1\n"
+        "end scenario\n"
+        "begin objective\n"
+        "  scenarios 1\n"
+        "  criteria 1\n"
+        "  services 3\n"
+        "  shape_services 2\n"
+        "  type weighted_sum\n"
+        "  weights 1\n"
+        "end objective\n"
+        "begin constraint 1\n"
+        "  criterion 4\n"
+        "  relative_target 0.25\n"
+        "  type less_than\n"
+        "  service 1\n"
+        "  scenario 1\n"
+        "end constraint\n"
+        "begin boundary_condition 1\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom velx\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 2\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom vely\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 3\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom velx\n"
+        "  value 1.5\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 4\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom vely\n"
+        "  value 0\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 5\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name outlet\n"
+        "  degree_of_freedom press\n"
+        "end boundary_condition\n"
+        "begin block 1\n"
+        "  material 1\n"
+        "end block\n"
+        "begin material 1\n"
+        "  material_model incompressible_fluid\n"
+        "  reynolds_number 100\n"
+        "  impermeability_number 100\n"
+        "end material\n"
+        "begin optimization_parameters\n"
+        "  optimization_algorithm mma\n"
+        "  discretization density\n"
+        "  max_iterations 50\n"
+        "  filter_radius_scale 1.75\n"
+        "  optimization_type shape\n"
+        "  num_shape_design_variables 4\n"
+        "end optimization_parameters\n"
+        "begin mesh\n"
+        "  name bolted_bracket.exo\n"
+        "end mesh\n"
+        "begin paths\n"
+        "  code PlatoMain PlatoMain\n"
+        "  code plato_analyze analyze_MPMD\n"
+        "end paths\n";
+
+    // do parse
+    XMLGenerator_UnitTester tTester;
+    tIss.str(tStringInput);
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseObjective(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseConstraints(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseBCs(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseOptimizationParameters(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCodePaths(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
+
+    // CALL GENERATE
+    auto tXMLGenMetadata = tTester.getInputData();
+    ASSERT_NO_THROW(tTester.generate(tXMLGenMetadata));
+    auto tTrash = std::system("rm -rf *.xml amgx.json mpirun.source");
+    Plato::Utils::ignore_unused(tTrash);
+}
+
+TEST(PlatoTestXMLGenerator, ShapeOptimization_num_shape_design_varibles_bad)
+{
+    // POSE INPUT DATA
+    std::istringstream tIss;
+    std::string tStringInput =
+        "begin service 1\n"
+        "  code platomain\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin service 2\n"
+        "  code plato_esp\n"
+        "  number_processors 10\n"
+        "end service\n"
+        "begin service 3\n"
+        "  code plato_analyze\n"
+        "  number_processors 1\n"
+        "end service\n"
+        "begin criterion 1\n"
+        "  type composite\n"
+        "  criterion_ids 2 3\n"
+        "  criterion_weights 1.0 -1.0\n"
+        "end criterion\n"
+        "begin criterion 2\n"
+        "  type inlet_pressure\n"
+        "  location_name inlet\n"
+        "end criterion\n"
+        "begin criterion 3\n"
+        "  type outlet_pressure\n"
+        "  location_name outlet\n"
+        "end criterion\n"
+        "begin criterion 4\n"
+        "   type volume\n"
+        "end criterion\n"
+        "begin scenario 1\n"
+        "  physics steady_state_incompressible_fluids\n"
+        "  dimensions 2\n"
+        "  loads 10 1\n"
+        "  boundary_conditions 1 2 3 4 5\n"
+        "  material 1\n"
+        "end scenario\n"
+        "begin objective\n"
+        "  scenarios 1\n"
+        "  criteria 1\n"
+        "  services 3\n"
+        "  shape_services 2\n"
+        "  type weighted_sum\n"
+        "  weights 1\n"
+        "end objective\n"
+        "begin constraint 1\n"
+        "  criterion 4\n"
+        "  relative_target 0.25\n"
+        "  type less_than\n"
+        "  service 1\n"
+        "  scenario 1\n"
+        "end constraint\n"
+        "begin boundary_condition 1\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom velx\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 2\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name no_slip\n"
+        "  degree_of_freedom vely\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 3\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom velx\n"
+        "  value 1.5\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 4\n"
+        "  type fixed_value\n"
+        "  location_type nodeset\n"
+        "  location_name inlet\n"
+        "  degree_of_freedom vely\n"
+        "  value 0\n"
+        "end boundary_condition\n"
+        "begin boundary_condition 5\n"
+        "  type zero_value\n"
+        "  location_type nodeset\n"
+        "  location_name outlet\n"
+        "  degree_of_freedom press\n"
+        "end boundary_condition\n"
+        "begin block 1\n"
+        "  material 1\n"
+        "end block\n"
+        "begin material 1\n"
+        "  material_model incompressible_fluid\n"
+        "  reynolds_number 100\n"
+        "  impermeability_number 100\n"
+        "end material\n"
+        "begin optimization_parameters\n"
+        "  optimization_algorithm mma\n"
+        "  discretization density\n"
+        "  max_iterations 50\n"
+        "  filter_radius_scale 1.75\n"
+        "  optimization_type shape\n"
+        "  num_shape_design_variables 4\n"
+        "end optimization_parameters\n"
+        "begin mesh\n"
+        "  name bolted_bracket.exo\n"
+        "end mesh\n"
+        "begin paths\n"
+        "  code PlatoMain PlatoMain\n"
+        "  code plato_analyze analyze_MPMD\n"
+        "end paths\n";
+
+    // do parse
+    XMLGenerator_UnitTester tTester;
+    tIss.str(tStringInput);
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseObjective(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseConstraints(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseServices(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCriteria(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseBCs(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    EXPECT_TRUE(tTester.publicParseBlocks(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseScenarios(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMaterials(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseOptimizationParameters(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseCodePaths(tIss));
+    tIss.clear();
+    tIss.seekg(0);
+    ASSERT_NO_THROW(tTester.publicParseMesh(tIss));
+
+    // CALL GENERATE
+    auto tXMLGenMetadata = tTester.getInputData();
+    ASSERT_THROW(tTester.generate(tXMLGenMetadata), std::runtime_error);
 }
 
 } // end PlatoTestXMLGenerator namespace
