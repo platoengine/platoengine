@@ -241,8 +241,12 @@ public:
     std::string mma_asymptote_expansion() const {return value("mma_asymptote_expansion");}
     std::string mma_asymptote_contraction() const {return value("mma_asymptote_contraction");}
     std::string mma_max_sub_problem_iterations() const {return value("mma_max_sub_problem_iterations");}
+    std::string mma_sub_problem_initial_penalty() const {return value("mma_sub_problem_initial_penalty");}
+    std::string mma_sub_problem_penalty_multiplier() const {return value("mma_sub_problem_penalty_multiplier");}
+    std::string mma_sub_problem_feasibility_tolerance() const {return value("mma_sub_problem_feasibility_tolerance");}
     std::string mma_control_stagnation_tolerance() const {return value("mma_control_stagnation_tolerance");}
     std::string mma_objective_stagnation_tolerance() const {return value("mma_objective_stagnation_tolerance");}
+    std::string mma_output_subproblem_diagnostics() const {return value("mma_output_subproblem_diagnostics");}
     std::string ks_trust_region_expansion_factor() const {return value("ks_trust_region_expansion_factor");}
     std::string ks_trust_region_contraction_factor() const {return value("ks_trust_region_contraction_factor");}
     std::string ks_max_trust_region_iterations() const {return value("ks_max_trust_region_iterations");}

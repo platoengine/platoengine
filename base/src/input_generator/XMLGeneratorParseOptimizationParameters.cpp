@@ -54,8 +54,12 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "mma_asymptote_expansion", { { {"mma_asymptote_expansion"}, ""}, "" } });
     mTags.insert({ "mma_asymptote_contraction", { { {"mma_asymptote_contraction"}, ""}, "" } });
     mTags.insert({ "mma_max_sub_problem_iterations", { { {"mma_max_sub_problem_iterations"}, ""}, "" } });
+    mTags.insert({ "mma_sub_problem_initial_penalty", { { {"mma_sub_problem_initial_penalty"}, ""}, "" } });
+    mTags.insert({ "mma_sub_problem_penalty_multiplier", { { {"mma_sub_problem_penalty_multiplier"}, ""}, "" } });
     mTags.insert({ "mma_control_stagnation_tolerance", { { {"mma_control_stagnation_tolerance"}, ""}, "" } });
     mTags.insert({ "mma_objective_stagnation_tolerance", { { {"mma_objective_stagnation_tolerance"}, ""}, "" } });
+    mTags.insert({ "mma_output_subproblem_diagnostics", { { {"mma_output_subproblem_diagnostics"}, ""}, "false" } });
+    mTags.insert({ "mma_sub_problem_feasibility_tolerance", { { {"mma_sub_problem_feasibility_tolerance"}, ""}, "" } });
     mTags.insert({ "oc_control_stagnation_tolerance", { { {"oc_control_stagnation_tolerance"}, ""}, "" } });
     mTags.insert({ "oc_objective_stagnation_tolerance", { { {"oc_objective_stagnation_tolerance"}, ""}, "" } });
     mTags.insert({ "oc_gradient_tolerance", { { {"oc_gradient_tolerance"}, ""}, "" } });
