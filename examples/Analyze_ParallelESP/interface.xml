@@ -408,6 +408,12 @@
   <Package>MMA</Package>
   <Options>
     <MaxNumOuterIterations>2</MaxNumOuterIterations>
+    <MoveLimit>0.5</MoveLimit>
+    <AsymptoteExpansion>1.2</AsymptoteExpansion>
+    <AsymptoteContraction>0.7</AsymptoteContraction>
+    <MaxNumSubProblemIter>50</MaxNumSubProblemIter>
+    <ControlStagnationTolerance>-1</ControlStagnationTolerance>
+    <ObjectiveStagnationTolerance>-1</ObjectiveStagnationTolerance>
   </Options>
   <Output>
     <OutputStage>Output To File</OutputStage>
@@ -442,5 +448,6 @@
     <GradientName>Constraint Gradient</GradientName>
     <GradientStageName>Constraint Gradient</GradientStageName>
     <AbsoluteTargetValue>17.5</AbsoluteTargetValue>
+    <ReferenceValue>17.5</ReferenceValue>
   </Constraint>
 </Optimizer>

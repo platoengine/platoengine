@@ -38,7 +38,7 @@ void ParseMaterial::insertElasticProperties()
 {
     mTags.insert({ "mass_density", { { {"mass_density"}, ""}, "" } });
     mTags.insert({ "youngs_modulus", { { {"youngs_modulus"}, ""}, "" } });
-    mTags.insert({ "poissons_ratio", { { {"poissons_ratio"}, ""}, "" } });
+    mTags.insert({ "poissons_ratio", { { {"poissons_ratio"}, ""}, "0.3" } });
 }
 
 void ParseMaterial::insertElasticOrthoProperties()
@@ -160,7 +160,14 @@ void ParseMaterial::setMaterialProperties(XMLGen::Material& aMetadata)
 
         if(!tItr->second.first.second.empty())
         {
-            aMetadata.property(tKeyword, tItr->second.first.second);
+            aMetadata.property(tKeyword, tItr->second.first.second, false);
+        }
+        else
+        {
+            if(!tItr->second.second.empty())
+            {
+                aMetadata.property(tKeyword, tItr->second.second, true);
+            }
         }
     }
     this->checkMaterialProperties(aMetadata);
@@ -187,12 +194,12 @@ void ParseMaterial::setPenaltyExponent(XMLGen::Material& aMetadata)
     {
         if(aMetadata.code().compare("plato_analyze") != 0)
         {
-            aMetadata.property("penalty_exponent", "3.0");
+            aMetadata.property("penalty_exponent", "3.0", true);
         }
     }
     else
     {
-        aMetadata.property("penalty_exponent", tItr->second.first.second);
+        aMetadata.property("penalty_exponent", tItr->second.first.second, false);
     }
 }
 

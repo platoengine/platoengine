@@ -77,12 +77,16 @@ inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType,
     aAlgorithm.setUpdateFrequency(aInputs.mUpdateFrequency);
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumSolverIter);
     aAlgorithm.setMaxNumSubProblemIterations(aInputs.mMaxNumSubProblemIter);
+std::cout << "Max sub problem iter: " << aInputs.mMaxNumSubProblemIter << std::endl;
     aAlgorithm.setMaxNumTrustRegionIterations(aInputs.mMaxNumTrustRegionIter);
 
     aAlgorithm.setMoveLimit(aInputs.mMoveLimit);
+std::cout << "Move limit: " << aInputs.mMoveLimit << std::endl;
     aAlgorithm.setInitialAugLagPenalty(aInputs.mInitialAugLagPenalty);
     aAlgorithm.setInitialAymptoteScaling(aInputs.mInitialAymptoteScaling);
     aAlgorithm.setAsymptoteExpansionParameter(aInputs.mAsymptoteExpansion);
+std::cout << "Expansion: " << aInputs.mAsymptoteExpansion << std::endl;
+std::cout << "Contraction: " << aInputs.mAsymptoteContraction << std::endl;
     aAlgorithm.setSubProblemBoundsScaling(aInputs.mSubProblemBoundsScaling);
     aAlgorithm.setAsymptoteContractionParameter(aInputs.mAsymptoteContraction);
     aAlgorithm.setAugLagSubProbPenaltyMultiplier(aInputs.mAugLagSubProbPenaltyMultiplier);

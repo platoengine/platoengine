@@ -53,13 +53,13 @@ void append_multiperformer_criterion_shared_data
             XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
 
         // shared data - nondeterministic criterion gradient
-            if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+            if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
             {
                 tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
                 tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tOwnerName, tFirstPlatoMainPerformer };
                 XMLGen::append_multiperformer_shared_data(tKeys, tValues, aDocument);
             }
-            else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+            else if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
             {
                 tTag = aCriterion + " Gradient {PerformerIndex*NumSamplesPerPerformer+PerformerSampleIndex}";
                 tValues = { tTag, "Scalar", "Global", aXMLMetaData.optimization_parameters().num_shape_design_variables(), tOwnerName, tFirstPlatoMainPerformer };
@@ -130,7 +130,7 @@ void append_multiperformer_topology_shared_data
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_document& aDocument)
 {
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         return;
     }
