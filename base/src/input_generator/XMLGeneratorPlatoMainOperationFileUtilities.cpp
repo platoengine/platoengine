@@ -408,7 +408,8 @@ void append_surface_extraction_to_output_operation
     {
         auto tSurfaceExtraction = aParentNode.append_child("SurfaceExtraction");
         std::vector<std::string> tKeys = { "OutputMethod", "Discretization" };
-        auto tDiscretization = aXMLMetaData.optimization_parameters().discretization().empty() ? "density" : aXMLMetaData.optimization_parameters().discretization();
+        std::string tStoredDiscretizationValue = aXMLMetaData.optimization_parameters().discretization();
+        auto tDiscretization = tStoredDiscretizationValue.empty() ? "density" : tStoredDiscretizationValue;
         std::vector<std::string> tValues = { tOutputMethod, tDiscretization };
         XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
         XMLGen::append_children(tKeys, tValues, tSurfaceExtraction);
@@ -787,7 +788,8 @@ void append_initialize_density_field_operation
     XMLGen::append_children({"Function", "Name", "Method"}, {"InitializeField", "Initialize Field", "Uniform"}, tOperation);
 
     auto tMethod = tOperation.append_child("Uniform");
-    auto tValue = aXMLMetaData.optimization_parameters().initial_density_value().empty() ? "0.5" : aXMLMetaData.optimization_parameters().initial_density_value();
+    std::string tInitialDensityValue = aXMLMetaData.optimization_parameters().initial_density_value();
+    auto tValue = tInitialDensityValue.empty() ? "0.5" : tInitialDensityValue;
     XMLGen::append_children({"Value"}, {tValue}, tMethod);
 
     auto tOutput = tOperation.append_child("Output");
