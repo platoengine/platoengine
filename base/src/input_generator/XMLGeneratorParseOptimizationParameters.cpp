@@ -57,9 +57,9 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "mma_max_sub_problem_iterations", { { {"mma_max_sub_problem_iterations"}, ""}, "50" } });
     mTags.insert({ "mma_control_stagnation_tolerance", { { {"mma_control_stagnation_tolerance"}, ""}, "1e-6" } });
     mTags.insert({ "mma_objective_stagnation_tolerance", { { {"mma_objective_stagnation_tolerance"}, ""}, "1e-8" } });
-    mTags.insert({ "oc_control_stagnation_tolerance", { { {"oc_control_stagnation_tolerance"}, ""}, "" } });
-    mTags.insert({ "oc_objective_stagnation_tolerance", { { {"oc_objective_stagnation_tolerance"}, ""}, "" } });
-    mTags.insert({ "oc_gradient_tolerance", { { {"oc_gradient_tolerance"}, ""}, "" } });
+    mTags.insert({ "oc_control_stagnation_tolerance", { { {"oc_control_stagnation_tolerance"}, ""}, "1e-2" } });
+    mTags.insert({ "oc_objective_stagnation_tolerance", { { {"oc_objective_stagnation_tolerance"}, ""}, "1e-5" } });
+    mTags.insert({ "oc_gradient_tolerance", { { {"oc_gradient_tolerance"}, ""}, "1e-8" } });
     mTags.insert({ "initial_guess_file_name", { { {"initial_guess_file_name"}, ""}, "" } });
     mTags.insert({ "initial_guess_field_name", { { {"initial_guess_field_name"}, ""}, "" } });
     mTags.insert({ "normalize_in_aggregator", { { {"normalize_in_aggregator"}, ""}, "" } });
