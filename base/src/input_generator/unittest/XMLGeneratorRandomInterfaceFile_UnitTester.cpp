@@ -2856,6 +2856,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     tOptimizationParameters.append("mma_max_sub_problem_iterations", "50");
     tOptimizationParameters.append("mma_control_stagnation_tolerance", "1e-3");
     tOptimizationParameters.append("mma_objective_stagnation_tolerance", "1e-8");
+    tOptimizationParameters.append("mma_output_subproblem_diagnostics", "true");
+    tOptimizationParameters.append("mma_sub_problem_initial_penalty", "0.001");
+    tOptimizationParameters.append("mma_sub_problem_penalty_multiplier", "1.1");
+    tOptimizationParameters.append("mma_sub_problem_feasibility_tolerance", "1e-6");
     tXMLMetaData.set(tOptimizationParameters);
     tOptimizerNode = tDocument2.append_child("Optimizer");
     XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
@@ -2867,8 +2871,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     tOptionsNode = tOptimizerNode.child("Options");
     tGoldKeys = {"MaxNumOuterIterations", "MoveLimit", "AsymptoteExpansion", "AsymptoteContraction",
-        "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
-    tGoldValues = {"11", "0.2", "2", "0.75", "50", "1e-3", "1e-8"};
+        "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance", "OutputSubProblemDiagnostics", 
+        "SubProblemInitialPenalty", "SubProblemPenaltyMultiplier", "SubProblemFeasibilityTolerance" };
+    tGoldValues = { "11", "0.2", "2", "0.75", "50", "1e-3", "1e-8", "true", "0.001", "1.1", "1e-6" };
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptionsNode);
 }
 

@@ -103,23 +103,25 @@ private:
 
             aData.mUpdateFrequency = this->updateFrequency(tOptionsNode);
             aData.mNumControlVectors = this->numControlVectors(tOptionsNode);
-            aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
-            aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
-            aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
 
+            // core mma parameters
             aData.mMoveLimit = this->moveLimit(tOptionsNode);
             aData.mAsymptoteExpansion = this->asymptoteExpansion(tOptionsNode);
+            aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
+            aData.mOptimalityTolerance = this->optimalityTolerance(tOptionsNode);
+            aData.mFeasibilityTolerance = this->feasibilityTolerance(tOptionsNode);
             aData.mAsymptoteContraction = this->asymptoteContraction(tOptionsNode);
             aData.mInitialAymptoteScaling = this->initialAymptoteScaling(tOptionsNode);
+            aData.mControlStagnationTolerance = this->controlStagnationTolerance(tOptionsNode);
+            aData.mObjectiveStagnationTolerance = this->objectiveStagnationTolerance(tOptionsNode);
+
+            // core augmented Lagrangian subproblem parameters
+            aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
+            aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
             aData.mInitialAugLagPenalty = this->augLagSubProblemInitialPenalty(tOptionsNode);
             aData.mSubProblemBoundsScaling = this->augLagSubProblemBoundsScaling(tOptionsNode);
             aData.mAugLagSubProbPenaltyMultiplier = this->augLagSubProbPenaltyMultiplier(tOptionsNode);
             aData.mConstraintNormalizationMultipliers = this->constraintNormalizationMultipliers(tOptionsNode);
-
-            aData.mOptimalityTolerance = this->optimalityTolerance(tOptionsNode);
-            aData.mFeasibilityTolerance = this->feasibilityTolerance(tOptionsNode);
-            aData.mControlStagnationTolerance = this->controlStagnationTolerance(tOptionsNode);
-            aData.mObjectiveStagnationTolerance = this->objectiveStagnationTolerance(tOptionsNode);
             aData.mAugLagSubProbFeasibilityTolerance = this->augLagSubProblemFeasibilityTolerance(tOptionsNode);
         }
     }
@@ -268,9 +270,9 @@ private:
     ScalarType augLagSubProblemInitialPenalty(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.0015;
-        if(aOptionsNode.size<std::string>("InitialAugLagPenalty"))
+        if(aOptionsNode.size<std::string>("SubProblemInitialPenalty"))
         {
-            tOutput = Plato::Get::Double(aOptionsNode, "InitialAugLagPenalty");
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemInitialPenalty");
         }
         return (tOutput);
     }
@@ -283,9 +285,9 @@ private:
     ScalarType augLagSubProbPenaltyMultiplier(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 1.025;
-        if(aOptionsNode.size<std::string>("AugLagPenaltyMultiplier"))
+        if(aOptionsNode.size<std::string>("SubProblemPenaltyMultiplier"))
         {
-            tOutput = Plato::Get::Double(aOptionsNode, "AugLagPenaltyMultiplier");
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemPenaltyMultiplier");
         }
         return (tOutput);
     }
