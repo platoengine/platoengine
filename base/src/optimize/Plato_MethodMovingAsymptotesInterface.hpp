@@ -63,10 +63,11 @@ template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
                                      Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+    if(aInputs.mPrintMMADiagnostics == true)
     {
-        aAlgorithm.enableDiagnostics(aInputs.mPrintDiagnostics);
+        aAlgorithm.enableDiagnostics(aInputs.mPrintMMADiagnostics);
     }
+    aAlgorithm.outputSubProblemDiagnostics(aInputs.mPrintAugLagSubProbDiagnostics);
 
     aAlgorithm.setInitialGuess(*aInputs.mInitialGuess);
     aAlgorithm.setControlLowerBounds(*aInputs.mLowerBounds);
@@ -84,11 +85,13 @@ inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType,
     aAlgorithm.setAsymptoteExpansionParameter(aInputs.mAsymptoteExpansion);
     aAlgorithm.setSubProblemBoundsScaling(aInputs.mSubProblemBoundsScaling);
     aAlgorithm.setAsymptoteContractionParameter(aInputs.mAsymptoteContraction);
+    aAlgorithm.setAugLagSubProbPenaltyMultiplier(aInputs.mAugLagSubProbPenaltyMultiplier);
 
     aAlgorithm.setOptimalityTolerance(aInputs.mOptimalityTolerance);
     aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
     aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setSubProblemFeasibilityTolerance(aInputs.mAugLagSubProbFeasibilityTolerance);
 }
 // function set_mma_algorithm_inputs
 

@@ -510,10 +510,10 @@
     <MaxNumOuterIterations>50</MaxNumOuterIterations>
 -->
     <MaxNumOuterIterations>5</MaxNumOuterIterations>
-    <MoveLimit>0.9</MoveLimit>
-    <AsymptoteExpansion>1.1</AsymptoteExpansion>
-    <AsymptoteContraction>0.9</AsymptoteContraction>
-    <MaxNumSubProblemIter>10</MaxNumSubProblemIter>
+    <MoveLimit>0.1</MoveLimit>
+    <AsymptoteExpansion>1.2</AsymptoteExpansion>
+    <AsymptoteContraction>0.7</AsymptoteContraction>
+    <MaxNumSubProblemIter>50</MaxNumSubProblemIter>
     <ControlStagnationTolerance>1e-6</ControlStagnationTolerance>
     <ObjectiveStagnationTolerance>1e-8</ObjectiveStagnationTolerance>
   </Options>

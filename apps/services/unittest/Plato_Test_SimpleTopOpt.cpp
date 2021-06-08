@@ -632,13 +632,14 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_1)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-6;
-    EXPECT_EQ(5u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(120u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(43u, tOutputs.mNumObjGradEval);
-    EXPECT_NEAR(0.15795339706529254, tOutputs.mObjFuncValue, tTolerance);
-    EXPECT_NEAR(-0.010073255787033775, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_EQ(12u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(291u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(106u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.15111367140236934, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(3.1850026986912638e-6, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test_one();
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
@@ -693,13 +694,14 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_2)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-6;
-    EXPECT_EQ(6u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(88u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(32u, tOutputs.mNumObjGradEval);
-    EXPECT_NEAR(0.15571837755848239, tOutputs.mObjFuncValue, tTolerance);
-    EXPECT_NEAR(-0.0074632094368177748, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_EQ(7u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(94u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(38u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.15907097798085507, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(-0.0058004315265859918, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test_two();
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
@@ -762,6 +764,7 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_3)
     EXPECT_NEAR(-0.0011649108117752771, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test_three();
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
@@ -816,13 +819,14 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_4)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-6;
-    EXPECT_EQ(12u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(139u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(105u, tOutputs.mNumObjGradEval);
-    EXPECT_NEAR(0.14986423102944968, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_EQ(13u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(142u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(108u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.14982633772913623, tOutputs.mObjFuncValue, tTolerance);
     EXPECT_NEAR(-1.4039405820065465e-05, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test_four();
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);
@@ -878,13 +882,14 @@ TEST(PlatoTest, SolveStrucTopoWithTrustRegionAugmentedLagrangianLight_5)
 
     // ********* TEST OUTPUT DATA *********
     const double tTolerance = 1e-6;
-    EXPECT_EQ(14u, tOutputs.mNumOuterIter);
-    EXPECT_EQ(76u, tOutputs.mNumObjFuncEval);
-    EXPECT_EQ(72u, tOutputs.mNumObjGradEval);
-    EXPECT_NEAR(0.14993991963605885, tOutputs.mObjFuncValue, tTolerance);
-    EXPECT_NEAR(-6.158066631345438e-06, (*tOutputs.mConstraints)[0], tTolerance);
+    EXPECT_EQ(20u, tOutputs.mNumOuterIter);
+    EXPECT_EQ(261u, tOutputs.mNumObjFuncEval);
+    EXPECT_EQ(102u, tOutputs.mNumObjGradEval);
+    EXPECT_NEAR(0.14957929692374308, tOutputs.mObjFuncValue, tTolerance);
+    EXPECT_NEAR(2.2543639177641239e-07, (*tOutputs.mConstraints)[0], tTolerance);
     EXPECT_STREQ("\n\n****** Optimization stopping due to control (i.e. design variable) stagnation. ******\n\n", tOutputs.mStopCriterion.c_str());
     std::vector<double> tGoldControl = TopoProxy::get_gold_control_ksal_test_five();
+
     for(size_t tIndex = 0; tIndex < tGoldControl.size(); tIndex++)
     {
         EXPECT_NEAR(tGoldControl[tIndex], (*tOutputs.mSolution)(0 /* vector index */, tIndex), tTolerance);

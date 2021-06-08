@@ -464,6 +464,7 @@
 <Optimizer>
   <Package>MMA</Package>
   <Options>
+    <MoveLimit>0.1</MoveLimit>
     <MaxNumOuterIterations>10</MaxNumOuterIterations>
   </Options>
   <Output>
