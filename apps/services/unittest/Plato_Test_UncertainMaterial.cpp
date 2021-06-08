@@ -220,13 +220,13 @@ TEST(PlatoTest, SROM_SolveSromProblem)
     double tSum = 0;
     double tProbTolerance = 1e-4;
     double tSampleTolerance = 1e-1;
-    std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
-    std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
+    std::vector<double> tGoldSamples = { 1311661401.549571, 660172913.150617, 657472271.01541042 };
+    std::vector<double> tGoldProbabilities = { 0.4323551639529441, 0.31860804837646761, 0.24887927116109365 };
     for (int tIndex = 0; tIndex < tSamplerProbPairs.mSampleProbPairs.mNumSamples; tIndex++)
     {
         tSum += tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex];
-        ASSERT_NEAR(tGoldSamples[tIndex], tSamplerProbPairs.mSampleProbPairs.mSamples[tIndex], tSampleTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex], tProbTolerance);
+        EXPECT_NEAR(tGoldSamples[tIndex], tSamplerProbPairs.mSampleProbPairs.mSamples[tIndex], tSampleTolerance);
+        EXPECT_NEAR(tGoldProbabilities[tIndex], tSamplerProbPairs.mSampleProbPairs.mProbabilities[tIndex], tProbTolerance);
     }
     tProbTolerance = 1e-2;
     ASSERT_NEAR(1.0, tSum, tProbTolerance);
@@ -318,16 +318,16 @@ TEST(PlatoTest, SROM_ComputeSampleProbabilityPairs_HomogeneousElasticModulus_Bet
     double tProbTolerance = 1e-4;
     double tSampleTolerance = 1e-1;
     const Plato::srom::SampleProbabilityPairs &tSampleProbabilityPairs = tMySampleProbPairs[0].mSampleProbPairs;
-    std::vector<double> tGoldSamples = { 1312017818.6197019, 659073448.54796219, 656356599.33196139 };
-    std::vector<double> tGoldProbabilities = { 0.43210087774761252, 0.31840063469163404, 0.24868340186995475 };
+    std::vector<double> tGoldSamples = { 1311661401.549571, 660172913.150617, 657472271.01541042 };
+    std::vector<double> tGoldProbabilities = { 0.4323551639529441, 0.31860804837646761, 0.24887927116109365 };
     for (int tIndex = 0; tIndex < tSampleProbabilityPairs.mNumSamples; tIndex++)
     {
         tSum += tSampleProbabilityPairs.mProbabilities[tIndex];
-        ASSERT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tSampleTolerance);
-        ASSERT_NEAR(tGoldProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tProbTolerance);
+        EXPECT_NEAR(tGoldSamples[tIndex], tSampleProbabilityPairs.mSamples[tIndex], tSampleTolerance);
+        EXPECT_NEAR(tGoldProbabilities[tIndex], tSampleProbabilityPairs.mProbabilities[tIndex], tProbTolerance);
     }
     tProbTolerance = 1e-2;
-    ASSERT_NEAR(1.0, tSum, tProbTolerance);
+    EXPECT_NEAR(1.0, tSum, tProbTolerance);
 
     Plato::system("rm -f plato_cdf_output.txt");
     Plato::system("rm -f plato_srom_diagnostics.txt");
@@ -1601,12 +1601,12 @@ TEST(PlatoTest, SROM_BuildMaterialSroms)
     const std::vector<std::vector<std::string>> tGoldTags = { { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, {
         "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio",
         "youngs modulus" }, { "poissons ratio", "youngs modulus" }, { "poissons ratio", "youngs modulus" } };
-    const std::vector<std::vector<std::vector<double>>> tGoldSamples = { { { 0.2575729129623087, 7.6968145268325285 }, { 0.25, 3.0 },
-        { 0.3448799880969564, 1.0 } }, { { 0.2575729129623087, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486,
-        7.6968145268325285 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.3448799880969564,
-        1.0 } }, { { 0.2575729129623087, 7.6968145268325285 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.2575729129623087, 12.8669604630312087 }, {
-        0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.3659845788546486, 7.6968145268325285 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { {
-        0.3659845788546486, 12.8669604630312087 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } } };
+    const std::vector<std::vector<std::vector<double>>> tGoldSamples = { { { 0.2575729129623087, 7.6969461773057324 }, { 0.25, 3.0 },
+        { 0.3448799880969564, 1.0 } }, { { 0.2575729129623087, 12.867065205497958 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486,
+        7.6969461773057324 }, { 0.25, 3.0 }, { 0.3448799880969564, 1.0 } }, { { 0.3659845788546486, 12.867065205497958 }, { 0.25, 3.0 }, { 0.3448799880969564,
+        1.0 } }, { { 0.2575729129623087, 7.6969461773057324 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.2575729129623087, 12.867065205497958 }, {
+        0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { { 0.3659845788546486, 7.6969461773057324 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } }, { {
+        0.3659845788546486, 12.867065205497958 }, { 0.25, 3.0 }, { 0.2121659959660376, 1.0 } } };
 
     double tProbSum = 0;
     for (auto &tRandomMatCase : tRandomMaterialCaseSet)

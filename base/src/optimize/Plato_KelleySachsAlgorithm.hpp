@@ -580,6 +580,7 @@ public:
         const ScalarType tCurrentTrustRegionRadius = aStepMng.getTrustRegionRadius();
         const ScalarType tStagnationMeasure = aDataMng.getObjectiveStagnationMeasure();
         const ScalarType tControlStagnationMeasure = aDataMng.getControlStagnationMeasure();
+        
         // Get termination criteria tolerances
         const OrdinalType tMaxNumIterations = this->getMaxNumIterations();
         const ScalarType tStationarityTolerance = this->getStationarityTolerance();
@@ -587,6 +588,7 @@ public:
         const ScalarType tActualReductionTolerance = this->getActualReductionTolerance();
         const ScalarType tControlStagnationTolerance = this->getControlStagnationTolerance();
         const ScalarType tObjectiveStagnationTolerance = this->getObjectiveStagnationTolerance();
+        
         if( tStationarityMeasure <= tStationarityTolerance )
         {
             tStop = true;

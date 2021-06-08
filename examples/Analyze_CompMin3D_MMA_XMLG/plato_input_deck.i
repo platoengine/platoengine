@@ -87,6 +87,7 @@ begin optimization_parameters
    max_iterations 10 
    output_frequency 1000 
    optimization_algorithm mma
+   mma_move_limit 0.1
    discretization density 
    initial_density_value .5
    normalize_in_aggregator false
@@ -102,5 +103,9 @@ code plato_analyze analyze_MPMD
 end paths
 begin paths
 code PlatoMain /ascldap/users/bwclark/spack2/platoengine/RELEASE/apps/services/PlatoMain
+code plato_analyze analyze_MPMD
+end paths
+begin paths
+code PlatoMain /home/maguilo/platoengine/build_release/apps/services/PlatoMain
 code plato_analyze analyze_MPMD
 end paths
