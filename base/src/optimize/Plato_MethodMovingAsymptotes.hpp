@@ -82,7 +82,7 @@ public:
         mMaxNumTrustRegionIterations(50),
         mMaxNumSubProblemIterations(100),
         mInitialAugLagPenalty(1),
-        mAugLagPenaltyMultiplier(1.1),
+        mAugLagPenaltyMultiplier(1.025),
         mOptimalityTolerance(1e-6),
         mFeasibilityTolerance(1e-4),
         mControlStagnationTolerance(1e-6),
@@ -294,7 +294,7 @@ public:
      * @brief Set reduction parameter for augmented Lagrangian penalty
      * @param [in] aInput reduction parameter for augmented Lagrangian penalty
     **********************************************************************************/
-    void setAugLagPenaltyReduction(const ScalarType& aInput)
+    void setAugLagSubProbPenaltyMultiplier(const ScalarType& aInput)
     {
         mAugLagPenaltyMultiplier = aInput;
     }
@@ -315,6 +315,15 @@ public:
     void setFeasibilityTolerance(const ScalarType& aInput)
     {
         mFeasibilityTolerance = aInput;
+    }
+
+    /******************************************************************************//**
+     * @brief Set feasibility tolerance for augmened Lagrangian subproblem.
+     * @param [in] aInput feasibility tolerance
+    **********************************************************************************/
+    void setSubProblemFeasibilityTolerance(const ScalarType& aInput)
+    {
+        mSubProblemFeasibilityTolerance = aInput;
     }
 
     /******************************************************************************//**
@@ -382,6 +391,18 @@ public:
     }
 
     /******************************************************************************//**
+     * @brief Set output diagnostics flag for augmented Lagrangian subproblem. 
+     * @param [out] aInput boolean flag
+    **********************************************************************************/
+    void outputSubProblemDiagnostics(const bool aInput)
+    {
+        if(aInput == true)
+        {
+            mSubProblemSolver->enableDiagnostics();
+        }
+    }
+
+    /******************************************************************************//**
      * @brief Gather 2D container of optimal optimization variables
      * @param [out] aInput reference to 2D container of optimal optimization variables
     **********************************************************************************/
@@ -445,7 +466,7 @@ private:
     {
         mSubProblemSolver->disablePostSmoothing();
         mSubProblemSolver->setPenaltyParameter(mInitialAugLagPenalty);
-        mSubProblemSolver->setFeasibilityTolerance(mFeasibilityTolerance);
+        mSubProblemSolver->setFeasibilityTolerance(mSubProblemFeasibilityTolerance);
         mSubProblemSolver->setControlStagnationTolerance(mControlStagnationTolerance);
         mSubProblemSolver->setMaxNumOuterIterations(mMaxNumSubProblemIterations);
         mSubProblemSolver->setPenaltyParameterScaleFactor(mAugLagPenaltyMultiplier);
@@ -734,7 +755,7 @@ private:
     }
 
 private:
-    bool mPrintDiagnostics; /*!< flag to enable output (default=false) */
+    bool mPrintDiagnostics; /*!< output MMA diagnostics to text file (default=false) */
     std::ofstream mOutputStream; /*!< output string stream with diagnostics */
 
     OrdinalType mIterationCount; /*!< number of optimization iterations */
@@ -748,6 +769,7 @@ private:
     ScalarType mAugLagPenaltyMultiplier; /*!< augmented Lagragian penalty reduction parameter */
     ScalarType mOptimalityTolerance; /*!< tolerance on the norm of the objective gradient - primary stopping tolerance */
     ScalarType mFeasibilityTolerance; /*!< feasibility tolerance - primary stopping tolerance */
+    ScalarType mSubProblemFeasibilityTolerance = 1e-8; /*!< feasibility tolerance for augmented Lagrangian subproblem */
     ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance - secondary stopping tolerance */
     ScalarType mObjectiveStagnationTolerance; /*!< objective stagnation tolerance - secondary stopping tolerance */
     Plato::algorithm::stop_t mStoppingCriterion; /*!< stopping criterion */

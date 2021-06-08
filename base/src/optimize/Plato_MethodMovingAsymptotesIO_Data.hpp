@@ -66,26 +66,8 @@ struct AlgorithmInputsMMA
      * @brief Default constructor
     **********************************************************************************/
     AlgorithmInputsMMA() :
-            mPrintDiagnostics(false),
-            mOutputStageName(),
-            mUpdateFrequency(0),
-            mMaxNumSolverIter(500),
-            mNumControlVectors(1),
-            mMaxNumSubProblemIter(100),
-            mMaxNumTrustRegionIter(50),
-            mMoveLimit(0.5),
-            mAsymptoteExpansion(1.2),
-            mAsymptoteContraction(0.7),
-            mInitialAugLagPenalty(1.0),
-            mInitialAymptoteScaling(0.5),
-            mSubProblemBoundsScaling(0.1),
-            mOptimalityTolerance(1e-6),
-            mFeasibilityTolerance(1e-4),
-            mControlStagnationTolerance(1e-6),
-            mObjectiveStagnationTolerance(1e-8),
             mConstraintNormalizationMultipliers(),
             mCommWrapper(),
-            mMemorySpace(Plato::MemorySpace::HOST),
             mLowerBounds(nullptr),
             mUpperBounds(nullptr),
             mInitialGuess(nullptr),
@@ -103,31 +85,34 @@ struct AlgorithmInputsMMA
     {
     }
 
-    bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
-    std::string mOutputStageName; /*!< output stage name */
+    bool mPrintMMADiagnostics = false; /*!< flag to enable problem statistics output (default=false) */
+    bool mPrintAugLagSubProbDiagnostics = false; /*!< output augmented Lagrangian subproblem diagnostics to text file (default=false) */
+    std::string mOutputStageName = ""; /*!< output stage name */
 
-    OrdinalType mUpdateFrequency; /*!< continuation frequency (default = disabled = 0) */
-    OrdinalType mMaxNumSolverIter; /*!< maximum number of outer iterations */
-    OrdinalType mNumControlVectors; /*!< number of control vectors (default = 1) */
-    OrdinalType mMaxNumSubProblemIter; /*!< maximum number of trust region sub problem iterations */
-    OrdinalType mMaxNumTrustRegionIter; /*!< maximum number of trust region iterations */
+    OrdinalType mUpdateFrequency = 0; /*!< continuation frequency (default = disabled = 0) */
+    OrdinalType mMaxNumSolverIter = 500; /*!< maximum number of outer iterations */
+    OrdinalType mNumControlVectors = 1; /*!< number of control vectors (default = 1) */
+    OrdinalType mMaxNumSubProblemIter = 50; /*!< maximum number of trust region sub problem iterations */
+    OrdinalType mMaxNumTrustRegionIter = 50; /*!< maximum number of trust region iterations */
 
-    ScalarType mMoveLimit; /*!< move limit */
-    ScalarType mAsymptoteExpansion; /*!< moving asymptotes expansion factor */
-    ScalarType mAsymptoteContraction; /*!< moving asymptotes' contraction factor */
-    ScalarType mInitialAugLagPenalty; /*!< initial penalty on augmented Lagrangian function */
-    ScalarType mInitialAymptoteScaling; /*!< initial moving asymptotes' scale factor */
-    ScalarType mSubProblemBoundsScaling; /*!< scaling on subproblem upper and lower bounds */
+    ScalarType mMoveLimit = 0.5; /*!< move limit */
+    ScalarType mAsymptoteExpansion = 1.2; /*!< moving asymptotes expansion factor */
+    ScalarType mAsymptoteContraction = 0.7; /*!< moving asymptotes' contraction factor */
+    ScalarType mInitialAugLagPenalty = 0.0015; /*!< initial penalty value used in augmented Lagrangian function, \f$ \mu = 1/\alpha \f$, where \f$ \alpha \f$ is the initial penalty value */
+    ScalarType mInitialAymptoteScaling = 0.5; /*!< initial moving asymptotes' scale factor */
+    ScalarType mSubProblemBoundsScaling = 0.1; /*!< scaling on subproblem upper and lower bounds */
+    ScalarType mAugLagSubProbPenaltyMultiplier = 1.025; /*!< augmented Lagrangian subproblem penalty multiplier, \f$ \alpha_{i+1} = \beta*\alpha_{i}, where \f$ \beta \f$ is the multiplier */
 
-    ScalarType mOptimalityTolerance; /*!< optimality tolerance */
-    ScalarType mFeasibilityTolerance; /*!< feasibility tolerance */
-    ScalarType mControlStagnationTolerance; /*!< control stagnation tolerance */
-    ScalarType mObjectiveStagnationTolerance; /*!< objective function stagnation tolerance */
+    ScalarType mOptimalityTolerance = 1e-6; /*!< optimality tolerance */
+    ScalarType mFeasibilityTolerance = 1e-4; /*!< feasibility tolerance */
+    ScalarType mControlStagnationTolerance = 1e-6; /*!< control stagnation tolerance */
+    ScalarType mObjectiveStagnationTolerance = 1e-8; /*!< objective function stagnation tolerance */
+    ScalarType mAugLagSubProbFeasibilityTolerance = 1e-8; /*!< augmented Lagrangian algorithm feasibility tolerance */
 
     std::vector<ScalarType> mConstraintNormalizationMultipliers; /*!< constraint normalization multipliers */
 
     Plato::CommWrapper mCommWrapper; /*!< distributed memory communication wrapper */
-    Plato::MemorySpace::type_t mMemorySpace; /*!< memory space: HOST (default) OR DEVICE */
+    Plato::MemorySpace::type_t mMemorySpace = Plato::MemorySpace::HOST; /*!< memory space: HOST (default) OR DEVICE */
 
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mLowerBounds; /*!< lower bounds */
     std::shared_ptr<Plato::MultiVector<ScalarType,OrdinalType>> mUpperBounds; /*!< upper bounds */

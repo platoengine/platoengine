@@ -75,6 +75,10 @@ public:
             mNumAugLagIter(0),
             mMaxNumAugLagIter(100),
             mMaxNumAugLagSubProbIter(5),
+            mObjFuncStagnation(std::numeric_limits<ScalarType>::max()),
+            mControlStagnation(std::numeric_limits<ScalarType>::max()),
+            mCurrentObjFuncValue(0.0),
+            mPreviousObjFuncValue(0.0),
             mOptimalityTolerance(1e-4),
             mControlStagnationTol(std::numeric_limits<ScalarType>::epsilon()),
             mActualReductionTol(std::numeric_limits<ScalarType>::epsilon()),
@@ -83,11 +87,14 @@ public:
             mDynamicFeasibilityTolerance(1e-1),
             mStoppingCriterion(Plato::algorithm::stop_t::NOT_CONVERGED),
             mOutputData(),
+            mCurrentControl(aDataFactory->control().create()),
+            mPreviousControl(aDataFactory->control().create()),
+            mControlReductionOperations(aDataFactory->getControlReductionOperations().create()),
             mDataMng(std::make_shared<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>>(aDataFactory)),
             mStageMng(std::make_shared<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>>(aDataFactory, aObjective, aConstraints)),
             mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, mDataMng, mStageMng))
     {
-        this->initialize();
+        this->initialize(aDataFactory.operator*());
     }
 
     /******************************************************************************//**
@@ -103,6 +110,10 @@ public:
             mNumAugLagIter(0),
             mMaxNumAugLagIter(100),
             mMaxNumAugLagSubProbIter(5),
+            mObjFuncStagnation(std::numeric_limits<ScalarType>::max()),
+            mControlStagnation(std::numeric_limits<ScalarType>::max()),
+            mCurrentObjFuncValue(0.0),
+            mPreviousObjFuncValue(0.0),
             mOptimalityTolerance(1e-4),
             mControlStagnationTol(std::numeric_limits<ScalarType>::epsilon()),
             mActualReductionTol(std::numeric_limits<ScalarType>::epsilon()),
@@ -111,11 +122,14 @@ public:
             mDynamicFeasibilityTolerance(1e-1),
             mStoppingCriterion(Plato::algorithm::stop_t::NOT_CONVERGED),
             mOutputData(),
+            mCurrentControl(aDataFactory->control().create()),
+            mPreviousControl(aDataFactory->control().create()),
+            mControlReductionOperations(aDataFactory->getControlReductionOperations().create()),
             mDataMng(aDataMng),
             mStageMng(aStageMng),
             mOptimizer(std::make_shared<Plato::KelleySachsBoundConstrained<ScalarType, OrdinalType>>(aDataFactory, mDataMng, mStageMng))
     {
-        this->initialize();
+        this->initialize(aDataFactory.operator*());
     }
 
     /******************************************************************************//**
@@ -486,6 +500,7 @@ public:
             mOptimizer->setStationarityTolerance(mDynamicAugLagProbTolerance);
             mOptimizer->solve(mOutputStream);
             mOptimizer->useCurrentTrustRegionRadius();
+            this->cacheState();
             // check stopping criteria
             bool tStop = this->checkStoppingCriteria();
             // output diagnostics
@@ -502,10 +517,13 @@ public:
 private:
     /******************************************************************************//**
      * @brief Initialize default parameters
+     * @param [in] aDataFactory factory for linear algebra data structure
     **********************************************************************************/
-    void initialize()
+    void initialize(const Plato::DataFactory<ScalarType, OrdinalType> & aDataFactory)
     {
+        const OrdinalType tVectorIndex = 0;
         mOptimizer->setMaxNumIterations(mMaxNumAugLagSubProbIter);
+        mControlWorkVector = aDataFactory.control(tVectorIndex).create();
         mDynamicAugLagProbTolerance = std::pow(mStageMng->getPenaltyParameter(), static_cast<ScalarType>(0.05));
     }
 
@@ -589,20 +607,20 @@ private:
     {
         bool tStop = false;
 
-        const ScalarType tActualReduction = mDataMng->getObjectiveStagnationMeasure();
-        const ScalarType tControlStagnation = mDataMng->getControlStagnationMeasure();
+        this->computeControlStagnationMeasure();
+        mObjFuncStagnation = std::abs(mCurrentObjFuncValue - mPreviousObjFuncValue);
 
         if(mNumAugLagIter == mMaxNumAugLagIter)
         {
             mStoppingCriterion = Plato::algorithm::MAX_NUMBER_ITERATIONS;
             tStop = true;
         }
-        else if(std::abs(tControlStagnation) <= mControlStagnationTol)
+        else if(mControlStagnation <= mControlStagnationTol)
         {
             mStoppingCriterion = Plato::algorithm::CONTROL_STAGNATION;
             tStop = true;
         }
-        else if(std::abs(tActualReduction) <= mActualReductionTol)
+        else if(mObjFuncStagnation <= mActualReductionTol)
         {
             mStoppingCriterion = Plato::algorithm::ACTUAL_REDUCTION_TOLERANCE;
             tStop = true;
@@ -681,8 +699,8 @@ private:
 
             mOutputData.mPenalty = static_cast<ScalarType>(1) / mStageMng->getPenaltyParameter();
             mOutputData.mStationarityMeasure = mDataMng->getStationarityMeasure();
-            mOutputData.mControlStagnationMeasure = mDataMng->getControlStagnationMeasure();
-            mOutputData.mObjectiveStagnationMeasure = mDataMng->getObjectiveStagnationMeasure();
+            mOutputData.mControlStagnationMeasure = mControlStagnation;
+            mOutputData.mObjectiveStagnationMeasure = mObjFuncStagnation;
 
             mOutputData.mObjFuncValue = mStageMng->getCurrentObjectiveFunctionValue();
             mOutputData.mNormObjFuncGrad = mStageMng->getNormObjectiveFunctionGradient();
@@ -701,6 +719,37 @@ private:
         }
     }
 
+    /******************************************************************************//**
+     * @brief Cache current state data, which includes the objective function value and the controls.
+    **********************************************************************************/
+    void cacheState()
+    {
+        mPreviousObjFuncValue = mCurrentObjFuncValue;
+        mCurrentObjFuncValue = mStageMng->getCurrentObjectiveFunctionValue();
+        Plato::update(1., *mCurrentControl, 0., *mPreviousControl);
+        Plato::update(1., mDataMng->getCurrentControl(), 0., *mCurrentControl);
+    }
+    
+    /******************************************************************************//**
+     * @brief Compute control stagnation measure, i.e. \f$ \max(x_{i+1}-x_i) \f$, where
+     *        \f$ x \f$ is the vector of control variables.
+    **********************************************************************************/
+    void computeControlStagnationMeasure()
+    {
+        OrdinalType tNumVectors = mCurrentControl->getNumVectors();
+        std::vector<ScalarType> tStorage(tNumVectors, std::numeric_limits<ScalarType>::min());
+        for(OrdinalType tIndex = 0; tIndex < tNumVectors; tIndex++)
+        {
+            const Plato::Vector<ScalarType, OrdinalType> & tMyCurrentControl = mCurrentControl->operator[](tIndex);
+            mControlWorkVector->update(1., tMyCurrentControl, 0.);
+            const Plato::Vector<ScalarType, OrdinalType> & tMyPreviousControl = mPreviousControl->operator[](tIndex);
+            mControlWorkVector->update(-1., tMyPreviousControl, 1.);
+            mControlWorkVector->modulus();
+            tStorage[tIndex] = mControlReductionOperations->max(*mControlWorkVector);
+        }
+        mControlStagnation = *std::max_element(tStorage.begin(), tStorage.end());
+    }
+
 private:
     bool mPrintDiagnostics; /*!< flag to enable problem statistics output (default=false) */
     std::ofstream mOutputStream;  /*!< output stream for diagnostics */
@@ -709,6 +758,10 @@ private:
     OrdinalType mMaxNumAugLagIter; /*!< maximum number of augmented Lagrangian outer iterations */
     OrdinalType mMaxNumAugLagSubProbIter; /*!< maximum number of augmented Lagrangian subproblem iterations */
 
+    ScalarType mObjFuncStagnation;
+    ScalarType mControlStagnation;
+    ScalarType mCurrentObjFuncValue; /*!< current objective function ( f(x) ) value  */
+    ScalarType mPreviousObjFuncValue; /*!< previous objective function ( f(x) ) value  */
     ScalarType mOptimalityTolerance; /*!< optimality tolerance - primary stopping tolerance */
     ScalarType mControlStagnationTol; /*!< control stagnation tolerance - secondary stopping tolerance */
     ScalarType mActualReductionTol; /*!< objective stagnation tolerance - secondary stopping tolerance */
@@ -718,6 +771,12 @@ private:
 
     Plato::algorithm::stop_t mStoppingCriterion; /*!< stopping criterion */
     Plato::OutputDataKSAL<ScalarType, OrdinalType> mOutputData; /*!< output data structure */
+
+    std::shared_ptr<Plato::Vector<ScalarType, OrdinalType>> mControlWorkVector;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mCurrentControl;
+    std::shared_ptr<Plato::MultiVector<ScalarType, OrdinalType>> mPreviousControl;
+
+    std::shared_ptr<Plato::ReductionOperations<ScalarType, OrdinalType>> mControlReductionOperations;
 
     std::shared_ptr<Plato::TrustRegionAlgorithmDataMng<ScalarType, OrdinalType>> mDataMng; /*!< state data manager */
     std::shared_ptr<Plato::AugmentedLagrangianStageMng<ScalarType, OrdinalType>> mStageMng; /*!< stage manager - manages criteria evaluations */
