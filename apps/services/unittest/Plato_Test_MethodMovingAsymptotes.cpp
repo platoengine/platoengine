@@ -207,7 +207,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(0.55, tInputsOne.mMoveLimit, tTolerance);
     EXPECT_NEAR(1.3, tInputsOne.mAsymptoteExpansion, tTolerance);
     EXPECT_NEAR(0.85, tInputsOne.mAsymptoteContraction, tTolerance);
-    EXPECT_NEAR(2.0, tInputsOne.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.0015, tInputsOne.mInitialAugLagPenalty, tTolerance);
     EXPECT_NEAR(0.25, tInputsOne.mInitialAymptoteScaling, tTolerance);
     EXPECT_NEAR(0.2, tInputsOne.mSubProblemBoundsScaling, tTolerance);
     EXPECT_NEAR(1e-2, tInputsOne.mOptimalityTolerance, tTolerance);
@@ -244,7 +244,7 @@ TEST(PlatoTest, MethodMovingAsymptotes_Parser)
     EXPECT_NEAR(0.55, tInputsTwo.mMoveLimit, tTolerance);
     EXPECT_NEAR(1.2, tInputsTwo.mAsymptoteExpansion, tTolerance);
     EXPECT_NEAR(0.7, tInputsTwo.mAsymptoteContraction, tTolerance);
-    EXPECT_NEAR(2.0, tInputsTwo.mInitialAugLagPenalty, tTolerance);
+    EXPECT_NEAR(0.0015, tInputsTwo.mInitialAugLagPenalty, tTolerance);
     EXPECT_NEAR(0.5, tInputsTwo.mInitialAymptoteScaling, tTolerance);
     EXPECT_NEAR(0.1, tInputsTwo.mSubProblemBoundsScaling, tTolerance);
     EXPECT_NEAR(1e-6, tInputsTwo.mOptimalityTolerance, tTolerance);
