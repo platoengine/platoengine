@@ -183,6 +183,8 @@ private:
     bool serviceExists(std::vector<XMLGen::Service> &aServiceList, XMLGen::Service &aService);
 
     void writeInputFiles(XMLGen::InputData& aInputData);
+    void checkForProblemSetupErrors(XMLGen::InputData& aInputData);
+    void checkForShapeOptimizationSetupErrors(XMLGen::InputData& aInputData);
 };
 
 }

@@ -260,7 +260,7 @@ void append_self_adjoint_parameter_to_plato_problem
         }
         tIsSelfAdjoint = tItr->second.second ? "true" : "false";
     }
-    if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
+    if(aXMLMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         tIsSelfAdjoint = "false";
     }

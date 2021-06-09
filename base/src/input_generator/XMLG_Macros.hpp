@@ -48,6 +48,8 @@
 
 #pragma once
 
+#include <iostream>
+
 namespace Plato
 {
 
@@ -62,6 +64,15 @@ namespace Plato
         + std::string("\nFUNCTION: ") + __PRETTY_FUNCTION__ \
         + std::string("\nLINE:") + std::to_string(__LINE__) \
         + std::string("\nMESSAGE: ") + msg);
+
+#define PRINTEMPTYINFO(parameter, context) \
+        std::cout << std::string("INFO: Parameter \"") + parameter + "\" was not set and there is no default value specified. Downstream applications depending on this parameter will use whatever default they have for it. Context: " + context + "\n";
+
+#define PRINTIGNOREINFO(parameter, context) \
+        std::cout << std::string("INFO: Ignoring parameter \"") + parameter + "\" because it was not set. It will take on whatever defaults are in the downstream application. Context: " + context + "\n";
+
+#define PRINTDEFAULTINFO(parameter, value, context) \
+        std::cout << std::string("INFO: Using default value of \"") + value + "\" for parameter \"" + parameter + "\" because it was not set. Context: " + context + "\n";
 
 }
 // namespace Plato

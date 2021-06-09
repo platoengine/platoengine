@@ -430,10 +430,11 @@ void append_case
     }
     else if(aCriterion.type() == "frf_mismatch")
     {
+        std::string tDiscretization = aMetaData.optimization_parameters().discretization();
         fprintf(aFilePtr, "  case = inverse_methods\n");
-        if(aMetaData.optimization_parameters().discretization() == "density")
+        if(tDiscretization == "density")
             fprintf(aFilePtr, "  inverse_method_objective = directfrf-plato-density-method\n");
-        else if(aMetaData.optimization_parameters().discretization() == "levelset")
+        else if(tDiscretization == "levelset")
             fprintf(aFilePtr, "  inverse_method_objective = directfrf-plato-levelset-method\n");
         fprintf(aFilePtr, "  ref_frf_file %s\n", aScenario.ref_frf_file().c_str());
         if(aScenario.frfMatchNodesetIDs().size() > 0)
