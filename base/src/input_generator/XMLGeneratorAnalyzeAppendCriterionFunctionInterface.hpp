@@ -19,24 +19,14 @@ template<typename CriterionT>
 void append_incompressible_fluids_scalar_functions
 (XMLGen::Analyze::CriterionFuncMap & aMap)
 {
-    // inlet pressure
+    // surface pressure
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
-    aMap.insert(std::make_pair("inlet_pressure",
+    aMap.insert(std::make_pair("surface_pressure",
     std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
 
-    // outlet pressure
+    // surface temperature
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
-    aMap.insert(std::make_pair("outlet_pressure",
-    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
-
-    // inlet temperature
-    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
-    aMap.insert(std::make_pair("inlet_temperature",
-    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
-
-    // outlet temperature
-    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
-    aMap.insert(std::make_pair("outlet_temperature",
+    aMap.insert(std::make_pair("surface_temperature",
     std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
 }
 // function append_incompressible_fluids_scalar_functions

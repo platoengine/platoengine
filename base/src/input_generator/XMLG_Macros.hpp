@@ -53,6 +53,9 @@
 namespace Plato
 {
 
+#define REPORT(msg) \
+        std::cout << std::string("\nPLATO WARNING: ") + msg + "\n";
+        
 #define PRINTERR(msg) \
         std::cout << std::string("\nFILE: ") + __FILE__ \
         + std::string("\nFUNCTION: ") + __PRETTY_FUNCTION__ \
