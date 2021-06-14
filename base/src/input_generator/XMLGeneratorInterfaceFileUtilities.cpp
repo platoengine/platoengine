@@ -1375,6 +1375,28 @@ inline void append_deterministic_write_output_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_visualization_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode)
+ {
+     if (aMetaData.mOutputMetaData[0].randomIDs().empty())
+     {
+         for (auto &tOutputMetadata : aMetaData.mOutputMetaData)
+         {
+             if (tOutputMetadata.value("native_service_output") == "true")
+             {
+                 auto tServiceID = tOutputMetadata.serviceID();
+                 auto tPerformerName = aMetaData.service(tServiceID).performer();
+                 auto tOperation = aParentNode.append_child("Operation");
+                 XMLGen::append_children({"Name", "PerformerName"}, {"Visualization", tPerformerName}, tOperation);
+             }
+         }
+     }
+ }
+ // function append_visualization_operation
+/******************************************************************************/
+
+/******************************************************************************/
 void append_write_ouput_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
@@ -1383,6 +1405,7 @@ void append_write_ouput_operation
     {
         return;
     }
+    XMLGen::append_visualization_operation(aMetaData, aParentNode);
     XMLGen::append_random_write_output_operation(aMetaData, aParentNode);
     XMLGen::append_deterministic_write_output_operation(aMetaData, aParentNode);
 }
