@@ -156,6 +156,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tXMLMetaData.objective = tObjective;
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
     tOutputMetadata.appendDeterminsiticQoI("dispy", "nodal field");
     tOutputMetadata.appendDeterminsiticQoI("dispz", "nodal field");

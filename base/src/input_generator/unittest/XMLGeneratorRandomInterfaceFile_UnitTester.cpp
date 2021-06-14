@@ -45,6 +45,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetTrueButEmptyO
     tMetaData.append(tService);
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
@@ -103,6 +104,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     tMetaData.append(tService);
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tMetaData.mOutputMetaData.push_back(tOutputMetadata);
     XMLGen::OptimizationParameters tOptimizationParameters;
@@ -176,6 +178,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
 
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
 

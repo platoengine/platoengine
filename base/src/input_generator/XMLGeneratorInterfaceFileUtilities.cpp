@@ -1383,7 +1383,7 @@ void append_visualization_operation
      {
          for (auto &tOutputMetadata : aMetaData.mOutputMetaData)
          {
-             if (tOutputMetadata.value("native_service_output") == "true")
+             if (!tOutputMetadata.value("native_service_output").empty() && tOutputMetadata.value("native_service_output") == "true")
              {
                  auto tServiceID = tOutputMetadata.serviceID();
                  auto tPerformerName = aMetaData.service(tServiceID).performer();
