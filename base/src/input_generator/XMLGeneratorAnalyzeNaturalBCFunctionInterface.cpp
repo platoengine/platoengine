@@ -62,8 +62,8 @@ void append_uniform_single_valued_load_to_plato_problem
     if(aLoad.load_values().size() > 1u)
     {
         THROWERR(std::string("Append Uniform Single Valued Load to Plato Problem: Single valued functions" )
-            + " are expected to have one value. However uniform load with name '" + aName + "' has '"
-            + std::to_string(aLoad.load_values().size()) + "' values.");
+            + " are expected to have one value. However, uniform load with name '" + aName + "' has '"
+            + std::to_string(aLoad.load_values().size()) + "' values instead of one value.");
     }
     if (aLoad.is_random())
         tValues = {"Value", "double", aLoad.load_values()[0]};

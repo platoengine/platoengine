@@ -871,7 +871,8 @@ struct ValidPhysicsNBCCombinations
         },
         {"steady_state_incompressible_fluids", 
             {
-                {"traction", {"Natural Boundary Conditions"}}
+                {"traction", {"Momentum Natural Boundary Conditions"}},
+                {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}},
             }
         }
     };
