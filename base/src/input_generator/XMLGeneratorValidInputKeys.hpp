@@ -200,10 +200,8 @@ private:
         "frf_mismatch", 
         "limit_stress",
         "compliance_and_volume_min",
-        "inlet_pressure",
-        "outlet_pressure",
-        "inlet_temperature",
-        "outlet_temperature",
+        "surface_pressure",
+        "surface_temperature",
         "flow_rate"
     };
 
@@ -536,7 +534,8 @@ private:
         "isotropic_linear_thermoelastic",
         "j2_plasticity",
         "thermoplasticity",
-        "incompressible_fluid"};
+        "natural_buoyancy",
+        "incompressible_flow"};
 
 public:
     /******************************************************************************//**
@@ -872,7 +871,8 @@ struct ValidPhysicsNBCCombinations
         },
         {"steady_state_incompressible_fluids", 
             {
-                {"traction", {"Natural Boundary Conditions"}}
+                {"traction", {"Momentum Natural Boundary Conditions"}},
+                {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}},
             }
         }
     };
@@ -1007,12 +1007,12 @@ private:
             }
         },
 
-        { "incompressible_fluid",
+        { "natural_buoyancy",
             {
-                { "reynolds_number", {"Reynolds Number", "double"} },
                 { "impermeability_number", {"Impermeability Number", "double"} },
-                { "dimensionless_viscocity", { "Dimensionless Viscocity", "double" } },
                 { "prandtl_number", { "Prandtl Number", "double" } }, 
+                { "thermal_diffusivity", { "Thermal Diffusivity", "double" } },
+                { "kinematic_viscocity", { "Kinematic Viscocity", "double" } },
                 { "reference_temperature", { "Reference Temperature", "double" } },
                 { "characteristic_length", { "Characteristic Length", "double" } },
                 { "grashof_number", { "Grashof Number", "Array(double)" } },
@@ -1020,6 +1020,14 @@ private:
                 { "rayleigh_number", {"Rayleigh Number", "Array(double)"} },
                 { "thermal_diffusivity_ratio", {"Thermal Diffusivity Ratio", "double"} },
                 { "thermal_conductivity", {"Thermal Conductivity", "double"} }
+            }
+        },
+
+
+        { "incompressible_flow",
+            {
+                { "reynolds_number", {"Reynolds Number", "double"} },
+                { "impermeability_number", {"Impermeability Number", "double"} },
             }
         }
     };
@@ -1212,10 +1220,8 @@ struct ValidAnalyzeCriteriaKeys
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
-        { "inlet_temperature", { "Average Surface Temperature", false } },
-        { "outlet_temperature", { "Average Surface Temperature", false } },
-        { "inlet_pressure", { "Average Surface Pressure", false } },
-        { "outlet_pressure", { "Average Surface Pressure", false } },
+        { "surface_temperature", { "Average Surface Temperature", false } },
+        { "surface_pressure", { "Average Surface Pressure", false } },
         { "flow_rate", { "Flow Rate", false } },
     };
 };

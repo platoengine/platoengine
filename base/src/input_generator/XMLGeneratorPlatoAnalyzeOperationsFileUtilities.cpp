@@ -452,6 +452,45 @@ void append_random_traction_vector_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
+// NOTE: Operation only works with a single analyze performer and deterministic 
+//       problems. Modifcations will be required to support native output for
+//       stochastic and multi-load problems. The define.xml file mechanism used 
+//       for stochastic problems will be needed to correctly assign the output 
+//       directory names for each samples (stochastic problem) or load case 
+//       (multi-load case problem). 
+void append_visualization_to_plato_analyze_operation
+(const XMLGen::InputData& aMetaData,
+ pugi::xml_node& aParentNode)
+{
+    // output block is undefined    
+    if(aMetaData.mOutputMetaData.size() == 0)
+    {
+        return;
+    }
+
+    // output is disabled 
+    if(aMetaData.mOutputMetaData[0].isOutputDisabled())
+    {
+        return;
+    }
+
+    std::vector<std::string> tNativeOutputList;
+    for (auto &tOutputMetadata : aMetaData.mOutputMetaData)
+    {
+        tNativeOutputList.push_back(tOutputMetadata.value("native_service_output"));
+    }
+    auto tItr = std::find(tNativeOutputList.begin(), tNativeOutputList.end(), "true");
+
+    if(tItr != tNativeOutputList.end())
+    {
+        auto tOperationNode = aParentNode.append_child("Operation");
+        XMLGen::append_children({"Function", "Name", "VizDirectory"}, {"Visualization", "Visualization", "native_plato_analyze_output"}, tOperationNode);
+    }
+}
+ // function append_visualization_to_plato_analyze_operation
+ /******************************************************************************/
+
+/******************************************************************************/
 void append_write_output_to_plato_analyze_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode)
@@ -500,6 +539,7 @@ void write_plato_analyze_operation_xml_file
     XMLGen::append_include_defines_xml_data(aXMLMetaData, tDocument);
     XMLGen::append_reinit_on_change_data(aXMLMetaData, tDocument);
     XMLGen::append_mesh_map_data(aXMLMetaData, tDocument);
+    XMLGen::append_visualization_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_write_output_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_update_problem_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_objective_value_to_plato_analyze_operation(aXMLMetaData, tDocument);

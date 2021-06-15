@@ -69,11 +69,11 @@ private:
     void insertElasticOrthoProperties();
 
     /******************************************************************************//**
-     * \fn insertIncompressibleFluidProperties
-     * \brief Insert valid incompressible fluids material properties, e.g. identifiers, \n
-     * to map from plato input file tags to valid tokens-value pairs
+     * \fn insertIncompressibleFlowProperties
+     * \brief Build map from plato input file material property keyword to keyword-value \n 
+     *        pair used for incompressible fluid flow applications.
     **********************************************************************************/
-    void insertIncompressibleFluidProperties();
+    void insertIncompressibleFluidFlowProperties();
 
     /******************************************************************************//**
      * \fn setCode

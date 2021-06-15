@@ -58,13 +58,13 @@ std::vector<std::string> return_list_of_objective_functions
             {
                 auto tSubCriterion = aXMLMetaData.criterion(tCriterionID);
                 auto tSubCriterionType = Plato::tolower(tSubCriterion.type());
-                auto tToken = std::string("my ") + tSubCriterionType;
+                auto tToken = std::string("my_") + tSubCriterionType + "_criterion_id_" + tCriterionID;
                 tTokens.push_back(tToken);
             }
         }
         else
         {
-            auto tToken = std::string("my ") + tCriterionType;
+            auto tToken = std::string("my_") + tCriterionType + "_criterion_id_" + aXMLMetaData.objective.criteriaIDs[i];
             tTokens.push_back(tToken);
         }
     }

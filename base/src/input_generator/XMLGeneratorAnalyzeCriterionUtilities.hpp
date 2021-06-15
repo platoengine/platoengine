@@ -96,7 +96,7 @@ pugi::xml_node append_surface_scalar_function_criterion
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
 
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
+    auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
     //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
     auto tCriterion = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
@@ -131,7 +131,7 @@ pugi::xml_node append_scalar_function_criterion
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
     auto tCriterionLinearFlag = XMLGen::Private::is_criterion_linear(aCriterion);
 
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
+    auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
     //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
     auto tObjective = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
@@ -227,7 +227,7 @@ inline pugi::xml_node append_stress_constrained_mass_minimization_criterion
  pugi::xml_node& aParentNode)
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
-    auto tName = std::string("my ") + Plato::tolower(aCriterion.type());
+    auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
     auto tObjective = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
