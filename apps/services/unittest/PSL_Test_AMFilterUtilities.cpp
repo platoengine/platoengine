@@ -607,7 +607,7 @@ PSL_TEST(AMFilterUtilities, computeGridBlueprintDensity_manyElements)
 
     for(int i = 0; i < (int) tGoldDensity.size(); ++i)
     {
-        EXPECT_DOUBLE_EQ(tGridBlueprintDensity[i], tGoldDensity[i]);
+        EXPECT_NEAR(tGridBlueprintDensity[i], tGoldDensity[i], 1e-13);
     }
 }
 
@@ -1495,8 +1495,7 @@ PSL_TEST(AMFilterUtilities, computeTetMeshPrintableDensity_manyElements)
 
     for(int i = 0; i < (int) tGoldDensity.size(); ++i)
     {
-        // printf("%.17e\n", tDensityVector.get_value(i));
-        EXPECT_DOUBLE_EQ(tDensityVector.get_value(i), tGoldDensity[i]);
+        EXPECT_NEAR(tDensityVector.get_value(i), tGoldDensity[i],1e-13);
     }
 }
 
