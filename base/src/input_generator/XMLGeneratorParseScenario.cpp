@@ -100,7 +100,7 @@ void ParseScenario::allocate()
     mTags.insert({ "output_frequency", { { {"output_frequency"}, ""}, "1" } });
     mTags.insert({ "steady_state_tolerance", { { {"steady_state_tolerance"}, ""}, "1e-4" } });
     mTags.insert({ "max_steady_state_iterations", { { {"max_steady_state_iterations"}, ""}, "500" } });
-    mTags.insert({ "heat_source_penalty_exponent", { { {"heat_source_penalty_exponent"}, ""}, "3" } });
+    mTags.insert({ "thermal_source_penalty_exponent", { { {"thermal_source_penalty_exponent"}, ""}, "3" } });
     mTags.insert({ "thermal_diffusion_penalty_exponent", { { {"thermal_diffusion_penalty_exponent"}, ""}, "3" } });
 
     mTags.insert({ "material", { { {"material"}, ""}, "" } });
