@@ -21,7 +21,7 @@
 #include "XMLGeneratorConstraintMetadata.hpp"
 #include "XMLGeneratorMaterialMetadata.hpp"
 #include "XMLGeneratorEssentialBoundaryConditionMetadata.hpp"
-#include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
+#include "XMLGeneratorLoadMetadata.hpp"
 #include "XMLGeneratorUncertaintyMetadata.hpp"
 #include "XMLGeneratorCriterionMetadata.hpp"
 #include "XMLGeneratorOptimizationParametersMetadata.hpp"
@@ -94,9 +94,9 @@ private:
 
 public:
     
-    std::vector<XMLGen::NaturalBoundaryCondition> scenarioLoads(const std::string& aID) const
+    std::vector<XMLGen::Load> scenarioLoads(const std::string& aID) const
     {
-        std::vector<XMLGen::NaturalBoundaryCondition> tScenarioLoads;
+        std::vector<XMLGen::Load> tScenarioLoads;
         auto &tScenario = scenario(aID);
         for(auto &tLoadID : tScenario.loadIDs())
         {
@@ -432,7 +432,7 @@ public:
     std::vector<XMLGen::Material> materials;
     std::vector<XMLGen::EssentialBoundaryCondition> ebcs;
     std::vector<XMLGen::Block> blocks;
-    std::vector<XMLGen::NaturalBoundaryCondition> loads;
+    std::vector<XMLGen::Load> loads;
     XMLGen::Mesh mesh;
     XMLGen::CodePaths codepaths;
     std::vector<XMLGen::Uncertainty> uncertainties;

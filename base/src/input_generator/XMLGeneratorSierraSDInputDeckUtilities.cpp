@@ -533,7 +533,7 @@ void append_file_block
 }
 /**************************************************************************/
 void append_load
-(const XMLGen::NaturalBoundaryCondition& aLoad,
+(const XMLGen::Load& aLoad,
  FILE *aFilePtr)
 {
     if(aLoad.type() == "acceleration")

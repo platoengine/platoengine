@@ -17,7 +17,7 @@ TEST(PlatoTestXMLGenerator, Test)
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.type("traction");
     tLoad1.id("1");
     tLoad1.is_random("true");
@@ -28,7 +28,7 @@ TEST(PlatoTestXMLGenerator, Test)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -39,7 +39,7 @@ TEST(PlatoTestXMLGenerator, Test)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -54,7 +54,7 @@ TEST(PlatoTestXMLGenerator, Test)
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.type("traction");
     tLoad4.is_random("true");
@@ -65,7 +65,7 @@ TEST(PlatoTestXMLGenerator, Test)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.type("traction");
     tLoad5.is_random("true");
@@ -118,7 +118,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.is_random("true");
     tLoad1.id("1");
     tLoad1.type("traction");
@@ -129,7 +129,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -140,7 +140,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.is_random("false");
     tLoad3.type("traction");
@@ -155,7 +155,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -166,7 +166,7 @@ TEST(PlatoTestXMLGenerator, WriteDefineXmlFile_Loads)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -224,7 +224,7 @@ TEST(PlatoTestXMLGenerator, PrepareProbabilitiesForDefineXmlFile)
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.is_random("true");
     std::vector<std::string> tValues;
     tValues.push_back("1");
@@ -237,7 +237,7 @@ TEST(PlatoTestXMLGenerator, PrepareProbabilitiesForDefineXmlFile)
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.is_random("true");
     tValues.clear();
     tValues.push_back("11");
@@ -272,7 +272,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.type("traction");
     tLoad1.is_random("true");
@@ -287,7 +287,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("1");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -337,7 +337,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.type("traction");
     tLoad1.is_random("true");
@@ -348,7 +348,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -363,7 +363,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("1");
     tLoad3.type("traction");
     tLoad3.is_random("true");
@@ -374,7 +374,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tValues.push_back("13");
     tLoad3.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad3);
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("2");
     tLoad4.type("traction");
     tLoad4.is_random("true");
@@ -425,7 +425,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.type("traction");
     tLoad1.is_random("true");
@@ -436,7 +436,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -447,7 +447,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -462,7 +462,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.type("traction");
     tLoad4.is_random("true");
@@ -473,7 +473,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("13");
     tLoad3.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.type("traction");
     tLoad5.is_random("true");
@@ -525,7 +525,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.type("traction");
     tLoad1.is_random("true");
@@ -535,7 +535,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tValues.push_back("2");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -549,7 +549,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("1");
     tLoad3.type("traction");
     tLoad3.is_random("true");
@@ -559,7 +559,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_AllRandomLoad
     tValues.push_back("12");
     tLoad3.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad3);
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("2");
     tLoad4.type("traction");
     tLoad4.is_random("true");
@@ -609,7 +609,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.type("traction");
     tLoad1.is_random("true");
@@ -619,7 +619,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("2");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.type("traction");
     tLoad2.is_random("true");
@@ -629,7 +629,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("5");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -643,7 +643,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.type("traction");
     tLoad4.is_random("true");
@@ -653,7 +653,7 @@ TEST(PlatoTestXMLGenerator, PrepareRandomTractionsForDefineXmlFile_2RandomLoadsA
     tValues.push_back("12");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.type("traction");
     tLoad5.is_random("true");
@@ -832,7 +832,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     // 1. APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
@@ -843,7 +843,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -854,7 +854,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.is_random("false");
     tLoad3.type("traction");
@@ -869,7 +869,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -880,7 +880,7 @@ TEST(PlatoTestXMLGenerator, ReturnRandomTractionsTags)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -1044,13 +1044,13 @@ TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile_ErrorZeroPerfor
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads.push_back(XMLGen::Load());
     tLoadCase1.loads[0].location_name("sideset");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads.push_back(XMLGen::Load());
     tLoadCase2.loads[0].location_name("sideset");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 
@@ -1070,13 +1070,13 @@ TEST(PlatoTestXMLGenerator, AppendBasicAttributesToDefineXmlFile)
     // 1.1 APPEND LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    tLoadCase1.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase1.loads.push_back(XMLGen::Load());
     tLoadCase1.loads[0].location_name("sideset");
     auto tLoadSet1 = std::make_pair(0.5, tLoadCase1);
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    tLoadCase2.loads.push_back(XMLGen::NaturalBoundaryCondition());
+    tLoadCase2.loads.push_back(XMLGen::Load());
     tLoadCase2.loads[0].location_name("sideset");
     auto tLoadSet2 = std::make_pair(0.5, tLoadCase2);
 

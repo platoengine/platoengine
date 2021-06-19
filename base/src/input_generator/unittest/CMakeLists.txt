@@ -28,7 +28,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorOutputMetadata.cpp
                                       ../XMLGeneratorParseObjective.cpp
                                       ../XMLGeneratorParseEssentialBoundaryCondition.cpp
-                                      ../XMLGeneratorParseNaturalBoundaryCondition.cpp
+                                      ../XMLGeneratorParseLoads.cpp
                                       ../XMLGeneratorParseConstraint.cpp
                                       ../XMLGeneratorParseUncertainty.cpp
                                       ../XMLGeneratorScenarioMetadata.cpp
@@ -50,8 +50,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
                                       ../XMLGeneratorSierraSDOperationsFileUtilities.cpp
                                       ../XMLGeneratorSierraSDInputDeckUtilities.cpp
-                                      ../XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
-                                      ../XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeLoadFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeLoadTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
