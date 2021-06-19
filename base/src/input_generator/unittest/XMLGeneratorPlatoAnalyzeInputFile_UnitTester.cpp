@@ -1460,7 +1460,64 @@ TEST(PlatoTestXMLGenerator, AppendThermalSourceToPlatoAnalyzeInputDeck)
     // run test
     pugi::xml_document tDocument;
     XMLGen::append_loads_to_plato_analyze_input_deck(tXMLMetaData, tDocument);
-    tDocument.save_file("dummy.xml");
+    //tDocument.save_file("dummy.xml");
+
+    // test results
+    auto tParameterList = tDocument.child("ParameterList");
+    ASSERT_FALSE(tParameterList.empty());
+    ASSERT_STREQ("ParameterList", tParameterList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Momentum Natural Boundary Conditions"}, tParameterList);
+    
+    tParameterList = tParameterList.next_sibling("ParameterList");
+    ASSERT_FALSE(tParameterList.empty());
+    ASSERT_STREQ("ParameterList", tParameterList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Natural Boundary Conditions"}, tParameterList);
+    
+    tParameterList = tParameterList.next_sibling("ParameterList");
+    ASSERT_FALSE(tParameterList.empty());
+    ASSERT_STREQ("ParameterList", tParameterList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Thermal Sources"}, tParameterList);
+
+    // load 1
+    auto tSourceParamList = tParameterList.child("ParameterList");
+    ASSERT_FALSE(tSourceParamList.empty());
+    ASSERT_STREQ("ParameterList", tParameterList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Source with ID 1"}, tSourceParamList);
+
+    std::vector<std::string> tGoldKeys = {"name", "type", "value"};
+    std::vector<std::vector<std::string>> tGoldValues =
+        { {"Type", "string", "Uniform"}, {"Value", "string", "2.0"}, {"Element Block", "string", "block_1"} };
+    auto tGoldValuesItr = tGoldValues.begin();
+    auto tParameter = tSourceParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    // load 2
+    tSourceParamList = tSourceParamList.next_sibling("ParameterList");
+    ASSERT_FALSE(tSourceParamList.empty());
+    ASSERT_STREQ("ParameterList", tParameterList.name());
+    PlatoTestXMLGenerator::test_attributes({"name"}, {"Uniform Source with ID 2"}, tSourceParamList);
+
+    tGoldValues = { {"Type", "string", "Uniform"}, {"Value", "string", "4.0"}, {"Element Block", "string", "block_2"} };
+    tGoldValuesItr = tGoldValues.begin();
+    tParameter = tSourceParamList.child("Parameter");
+    while(!tParameter.empty())
+    {
+        ASSERT_FALSE(tParameter.empty());
+        ASSERT_STREQ("Parameter", tParameter.name());
+        PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValuesItr.operator*(), tParameter);
+        tParameter = tParameter.next_sibling();
+        std::advance(tGoldValuesItr, 1);
+    }
+
+    tSourceParamList = tSourceParamList.next_sibling("ParameterList");
+    ASSERT_TRUE(tSourceParamList.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryConditionsToPlatoAnalyzeInputDeck)
