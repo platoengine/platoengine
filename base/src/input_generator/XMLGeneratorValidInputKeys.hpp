@@ -360,7 +360,7 @@ struct ValidLoadKeys
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
-    std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure"};
+    std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure", "uniform_source"};
 };
 
 // struct ValidEssentialBoundaryConditionsKeys
@@ -829,9 +829,9 @@ public:
         return (tKeyItr->second);
     }
 };
-struct ValidPhysicsNBCCombinations
+struct ValidPhysicsLoadCombinations
 {
-    // Map physics->NBC->parent node name
+    // Map physics->load->parent node name
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::string>>> mKeys =
     {
         {"steady_state_mechanics", 
@@ -871,37 +871,41 @@ struct ValidPhysicsNBCCombinations
         },
         {"steady_state_incompressible_fluids", 
             {
+                {"uniform_source", {"Thermal Sources"}},
                 {"traction", {"Momentum Natural Boundary Conditions"}},
-                {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}},
+                {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}}
             }
         }
     };
 public:
-    void get_parent_names(const std::string &aPhysics,
-                          std::set<std::vector<std::string>> &aParentNames)
+    void get_parent_names
+    (const std::string &aPhysics,
+     std::set<std::vector<std::string>> &aParentNames)
     {
         auto tKeyItr = mKeys.find(aPhysics);
         if(tKeyItr == mKeys.end())
         {
-            THROWERR("Valid Physics NBC Combinations: Couldn't find physics: " + aPhysics)
+            THROWERR("Valid Physics-To-Load Combinations: Couldn't find physics: " + aPhysics)
         }
-        auto tNBCItr = tKeyItr->second.begin();
-        while(tNBCItr != tKeyItr->second.end())
+        auto tLoadItr = tKeyItr->second.begin();
+        while(tLoadItr != tKeyItr->second.end())
         {
-            aParentNames.insert(tNBCItr->second);
-            tNBCItr++;
+            aParentNames.insert(tLoadItr->second);
+            tLoadItr++;
         }
     }  
-    std::vector<std::string> get_parent_nbc_node_names(const std::string &aPhysics,
-                                                       const std::string &aLoadType)
+
+    std::vector<std::string> get_parent_load_node_names
+    (const std::string &aPhysics,
+     const std::string &aLoadType)
     {
         auto tKeyItr = mKeys.find(aPhysics);
         if(tKeyItr != mKeys.end())
         {
-            auto tNBCItr = tKeyItr->second.find(aLoadType);
-            if(tNBCItr != tKeyItr->second.end())
+            auto tLoadItr = tKeyItr->second.find(aLoadType);
+            if(tLoadItr != tKeyItr->second.end())
             {
-                return tNBCItr->second;
+                return tLoadItr->second;
             }
         }
         return {""};
@@ -1022,7 +1026,6 @@ private:
                 { "thermal_conductivity", {"Thermal Conductivity", "double"} }
             }
         },
-
 
         { "incompressible_flow",
             {

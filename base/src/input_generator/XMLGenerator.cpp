@@ -71,6 +71,7 @@
 #include "XMLGeneratorProblem.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 
+#include "XMLGeneratorParseLoads.hpp"
 #include "XMLGeneratorParseOutput.hpp"
 #include "XMLGeneratorParseScenario.hpp"
 #include "XMLGeneratorParseServices.hpp"
@@ -81,7 +82,6 @@
 #include "XMLGeneratorParseUncertainty.hpp"
 #include "XMLGeneratorParseOptimizationParameters.hpp"
 #include "XMLGeneratorParseEssentialBoundaryCondition.hpp"
-#include "XMLGeneratorParseNaturalBoundaryCondition.hpp"
 
 namespace XMLGen
 {
@@ -736,9 +736,9 @@ void XMLGenerator::parseObjective(std::istream &aInputFile)
 bool XMLGenerator::parseLoads(std::istream &fin)
 /******************************************************************************/
 {
-    XMLGen::ParseNaturalBoundaryCondition tParseNaturalBoundaryCondition;
-    tParseNaturalBoundaryCondition.parse(fin);
-    m_InputData.loads = tParseNaturalBoundaryCondition.data();
+    XMLGen::ParseLoad tParseLoad;
+    tParseLoad.parse(fin);
+    m_InputData.loads = tParseLoad.data();
     return true;
 }
 

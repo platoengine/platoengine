@@ -9,8 +9,8 @@
 #include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeInputFileUtilities.hpp"
 #include "XMLGeneratorAnalyzePhysicsFunctionInterface.hpp"
-#include "XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp"
-#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzeLoadFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzeLoadTagFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeAppendCriterionFunctionInterface.hpp"
 #include "XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp"
@@ -309,7 +309,7 @@ void append_plato_problem_to_plato_analyze_input_deck
     XMLGen::append_physics_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_material_models_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
-    XMLGen::append_natural_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+    XMLGen::append_loads_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
     XMLGen::append_essential_boundary_conditions_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
 }
 // function append_plato_problem_to_plato_analyze_input_deck
@@ -672,33 +672,33 @@ void append_spatial_model_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_natural_boundary_conditions_to_plato_problem
+void append_loads_to_plato_problem
 (const std::string &aPhysics,
- const std::vector<XMLGen::NaturalBoundaryCondition> &aLoads,
+ const std::vector<XMLGen::Load> &aLoads,
  std::vector<pugi::xml_node> &aParentNodes)
 {
-    XMLGen::AppendNaturalBoundaryCondition tNaturalBCFuncInterface;
-    XMLGen::NaturalBoundaryConditionTag tNaturalBCNameFuncInterface;
+    XMLGen::AppendLoad tLoadFuncInterface;
+    XMLGen::LoadTag tLoadNameFuncInterface;
     for(auto& tLoad : aLoads)
     {
-        auto tName = tNaturalBCNameFuncInterface.call(tLoad);
+        auto tName = tLoadNameFuncInterface.call(tLoad);
         pugi::xml_node tParentNode;
-        XMLGen::get_nbc_parent_node(aPhysics, tLoad, aParentNodes, tParentNode);
-        tNaturalBCFuncInterface.call(tName, tLoad, tParentNode);
+        XMLGen::get_load_parent_node(aPhysics, tLoad, aParentNodes, tParentNode);
+        tLoadFuncInterface.call(tName, tLoad, tParentNode);
     }
 }
-// function append_natural_boundary_conditions_to_plato_problem
+// function append_loads_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void get_nbc_parent_node
+void get_load_parent_node
 (const std::string &aPhysics,
- const XMLGen::NaturalBoundaryCondition &aLoad,
+ const XMLGen::Load &aLoad,
  const std::vector<pugi::xml_node> &aParentNodes,
  pugi::xml_node &aParentNode)
 {
-    XMLGen::ValidPhysicsNBCCombinations tPhysicsNBCMap;
-    std::vector<std::string> tParentNames = tPhysicsNBCMap.get_parent_nbc_node_names(aPhysics, aLoad.type()); 
+    XMLGen::ValidPhysicsLoadCombinations tPhysicsToLoadMap;
+    std::vector<std::string> tParentNames = tPhysicsToLoadMap.get_parent_load_node_names(aPhysics, aLoad.type()); 
     for(auto &tCurParentNode : aParentNodes)
     {
         if(tParentNames[tParentNames.size() - 1].compare(tCurParentNode.attribute("name").value()) == 0)
@@ -747,7 +747,7 @@ std::string get_essential_boundary_condition_block_title(XMLGen::Scenario &aScen
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_deterministic_natural_boundary_conditions_to_plato_problem
+void append_deterministic_loads_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -756,24 +756,24 @@ void append_deterministic_natural_boundary_conditions_to_plato_problem
     for (auto &tScenario : tScenarioList)
     {
         std::vector<pugi::xml_node> tParentNodes;
-        XMLGen::create_natural_boundary_condition_parent_nodes(tScenario, aParentNode, tParentNodes);
+        XMLGen::create_load_parent_nodes(tScenario, aParentNode, tParentNodes);
 
-        std::vector<XMLGen::NaturalBoundaryCondition> tScenarioLoads = aXMLMetaData.scenarioLoads(tScenario.id());
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tScenarioLoads, tParentNodes);
+        std::vector<XMLGen::Load> tScenarioLoads = aXMLMetaData.scenarioLoads(tScenario.id());
+        XMLGen::append_loads_to_plato_problem(tScenario.physics(), tScenarioLoads, tParentNodes);
     }
 }
-// function append_deterministic_natural_boundary_conditions_to_plato_problem
+// function append_deterministic_loads_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void create_natural_boundary_condition_parent_nodes
+void create_load_parent_nodes
 (const XMLGen::Scenario &aScenario,
  pugi::xml_node &aParentNode,
  std::vector<pugi::xml_node> &aParentNodes)
 {
-    XMLGen::ValidPhysicsNBCCombinations tPhysicsToNBCMap;
+    XMLGen::ValidPhysicsLoadCombinations tPhysicsToLoadMap;
     std::set<std::vector<std::string>> tParentNames;
-    tPhysicsToNBCMap.get_parent_names(aScenario.physics(), tParentNames);
+    tPhysicsToLoadMap.get_parent_names(aScenario.physics(), tParentNames);
     size_t tParentCounter = 0;
     pugi::xml_node tCurrentParent;
     auto tItr = tParentNames.begin();
@@ -782,9 +782,9 @@ void create_natural_boundary_condition_parent_nodes
         std::vector<std::string> tCurrentNames = *tItr;
         if (tCurrentNames.size() == 1)
         {
-            auto tNaturalBCParent = aParentNode.append_child("ParameterList");
-            XMLGen::append_attributes({"name"}, {tCurrentNames[0]}, tNaturalBCParent);
-            aParentNodes.push_back(tNaturalBCParent);
+            auto tLoadParent = aParentNode.append_child("ParameterList");
+            XMLGen::append_attributes({"name"}, {tCurrentNames[0]}, tLoadParent);
+            aParentNodes.push_back(tLoadParent);
         }
         else if (tCurrentNames.size() == 2)
         {
@@ -794,13 +794,13 @@ void create_natural_boundary_condition_parent_nodes
                 XMLGen::append_attributes({"name"}, {tCurrentNames[0]}, tCurrentParent);
             }
             // Append to the parent that was previously created
-            auto tNaturalBCParent = tCurrentParent.append_child("ParameterList");
-            XMLGen::append_attributes({"name"}, {tCurrentNames[1]}, tNaturalBCParent);
-            aParentNodes.push_back(tNaturalBCParent);
+            auto tLoadParent = tCurrentParent.append_child("ParameterList");
+            XMLGen::append_attributes({"name"}, {tCurrentNames[1]}, tLoadParent);
+            aParentNodes.push_back(tLoadParent);
         }
         else
         {
-            THROWERR("Only two levels of natural boundary condition parent parameter lists are allowed.")
+            THROWERR("Only two levels of load parent parameter lists are allowed.")
         }
         tItr++;
         tParentCounter++;
@@ -829,7 +829,7 @@ void get_ebc_vector_for_scenario
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_random_natural_boundary_conditions_to_plato_problem
+void append_random_loads_to_plato_problem
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
@@ -838,32 +838,32 @@ void append_random_natural_boundary_conditions_to_plato_problem
         auto tRandomLoads = aXMLMetaData.mRandomMetaData.loadcase();
         auto &tScenario = aXMLMetaData.scenario(aXMLMetaData.objective.scenarioIDs[0]);
         std::vector<pugi::xml_node> tParentNodes;
-        XMLGen::create_natural_boundary_condition_parent_nodes(tScenario, aParentNode, tParentNodes);
-        XMLGen::append_natural_boundary_conditions_to_plato_problem(tScenario.physics(), tRandomLoads.loads, tParentNodes);
+        XMLGen::create_load_parent_nodes(tScenario, aParentNode, tParentNodes);
+        XMLGen::append_loads_to_plato_problem(tScenario.physics(), tRandomLoads.loads, tParentNodes);
     }
     else
     {
-        XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
+        XMLGen::append_deterministic_loads_to_plato_problem(aXMLMetaData, aParentNode);
     }
 }
-// function append_random_natural_boundary_conditions_to_plato_problem
+// function append_random_loads_to_plato_problem
 /**********************************************************************************/
 
 /**********************************************************************************/
-void append_natural_boundary_conditions_to_plato_analyze_input_deck
+void append_loads_to_plato_analyze_input_deck
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
     if(aXMLMetaData.mRandomMetaData.samplesDrawn())
     {
-        XMLGen::append_random_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
+        XMLGen::append_random_loads_to_plato_problem(aXMLMetaData, aParentNode);
     }
     else
     {
-        XMLGen::append_deterministic_natural_boundary_conditions_to_plato_problem(aXMLMetaData, aParentNode);
+        XMLGen::append_deterministic_loads_to_plato_problem(aXMLMetaData, aParentNode);
     }
 }
-// function append_natural_boundary_conditions_to_plato_analyze_input_deck
+// function append_loads_to_plato_analyze_input_deck
 /**********************************************************************************/
 
 /**********************************************************************************/

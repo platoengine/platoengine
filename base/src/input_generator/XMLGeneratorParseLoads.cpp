@@ -1,18 +1,18 @@
 /*
- * XMLGeneratorParseNaturalBoundaryCondition.cpp
+ * XMLGeneratorParseLoads.cpp
  *
  *  Created on: Jan 5, 2021
  */
 
 #include <algorithm>
 
-#include "XMLGeneratorParseNaturalBoundaryCondition.hpp"
+#include "XMLGeneratorParseLoads.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 
 namespace XMLGen
 {
 
-void ParseNaturalBoundaryCondition::insertCoreProperties()
+void ParseLoad::insertCoreProperties()
 {
     mTags.insert({ "id", { { {"id"}, ""}, "" } });
     mTags.insert({ "type", { { {"type"}, ""}, "" } });
@@ -22,40 +22,40 @@ void ParseNaturalBoundaryCondition::insertCoreProperties()
     mTags.insert({ "value", { { {"value"}, ""}, "" } });
 }
 
-void ParseNaturalBoundaryCondition::allocate()
+void ParseLoad::allocate()
 {
     mTags.clear();
     this->insertCoreProperties();
 }
 
-void ParseNaturalBoundaryCondition::setNaturalBoundaryConditionIdentification(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setLoadIdentification(XMLGen::Load& aMetadata)
 {
     if(aMetadata.id().empty())
     {
         auto tItr = mTags.find("id");
         if(tItr->second.first.second.empty())
         {
-            THROWERR(std::string("Parse NaturalBoundaryCondition: natural boundary condition identification number is empty. ")
-                + std::string("A unique natural boundary condition identification number must be assigned to an natural boundary condition block."))
+            THROWERR(std::string("Parse Load: load identification number is empty. ")
+                + std::string("A unique load identification number must be assigned to a load block."))
         }
         aMetadata.id(tItr->second.first.second);
     }
 }
 
-void ParseNaturalBoundaryCondition::setType(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setType(XMLGen::Load& aMetadata)
 {
     if(aMetadata.value("type").empty())
     {
         auto tItr = mTags.find("type");
         if(tItr->second.first.second.empty())
         {
-            THROWERR("Parse NaturalBoundaryCondition: natural boundary condition type is empty.")
+            THROWERR("Parse Load: load type is empty.")
         }
         aMetadata.property("type", tItr->second.first.second);
     }
 }
 
-void ParseNaturalBoundaryCondition::setLocationType(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setLocationType(XMLGen::Load& aMetadata)
 {
     if(aMetadata.value("location_type").empty())
     {
@@ -67,7 +67,7 @@ void ParseNaturalBoundaryCondition::setLocationType(XMLGen::NaturalBoundaryCondi
     }
 }
 
-void ParseNaturalBoundaryCondition::setLocationName(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setLocationName(XMLGen::Load& aMetadata)
 {
     if(aMetadata.value("location_name").empty())
     {
@@ -79,7 +79,7 @@ void ParseNaturalBoundaryCondition::setLocationName(XMLGen::NaturalBoundaryCondi
     }
 }
 
-void ParseNaturalBoundaryCondition::setLocationID(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setLocationID(XMLGen::Load& aMetadata)
 {
     if(aMetadata.value("location_id").empty())
     {
@@ -91,7 +91,7 @@ void ParseNaturalBoundaryCondition::setLocationID(XMLGen::NaturalBoundaryConditi
     }
 }
 
-void ParseNaturalBoundaryCondition::setValueMetadata(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setValueMetadata(XMLGen::Load& aMetadata)
 {
     if(aMetadata.load_values().size() == 0)
     {
@@ -112,9 +112,9 @@ void ParseNaturalBoundaryCondition::setValueMetadata(XMLGen::NaturalBoundaryCond
     }
 }
 
-void ParseNaturalBoundaryCondition::setMetadata(XMLGen::NaturalBoundaryCondition& aMetadata)
+void ParseLoad::setMetadata(XMLGen::Load& aMetadata)
 {
-    this->setNaturalBoundaryConditionIdentification(aMetadata);
+    this->setLoadIdentification(aMetadata);
     this->setType(aMetadata);
     this->setLocationType(aMetadata);
     this->setLocationName(aMetadata);
@@ -122,7 +122,7 @@ void ParseNaturalBoundaryCondition::setMetadata(XMLGen::NaturalBoundaryCondition
     this->setValueMetadata(aMetadata);
 }
 
-void ParseNaturalBoundaryCondition::checkUniqueIDs()
+void ParseLoad::checkUniqueIDs()
 {
     std::vector<std::string> tIDs;
     for(auto& tEBC : mData)
@@ -132,16 +132,16 @@ void ParseNaturalBoundaryCondition::checkUniqueIDs()
 
     if(!XMLGen::unique(tIDs))
     {
-        THROWERR("Parse NaturalBoundaryCondition: BoundaryCondition block identification numbers, i.e. IDs, are not unique.  BoundaryCondition block IDs must be unique.")
+        THROWERR("Parse Load: BoundaryCondition block identification numbers, i.e. IDs, are not unique. BoundaryCondition block IDs must be unique.")
     }
 }
 
-std::vector<XMLGen::NaturalBoundaryCondition> ParseNaturalBoundaryCondition::data() const
+std::vector<XMLGen::Load> ParseLoad::data() const
 {
     return mData;
 }
 
-void ParseNaturalBoundaryCondition::parse(std::istream &aInputFile)
+void ParseLoad::parse(std::istream &aInputFile)
 {
     mData.clear();
     this->allocate();
@@ -158,7 +158,7 @@ void ParseNaturalBoundaryCondition::parse(std::istream &aInputFile)
         std::string tBCBlockID;
         if (XMLGen::parse_single_value(tTokens, { "begin", "load" }, tBCBlockID))
         {
-            XMLGen::NaturalBoundaryCondition tMetadata;
+            XMLGen::Load tMetadata;
             tMetadata.id(tBCBlockID);
             XMLGen::erase_tag_values(mTags);
             XMLGen::parse_input_metadata( { "end", "load" }, aInputFile, mTags);

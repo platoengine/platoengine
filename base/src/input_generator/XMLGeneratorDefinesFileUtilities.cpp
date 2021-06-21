@@ -8,7 +8,7 @@
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorDefinesFileUtilities.hpp"
-#include "XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp"
+#include "XMLGeneratorAnalyzeLoadTagFunctionInterface.hpp"
 
 namespace XMLGen
 {
@@ -70,14 +70,14 @@ return_random_tractions_tags_for_define_xml_file
     std::unordered_map<std::string, std::vector<std::string>> tOutput;
 
     XMLGen::ValidAxesKeys tValidDofs;
-    XMLGen::NaturalBoundaryConditionTag tNaturalBCNameFuncInterface;
+    XMLGen::LoadTag tLoadNameFuncInterface;
 
     auto tLoadCase = aRandomMetaData.loadcase();
     for(auto& tLoad : tLoadCase.loads)
     {
         auto tLoadTagLower = Plato::tolower(tLoad.type());
         auto tIsTractionLoad = tLoadTagLower == "traction";
-        auto tLoadIdentifier = tNaturalBCNameFuncInterface.call(tLoad);
+        auto tLoadIdentifier = tLoadNameFuncInterface.call(tLoad);
         if(tLoad.is_random() && tIsTractionLoad)
         {
             for (auto &tValue : tLoad.load_values())
@@ -234,7 +234,7 @@ allocate_map_from_random_load_identifier_to_load_samples
     std::map<std::string, std::vector<std::vector<std::string>>> tOutput;
 
     auto tLoadCase = aRandomMetaData.loadcase();
-    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    XMLGen::LoadTag tIdentifierInterface;
     for(auto& tLoad : tLoadCase.loads)
     {
         if(tLoad.is_random())
@@ -260,7 +260,7 @@ prepare_tractions_for_define_xml_file
         XMLGen::allocate_map_from_random_load_identifier_to_load_samples(aRandomMetaData);
 
     auto tSamples = aRandomMetaData.samples();
-    XMLGen::NaturalBoundaryConditionTag tIdentifierInterface;
+    XMLGen::LoadTag tIdentifierInterface;
     for(auto& tSample : tSamples)
     {
         auto tLoadCase = tSample.loadcase();
