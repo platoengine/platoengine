@@ -50,6 +50,7 @@
 #define PLATO_UNITTESTUTILS_HPP_
 
 #include <string>
+#include <fstream>
 #include <cassert>
 #include <iostream>
 
@@ -62,7 +63,7 @@ namespace PlatoTest
 {
 
 template<typename ScalarType, typename OrdinalType>
-void printVector(const Plato::Vector<ScalarType, OrdinalType> & aInput)
+inline void printVector(const Plato::Vector<ScalarType, OrdinalType> & aInput)
 {
     for (OrdinalType tIndex = 0; tIndex < aInput.size(); tIndex++)
     {
@@ -71,7 +72,7 @@ void printVector(const Plato::Vector<ScalarType, OrdinalType> & aInput)
 }
 
 template<typename ScalarType, typename OrdinalType>
-void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
+inline void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput)
 {
     auto tNumVectors = aInput.getNumVectors();
     for(decltype(tNumVectors) tVectorIndex = 0; tVectorIndex < tNumVectors; tVectorIndex++)
@@ -85,9 +86,9 @@ void printMultiVector(const Plato::MultiVector<ScalarType, OrdinalType> & aInput
 }
 
 template<typename ScalarType, typename OrdinalType>
-void checkVectorData(const Plato::Vector<ScalarType, OrdinalType> & aInput,
-                     const Plato::Vector<ScalarType, OrdinalType> & aGold,
-                     ScalarType aTolerance = 1e-6)
+inline void checkVectorData(const Plato::Vector<ScalarType, OrdinalType> & aInput,
+                            const Plato::Vector<ScalarType, OrdinalType> & aGold,
+                            ScalarType aTolerance = 1e-6)
 {
     if(aInput.size() != aGold.size())
     {
@@ -105,9 +106,9 @@ void checkVectorData(const Plato::Vector<ScalarType, OrdinalType> & aInput,
 }
 
 template<typename ScalarType, typename OrdinalType>
-void checkMultiVectorData(const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
-                          const Plato::MultiVector<ScalarType, OrdinalType> & aGold,
-                          ScalarType aTolerance = 1e-6)
+inline void checkMultiVectorData(const Plato::MultiVector<ScalarType, OrdinalType> & aInput,
+                                const Plato::MultiVector<ScalarType, OrdinalType> & aGold,
+                                ScalarType aTolerance = 1e-6)
 {
     assert(aInput.getNumVectors() == aGold.getNumVectors());
     OrdinalType tNumVectors = aInput.getNumVectors();
@@ -120,6 +121,23 @@ void checkMultiVectorData(const Plato::MultiVector<ScalarType, OrdinalType> & aI
         }
     }
 }
+
+/******************************************************************************/
+inline std::stringstream read_data_from_file(const std::string& aFilename)
+{
+    std::ifstream tReadFile;
+    tReadFile.open(aFilename);
+    std::string tInputString;
+    std::stringstream tReadData;
+    while (tReadFile >> tInputString)
+    {
+        tReadData << tInputString.c_str();
+    }
+    tReadFile.close();
+    return (tReadData);
+}
+// function read_data_from_file
+/******************************************************************************/
 
 } // namespace PlatoTest
 
