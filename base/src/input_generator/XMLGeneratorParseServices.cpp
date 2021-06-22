@@ -48,6 +48,7 @@ void ParseService::allocate()
     mTags.insert({ "number_processors", { { {"number_processors"}, ""}, "1" } });
     mTags.insert({ "number_ranks", { { {"number_ranks"}, ""}, "1" } });
     mTags.insert({ "device_ids", { { {"device_ids"}, ""}, "" } });
+    mTags.insert({ "existing_input_deck", { { {"existing_input_deck"}, ""}, "" } });
 }
 
 void ParseService::checkCacheState(XMLGen::Service& aService)

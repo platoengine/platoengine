@@ -4,7 +4,10 @@
  *  Created on: Feb 6, 2021
  */
 
+#include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <sys/stat.h>
 
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorSierraSDOperationsFileUtilities.hpp"
@@ -218,6 +221,21 @@ void append_echo_block
     }
     outfile << "END" << std::endl;
 }
+
+void append_penalty_terms_to_material_block(const XMLGen::InputData &aMetaData,
+                                            const XMLGen::Criterion &aCriterion,
+                                            const XMLGen::Scenario &aScenario,
+                                            std::ostream &outfile) {
+    outfile << "  material_penalty_model = simp" << std::endl;
+    if (aMetaData.optimization_parameters().discretization().compare("density") == 0) {
+        if (aScenario.materialPenaltyExponent().length() > 0)
+            outfile << "  penalty_coefficient = " << aScenario.materialPenaltyExponent() << std::endl;
+    }
+    if (aCriterion.type() == "frf_mismatch") {
+        outfile << "  minimum_stiffness_penalty_value=1e-3" << std::endl;
+    }
+}
+
 /**************************************************************************/
 void append_material_blocks
 (const XMLGen::InputData& aMetaData,
@@ -233,18 +251,7 @@ void append_material_blocks
         outfile << "  nu = " << tMaterial.property("poissons_ratio") << std::endl;
         if(tMaterial.property("mass_density").empty() == false)
             outfile << "  density = " << tMaterial.property("mass_density") << std::endl;
-
-        outfile << "  material_penalty_model = simp" << std::endl;
-        if(aMetaData.optimization_parameters().discretization().compare("density") == 0)
-        {
-            if(aScenario.materialPenaltyExponent().length() > 0)
-                outfile << "  penalty_coefficient = " << aScenario.materialPenaltyExponent() << std::endl;
-    
-        }
-        if(aCriterion.type() == "frf_mismatch")
-        {
-            outfile << "  minimum_stiffness_penalty_value=1e-3" << std::endl;
-        }
+        append_penalty_terms_to_material_block(aMetaData, aCriterion, aScenario, outfile);
         outfile << "END" << std::endl;
     }
 }
@@ -685,43 +692,175 @@ void append_boundary_block
     outfile << "END" << std::endl;
 }
 /**************************************************************************/
-void add_input_deck_blocks
-(const XMLGen::InputData& aMetaData,
- std::ostream &outfile)
+bool extractMetaDataForWritingInputDeck(const XMLGen::InputData &aMetaData,
+                                        XMLGen::Service &tService,
+                                        XMLGen::Scenario &tScenario,
+                                        XMLGen::Criterion &tCriterion)
 {
     if(aMetaData.objective.serviceIDs.size() > 0)
     {
         auto tServiceID = aMetaData.objective.serviceIDs[0];
-        auto &tService = aMetaData.service(tServiceID);
+        tService = aMetaData.service(tServiceID);
         if(tService.code() == "sierra_sd")
         {
             auto tScenarioID = aMetaData.objective.scenarioIDs[0];
-            auto &tScenario = aMetaData.scenario(tScenarioID);
+            tScenario = aMetaData.scenario(tScenarioID);
             auto tCriterionID = aMetaData.objective.criteriaIDs[0];
-            auto &tCriterion = aMetaData.criterion(tCriterionID);
-            append_solution_block(aMetaData, outfile);
-            append_parameters_block(tScenario, outfile);
-            append_frf_related_blocks(aMetaData, tCriterion, tScenario, outfile);
-            append_gdsw_block(tCriterion, tScenario, outfile);
-            append_outputs_block(tCriterion, outfile);
-            append_echo_block(tCriterion, outfile);
-            append_material_blocks(aMetaData, tCriterion, tScenario, outfile);
-            append_block_blocks(aMetaData, tCriterion, tScenario, outfile);
-            append_topology_optimization_block(aMetaData, tCriterion, tScenario, outfile);
-            append_file_block(aMetaData, outfile);
-            append_loads_block(aMetaData, tCriterion, tScenario, outfile);
-            append_boundary_block(aMetaData, tCriterion, tScenario, outfile);
+            tCriterion = aMetaData.criterion(tCriterionID);
+            return true;
         }
     }
+    return false;
+}
+
+void add_input_deck_blocks
+(const XMLGen::InputData& aMetaData,
+ std::ostream &outfile)
+{
+    XMLGen::Service tService;
+    XMLGen::Scenario tScenario;
+    XMLGen::Criterion tCriterion;
+
+    if (!extractMetaDataForWritingInputDeck(aMetaData, tService, tScenario, tCriterion)) {
+        return;
+    }
+
+    append_solution_block(aMetaData, outfile);
+    append_parameters_block(tScenario, outfile);
+    append_frf_related_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_gdsw_block(tCriterion, tScenario, outfile);
+    append_outputs_block(tCriterion, outfile);
+    append_echo_block(tCriterion, outfile);
+    append_material_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_block_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_topology_optimization_block(aMetaData, tCriterion, tScenario, outfile);
+    append_file_block(aMetaData, outfile);
+    append_loads_block(aMetaData, tCriterion, tScenario, outfile);
+    append_boundary_block(aMetaData, tCriterion, tScenario, outfile);
 }
 /******************************************************************************/
+
+// sometimes, people generate Salinas input decks with DOS end-of-line characters - yikes!
+bool getlineSafeForDOS(std::istream &input, std::string& line)
+{
+    bool ret = false;
+    if (std::getline(input, line)) {
+        ret = true;
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
+    }
+    return ret;
+}
+
+bool isEmptyLine(std::string line) {
+    return std::count_if(line.begin(), line.end(),
+    [](unsigned char c){
+        return !std::isspace(c);}) == 0;
+}
+
+void makeLowerCase(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);    
+}
+
+std::string getFirstTokenInLine(std::string line) {
+    std::istringstream stream(line);
+    std::string firstToken;
+    stream >> firstToken;
+    return firstToken;
+}
+
+std::string lowerCaseFirstTokenInLine(std::string line) {
+    std::string firstToken = getFirstTokenInLine(line);
+    makeLowerCase(firstToken);
+    return firstToken;
+}
+
+bool tokenMatches(std::string token, std::string str) {
+    return (token.find(str) != std::string::npos);
+}
+
+bool loadBlockFromSDInputDeck(std::istream &inputDeck, std::vector<std::string> &blockLines) {
+    blockLines.clear();
+    std::string line;
+    while (getlineSafeForDOS(inputDeck, line)) {
+        if (isEmptyLine(line)) {
+            continue;
+        }
+
+        std::string token = lowerCaseFirstTokenInLine(line);
+        blockLines.push_back(line);
+        if (tokenMatches(token, "end")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void printBlockExceptEndToken(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    for(size_t i=0;i<blockLines.size()-1;i++) {
+        outfile << blockLines[i] << std::endl;
+    }
+}
+
+void printBlockEndToken(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    const std::string &endToken = *(blockLines.end()-1);
+    outfile << endToken << std::endl;
+}
+
+void augment_sierra_sd_input_deck_with_plato_problem_description(const XMLGen::InputData &aXMLMetaData, std::istream &inputDeck, std::ostream &outfile) {
+    XMLGen::Service tService;
+    XMLGen::Scenario tScenario;
+    XMLGen::Criterion tCriterion;
+
+    if (!extractMetaDataForWritingInputDeck(aXMLMetaData, tService, tScenario, tCriterion)) {
+        return;
+    }
+
+    std::vector<std::string> blockLines;
+    while (loadBlockFromSDInputDeck(inputDeck, blockLines)) {
+        std::string token = lowerCaseFirstTokenInLine(*blockLines.begin());
+
+        if (tokenMatches(token, "solution")) {
+            append_solution_block(aXMLMetaData, outfile);
+        }
+        else if (tokenMatches(token, "material")) {
+            printBlockExceptEndToken(blockLines, outfile);
+            append_penalty_terms_to_material_block(aXMLMetaData, tCriterion, tScenario, outfile);
+            printBlockEndToken(blockLines, outfile);
+        }
+        else if (tokenMatches(token, "outputs") || tokenMatches(token, "echo")) {
+            printBlockExceptEndToken(blockLines, outfile);
+            outfile << "  topology" << std::endl;
+            printBlockEndToken(blockLines, outfile);
+        }
+        else {
+            printBlockExceptEndToken(blockLines, outfile);
+            printBlockEndToken(blockLines, outfile);
+        }
+    }
+
+    append_topology_optimization_block(aXMLMetaData, tCriterion, tScenario, outfile);
+}
+
 void write_sierra_sd_input_deck
 (const XMLGen::InputData& aXMLMetaData)
 {
     std::string tServiceID = get_salinas_service_id(aXMLMetaData);
     std::string tFilename = std::string("sierra_sd_") + tServiceID + "_input_deck.i";
     std::ofstream outfile(tFilename, std::ofstream::out);
-    add_input_deck_blocks(aXMLMetaData, outfile);
+
+    std::string existingDeck = aXMLMetaData.service(tServiceID).existingInputDeck();
+
+    struct stat buffer;
+    const bool haveExistingDeck = !existingDeck.empty() && (stat(existingDeck.c_str(), &buffer) == 0);
+
+    if (!haveExistingDeck) {
+        add_input_deck_blocks(aXMLMetaData, outfile);
+    } else {
+        std::ifstream iDeck(existingDeck);
+        augment_sierra_sd_input_deck_with_plato_problem_description(aXMLMetaData, iDeck, outfile);
+    }
 }
 /**************************************************************************/
 

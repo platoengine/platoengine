@@ -18,6 +18,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGeneratorPlatoMainOperationFile_UnitTester.cpp
                                       XMLGeneratorPlatoAnalyzeInputFile_UnitTester.cpp
                                       XMLGeneratorPlatoAnalyzeOperationsFile_UnitTester.cpp
+                                      XMLGeneratorSierraSDInputFile_UnitTester.cpp
                                       ../XMLGeneratorParseOptimizationParameters.cpp
                                       ../XMLGeneratorOptimizationParametersMetadata.cpp
                                       ../XMLGeneratorParseOutput.cpp
