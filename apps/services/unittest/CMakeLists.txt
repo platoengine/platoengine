@@ -138,7 +138,7 @@ INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 # actual target:
 #set(PLATOMAINUNITTESTER_ADDITIONAL_LIBS ${CMAKE_SOURCE_DIR}/tpls/gtest/build) 
 set(PLATOMAINUNITTESTER_LIBS ${PLATOMAINUNITTESTER_ADDITIONAL_LIBS} ${PLATO_LIBRARIES} ${PLATO_LIBRARIES} 
-                             ${NLOPT_LIBRARY} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} ${PYTHON_LIBRARY} 
+                             ${NLOPT_LIBRARY} ${GTEST_BOTH_LIBRARIES} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} ${PYTHON_LIBRARY} 
                              ${PYTHON_LINK_LIBS} ${Plato_EXTRA_LINK_FLAGS})
 add_executable(PlatoMainUnitTester ${PlatoMainUnitTester_SRCS})
 target_link_libraries(PlatoMainUnitTester PlatoApp ${PLATOMAINUNITTESTER_LIBS})

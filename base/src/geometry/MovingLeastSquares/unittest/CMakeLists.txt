@@ -15,7 +15,7 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/geometry/MovingLeastSquares
                        ${CMAKE_SOURCE_DIR}/base/src/tools)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
-set(PlatoGeometry_UnitTester_LIBS ${GTEST_LIBRARY} PlatoParser PlatoExceptions ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} )
+set(PlatoGeometry_UnitTester_LIBS ${GTEST_BOTH_LIBRARIES} PlatoParser PlatoExceptions ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} )
 add_executable(PlatoGeometryMLS_UnitTester ${PlatoGeometryMLS_UnitTester_SRCS})
 target_link_libraries(PlatoGeometryMLS_UnitTester ${PlatoGeometry_UnitTester_LIBS})
 add_test(NAME PlatoGeometryMLS_UnitTester COMMAND ${CMAKE_BINARY_DIR}/base/src/geometry/MovingLeastSquares/unittest/PlatoGeometryMLS_UnitTester)
