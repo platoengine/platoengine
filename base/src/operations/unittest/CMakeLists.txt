@@ -16,7 +16,7 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/tools ..)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
 # The order of these libraries and the duplicates are necessary
-set(Plato_Operations_UnitTester_LIBS ${GTEST_LIBRARY} 
+set(Plato_Operations_UnitTester_LIBS ${GTEST_BOTH_LIBRARIES} 
                                      PlatoApp
                                      ${PLATO_LIBRARIES}
                                      ${Trilinos_LIBRARIES}

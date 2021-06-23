@@ -18,7 +18,7 @@ INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
 
 set(PlatoXTK_UnitTester_LIBS 
-    ${GTEST_LIBRARY} 
+    ${GTEST_BOTH_LIBRARIES} 
     PlatoXTK
     ${XTK_Libs} 
     PlatoParser 
