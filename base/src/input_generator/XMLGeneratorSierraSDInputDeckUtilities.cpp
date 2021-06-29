@@ -808,6 +808,17 @@ void printBlockEndToken(const std::vector<std::string> &blockLines, std::ostream
     outfile << endToken << std::endl;
 }
 
+void replaceSolutionCases(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    for(auto it = blockLines.begin(); it < blockLines.end(); it++) {
+        const std::string &line = *it;
+        outfile << line << std::endl;
+        if (lowerCaseFirstTokenInLine(line) == "case") {
+            outfile << "  topology_optimization" << std::endl;
+            it++; 
+        }
+    }
+}
+
 void augment_sierra_sd_input_deck_with_plato_problem_description(const XMLGen::InputData &aXMLMetaData, std::istream &inputDeck, std::ostream &outfile) {
     XMLGen::Service tService;
     XMLGen::Scenario tScenario;
@@ -822,7 +833,7 @@ void augment_sierra_sd_input_deck_with_plato_problem_description(const XMLGen::I
         std::string token = lowerCaseFirstTokenInLine(*blockLines.begin());
 
         if (tokenMatches(token, "solution")) {
-            append_solution_block(aXMLMetaData, outfile);
+            replaceSolutionCases(blockLines, outfile);
         }
         else if (tokenMatches(token, "material")) {
             printBlockExceptEndToken(blockLines, outfile);
