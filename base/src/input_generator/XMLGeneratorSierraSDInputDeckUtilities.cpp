@@ -684,7 +684,7 @@ void append_boundary_block
                 }
                 else
                 {
-                    outfile << "  " << tCurEBC.location_type() << " " << tCurEBC.location_id() << " " << tDOF << " " << tCurEBC.dof_value() << " 0" << std::endl;
+                    outfile << "  " << tCurEBC.location_type() << " " << tCurEBC.location_id() << " " << tDOF << " " << tCurEBC.dof_value() << std::endl;
                 }
             }
         }
