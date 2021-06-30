@@ -4,6 +4,11 @@
  *  Created on: Feb 6, 2021
  */
 
+#include <algorithm>
+#include <fstream>
+#include <sstream>
+#include <sys/stat.h>
+
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorSierraSDOperationsFileUtilities.hpp"
 
@@ -13,37 +18,37 @@ namespace XMLGen
 /**************************************************************************/
 void append_solution_block
 (const XMLGen::InputData& aMetaData,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "SOLUTION\n");
+    outfile << "SOLUTION" << std::endl;
     if(aMetaData.objective.multi_load_case == "true")
     {
         for(auto tScenarioID : aMetaData.objective.scenarioIDs)
         {
-            fprintf(aFilePtr, "  case '%s'\n", tScenarioID.c_str());
-            fprintf(aFilePtr, "    topology_optimization\n");
-            fprintf(aFilePtr, "    load=%s\n", tScenarioID.c_str());
+            outfile << "  case '" << tScenarioID << "'" << std::endl;
+            outfile << "    topology_optimization" << std::endl;
+            outfile << "    load=" << tScenarioID << std::endl;
         }
     }
     else
     {
-        fprintf(aFilePtr, "  case '%s'\n", aMetaData.objective.scenarioIDs[0].c_str());
-        fprintf(aFilePtr, "  topology_optimization\n");
+        outfile << "  case '" << aMetaData.objective.scenarioIDs[0] << "'" << std::endl;
+        outfile << "  topology_optimization" << std::endl;
     }
-    fprintf(aFilePtr, "  solver gdsw\n");
-    fprintf(aFilePtr, "END\n");
+    outfile << "  solver gdsw" << std::endl;
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
 void append_parameters_block
 (const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     auto tWeightMassScaleFactor = aScenario.weightMassScaleFactor();
     if(tWeightMassScaleFactor != "")
     {
-        fprintf(aFilePtr, "PARAMETERS\n");
-        fprintf(aFilePtr, "  WTMASS = %s\n", tWeightMassScaleFactor.c_str());
-        fprintf(aFilePtr, "END\n");
+        outfile << "PARAMETERS" << std::endl;
+        outfile << "  WTMASS = " << tWeightMassScaleFactor << std::endl;
+        outfile << "END" << std::endl;
     }
 }
 /**************************************************************************/
@@ -51,11 +56,11 @@ void append_frf_related_blocks
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aCriterion.type() == "frf_mismatch")
     {
-        fprintf(aFilePtr, "INVERSE-PROBLEM\n");
+        outfile << "INVERSE-PROBLEM" << std::endl;
         if(aMetaData.optimization_parameters().discretization().compare("levelset") == 0)
         {
             std::string tTruthTableFile = "dummy_ttable_";
@@ -71,9 +76,9 @@ void append_frf_related_blocks
             // files at each iteration corresponding to the new computational
             // mesh node ids.  Therefore, we will start things off with 3
             // dummy files that just have generic data in them.
-            fprintf(aFilePtr, "  data_truth_table %s\n", tTruthTableFile.c_str());
-            fprintf(aFilePtr, "  real_data_file %s\n", tRealDataFile.c_str());
-            fprintf(aFilePtr, "  imaginary_data_file %s\n", tImagDataFile.c_str());
+            outfile << "  data_truth_table " << tTruthTableFile << std::endl;
+            outfile << "  real_data_file " << tRealDataFile << std::endl;
+            outfile << "  imaginary_data_file " << tImagDataFile << std::endl;
             // Create the 3 generic files.
             double tFreqMin, tFreqMax, tFreqStep;
             sscanf(aScenario.frequency_min().c_str(), "%lf", &tFreqMin);
@@ -123,45 +128,45 @@ void append_frf_related_blocks
         }
         else
         {
-            fprintf(aFilePtr, "  data_truth_table %s\n", "ttable.txt");
-            fprintf(aFilePtr, "  real_data_file %s\n", "data.txt");
-            fprintf(aFilePtr, "  imaginary_data_file %s\n", "data_im.txt");
+            outfile << "  data_truth_table ttable.txt" << std::endl;
+            outfile << "  real_data_file data.txt" << std::endl;
+            outfile << "  imaginary_data_file data_im.txt" << std::endl;
         }
-        fprintf(aFilePtr, "END\n");
-        fprintf(aFilePtr, "OPTIMIZATION\n");
-        fprintf(aFilePtr, "  optimization_package ROL_lib\n");
-        fprintf(aFilePtr, "  ROLmethod linesearch\n");
-        fprintf(aFilePtr, "  LSstep Newton-Krylov\n");
-        fprintf(aFilePtr, "  LS_curvature_condition null\n");
-        fprintf(aFilePtr, "  Max_iter_Krylov 50\n");
-        fprintf(aFilePtr, "  Use_FD_hessvec false\n");
-        fprintf(aFilePtr, "  Use_inexact_hessvec false\n");
-        fprintf(aFilePtr, "END\n");
+        outfile << "END" << std::endl;
+        outfile << "OPTIMIZATION" << std::endl;
+        outfile << "  optimization_package ROL_lib" << std::endl;
+        outfile << "  ROLmethod linesearch" << std::endl;
+        outfile << "  LSstep Newton-Krylov" << std::endl;
+        outfile << "  LS_curvature_condition null" << std::endl;
+        outfile << "  Max_iter_Krylov 50" << std::endl;
+        outfile << "  Use_FD_hessvec false" << std::endl;
+        outfile << "  Use_inexact_hessvec false" << std::endl;
+        outfile << "END" << std::endl;
         if(aScenario.raleigh_damping_alpha().length() > 0 &&
            aScenario.raleigh_damping_beta().length() > 0)
         {
-            fprintf(aFilePtr, "DAMPING\n");
-            fprintf(aFilePtr, "  alpha %s\n", aScenario.raleigh_damping_alpha().c_str());
-            fprintf(aFilePtr, "  beta %s\n", aScenario.raleigh_damping_beta().c_str());
-            fprintf(aFilePtr, "END\n");
+            outfile << "DAMPING" << std::endl;
+            outfile << "  alpha " << aScenario.raleigh_damping_alpha() << std::endl;
+            outfile << "  beta " << aScenario.raleigh_damping_beta() << std::endl;
+            outfile << "END" << std::endl;
         }
-        fprintf(aFilePtr, "FREQUENCY\n");
-        fprintf(aFilePtr, "  freq_min %s\n", aScenario.frequency_min().c_str());
-        fprintf(aFilePtr, "  freq_max %s\n", aScenario.frequency_max().c_str());
-        fprintf(aFilePtr, "  freq_step %s\n", aScenario.frequency_step().c_str());
-        fprintf(aFilePtr, "END\n");
-        fprintf(aFilePtr, "FUNCTION 1\n");
-        fprintf(aFilePtr, "  type linear\n");
-        fprintf(aFilePtr, "  data 0 1\n");
-        fprintf(aFilePtr, "  data 1e6 1\n");
-        fprintf(aFilePtr, "END\n");
+        outfile << "FREQUENCY" << std::endl;
+        outfile << "  freq_min " << aScenario.frequency_min() << std::endl;
+        outfile << "  freq_max " << aScenario.frequency_max() << std::endl;
+        outfile << "  freq_step " << aScenario.frequency_step() << std::endl;
+        outfile << "END" << std::endl;
+        outfile << "FUNCTION 1" << std::endl;
+        outfile << "  type linear" << std::endl;
+        outfile << "  data 0 1" << std::endl;
+        outfile << "  data 1e6 1" << std::endl;
+        outfile << "END" << std::endl;
     }
 }
 /**************************************************************************/
 void append_gdsw_block
 (const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     bool isDifficultForSolver = false;
     if(aCriterion.type() == "limit_stress")
@@ -170,78 +175,84 @@ void append_gdsw_block
         isDifficultForSolver = true;
     else if(aCriterion.type() == "stress_and_mass")
         isDifficultForSolver = true;
-    fprintf(aFilePtr, "GDSW\n");
+    outfile << "GDSW" << std::endl;
     const bool haveSolverTolerance = (aScenario.solverTolerance() != "");
     if(haveSolverTolerance)
     {
-        fprintf(aFilePtr, "  solver_tol = %s\n", aScenario.solverTolerance().c_str());
+        outfile << "  solver_tol = " << aScenario.solverTolerance() << std::endl;
     }
     if(isDifficultForSolver)
     {
-        fprintf(aFilePtr, "  diag_scaling diagonal\n");
-        fprintf(aFilePtr, "  krylov_method = GMRESClassic\n");
-        fprintf(aFilePtr, "  stag_tol = 0.001\n");
-        fprintf(aFilePtr, "  orthog = 0\n");
-        fprintf(aFilePtr, "  num_GS_steps = 2\n");
-        fprintf(aFilePtr, "  overlap = 4\n");
-        fprintf(aFilePtr, "  bailout true\n");
+        outfile << "  diag_scaling diagonal" << std::endl;
+        outfile << "  krylov_method = GMRESClassic" << std::endl;
+        outfile << "  stag_tol = 0.001" << std::endl;
+        outfile << "  orthog = 0" << std::endl;
+        outfile << "  num_GS_steps = 2" << std::endl;
+        outfile << "  overlap = 4" << std::endl;
+        outfile << "  bailout true" << std::endl;
         if(!haveSolverTolerance)
         {
-            fprintf(aFilePtr, "  solver_tol = 1e-4\n");
+            outfile << "  solver_tol = 1e-4" << std::endl;
         }
     }
-    fprintf(aFilePtr, "END\n");
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
 void append_outputs_block
 (const XMLGen::Criterion &aCriterion,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "OUTPUTS\n");
+    outfile << "OUTPUTS" << std::endl;
     if(aCriterion.type() != "frf_mismatch")
     {
-        fprintf(aFilePtr, "  topology\n");
+        outfile << "  topology" << std::endl;
     }
-    fprintf(aFilePtr, "END\n");
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
 void append_echo_block
 (const XMLGen::Criterion &aCriterion,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "ECHO\n");
+    outfile << "ECHO" << std::endl;
     if(aCriterion.type() != "frf_mismatch")
     {
-        fprintf(aFilePtr, "  topology\n");
+        outfile << "  topology" << std::endl;
     }
-    fprintf(aFilePtr, "END\n");
+    outfile << "END" << std::endl;
 }
+
+void append_penalty_terms_to_material_block(const XMLGen::InputData &aMetaData,
+                                            const XMLGen::Criterion &aCriterion,
+                                            const XMLGen::Scenario &aScenario,
+                                            std::ostream &outfile) {
+    outfile << "  material_penalty_model = simp" << std::endl;
+    if (aMetaData.optimization_parameters().discretization().compare("density") == 0) {
+        if (aScenario.materialPenaltyExponent().length() > 0)
+            outfile << "  penalty_coefficient = " << aScenario.materialPenaltyExponent() << std::endl;
+    }
+    if (aCriterion.type() == "frf_mismatch") {
+        outfile << "  minimum_stiffness_penalty_value=1e-3" << std::endl;
+    }
+}
+
 /**************************************************************************/
 void append_material_blocks
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     for(auto &tMaterial : aMetaData.materials)
     {
-        fprintf(aFilePtr, "MATERIAL %s\n", tMaterial.id().c_str());
-        fprintf(aFilePtr, "  isotropic\n");
-        fprintf(aFilePtr, "  E = %s\n", tMaterial.property("youngs_modulus").c_str());
-        fprintf(aFilePtr, "  nu = %s\n", tMaterial.property("poissons_ratio").c_str());
+        outfile << "MATERIAL " << tMaterial.id() << std::endl;
+        outfile << "  isotropic" << std::endl;
+        outfile << "  E = " << tMaterial.property("youngs_modulus") << std::endl;
+        outfile << "  nu = " << tMaterial.property("poissons_ratio") << std::endl;
         if(tMaterial.property("mass_density").empty() == false)
-            fprintf(aFilePtr, "  density = %s\n", tMaterial.property("mass_density").c_str());
-        fprintf(aFilePtr, "  material_penalty_model = simp\n");
-        if(aMetaData.optimization_parameters().discretization().compare("density") == 0)
-        {
-            if(aScenario.materialPenaltyExponent().length() > 0)
-                fprintf(aFilePtr, "  penalty_coefficient = %s\n", aScenario.materialPenaltyExponent().c_str());
-        }
-        if(aCriterion.type() == "frf_mismatch")
-        {
-            fprintf(aFilePtr, "  minimum_stiffness_penalty_value=1e-3\n");
-        }
-        fprintf(aFilePtr, "END\n");
+            outfile << "  density = " << tMaterial.property("mass_density") << std::endl;
+        append_penalty_terms_to_material_block(aMetaData, aCriterion, aScenario, outfile);
+        outfile << "END" << std::endl;
     }
 }
 /**************************************************************************/
@@ -249,43 +260,45 @@ void append_block_blocks
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     for(auto &tBlock : aMetaData.blocks)
     {
         if(tBlock.block_id.empty() == false)
         {
-            fprintf(aFilePtr, "BLOCK %s\n", tBlock.block_id.c_str());
+            outfile << "BLOCK " << tBlock.block_id << std::endl;
+
         }
         if(tBlock.material_id.empty() == false)
         {
-            fprintf(aFilePtr, "  material %s\n", tBlock.material_id.c_str());
+            outfile << "  material " << tBlock.material_id << std::endl;
+
         }
         if(tBlock.element_type == "hex8")
         {
-            fprintf(aFilePtr, "  hex8u\n"); 
+            outfile << "  hex8u" << std::endl; 
         }
         else if(tBlock.element_type == "tet4")
         {
-            fprintf(aFilePtr, "  tet4\n");
+            outfile << "  tet4" << std::endl;
         }
         else if(tBlock.element_type == "tet10")
         {
-            fprintf(aFilePtr, "  tet10\n");
+            outfile << "  tet10" << std::endl;
         }
         else if(tBlock.element_type == "rbar")
         {
-            fprintf(aFilePtr, "  rbar\n");
+            outfile << "  rbar" << std::endl;
         }
         else if(tBlock.element_type == "rbe3")
         {
-            fprintf(aFilePtr, "  rbe3\n");
+            outfile << "  rbe3" << std::endl;
         }
         if(aCriterion.type() == "frf_mismatch")
         {
-            fprintf(aFilePtr, "  inverse_material_type homogeneous\n");
+            outfile << "  inverse_material_type homogeneous" << std::endl;
         }
-        fprintf(aFilePtr, "END\n");
+        outfile << "END" << std::endl;
     }
 }
 /**************************************************************************/
@@ -293,7 +306,7 @@ void append_stress_parameters
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aCriterion.type() == "stress_and_mass" ||
        aCriterion.type() == "limit_stress" ||
@@ -301,103 +314,128 @@ void append_stress_parameters
     {
         if(aCriterion.volume_misfit_target() != "")
         {
-            fprintf(aFilePtr, "  volume_misfit_target = %s\n", aCriterion.volume_misfit_target().c_str());
+            outfile << "  volume_misfit_target = " << aCriterion.volume_misfit_target() << std::endl;
+
         }
         if(aCriterion.scmmInitialPenalty() != "")
         {
-            fprintf(aFilePtr, "  aug_lag_penalty_initial_value = %s\n", aCriterion.scmmInitialPenalty().c_str());
+            outfile << "  aug_lag_penalty_initial_value = " << aCriterion.scmmInitialPenalty() << std::endl;
+
         }
         if(aCriterion.scmmPenaltyExpansionMultiplier() != "")
         {
-            fprintf(aFilePtr, "  aug_lag_penalty_expansion_factor = %s\n", aCriterion.scmmPenaltyExpansionMultiplier().c_str());
+            outfile << "  aug_lag_penalty_expansion_factor = " << aCriterion.scmmPenaltyExpansionMultiplier() << std::endl;
+
         }
         if(aCriterion.scmm_constraint_exponent() != "")
         {
-            fprintf(aFilePtr, "  aug_lag_constraint_exponent = %s\n", aCriterion.scmm_constraint_exponent().c_str());
+            outfile << "  aug_lag_constraint_exponent = " << aCriterion.scmm_constraint_exponent() << std::endl;
+
         }
         if(aCriterion.stressLimit() != "")
         {
-            fprintf(aFilePtr, "  stress_limit_value = %s\n", aCriterion.stressLimit().c_str());
+            outfile << "  stress_limit_value = " << aCriterion.stressLimit() << std::endl;
+
         }
         if(aCriterion.relative_stress_limit() != "")
         {
-            fprintf(aFilePtr, "  relative_stress_limit = %s\n", aCriterion.relative_stress_limit().c_str());
+            outfile << "  relative_stress_limit = " << aCriterion.relative_stress_limit() << std::endl;
+
         }
         if(aCriterion.pnormExponent() != "")
         {
-            fprintf(aFilePtr, "  stress_p_norm_power = %s\n", aCriterion.pnormExponent().c_str());
+            outfile << "  stress_p_norm_power = " << aCriterion.pnormExponent() << std::endl;
+
         }
         if(aCriterion.relaxed_stress_ramp_factor() != "")
         {
-            fprintf(aFilePtr, "  relaxed_stress_ramp_factor = %s\n", aCriterion.relaxed_stress_ramp_factor().c_str());
+            outfile << "  relaxed_stress_ramp_factor = " << aCriterion.relaxed_stress_ramp_factor() << std::endl;
+
         }
         if(aCriterion.limit_power_min() != "")
         {
-            fprintf(aFilePtr, "  limit_min = %s\n", aCriterion.limit_power_min().c_str());
+            outfile << "  limit_min = " << aCriterion.limit_power_min() << std::endl;
+
         }
         if(aCriterion.limit_power_max() != "")
         {
-            fprintf(aFilePtr, "  limit_max = %s\n", aCriterion.limit_power_max().c_str());
+            outfile << "  limit_max = " << aCriterion.limit_power_max() << std::endl;
+
         }
         if(aCriterion.limit_power_feasible_bias() != "")
         {
-            fprintf(aFilePtr, "  limit_feasible_bias = %s\n", aCriterion.limit_power_feasible_bias().c_str());
+            outfile << "  limit_feasible_bias = " << aCriterion.limit_power_feasible_bias() << std::endl;
+
         }
         if(aCriterion.limit_power_feasible_slope() != "")
         {
-            fprintf(aFilePtr, "  limit_feasible_slope = %s\n", aCriterion.limit_power_feasible_slope().c_str());
+            outfile << "  limit_feasible_slope = " << aCriterion.limit_power_feasible_slope() << std::endl;
+
         }
         if(aCriterion.limit_power_infeasible_bias() != "")
         {
-            fprintf(aFilePtr, "  limit_infeasible_bias = %s\n", aCriterion.limit_power_infeasible_bias().c_str());
+            outfile << "  limit_infeasible_bias = " << aCriterion.limit_power_infeasible_bias() << std::endl;
+
         }
         if(aCriterion.limit_power_infeasible_slope() != "")
         {
-            fprintf(aFilePtr, "  limit_infeasible_slope = %s\n", aCriterion.limit_power_infeasible_slope().c_str());
+            outfile << "  limit_infeasible_slope = " << aCriterion.limit_power_infeasible_slope() << std::endl;
+
         }
         if(aCriterion.limit_reset_subfrequency() != "")
         {
-            fprintf(aFilePtr, "  limit_reset_subfrequency = %s\n", aCriterion.limit_reset_subfrequency().c_str());
+            outfile << "  limit_reset_subfrequency = " << aCriterion.limit_reset_subfrequency() << std::endl;
+
         }
         if(aCriterion.limit_reset_count() != "")
         {
-            fprintf(aFilePtr, "  limit_reset_count = %s\n", aCriterion.limit_reset_count().c_str());
+            outfile << "  limit_reset_count = " << aCriterion.limit_reset_count() << std::endl;
+
         }
         if(aCriterion.inequality_allowable_feasibility_upper() != "")
         {
-            fprintf(aFilePtr, "  stress_ineq_upper = %s\n", aCriterion.inequality_allowable_feasibility_upper().c_str());
+            outfile << "  stress_ineq_upper = " << aCriterion.inequality_allowable_feasibility_upper() << std::endl;
+
         }
         if(aCriterion.inequality_feasibility_scale() != "")
         {
-            fprintf(aFilePtr, "  inequality_feasibility_scale = %s\n", aCriterion.inequality_feasibility_scale().c_str());
+            outfile << "  inequality_feasibility_scale = " << aCriterion.inequality_feasibility_scale() << std::endl;
+
         }
         if(aCriterion.inequality_infeasibility_scale() != "")
         {
-            fprintf(aFilePtr, "  inequality_infeasibility_scale = %s\n", aCriterion.inequality_infeasibility_scale().c_str());
+            outfile << "  inequality_infeasibility_scale = " << aCriterion.inequality_infeasibility_scale() << std::endl;
+
         }
         if(aCriterion.stress_inequality_power() != "")
         {
-            fprintf(aFilePtr, "  stress_inequality_power = %s\n", aCriterion.stress_inequality_power().c_str());
+            outfile << "  stress_inequality_power = " << aCriterion.stress_inequality_power() << std::endl;
+
         }
         if(aCriterion.stress_favor_final() != "")
         {
-            fprintf(aFilePtr, "  stress_favor_final = %s\n", aCriterion.stress_favor_final().c_str());
+            outfile << "  stress_favor_final = " << aCriterion.stress_favor_final() << std::endl;
+
         }
         if(aCriterion.stress_favor_updates() != "")
         {
-            fprintf(aFilePtr, "  stress_favor_updates = %s\n", aCriterion.stress_favor_updates().c_str());
+            outfile << "  stress_favor_updates = " << aCriterion.stress_favor_updates() << std::endl;
+
         }
         if(aCriterion.volume_penalty_power() != "")
         {
-            fprintf(aFilePtr, "  volume_penalty_power = %s\n", aCriterion.volume_penalty_power().c_str());
+            outfile << "  volume_penalty_power = " << aCriterion.volume_penalty_power() << std::endl;
+
         }
         if(aCriterion.volume_penalty_divisor() != "")
         {
-            fprintf(aFilePtr, "  volume_penalty_divisor = %s\n", aCriterion.volume_penalty_divisor().c_str());
+            outfile << "  volume_penalty_divisor = " << aCriterion.volume_penalty_divisor() << std::endl;
+
         }
         if(aCriterion.volume_penalty_bias() != "")
         {
-            fprintf(aFilePtr, "  volume_penalty_bias = %s\n", aCriterion.volume_penalty_bias().c_str());
+            outfile << "  volume_penalty_bias = " << aCriterion.volume_penalty_bias() << std::endl;
+
         }
     }
 }
@@ -406,57 +444,60 @@ void append_case
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aCriterion.type() == "mechanical_compliance")
     {
-        fprintf(aFilePtr, "  case = compliance_min\n");
+        outfile << "  case = compliance_min" << std::endl;
     }
     else if(aCriterion.type() == "limit_stress")
     {
-        fprintf(aFilePtr, "  case = stress_limit\n");
+        outfile << "  case = stress_limit" << std::endl;
     }
     else if(aCriterion.type() == "stress_and_mass")
     {
-        fprintf(aFilePtr, "  case = stress_constrained_mass_minimization\n");
+        outfile << "  case = stress_constrained_mass_minimization" << std::endl;
     }
     else if(aCriterion.type() == "stress_p-norm")
     {
-        fprintf(aFilePtr, "  case = stress_min\n");
+        outfile << "  case = stress_min" << std::endl;
     }
     else if(aCriterion.type() == "compliance_and_volume_min")
     {
-        fprintf(aFilePtr, "  case = primary_compliance_secondary_volume\n");
+        outfile << "  case = primary_compliance_secondary_volume" << std::endl;
     }
     else if(aCriterion.type() == "frf_mismatch")
     {
         std::string tDiscretization = aMetaData.optimization_parameters().discretization();
-        fprintf(aFilePtr, "  case = inverse_methods\n");
+        outfile << "  case = inverse_methods" << std::endl;
         if(tDiscretization == "density")
-            fprintf(aFilePtr, "  inverse_method_objective = directfrf-plato-density-method\n");
+            outfile << "  inverse_method_objective = directfrf-plato-density-method" << std::endl;
         else if(tDiscretization == "levelset")
-            fprintf(aFilePtr, "  inverse_method_objective = directfrf-plato-levelset-method\n");
-        fprintf(aFilePtr, "  ref_frf_file %s\n", aScenario.ref_frf_file().c_str());
+            outfile << "  inverse_method_objective = directfrf-plato-levelset-method" << std::endl;
+        outfile << "  ref_frf_file " << aScenario.ref_frf_file() << std::endl;
         if(aScenario.frfMatchNodesetIDs().size() > 0)
         {
-            fprintf(aFilePtr, "  frf_nodesets");
+            outfile << "  frf_nodesets";
             for(auto tNodesetID : aScenario.frfMatchNodesetIDs())
             {
-                fprintf(aFilePtr, " %s", tNodesetID.c_str());
+                outfile << " " << tNodesetID << std::endl;
+    
             }
-            fprintf(aFilePtr, "\n");
+            outfile << "" << std::endl;
         }
         if(aScenario.complex_error_measure().length() > 0)
-            fprintf(aFilePtr, "  complex_error_measure %s\n", aScenario.complex_error_measure().c_str());
+            outfile << "  complex_error_measure " << aScenario.complex_error_measure() << std::endl;
+
         if (aScenario.convert_to_tet10().length()>0)
-            fprintf(aFilePtr, " ls_tet_mesh_type %s\n", aScenario.convert_to_tet10().c_str());
+            outfile << " ls_tet_mesh_type " << aScenario.convert_to_tet10() << std::endl;
+
     }
 }
 /**************************************************************************/
 void append_normalization_parameter
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     bool tNormalizeObjective = true;
     if(XMLGen::is_robust_optimization_problem(aMetaData))
@@ -469,22 +510,23 @@ void append_normalization_parameter
     }
     if(tNormalizeObjective == false)
     {
-        fprintf(aFilePtr, "  objective_normalization false\n");
+        outfile << "  objective_normalization false" << std::endl;
     }
 }
 /**************************************************************************/
 void append_multi_load_case_data
 (const XMLGen::InputData& aMetaData,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aMetaData.objective.multi_load_case == "true")
     {
-        fprintf(aFilePtr, "  load_case_weights = ");
+        outfile << "  load_case_weights = ";
         for(auto tWeight : aMetaData.objective.weights)
         {
-            fprintf(aFilePtr, "%s ", tWeight.c_str());
+            outfile << tWeight << " " << std::endl;
+
         }
-        fprintf(aFilePtr, "\n");
+        outfile << "" << std::endl;
     }
 }
 /**************************************************************************/
@@ -492,12 +534,12 @@ void append_topology_optimization_block
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion &aCriterion,
  const XMLGen::Scenario &aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "TOPOLOGY-OPTIMIZATION\n");
-    fprintf(aFilePtr, "  algorithm = plato_engine\n");
-    append_case(aMetaData, aCriterion, aScenario, aFilePtr);
-    append_stress_parameters(aMetaData, aCriterion, aScenario, aFilePtr);
+    outfile << "TOPOLOGY-OPTIMIZATION" << std::endl;
+    outfile << "  algorithm = plato_engine" << std::endl;
+    append_case(aMetaData, aCriterion, aScenario, outfile);
+    append_stress_parameters(aMetaData, aCriterion, aScenario, outfile);
     if(aCriterion.type() == "frf_mismatch")
     {
         if(aMetaData.constraints.size() > 0)
@@ -506,8 +548,10 @@ void append_topology_optimization_block
             auto &tConstraintCriterion = aMetaData.criterion(tConstraintCriterionID);
             if(tConstraintCriterion.type() == "surface_area")
             {
-                fprintf(aFilePtr, "  surface_area_constraint_value = %s\n", aMetaData.constraints[0].absoluteTarget().c_str());
-                fprintf(aFilePtr, "  surface_area_ssid = %s\n", tConstraintCriterion.surface_area_sideset_id().c_str());
+                outfile << "  surface_area_constraint_value = " << aMetaData.constraints[0].absoluteTarget() << std::endl;
+    
+                outfile << "  surface_area_ssid = " << tConstraintCriterion.surface_area_sideset_id() << std::endl;
+    
             }
         }
 
@@ -516,53 +560,40 @@ void append_topology_optimization_block
     {
         // This is a dummy place holder value and is simply here to tell Salinas that 
         // this is a single material optimization.
-        fprintf(aFilePtr, "  volume_fraction = %f\n", .314);
+        outfile << "  volume_fraction = .314" << std::endl;
     }
-    append_multi_load_case_data(aMetaData, aFilePtr);
-    append_normalization_parameter(aMetaData, aCriterion, aFilePtr);
-    fprintf(aFilePtr, "END\n");
+    append_multi_load_case_data(aMetaData, outfile);
+    append_normalization_parameter(aMetaData, aCriterion, outfile);
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
 void append_file_block
 (const XMLGen::InputData& aMetaData,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "FILE\n");
-    fprintf(aFilePtr, "  geometry_file '%s'\n", aMetaData.mesh.run_name.c_str());
-    fprintf(aFilePtr, "END\n");
+    outfile << "FILE" << std::endl;
+    outfile << "  geometry_file '" << aMetaData.mesh.run_name << "'"  << std::endl;
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
 void append_load
 (const XMLGen::Load& aLoad,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aLoad.type() == "acceleration")
     {
         auto &tLoadValues = aLoad.load_values(); 
-        fprintf(aFilePtr, "  body gravity %s %s %s scale 1.0\n",
-                tLoadValues[0].c_str(),
-                tLoadValues[1].c_str(),
-                tLoadValues[2].c_str());
+        outfile << "  body gravity " << tLoadValues[0] << " " << tLoadValues[1] << " " << tLoadValues[2] << " scale 1.0" << std::endl;
     }
     else if(aLoad.type() == "pressure")
     {
-        auto &tLoadValues = aLoad.load_values(); 
-        fprintf(aFilePtr, "  %s %s %s %s\n",
-                aLoad.location_type().c_str(),
-                aLoad.location_id().c_str(),
-                aLoad.type().c_str(),
-                tLoadValues[0].c_str());
+        auto &tLoadValues = aLoad.load_values();     
+        outfile << "  " << aLoad.location_type() << " " << aLoad.location_id() << " " << aLoad.type() << " " << tLoadValues[0] << std::endl;
     }
     else
     {
         auto &tLoadValues = aLoad.load_values(); 
-        fprintf(aFilePtr, "  %s %s %s %s %s %s scale 1.0\n",
-                aLoad.location_type().c_str(),
-                aLoad.location_id().c_str(),
-                aLoad.type().c_str(),
-                tLoadValues[0].c_str(),
-                tLoadValues[1].c_str(),
-                tLoadValues[2].c_str());
+        outfile << "  " << aLoad.location_type() << " " << aLoad.location_id() << " " << aLoad.type() << " " << tLoadValues[0] << " " << tLoadValues[1] << " " << tLoadValues[2] << " scale 1.0" << std::endl;
     }
 }
 /**************************************************************************/
@@ -570,32 +601,33 @@ void append_loads_block
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion& aCriterion,
  const XMLGen::Scenario& aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
     if(aMetaData.objective.multi_load_case == "true")
     {
         for(auto tScenarioID : aMetaData.objective.scenarioIDs)
         {
-            fprintf(aFilePtr, "LOAD=%s\n", tScenarioID.c_str());
+            outfile << "LOAD=" << tScenarioID << std::endl;
+
             for(auto &tLoad : aMetaData.scenarioLoads(tScenarioID))
             {
-                append_load(tLoad, aFilePtr);
+                append_load(tLoad, outfile);
             }
-            fprintf(aFilePtr, "END\n");
+            outfile << "END" << std::endl;
         }
     }
     else
     {
-        fprintf(aFilePtr, "LOADS\n");
+        outfile << "LOADS" << std::endl;
         for(auto &tLoad : aMetaData.scenarioLoads(aScenario.id()))
         {
-            append_load(tLoad, aFilePtr);
+            append_load(tLoad, outfile);
         }
         if(aCriterion.type() == "frf_mismatch")
         {
-            fprintf(aFilePtr, "  function=1\n");
+            outfile << "  function=1" << std::endl;
         }
-        fprintf(aFilePtr, "END\n");
+        outfile << "END" << std::endl;
     }
 }
 /**************************************************************************/
@@ -622,9 +654,9 @@ void append_boundary_block
 (const XMLGen::InputData& aMetaData,
  const XMLGen::Criterion& aCriterion,
  const XMLGen::Scenario& aScenario,
- FILE *aFilePtr)
+ std::ostream &outfile)
 {
-    fprintf(aFilePtr, "BOUNDARY\n");
+    outfile << "BOUNDARY" << std::endl;
     for(auto tBCID : aScenario.bcIDs())
     {
         bool found = false;
@@ -641,74 +673,204 @@ void append_boundary_block
         {
             if(tCurEBC.degree_of_freedom().empty())
             {
-                fprintf(aFilePtr, "  %s %s fixed\n",
-                        tCurEBC.location_type().c_str(),
-                        tCurEBC.location_id().c_str());
+                outfile << "  " << tCurEBC.location_type() << " " << tCurEBC.location_id() << " fixed" << std::endl;
             }
             else
             {
                 std::string tDOF = convertDOF(tCurEBC.degree_of_freedom());
                 if(tCurEBC.dof_value().empty())
                 {
-                    fprintf(aFilePtr, "  %s %s %s 0\n",
-                            tCurEBC.location_type().c_str(),
-                            tCurEBC.location_id().c_str(),
-                            tDOF.c_str());
+                    outfile << "  " << tCurEBC.location_type() << " " << tCurEBC.location_id() << " " << tDOF << " 0" << std::endl;
                 }
                 else
                 {
-                    fprintf(aFilePtr, "  %s %s %s %s\n",
-                            tCurEBC.location_type().c_str(),
-                            tCurEBC.location_id().c_str(),
-                            tDOF.c_str(),
-                            tCurEBC.dof_value().c_str());
+                    outfile << "  " << tCurEBC.location_type() << " " << tCurEBC.location_id() << " " << tDOF << " " << tCurEBC.dof_value() << std::endl;
                 }
             }
         }
     }
-    fprintf(aFilePtr, "END\n");
+    outfile << "END" << std::endl;
 }
 /**************************************************************************/
-void add_input_deck_blocks
-(const XMLGen::InputData& aMetaData,
- FILE *aFilePtr)
+bool extractMetaDataForWritingInputDeck(const XMLGen::InputData &aMetaData,
+                                        XMLGen::Service &tService,
+                                        XMLGen::Scenario &tScenario,
+                                        XMLGen::Criterion &tCriterion)
 {
     if(aMetaData.objective.serviceIDs.size() > 0)
     {
         auto tServiceID = aMetaData.objective.serviceIDs[0];
-        auto &tService = aMetaData.service(tServiceID);
+        tService = aMetaData.service(tServiceID);
         if(tService.code() == "sierra_sd")
         {
             auto tScenarioID = aMetaData.objective.scenarioIDs[0];
-            auto &tScenario = aMetaData.scenario(tScenarioID);
+            tScenario = aMetaData.scenario(tScenarioID);
             auto tCriterionID = aMetaData.objective.criteriaIDs[0];
-            auto &tCriterion = aMetaData.criterion(tCriterionID);
-            append_solution_block(aMetaData, aFilePtr);
-            append_parameters_block(tScenario, aFilePtr);
-            append_frf_related_blocks(aMetaData, tCriterion, tScenario, aFilePtr);
-            append_gdsw_block(tCriterion, tScenario, aFilePtr);
-            append_outputs_block(tCriterion, aFilePtr);
-            append_echo_block(tCriterion, aFilePtr);
-            append_material_blocks(aMetaData, tCriterion, tScenario, aFilePtr);
-            append_block_blocks(aMetaData, tCriterion, tScenario, aFilePtr);
-            append_topology_optimization_block(aMetaData, tCriterion, tScenario, aFilePtr);
-            append_file_block(aMetaData, aFilePtr);
-            append_loads_block(aMetaData, tCriterion, tScenario, aFilePtr);
-            append_boundary_block(aMetaData, tCriterion, tScenario, aFilePtr);
+            tCriterion = aMetaData.criterion(tCriterionID);
+            return true;
+        }
+    }
+    return false;
+}
+
+void add_input_deck_blocks
+(const XMLGen::InputData& aMetaData,
+ std::ostream &outfile)
+{
+    XMLGen::Service tService;
+    XMLGen::Scenario tScenario;
+    XMLGen::Criterion tCriterion;
+
+    if (!extractMetaDataForWritingInputDeck(aMetaData, tService, tScenario, tCriterion)) {
+        return;
+    }
+
+    append_solution_block(aMetaData, outfile);
+    append_parameters_block(tScenario, outfile);
+    append_frf_related_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_gdsw_block(tCriterion, tScenario, outfile);
+    append_outputs_block(tCriterion, outfile);
+    append_echo_block(tCriterion, outfile);
+    append_material_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_block_blocks(aMetaData, tCriterion, tScenario, outfile);
+    append_topology_optimization_block(aMetaData, tCriterion, tScenario, outfile);
+    append_file_block(aMetaData, outfile);
+    append_loads_block(aMetaData, tCriterion, tScenario, outfile);
+    append_boundary_block(aMetaData, tCriterion, tScenario, outfile);
+}
+/******************************************************************************/
+
+// sometimes, people generate Salinas input decks with DOS end-of-line characters - yikes!
+bool getlineSafeForDOS(std::istream &input, std::string& line)
+{
+    bool ret = false;
+    if (std::getline(input, line)) {
+        ret = true;
+        if (line.back() == '\r') {
+            line.pop_back();
+        }
+    }
+    return ret;
+}
+
+bool isEmptyLine(std::string line) {
+    return std::count_if(line.begin(), line.end(),
+    [](unsigned char c){
+        return !std::isspace(c);}) == 0;
+}
+
+void makeLowerCase(std::string &str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);    
+}
+
+std::string getFirstTokenInLine(std::string line) {
+    std::istringstream stream(line);
+    std::string firstToken;
+    stream >> firstToken;
+    return firstToken;
+}
+
+std::string lowerCaseFirstTokenInLine(std::string line) {
+    std::string firstToken = getFirstTokenInLine(line);
+    makeLowerCase(firstToken);
+    return firstToken;
+}
+
+bool tokenMatches(std::string token, std::string str) {
+    return (token.find(str) != std::string::npos);
+}
+
+bool loadBlockFromSDInputDeck(std::istream &inputDeck, std::vector<std::string> &blockLines) {
+    blockLines.clear();
+    std::string line;
+    while (getlineSafeForDOS(inputDeck, line)) {
+        if (isEmptyLine(line)) {
+            continue;
+        }
+
+        std::string token = lowerCaseFirstTokenInLine(line);
+        blockLines.push_back(line);
+        if (tokenMatches(token, "end")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void printBlockExceptEndToken(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    for(size_t i=0;i<blockLines.size()-1;i++) {
+        outfile << blockLines[i] << std::endl;
+    }
+}
+
+void printBlockEndToken(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    const std::string &endToken = *(blockLines.end()-1);
+    outfile << endToken << std::endl;
+}
+
+void replaceSolutionCases(const std::vector<std::string> &blockLines, std::ostream &outfile) {
+    for(auto it = blockLines.begin(); it < blockLines.end(); it++) {
+        const std::string &line = *it;
+        outfile << line << std::endl;
+        if (lowerCaseFirstTokenInLine(line) == "case") {
+            outfile << "  topology_optimization" << std::endl;
+            it++; 
         }
     }
 }
-/******************************************************************************/
+
+void augment_sierra_sd_input_deck_with_plato_problem_description(const XMLGen::InputData &aXMLMetaData, std::istream &inputDeck, std::ostream &outfile) {
+    XMLGen::Service tService;
+    XMLGen::Scenario tScenario;
+    XMLGen::Criterion tCriterion;
+
+    if (!extractMetaDataForWritingInputDeck(aXMLMetaData, tService, tScenario, tCriterion)) {
+        return;
+    }
+
+    std::vector<std::string> blockLines;
+    while (loadBlockFromSDInputDeck(inputDeck, blockLines)) {
+        std::string token = lowerCaseFirstTokenInLine(*blockLines.begin());
+
+        if (tokenMatches(token, "solution")) {
+            replaceSolutionCases(blockLines, outfile);
+        }
+        else if (tokenMatches(token, "material")) {
+            printBlockExceptEndToken(blockLines, outfile);
+            append_penalty_terms_to_material_block(aXMLMetaData, tCriterion, tScenario, outfile);
+            printBlockEndToken(blockLines, outfile);
+        }
+        else if (tokenMatches(token, "outputs") || tokenMatches(token, "echo")) {
+            printBlockExceptEndToken(blockLines, outfile);
+            outfile << "  topology" << std::endl;
+            printBlockEndToken(blockLines, outfile);
+        }
+        else {
+            printBlockExceptEndToken(blockLines, outfile);
+            printBlockEndToken(blockLines, outfile);
+        }
+    }
+
+    append_topology_optimization_block(aXMLMetaData, tCriterion, tScenario, outfile);
+}
+
 void write_sierra_sd_input_deck
 (const XMLGen::InputData& aXMLMetaData)
 {
     std::string tServiceID = get_salinas_service_id(aXMLMetaData);
     std::string tFilename = std::string("sierra_sd_") + tServiceID + "_input_deck.i";
-    FILE *tFilePtr=fopen(tFilename.c_str(), "w");
-    if(tFilePtr)
-    {
-        add_input_deck_blocks(aXMLMetaData, tFilePtr);
-        fclose(tFilePtr);
+    std::ofstream outfile(tFilename, std::ofstream::out);
+
+    std::string existingDeck = aXMLMetaData.service(tServiceID).existingInputDeck();
+
+    struct stat buffer;
+    const bool haveExistingDeck = !existingDeck.empty() && (stat(existingDeck.c_str(), &buffer) == 0);
+
+    if (!haveExistingDeck) {
+        add_input_deck_blocks(aXMLMetaData, outfile);
+    } else {
+        std::ifstream iDeck(existingDeck);
+        augment_sierra_sd_input_deck_with_plato_problem_description(aXMLMetaData, iDeck, outfile);
     }
 }
 /**************************************************************************/

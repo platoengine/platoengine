@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <fstream>
+
 #include "pugixml.hpp"
 
 #include "XMLGeneratorDataStruct.hpp"
@@ -21,6 +23,7 @@ namespace XMLGen
 void write_sierra_sd_input_deck
 (const XMLGen::InputData& aXMLMetaData);
 
+void augment_sierra_sd_input_deck_with_plato_problem_description(const XMLGen::InputData &aXMLMetaData, std::istream &inputDeck, std::ostream &outfile);
 
 }
 // namespace XMLGen
