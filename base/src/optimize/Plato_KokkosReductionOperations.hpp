@@ -114,15 +114,7 @@ public:
         const ScalarType* tInputData = aInput.data();
 
         ScalarType tOutput;
-#ifdef BUILD_IN_SIERRA
         Kokkos::Min<ScalarType> tMinReducer(tOutput);
-#else
-#ifdef NEW_TRILINOS_INTEGRATION
-        Kokkos::Min<ScalarType> tMinReducer(tOutput);
-#else
-        Kokkos::Min<ScalarType> tMinReducer(tOutput);
-#endif
-#endif
         Kokkos::parallel_reduce("KokkosReductionOperations::min",
                                 Kokkos::RangePolicy<>(0, tSize),
                                 KOKKOS_LAMBDA(const OrdinalType & aIndex, ScalarType & aValue){

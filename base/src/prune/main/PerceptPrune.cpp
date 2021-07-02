@@ -18,17 +18,17 @@
 #include <stk_mesh/base/MetaData.hpp>
 #include <stk_mesh/base/DestroyElements.hpp>
 
-#include <percept/xfer/STKMeshTransferSetup.hpp>
-#include <percept/function/StringFunction.hpp>
-#include <percept/function/FieldFunction.hpp>
-#include <percept/Percept.hpp>
-#include <percept/Util.hpp>
-#include <percept/ExceptionWatch.hpp>
-#include <percept/GeometryVerifier.hpp>
-#include <percept/function/StringFunction.hpp>
-#include <percept/function/FieldFunction.hpp>
-#include <percept/function/ConstantFunction.hpp>
-#include <percept/PerceptMesh.hpp>
+#include <STKMeshTransferSetup.hpp>
+#include <StringFunction.hpp>
+#include <FieldFunction.hpp>
+#include <Percept.hpp>
+#include <Util.hpp>
+#include <ExceptionWatch.hpp>
+#include <GeometryVerifier.hpp>
+#include <StringFunction.hpp>
+#include <FieldFunction.hpp>
+#include <ConstantFunction.hpp>
+#include <PerceptMesh.hpp>
 
 #include <Ioss_SubSystem.h>
 

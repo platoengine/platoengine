@@ -7,7 +7,7 @@
 
 #include "MeshManager.hpp"
 
-#include <percept/PerceptMesh.hpp>
+#include <PerceptMesh.hpp>
 #include "PruneMeshAPISTK.hpp"
 #include "PruneMeshAPI.hpp"
 

@@ -9,8 +9,8 @@
 #define ISO_PRUNE_MAIN_MESHTRANSFER_HPP_
 
 #include "MeshManager.hpp"
-#include <percept/xfer/STKMeshTransferSetup.hpp>
-#include <percept/PerceptMesh.hpp>
+#include <STKMeshTransferSetup.hpp>
+#include <PerceptMesh.hpp>
 
 class MeshTransfer
 {
