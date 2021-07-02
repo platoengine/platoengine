@@ -48,9 +48,9 @@ void ParseScenario::setLoadIDs(XMLGen::Scenario &aMetadata)
     }
 }
 
-void ParseScenario::setFRFMatchNodesetIDs(XMLGen::Scenario &aMetadata)
+void ParseScenario::setMatchNodesetIDs(XMLGen::Scenario &aMetadata)
 {
-    auto tItr = mTags.find("frf_match_nodesets");
+    auto tItr = mTags.find("match_nodesets");
     std::string tValues = tItr->second.first.second;
     if (tItr != mTags.end() && !tValues.empty())
     {
@@ -126,7 +126,7 @@ void ParseScenario::allocate()
 
     mTags.insert({ "loads", { { {"loads"}, ""}, "" } });
     mTags.insert({ "boundary_conditions", { { {"boundary_conditions"}, ""}, "" } });
-    mTags.insert({ "ref_frf_file", { { {"ref_frf_file"}, ""}, "" } });
+    mTags.insert({ "ref_data_file", { { {"ref_data_file"}, ""}, "" } });
     mTags.insert({ "weight_mass_scale_factor", { { {"weight_mass_scale_factor"}, ""}, "" } });
 
     mTags.insert({ "frequency_min", { { {"frequency_min"}, ""}, "" } });
@@ -134,7 +134,7 @@ void ParseScenario::allocate()
     mTags.insert({ "frequency_step", { { {"frequency_step"}, ""}, "" } });
     mTags.insert({ "raleigh_damping_alpha", { { {"raleigh_damping_alpha"}, ""}, "" } });
     mTags.insert({ "raleigh_damping_beta", { { {"raleigh_damping_beta"}, ""}, "" } });
-    mTags.insert({ "frf_match_nodesets", { { {"frf_match_nodesets"}, ""}, "" } });
+    mTags.insert({ "match_nodesets", { { {"match_nodesets"}, ""}, "" } });
     mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
     mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
 
@@ -232,7 +232,7 @@ void ParseScenario::parse(std::istream &aInputFile)
             this->setTags(tScenario);
             this->setLoadIDs(tScenario);
             this->setBCIDs(tScenario);
-            this->setFRFMatchNodesetIDs(tScenario);
+            this->setMatchNodesetIDs(tScenario);
             tScenario.id(tScenarioBlockID);
             this->checkTags(tScenario);
             mData.push_back(tScenario);

@@ -292,7 +292,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers)
 
   XMLGen::Scenario tScenario;
   tScenario.id("1");
-  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tScenario.append("ref_data_file", "dummy_frf_file.exo");
   tInputData.append(tScenario);
 
   XMLGen::Objective tObjective;
@@ -338,7 +338,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_noNeedToDecompose)
 
   XMLGen::Scenario tScenario;
   tScenario.id("1");
-  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tScenario.append("ref_data_file", "dummy_frf_file.exo");
   tInputData.append(tScenario);
 
   XMLGen::Objective tObjective;
@@ -375,12 +375,12 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_multipleObjectivesSam
 
   XMLGen::Scenario tScenario;
   tScenario.id("1");
-  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tScenario.append("ref_data_file", "dummy_frf_file.exo");
   tInputData.append(tScenario);
 
   XMLGen::Scenario tScenario2;
   tScenario2.id("2");
-  tScenario2.append("ref_frf_file", "dummy_frf_file2.exo");
+  tScenario2.append("ref_data_file", "dummy_frf_file2.exo");
   tInputData.append(tScenario2);
 
   XMLGen::Objective tObjective;
@@ -414,7 +414,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesForPerformers_hasBeenDecomposed)
 
   XMLGen::Scenario tScenario;
   tScenario.id("1");
-  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tScenario.append("ref_data_file", "dummy_frf_file.exo");
   tInputData.append(tScenario);
 
   XMLGen::Objective tObjective;
@@ -454,7 +454,7 @@ TEST(PlatoTestXMLGenerator, appendDecompLinesToMPILaunchScript)
 
   XMLGen::Scenario tScenario;
   tScenario.id("1");
-  tScenario.append("ref_frf_file", "dummy_frf_file.exo");
+  tScenario.append("ref_data_file", "dummy_frf_file.exo");
   tInputData.append(tScenario);
 
   XMLGen::Objective tObjective;

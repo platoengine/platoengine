@@ -47,11 +47,11 @@ private:
     void setLoadIDs(XMLGen::Scenario& aScenario);
 
     /******************************************************************************//**
-     * \fn setFRFMatchNodesetIDs
-     * \brief Set nodeset ids to be used when matching frfs.
+     * \fn setMatchNodesetIDs
+     * \brief Set nodeset ids to be used when matching frf or modal data
      * \param [in] aScenario Scenario metadata
     **********************************************************************************/
-    void setFRFMatchNodesetIDs(XMLGen::Scenario &aMetadata);
+    void setMatchNodesetIDs(XMLGen::Scenario &aMetadata);
 
     /******************************************************************************//**
      * \fn setBCIDs

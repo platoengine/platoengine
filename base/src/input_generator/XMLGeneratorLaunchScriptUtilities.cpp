@@ -202,8 +202,8 @@ namespace XMLGen
             {
                 if(hasBeenDecompedForThisNumberOfProcessors[num_procs]++ == 0)
                   XMLGen::append_decomp_line(fp, num_procs, aInputData.mesh.run_name);
-                if(tScenario.value("ref_frf_file").length() > 0)
-                  XMLGen::append_decomp_line(fp, num_procs, tScenario.value("ref_frf_file"));
+                if(tScenario.value("ref_data_file").length() > 0)
+                  XMLGen::append_decomp_line(fp, num_procs, tScenario.value("ref_data_file"));
             }
         }
     }

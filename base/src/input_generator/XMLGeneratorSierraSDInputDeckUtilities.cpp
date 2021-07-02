@@ -86,7 +86,7 @@ void append_frf_related_blocks
             sscanf(aScenario.frequency_step().c_str(), "%lf", &tFreqStep);
             // This is the formula sierra_sd uses to get the number of frequencies
             int tNumFreqs = (int)(((tFreqMax-tFreqMin)/tFreqStep)+0.5) + 1;
-            int tNumMatchNodes = aScenario.frfMatchNodesetIDs().size();
+            int tNumMatchNodes = aScenario.matchNodesetIDs().size();
             FILE *tTmpFP = fopen(tTruthTableFile.c_str(), "w");
             if(tTmpFP)
             {
@@ -439,6 +439,18 @@ void append_stress_parameters
         }
     }
 }
+
+bool isInverseMethodCase(const XMLGen::Criterion &aCriterion) {
+    return aCriterion.type() == "frf_mismatch";
+}
+
+void writeInverseMethodObjective(const std::string &tDiscretization, const XMLGen::Criterion &aCriterion, std::ostream &outfile) {
+    if(tDiscretization == "density")
+        outfile << "  inverse_method_objective = directfrf-plato-density-method" << std::endl;
+    else if(tDiscretization == "levelset")
+        outfile << "  inverse_method_objective = directfrf-plato-levelset-method" << std::endl;
+}
+
 /**************************************************************************/
 void append_case
 (const XMLGen::InputData& aMetaData,
@@ -466,19 +478,18 @@ void append_case
     {
         outfile << "  case = primary_compliance_secondary_volume" << std::endl;
     }
-    else if(aCriterion.type() == "frf_mismatch")
+    else if(isInverseMethodCase(aCriterion))
     {
-        std::string tDiscretization = aMetaData.optimization_parameters().discretization();
         outfile << "  case = inverse_methods" << std::endl;
-        if(tDiscretization == "density")
-            outfile << "  inverse_method_objective = directfrf-plato-density-method" << std::endl;
-        else if(tDiscretization == "levelset")
-            outfile << "  inverse_method_objective = directfrf-plato-levelset-method" << std::endl;
-        outfile << "  ref_frf_file " << aScenario.ref_frf_file() << std::endl;
-        if(aScenario.frfMatchNodesetIDs().size() > 0)
+
+        std::string tDiscretization = aMetaData.optimization_parameters().discretization();
+        writeInverseMethodObjective(tDiscretization, aCriterion, outfile);
+
+        outfile << "  ref_data_file " << aScenario.ref_data_file() << std::endl;
+        if(aScenario.matchNodesetIDs().size() > 0)
         {
-            outfile << "  frf_nodesets";
-            for(auto tNodesetID : aScenario.frfMatchNodesetIDs())
+            outfile << "  match_nodesets";
+            for(auto tNodesetID : aScenario.matchNodesetIDs())
             {
                 outfile << " " << tNodesetID << std::endl;
     
