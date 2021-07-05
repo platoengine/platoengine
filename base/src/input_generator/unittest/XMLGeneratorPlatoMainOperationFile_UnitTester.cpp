@@ -1484,10 +1484,21 @@ TEST(PlatoTestXMLGenerator, AppendStochasticObjectiveValueToPlatoMainOperation)
     PlatoTestXMLGenerator::test_children({"Statistic", "ArgumentName"}, {"mean_plus_2_std_dev", "Objective Mean Plus 2 StdDev"}, tOuterOutput);
 }
 
-TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
+TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation_THROW)
 {
     pugi::xml_document tDocument;
     XMLGen::InputData tXMLMetaData;
+    ASSERT_THROW(XMLGen::append_output_to_plato_main_operation(tXMLMetaData, tDocument), std::runtime_error);
+    ASSERT_FALSE(tDocument.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
+{
+    pugi::xml_document tDocument;
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("3");
+    XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.append(tScenario);
     ASSERT_NO_THROW(XMLGen::append_output_to_plato_main_operation(tXMLMetaData, tDocument));
     ASSERT_FALSE(tDocument.empty());
 
@@ -1506,7 +1517,10 @@ TEST(PlatoTestXMLGenerator, AppendOutputToPlatoMainOperation)
 TEST(PlatoTestXMLGenerator, AppendSurfaceExtractionToOutputOperation)
 {
     pugi::xml_document tDocument;
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("3");
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.append(tScenario);
     auto tOperation = tDocument.append_child("Operation");
 
     // CASE 1: EMPTY CHILD - NOT DEFINED
@@ -1802,7 +1816,11 @@ TEST(PlatoTestXMLGenerator, AppendFilterOptionsToOperation)
 
 TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
 {
+    XMLGen::Scenario tScenario;
+    tScenario.dimensions("3");
     XMLGen::InputData tXMLMetaData;
+    tXMLMetaData.append(tScenario);
+
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("discretization", "density");
     tOptimizationParameters.append("filter_type", "Kernel");
