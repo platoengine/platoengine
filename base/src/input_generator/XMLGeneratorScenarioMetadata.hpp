@@ -359,6 +359,20 @@ public:
     std::string weightMassScaleFactor() const;
 
     /******************************************************************************//**
+     * \fn shapeSideset
+     * \brief Set string value for Sierra/SD shape sideset
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void shapeSideset(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn weightMassScaleFactor
+     * \brief Return string value Sierra/SD shape sideset
+     * \return value
+    **********************************************************************************/
+    std::string shapeSideset() const;
+
+    /******************************************************************************//**
      * \fn pressureScaling
      * \brief Set string value for keyword 'pressure_scaling'.
      * \param [in] aInput string value

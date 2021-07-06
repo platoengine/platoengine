@@ -94,6 +94,26 @@ void ParseCriteria::allocate()
     mTags.insert({ "volume_penalty_divisor", { { {"volume_penalty_divisor"}, ""}, "" } });
     mTags.insert({ "volume_penalty_bias", { { {"volume_penalty_bias"}, ""}, "" } });
     mTags.insert({ "surface_area_sideset_id", { { {"surface_area_sideset_id"}, ""}, "" } });
+
+    // Sierra/SD modal objectives
+    mTags.insert({ "num_modes_compute", { { {"num_modes_compute"}, ""}, "30" } });
+    mTags.insert({ "modes_to_exclude", { { {"modes_to_exclude"}, ""}, "" } });
+    mTags.insert({ "eigen_solver_shift", { { {"eigen_solver_shift"}, ""}, "-1e6" } });
+    mTags.insert({ "camp_solver_tol", { { {"camp_solver_tol"}, ""}, "1e-6" } });
+    mTags.insert({ "camp_max_iter", { { {"camp_max_iter"}, ""}, "1000" } });
+}
+
+void ParseCriteria::setModesToExclude(XMLGen::Criterion &aMetadata)
+{
+    auto tItr = mTags.find("modes_to_exclude");
+    std::string tValues = tItr->second.first.second;
+    if (tItr != mTags.end() && !tValues.empty()) {
+        std::vector<std::string> tModes;
+        char tValuesBuffer[10000];
+        strcpy(tValuesBuffer, tValues.c_str());
+        XMLGen::parse_tokens(tValuesBuffer, tModes);
+        aMetadata.modesToExclude(tModes);
+    }
 }
 
 void ParseCriteria::setCriterionWeights(XMLGen::Criterion &aMetadata)
@@ -157,6 +177,7 @@ void ParseCriteria::setMetadata(XMLGen::Criterion& aMetadata)
     this->setCriterionType(aMetadata);
     this->setCriterionIDs(aMetadata);
     this->setCriterionWeights(aMetadata);
+    setModesToExclude(aMetadata);
     this->setTags(aMetadata);
 }
 

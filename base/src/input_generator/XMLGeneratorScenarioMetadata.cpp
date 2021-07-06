@@ -238,6 +238,16 @@ std::string Scenario::weightMassScaleFactor() const
     return (this->getValue("weight_mass_scale_factor"));
 }
 
+void Scenario::shapeSideset(const std::string& aInput)
+{
+    mMetaData["shape_sideset"] = aInput;
+}
+
+std::string Scenario::shapeSideset() const
+{
+    return (this->getValue("shape_sideset"));
+}
+
 void Scenario::pressureScaling(const std::string& aInput)
 {
     mMetaData["pressure_scaling"] = aInput;

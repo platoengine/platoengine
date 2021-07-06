@@ -48,6 +48,13 @@ private:
     void setCriterionWeights(XMLGen::Criterion& aMetadata);
 
     /******************************************************************************//**
+     * \fn setModesToExclude
+     * \brief Set 'modes_to_exclude' keyword for modal inverse
+     * \param [in/out] aInputFile parsed input metadata
+    **********************************************************************************/
+    void setModesToExclude(XMLGen::Criterion& aMetadata);
+
+    /******************************************************************************//**
      * \fn setMetaData
      * \brief Set XMLGen::Criterion metadata.
      * \param [in/out] aInputFile parsed input metadata

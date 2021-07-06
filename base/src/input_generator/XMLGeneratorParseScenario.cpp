@@ -58,7 +58,7 @@ void ParseScenario::setMatchNodesetIDs(XMLGen::Scenario &aMetadata)
         char tValuesBuffer[10000];
         strcpy(tValuesBuffer, tValues.c_str());
         XMLGen::parse_tokens(tValuesBuffer, tNodesetIDs);
-        aMetadata.setFRFMatchNodesetIDs(tNodesetIDs);
+        aMetadata.setMatchNodesetIDs(tNodesetIDs);
     }
 }
 
@@ -138,8 +138,7 @@ void ParseScenario::allocate()
     mTags.insert({ "complex_error_measure", { { {"complex_error_measure"}, ""}, "" } });
     mTags.insert({ "convert_to_tet10", { { {"convert_to_tet10"}, ""}, "" } });
 
-    //frf matching, some of these probably should belong as criterion parameters instead
-    // mTags.insert({ "normalize_objective", { { {"normalize_objective"}, ""}, "" } });
+    mTags.insert({ "shape_sideset", { { {"shape_sideset"}, ""}, "" } });
 }
 
 void ParseScenario::checkSpatialDimensions(XMLGen::Scenario& aScenario)

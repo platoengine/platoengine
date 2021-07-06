@@ -103,7 +103,13 @@ struct ValidCriterionParameterKeys
         "volume_penalty_power",
         "volume_penalty_divisor",
         "volume_penalty_bias",
-        "surface_area_sideset_id"
+        "surface_area_sideset_id",
+        // SD modal objectives
+        "num_modes_compute",
+        "modes_to_exclude",
+        "eigen_solver_shift",
+        "camp_solver_tol",
+        "camp_max_iter"
     };
 };
 
@@ -202,7 +208,9 @@ private:
         "compliance_and_volume_min",
         "surface_pressure",
         "surface_temperature",
-        "flow_rate"
+        "flow_rate",
+        "modal_matching",
+        "modal_projection_error"
     };
 
 public:
@@ -501,6 +509,7 @@ private:
         "plasticity", 
         "thermoplasticity",
         "frequency_response_function",
+        "modal_response",
         "steady_state_incompressible_fluids"
     };
 
