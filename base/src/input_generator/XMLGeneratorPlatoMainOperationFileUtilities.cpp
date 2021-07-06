@@ -403,19 +403,28 @@ void append_surface_extraction_to_output_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node &aParentNode)
 {
-    std::string tOutputMethod = aXMLMetaData.optimization_parameters().output_method();
-    if (!tOutputMethod.empty())
+    const std::vector<XMLGen::Scenario> &tScenarios = aXMLMetaData.scenarios();
+    if (tScenarios.empty())
     {
-        auto tSurfaceExtraction = aParentNode.append_child("SurfaceExtraction");
-        std::vector<std::string> tKeys = { "OutputMethod", "Discretization" };
-        std::string tStoredDiscretizationValue = aXMLMetaData.optimization_parameters().discretization();
-        auto tDiscretization = tStoredDiscretizationValue.empty() ? "density" : tStoredDiscretizationValue;
-        std::vector<std::string> tValues = { tOutputMethod, tDiscretization };
-        XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
-        XMLGen::append_children(tKeys, tValues, tSurfaceExtraction);
+        THROWERR("Scenarios list is empty. Scenarios list is requested to determine the number of spatial dimensions.")
+    }
 
-        auto tOutput = tSurfaceExtraction.append_child("Output");
-        XMLGen::append_children( { "Format" }, { "Exodus" }, tOutput);
+    if (tScenarios[0].dimensions() == "3")
+    {
+        std::string tOutputMethod = aXMLMetaData.optimization_parameters().output_method();
+        if (!tOutputMethod.empty())
+        {
+            auto tSurfaceExtraction = aParentNode.append_child("SurfaceExtraction");
+            std::vector<std::string> tKeys = {"OutputMethod", "Discretization"};
+            std::string tStoredDiscretizationValue = aXMLMetaData.optimization_parameters().discretization();
+            auto tDiscretization = tStoredDiscretizationValue.empty() ? "density" : tStoredDiscretizationValue;
+            std::vector<std::string> tValues = {tOutputMethod, tDiscretization};
+            XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+            XMLGen::append_children(tKeys, tValues, tSurfaceExtraction);
+
+            auto tOutput = tSurfaceExtraction.append_child("Output");
+            XMLGen::append_children({"Format"}, {"Exodus"}, tOutput);
+        }
     }
 }
 // function append_surface_extraction_to_output_operation
