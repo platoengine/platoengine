@@ -203,7 +203,7 @@ endif()
 
 
 if( ENABLE_ISO )
-  add_subdirectory(base/src/iso/main)
+  add_subdirectory(base/src/iso)
 endif()
 
 if( ENABLE_PRUNE )
