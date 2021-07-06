@@ -176,7 +176,7 @@ std::string transform_tokens_for_plato_analyze_input_deck
     for(auto tItr = aTokens.begin(); tItr != tEndIterator; ++tItr)
     {
         auto tIndex = std::distance(aTokens.begin(), tItr);
-        tOutput += aTokens[tIndex] + ", ";
+        tOutput += aTokens[tIndex] + ",";
     }
     tOutput += aTokens[tEndIndex] + "}";
     return tOutput;

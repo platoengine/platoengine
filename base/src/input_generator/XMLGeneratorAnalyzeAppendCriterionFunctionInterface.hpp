@@ -22,12 +22,17 @@ void append_incompressible_fluids_scalar_functions
     // surface pressure
     auto tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
     aMap.insert(std::make_pair("surface_pressure",
-    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+        std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
 
     // surface temperature
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>));
     aMap.insert(std::make_pair("surface_temperature",
-    std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+        std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_surface_scalar_function_criterion<CriterionT>, tFuncIndex)));
+
+    // thermoplasticity_thermal_energy
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_scalar_function_criterion<CriterionT>));
+    aMap.insert(std::make_pair("cfd_thermal_compliance", 
+        std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionT>, tFuncIndex)));
 }
 // function append_incompressible_fluids_scalar_functions
 

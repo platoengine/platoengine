@@ -102,6 +102,7 @@ void ParseScenario::allocate()
     mTags.insert({ "max_steady_state_iterations", { { {"max_steady_state_iterations"}, ""}, "500" } });
     mTags.insert({ "thermal_source_penalty_exponent", { { {"thermal_source_penalty_exponent"}, ""}, "3" } });
     mTags.insert({ "thermal_diffusion_penalty_exponent", { { {"thermal_diffusion_penalty_exponent"}, ""}, "3" } });
+    mTags.insert({ "thermal_convection_penalty_exponent", { { {"thermal_convection_penalty_exponent"}, ""}, "3" } });
 
     mTags.insert({ "material", { { {"material"}, ""}, "" } });
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });

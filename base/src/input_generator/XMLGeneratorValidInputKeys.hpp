@@ -202,7 +202,8 @@ private:
         "compliance_and_volume_min",
         "surface_pressure",
         "surface_temperature",
-        "flow_rate"
+        "flow_rate",
+        "cfd_thermal_compliance"
     };
 
 public:
@@ -1226,6 +1227,7 @@ struct ValidAnalyzeCriteriaKeys
         { "surface_temperature", { "Average Surface Temperature", false } },
         { "surface_pressure", { "Average Surface Pressure", false } },
         { "flow_rate", { "Flow Rate", false } },
+        { "cfd_thermal_compliance", { "Thermal Compliance", false } },
     };
 };
 // ValidAnalyzeCriteriaKeys

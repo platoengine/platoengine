@@ -131,9 +131,11 @@ void append_incompressible_cfd_conservation_equations_options(
         XMLGen::append_attributes({"name"}, {"Energy Conservation"}, tEnergyConservation);
         auto tPenaltyFunction = tEnergyConservation.append_child("ParameterList");
         XMLGen::append_attributes({"name"}, {"Penalty Function"}, tPenaltyFunction);
-        tValues = {"Thermal Source Penalty Exponent", "double", aScenario.value("thermal_source_penalty_exponent")};
+        tValues = {"Source Term Penalty Exponent", "double", aScenario.value("thermal_source_penalty_exponent")};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
-        tValues = {"Thermal Diffusion Penalty Exponent", "double", aScenario.value("thermal_diffusion_penalty_exponent")};
+        tValues = {"Diffusive Term Penalty Exponent", "double", aScenario.value("thermal_diffusion_penalty_exponent")};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
+        tValues = {"Convective Term Penalty Exponent", "double", aScenario.value("thermal_convection_penalty_exponent")};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPenaltyFunction);
     }
 }

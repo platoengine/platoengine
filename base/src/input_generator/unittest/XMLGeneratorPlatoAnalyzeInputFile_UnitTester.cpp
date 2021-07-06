@@ -1857,7 +1857,7 @@ TEST(PlatoTestXMLGenerator, AppendNaturalBoundaryCondition_Traction)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0, 2.0, 3.0}"}, {"Sides", "string", "ss_1"} };
+        { {"Type", "string", "Uniform"}, {"Values", "Array(string)", "{1.0,2.0,3.0}"}, {"Sides", "string", "ss_1"} };
     auto tGoldValuesItr = tGoldValues.begin();
     auto tParameter = tLoadParamList.child("Parameter");
     while(!tParameter.empty())
@@ -2602,11 +2602,11 @@ TEST(PlatoTestXMLGenerator, AppendMaterialModelToPlatoAnalyzeInputDeck_NaturalBu
     tParameter = tParameter.next_sibling("Parameter");
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Thermal Diffusivity Ratio", "double", "3.0"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
-    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Grashof Number", "Array(double)", "{10, 10}"}, tParameter);
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Grashof Number", "Array(double)", "{10,10}"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
-    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Rayleigh Number", "Array(double)", "{30, 30}"}, tParameter);
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Rayleigh Number", "Array(double)", "{30,30}"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
-    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Richardson Number", "Array(double)", "{20, 20}"}, tParameter);
+    PlatoTestXMLGenerator::test_attributes(tGoldKeys, {"Richardson Number", "Array(double)", "{20,20}"}, tParameter);
     tParameter = tParameter.next_sibling("Parameter");
     ASSERT_TRUE(tParameter.empty());
     // TEST WATER BLOCK END
@@ -3242,7 +3242,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveCriteriaToCriteriaList)
 
     std::vector<std::string> tGoldKeys = {"name", "type", "value"};
     std::vector<std::vector<std::string>> tGoldValues =
-        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my_mechanical_compliance_criterion_id_1, my_thermal_compliance_criterion_id_2}"}, {"Weights", "Array(double)", "{1.0, 1.0}"} };
+        { {"Type", "string", "Weighted Sum"}, {"Functions", "Array(string)", "{my_mechanical_compliance_criterion_id_1,my_thermal_compliance_criterion_id_2}"}, {"Weights", "Array(double)", "{1.0,1.0}"} };
     auto tGoldValuesItr = tGoldValues.begin();
 
     auto tChild = tParamList.child("Parameter");
@@ -3390,11 +3390,11 @@ TEST(PlatoTestXMLGenerator, AppendObjectivePressureMisfitCriteriaToCriteriaList)
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling();
-    tGoldValues = {"Functions", "Array(string)", "{my_surface_pressure_criterion_id_2, my_surface_pressure_criterion_id_3}"};
+    tGoldValues = {"Functions", "Array(string)", "{my_surface_pressure_criterion_id_2,my_surface_pressure_criterion_id_3}"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling();
-    tGoldValues = {"Weights", "Array(double)", "{1.0, -1.0}"};
+    tGoldValues = {"Weights", "Array(double)", "{1.0,-1.0}"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     // 2. TEST MY INLET PRESSURE
@@ -3485,11 +3485,11 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveTemperatureMisfitCriteriaToCriteriaLi
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling();
-    tGoldValues = {"Functions", "Array(string)", "{my_surface_temperature_criterion_id_2, my_surface_temperature_criterion_id_3}"};
+    tGoldValues = {"Functions", "Array(string)", "{my_surface_temperature_criterion_id_2,my_surface_temperature_criterion_id_3}"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     tParameter = tParameter.next_sibling();
-    tGoldValues = {"Weights", "Array(double)", "{1.0, -1.0}"};
+    tGoldValues = {"Weights", "Array(double)", "{1.0,-1.0}"};
     PlatoTestXMLGenerator::test_attributes(tGoldKeys, tGoldValues, tParameter);
 
     // 2. TEST MY INLET PRESSURE

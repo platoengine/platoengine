@@ -62,7 +62,7 @@ void append_uniform_single_valued_load_to_plato_problem
 
     if(aLoad.load_values().size() > 1u)
     {
-        THROWERR(std::string("Single valued load functions are expected to have one value. However, uniform load with name" )
+        THROWERR(std::string("Single valued load functions are expected to have one value. However, uniform load with name '" )
             + aName + "' has '" + std::to_string(aLoad.load_values().size()) + "' load values instead of one value. "
             + "Check load values for uniform singled valued load with id '" + aLoad.id() + "' applied at location with name '"
             + aLoad.location_name() +"'.")
