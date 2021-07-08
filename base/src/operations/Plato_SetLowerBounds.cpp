@@ -134,9 +134,9 @@ void SetLowerBounds::operator()()
 
         double tBoundaryValue = .5001;
         double tUpperValue = 1.;
-        mPlatoApp->getMeshServices()->updateLowerBoundsForFixedBlocks(tToData, mFixedBlocks, tLowerBoundIn, tBoundaryValue, tUpperValue, *tDistributedVector);
-        mPlatoApp->getMeshServices()->updateLowerBoundsForFixedSidesets(tToData, mFixedSidesets, tBoundaryValue);
-        mPlatoApp->getMeshServices()->updateLowerBoundsForFixedNodesets(tToData, mFixedNodesets, tBoundaryValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlocks, tLowerBoundIn, tBoundaryValue, tUpperValue, *tDistributedVector);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesets, tBoundaryValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesets, tBoundaryValue);
 
         delete tDistributedVector;
         delete tSysGraph_1D;

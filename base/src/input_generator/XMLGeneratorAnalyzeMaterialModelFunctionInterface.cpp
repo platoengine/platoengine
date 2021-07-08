@@ -65,7 +65,6 @@ void append_material_property_array
         auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
         std::vector<std::string> tKeys = {"name", "type", "value"};
         auto tMatPropValues = XMLGen::transform_tokens_for_plato_analyze_input_deck(tMatPropList);
-        std::replace(tMatPropValues.begin(), tMatPropValues.end(), ' ', ','); // guard against the possibility of white spaces between two consecutive number characters
         std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tMatPropValues};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
     }

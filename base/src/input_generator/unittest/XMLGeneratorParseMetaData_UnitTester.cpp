@@ -331,7 +331,7 @@ TEST(PlatoTestXMLGenerator, ParseCriteria_ThreeCriteria)
     tInputSS.str(tStringInput);
 
     XMLGen::ParseCriteria tCriteriaParser;
-    ASSERT_NO_THROW(tCriteriaParser.parse(tInputSS));
+    tCriteriaParser.parse(tInputSS);
 
     auto tCriterionMetaData = tCriteriaParser.data();
     ASSERT_EQ(3u, tCriterionMetaData.size());

@@ -149,8 +149,8 @@ public:
      * \fn call
      * \tparam CriterionType criterion function metadata C++ structure type
      * \brief Append criterion function parameters to plato_analyze_input_deck.xml file.
-     * \param [in]     Criterion    criterion metadata
-     * \param [in/out] aParentNode  pugi::xml_node
+     * \param [in]  aCriterion   criterion metadata
+     * \param [out] aParentNode  pugi::xml_node
     **********************************************************************************/
     pugi::xml_node call(const CriterionType& aCriterion, pugi::xml_node &aParentNode) const
     {

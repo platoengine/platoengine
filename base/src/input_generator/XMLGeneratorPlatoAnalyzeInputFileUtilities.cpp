@@ -179,6 +179,9 @@ std::string transform_tokens_for_plato_analyze_input_deck
         tOutput += aTokens[tIndex] + ",";
     }
     tOutput += aTokens[tEndIndex] + "}";
+
+    std::replace(tOutput.begin(), tOutput.end(), ' ', ','); // guard against the possibility of white spaces between two consecutive number characters
+
     return tOutput;
 }
 // function transform_tokens_for_plato_analyze_input_deck

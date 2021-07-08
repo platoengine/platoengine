@@ -118,9 +118,9 @@ void SetUpperBounds::operator()()
     if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
         double tValue = -0.001;
-        mPlatoApp->getMeshServices()->updateUpperBoundsForFixedBlocks(tToData, mFixedBlocks, tValue);
-        mPlatoApp->getMeshServices()->updateUpperBoundsForFixedSidesets(tToData, mFixedSidesets, tValue);
-        mPlatoApp->getMeshServices()->updateUpperBoundsForFixedNodesets(tToData, mFixedNodesets, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlocks, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesets, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesets, tValue);
     }
 }
 

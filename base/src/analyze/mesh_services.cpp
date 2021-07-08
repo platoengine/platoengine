@@ -262,9 +262,10 @@ MeshServices::getCurrentVolume(
 }
 
 /******************************************************************************/
-void
-MeshServices::updateUpperBoundsForFixedNodesets(double *aUpperBoundVector, const std::vector<int> &aFixedNodesets,
-                                                const double &aFixedNodesetValue)
+void MeshServices::updateBoundsForFixedNodesets
+(double *aBoundsVector, 
+ const std::vector<int> &aFixedNodesets,
+const double &aFixedNodesetValue)
 /******************************************************************************/
 {
     DataMesh& tMyMesh = *myDataMesh;
@@ -281,42 +282,17 @@ MeshServices::updateUpperBoundsForFixedNodesets(double *aUpperBoundVector, const
             tMyMesh.getDataContainer()->getVariable(nsi->NODE_LIST, nodes);
             for (int inode=0; inode<num_nodes; inode++)
             {
-                aUpperBoundVector[nodes[inode]] = aFixedNodesetValue;
+                aBoundsVector[nodes[inode]] = aFixedNodesetValue;
             }
         }
     } // *** end block loop ***
 }
 
 /******************************************************************************/
-void
-MeshServices::updateLowerBoundsForFixedNodesets(double *aLowerBoundVector, const std::vector<int> &aFixedNodesets,
-                                                const double &aFixedNodesetValue)
-/******************************************************************************/
-{
-    DataMesh& tMyMesh = *myDataMesh;
-    int tNumNodesets = tMyMesh.getNumNodeSets();
-    for(int ib=0; ib<tNumNodesets; ib++)
-    {
-        DMNodeSet *nsi = tMyMesh.getNodeSet(ib);
-        if(std::find(aFixedNodesets.begin(), aFixedNodesets.end(), nsi->id) == aFixedNodesets.end())
-            continue;
-        int num_nodes = nsi->numNodes;
-        if(num_nodes)
-        {
-            int* nodes;
-            tMyMesh.getDataContainer()->getVariable(nsi->NODE_LIST, nodes);
-            for (int inode=0; inode<num_nodes; inode++)
-            {
-                aLowerBoundVector[nodes[inode]] = aFixedNodesetValue;
-            }
-        }
-    } // *** end block loop ***
-}
-
-/******************************************************************************/
-void
-MeshServices::updateLowerBoundsForFixedSidesets(double *aLowerBoundVector, const std::vector<int> &aFixedSidesets,
-                                                const double &aFixedSidesetValue)
+void MeshServices::updateBoundsForFixedSidesets
+(double *aBoundsVector, 
+ const std::vector<int> &aFixedSidesets,
+ const double &aFixedSidesetValue)
 /******************************************************************************/
 {
     DataMesh& tMyMesh = *myDataMesh;
@@ -333,46 +309,55 @@ MeshServices::updateLowerBoundsForFixedSidesets(double *aLowerBoundVector, const
             tMyMesh.getDataContainer()->getVariable(ssi->FACE_NODE_LIST, nodes);
             for (int inode=0; inode<num_nodes; inode++)
             {
-                aLowerBoundVector[nodes[inode]] = aFixedSidesetValue;
+                aBoundsVector[nodes[inode]] = aFixedSidesetValue;
             }
         }
     } // *** end block loop ***
 }
 
 /******************************************************************************/
-void
-MeshServices::updateUpperBoundsForFixedSidesets(double *aUpperBoundVector, const std::vector<int> &aFixedSidesets,
-                                                const double &aFixedSidesetValue)
+void MeshServices::updateBoundsForFixedBlocks
+(double *aBoundsVector, 
+ const std::vector<int> &aFixedBlocks,
+ const double &aFixedBlockValue)
 /******************************************************************************/
 {
     DataMesh& tMyMesh = *myDataMesh;
-    int tNumSidesets = tMyMesh.getNumSideSets();
-    for(int ib=0; ib<tNumSidesets; ib++)
+    int tNumBlocks = tMyMesh.getNumElemBlks();
+    for(int ib=0; ib<tNumBlocks; ib++)
     {
-        DMSideSet *ssi = tMyMesh.getSideSet(ib);
-        if(std::find(aFixedSidesets.begin(), aFixedSidesets.end(), ssi->id) == aFixedSidesets.end())
+        Topological::Element& tCurBlock = *(tMyMesh.getElemBlk(ib));
+        int tCurBlockId = tCurBlock.getBlockId();
+
+        if(std::find(aFixedBlocks.begin(), aFixedBlocks.end(), tCurBlockId) == aFixedBlocks.end())
             continue;
-        int num_nodes = ssi->numNodes;
-        if(num_nodes)
+
+        // not all blocks will be present on all processors
+        int tNumElemsThisBlock = tCurBlock.getNumElem();
+        if( tNumElemsThisBlock == 0 )
+            continue;
+
+        int tNumNodesPerElem = tCurBlock.getNnpe();
+        // *** Element loop ***
+        for (int iel=0; iel<tNumElemsThisBlock; iel++)
         {
-            int* nodes;
-            tMyMesh.getDataContainer()->getVariable(ssi->FACE_NODE_LIST, nodes);
-            for (int inode=0; inode<num_nodes; inode++)
+            int* tElemConnect = tCurBlock.Connect(iel);
+            for (int inode=0; inode<tNumNodesPerElem; inode++)
             {
-                aUpperBoundVector[nodes[inode]] = aFixedSidesetValue;
+                aBoundsVector[tElemConnect[inode]] = aFixedBlockValue;
             }
-        }
+        } // *** end element loop ***
     } // *** end block loop ***
 }
 
 /******************************************************************************/
-void
-MeshServices::updateLowerBoundsForFixedBlocks(double *aLowerBoundVector,
-                                              const std::vector<int> &aFixedBlocks,
-                                              const double& aOptimizationBlockInternalValue,
-                                              const double& aFixedBlockBoundaryValue,
-                                              const double& aFixedBlockInternalValue,
-                                              DistributedVector& aDistributed)
+void MeshServices::updateBoundsForFixedBlocks
+(double *aBoundsVector,
+ const std::vector<int> &aFixedBlocks,
+ const double &aOptimizationBlockInternalValue,
+ const double &aFixedBlockBoundaryValue,
+ const double &aFixedBlockInternalValue,
+ DistributedVector &aDistributed)
 /******************************************************************************/
 {
     DataMesh& tMyMesh = *myDataMesh;
@@ -582,19 +567,19 @@ MeshServices::updateLowerBoundsForFixedBlocks(double *aLowerBoundVector,
             case 1:
             {
                 // 1 purely optimization
-                aLowerBoundVector[inode] = aOptimizationBlockInternalValue;
+                aBoundsVector[inode] = aOptimizationBlockInternalValue;
                 break;
             }
             case 2:
             {
                 // 2 between optimization and fixed
-                aLowerBoundVector[inode] = aFixedBlockBoundaryValue;
+                aBoundsVector[inode] = aFixedBlockBoundaryValue;
                 break;
             }
             case 3:
             {
                 // 3 purely fixed
-                aLowerBoundVector[inode] = aFixedBlockInternalValue;
+                aBoundsVector[inode] = aFixedBlockInternalValue;
                 break;
             }
             case 0:
@@ -613,40 +598,6 @@ MeshServices::updateLowerBoundsForFixedBlocks(double *aLowerBoundVector,
             }
         }
     }
-}
-
-/******************************************************************************/
-void
-MeshServices::updateUpperBoundsForFixedBlocks(double *aUpperBoundVector, const std::vector<int> &aFixedBlocks,
-                                              const double &aFixedBlockValue)
-/******************************************************************************/
-{
-    DataMesh& tMyMesh = *myDataMesh;
-    int tNumBlocks = tMyMesh.getNumElemBlks();
-    for(int ib=0; ib<tNumBlocks; ib++)
-    {
-        Topological::Element& tCurBlock = *(tMyMesh.getElemBlk(ib));
-        int tCurBlockId = tCurBlock.getBlockId();
-
-        if(std::find(aFixedBlocks.begin(), aFixedBlocks.end(), tCurBlockId) == aFixedBlocks.end())
-            continue;
-
-        // not all blocks will be present on all processors
-        int tNumElemsThisBlock = tCurBlock.getNumElem();
-        if( tNumElemsThisBlock == 0 )
-            continue;
-
-        int tNumNodesPerElem = tCurBlock.getNnpe();
-        // *** Element loop ***
-        for (int iel=0; iel<tNumElemsThisBlock; iel++)
-        {
-            int* tElemConnect = tCurBlock.Connect(iel);
-            for (int inode=0; inode<tNumNodesPerElem; inode++)
-            {
-                aUpperBoundVector[tElemConnect[inode]] = aFixedBlockValue;
-            }
-        } // *** end element loop ***
-    } // *** end block loop ***
 }
 
 /******************************************************************************/

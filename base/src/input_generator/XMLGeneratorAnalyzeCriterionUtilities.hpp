@@ -82,22 +82,50 @@ void append_simp_penalty_function
 }
 
 /******************************************************************************//**
+ * \fn check_surface_entity_set_list
+ * \tparam CriterionT criterion metadata
+ * \brief Check if 'surfaces' keyword is defined, if not, thorw error to console.
+ * \param [in]  aCriterion   criterion metadata
+ **********************************************************************************/
+template<typename CriterionT>
+void check_surface_entity_set_list
+(const CriterionT& aCriterion)
+{
+    auto tEntitySetNames = aCriterion.values("surfaces");
+    if (!tEntitySetNames.empty())
+    {
+        if (tEntitySetNames.size() <= 1 && tEntitySetNames[0].empty())
+        {
+            std::cout << "\n" << std::flush;
+            THROWERR(std::string("Surface scalar function of type '") + aCriterion.type() + "' with criterion id '" + aCriterion.id() 
+                + "' was requested but its application location was not specified. User must defined the application location by setting the 'surfaces' keyword.")
+        }
+    }
+    else
+    {
+            std::cout << "\n" << std::flush;
+            THROWERR(std::string("Surface scalar function of type '") + aCriterion.type() + "' with criterion id '" + aCriterion.id() 
+                + "' was requested but its application location was not specified. User must defined the application location by setting the 'surfaces' keyword.")
+    }
+}
+// function check_surface_entity_set_list
+
+/******************************************************************************//**
  * \fn append_surface_scalar_function_criterion
- * \tparam Criterion criterion metadata
+ * \tparam CriterionT criterion metadata
  * \brief Append surface scalar function to criterion parameter list. Surface scalar 
 *         functions are integrated along surfaces. 
  * \param [in]  aCriterion   criterion metadata
  * \param [out] aParentNode  pugi::xml_node
  **********************************************************************************/
-template<typename Criterion>
+template<typename CriterionT>
 pugi::xml_node append_surface_scalar_function_criterion
-(const Criterion& aCriterion,
- pugi::xml_node& aParentNode)
+(const CriterionT& aCriterion,
+ pugi::xml_node&   aParentNode)
 {
     auto tDesignCriterionName = XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
 
     auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
-    //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
     auto tCriterion = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
@@ -109,8 +137,10 @@ pugi::xml_node append_surface_scalar_function_criterion
     tValues = {"Scalar Function Type", "string", tDesignCriterionName};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
 
-    auto tSideSetNames = XMLGen::transform_tokens_for_plato_analyze_input_deck(aCriterion.values("location_name"));
-    tValues = {"Sides", "Array(string)", tSideSetNames};
+    XMLGen::Private::check_surface_entity_set_list(aCriterion);
+    auto tEntitySetNames = aCriterion.values("surfaces");
+    auto tEntitySetList = XMLGen::transform_tokens_for_plato_analyze_input_deck(tEntitySetNames);
+    tValues = {"Sides", "Array(string)", tEntitySetList};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCriterion);
 
     return tCriterion;
@@ -133,22 +163,33 @@ pugi::xml_node append_scalar_function_criterion
 
     auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
     //auto tName = std::string("my ") + Plato::tolower(aCriterion.category());
-    auto tObjective = aParentNode.append_child("ParameterList");
+    auto tScalarFunction = aParentNode.append_child("ParameterList");
     std::vector<std::string> tKeys = {"name"};
     std::vector<std::string> tValues = {tName};
-    XMLGen::append_attributes(tKeys, tValues, tObjective);
+    XMLGen::append_attributes(tKeys, tValues, tScalarFunction);
 
     tKeys = {"name", "type", "value"}; tValues = {"Type", "string", "Scalar Function"};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tScalarFunction);
+
     if(tCriterionLinearFlag == "true")
     {
         tKeys = {"name", "type", "value"}; tValues = {"Linear", "bool", "true"};
-        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tScalarFunction);
     }
+
+    /*auto tElemBlocks = aCriterion.values("blocks");
+    if( !tElemBlocks.empty() )
+    {
+        auto tElemBlocksNames = XMLGen::transform_tokens_for_plato_analyze_input_deck(aCriterion.values("blocks"));
+        tValues = {"Element Blocks", "Array(string)", tElemBlocksNames};
+        XMLGen::append_parameter_plus_attributes(tKeys, tValues, tScalarFunction);
+    }*/
+    
     tValues = {"Scalar Function Type", "string", tDesignCriterionName};
-    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
-    XMLGen::Private::append_simp_penalty_function(aCriterion, tObjective);
-    return tObjective;
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tScalarFunction);
+    XMLGen::Private::append_simp_penalty_function(aCriterion, tScalarFunction);
+
+    return tScalarFunction;
 }
 
 /******************************************************************************//**

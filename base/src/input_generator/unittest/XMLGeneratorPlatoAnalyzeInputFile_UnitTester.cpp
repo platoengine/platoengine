@@ -3345,12 +3345,12 @@ TEST(PlatoTestXMLGenerator, AppendObjectivePressureMisfitCriteriaToCriteriaList)
     XMLGen::Criterion tCriterion1;
     tCriterion1.type("surface_pressure");
     tCriterion1.id("2");
-    tCriterion1.append("location_name", "inlet");
+    tCriterion1.append("surfaces", "inlet");
     tXMLMetaData.append(tCriterion1);
     XMLGen::Criterion tCriterion2;
     tCriterion2.type("surface_pressure");
     tCriterion2.id("3");
-    tCriterion2.append("location_name", "outlet");
+    tCriterion2.append("surfaces", "outlet");
     tXMLMetaData.append(tCriterion2);
 
     XMLGen::Service tService;
@@ -3440,12 +3440,12 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveTemperatureMisfitCriteriaToCriteriaLi
     XMLGen::Criterion tCriterion1;
     tCriterion1.type("surface_temperature");
     tCriterion1.id("2");
-    tCriterion1.append("location_name", "inlet");
+    tCriterion1.append("surfaces", "inlet");
     tXMLMetaData.append(tCriterion1);
     XMLGen::Criterion tCriterion2;
     tCriterion2.type("surface_temperature");
     tCriterion2.id("3");
-    tCriterion2.append("location_name", "outlet");
+    tCriterion2.append("surfaces", "outlet");
     tXMLMetaData.append(tCriterion2);
 
     XMLGen::Service tService;

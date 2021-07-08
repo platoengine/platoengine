@@ -71,7 +71,9 @@ void ParseCriteria::allocate()
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "" } });
     mTags.insert({ "criterion_ids", { { {"criterion_ids"}, ""}, "" } });
     mTags.insert({ "criterion_weights", { { {"criterion_weights"}, ""}, "" } });
-    mTags.insert({ "location_name", { { {"location_name"}, ""}, "" } });
+    mTags.insert({ "surfaces", { { {"surfaces"}, ""}, "" } });
+    mTags.insert({ "blocks", { { {"blocks"}, ""}, "" } });
+
     /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
     mTags.insert({ "volume_misfit_target", { { {"volume_misfit_target"}, ""}, "" } });
     mTags.insert({ "relative_stress_limit", { { {"relative_stress_limit"}, ""}, "" } });
