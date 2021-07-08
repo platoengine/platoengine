@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<Operation>
+  <Name>FilterControl</Name>
+  <Function>ApplyHelmholtz</Function>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Solution</ArgumentName>
+  </Output>
+</Operation>
+
+<Operation>
+  <Name>FilterGradient</Name>
+  <Function>ApplyHelmholtzGradient</Function>
+  <Input>
+    <ArgumentName>Topology</ArgumentName>
+  </Input>
+  <Output>
+    <ArgumentName>Solution</ArgumentName>
+  </Output>
+</Operation>
+

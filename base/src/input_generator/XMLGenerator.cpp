@@ -187,6 +187,45 @@ void XMLGenerator::determineIfPlatoEngineFilteringIsNeeded()
 }
 
 /******************************************************************************/
+void XMLGenerator::setupHelmholtzFilterService()
+/******************************************************************************/
+{
+    if(m_InputDataWithExpandedEBCs.optimization_parameters().filter_type() == "helmholtz")
+    {
+        // set filter_in_engine to false
+        XMLGen::OptimizationParameters tOptimizationParameters = m_InputData.optimization_parameters();
+        tOptimizationParameters.filter_in_engine("false");
+        m_InputData.set(tOptimizationParameters);
+
+        // create service for helmholtz filter
+        XMLGen::Service tHelmholtzService;
+        tHelmholtzService.id("helmholtz");
+        tHelmholtzService.code("plato_analyze");
+        tHelmholtzService.numberProcessors("1");
+        tHelmholtzService.updateProblem("false");
+        tHelmholtzService.cacheState("false");
+        
+        // copy objective first scenario for helmholtz performer spatial dimensions
+        std::string tScenarioID = m_InputDataWithExpandedEBCs.objective.scenarioIDs[0];
+        XMLGen::Scenario tCurScenario = m_InputDataWithExpandedEBCs.scenario(tScenarioID);
+
+        // create new input data for helmholtz performer
+        XMLGen::InputData tNewInputData = m_InputDataWithExpandedEBCs;
+        clearInputDataLists(tNewInputData);
+        tNewInputData.append_unique(tHelmholtzService);
+        tNewInputData.append(tCurScenario);
+        loadMaterialData(tNewInputData, tScenarioID);
+
+        if(!serviceExists(m_InputData.mPerformerServices, tHelmholtzService))
+        {
+            m_InputData.mPerformerServices.push_back(tHelmholtzService);
+        }
+
+        m_PreProcessedInputData.push_back(tNewInputData);
+    }
+}
+
+/******************************************************************************/
 void XMLGenerator::updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap)
 /******************************************************************************/
 {
@@ -223,6 +262,7 @@ void XMLGenerator::preProcessInputMetaData()
     expandEssentialBoundaryConditions();
     determineIfPlatoEngineFilteringIsNeeded();
     createCopiesForPerformerCreation();
+    setupHelmholtzFilterService();
 }
 
 /******************************************************************************/

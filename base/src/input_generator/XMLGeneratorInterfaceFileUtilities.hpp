@@ -150,12 +150,12 @@ void append_objective_gradient_stage
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
- * \fn append_write_ouput_operation
+ * \fn append_write_output_operation
  * \brief Append write output operation to output stage.
  * \param [in]     aMetaData    Plato problem input data
  * \param [in/out] aDocument    pugi::xml_document
 **********************************************************************************/
-void append_write_ouput_operation
+void append_write_output_operation
 (const XMLGen::InputData& aMetaData,
  pugi::xml_node& aParentNode);
 
@@ -504,6 +504,18 @@ void append_enforce_bounds_operation
  * \param [in/out] aParentNode     pugi::xml_node
 **********************************************************************************/
 void append_filter_criterion_gradient_operation
+(const XMLGen::InputData& aXMLMetaData,
+ const std::string& aInputSharedDataName,
+ const std::string& aOutputSharedDataName,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_helmholtz_filter_criterion_gradient_operation
+ * \brief Append helmholtz filter criterion gradient operation to PUGI XML document.
+ * \param [in]     aSharedDataName criterion gradient shared data name
+ * \param [in/out] aParentNode     pugi::xml_node
+**********************************************************************************/
+void append_helmholtz_filter_criterion_gradient_operation
 (const XMLGen::InputData& aXMLMetaData,
  const std::string& aInputSharedDataName,
  const std::string& aOutputSharedDataName,

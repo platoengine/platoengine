@@ -1,0 +1,27 @@
+<ParameterList name="Problem">
+  <Parameter name="Physics" type="string" value="Plato Driver"/>
+  <Parameter  name="Spatial Dimension"    type="int"    value="3"/>
+
+  <Parameter name="Input Mesh" type="string" value="bolted_bracket.exo"/>
+
+  <ParameterList name="Plato Problem">
+    <Parameter name="Physics"            type="string"  value="Helmholtz Filter"/>
+    <Parameter name="PDE Constraint"     type="string"  value="Helmholtz Filter"/>
+
+    <ParameterList name="Length Scale">
+      <Parameter name="Length Scale" type="double" value="0.2"/>
+    </ParameterList>
+
+    <ParameterList name="Spatial Model">
+      <ParameterList name="Domains">
+        <ParameterList name="Block 1">
+          <Parameter name="Element Block" type="string" value="block_1" />
+          <Parameter name="Material Model" type="string" value="Material 1" />
+        </ParameterList>
+      </ParameterList>
+    </ParameterList>
+
+  </ParameterList>
+
+</ParameterList>
+

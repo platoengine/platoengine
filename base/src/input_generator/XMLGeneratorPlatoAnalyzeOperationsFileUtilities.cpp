@@ -493,6 +493,42 @@ void append_write_output_to_plato_analyze_operation
 /******************************************************************************/
 
 /******************************************************************************/
+void append_filter_control_to_plato_analyze_helmholtz_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name"}, {"ApplyHelmholtz", "Filter Control"}, tOperation);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tOutput);
+    }
+}
+// function append_filter_control_to_plato_analyze_helmholtz_operation
+/******************************************************************************/
+
+/******************************************************************************/
+void append_filter_gradient_to_plato_analyze_helmholtz_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_document& aDocument)
+{
+    if(aXMLMetaData.optimization_parameters().optimization_type() == "topology")
+    {
+        auto tOperation = aDocument.append_child("Operation");
+        XMLGen::append_children({"Function", "Name"}, {"ApplyHelmholtzGradient", "Filter Gradient"}, tOperation);
+        auto tInput = tOperation.append_child("Input");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tInput);
+        auto tOutput = tOperation.append_child("Output");
+        XMLGen::append_children({"ArgumentName"}, {"Topology"}, tOutput);
+    }
+}
+// function append_filter_gradient_to_plato_analyze_helmholtz_operation
+/******************************************************************************/
+
+/******************************************************************************/
 void write_plato_analyze_operation_xml_file
 (const XMLGen::InputData& aXMLMetaData)
 {
@@ -507,6 +543,20 @@ void write_plato_analyze_operation_xml_file
     XMLGen::append_compute_constraint_value_to_plato_analyze_operation(aXMLMetaData, tDocument);
     XMLGen::append_compute_constraint_gradient_to_plato_analyze_operation(aXMLMetaData, tDocument);
     std::string tServiceID = get_plato_analyze_service_id(aXMLMetaData);
+    std::string tFilename = std::string("plato_analyze_") + tServiceID + "_operations.xml";
+    tDocument.save_file(tFilename.c_str(), "  ");
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void write_plato_analyze_helmholtz_operation_xml_file
+(const XMLGen::InputData& aXMLMetaData)
+{
+    pugi::xml_document tDocument;
+    XMLGen::append_filter_control_to_plato_analyze_helmholtz_operation(aXMLMetaData, tDocument);
+    XMLGen::append_filter_gradient_to_plato_analyze_helmholtz_operation(aXMLMetaData, tDocument);
+
+    std::string tServiceID = aXMLMetaData.services()[0].id();
     std::string tFilename = std::string("plato_analyze_") + tServiceID + "_operations.xml";
     tDocument.save_file(tFilename.c_str(), "  ");
 }

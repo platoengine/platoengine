@@ -12,6 +12,7 @@
 #include "XMLGeneratorPlatoAnalyzeUtilities.hpp"
 #include "XMLGeneratorMaterialFunctionInterface.hpp"
 #include "XMLGeneratorPlatoAnalyzeOperationsFileUtilities.hpp"
+/* #include "XMLGeneratorProblem.hpp" */
 
 
 #include "XMLGeneratorValidInputKeys.hpp"
@@ -1877,6 +1878,31 @@ TEST(PlatoTestXMLGenerator, IsTopologyOptimizationProblem)
     ASSERT_TRUE(XMLGen::is_topology_optimization_problem("ToPoLogy"));
     ASSERT_FALSE(XMLGen::is_topology_optimization_problem("_topology"));
     ASSERT_FALSE(XMLGen::is_topology_optimization_problem("_topology_"));
+}
+
+TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForHelmholtzFilter)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_type", "helmholtz");
+    tOptimizationParameters.append("filter_in_engine", "false");
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+
+    XMLGen::Service tService;
+    tService.id("helmholtz");
+    tService.code("plato_analyze");
+    tXMLMetaData.append(tService);
+
+    // CALL FUNCTION
+    ASSERT_NO_THROW(XMLGen::write_plato_analyze_helmholtz_operation_xml_file(tXMLMetaData));
+    auto tData = XMLGen::read_data_from_file("plato_analyze_helmholtz_operations.xml");
+    auto tGold = std::string("<?xmlversion=\"1.0\"?><Operation><Function>ApplyHelmholtz</Function><Name>FilterControl</Name><Input><ArgumentName>Topology</ArgumentName></Input>")
+    +"<Output><ArgumentName>Topology</ArgumentName></Output></Operation><Operation><Function>ApplyHelmholtzGradient</Function><Name>FilterGradient</Name>"
+    +"<Input><ArgumentName>Topology</ArgumentName></Input><Output><ArgumentName>Topology</ArgumentName></Output></Operation>";
+    ASSERT_STREQ(tGold.c_str(), tData.str().c_str());
+    Plato::system("rm -f plato_analyze_helmholtz_operations.xml");
 }
 
 }

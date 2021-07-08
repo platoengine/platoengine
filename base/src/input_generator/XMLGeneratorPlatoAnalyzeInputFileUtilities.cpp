@@ -852,6 +852,47 @@ void write_plato_analyze_input_deck_file
 /**********************************************************************************/
 
 /**********************************************************************************/
+void write_plato_analyze_helmholtz_input_deck_file
+(const XMLGen::InputData& aXMLMetaData)
+{
+    pugi::xml_document tDocument;
+
+    // problem
+    XMLGen::append_problem_description_to_plato_analyze_input_deck(aXMLMetaData, tDocument);
+
+    // plato problem
+    auto tProblem = tDocument.child("ParameterList");
+    auto tPlatoProblem = tProblem.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Plato Problem"}, tPlatoProblem);
+
+    // physics 
+    std::vector<std::string> tKeys = {"name", "type", "value"};
+    std::vector<std::string> tValues = {"Physics", "string", "Helmholtz Filter"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPlatoProblem);
+
+    // pde constraint
+    tValues = {"PDE Constraint", "string", "Helmholtz Filter"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tPlatoProblem);
+
+    // spatial model
+    XMLGen::append_spatial_model_to_plato_analyze_input_deck(aXMLMetaData, tPlatoProblem);
+
+    // length scale
+    auto tLengthScale = tPlatoProblem.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {"Length Scale"}, tLengthScale);
+    tKeys = {"name", "type", "value"};
+    auto tLengthScaleValue = aXMLMetaData.optimization_parameters().filter_radius_absolute();
+    tValues = {"Length Scale", "double", tLengthScaleValue};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tLengthScale);
+
+    std::string tServiceID = aXMLMetaData.services()[0].id();
+    std::string tFilename = std::string("plato_analyze_") + tServiceID + "_input_deck.xml";
+    tDocument.save_file(tFilename.c_str(), "  ");
+}
+// function write_plato_analyze_helmholtz_input_deck_file
+/**********************************************************************************/
+
+/**********************************************************************************/
 std::string get_plato_analyze_service_id
 (const XMLGen::InputData& aXMLMetaData)
 {

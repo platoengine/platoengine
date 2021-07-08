@@ -110,6 +110,7 @@ private:
 
     void preProcessInputMetaData();
     void determineIfPlatoEngineFilteringIsNeeded();
+    void setupHelmholtzFilterService();
     void expandEssentialBoundaryConditions();
     void updateScenariosWithExpandedBoundaryConditions(std::map<int, std::vector<int> > aOldIDToNewIDMap);
     void loadOutputData(XMLGen::InputData &aNewInputData, 

@@ -382,6 +382,14 @@ void write_plato_analyze_input_deck_file
 (const XMLGen::InputData& aXMLMetaData);
 
 /******************************************************************************//**
+ * \fn write_plato_analyze_helmholtz_input_deck_file
+ * \brief Write plato analyze input file for helmholtz filter performer.
+ * \param [in] aXMLMetaData Plato problem input data
+**********************************************************************************/
+void write_plato_analyze_helmholtz_input_deck_file
+(const XMLGen::InputData& aXMLMetaData);
+
+/******************************************************************************//**
  * \fn get_nbc_parent_node
  * \brief get the appropiate nbc parent node	
  * \param [in] aPhysics String indicating the physics
