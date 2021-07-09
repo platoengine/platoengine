@@ -924,25 +924,14 @@ int
 ExodusIO::testFile(const char *file_name)
 {
   int err;
-  int c1, c2, c3;
   ifstream test_file;
 
   test_file.open(file_name);
   if (test_file.bad()) {
     err = -1;
   } else {
-    c1 = test_file.get();
-    c2 = test_file.get();
-    c3 = test_file.get();
-    if (c1 == 'C' && c2 == 'D' && c3 == 'F') {
-      // File is a valid netCDF file
-      test_file.close();
-      err = 0;
-    } else {
-      // File exists but isn't a valid netCDF file
-      test_file.close();
-      err = -2;
-    }
+    test_file.close();
+    err = 0;
   }
   return err;
 }
