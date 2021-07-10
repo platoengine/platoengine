@@ -8,8 +8,9 @@
 
 #include "XMLGenerator_UnitTester_Tools.hpp"
 
-#include "XMLGeneratorRandomMetadata.hpp"
 #include "XMLGeneratorUtilities.hpp"
+#include "XMLGeneratorRandomMetadata.hpp"
+#include "XMLGeneratorFixedBlockUtilities.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
 namespace PlatoTestXMLGenerator
@@ -260,9 +261,11 @@ TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
     tOptimizationParameters.append("optimization_type", "topology");
     tOptimizationParameters.addFixedBlockID("1");
     tOptimizationParameters.addFixedBlockID("2");
+    XMLGen::FixedBlock::check_fixed_block_metadata(tOptimizationParameters);
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_set_lower_bounds_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
+    //tDocument.save_file("dummy.xml");
 
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
@@ -281,16 +284,61 @@ TEST(PlatoTestXMLGenerator, AppendSetLowerBoundsToPlatoMainOperation)
     tKeys = {"ArgumentName"}; tValues = {"Lower Bound Vector"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
 
+    // FIXED BLOCK 1
     auto tFixedBlocks = tOperation.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    auto tIndexNode = tFixedBlocks.child("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "1");
+    auto tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "1");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
 
-    tIndexNode = tIndexNode.next_sibling("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "2");
+    auto tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
+
+    auto tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    auto tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
+
+    // FIXED BLOCK 2
+    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
+    ASSERT_FALSE(tFixedBlocks.empty());
+    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
+    tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "2");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
+
+    tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
+
+    tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
@@ -304,9 +352,11 @@ TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
     tOptimizationParameters.addFixedBlockID("2");
     tOptimizationParameters.addFixedSidesetID("11");
     tOptimizationParameters.addFixedSidesetID("12");
+    XMLGen::FixedBlock::check_fixed_block_metadata(tOptimizationParameters);
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_set_upper_bounds_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
+    //tDocument.save_file("dummy.txt");
 
     auto tOperation = tDocument.child("Operation");
     ASSERT_FALSE(tOperation.empty());
@@ -327,27 +377,73 @@ TEST(PlatoTestXMLGenerator, AppendSetUpperBoundsToPlatoMainOperation)
     tKeys = {"ArgumentName"}; tValues = {"Upper Bound Vector"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOutput);
 
+    // FIXED BLOCK 1
     auto tFixedBlocks = tOperation.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    auto tIndexNode = tFixedBlocks.child("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "1");
+    auto tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "1");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
 
-    tIndexNode = tIndexNode.next_sibling("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "2");
+    auto tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
 
+    auto tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    auto tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
+
+    // FIXED BLOCK 2
+    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
+    ASSERT_FALSE(tFixedBlocks.empty());
+    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
+    tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "2");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
+
+    tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
+
+    tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
+
+    // FIXED SIDE SETS
     auto tFixedSidesets = tOperation.child("FixedSidesets");
     ASSERT_FALSE(tFixedSidesets.empty());
     ASSERT_STREQ("FixedSidesets", tFixedSidesets.name());
-    tIndexNode = tFixedSidesets.child("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "11");
+    tIndex = tFixedSidesets.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "11");
 
-    tIndexNode = tIndexNode.next_sibling("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "12");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "12");
 }
 
 TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation_NoFixedBlocks)
@@ -368,20 +464,67 @@ TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation)
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.addFixedBlockID("1");
     tOptimizationParameters.addFixedBlockID("2");
+    XMLGen::FixedBlock::check_fixed_block_metadata(tOptimizationParameters);
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_fixed_blocks_identification_numbers_to_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
+    tDocument.save_file("dummy.xml");
 
+    // FIXED BLOCK 1
     auto tFixedBlocks = tDocument.child("FixedBlocks");
     ASSERT_FALSE(tFixedBlocks.empty());
     ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
-    auto tIndexNode = tFixedBlocks.child("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "1");
+    auto tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "1");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
 
-    tIndexNode = tIndexNode.next_sibling("Index");
-    ASSERT_FALSE(tIndexNode.empty());
-    ASSERT_STREQ(tIndexNode.child_value(), "2");
+    auto tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
+
+    auto tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    auto tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
+
+    // FIXED BLOCK 2
+    tFixedBlocks = tFixedBlocks.next_sibling("FixedBlocks");
+    ASSERT_FALSE(tFixedBlocks.empty());
+    ASSERT_STREQ("FixedBlocks", tFixedBlocks.name());
+    tIndex = tFixedBlocks.child("Index");
+    ASSERT_FALSE(tIndex.empty());
+    ASSERT_STREQ(tIndex.child_value(), "2");
+    tIndex = tIndex.next_sibling("Index");
+    ASSERT_TRUE(tIndex.empty());
+
+    tDomainValue = tFixedBlocks.child("DomainValue");
+    ASSERT_FALSE(tDomainValue.empty());
+    ASSERT_STREQ(tDomainValue.child_value(), "1.0");
+    tDomainValue = tDomainValue.next_sibling("DomainValue");
+    ASSERT_TRUE(tDomainValue.empty());
+
+    tBoundaryValue= tFixedBlocks.child("BoundaryValue");
+    ASSERT_FALSE(tBoundaryValue.empty());
+    ASSERT_STREQ(tBoundaryValue.child_value(), "0.5001");
+    tBoundaryValue = tBoundaryValue.next_sibling("BoundaryValue");
+    ASSERT_TRUE(tBoundaryValue.empty());
+
+    tMaterialState= tFixedBlocks.child("MaterialState");
+    ASSERT_FALSE(tMaterialState.empty());
+    ASSERT_STREQ(tMaterialState.child_value(), "solid");
+    tMaterialState = tMaterialState.next_sibling("MaterialState");
+    ASSERT_TRUE(tMaterialState.empty());
 }
 
 TEST(PlatoTestXMLGenerator, AppendFixedSidesetsIdentificationNumbersToOperation_NoFixedSidesets)

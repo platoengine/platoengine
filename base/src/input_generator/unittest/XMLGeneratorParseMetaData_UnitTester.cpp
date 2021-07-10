@@ -16,9 +16,171 @@
 #include "XMLGeneratorParseObjective.hpp"
 #include "XMLGeneratorParseConstraint.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorFixedBlockUtilities.hpp"
+
 
 namespace PlatoTestXMLGenerator
 {
+
+TEST(PlatoTestXMLGenerator, CheckFixedBlocksData_Case1)
+{
+    // SET PROBLEM
+    XMLGen::OptimizationParameters tMetadata;
+    std::vector<std::string> tFixedBlockIds = {"1", "2", "3"};
+    tMetadata.setFixedBlockIDs(tFixedBlockIds);
+    XMLGen::FixedBlock::check_fixed_block_metadata(tMetadata);
+
+    // TEST OUTPUT
+    auto tMaterialStates = tMetadata.fixed_block_material_states();
+    ASSERT_EQ(3u, tMaterialStates.size());
+    for(auto& tState : tMaterialStates)
+    {
+        ASSERT_STREQ("solid", tState.c_str());
+    }
+
+    auto tDomainValues = tMetadata.fixed_block_domain_values();
+    ASSERT_EQ(3u, tDomainValues.size());
+    for(auto& tValue : tDomainValues)
+    {
+        ASSERT_STREQ("1.0", tValue.c_str());
+    }
+
+    auto tBoundaryValues = tMetadata.fixed_block_boundary_values();
+    ASSERT_EQ(3u, tBoundaryValues.size());
+    for(auto& tValue : tBoundaryValues)
+    {
+        ASSERT_STREQ("0.5001", tValue.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, CheckFixedBlocksData_Case2)
+{
+    // SET PROBLEM
+    XMLGen::OptimizationParameters tMetadata;
+    std::vector<std::string> tFixedBlockIds = {"1", "2", "3"};
+    tMetadata.setFixedBlockIDs(tFixedBlockIds);
+    std::vector<std::string> tMaterialStates = {"solid", "fluid", "solid"};
+    tMetadata.setFixedBlockMaterialStates(tMaterialStates);
+
+    // CALL FUNCTION
+    XMLGen::FixedBlock::check_fixed_block_metadata(tMetadata);
+    
+    // TEST OUTPUT
+    std::vector<std::string> tMaterialStatesGold = {"solid", "fluid", "solid"};
+    tMaterialStates = tMetadata.fixed_block_material_states();
+    ASSERT_EQ(3u, tMaterialStates.size());
+    for(auto& tState : tMaterialStates)
+    {
+        auto tIndex = &tState - &tMaterialStates[0];
+        ASSERT_STREQ(tMaterialStatesGold[tIndex].c_str(), tState.c_str());
+    }
+
+    std::vector<std::string> tDomainValuesGold = {"0.0", "1.0", "0.0"};
+    auto tDomainValues = tMetadata.fixed_block_domain_values();
+    ASSERT_EQ(3u, tDomainValues.size());
+    for(auto& tValue : tDomainValues)
+    {
+        auto tIndex = &tValue - &tDomainValues[0];
+        ASSERT_STREQ(tDomainValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+
+    std::vector<std::string> tBoundaryValuesGold = {"0.4999", "0.5001", "0.4999"};
+    auto tBoundaryValues = tMetadata.fixed_block_boundary_values();
+    ASSERT_EQ(3u, tBoundaryValues.size());
+    for(auto& tValue : tBoundaryValues)
+    {
+        auto tIndex = &tValue - &tBoundaryValues[0];
+        ASSERT_STREQ(tBoundaryValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, CheckFixedBlocksData_Case3)
+{
+    // SET PROBLEM
+    XMLGen::OptimizationParameters tMetadata;
+    std::vector<std::string> tFixedBlockIds = {"1", "2", "3"};
+    tMetadata.setFixedBlockIDs(tFixedBlockIds);
+    std::vector<std::string> tDomainValues = {"0.9", "0.4", "0.8"};
+    tMetadata.setFixedBlockDomainValues(tDomainValues);
+    std::vector<std::string> tBoundaryValues = {"0.92", "0.43", "0.85"};
+    tMetadata.setFixedBlockBoundaryValues(tBoundaryValues);
+
+    // CALL FUNCTION
+    XMLGen::FixedBlock::check_fixed_block_metadata(tMetadata);
+    
+    // TEST OUTPUT
+    std::vector<std::string> tMaterialStatesGold = {"solid", "solid", "solid"};
+    auto tMaterialStates = tMetadata.fixed_block_material_states();
+    ASSERT_EQ(3u, tMaterialStates.size());
+    for(auto& tState : tMaterialStates)
+    {
+        auto tIndex = &tState - &tMaterialStates[0];
+        ASSERT_STREQ(tMaterialStatesGold[tIndex].c_str(), tState.c_str());
+    }
+
+    std::vector<std::string> tDomainValuesGold = {"0.9", "0.4", "0.8"};
+    tDomainValues = tMetadata.fixed_block_domain_values();
+    ASSERT_EQ(3u, tDomainValues.size());
+    for(auto& tValue : tDomainValues)
+    {
+        auto tIndex = &tValue - &tDomainValues[0];
+        ASSERT_STREQ(tDomainValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+
+    std::vector<std::string> tBoundaryValuesGold = {"0.92", "0.43", "0.85"};
+    tBoundaryValues = tMetadata.fixed_block_boundary_values();
+    ASSERT_EQ(3u, tBoundaryValues.size());
+    for(auto& tValue : tBoundaryValues)
+    {
+        auto tIndex = &tValue - &tBoundaryValues[0];
+        ASSERT_STREQ(tBoundaryValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+}
+
+TEST(PlatoTestXMLGenerator, CheckFixedBlocksData_Case4)
+{
+    // SET PROBLEM
+    XMLGen::OptimizationParameters tMetadata;
+    std::vector<std::string> tFixedBlockIds = {"1", "2", "3"};
+    tMetadata.setFixedBlockIDs(tFixedBlockIds);
+    std::vector<std::string> tDomainValues = {"0.9", "0.4", "0.8"};
+    tMetadata.setFixedBlockDomainValues(tDomainValues);
+    std::vector<std::string> tBoundaryValues = {"0.92", "0.43", "0.85"};
+    tMetadata.setFixedBlockBoundaryValues(tBoundaryValues);
+    std::vector<std::string> tMaterialStates = {"solid", "fluid", "solid"};
+    tMetadata.setFixedBlockMaterialStates(tMaterialStates);
+
+    // CALL FUNCTION
+    XMLGen::FixedBlock::check_fixed_block_metadata(tMetadata);
+    
+    // TEST OUTPUT
+    std::vector<std::string> tMaterialStatesGold = {"solid", "fluid", "solid"};
+    tMaterialStates = tMetadata.fixed_block_material_states();
+    ASSERT_EQ(3u, tMaterialStates.size());
+    for(auto& tState : tMaterialStates)
+    {
+        auto tIndex = &tState - &tMaterialStates[0];
+        ASSERT_STREQ(tMaterialStatesGold[tIndex].c_str(), tState.c_str());
+    }
+
+    std::vector<std::string> tDomainValuesGold = {"0.9", "0.4", "0.8"};
+    tDomainValues = tMetadata.fixed_block_domain_values();
+    ASSERT_EQ(3u, tDomainValues.size());
+    for(auto& tValue : tDomainValues)
+    {
+        auto tIndex = &tValue - &tDomainValues[0];
+        ASSERT_STREQ(tDomainValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+
+    std::vector<std::string> tBoundaryValuesGold = {"0.92", "0.43", "0.85"};
+    tBoundaryValues = tMetadata.fixed_block_boundary_values();
+    ASSERT_EQ(3u, tBoundaryValues.size());
+    for(auto& tValue : tBoundaryValues)
+    {
+        auto tIndex = &tValue - &tBoundaryValues[0];
+        ASSERT_STREQ(tBoundaryValuesGold[tIndex].c_str(), tValue.c_str());
+    }
+}
 
 TEST(PlatoTestXMLGenerator, ParseObjective_ErrorNoType)
 {

@@ -239,6 +239,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStage)
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_objective_value_stage(tMetaData, tDocument));
+    //tDocument.save_file("dummy.xml");
 
     // STAGE INPUTS
     auto tStage = tDocument.child("Stage");

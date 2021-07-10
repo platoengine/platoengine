@@ -75,6 +75,27 @@ private:
     void setFixedSidesetIDs(XMLGen::OptimizationParameters &aMetadata);
 
     /******************************************************************************//**
+     * \fn setFixedBlockDomainValues
+     * \brief Set density values corresponding to the fixed block domains 
+     * \param [in] aMetadata optimization parameters metadata
+    **********************************************************************************/
+    void setFixedBlockDomainValues(XMLGen::OptimizationParameters &aMetadata);
+
+    /******************************************************************************//**
+     * \fn setFixedBlockBoundaryValues
+     * \brief Set density values corresponding to the fixed block boundaries 
+     * \param [in] aMetadata optimization parameters metadata
+    **********************************************************************************/
+    void setFixedBlockBoundaryValues(XMLGen::OptimizationParameters &aMetadata);
+
+    /******************************************************************************//**
+     * \fn setFixedBlockMaterialStates
+     * \brief Set material state for each fixed block, options are solid and fluid. 
+     * \param [in] aMetadata optimization parameters metadata
+    **********************************************************************************/
+    void setFixedBlockMaterialStates(XMLGen::OptimizationParameters &aMetadata);
+
+    /******************************************************************************//**
      * \fn setMaterialBoxExtents
      * \brief Set the material box extent metadata
      * \param [in] aMetadata optimization parameters metadata

@@ -44,6 +44,9 @@ private:
     std::vector<std::string> mFixedBlockIDs;
     std::vector<std::string> mFixedSidesetIDs;
     std::vector<std::string> mFixedNodesetIDs;
+    std::vector<std::string> mFixedBlockDomainValues;
+    std::vector<std::string> mFixedBlockBoundaryValues;
+    std::vector<std::string> mFixedBlockMaterialStates;
     std::vector<std::string> mSymmetryPlaneOrigin;
     std::vector<std::string> mSymmetryPlaneNormal;
 
@@ -205,80 +208,78 @@ public:
      * \brief Set the fixed block ids
      * \param [in] aFixedBlockIDs vector of strings with fixed block ids
     **********************************************************************************/
-    void setFixedBlockIDs(const std::vector<std::string> &aFixedBlockIDs)
-    {
-        mFixedBlockIDs = aFixedBlockIDs;
-    }
-
-    /******************************************************************************//**
-     * \fn addLevelsetNodeset
-     * \brief Add a levelset nodeset id to the levelset nodeset id list
-     * \param [in] aLevelsetNodesetID string with the levelset nodeset id
-    **********************************************************************************/
-    void addLevelsetNodeset(const std::string &aLevelsetNodesetID)
-    {
-        mLevelsetNodesets.push_back(aLevelsetNodesetID);
-    }
-
-    /******************************************************************************//**
-     * \fn addFixedNodesetID
-     * \brief Add a fixed nodeset id to the fixed nodeset id list
-     * \param [in] aFixedNodesetID string with the fixed nodeset id
-    **********************************************************************************/
-    void addFixedNodesetID(const std::string &aFixedNodesetID)
-    {
-        mFixedNodesetIDs.push_back(aFixedNodesetID);
-    }
-
-    /******************************************************************************//**
-     * \fn addFixedSidesetID
-     * \brief Add a fixed sideset id to the fixed sideset id list
-     * \param [in] aFixedSidesetID string with the fixed sideset id
-    **********************************************************************************/
-    void addFixedSidesetID(const std::string &aFixedSidesetID)
-    {
-        mFixedSidesetIDs.push_back(aFixedSidesetID);
-    }
-
-    /******************************************************************************//**
-     * \fn addFixedBlockID
-     * \brief Add a fixed block id to the fixed block id list
-     * \param [in] aFixedBlockID string with the fixed block id
-    **********************************************************************************/
-    void addFixedBlockID(const std::string &aFixedBlockID)
-    {
-        mFixedBlockIDs.push_back(aFixedBlockID);
-    }
+    void setFixedBlockIDs(const std::vector<std::string> &aFixedBlockIDs) { mFixedBlockIDs = aFixedBlockIDs; }
 
     /******************************************************************************//**
      * \fn setFixedSidesetIDs
      * \brief Set the fixed sideset ids
      * \param [in] aFixedSidesetIDs vector of strings with fixed sideset ids
     **********************************************************************************/
-    void setFixedSidesetIDs(const std::vector<std::string> &aFixedSidesetIDs)
-    {
-        mFixedSidesetIDs = aFixedSidesetIDs;
-    }
+    void setFixedSidesetIDs(const std::vector<std::string> &aFixedSidesetIDs) { mFixedSidesetIDs = aFixedSidesetIDs; }
 
     /******************************************************************************//**
      * \fn setFixedNodesetIDs
      * \brief Set the fixed nodeset ids
      * \param [in] aFixedNodesetIDs vector of strings with fixed nodeset ids
     **********************************************************************************/
-    void setFixedNodesetIDs(const std::vector<std::string> &aFixedNodesetIDs)
-    {
-        mFixedNodesetIDs = aFixedNodesetIDs;
-    }
+    void setFixedNodesetIDs(const std::vector<std::string> &aFixedNodesetIDs) { mFixedNodesetIDs = aFixedNodesetIDs; }
+
+    /******************************************************************************//**
+     * \fn setFixedBlockDomainValues
+     * \brief Set density values for the nodes associated with the fixed block domains. 
+     *        assign to the domain.
+     * \param [in] aFixedBlockDomainValues list of homogeneous density values 
+    **********************************************************************************/
+    void setFixedBlockDomainValues(const std::vector<std::string> &aFixedBlockDomainValues) { mFixedBlockDomainValues = aFixedBlockDomainValues; }
+
+    /******************************************************************************//**
+     * \fn setFixedBlockBoundaryValues
+     * \brief Set density values for the nodes associated with the fixed block boundaries.
+     * \param [in] aFixedBlockBoundaryValues list of homogeneous density values 
+    **********************************************************************************/
+    void setFixedBlockBoundaryValues(const std::vector<std::string> &aFixedBlockBoundaryValues) { mFixedBlockBoundaryValues = aFixedBlockBoundaryValues; }
+
+    /******************************************************************************//**
+     * \fn setFixedBlockMaterialStates
+     * \brief Set material state (options: solid and fluid) for each fixed block. 
+     * \param [in] aFixedBlockMaterialStates list of material states 
+    **********************************************************************************/
+    void setFixedBlockMaterialStates(const std::vector<std::string> &aFixedBlockMaterialStates) { mFixedBlockMaterialStates = aFixedBlockMaterialStates; }
 
     /******************************************************************************//**
      * \fn setLevelsetNodesets
      * \brief Set the levelset nodeset ids
      * \param [in] aLevelsetNodesets vector of strings with levelset nodeset ids
     **********************************************************************************/
-    void setLevelsetNodesets(const std::vector<std::string> &aLevelsetNodesets)
-    {
-        mLevelsetNodesets = aLevelsetNodesets;
-    }
+    void setLevelsetNodesets(const std::vector<std::string> &aLevelsetNodesets) { mLevelsetNodesets = aLevelsetNodesets; }
+
+    /******************************************************************************//**
+     * \fn addFixedBlockID
+     * \brief Add a fixed block id to the fixed block id list
+     * \param [in] aFixedBlockID string with the fixed block id
+    **********************************************************************************/
+    void addFixedBlockID(const std::string &aFixedBlockID) { mFixedBlockIDs.push_back(aFixedBlockID); }
+
+    /******************************************************************************//**
+     * \fn addFixedNodesetID
+     * \brief Add a fixed nodeset id to the fixed nodeset id list
+     * \param [in] aFixedNodesetID string with the fixed nodeset id
+    **********************************************************************************/
+    void addFixedNodesetID(const std::string &aFixedNodesetID) {  mFixedNodesetIDs.push_back(aFixedNodesetID); }
+
+    /******************************************************************************//**
+     * \fn addFixedSidesetID
+     * \brief Add a fixed sideset id to the fixed sideset id list
+     * \param [in] aFixedSidesetID string with the fixed sideset id
+    **********************************************************************************/
+    void addFixedSidesetID(const std::string &aFixedSidesetID) { mFixedSidesetIDs.push_back(aFixedSidesetID); }
+
+    /******************************************************************************//**
+     * \fn addLevelsetNodeset
+     * \brief Add a levelset nodeset id to the levelset nodeset id list
+     * \param [in] aLevelsetNodesetID string with the levelset nodeset id
+    **********************************************************************************/
+    void addLevelsetNodeset(const std::string &aLevelsetNodesetID) { mLevelsetNodesets.push_back(aLevelsetNodesetID); }
 
     /******************************************************************************//**
      * \fn needsMeshMap 
@@ -286,7 +287,6 @@ public:
      * \return value
     **********************************************************************************/
     bool needsMeshMap() const;
-
 
     // Functions to get member values
     std::string optimization_algorithm() const {return value("optimization_algorithm");} 
@@ -321,6 +321,9 @@ public:
     std::vector<std::string> fixed_block_ids() const {return mFixedBlockIDs;}
     std::vector<std::string> fixed_nodeset_ids() const {return mFixedNodesetIDs;}
     std::vector<std::string> fixed_sideset_ids() const {return mFixedSidesetIDs;}
+    std::vector<std::string> fixed_block_domain_values() const {return mFixedBlockDomainValues;}
+    std::vector<std::string> fixed_block_boundary_values() const {return mFixedBlockBoundaryValues;}
+    std::vector<std::string> fixed_block_material_states() const {return mFixedBlockMaterialStates;}
     std::string mma_move_limit() const {return value("mma_move_limit");}
     std::string mma_asymptote_expansion() const {return value("mma_asymptote_expansion");}
     std::string mma_asymptote_contraction() const {return value("mma_asymptote_contraction");}

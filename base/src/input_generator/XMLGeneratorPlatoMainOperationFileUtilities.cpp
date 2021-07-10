@@ -1110,10 +1110,19 @@ void append_fixed_blocks_identification_numbers_to_operation
 {
     if(aXMLMetaData.optimization_parameters().fixed_block_ids().size() > 0)
     {
-        auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
-        for(auto& tID : aXMLMetaData.optimization_parameters().fixed_block_ids())
+        auto tFixedBlockIDs = aXMLMetaData.optimization_parameters().fixed_block_ids();
+        auto tDomainValues = aXMLMetaData.optimization_parameters().fixed_block_domain_values();
+        auto tBoundaryValues = aXMLMetaData.optimization_parameters().fixed_block_boundary_values();
+        auto tMaterialStates = aXMLMetaData.optimization_parameters().fixed_block_material_states();
+        //auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
+        for(auto& tID : tFixedBlockIDs)
         {
+            auto tIndex = &tID - &tFixedBlockIDs[0];
+            auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
             XMLGen::append_children({"Index"}, {tID}, tFixedBlocks);
+            XMLGen::append_children({"DomainValue"}, {tDomainValues[tIndex]}, tFixedBlocks);
+            XMLGen::append_children({"BoundaryValue"}, {tBoundaryValues[tIndex]}, tFixedBlocks);
+            XMLGen::append_children({"MaterialState"}, {tMaterialStates[tIndex]}, tFixedBlocks);
         }
     }
 }
