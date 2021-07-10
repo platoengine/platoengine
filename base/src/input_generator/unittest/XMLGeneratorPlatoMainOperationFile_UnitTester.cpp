@@ -468,7 +468,7 @@ TEST(PlatoTestXMLGenerator, AppendFixedBlocksIdentificationNumbersToOperation)
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_fixed_blocks_identification_numbers_to_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
-    tDocument.save_file("dummy.xml");
+    //tDocument.save_file("dummy.xml");
 
     // FIXED BLOCK 1
     auto tFixedBlocks = tDocument.child("FixedBlocks");
