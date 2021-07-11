@@ -82,6 +82,25 @@ public:
     void getArguments(std::vector<Plato::LocalArg>& aLocalArgs);
 
 private:
+    /******************************************************************************//**
+     * \brief Parse node and side sets metadata.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseEntitySets(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Parse fixed block metadata.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseFixedBlocks(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Parse operation input and output arguments.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseOperationArguments(Plato::InputData& aNode);
+    
+private:
     int mOutputSize; /*!< output field length */
 
     std::string mInputName; /*!< input argument name */
@@ -89,9 +108,12 @@ private:
     std::string mDiscretization; /*!< topology/design representation, levelset or density */
     Plato::data::layout_t mOutputLayout; /*!< output field data layout */
 
-    std::vector<int> mFixedBlocks; /*!< fixed blocks' identifiers */
-    std::vector<int> mFixedSidesets; /*!< fixed blocks' sideset identifiers */
-    std::vector<int> mFixedNodesets; /*!< fixed blocks' nodeset identifiers */
+    std::vector<int> mFixedBlockIDs; /*!< fixed block identification number */
+    std::vector<int> mFixedSidesetIDs; /*!< fixed sideset identification number */
+    std::vector<int> mFixedNodesetIDs; /*!< fixed nodeset identification number */
+    std::vector<double> mDomainValues; /*!< fixed block domain values */
+    std::vector<double> mBoundaryValues; /*!< fixed block boundary values */
+    std::vector<std::string> mMaterialStates; /*!< fixed block material states */
 };
 // class SetLowerBounds;
 

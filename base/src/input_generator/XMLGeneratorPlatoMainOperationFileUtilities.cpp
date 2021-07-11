@@ -7,6 +7,7 @@
 #include "XMLGeneratorUtilities.hpp"
 #include "XMLGeneratorValidInputKeys.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
+#include "XMLGeneratorFixedBlockUtilities.hpp"
 #include "XMLGeneratorPlatoAnalyzeProblem.hpp"
 #include "XMLGeneratorPlatoMainOperationFileUtilities.hpp"
 
@@ -1108,13 +1109,16 @@ void append_fixed_blocks_identification_numbers_to_operation
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
-    if(aXMLMetaData.optimization_parameters().fixed_block_ids().size() > 0)
+    const auto& tOptParams = aXMLMetaData.optimization_parameters();
+    if(tOptParams.fixed_block_ids().size() > 0)
     {
-        auto tFixedBlockIDs = aXMLMetaData.optimization_parameters().fixed_block_ids();
-        auto tDomainValues = aXMLMetaData.optimization_parameters().fixed_block_domain_values();
-        auto tBoundaryValues = aXMLMetaData.optimization_parameters().fixed_block_boundary_values();
-        auto tMaterialStates = aXMLMetaData.optimization_parameters().fixed_block_material_states();
-        //auto tFixedBlocks = aParentNode.append_child("FixedBlocks");
+        XMLGen::FixedBlock::check_fixed_block_arrays(tOptParams);
+
+        auto tFixedBlockIDs = tOptParams.fixed_block_ids();
+        auto tDomainValues = tOptParams.fixed_block_domain_values();
+        auto tBoundaryValues = tOptParams.fixed_block_boundary_values();
+        auto tMaterialStates = tOptParams.fixed_block_material_states();
+
         for(auto& tID : tFixedBlockIDs)
         {
             auto tIndex = &tID - &tFixedBlockIDs[0];

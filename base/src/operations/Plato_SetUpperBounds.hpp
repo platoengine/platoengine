@@ -1,5 +1,5 @@
 /*
- //@HEADER
+ //\HEADER
  // *************************************************************************
  //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
  //                    Solutions of Sandia, LLC (NTESS).
@@ -34,10 +34,10 @@
  // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  //
- // Questions? Contact the Plato team (plato3D-help@sandia.gov)
+ // Questions? Contact the Plato team (plato3D-help\sandia.gov)
  //
  // *************************************************************************
- //@HEADER
+ //\HEADER
  */
 
 /*
@@ -58,40 +58,62 @@ namespace Plato
 class InputData;
 
 /******************************************************************************//**
- * @brief Compute design variables' upper bound
+ * \brief Compute design variables' upper bound
 **********************************************************************************/
 class SetUpperBounds : public Plato::LocalOp
 {
 public:
     /******************************************************************************//**
-     * @brief Constructor
-     * @param [in] aPlatoApp PLATO application
-     * @param [in] aNode input XML data
+     * \brief Constructor
+     * \param [in] aPlatoApp PLATO application
+     * \param [in] aNode input XML data
     **********************************************************************************/
     SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode);
 
     /******************************************************************************//**
-     * @brief perform local operation - compute upper bounds
+     * \brief perform local operation - compute upper bounds
     **********************************************************************************/
     void operator()();
 
     /******************************************************************************//**
-     * @brief Return local operation's argument list
-     * @param [out] aLocalArgs argument list
+     * \brief Return local operation's argument list
+     * \param [out] aLocalArgs argument list
     **********************************************************************************/
     void getArguments(std::vector<Plato::LocalArg> & aLocalArgs);
 
 private:
+    /******************************************************************************//**
+     * \brief Parse node and side sets metadata.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseEntitySets(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Parse fixed block metadata.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseFixedBlocks(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Parse operation input and output arguments.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseOperationArguments(Plato::InputData& aNode);
+
+private:
     int mOutputSize; /*!< output field length */
 
-    std::string mInputName; /*!< input argument name */
-    std::string mOutputName; /*!< output argument name */
+    std::string mInputArgumentName; /*!< input argument name */
+    std::string mOutputArgumentName; /*!< output argument name */
     std::string mDiscretization; /*!< topology/design representation, levelset or density */
     Plato::data::layout_t mOutputLayout; /*!< output field data layout */
 
-    std::vector<int> mFixedBlocks; /*!< fixed blocks' identifiers */
-    std::vector<int> mFixedSidesets; /*!< fixed blocks' sideset identifiers */
-    std::vector<int> mFixedNodesets; /*!< fixed blocks' nodeset identifiers */
+    std::vector<int> mFixedBlockIDs; /*!< fixed block identification number */
+    std::vector<int> mFixedSidesetIDs; /*!< fixed sideset identification number */
+    std::vector<int> mFixedNodesetIDs; /*!< fixed nodeset identification number */
+    std::vector<double> mDomainValues; /*!< fixed block domain values */
+    std::vector<double> mBoundaryValues; /*!< fixed block boundary values */
+    std::vector<std::string> mMaterialStates; /*!< fixed block material states */
 };
 // class SetUpperBounds;
 

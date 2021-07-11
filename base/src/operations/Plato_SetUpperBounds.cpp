@@ -60,24 +60,9 @@ namespace Plato
 SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
         Plato::LocalOp(aPlatoApp)
 {
-    mInputName = "Upper Bound Value";
-    auto tInputData = Plato::Get::InputData(aNode, "Input");
-    mInputName = Plato::Get::String(tInputData, "ArgumentName");
-
-    mOutputName = "Upper Bound Vector";
-    auto tOutputNode = Plato::Get::InputData(aNode, "Output");
-    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
-    mOutputSize = Plato::Get::Int(tOutputNode, "Size");
-
-    auto tFixedBlocksNode = Plato::Get::InputData(aNode, "FixedBlocks");
-    mFixedBlocks = Plato::Get::Ints(tFixedBlocksNode, "Index");
-
-    auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
-    mFixedSidesets = Plato::Get::Ints(tFixedSidesetsNode, "Index");
-
-    auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
-    mFixedNodesets = Plato::Get::Ints(tFixedNodesetsNode, "Index");
-
+    this->parseOperationArguments(aNode);
+    this->parseFixedBlocks(aNode);
+    this->parseEntitySets(aNode);
     mDiscretization = Plato::Get::String(aNode, "Discretization");
 }
 
@@ -89,7 +74,7 @@ void SetUpperBounds::operator()()
 
     if(mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
-        auto& tOutputField = *(mPlatoApp->getNodeField(mOutputName));
+        auto& tOutputField = *(mPlatoApp->getNodeField(mOutputArgumentName));
         tOutputField.ExtractView(&tToData);
         tDataLength = tOutputField.MyLength();
     }
@@ -99,14 +84,14 @@ void SetUpperBounds::operator()()
     }
     else if(mOutputLayout == Plato::data::layout_t::SCALAR)
     {
-        auto tOutputScalar = mPlatoApp->getValue(mOutputName);
+        auto tOutputScalar = mPlatoApp->getValue(mOutputArgumentName);
         tDataLength = mOutputSize;
         tOutputScalar->resize(tDataLength);
         tToData = tOutputScalar->data();
     }
 
     // Get incoming global Upper bound specified by user
-    std::vector<double>* tInData = mPlatoApp->getValue(mInputName);
+    std::vector<double>* tInData = mPlatoApp->getValue(mInputArgumentName);
     double tUpperBoundIn = (*tInData)[0];
 
     // Set specified value for the user
@@ -118,16 +103,52 @@ void SetUpperBounds::operator()()
     if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
         double tValue = -0.001;
-        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlocks, tValue);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesets, tValue);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesets, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlockIDs, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesetIDs, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesetIDs, tValue);
     }
 }
 
 void SetUpperBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 {
-    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
+    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputArgumentName));
+    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputArgumentName, mOutputSize));
+}
+
+void SetUpperBounds::parseEntitySets(Plato::InputData& aNode)
+{
+    auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
+    mFixedSidesetIDs = Plato::Get::Ints(tFixedSidesetsNode, "Index");
+
+    auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
+    mFixedNodesetIDs = Plato::Get::Ints(tFixedNodesetsNode, "Index");
+}
+
+void SetUpperBounds::parseFixedBlocks(Plato::InputData& aNode)
+{
+    for(auto tFixedBlock : aNode.getByName<Plato::InputData>("FixedBlocks"))
+    {
+        auto tIndex = Plato::Get::Int(tFixedBlock, "Index");
+        mFixedBlockIDs.push_back(tIndex);
+        auto tDomainValue = Plato::Get::Double(tFixedBlock, "DomainValue");
+        mDomainValues.push_back(tDomainValue);
+        auto tBoundaryValue = Plato::Get::Double(tFixedBlock, "BoundaryValue");
+        mBoundaryValues.push_back(tBoundaryValue);
+        auto tMaterialState = Plato::Get::String(tFixedBlock, "MaterialState");
+        mMaterialStates.push_back(tMaterialState);
+    }
+}
+
+void SetUpperBounds::parseOperationArguments(Plato::InputData& aNode)
+{
+    mInputArgumentName = "Upper Bound Value";
+    auto tInputData = Plato::Get::InputData(aNode, "Input");
+    mInputArgumentName = Plato::Get::String(tInputData, "ArgumentName");
+
+    mOutputArgumentName = "Upper Bound Vector";
+    auto tOutputNode = Plato::Get::InputData(aNode, "Output");
+    mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
+    mOutputSize = Plato::Get::Int(tOutputNode, "Size");
 }
 
 }

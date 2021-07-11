@@ -219,7 +219,76 @@ inline void set_fixed_block_material_states
     aMetadata.setFixedBlockMaterialStates(tFixedBlockMaterialStates);
 }
 
+/******************************************************************************//**
+ * \fn check_domain_values_array
+ * \brief Check if the number of domain values matches the number of fixed blocks. 
+ *        Function throws error if numbers do not match. 
+ * \param [in] aMetadata optimization block metadata
+**********************************************************************************/
+inline void check_domain_values_array
+(const XMLGen::OptimizationParameters& aMetadata)
+{
+     auto tBlockIDs = aMetadata.fixed_block_ids();
+     auto tDomainValues = aMetadata.fixed_block_domain_values();
 
+     auto tNumFixedBlocks = tBlockIDs.size();
+     if (tNumFixedBlocks != tDomainValues.size())
+     {
+         THROWERR("Number of domain values '" + std::to_string(tDomainValues.size()) + "' does not match the number of fixed blocks '" + std::to_string(tNumFixedBlocks) + "'.")
+     }
+}
+
+/******************************************************************************//**
+ * \fn check_boundary_values_array
+ * \brief Check if the number of boundary values matches the number of fixed blocks. 
+ *        Function throws error if numbers do not match. 
+ * \param [in] aMetadata optimization block metadata
+**********************************************************************************/
+inline void check_boundary_values_array
+(const XMLGen::OptimizationParameters& aMetadata)
+{
+    auto tBlockIDs = aMetadata.fixed_block_ids();
+    auto tBoundaryValues = aMetadata.fixed_block_boundary_values();
+
+    auto tNumFixedBlocks = tBlockIDs.size();
+    if (tNumFixedBlocks != tBoundaryValues.size())
+    {
+        THROWERR("Number of boundary values '" + std::to_string(tBoundaryValues.size()) + "' does not match the number of fixed blocks '" + std::to_string(tNumFixedBlocks) + "'.")
+    }
+}
+
+/******************************************************************************//**
+ * \fn check_boundary_values_array
+ * \brief Check if the number of material states matches the number of fixed blocks. 
+ *        Function throws error if numbers do not match. 
+ * \param [in] aMetadata optimization block metadata
+**********************************************************************************/
+inline void check_material_states_array
+(const XMLGen::OptimizationParameters &aMetadata)
+{
+    auto tBlockIDs = aMetadata.fixed_block_ids();
+    auto tMaterialStates = aMetadata.fixed_block_material_states();
+
+    auto tNumFixedBlocks = tBlockIDs.size();
+    if (tNumFixedBlocks != tMaterialStates.size())
+    {
+        THROWERR("Number of material states '" + std::to_string(tMaterialStates.size()) + "' does not match the number of fixed blocks '" + std::to_string(tNumFixedBlocks) + "'.")
+    }
+}
+
+/******************************************************************************//**
+ * \fn check_fixed_block_arrays
+ * \brief Check domain_values_array, boundary_values_array, and material_states_array size. 
+ *        Function throws error if numbers do not match. 
+ * \param [in] aMetadata optimization block metadata
+**********************************************************************************/
+inline void check_fixed_block_arrays
+(const XMLGen::OptimizationParameters &aMetadata)
+{
+    XMLGen::FixedBlock::check_domain_values_array(aMetadata);
+    XMLGen::FixedBlock::check_boundary_values_array(aMetadata);
+    XMLGen::FixedBlock::check_material_states_array(aMetadata);
+}
 
 /******************************************************************************//**
  * \fn check_fixed_block_metadata
