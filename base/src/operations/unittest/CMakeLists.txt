@@ -26,7 +26,9 @@ INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 #MESSAGE(${Trilinos_TPL_LIBRARIES})
 #MESSAGE("***************************LIBRARIES**************************")
 set(Plato_Operations_UnitTester_LIBS ${GTEST_LIBRARY} 
-                                     ${PLATO_LIBRARIES})
+                                     PlatoApp
+                                     ${PLATO_LIBRARIES}
+                                     ${Trilinos_LIBRARIES})
  
 add_executable(Plato_Operations_UnitTester ${Plato_Operations_UnitTester_SRCS})
 target_link_libraries(Plato_Operations_UnitTester ${Plato_Operations_UnitTester_LIBS} ${Plato_Operations_UnitTester_LIBS})
