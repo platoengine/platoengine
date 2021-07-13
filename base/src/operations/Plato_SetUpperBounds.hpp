@@ -49,6 +49,7 @@
 #pragma once
 
 #include "Plato_LocalOperation.hpp"
+#include "Plato_OperationMetadata.hpp"
 
 class PlatoApp;
 
@@ -83,6 +84,18 @@ public:
 
 private:
     /******************************************************************************//**
+     * \brief Modifies upper bound values if use case is leveset.
+     * \param [in,out] aToData vector to upper bound vector
+    **********************************************************************************/
+    void checkLevelsetUseCase(double* aToData);
+
+    /******************************************************************************//**
+     * \brief Initialize upper bound vector. 
+     * \param [in,out] aToData vector to upper bound vector
+    **********************************************************************************/
+    void initializeUpperBoundVector(double* aToData);
+
+    /******************************************************************************//**
      * \brief Parse node and side sets metadata.
      * \param [in] aNode XML metadata for this operation
     **********************************************************************************/
@@ -101,19 +114,15 @@ private:
     void parseOperationArguments(Plato::InputData& aNode);
 
 private:
-    int mOutputSize; /*!< output field length */
+    int mOutputSize = 0; /*!< output field length */
+    int mUpperBoundVectorLength = 0; /*!< upper bound vector length */
 
     std::string mInputArgumentName; /*!< input argument name */
     std::string mOutputArgumentName; /*!< output argument name */
     std::string mDiscretization; /*!< topology/design representation, levelset or density */
     Plato::data::layout_t mOutputLayout; /*!< output field data layout */
 
-    std::vector<int> mFixedBlockIDs; /*!< fixed block identification number */
-    std::vector<int> mFixedSidesetIDs; /*!< fixed sideset identification number */
-    std::vector<int> mFixedNodesetIDs; /*!< fixed nodeset identification number */
-    std::vector<double> mDomainValues; /*!< fixed block domain values */
-    std::vector<double> mBoundaryValues; /*!< fixed block boundary values */
-    std::vector<std::string> mMaterialStates; /*!< fixed block material states */
+    Plato::FixedBlock::Metadata mFixedBlockMetadata; /*!< data describing fixed blocks */
 };
 // class SetUpperBounds;
 

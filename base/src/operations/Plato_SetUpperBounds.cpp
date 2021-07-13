@@ -70,13 +70,11 @@ void SetUpperBounds::operator()()
 {
     // Get the output field
     double* tToData;
-    int tDataLength = 0;
-
     if(mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
         auto& tOutputField = *(mPlatoApp->getNodeField(mOutputArgumentName));
         tOutputField.ExtractView(&tToData);
-        tDataLength = tOutputField.MyLength();
+        mUpperBoundVectorLength = tOutputField.MyLength();
     }
     else if(mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD)
     {
@@ -85,27 +83,37 @@ void SetUpperBounds::operator()()
     else if(mOutputLayout == Plato::data::layout_t::SCALAR)
     {
         auto tOutputScalar = mPlatoApp->getValue(mOutputArgumentName);
-        tDataLength = mOutputSize;
-        tOutputScalar->resize(tDataLength);
+        mUpperBoundVectorLength = mOutputSize;
+        tOutputScalar->resize(mUpperBoundVectorLength);
         tToData = tOutputScalar->data();
     }
 
+    this->initializeUpperBoundVector(tToData);
+    this->checkLevelsetUseCase(tToData);
+}
+
+void SetUpperBounds::checkLevelsetUseCase(double* aToData)
+{
+    // Now update values based on fixed entities
+    if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
+    {
+        double tValue = -0.001;
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(aToData, mFixedBlockMetadata.mBlockIDs, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(aToData, mFixedBlockMetadata.mSidesetIDs, tValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(aToData, mFixedBlockMetadata.mNodesetIDs, tValue);
+    }
+}
+
+void SetUpperBounds::initializeUpperBoundVector(double* aToData)
+{
     // Get incoming global Upper bound specified by user
     std::vector<double>* tInData = mPlatoApp->getValue(mInputArgumentName);
     double tUpperBoundIn = (*tInData)[0];
 
     // Set specified value for the user
-    for(int tIndex = 0; tIndex < tDataLength; tIndex++)
+    for(int tIndex = 0; tIndex < mUpperBoundVectorLength; tIndex++)
     {
-        tToData[tIndex] = tUpperBoundIn;
-    }
-    // Now update values based on fixed entities
-    if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
-    {
-        double tValue = -0.001;
-        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlockIDs, tValue);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesetIDs, tValue);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesetIDs, tValue);
+        aToData[tIndex] = tUpperBoundIn;
     }
 }
 
@@ -118,24 +126,28 @@ void SetUpperBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 void SetUpperBounds::parseEntitySets(Plato::InputData& aNode)
 {
     auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
-    mFixedSidesetIDs = Plato::Get::Ints(tFixedSidesetsNode, "Index");
+    mFixedBlockMetadata.mSidesetIDs = Plato::Get::Ints(tFixedSidesetsNode, "Index");
 
     auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
-    mFixedNodesetIDs = Plato::Get::Ints(tFixedNodesetsNode, "Index");
+    mFixedBlockMetadata.mNodesetIDs = Plato::Get::Ints(tFixedNodesetsNode, "Index");
 }
 
 void SetUpperBounds::parseFixedBlocks(Plato::InputData& aNode)
 {
     for(auto tFixedBlock : aNode.getByName<Plato::InputData>("FixedBlocks"))
     {
+        auto tIndexString = Plato::Get::String(tFixedBlock, "Index");
+        if (tIndexString.empty())
+            { continue; /* break from current iteration, continue with the next iteration in the loop. */ }
+
         auto tIndex = Plato::Get::Int(tFixedBlock, "Index");
-        mFixedBlockIDs.push_back(tIndex);
+        mFixedBlockMetadata.mBlockIDs.push_back(tIndex);
         auto tDomainValue = Plato::Get::Double(tFixedBlock, "DomainValue");
-        mDomainValues.push_back(tDomainValue);
+        mFixedBlockMetadata.mDomainValues.push_back(tDomainValue);
         auto tBoundaryValue = Plato::Get::Double(tFixedBlock, "BoundaryValue");
-        mBoundaryValues.push_back(tBoundaryValue);
+        mFixedBlockMetadata.mBoundaryValues.push_back(tBoundaryValue);
         auto tMaterialState = Plato::Get::String(tFixedBlock, "MaterialState");
-        mMaterialStates.push_back(tMaterialState);
+        mFixedBlockMetadata.mMaterialStates.push_back(tMaterialState);
     }
 }
 

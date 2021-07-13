@@ -49,6 +49,7 @@
 #pragma once
 
 #include "Plato_LocalOperation.hpp"
+#include "Plato_OperationMetadata.hpp"
 
 class PlatoApp;
 
@@ -83,6 +84,18 @@ public:
 
 private:
     /******************************************************************************//**
+     * \brief Initialize lower bound vector to optimization region value.
+     * \param [in,out] aToData lower bound vector
+    **********************************************************************************/
+    void initializeLowerBoundVector(double* aToData);
+
+    /******************************************************************************//**
+     * \brief Update lower bound vector based on fixed entitiies.
+     * \param [in,out] aToData lower bound vector
+    **********************************************************************************/
+    void updateLowerBoundVectorBasedOnFixedEntities(double* aToData);
+
+    /******************************************************************************//**
      * \brief Parse node and side sets metadata.
      * \param [in] aNode XML metadata for this operation
     **********************************************************************************/
@@ -99,21 +112,49 @@ private:
      * \param [in] aNode XML metadata for this operation
     **********************************************************************************/
     void parseOperationArguments(Plato::InputData& aNode);
-    
-private:
-    int mOutputSize; /*!< output field length */
 
-    std::string mInputName; /*!< input argument name */
-    std::string mOutputName; /*!< output argument name */
+    /******************************************************************************//**
+     * \brief Set fixed block identification number.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void setBlockIndex(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Set nodal value for all the design variables inside the fixed block domain.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void setDomainValue(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Set nodal value for all the design variables on the fixed block boundary.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void setBoundaryValue(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Set fixed block material state.
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void setMaterialState(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Set lower bound vector for density-based topology optimization problems.
+     * \param [in] aMetadata fixed blocks metadata
+     * \param [in,out] aToData lower bound vector
+    **********************************************************************************/
+    void setLowerBoundsForDensityProblems
+    (const Plato::FixedBlock::Metadata& aMetadata, double* aToData);
+
+private:
+    int mOutputSize = 0; /*!< output field length */
+    int mLowerBoundVectorLength = 0; /*!< lower bound vector length */
+
+    std::string mInputArgumentName; /*!< input argument name */
+    std::string mOutputArgumentName; /*!< output argument name */
     std::string mDiscretization; /*!< topology/design representation, levelset or density */
     Plato::data::layout_t mOutputLayout; /*!< output field data layout */
 
-    std::vector<int> mFixedBlockIDs; /*!< fixed block identification number */
-    std::vector<int> mFixedSidesetIDs; /*!< fixed sideset identification number */
-    std::vector<int> mFixedNodesetIDs; /*!< fixed nodeset identification number */
-    std::vector<double> mDomainValues; /*!< fixed block domain values */
-    std::vector<double> mBoundaryValues; /*!< fixed block boundary values */
-    std::vector<std::string> mMaterialStates; /*!< fixed block material states */
+    Plato::FixedBlock::Metadata mFixedBlockMetadata; /*!< data describing fixed blocks */
 };
 // class SetLowerBounds;
 

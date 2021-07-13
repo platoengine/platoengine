@@ -47,6 +47,7 @@
  */
 
 #include "PlatoApp.hpp"
+#include "Plato_Macros.hpp"
 #include "Plato_Parser.hpp"
 #include "Plato_InputData.hpp"
 #include "Plato_Exceptions.hpp"
@@ -58,7 +59,7 @@ namespace Plato
 {
 
 SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
-        Plato::LocalOp(p)
+    Plato::LocalOp(p)
 {
     this->parseOperationArguments(aNode);
     this->parseFixedBlocks(aNode);
@@ -68,21 +69,19 @@ SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
 
 void SetLowerBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
 {
-    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputName));
-    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputName, mOutputSize));
+    aLocalArgs.push_back(Plato::LocalArg(Plato::data::layout_t::SCALAR, mInputArgumentName));
+    aLocalArgs.push_back(Plato::LocalArg(mOutputLayout, mOutputArgumentName, mOutputSize));
 }
 
 void SetLowerBounds::operator()()
 {
     // Get the output field
     double* tToData;
-    int tDataLength = 0;
-
     if(mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
-        auto& tOutputField = *(mPlatoApp->getNodeField(mOutputName));
+        auto& tOutputField = *(mPlatoApp->getNodeField(mOutputArgumentName));
         tOutputField.ExtractView(&tToData);
-        tDataLength = tOutputField.MyLength();
+        mLowerBoundVectorLength = tOutputField.MyLength();
     }
     else if(mOutputLayout == Plato::data::layout_t::ELEMENT_FIELD)
     {
@@ -90,25 +89,39 @@ void SetLowerBounds::operator()()
     }
     else if(mOutputLayout == Plato::data::layout_t::SCALAR)
     {
-        auto tOutputScalar = mPlatoApp->getValue(mOutputName);
-        tDataLength = mOutputSize;
-        tOutputScalar->resize(tDataLength);
+        auto tOutputScalar = mPlatoApp->getValue(mOutputArgumentName);
+        mLowerBoundVectorLength = mOutputSize;
+        tOutputScalar->resize(mLowerBoundVectorLength);
         tToData = tOutputScalar->data();
     }
 
-    // Get incoming global lower bound specified by user
-    std::vector<double>* tInData = mPlatoApp->getValue(mInputName);
-    double tLowerBoundIn = (*tInData)[0];
-
-    // Set specified value for the user
-    for(int tIndex = 0; tIndex < tDataLength; tIndex++)
+    this->initializeLowerBoundVector(tToData);
+    if( !mFixedBlockMetadata.mBlockIDs.empty() )
     {
-        tToData[tIndex] = tLowerBoundIn;
+        this->updateLowerBoundVectorBasedOnFixedEntities(tToData); 
     }
 
-    // Now update values based on fixed entities
+}
+
+void SetLowerBounds::updateLowerBoundVectorBasedOnFixedEntities(double* aToData)
+{
     if(mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
+        if( Plato::FixedBlock::is_material_state_solid(mFixedBlockMetadata) )
+        {
+            this->setLowerBoundsForDensityProblems(mFixedBlockMetadata, aToData);
+        }
+        else
+        {
+            auto tFluidFixedBlocksMetadata = Plato::FixedBlock::get_fixed_fluid_blocks_metadata(mFixedBlockMetadata);
+            this->setLowerBoundsForDensityProblems(tFluidFixedBlocksMetadata, aToData);
+        }
+    }
+}
+
+void SetLowerBounds::setLowerBoundsForDensityProblems
+(const Plato::FixedBlock::Metadata& aMetadata, double* aToData)
+{
         LightMP* tLightMP = mPlatoApp->getLightMP();
         const int tDofsPerNode_1D = 1;
         SystemContainer* tSysGraph_1D = new SystemContainer(tLightMP->getMesh(), tDofsPerNode_1D, tLightMP->getInput());
@@ -118,48 +131,101 @@ void SetLowerBounds::operator()()
         tSingleValue[0] = tDataContainer->registerVariable(RealType, "lowerBoundWorking", NODE, !tPlottable);
         DistributedVector* tDistributedVector = new DistributedVector(tSysGraph_1D, tSingleValue);
 
-        double tBoundaryValue = .5001;
-        double tUpperValue = 1.;
-        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(tToData, mFixedBlockIDs, tLowerBoundIn, tBoundaryValue, tUpperValue, *tDistributedVector);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(tToData, mFixedSidesetIDs, tBoundaryValue);
-        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(tToData, mFixedNodesetIDs, tBoundaryValue);
+        double tEntitySetsBoundaryValue = .5001;
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(aToData, aMetadata, *tDistributedVector);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(aToData, aMetadata.mSidesetIDs, tEntitySetsBoundaryValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(aToData, aMetadata.mNodesetIDs, tEntitySetsBoundaryValue);
 
         delete tDistributedVector;
         delete tSysGraph_1D;
-    }
+}
+
+void SetLowerBounds::initializeLowerBoundVector(double* aToData)
+{
+    // Get incoming global lower bound specified by user
+    std::vector<double>* tInData = mPlatoApp->getValue(mInputArgumentName);
+    double tLowerBoundIn = (*tInData)[0];
+    mFixedBlockMetadata.mOptimizationBlockValue = tLowerBoundIn;
+
+    // Set specified value for the user
+    for(int tIndex = 0; tIndex < mLowerBoundVectorLength; tIndex++)
+    {
+        aToData[tIndex] = tLowerBoundIn;
+    }   
 }
 
 void SetLowerBounds::parseEntitySets(Plato::InputData& aNode)
 {
     auto tFixedSidesetsNode = Plato::Get::InputData(aNode, "FixedSidesets");
-    mFixedSidesetIDs = Plato::Get::Ints(tFixedSidesetsNode, "Index");
+    mFixedBlockMetadata.mSidesetIDs = Plato::Get::Ints(tFixedSidesetsNode, "Index");
 
     auto tFixedNodesetsNode = Plato::Get::InputData(aNode, "FixedNodesets");
-    mFixedNodesetIDs = Plato::Get::Ints(tFixedNodesetsNode, "Index");
+    mFixedBlockMetadata.mNodesetIDs = Plato::Get::Ints(tFixedNodesetsNode, "Index");
+}
+
+void SetLowerBounds::setBlockIndex(Plato::InputData& aNode)
+{
+    auto tIndex = Plato::Get::Int(aNode, "Index");
+    mFixedBlockMetadata.mBlockIDs.push_back(tIndex);
+}
+
+void SetLowerBounds::setDomainValue(Plato::InputData& aNode)
+{
+    auto tDomainValueString = Plato::Get::String(aNode, "DomainValue");
+    if( tDomainValueString.empty() )
+    {
+        mFixedBlockMetadata.mDomainValues.push_back(1.0); // default: assumes all fixed block are in solid material state
+    }
+    else
+    {
+        auto tDomainValue = Plato::Get::Double(aNode, "DomainValue");
+        mFixedBlockMetadata.mDomainValues.push_back(tDomainValue);
+    }
+}
+
+void SetLowerBounds::setBoundaryValue(Plato::InputData &aNode)
+{
+    auto tBoundaryValueString = Plato::Get::String(aNode, "BoundaryValue");
+    if (tBoundaryValueString.empty())
+    {
+        mFixedBlockMetadata.mBoundaryValues.push_back(0.5001); // default: assumes all fixed block are in solid material state
+    }
+    else
+    {
+        auto tBoundaryValue = Plato::Get::Double(aNode, "BoundaryValue");
+        mFixedBlockMetadata.mBoundaryValues.push_back(tBoundaryValue);
+    }
+}
+
+void SetLowerBounds::setMaterialState(Plato::InputData &aNode)
+{
+    auto tMaterialState = Plato::Get::String(aNode, "MaterialState");
+    tMaterialState = tMaterialState.empty() ? "solid" : tMaterialState; // default: assumes all fixed block are in solid material state
+    mFixedBlockMetadata.mMaterialStates.push_back(tMaterialState);
 }
 
 void SetLowerBounds::parseFixedBlocks(Plato::InputData& aNode)
 {
-    for(auto tFixedBlock : aNode.getByName<Plato::InputData>("FixedBlocks"))
+    for(auto& tFixedBlock : aNode.getByName<Plato::InputData>("FixedBlocks"))
     {
-        auto tIndex = Plato::Get::Int(tFixedBlock, "Index");
-        mFixedBlockIDs.push_back(tIndex);
-        auto tDomainValue = Plato::Get::Double(tFixedBlock, "DomainValue");
-        mDomainValues.push_back(tDomainValue);
-        auto tBoundaryValue = Plato::Get::Double(tFixedBlock, "BoundaryValue");
-        mBoundaryValues.push_back(tBoundaryValue);
-        auto tMaterialState = Plato::Get::String(tFixedBlock, "MaterialState");
-        mMaterialStates.push_back(tMaterialState);
+        auto tIndexString = Plato::Get::String(tFixedBlock, "Index");
+        if (tIndexString.empty())
+            { continue; /* break from current iteration, continue with the next iteration in the loop. */ }
+        
+        this->setBlockIndex(tFixedBlock);
+        this->setDomainValue(tFixedBlock);
+        this->setBoundaryValue(tFixedBlock);
+        this->setMaterialState(tFixedBlock);
     }
 }
 
 void SetLowerBounds::parseOperationArguments(Plato::InputData& aNode)
 {
-    mInputName = "Lower Bound Value";
+    mInputArgumentName = "Lower Bound Value";
     auto tInputData = Plato::Get::InputData(aNode, "Input");
-    mInputName = Plato::Get::String(tInputData, "ArgumentName");
+    mInputArgumentName = Plato::Get::String(tInputData, "ArgumentName");
 
-    mOutputName = "Lower Bound Vector";
+    mOutputArgumentName = "Lower Bound Vector";
     auto tOutputNode = Plato::Get::InputData(aNode, "Output");
     mOutputLayout = Plato::getLayout(tOutputNode, Plato::data::layout_t::SCALAR_FIELD);
     mOutputSize = Plato::Get::Int(tOutputNode, "Size");

@@ -40,6 +40,11 @@
 //@HEADER
 */
 
+#include "Intrepid_Basis.hpp"
+#include "Intrepid_FieldContainer.hpp"
+#include "Shards_CellTopology.hpp"
+
+#include "Plato_Macros.hpp"
 #include "mesh_services.hpp"
 #include "data_mesh.hpp"
 #include "data_container.hpp"
@@ -353,162 +358,31 @@ void MeshServices::updateBoundsForFixedBlocks
 /******************************************************************************/
 void MeshServices::updateBoundsForFixedBlocks
 (double *aBoundsVector,
- const std::vector<int> &aFixedBlocks,
- const double &aOptimizationBlockInternalValue,
- const double &aFixedBlockBoundaryValue,
- const double &aFixedBlockInternalValue,
+ const Plato::FixedBlock::Metadata& aMetadata,
  DistributedVector &aDistributed)
 /******************************************************************************/
 {
-    DataMesh& tMyMesh = *myDataMesh;
-    const int tNumNodes = tMyMesh.getNumNodes();
+    const int tNumNodes = myDataMesh->getNumNodes();
+    std::vector<Plato::FixedBlock::node_type> tNodeTypeEnum(tNumNodes, Plato::FixedBlock::UNDEFINED);
+    this->initializeNodeTypeList(aMetadata, tNodeTypeEnum);
 
-    std::vector<int> tNodeTypeEnum(tNumNodes, 0);
-    // 0 not yet set
-    // 1 purely optimization
-    // 2 between optimization and fixed
-    // 3 purely fixed
+    this->parallelizeNodeTypeListInOptimizableDomain(aDistributed, tNodeTypeEnum);
+    this->parallelizeNodeTypeListInFixedDomain(aDistributed, tNodeTypeEnum);
 
-    // for each block
-    const int tNumBlocks = tMyMesh.getNumElemBlks();
-    for(int ib = 0; ib < tNumBlocks; ib++)
-    {
-        Topological::Element& tCurBlock = *(tMyMesh.getElemBlk(ib));
-        int tCurBlockId = tCurBlock.getBlockId();
+    this->setBoundsVector(aMetadata, tNodeTypeEnum, aBoundsVector);
+}
 
-        // not all blocks will be present on all processors
-        int tNumElemsThisBlock = tCurBlock.getNumElem();
-        if(tNumElemsThisBlock == 0)
-        {
-            continue;
-        }
-
-        // determine if this block is within list
-        const bool tIsThisBlockFixed = (std::find(aFixedBlocks.begin(), aFixedBlocks.end(), tCurBlockId) != aFixedBlocks.end());
-
-        // for each element
-        for(int iel = 0; iel < tNumElemsThisBlock; iel++)
-        {
-            // for each node in this element
-            int* tElemConnect = tCurBlock.Connect(iel);
-            int tNumNodesPerElem = tCurBlock.getNnpe();
-            for(int inode = 0; inode < tNumNodesPerElem; inode++)
-            {
-                const int tNodeId = tElemConnect[inode];
-                switch(tNodeTypeEnum[tNodeId])
-                {
-                    case 0:
-                    {
-                        if(tIsThisBlockFixed)
-                        {
-                            // before: not yet set, after: purely fixed
-                            tNodeTypeEnum[tNodeId] = 3;
-                        }
-                        else
-                        {
-                            // before: not yet set, after: purely optimization
-                            tNodeTypeEnum[tNodeId] = 1;
-                        }
-                        break;
-                    }
-                    case 1:
-                    {
-                        if(tIsThisBlockFixed)
-                        {
-                            // before: purely optimization, after: between
-                            tNodeTypeEnum[tNodeId] = 2;
-                        }
-                        break;
-                    }
-                    case 2:
-                    {
-                        break;
-                    }
-                    case 3:
-                    {
-                        if(!tIsThisBlockFixed)
-                        {
-                            // before: purely fixed, after: between
-                            tNodeTypeEnum[tNodeId] = 2;
-                        }
-                        break;
-                    }
-                    default:
-                    {
-                        std::cout << "Plato Mesh Services Fatal Error: Unmatched node enumeration value." << std::endl
-                                  << "Possible memory corruption" << std::endl;
-                        std::abort();
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    // make parallel optimize
-    aDistributed.PutScalar(0.);
-    // for each node
-    for(int inode = 0; inode < tNumNodes; inode++)
-    {
-        const bool tIsPurelyOptimize = (tNodeTypeEnum[inode] == 1);
-        const bool tIsBetween = (tNodeTypeEnum[inode] == 2);
-        if(tIsPurelyOptimize || tIsBetween)
-        {
-            aDistributed.Assemble(1., inode, 0);
-        }
-    }
-    aDistributed.Export();
-    aDistributed.DisAssemble();
-    double* tParallelIsOptimize = NULL;
-    aDistributed.ExtractView(&tParallelIsOptimize);
-    // for each node
-    for(int inode = 0; inode < tNumNodes; inode++)
-    {
-        const bool tIsAtleastPartialOptimize = (0 < tParallelIsOptimize[inode]);
-        if(!tIsAtleastPartialOptimize)
-        {
-            continue;
-        }
-
-        switch(tNodeTypeEnum[inode])
-        {
-            case 0:
-            {
-                // before: not yet set, after: purely optimization
-                tNodeTypeEnum[inode] = 1;
-                break;
-            }
-            case 1:
-            {
-                break;
-            }
-            case 2:
-            {
-                break;
-            }
-            case 3:
-            {
-                // before: purely fixed, after: between
-                tNodeTypeEnum[inode] = 2;
-                break;
-            }
-            default:
-            {
-                std::cout << "Plato Mesh Services Fatal Error: Unmatched node enumeration value." << std::endl
-                          << "Possible memory corruption" << std::endl;
-                std::abort();
-                break;
-            }
-        }
-    }
-
+void MeshServices::parallelizeNodeTypeListInFixedDomain
+(DistributedVector &aDistributed,
+ std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum)
+{
     // make parallel fixed
     aDistributed.PutScalar(0.);
-    // for each node
+    const int tNumNodes = myDataMesh->getNumNodes();
     for(int inode = 0; inode < tNumNodes; inode++)
     {
-        const bool tIsBetween = (tNodeTypeEnum[inode] == 2);
-        const bool tIsPurelyFixed = (tNodeTypeEnum[inode] == 3);
+        const bool tIsBetween = (aNodeTypeEnum[inode] == Plato::FixedBlock::FIXED_BOUNDARY);
+        const bool tIsPurelyFixed = (aNodeTypeEnum[inode] == Plato::FixedBlock::FIXED_DOMAIN);
         if(tIsPurelyFixed || tIsBetween)
         {
             aDistributed.Assemble(1., inode, 0);
@@ -527,74 +401,235 @@ void MeshServices::updateBoundsForFixedBlocks
             continue;
         }
 
-        switch(tNodeTypeEnum[inode])
+        switch(aNodeTypeEnum[inode])
         {
-            case 0:
+            case Plato::FixedBlock::UNDEFINED:
             {
                 // before: not yet set, after: purely fixed
-                tNodeTypeEnum[inode] = 3;
+                aNodeTypeEnum[inode] = Plato::FixedBlock::FIXED_DOMAIN;
                 break;
             }
-            case 1:
+            case Plato::FixedBlock::OPTIMIZABLE:
             {
                 // before: purely optimize, after: between
-                tNodeTypeEnum[inode] = 2;
+                aNodeTypeEnum[inode] = Plato::FixedBlock::FIXED_BOUNDARY;
                 break;
             }
-            case 2:
+            case Plato::FixedBlock::FIXED_BOUNDARY:
             {
                 break;
             }
-            case 3:
+            case Plato::FixedBlock::FIXED_DOMAIN:
             {
                 break;
             }
             default:
             {
-                std::cout << "Plato Mesh Services Fatal Error: Unmatched node enumeration value." << std::endl
-                          << "Possible memory corruption" << std::endl;
-                std::abort();
+                THROWERR(std::string("Plato Mesh Services Fatal Error: Unmatched node enumeration value.\n") + "Possible memory corruption.")
                 break;
             }
         }
     }
+}
 
+void MeshServices::parallelizeNodeTypeListInOptimizableDomain
+(DistributedVector &aDistributed,
+ std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum)
+{
+    // make parallel optimize
+    aDistributed.PutScalar(0.);
+    const int tNumNodes = myDataMesh->getNumNodes();
+    for(int inode = 0; inode < tNumNodes; inode++)
+    {
+        const bool tIsPurelyOptimize = (aNodeTypeEnum[inode] == Plato::FixedBlock::OPTIMIZABLE);
+        const bool tIsBetween = (aNodeTypeEnum[inode] == Plato::FixedBlock::FIXED_BOUNDARY);
+        if(tIsPurelyOptimize || tIsBetween)
+        {
+            aDistributed.Assemble(1., inode, 0);
+        }
+    }
+    aDistributed.Export();
+    aDistributed.DisAssemble();
+    double* tParallelIsOptimize = NULL;
+    aDistributed.ExtractView(&tParallelIsOptimize);
     // for each node
     for(int inode = 0; inode < tNumNodes; inode++)
     {
-        switch(tNodeTypeEnum[inode])
+        const bool tIsAtleastPartialOptimize = (0 < tParallelIsOptimize[inode]);
+        if(!tIsAtleastPartialOptimize)
         {
-            case 1:
+            continue;
+        }
+
+        switch(aNodeTypeEnum[inode])
+        {
+            case Plato::FixedBlock::UNDEFINED:
             {
-                // 1 purely optimization
-                aBoundsVector[inode] = aOptimizationBlockInternalValue;
+                // before: not yet set, after: purely optimization
+                aNodeTypeEnum[inode] = Plato::FixedBlock::OPTIMIZABLE;
                 break;
             }
-            case 2:
+            case Plato::FixedBlock::OPTIMIZABLE:
             {
-                // 2 between optimization and fixed
-                aBoundsVector[inode] = aFixedBlockBoundaryValue;
                 break;
             }
-            case 3:
+            case Plato::FixedBlock::FIXED_BOUNDARY:
             {
-                // 3 purely fixed
-                aBoundsVector[inode] = aFixedBlockInternalValue;
                 break;
             }
-            case 0:
+            case Plato::FixedBlock::FIXED_DOMAIN:
             {
-                std::cout << "Plato Mesh Services Fatal Error: Not yet set node enumeration value." << std::endl
-                          << "Possible node not connected to mesh elements." << std::endl;
-                std::abort();
+                // before: purely fixed, after: between
+                aNodeTypeEnum[inode] = Plato::FixedBlock::FIXED_BOUNDARY;
                 break;
             }
             default:
             {
-                std::cout << "Plato Mesh Services Fatal Error: Unmatched node enumeration value." << std::endl
-                          << "Possible memory corruption" << std::endl;
-                std::abort();
+                THROWERR(std::string("Plato Mesh Services Fatal Error: Unmatched node enumeration value.\n") + "Possible memory corruption.")
                 break;
+            }
+        }
+    }
+}
+
+void MeshServices::initializeNodeTypeList
+(const Plato::FixedBlock::Metadata& aMetadata,
+ std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum)
+{
+    // for each block
+    const int tNumBlocks = myDataMesh->getNumElemBlks();
+    for(int ib = 0; ib < tNumBlocks; ib++)
+    {
+        Topological::Element& tCurBlock = *(myDataMesh->getElemBlk(ib));
+        int tCurBlockId = tCurBlock.getBlockId();
+
+        // not all blocks will be present on all processors
+        int tNumElemsThisBlock = tCurBlock.getNumElem();
+        if(tNumElemsThisBlock == 0)
+        {
+            continue;
+        }
+
+        // determine if this block is within list
+        const bool tIsThisBlockFixed = (std::find(aMetadata.mBlockIDs.begin(), aMetadata.mBlockIDs.end(), tCurBlockId) != aMetadata.mBlockIDs.end());
+
+        // for each element
+        for(int iel = 0; iel < tNumElemsThisBlock; iel++)
+        {
+            // for each node in this element
+            int* tElemConnect = tCurBlock.Connect(iel);
+            int tNumNodesPerElem = tCurBlock.getNnpe();
+            for(int inode = 0; inode < tNumNodesPerElem; inode++)
+            {
+                const int tNodeId = tElemConnect[inode];
+                switch(aNodeTypeEnum[tNodeId])
+                {
+                    case Plato::FixedBlock::UNDEFINED:
+                    {
+                        if(tIsThisBlockFixed)
+                        {
+                            // before: not yet set, after: purely fixed
+                            aNodeTypeEnum[tNodeId] = Plato::FixedBlock::FIXED_DOMAIN;
+                        }
+                        else
+                        {
+                            // before: not yet set, after: purely optimization
+                            aNodeTypeEnum[tNodeId] = Plato::FixedBlock::OPTIMIZABLE;
+                        }
+                        break;
+                    }
+                    case Plato::FixedBlock::OPTIMIZABLE:
+                    {
+                        if(tIsThisBlockFixed)
+                        {
+                            // before: purely optimization, after: between
+                            aNodeTypeEnum[tNodeId] = Plato::FixedBlock::FIXED_BOUNDARY;
+                        }
+                        break;
+                    }
+                    case Plato::FixedBlock::FIXED_BOUNDARY:
+                    {
+                        break;
+                    }
+                    case Plato::FixedBlock::FIXED_DOMAIN:
+                    {
+                        if(!tIsThisBlockFixed)
+                        {
+                            // before: purely fixed, after: between
+                            aNodeTypeEnum[tNodeId] = Plato::FixedBlock::FIXED_BOUNDARY;
+                        }
+                        break;
+                    }
+                    default:
+                    {
+                        THROWERR(std::string("Plato Mesh Services Fatal Error: Unmatched node enumeration value.\n") + "Possible memory corruption.")
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void MeshServices::setBoundsVector
+(const Plato::FixedBlock::Metadata& aMetadata, 
+ const std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum, 
+ double *aBoundsVector)
+{
+    const int tNumBlocks = myDataMesh->getNumElemBlks();
+    for (int ib = 0; ib < tNumBlocks; ib++)
+    {
+        Topological::Element &tCurBlock = *(myDataMesh->getElemBlk(ib));
+        int tCurBlockId = tCurBlock.getBlockId();
+
+        // not all blocks will be present on all processors
+        int tNumElemsThisBlock = tCurBlock.getNumElem();
+        if (tNumElemsThisBlock == 0)
+            { continue; /* break from current iteration, continue with the next iteration in the loop. */ }
+        
+        // determine if this block is in the fixed block list and find its index
+        auto tIterator = std::find(aMetadata.mBlockIDs.begin(), aMetadata.mBlockIDs.end(), tCurBlockId);
+        auto tFixedBlockIndex = std::distance(aMetadata.mBlockIDs.begin(), tIterator);
+
+        // for each element
+        for (int iel = 0; iel < tNumElemsThisBlock; iel++)
+        {
+            // for each node in this element
+            int *tElemConnect = tCurBlock.Connect(iel);
+            int tNumNodesPerElem = tCurBlock.getNnpe();
+            for (int inode = 0; inode < tNumNodesPerElem; inode++)
+            {
+                switch (aNodeTypeEnum[tElemConnect[inode]])
+                {
+                case Plato::FixedBlock::OPTIMIZABLE:
+                {
+                    // 1 purely optimization
+                    aBoundsVector[tElemConnect[inode]] = aMetadata.mOptimizationBlockValue;
+                    break;
+                }
+                case Plato::FixedBlock::FIXED_BOUNDARY:
+                {
+                    // 2 between optimization and fixed
+                    aBoundsVector[tElemConnect[inode]] = aMetadata.mBoundaryValues[tFixedBlockIndex];
+                    break;
+                }
+                case Plato::FixedBlock::FIXED_DOMAIN:
+                {
+                    // 3 purely fixed
+                    aBoundsVector[tElemConnect[inode]] = aMetadata.mDomainValues[tFixedBlockIndex];
+                    break;
+                }
+                case Plato::FixedBlock::UNDEFINED:
+                {
+                    THROWERR(std::string("Plato Mesh Services Fatal Error: Not yet set node enumeration value.\n") + "Possible node not connected to mesh elements.")
+                    break;
+                }
+                default:
+                {
+                    THROWERR(std::string("Plato Mesh Services Fatal Error: Unmatched node enumeration value.\n") + "Possible memory corruption.")
+                    break;
+                }
+                }
             }
         }
     }

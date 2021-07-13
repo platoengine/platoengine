@@ -43,43 +43,56 @@
 #ifndef MESH_SERVICES
 #define MESH_SERVICES
 
-#include "Intrepid_Basis.hpp"
-#include "Intrepid_FieldContainer.hpp"
-#include "Shards_CellTopology.hpp"
 #include "matrix_container.hpp"
+#include "Plato_OperationMetadata.hpp"
 
 class DataMesh;
-namespace Plato { class PenaltyModel; }
 
-/******************************************************************************/
-class MeshServices
-/******************************************************************************/
+namespace Plato
 {
+  class PenaltyModel;
+}
+
+  /******************************************************************************/
+  class MeshServices
+  /******************************************************************************/
+  {
   public:
-    MeshServices(DataMesh* dataMesh) : myDataMesh(dataMesh){}
+    MeshServices(DataMesh *dataMesh) : myDataMesh(dataMesh) {}
 
     double getTotalVolume();
-    void getCurrentVolume(const DistributedVector& topo,
-                          double& volume, DistributedVector& volumeGradient,
-                          Plato::PenaltyModel* pModel=nullptr);
+    void getCurrentVolume(const DistributedVector &topo,
+                          double &volume, DistributedVector &volumeGradient,
+                          Plato::PenaltyModel *pModel = nullptr);
 
-    void getRoughness(const DistributedVector& topo,
-                      double& roughness, DistributedVector& roughnessGradient,
-                      Plato::PenaltyModel* pModel = nullptr);
-    void updateBoundsForFixedBlocks(double *toData,
-                                    const std::vector<int> &aFixedBlocks,
-                                    const double &aOptimizationBlockInternalValue,
-                                    const double &aFixedBlockBoundaryValue,
-                                    const double &aFixedBlockInternalValue,
-                                    DistributedVector &aDistributed);
+    void getRoughness(const DistributedVector &topo,
+                      double &roughness, DistributedVector &roughnessGradient,
+                      Plato::PenaltyModel *pModel = nullptr);
+
+    void updateBoundsForFixedBlocks(double *toData, const Plato::FixedBlock::Metadata &aMetadata, DistributedVector &aDistributed);
     void updateBoundsForFixedBlocks(double *toData, const std::vector<int> &mFixedBlocks, const double &aFixedBlockValue);
     void updateBoundsForFixedSidesets(double *toData, const std::vector<int> &aFixedSidesets, const double &aFixedSidesetsValue);
     void updateBoundsForFixedNodesets(double *toData, const std::vector<int> &aFixedNodesets, const double &aFixedNodesetsValue);
 
   private:
-    DataMesh* myDataMesh;
-    //shards::CellTopology **blockTopology;
-    //Intrepid::Basis<double, Intrepid::FieldContainer<double> > **blockBasis;
-};
+    void setBoundsVector
+    (const Plato::FixedBlock::Metadata &aMetadata,
+     const std::vector<Plato::FixedBlock::node_type> &aNodeTypeEnum, 
+     double *aBoundsVector);
+    
+    void initializeNodeTypeList
+    (const Plato::FixedBlock::Metadata& aMetadata,
+     std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum);
+
+    void parallelizeNodeTypeListInOptimizableDomain
+    (DistributedVector &aDistributed,
+     std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum);
+
+    void parallelizeNodeTypeListInFixedDomain
+    (DistributedVector &aDistributed,
+     std::vector<Plato::FixedBlock::node_type>& aNodeTypeEnum);
+
+    DataMesh *myDataMesh;
+  };
 /******************************************************************************/
 #endif
