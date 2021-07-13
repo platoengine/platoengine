@@ -126,6 +126,11 @@ private:
         mMap.insert(std::make_pair("thermoplasticity_thermal_energy",
           std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_scalar_function_criterion<CriterionType>, tFuncIndex)));
         
+        // volume_average
+        tFuncIndex = std::type_index(typeid(XMLGen::Private::append_volume_average_criterion<CriterionType>));
+        mMap.insert(std::make_pair("volume_average",
+          std::make_pair((XMLGen::Analyze::CriterionFunc)XMLGen::Private::append_volume_average_criterion<CriterionType>, tFuncIndex)));
+        
         // incompressible fluids
         XMLGen::Private::append_incompressible_fluids_scalar_functions<CriterionType>(mMap);
     }

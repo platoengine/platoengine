@@ -298,6 +298,26 @@ public:
     }
 
     /******************************************************************************//**
+     * \fn spatial_weighting_function
+     * \brief Return string value for keyword 'spatial_weighting_function'.
+     * \return value
+     **********************************************************************************/
+    std::string spatialWeightingFunction() const
+    {
+        return (this->value("spatial_weighting_function"));
+    }
+
+    /******************************************************************************//**
+     * \fn local_measure
+     * \brief Return string value for keyword 'local_measure'.
+     * \return value
+     **********************************************************************************/
+    std::string localMeasure() const
+    {
+        return (this->value("local_measure"));
+    }
+
+    /******************************************************************************//**
      * \fn criterionIDs
      * \brief Set ID strings for composite criteria
      * \param [in] aInput list of IDs

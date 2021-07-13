@@ -84,6 +84,8 @@ struct ValidCriterionParameterKeys
         "relative_stress_limit",
         "relaxed_stress_ramp_factor",
         "location_name",
+        "local_measure",
+        "spatial_weighting_function",
         /* These are all related to stress-constrained mass minimization problems with Sierra/SD */
         "volume_misfit_target",
         "limit_power_min",
@@ -176,6 +178,7 @@ private:
         "plastic_work",
         "thermoplasticity_thermal_energy",
         "volume", 
+        "volume_average", 
         "mass", 
         "CG_x", 
         "CG_y", 
@@ -1209,6 +1212,7 @@ struct ValidAnalyzeCriteriaKeys
     {
         { "composite", { "Composite", false } },
         { "volume", { "Volume", false } },
+        { "volume_average", { "Volume Average Criterion", false } },
         { "elastic_work", { "Elastic Work", false } },
         { "plastic_work", { "Plastic Work", false } },
         { "total_work", { "Total Work", false } },
