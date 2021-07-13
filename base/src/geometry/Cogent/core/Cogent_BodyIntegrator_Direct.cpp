@@ -68,7 +68,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
 //******************************************************************************//
 {
   uint offset = 0;
-  uint nRefPoints = m_bodySimplexPoints.dimension(0);
+  uint nRefPoints = m_bodySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   weights = Cogent::FContainer<RealType>("weights",nQPs);
@@ -92,7 +92,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
 
   if( nSimplexes == 0 ) return;
 
-  uint nRefPoints = m_bodySimplexPoints.dimension(0);
+  uint nRefPoints = m_bodySimplexPoints.extent(0);
   uint nTopos = explicitSimplexes[0].fieldvals[0].size();
   uint nQPs = nSimplexes*nRefPoints;
   uint nNodes = m_baseElementBasis->getCardinality();
@@ -148,7 +148,7 @@ void Cogent::BodyIntegrator_Direct::getCubature(
     getQPoints(explicitSimplexes, weights, points);
 
     RealType scale = getUniformScaling(coordCon);
-    int nQPs = weights.dimension(0);
+    int nQPs = weights.extent(0);
     for(int j=0; j<nQPs; j++)
       weights(j) *= scale;
   }
@@ -207,7 +207,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
 
   // get simplex vertices, P_Ij, in the reference coords of the parent element
   //
-  int nDerivs = dwdtopo.dimension(1)+1;
+  int nDerivs = dwdtopo.extent(1)+1;
   Cogent::FContainer<DFadType> vertPoints("vertPoints",1, nPoints, m_numDims, nDerivs);
   for(int i=0; i<nPoints; i++)
     for(uint j=0; j<m_numDims; j++)
@@ -215,7 +215,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
 
   // get Jacobian determinant at each refPoint
   //
-  int numQPs = m_bodySimplexWeights.dimension(0);
+  int numQPs = m_bodySimplexWeights.extent(0);
   Cogent::FContainer<DFadType> jacobian("jacobian",/*numCells=*/1,numQPs,m_numDims,m_numDims, nDerivs);
   Cogent::FContainer<DFadType> jacobian_det("jacobian_det",/*numCells=*/1,numQPs, nDerivs);
   Cogent::FContainer<DFadType> weighted_measure("weighted_measure",/*numCells=*/1,numQPs, nDerivs);
@@ -227,7 +227,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
   //
   Intrepid2::FunctionSpaceTools<Kokkos::Serial>::computeCellMeasure(weighted_measure, jacobian_det, m_bodySimplexWeights);
 
-  int nRefPoints = m_bodySimplexPoints.dimension(0);
+  int nRefPoints = m_bodySimplexPoints.extent(0);
   for(int i=0; i<nRefPoints; i++){
     weights(offset+i) = weighted_measure(0,i).val();
     int nTopo = weighted_measure(0,i).size();
@@ -242,7 +242,7 @@ void Cogent::BodyIntegrator_Direct::getQPoints(
  
   // compute quadrature point locations, N_I(\xi_i) P_Ij, in parent reference coords
   //
-  int nDim = m_bodySimplexPoints.dimension(1);
+  int nDim = m_bodySimplexPoints.extent(1);
   for(int I=0; I<numNodes; I++)
     for(int i=0; i<nRefPoints; i++)
       for(int j=0; j<nDim; j++)

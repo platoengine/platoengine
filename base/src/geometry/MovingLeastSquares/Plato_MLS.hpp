@@ -254,8 +254,8 @@ class SphereArray {
      void
      getValues(ScalarArray<ScalarType> a_coords, ScalarVector<ScalarType> a_field){
           // loop on grid points then spheres
-          int t_numSpheres = m_sphereCoords.dimension(0);
-          int t_numPoints  = a_coords.dimension(0);
+          int t_numSpheres = m_sphereCoords.extent(0);
+          int t_numPoints  = a_coords.extent(0);
           auto t_radius = m_radius;
           auto t_insideValue = m_insideValue;
           auto t_outsideValue = m_outsideValue;
@@ -308,7 +308,7 @@ class MovingLeastSquares {
 
     decltype(m_fields) getPointFields(){return m_fields;}
 
-    int getNumPoints(){return m_coords.dimension(0); }
+    int getNumPoints(){return m_coords.extent(0); }
 
     /***************************************************************************/
     /*!

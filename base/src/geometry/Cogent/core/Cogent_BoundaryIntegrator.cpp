@@ -44,8 +44,8 @@ Cogent::BoundaryIntegrator::getMeasure(
 
 /// TODO: (FIX)  specific to non-parameterize model
     if(newMeasure.size()) {
-      uint nNodes = geomData.dimension(0);
-      uint nTopos = geomData.dimension(1);
+      uint nNodes = geomData.extent(0);
+      uint nTopos = geomData.extent(1);
       dMdtopo = Cogent::FContainer<RealType>("dMdtopo",nNodes,nTopos);
       for (uint i=0;i<nNodes;i++)
         for (uint j=0;j<nTopos;j++)
@@ -121,7 +121,7 @@ void Cogent::BoundaryIntegrator::getQPoints(
 
   // get simplex vertices, P_Ij, in the reference coords of the parent element
   //
-  uint nDerivs = dwdtopo.dimension(1)+1;
+  uint nDerivs = dwdtopo.extent(1)+1;
   Cogent::FContainer<DFadType> vertPoints("vertPoints", nPoints, m_numDims, nDerivs);
   for(int i=0; i<nPoints; i++)
     for(uint j=0; j<m_numDims; j++)
@@ -142,7 +142,7 @@ void Cogent::BoundaryIntegrator::getQPoints(
 
   // get basis values, N_I(\xi_i), at m_boundarySimplexPoints, \xi_i.
   //
-  int nRefPoints = m_boundarySimplexPoints.dimension(0);
+  int nRefPoints = m_boundarySimplexPoints.extent(0);
   Cogent::FContainer<RealType> Nvals("Nvals",numNodes, nRefPoints);
   m_simplexBoundaryBasis->getValues(Nvals, m_boundarySimplexPoints, Intrepid2::OPERATOR_VALUE);
 

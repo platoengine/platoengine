@@ -6,8 +6,8 @@ void Cogent::BoundaryIntegrator_Projected::getStandardPoints(
      Cogent::FContainer<RealType>& points)
 //******************************************************************************//
 {
-  int numQPs = m_standardPoints.dimension(0);
-  int numDims = m_standardPoints.dimension(1);
+  int numQPs = m_standardPoints.extent(0);
+  int numDims = m_standardPoints.extent(1);
   points = Cogent::FContainer<RealType>("points",numQPs,numDims);
   for(int i=0; i<numQPs; ++i)
     for(int j=0; j<numDims; ++j)
@@ -97,7 +97,7 @@ void Cogent::BoundaryIntegrator_Projected::getCubatureWeights(
   }
 
   if(m_ErrorChecking > 2){
-    int nqps = weights.dimension(0);
+    int nqps = weights.extent(0);
     RealType totalWeight = 0.0;
     for(int i=0; i<nqps; i++)
       totalWeight += weights(i);
@@ -156,7 +156,7 @@ void Cogent::BoundaryIntegrator_Projected::getQPointWeights(
   uint nNodes = m_baseElementBasis->getCardinality();
   uint nTopos = explicitSimplexes[0].fieldvals[0].size();
   uint offset = 0;
-  uint nRefPoints = m_boundarySimplexPoints.dimension(0);
+  uint nRefPoints = m_boundarySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   uint nDerivs = nTopos*nNodes;
@@ -198,7 +198,7 @@ void Cogent::BoundaryIntegrator_Projected::getQPointWeights(
 {
 
   uint offset = 0;
-  uint nRefPoints = m_boundarySimplexPoints.dimension(0);
+  uint nRefPoints = m_boundarySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   Cogent::FContainer<RealType> cweights("cweights",nQPs);
@@ -231,7 +231,7 @@ void Cogent::BoundaryIntegrator_Projected::getQPointWeights(
 {
 
   uint offset = 0;
-  uint nRefPoints = m_boundarySimplexPoints.dimension(0);
+  uint nRefPoints = m_boundarySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   uint nTopos = explicitSimplexes[0].fieldvals[0].size();

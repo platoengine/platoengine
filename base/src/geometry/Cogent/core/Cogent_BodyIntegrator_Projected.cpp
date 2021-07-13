@@ -9,8 +9,8 @@ void Cogent::BodyIntegrator_Projected::getStandardPoints(
   Timer timer(__func__);
 #endif
 
-  int numQPs = m_standardPoints.dimension(0);
-  int numDims = m_standardPoints.dimension(1);
+  int numQPs = m_standardPoints.extent(0);
+  int numDims = m_standardPoints.extent(1);
   points = Cogent::FContainer<RealType>("points",numQPs,numDims);
   for(int i=0; i<numQPs; ++i)
     for(int j=0; j<numDims; ++j)
@@ -107,7 +107,7 @@ void Cogent::BodyIntegrator_Projected::getCubatureWeights(
     weights(j) *= scale;
 
   if(m_ErrorChecking > 2){
-    int nqps = weights.dimension(0);
+    int nqps = weights.extent(0);
     RealType totalWeight = 0.0;
     for(int i=0; i<nqps; i++)
       totalWeight += weights(i);
@@ -159,7 +159,7 @@ void Cogent::BodyIntegrator_Projected::getCubatureWeights(
   }
 
   RealType scale = getUniformScaling(coordCon);
-  int shapeDim = dwdgeom.dimension(1);
+  int shapeDim = dwdgeom.extent(1);
   for(int i=0; i<m_systemSize; i++){
     weights(i) *= scale;
     for(int j=0; j<shapeDim; j++){
@@ -186,7 +186,7 @@ void Cogent::BodyIntegrator_Projected::getQPointWeights(
 
   if( nSimplexes == 0 ) return;
 
-  uint nRefPoints = m_bodySimplexPoints.dimension(0);
+  uint nRefPoints = m_bodySimplexPoints.extent(0);
   uint nTopos = explicitSimplexes[0].fieldvals[0].size();
   uint nQPs = nSimplexes*nRefPoints;
   uint nNodes = m_baseElementBasis->getCardinality();
@@ -238,7 +238,7 @@ void Cogent::BodyIntegrator_Projected::getQPointWeights(
 #endif
 
   uint offset = 0;
-  uint nRefPoints = m_bodySimplexPoints.dimension(0);
+  uint nRefPoints = m_bodySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   Cogent::FContainer<RealType> cweights("cweights",nQPs);

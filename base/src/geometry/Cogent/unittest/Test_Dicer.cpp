@@ -350,8 +350,8 @@ void test(Cogent::FContainer<RealType>& topoVals,
   std::vector<Cogent::Simplex<RealType,RealType>> realAllSimplexes, realFittedSimplexes;
 
   RealType epsilon = 1e-5;
-  int numNodes = topoVals.dimension(0);
-  int numLevelsets = topoVals.dimension(1);
+  int numNodes = topoVals.extent(0);
+  int numLevelsets = topoVals.extent(1);
   int numDerivs = numNodes*numLevelsets;
   std::vector<RealType> dmdtopo(numDerivs);
   for(int j=0; j<numNodes; j++){

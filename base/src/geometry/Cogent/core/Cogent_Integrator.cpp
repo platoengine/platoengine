@@ -28,8 +28,8 @@ void toDFadType(const FContainer<RealType>& from,
 //******************************************************************************//
 {
 // TODO:  make general.  This only works for 2D array. need 1D as well.
-  uint nNodes = from.dimension(0);
-  uint nTopos = from.dimension(1);
+  uint nNodes = from.extent(0);
+  uint nTopos = from.extent(1);
   uint nDerivs = nNodes*nTopos;
   Cogent::FContainer<RealType> Tval("Tval",nNodes,nTopos);
   to = Cogent::FContainer<DFadType>("Tfad",nNodes,nTopos,nDerivs+1);
@@ -158,7 +158,7 @@ RealType Cogent::Integrator::getUniformScaling(const FContainer<RealType>& coord
 {
   int numNodes = m_baseElementBasis->getCardinality();
 
-  FContainer<RealType> Bvals("Bvals",numNodes, m_centerPoint.dimension(0), m_numDims);
+  FContainer<RealType> Bvals("Bvals",numNodes, m_centerPoint.extent(0), m_numDims);
   m_baseElementBasis->getValues(Bvals, m_centerPoint, Intrepid2::OPERATOR_GRAD);
 
   LocalMatrix<RealType> b(m_numDims,m_numDims);
@@ -292,8 +292,8 @@ void Cogent::Integrator::getMeasure(
       measure = newMeasure.val();
 
       if(newMeasure.size()) {
-        uint nNodes = topoData.dimension(0);
-        uint nTopos = topoData.dimension(1);
+        uint nNodes = topoData.extent(0);
+        uint nTopos = topoData.extent(1);
         Cogent::FContainer<RealType> 
           dMdtopo = Cogent::FContainer<RealType>("dMdtopo",nNodes,nTopos);
         for (uint i=0;i<nNodes;i++)

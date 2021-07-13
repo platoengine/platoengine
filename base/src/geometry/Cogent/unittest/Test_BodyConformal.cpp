@@ -86,7 +86,7 @@ TEST(BodyConformalTest, Parameterized_Tet4)
 
   double conformalWeight = 0.0;
   std::vector<RealType> dWeightdGeomConf(numGeomVals,0.0);
-  int ncQPs = cweights.dimension(0);
+  int ncQPs = cweights.extent(0);
   for(int q=0; q<ncQPs; ++q){
     conformalWeight += cweights(q);
     for(int m=0; m<numGeomVals; m++)
@@ -190,7 +190,7 @@ TEST(BodyConformalTest, Parameterized)
 
   double conformalWeight = 0.0;
   std::vector<RealType> dWeightdGeomConf(numGeomVals,0.0);
-  int ncQPs = cweights.dimension(0);
+  int ncQPs = cweights.extent(0);
   for(int q=0; q<ncQPs; ++q){
     conformalWeight += cweights(q);
     for(int m=0; m<numGeomVals; m++)
@@ -268,7 +268,7 @@ TEST(BodyConformalTest, NonParameterized_Value)
 
   // write to screen
   //
-  int nQPs = cweights.dimension(0);
+  int nQPs = cweights.extent(0);
   double totalWeight = 0.0;
   for(int j=0; j<nQPs; j++) {
     totalWeight += cweights(j);
@@ -340,14 +340,14 @@ TEST(BodyConformalTest, NonParameterized_Deriv_SingleLS)
 
   // write to screen
   //
-  int nQPs = cweights.dimension(0);
+  int nQPs = cweights.extent(0);
   double totalWeight = 0.0;
   for(int j=0; j<nQPs; j++) {
     totalWeight += cweights(j);
   }
   std::cout << "Total weight: " << totalWeight << std::endl;
 
-  int nDerivs = cdwdgeom.dimension(1);
+  int nDerivs = cdwdgeom.extent(1);
   std::vector<double> dwdgeom(nDerivs,0.0);
   for(int j=0; j<nQPs; j++) {
     for(int k=0; k<nDerivs; k++)
@@ -370,7 +370,7 @@ TEST(BodyConformalTest, NonParameterized_Deriv_SingleLS)
       dtopoVals(k,j) += epsilon;
       integrator->getCubature(dcweights, cpoints, constDtopoVals, coordCon);
       dtopoVals(k,j) -= epsilon;
-      int nQPs = dcweights.dimension(0);
+      int nQPs = dcweights.extent(0);
       double dtotalWeight = 0.0;
       for(int q=0; q<nQPs; q++) {
         dtotalWeight += dcweights(q);
@@ -494,14 +494,14 @@ TEST(BodyConformalTest, DISABLED_NonParameterized_Deriv_TwoLS)
 
   // write to screen
   //
-  int nQPs = cweights.dimension(0);
+  int nQPs = cweights.extent(0);
   double totalWeight = 0.0;
   for(int j=0; j<nQPs; j++) {
     totalWeight += cweights(j);
   }
   std::cout << "Total weight: " << totalWeight << std::endl;
 
-  int nDerivs = cdwdgeom.dimension(1);
+  int nDerivs = cdwdgeom.extent(1);
   std::vector<double> dwdgeom(nDerivs,0.0);
   for(int j=0; j<nQPs; j++) {
     for(int k=0; k<nDerivs; k++)
@@ -524,7 +524,7 @@ TEST(BodyConformalTest, DISABLED_NonParameterized_Deriv_TwoLS)
       dtopoVals(k,j) += epsilon;
       integrator->getCubature(dcweights, cpoints, constDtopoVals, coordCon);
       dtopoVals(k,j) -= epsilon;
-      int nQPs = dcweights.dimension(0);
+      int nQPs = dcweights.extent(0);
       double dtotalWeight = 0.0;
       for(int q=0; q<nQPs; q++) {
         dtotalWeight += dcweights(q);

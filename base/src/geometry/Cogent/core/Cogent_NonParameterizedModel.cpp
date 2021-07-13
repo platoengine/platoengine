@@ -71,7 +71,7 @@ bool NonParameterizedModel::isPartialElement()
 
   Positive<RealType> positive;
 
-  int nNodes = m_geomData.dimension(0);
+  int nNodes = m_geomData.extent(0);
 
   // check first node for material
   bool firstMat = false;
@@ -122,7 +122,7 @@ bool NonParameterizedModel::isEmptyElement()
 
   Positive<RealType> positive;
 
-  int nNodes = m_geomData.dimension(0);
+  int nNodes = m_geomData.extent(0);
 
   int nSubDomains = m_subDomains.size();
 
