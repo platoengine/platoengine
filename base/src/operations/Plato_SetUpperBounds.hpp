@@ -84,12 +84,6 @@ public:
 
 private:
     /******************************************************************************//**
-     * \brief Modifies upper bound values if use case is leveset.
-     * \param [in,out] aToData vector to upper bound vector
-    **********************************************************************************/
-    void checkLevelsetUseCase(double* aToData);
-
-    /******************************************************************************//**
      * \brief Initialize upper bound vector. 
      * \param [in,out] aToData vector to upper bound vector
     **********************************************************************************/
@@ -112,6 +106,28 @@ private:
      * \param [in] aNode XML metadata for this operation
     **********************************************************************************/
     void parseOperationArguments(Plato::InputData& aNode);
+
+    /******************************************************************************//**
+     * \brief Update upper bound vector based on fixed entities. This function is only
+     *        used for Density-Based Topology Optimization Problems (DBTOP).
+     * \param [in,out] aToData vector to upper bound vector
+    **********************************************************************************/
+    void updateUpperBoundsBasedOnFixedEntitiesForDBTOP(double* aToData);
+
+    /******************************************************************************//**
+     * \brief Update upper bound vector based on fixed entities for Levelset Topology 
+     *        Optimization Problems (LSTOP).
+     * \param [in,out] aToData vector to upper bound vector
+    **********************************************************************************/
+    void updateUpperBoundsBasedOnFixedEntitiesForLSTOP(double* aToData);
+
+    /******************************************************************************//**
+     * \brief Set upper bound vector for density-based topology optimization problems.
+     * \param [in] aMetadata fixed blocks metadata
+     * \param [in,out] aToData lower bound vector
+    **********************************************************************************/
+    void updateUpperBoundsForDensityProblems
+    (const Plato::FixedBlock::Metadata& aMetadata, double* aToData);
 
 private:
     int mOutputSize = 0; /*!< output field length */

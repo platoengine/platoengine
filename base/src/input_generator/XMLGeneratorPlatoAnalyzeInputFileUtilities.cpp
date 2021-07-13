@@ -557,7 +557,7 @@ void append_spatial_model_to_plato_problem
         auto tCurDomain = tDomains.append_child("ParameterList");
         XMLGen::append_attributes({"name"}, {std::string("Block ") + tBlock.block_id}, tCurDomain);
         std::vector<std::string> tKeys = {"name", "type", "value"};
-        std::vector<std::string> tValues = {"Element Block", "string", std::string("block_") + tBlock.block_id};
+        std::vector<std::string> tValues = {"Element Block", "string", tBlock.name};
         XMLGen::append_parameter_plus_attributes(tKeys, tValues, tCurDomain);
 
         auto tMaterials = aXMLMetaData.materials;

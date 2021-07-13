@@ -89,13 +89,31 @@ void SetUpperBounds::operator()()
     }
 
     this->initializeUpperBoundVector(tToData);
-    this->checkLevelsetUseCase(tToData);
+    if( !mFixedBlockMetadata.mBlockIDs.empty() )
+    {
+        this->updateUpperBoundsBasedOnFixedEntitiesForDBTOP(tToData);
+        this->updateUpperBoundsBasedOnFixedEntitiesForLSTOP(tToData);
+    }
 }
 
-void SetUpperBounds::checkLevelsetUseCase(double* aToData)
+void SetUpperBounds::updateUpperBoundsBasedOnFixedEntitiesForDBTOP(double* aToData)
 {
-    // Now update values based on fixed entities
-    if(mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
+    auto tHasAtLeastOneFluidMaterialState = Plato::FixedBlock::has_fluid_material_state(mFixedBlockMetadata);
+    auto tIsDensityBasedTopologyOptimizationProblem = mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD;
+    if (tIsDensityBasedTopologyOptimizationProblem && tHasAtLeastOneFluidMaterialState)
+    {
+        auto tSolidFixedBlocksMetadata = Plato::FixedBlock::get_fixed_solid_blocks_metadata(mFixedBlockMetadata);
+        if( !tSolidFixedBlocksMetadata.mBlockIDs.empty() )
+        {
+            this->updateUpperBoundsForDensityProblems(tSolidFixedBlocksMetadata, aToData);
+        }
+    }
+}
+
+void SetUpperBounds::updateUpperBoundsBasedOnFixedEntitiesForLSTOP(double* aToData)
+{
+    auto tIsLevelsetTopologyOptimizationProblem = mDiscretization == "levelset" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD;
+    if (tIsLevelsetTopologyOptimizationProblem)
     {
         double tValue = -0.001;
         mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(aToData, mFixedBlockMetadata.mBlockIDs, tValue);
@@ -109,12 +127,34 @@ void SetUpperBounds::initializeUpperBoundVector(double* aToData)
     // Get incoming global Upper bound specified by user
     std::vector<double>* tInData = mPlatoApp->getValue(mInputArgumentName);
     double tUpperBoundIn = (*tInData)[0];
+    mFixedBlockMetadata.mOptimizationBlockValue = tUpperBoundIn;
 
     // Set specified value for the user
     for(int tIndex = 0; tIndex < mUpperBoundVectorLength; tIndex++)
     {
         aToData[tIndex] = tUpperBoundIn;
     }
+}
+
+void SetUpperBounds::updateUpperBoundsForDensityProblems
+(const Plato::FixedBlock::Metadata& aMetadata, double* aToData)
+{
+        LightMP* tLightMP = mPlatoApp->getLightMP();
+        const int tDofsPerNode_1D = 1;
+        SystemContainer* tSysGraph_1D = new SystemContainer(tLightMP->getMesh(), tDofsPerNode_1D, tLightMP->getInput());
+        std::vector<VarIndex> tSingleValue(1u);
+        DataContainer* tDataContainer = tLightMP->getDataContainer();
+        bool tPlottable = true;
+        tSingleValue[0] = tDataContainer->registerVariable(RealType, "lowerBoundWorking", NODE, !tPlottable);
+        DistributedVector* tDistributedVector = new DistributedVector(tSysGraph_1D, tSingleValue);
+
+        double tEntitySetsBoundaryValue = 0.4999;
+        mPlatoApp->getMeshServices()->updateBoundsForFixedBlocks(aToData, aMetadata, *tDistributedVector);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedSidesets(aToData, aMetadata.mSidesetIDs, tEntitySetsBoundaryValue);
+        mPlatoApp->getMeshServices()->updateBoundsForFixedNodesets(aToData, aMetadata.mNodesetIDs, tEntitySetsBoundaryValue);
+
+        delete tDistributedVector;
+        delete tSysGraph_1D;
 }
 
 void SetUpperBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)

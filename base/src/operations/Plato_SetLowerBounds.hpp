@@ -90,10 +90,11 @@ private:
     void initializeLowerBoundVector(double* aToData);
 
     /******************************************************************************//**
-     * \brief Update lower bound vector based on fixed entitiies.
+     * \brief Update lower bound vector based on fixed entitiies for Density-Based 
+     *        Topology Optimization Problems (DBTOP).
      * \param [in,out] aToData lower bound vector
     **********************************************************************************/
-    void updateLowerBoundVectorBasedOnFixedEntities(double* aToData);
+    void updateLowerBoundsBasedOnFixedEntitiesForDBTOP(double* aToData);
 
     /******************************************************************************//**
      * \brief Parse node and side sets metadata.
@@ -142,7 +143,7 @@ private:
      * \param [in] aMetadata fixed blocks metadata
      * \param [in,out] aToData lower bound vector
     **********************************************************************************/
-    void setLowerBoundsForDensityProblems
+    void updateLowerBoundsForDensityProblems
     (const Plato::FixedBlock::Metadata& aMetadata, double* aToData);
 
 private:

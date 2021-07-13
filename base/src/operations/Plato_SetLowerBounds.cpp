@@ -98,28 +98,28 @@ void SetLowerBounds::operator()()
     this->initializeLowerBoundVector(tToData);
     if( !mFixedBlockMetadata.mBlockIDs.empty() )
     {
-        this->updateLowerBoundVectorBasedOnFixedEntities(tToData); 
+        this->updateLowerBoundsBasedOnFixedEntitiesForDBTOP(tToData); 
     }
 
 }
 
-void SetLowerBounds::updateLowerBoundVectorBasedOnFixedEntities(double* aToData)
+void SetLowerBounds::updateLowerBoundsBasedOnFixedEntitiesForDBTOP(double* aToData)
 {
     if(mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
         if( Plato::FixedBlock::is_material_state_solid(mFixedBlockMetadata) )
         {
-            this->setLowerBoundsForDensityProblems(mFixedBlockMetadata, aToData);
+            this->updateLowerBoundsForDensityProblems(mFixedBlockMetadata, aToData);
         }
         else
         {
             auto tFluidFixedBlocksMetadata = Plato::FixedBlock::get_fixed_fluid_blocks_metadata(mFixedBlockMetadata);
-            this->setLowerBoundsForDensityProblems(tFluidFixedBlocksMetadata, aToData);
+            this->updateLowerBoundsForDensityProblems(tFluidFixedBlocksMetadata, aToData);
         }
     }
 }
 
-void SetLowerBounds::setLowerBoundsForDensityProblems
+void SetLowerBounds::updateLowerBoundsForDensityProblems
 (const Plato::FixedBlock::Metadata& aMetadata, double* aToData)
 {
         LightMP* tLightMP = mPlatoApp->getLightMP();

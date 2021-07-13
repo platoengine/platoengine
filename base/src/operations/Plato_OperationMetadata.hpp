@@ -86,7 +86,7 @@ struct Metadata
 
 /******************************************************************************//**
  * \fn is_material_state_solid
- * \brief Return true if all the elemement blocks are set to a solid material state. 
+ * \brief Return true if all the material states in the element blocks are set to solid. 
  * \param [in] aMetadata fixed block metadata
  * \return boolean flag (true or false)
 **********************************************************************************/
@@ -99,6 +99,23 @@ inline bool is_material_state_solid
     }
     auto tIsSolidState = std::find(aMetadata.mMaterialStates.begin(), aMetadata.mMaterialStates.end(), "fluid") == aMetadata.mMaterialStates.end();
     return tIsSolidState;
+}
+
+/******************************************************************************//**
+ * \fn has_fluid_material_state
+ * \brief Return true if the material state of any of the element blocks is set to fluid. 
+ * \param [in] aMetadata fixed block metadata
+ * \return boolean flag (true or false)
+**********************************************************************************/
+inline bool has_fluid_material_state
+(Plato::FixedBlock::Metadata& aMetadata)
+{
+    if(aMetadata.mMaterialStates.empty())
+    {
+        THROWERR("List of fixed block material states is empty. Material states must be defined.")
+    }
+    auto tHasFluidMaterialState = std::find(aMetadata.mMaterialStates.begin(), aMetadata.mMaterialStates.end(), "fluid") != aMetadata.mMaterialStates.end();
+    return tHasFluidMaterialState;
 }
 
 /******************************************************************************//**
@@ -126,6 +143,33 @@ get_fixed_fluid_blocks_metadata
     tFluidFixedBlocks.mSidesetIDs = aMetadata.mSidesetIDs;
     tFluidFixedBlocks.mOptimizationBlockValue = aMetadata.mOptimizationBlockValue;
     return tFluidFixedBlocks;
+}
+
+/******************************************************************************//**
+ * \fn get_fixed_solid_blocks_metadata
+ * \brief Return only the fixed blocks metadata belonging to fluid material states.
+ * \param [in] aMetadata all fixed block metadata
+ * \return fluids fixed block metadta
+**********************************************************************************/
+inline Plato::FixedBlock::Metadata 
+get_fixed_solid_blocks_metadata
+(Plato::FixedBlock::Metadata& aMetadata)
+{
+    Plato::FixedBlock::Metadata tSolidFixedBlocks;
+    for(auto& tMaterialState : aMetadata.mMaterialStates)
+    {
+        auto tLowerMaterialState = Plato::tolower(tMaterialState);
+        if(tLowerMaterialState != "solid") { continue; }
+        auto tIndex = &tMaterialState - &aMetadata.mMaterialStates[0];
+        tSolidFixedBlocks.mMaterialStates.push_back(tMaterialState);
+        tSolidFixedBlocks.mBlockIDs.push_back(aMetadata.mBlockIDs[tIndex]);
+        tSolidFixedBlocks.mDomainValues.push_back(aMetadata.mDomainValues[tIndex]);
+        tSolidFixedBlocks.mBoundaryValues.push_back(aMetadata.mBoundaryValues[tIndex]);
+    }
+    tSolidFixedBlocks.mNodesetIDs = aMetadata.mNodesetIDs;
+    tSolidFixedBlocks.mSidesetIDs = aMetadata.mSidesetIDs;
+    tSolidFixedBlocks.mOptimizationBlockValue = aMetadata.mOptimizationBlockValue;
+    return tSolidFixedBlocks;
 }
 
 }
