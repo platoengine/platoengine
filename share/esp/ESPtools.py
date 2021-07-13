@@ -163,13 +163,16 @@ def toExo(meshName, groupAttrs):
   callArgs.append("mark")
   callArgs.append("1")
   callArgs.append("sideset")
-  callArgs.append("surface")
+  callArgs.append("remaining_surface")
 
   for entry in groupAttrs:
     if entry["name"] != "solid_group":
       callArgs.append("mark")
       callArgs.append(entry["index"])
-      callArgs.append("sideset")
+      if entry["name"].find("_nodeset") != -1:
+        callArgs.append("nodeset")
+      else :
+        callArgs.append("sideset")
       callArgs.append(entry["name"])
 
   subprocess.call(callArgs)
