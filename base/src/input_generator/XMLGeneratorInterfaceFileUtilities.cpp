@@ -2244,6 +2244,9 @@ void append_reinitialize_on_change_operation
 (const std::string &aPerformer, 
  pugi::xml_node& aParentNode)
 {
+    if (aPerformer.find("sierra_sd") != std::string::npos) {
+        return;
+    }
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"}, {"Reinitialize on Change", aPerformer}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");

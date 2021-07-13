@@ -219,7 +219,7 @@ void writeDummyModalFiles(const XMLGen::Scenario &aScenario, const XMLGen::Crite
     std::ofstream dummy;
 
     dummy.open(data_truth_table);
-    dummy << numNodes << " 4" << std::endl;
+    dummy << numNodes << std::endl;
     for(int i=0;i<numNodes;i++) {
         dummy << matchNodes[i] << " 1 1 1" << std::endl;
     }
@@ -237,14 +237,14 @@ void writeDummyModalFiles(const XMLGen::Scenario &aScenario, const XMLGen::Crite
 
     dummy.open(modal_data_file);
     dummy << numModes << std::endl;
-    for(int i=0;i<numNodes;i++) {
+    for(int i=0;i<numModes;i++) {
         dummy << "0" << std::endl;
     }
     dummy.close();
 
     dummy.open(modal_weight_table);
     dummy << numModes << std::endl;
-    for(int i=0;i<numNodes;i++) {
+    for(int i=0;i<numModes;i++) {
         dummy << "1" << std::endl;
     }
     dummy.close();
