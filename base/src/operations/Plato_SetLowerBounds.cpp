@@ -64,7 +64,7 @@ SetLowerBounds::SetLowerBounds(PlatoApp* p, Plato::InputData& aNode) :
     this->parseOperationArguments(aNode);
     this->parseFixedBlocks(aNode);
     this->parseEntitySets(aNode);
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
+    this->parseMemberData(aNode);
 }
 
 void SetLowerBounds::getArguments(std::vector<Plato::LocalArg> & aLocalArgs)
@@ -107,7 +107,7 @@ void SetLowerBounds::updateLowerBoundsBasedOnFixedEntitiesForDBTOP(double* aToDa
 {
     if(mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD)
     {
-        if( Plato::FixedBlock::is_material_state_solid(mFixedBlockMetadata) )
+        if( mMaterialUseCase == "solid" )
         {
             this->updateLowerBoundsForDensityProblems(mFixedBlockMetadata, aToData);
         }
@@ -217,6 +217,16 @@ void SetLowerBounds::parseFixedBlocks(Plato::InputData& aNode)
         this->setBoundaryValue(tFixedBlock);
         this->setMaterialState(tFixedBlock);
     }
+}
+
+void SetLowerBounds::parseMemberData
+(Plato::InputData& aNode)
+{
+    if( !mFixedBlockMetadata.mBlockIDs.empty() )
+    {
+        mMaterialUseCase = Plato::Parse::keyword(aNode, "UseCase", "solid");
+    }
+    mDiscretization = Plato::Parse::keyword(aNode, "Discretization", "density");
 }
 
 void SetLowerBounds::parseOperationArguments(Plato::InputData& aNode)

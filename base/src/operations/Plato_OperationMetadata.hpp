@@ -85,40 +85,6 @@ struct Metadata
 // struct Metadata
 
 /******************************************************************************//**
- * \fn is_material_state_solid
- * \brief Return true if all the material states in the element blocks are set to solid. 
- * \param [in] aMetadata fixed block metadata
- * \return boolean flag (true or false)
-**********************************************************************************/
-inline bool is_material_state_solid
-(Plato::FixedBlock::Metadata& aMetadata)
-{
-    if(aMetadata.mMaterialStates.empty())
-    {
-        THROWERR("List of fixed block material states is empty. Material states must be defined.")
-    }
-    auto tIsSolidState = std::find(aMetadata.mMaterialStates.begin(), aMetadata.mMaterialStates.end(), "fluid") == aMetadata.mMaterialStates.end();
-    return tIsSolidState;
-}
-
-/******************************************************************************//**
- * \fn has_fluid_material_state
- * \brief Return true if the material state of any of the element blocks is set to fluid. 
- * \param [in] aMetadata fixed block metadata
- * \return boolean flag (true or false)
-**********************************************************************************/
-inline bool has_fluid_material_state
-(Plato::FixedBlock::Metadata& aMetadata)
-{
-    if(aMetadata.mMaterialStates.empty())
-    {
-        THROWERR("List of fixed block material states is empty. Material states must be defined.")
-    }
-    auto tHasFluidMaterialState = std::find(aMetadata.mMaterialStates.begin(), aMetadata.mMaterialStates.end(), "fluid") != aMetadata.mMaterialStates.end();
-    return tHasFluidMaterialState;
-}
-
-/******************************************************************************//**
  * \fn get_fixed_fluid_blocks_metadata
  * \brief Return only the fixed blocks metadata belonging to fluid material states.
  * \param [in] aMetadata all fixed block metadata

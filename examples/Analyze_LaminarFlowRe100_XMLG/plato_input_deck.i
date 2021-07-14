@@ -95,7 +95,7 @@ end boundary_condition
 
 begin block 1
   material 1
-  name water
+  name block_1
 end block
 
 begin material 1

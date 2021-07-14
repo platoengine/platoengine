@@ -487,36 +487,58 @@ public:
 struct ValidPhysicsKeys
 {
 private:
-    /*!<
-     * \brief Valid plato input deck physics keywords.
-     **/
-    std::vector<std::string> mKeys =
+     /******************************************************************************//**
+     * \brief Map from valid simulation usecase to principal material state. Fluid 
+     *  usecases can have both fluid and solid material states in a single run. 
+     *  However, the principal material state for a fluids application is the fluid state.
+     **********************************************************************************/
+    std::unordered_map<std::string, std::string> mKeys =
     { 
-        "steady_state_mechanics", 
-        "transient_mechanics", 
-        "steady_state_thermal", 
-        "transient_thermal", 
-        "steady_state_electrical", 
-        "steady_state_thermomechanics",
-        "transient_thermomechanics",
-        "steady_state_electromechanics",
-        "plasticity", 
-        "thermoplasticity",
-        "frequency_response_function",
-        "steady_state_incompressible_fluids"
+        {"steady_state_mechanics", "solid"},
+        {"transient_mechanics", "solid"}, 
+        {"steady_state_thermal", "solid"}, 
+        {"transient_thermal", "solid"}, 
+        {"steady_state_electrical", "solid"}, 
+        {"steady_state_thermomechanics", "solid"},
+        {"transient_thermomechanics", "solid"},
+        {"steady_state_electromechanics", "solid"},
+        {"plasticity", "solid"},
+        {"thermoplasticity", "solid"},
+        {"frequency_response_function", "solid"},
+        {"steady_state_incompressible_fluids", "fluid"}
     };
-
 
 public:
     /******************************************************************************//**
-     * \fn value
-     * \brief Return supported physics keyword.
-     * \param [in] aKey input file keyword
-     * \return supported physics keyword. If key is not supported, return an empty string.
+     * \fn usecase
+     * \brief Return supported simulation usecase.
+     * \param [in] aKey keyword
+     * \return supported simulation usecase keyword, if not supported, return empty string.
     **********************************************************************************/
-    std::string value(const std::string& aKey) const
+    std::string usecase(const std::string& aKey) const
     {
-        return (XMLGen::return_supported_value(aKey, mKeys));
+        auto tItr = mKeys.find(aKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->first;
+    }
+
+    /******************************************************************************//**
+     * \fn material_state
+     * \brief Return principal material state given a supported simulation usecase.
+     * \param [in] aKey supported simulation usecase
+     * \return principal material state, if simulation usecase is not supported, return empty string.
+    **********************************************************************************/
+    std::string material_state(const std::string& aKey) const
+    {
+        auto tItr = mKeys.find(aKey);
+        if(tItr == mKeys.end())
+        {
+            return ("");
+        }
+        return tItr->second;
     }
 };
 // struct ValidPhysicsKeys

@@ -97,6 +97,12 @@ private:
     void updateLowerBoundsBasedOnFixedEntitiesForDBTOP(double* aToData);
 
     /******************************************************************************//**
+     * \brief Parse member data
+     * \param [in] aNode XML metadata for this operation
+    **********************************************************************************/
+    void parseMemberData(Plato::InputData& aNode);
+
+    /******************************************************************************//**
      * \brief Parse node and side sets metadata.
      * \param [in] aNode XML metadata for this operation
     **********************************************************************************/
@@ -152,7 +158,8 @@ private:
 
     std::string mInputArgumentName; /*!< input argument name */
     std::string mOutputArgumentName; /*!< output argument name */
-    std::string mDiscretization; /*!< topology/design representation, levelset or density */
+    std::string mDiscretization; /*!< topology/design representation, levelset or density, default = 'density' */
+    std::string mMaterialUseCase; /*!< main material state use case for the problem, default = 'solid' */
     Plato::data::layout_t mOutputLayout; /*!< output field data layout */
 
     Plato::FixedBlock::Metadata mFixedBlockMetadata; /*!< data describing fixed blocks */

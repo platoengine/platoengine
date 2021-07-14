@@ -1,5 +1,5 @@
 /*
- //@HEADER
+ //\HEADER
  // *************************************************************************
  //   Plato Engine v.1.0: Copyright 2018, National Technology & Engineering
  //                    Solutions of Sandia, LLC (NTESS).
@@ -34,10 +34,10 @@
  // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  //
- // Questions? Contact the Plato team (plato3D-help@sandia.gov)
+ // Questions? Contact the Plato team (plato3D-help\sandia.gov)
  //
  // *************************************************************************
- //@HEADER
+ //\HEADER
  */
 
 /*
@@ -56,46 +56,46 @@ namespace Plato
 class InputData;
 
 /******************************************************************************//**
- * @brief Return string layout
- * @param [in] aInput enum layout
- * @return string layout
+ * \brief Return string layout
+ * \param [in] aInput enum layout
+ * \return string layout
 **********************************************************************************/
 std::string getLayout(const Plato::data::layout_t & aInput);
 
 /******************************************************************************//**
- * @brief Return shared data layout
- * @param [in] aLayoutStr layout string
- * @return layout
+ * \brief Return shared data layout
+ * \param [in] aLayoutStr layout string
+ * \return layout
 **********************************************************************************/
 Plato::data::layout_t getLayout(const std::string & aLayoutStr);
 
 /******************************************************************************//**
- * @brief Return shared data layout. If no 'Layout' keyword is given in the input
+ * \brief Return shared data layout. If no 'Layout' keyword is given in the input
  *        xml_node (aNode), aDefaultLayout is returned
- * @param [in] aNode XML input data
- * @param [in/out] aDefaultLayout default layout
- * @return layout
+ * \param [in] aNode XML input data
+ * \param [in,out] aDefaultLayout default layout
+ * \return layout
 **********************************************************************************/
 Plato::data::layout_t getLayout(const Plato::InputData& aNode, Plato::data::layout_t aDefaultLayout);
 
 /******************************************************************************//**
- * @brief Return shared data layout
- * @param [in] aNode XML input data
- * @return layout
+ * \brief Return shared data layout
+ * \param [in] aNode XML input data
+ * \return layout
 **********************************************************************************/
 Plato::data::layout_t getLayout(const Plato::InputData& aNode);
 
 /******************************************************************************//**
- * @brief Split collection of strings separated by the '_' delimiter.
- * @param [in] aInput input string
- * @param [in/out] aOutput list of strings
+ * \brief Split collection of strings separated by the '_' delimiter.
+ * \param [in] aInput input string
+ * \param [in,out] aOutput list of strings
 **********************************************************************************/
 void split(const std::string & aInput, std::vector<std::string> & aOutput);
 
 /******************************************************************************//**
- * @brief Zero all entries
- * @param [in] aLength container's length
- * @param [in/out] aData container's data
+ * \brief Zero all entries
+ * \param [in] aLength container's length
+ * \param [in,out] aData container's data
 **********************************************************************************/
 void zero(const size_t& aLength, double* aData);
 

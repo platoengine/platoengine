@@ -344,7 +344,7 @@ bool transform_boolean_key(const std::string& aInput)
 std::string check_physics_keyword(const std::string& aInput)
 {
     XMLGen::ValidPhysicsKeys tValidKeys;
-    auto tValue = tValidKeys.value(aInput);
+    auto tValue = tValidKeys.usecase(aInput);
     if(tValue.empty())
     {
         THROWERR(std::string("Check Physics Keyword: keyword 'physics' with tag '") + aInput + "' is not supported.")

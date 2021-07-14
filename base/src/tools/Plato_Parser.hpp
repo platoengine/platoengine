@@ -167,6 +167,14 @@ std::vector<std::string> getStrings(const pugi::xml_node & aXML_Node, const std:
 void toUppercase(std::string& aString);
 bool boolFromString(const std::string & strval);
 
+/******************************************************************************//**
+ * \brief Parse keyword from input data node. Returns empty string if the keyword is not defined.
+ * \param [in] aKeyword keyword to parse
+ * \param [in] aDefault default value
+ * \param [in] aNode    input data node
+**********************************************************************************/
+std::string keyword(const Plato::InputData& aNode, const std::string& aKeyword, const std::string& aDefault);
+
 void parseArgumentNameInputs    (const Plato::InputData & aInputData,  std::vector<std::string> & aInputs);
 void parseArgumentNameOutputs   (const Plato::InputData & aOutputData, std::vector<std::string> & aOutputs);
 void parseSharedDataNameInputs  (const Plato::InputData & tInputData,  std::vector<std::string> & aInputs);

@@ -1174,9 +1174,17 @@ void append_set_lower_bounds_to_plato_main_operation
 {
     if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
+        // TODO: THIS CODE ASSUMES THAT ONLY ONE SCENARIO BLOCK IS DEFINED AND WILL NOT WORK 
+        // IF MULTIPLE ANALYZE SCENARIO BLOCKS ARE DEFINED. THIS CODE WILL NEED REFACTORING 
+        // IF THIS USE CASE IS NEEDED IN THE FUTURE.
+        XMLGen::ValidPhysicsKeys tValidPhysicsKeys;
+        auto tPhysics = aXMLMetaData.scenario(0).physics();
+        auto tMainMaterialStateForApplication = tValidPhysicsKeys.material_state(tPhysics);
+
         auto tOperation = aDocument.append_child("Operation");
-        std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-        std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", aXMLMetaData.optimization_parameters().discretization()};
+        auto tDiscretization = aXMLMetaData.optimization_parameters().discretization();
+        std::vector<std::string> tKeys = {"Function", "Name", "UseCase", "Discretization"};
+        std::vector<std::string> tValues = {"SetLowerBounds", "Compute Lower Bounds", tMainMaterialStateForApplication, tDiscretization};
         XMLGen::append_children(tKeys, tValues, tOperation);
 
         auto tInput = tOperation.append_child("Input");
@@ -1235,9 +1243,17 @@ void append_set_upper_bounds_to_plato_main_operation
 {
     if(aXMLMetaData.optimization_parameters().optimizationType() == OT_TOPOLOGY)
     {
+        // TODO: THIS CODE ASSUMES THAT ONLY ONE SCENARIO BLOCK IS DEFINED AND WILL NOT WORK 
+        // IF MULTIPLE ANALYZE SCENARIO BLOCKS ARE DEFINED. THIS CODE WILL NEED REFACTORING 
+        // IF THIS USE CASE IS NEEDED IN THE FUTURE.
+        XMLGen::ValidPhysicsKeys tValidPhysicsKeys;
+        auto tPhysics = aXMLMetaData.scenario(0).physics();
+        auto tMainMaterialStateForApplication = tValidPhysicsKeys.material_state(tPhysics);
+
         auto tOperation = aDocument.append_child("Operation");
-        std::vector<std::string> tKeys = {"Function", "Name", "Discretization"};
-        std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", aXMLMetaData.optimization_parameters().discretization()};
+        auto tDiscretization = aXMLMetaData.optimization_parameters().discretization();
+        std::vector<std::string> tKeys = {"Function", "Name", "UseCase", "Discretization"};
+        std::vector<std::string> tValues = {"SetUpperBounds", "Compute Upper Bounds", tMainMaterialStateForApplication, tDiscretization};
         XMLGen::append_children(tKeys, tValues, tOperation);
 
         auto tInput = tOperation.append_child("Input");

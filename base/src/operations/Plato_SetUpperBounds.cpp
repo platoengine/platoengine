@@ -63,7 +63,10 @@ SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     this->parseOperationArguments(aNode);
     this->parseFixedBlocks(aNode);
     this->parseEntitySets(aNode);
+    mMaterialUseCase = Plato::Get::String(aNode, "UseCase");
+    mMaterialUseCase = Plato::tolower(mMaterialUseCase);
     mDiscretization = Plato::Get::String(aNode, "Discretization");
+    mDiscretization = Plato::tolower(mDiscretization);
 }
 
 void SetUpperBounds::operator()()
@@ -98,9 +101,9 @@ void SetUpperBounds::operator()()
 
 void SetUpperBounds::updateUpperBoundsBasedOnFixedEntitiesForDBTOP(double* aToData)
 {
-    auto tHasAtLeastOneFluidMaterialState = Plato::FixedBlock::has_fluid_material_state(mFixedBlockMetadata);
+    auto tIsFluidMaterialUseCase = mMaterialUseCase == "fluid";
     auto tIsDensityBasedTopologyOptimizationProblem = mDiscretization == "density" && mOutputLayout == Plato::data::layout_t::SCALAR_FIELD;
-    if (tIsDensityBasedTopologyOptimizationProblem && tHasAtLeastOneFluidMaterialState)
+    if (tIsDensityBasedTopologyOptimizationProblem && tIsFluidMaterialUseCase)
     {
         auto tSolidFixedBlocksMetadata = Plato::FixedBlock::get_fixed_solid_blocks_metadata(mFixedBlockMetadata);
         if( !tSolidFixedBlocksMetadata.mBlockIDs.empty() )
@@ -189,6 +192,16 @@ void SetUpperBounds::parseFixedBlocks(Plato::InputData& aNode)
         auto tMaterialState = Plato::Get::String(tFixedBlock, "MaterialState");
         mFixedBlockMetadata.mMaterialStates.push_back(tMaterialState);
     }
+}
+
+void SetUpperBounds::parseMemberData
+(Plato::InputData& aNode)
+{
+    if( !mFixedBlockMetadata.mBlockIDs.empty() )
+    {
+        mMaterialUseCase = Plato::Parse::keyword(aNode, "UseCase", "solid");
+    }
+    mDiscretization = Plato::Parse::keyword(aNode, "Discretization", "density");
 }
 
 void SetUpperBounds::parseOperationArguments(Plato::InputData& aNode)
