@@ -307,19 +307,19 @@ Tri3::registerData()
   int number = myNel*myNnpe;
   
   NODECONNECT = myData->registerVariable( IntType,
-					  "CONNT3",
+					  strint("CONNT3",groupID),
 					  UNSET,
 					  number );
 
   GLOBALID    = myData->registerVariable( IntType,
-					  "T3GID",
+					  strint("T3GID",groupID),
 					  ELEM,
 					  myNel );
 
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                          "T3ATR",
+                                          strint("T3ATR",groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
@@ -415,19 +415,19 @@ Quad8::registerData()
   int number = myNel*myNnpe;
   
   NODECONNECT = myData->registerVariable( IntType,
-					  "CONNQ8",
+					  strint("CONNQ8", groupID),
 					  UNSET,
 					  number );
 
   GLOBALID    = myData->registerVariable( IntType,
-					  "Q8GID",
+					  strint("Q8GID", groupID),
 					  ELEM,
 					  myNel );
   
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                          "Q8ATR",
+                                          strint("Q8ATR", groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
@@ -472,19 +472,19 @@ Quad4::registerData()
   int number = myNel*myNnpe;
   
   NODECONNECT = myData->registerVariable( IntType,
-					  "CONNQ4",
+					  strint("CONNQ4", groupID),
 					  UNSET,
 					  number );
 
   GLOBALID    = myData->registerVariable( IntType,
-					  "Q4GID",
+					  strint("Q4GID", groupID),
 					  ELEM,
 					  myNel );
   
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                          "Q4ATR",
+                                          strint("Q4ATR", groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
@@ -561,7 +561,7 @@ Hex8::registerData()
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                          "H8ATR",
+                                          string("H8ATR", groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
@@ -609,19 +609,19 @@ Hex20::registerData()
   int number = myNel*myNnpe;
 
   NODECONNECT = myData->registerVariable( IntType,
-					  "CONNH20",
+					  strint("CONNH20", groupID),
 					  UNSET,
 					  number );
 
   GLOBALID    = myData->registerVariable( IntType,
-					  "H20GID",
+					  strint("H20GID", groupID),
 					  ELEM,
 					  myNel );
   
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                          "H20ATR",
+                                          strint("H20ATR", groupID),
                                           UNSET,
                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
@@ -671,30 +671,23 @@ void
 Tet4::registerData()
 {
   int number = myNel*myNnpe;
-  char conn_name[15];
-  char id_name[15];
-  char att_name[15];
-
-  sprintf(conn_name, "CONNT4_%d", this->groupID);
-  sprintf(id_name, "T4GID_%d", this->groupID);
-  sprintf(att_name, "T4ATR_%d", this->groupID);
 
   NODECONNECT = myData->registerVariable( IntType,
-					  conn_name,
+					  strint("CONT4", groupID),
 					  UNSET,
 					  number );
 
   GLOBALID    = myData->registerVariable( IntType,
-					  id_name,
+					  strint("T4GID", groupID),
 					  ELEM,
 					  myNel );
   
   number = myNel*myNattr;
   if(myNattr){
     ATTRIBUTES = myData->registerVariable( RealType, 
-                                           att_name,
-                                          UNSET,
-                                          number );
+                                           strint("T4ATR", groupID),
+                                           UNSET,
+                                           number );
     myData->getVariable(ATTRIBUTES, attributes);
   }
 
