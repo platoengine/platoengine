@@ -2755,6 +2755,16 @@ void append_optimality_criteria_options
 (const XMLGen::InputData& aXMLMetaData,
  pugi::xml_node& aParentNode)
 {
+    std::vector<std::string> tKeys = {"ProblemUpdateFrequency"};
+    std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().problem_update_frequency()};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    auto tOptionsNode = aParentNode.child("Options");
+    if(tOptionsNode.empty())
+    {
+        tOptionsNode = aParentNode.append_child("Options");
+    }
+    XMLGen::append_children(tKeys, tValues, tOptionsNode);
+
     auto tConvergenceNode = aParentNode.append_child("Convergence");
     XMLGen::append_children({"MaxIterations"}, {aXMLMetaData.optimization_parameters().max_iterations()}, tConvergenceNode);
 }
@@ -2767,10 +2777,10 @@ void append_method_moving_asymptotes_options
  pugi::xml_node& aParentNode)
 {
     std::vector<std::string> tKeys = {"MaxNumOuterIterations", "MoveLimit", "AsymptoteExpansion", "AsymptoteContraction",
-         "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
+         "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance", "UpdateFrequency"};
     std::vector<std::string> tValues = {aXMLMetaData.optimization_parameters().max_iterations(), aXMLMetaData.optimization_parameters().mma_move_limit(), aXMLMetaData.optimization_parameters().mma_asymptote_expansion(),
         aXMLMetaData.optimization_parameters().mma_asymptote_contraction(), aXMLMetaData.optimization_parameters().mma_max_sub_problem_iterations(), aXMLMetaData.optimization_parameters().mma_control_stagnation_tolerance(),
-        aXMLMetaData.optimization_parameters().mma_objective_stagnation_tolerance()};
+        aXMLMetaData.optimization_parameters().mma_objective_stagnation_tolerance(),aXMLMetaData.optimization_parameters().problem_update_frequency()};
     XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
     auto tOptionsNode = aParentNode.append_child("Options");
     XMLGen::append_children(tKeys, tValues, tOptionsNode);
