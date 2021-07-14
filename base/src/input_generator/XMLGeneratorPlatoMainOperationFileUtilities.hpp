@@ -51,6 +51,16 @@ void append_filter_options_to_operation
  pugi::xml_node &aParentNode);
 
 /******************************************************************************//**
+ * \fn append_projection_options_to_operation
+ * \brief Append projection options to PUGI XML document.
+ * \param [in]     aXMLMetaData Plato problem input data
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+void append_projection_options_to_operation
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node &aParentNode);
+
+/******************************************************************************//**
  * \fn append_initialize_data_for_shape_problem
  * \brief Append initialize data operations for shape optimizatino problems
  * \param [in]     aXMLMetaData Plato problem input data

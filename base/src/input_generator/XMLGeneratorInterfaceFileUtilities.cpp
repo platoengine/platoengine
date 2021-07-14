@@ -238,6 +238,7 @@ void append_topology_shared_data
     }
 
     std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+
     auto tSharedData = aDocument.append_child("SharedData");
 
     std::vector<std::string> tKeys = {"Name", "Type", "Layout", "Size"};
@@ -248,24 +249,16 @@ void append_topology_shared_data
     {
         if(aXMLMetaData.optimization_parameters().filter_type() == "helmholtz")
         {
-            std::string tHelmholtzPerformer = "";
-            for(auto& tService : aXMLMetaData.mPerformerServices)
+            XMLGen::ValidProjectionKeys tValidProjectionKeys;
+            auto tProjectionName = tValidProjectionKeys.value(aXMLMetaData.optimization_parameters().projection_type());
+            if(tProjectionName.empty())
             {
-                if(tService.id() == "helmholtz")
-                {
-                    tHelmholtzPerformer = tService.performer();
-                    break;
-                }
+                append_helmholtz_topology_shared_data(aXMLMetaData, tSharedData);
             }
-            tKeys = {"OwnerName"};
-            tValues = {tHelmholtzPerformer};
-            XMLGen::append_children(tKeys, tValues, tSharedData);
-
-            for(auto& tService : aXMLMetaData.services())
+            else
             {
-                tKeys = {"UserName"};
-                tValues = {tService.performer()};
-                XMLGen::append_children(tKeys, tValues, tSharedData);
+                auto tFilteredControlSharedData = aDocument.append_child("SharedData");
+                append_projection_helmholtz_topology_shared_data(aXMLMetaData, tSharedData, tFilteredControlSharedData);
             }
         }
         else
@@ -273,6 +266,7 @@ void append_topology_shared_data
             std::string tFirstPlatoAnalyzePerformer = aXMLMetaData.getFirstPlatoAnalyzePerformer();
             tKeys = {"OwnerName"};
             tValues = {tFirstPlatoAnalyzePerformer};
+            XMLGen::append_children(tKeys, tValues, tSharedData);
             tKeys = {"UserName"};
             tValues = {tFirstPlatoAnalyzePerformer};
             XMLGen::append_children(tKeys, tValues, tSharedData);
@@ -285,6 +279,7 @@ void append_topology_shared_data
     {
         tKeys = {"OwnerName"};
         tValues = {tFirstPlatoMainPerformer};
+        XMLGen::append_children(tKeys, tValues, tSharedData);
 
         for(auto& tService : aXMLMetaData.services())
         {
@@ -293,6 +288,70 @@ void append_topology_shared_data
             XMLGen::append_children(tKeys, tValues, tSharedData);
         }
     }
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_helmholtz_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode)
+{
+
+    std::string tHelmholtzPerformer = "";
+    for(auto& tService : aXMLMetaData.mPerformerServices)
+    {
+        if(tService.id() == "helmholtz")
+        {
+            tHelmholtzPerformer = tService.performer();
+            break;
+        }
+    }
+
+    std::vector<std::string> tKeys = {"OwnerName"};
+    std::vector<std::string> tValues = {tHelmholtzPerformer};
+    XMLGen::append_children(tKeys, tValues, aParentNode);
+    for(auto& tService : aXMLMetaData.services())
+    {
+        tKeys = {"UserName"};
+        tValues = {tService.performer()};
+        XMLGen::append_children(tKeys, tValues, aParentNode);
+    }
+
+}
+/******************************************************************************/
+
+/******************************************************************************/
+void append_projection_helmholtz_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aTopologyNode,
+ pugi::xml_node& aFilteredControlNode)
+{
+
+    std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+
+    std::string tHelmholtzPerformer = "";
+    for(auto& tService : aXMLMetaData.mPerformerServices)
+    {
+        if(tService.id() == "helmholtz")
+        {
+            tHelmholtzPerformer = tService.performer();
+            break;
+        }
+    }
+
+    std::vector<std::string> tKeys = {"OwnerName"};
+    std::vector<std::string> tValues = {tFirstPlatoMainPerformer};
+    XMLGen::append_children(tKeys, tValues, aTopologyNode);
+    for(auto& tService : aXMLMetaData.services())
+    {
+        tKeys = {"UserName"};
+        tValues = {tService.performer()};
+        XMLGen::append_children(tKeys, tValues, aTopologyNode);
+    }
+
+    tKeys = {"Name", "Type", "Layout", "Size", "OwnerName", "UserName", "UserName"};
+    tValues = {"Filtered Control", "Scalar", "Nodal Field", "IGNORE", tHelmholtzPerformer, tHelmholtzPerformer, tFirstPlatoMainPerformer};
+    XMLGen::append_children(tKeys, tValues, aFilteredControlNode);
 }
 /******************************************************************************/
 
@@ -1743,9 +1802,23 @@ void append_parameter_sensitivity_shared_data
                         break;
                     }
                 }
-                tKeys = {"UserName"};
-                tValues = {tHelmholtzPerformer};
-                XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+
+                XMLGen::ValidProjectionKeys tValidProjectionKeys;
+                auto tProjectionName = tValidProjectionKeys.value(aXMLMetaData.optimization_parameters().projection_type());
+                if(tProjectionName.empty())
+                {
+                    tKeys = {"UserName"};
+                    tValues = {tHelmholtzPerformer};
+                    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+                }
+                else
+                {
+                    tSharedDataNode = aDocument.append_child("SharedData");
+                    tTag = std::string("Projected Gradient - ") + tIdentifierString;
+                    tKeys = { "Name", "Type", "Layout", "Size", "OwnerName", "UserName", "UserName" };
+                    tValues = { tTag, "Scalar", "Nodal Field", "IGNORE", tFirstPlatoMainPerformer, tFirstPlatoMainPerformer, tHelmholtzPerformer };
+                    XMLGen::append_children(tKeys, tValues, tSharedDataNode);
+                }
             }
         }
         else if(aXMLMetaData.optimization_parameters().optimization_type() == "shape")
@@ -1950,7 +2023,7 @@ void append_design_parameters_shared_data
         }
     }
 }
-// append_design_parameters_shared_data append_control_shared_data
+// append_design_parameters_shared_data
 /******************************************************************************/
 
 /******************************************************************************/
@@ -2040,8 +2113,28 @@ void append_filter_control_operation
         XMLGen::append_children({"Name", "PerformerName"},{"Filter Control", tHelmholtzPerformer}, tOperationNode);
         auto tInputNode = tOperationNode.append_child("Input");
         XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Control"}, tInputNode);
-        auto tOutputNode = tOperationNode.append_child("Output");
-        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Topology"}, tOutputNode);
+
+        // append projection operation
+        XMLGen::ValidProjectionKeys tValidProjectionKeys;
+        auto tProjectionName = tValidProjectionKeys.value(aXMLMetaData.optimization_parameters().projection_type());
+        if(tProjectionName.empty())
+        {
+            auto tOutputNode = tOperationNode.append_child("Output");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Topology"}, tOutputNode);
+        }
+        else
+        {
+            auto tOutputNode = tOperationNode.append_child("Output");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", "Filtered Control"}, tOutputNode);
+
+            std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+            auto tProjectionNode = aParentNode.append_child("Operation");
+            XMLGen::append_children({"Name", "PerformerName"},{"Project Control", tFirstPlatoMainPerformer}, tProjectionNode);
+            auto tInputNode = tProjectionNode.append_child("Input");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Filtered Control"}, tInputNode);
+            tOutputNode = tProjectionNode.append_child("Output");
+            XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Field", "Topology"}, tOutputNode);
+        }
     }
 }
 // function append_filter_control_operation
@@ -2097,6 +2190,29 @@ void append_helmholtz_filter_criterion_gradient_operation
  const std::string& aOutputSharedDataName,
  pugi::xml_node& aParentNode)
 {
+    auto tFilterInputName = aInputSharedDataName;
+
+    // append projection operation
+    XMLGen::ValidProjectionKeys tValidProjectionKeys;
+    auto tProjectionName = tValidProjectionKeys.value(aXMLMetaData.optimization_parameters().projection_type());
+    if(!tProjectionName.empty())
+    {
+        std::string tFirstPlatoMainPerformer = aXMLMetaData.getFirstPlatoMainPerformer();
+        std::string tProjectionOutputName = aInputSharedDataName;
+        std::string tProjectionReplacement = "Projected";
+        tProjectionOutputName.replace(0,9,tProjectionReplacement);
+
+        auto tProjectionNode = aParentNode.append_child("Operation");
+        XMLGen::append_children({"Name", "PerformerName"},{"Project Gradient", tFirstPlatoMainPerformer}, tProjectionNode);
+        auto tInputNode = tProjectionNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Field", "Filtered Control"}, tInputNode);
+        tInputNode = tProjectionNode.append_child("Input");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Gradient", aInputSharedDataName}, tInputNode);
+        auto tOutputNode = tProjectionNode.append_child("Output");
+        XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Filtered Gradient", tProjectionOutputName}, tOutputNode);
+        tFilterInputName = tProjectionOutputName;
+    }
+
     std::string tHelmholtzPerformer = "";
     for(auto& tService : aXMLMetaData.mPerformerServices)
     {
@@ -2109,7 +2225,7 @@ void append_helmholtz_filter_criterion_gradient_operation
     auto tOperationNode = aParentNode.append_child("Operation");
     XMLGen::append_children({"Name", "PerformerName"},{"Filter Gradient", tHelmholtzPerformer}, tOperationNode);
     auto tInputNode = tOperationNode.append_child("Input");
-    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", aInputSharedDataName}, tInputNode);
+    XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", tFilterInputName}, tInputNode);
     auto tOutputNode = tOperationNode.append_child("Output");
     XMLGen::append_children({"ArgumentName", "SharedDataName"},{"Topology", aOutputSharedDataName}, tOutputNode);
 }

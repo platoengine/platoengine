@@ -1184,6 +1184,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterGradientToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("optimization_type", "topology");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1217,6 +1218,7 @@ TEST(PlatoTestXMLGenerator, AppendFilterControlToPlatoMainOperation)
     XMLGen::InputData tXMLMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("optimization_type", "topology");
+    tOptimizationParameters.append("filter_in_engine", "true");
     tXMLMetaData.set(tOptimizationParameters);
     XMLGen::append_filter_control_to_plato_main_operation(tXMLMetaData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1858,6 +1860,130 @@ TEST(PlatoTestXMLGenerator, WriteStochasticPlatoMainOperationsXmlFile)
     +"<Input><ArgumentName>Gradient</ArgumentName></Input><Output><ArgumentName>FilteredGradient</ArgumentName></Output></Operation>";
     ASSERT_STREQ(tGold.c_str(), tReadData.str().c_str());
  //   Plato::system("rm -f plato_main_operations.xml");
+}
+
+TEST(PlatoTestXMLGenerator, AppendFilterOptionsWithProjectionToPlatoMainOperation)
+{
+    // CASE 1: USER DEFINED FILTER AND PROJECTION
+    pugi::xml_document tDocument1;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_type", "kernel");
+    tOptimizationParameters.append("projection_type", "tanh");
+    tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+    XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument1);
+    ASSERT_FALSE(tDocument1.empty());
+    auto tFilterNode = tDocument1.child("Filter");
+    ASSERT_STREQ("Filter", tFilterNode.name());
+    PlatoTestXMLGenerator::test_children({"Name", "Scale"}, {"KernelThenTANH", "2.0"}, tFilterNode);
+
+    // CASE 2: DEFAULT FILTER
+    pugi::xml_document tDocument2;
+    XMLGen::OptimizationParameters tOptimizationParameters2;
+    tOptimizationParameters2.append("filter_type", "pde_filter");
+    tOptimizationParameters2.append("filter_in_engine", "true");
+    tOptimizationParameters2.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters2);
+    XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument2);
+    ASSERT_FALSE(tDocument2.empty());
+    tFilterNode = tDocument2.child("Filter");
+    ASSERT_STREQ("Filter", tFilterNode.name());
+    PlatoTestXMLGenerator::test_children({"Name", "Scale"}, {"Kernel", "2.0"}, tFilterNode);
+    
+    // CASE 3: JUST HELMHOLTZ FILTER
+    pugi::xml_document tDocument3;
+    XMLGen::OptimizationParameters tOptimizationParameters3;
+    tOptimizationParameters3.append("filter_type", "helmholtz");
+    tOptimizationParameters3.append("filter_in_engine", "false");
+    tOptimizationParameters3.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters3);
+    XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument3);
+    ASSERT_FALSE(tDocument3.empty());
+    tFilterNode = tDocument3.child("Filter");
+    ASSERT_STREQ("", tFilterNode.name());
+    
+    // CASE 4: HELMHOLTZ FILTER WITH PROJECTION
+    pugi::xml_document tDocument4;
+    XMLGen::OptimizationParameters tOptimizationParameters4;
+    tOptimizationParameters4.append("filter_type", "helmholtz");
+    tOptimizationParameters4.append("filter_in_engine", "false");
+    tOptimizationParameters4.append("projection_type", "heaviside");
+    tOptimizationParameters4.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters4);
+    XMLGen::append_filter_options_to_plato_main_operation(tXMLMetaData, tDocument4);
+    ASSERT_FALSE(tDocument4.empty());
+    tFilterNode = tDocument4.child("Filter");
+    ASSERT_STREQ("Filter", tFilterNode.name());
+    PlatoTestXMLGenerator::test_children({"Name"}, {"ProjectionHeaviside"}, tFilterNode);
+}
+
+TEST(PlatoTestXMLGenerator, AppendFilterGradientToPlatoMainOperationForProjection)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_type", "helmholtz");
+    tOptimizationParameters.append("filter_in_engine", "false");
+    tOptimizationParameters.append("projection_type", "tanh");
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+    XMLGen::append_filter_gradient_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Gradient", "Input", "Input", "Output"};
+    std::vector<std::string> tValues = {"Filter", "Project Gradient", "True", "", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Field"}, tInput);
+    tInput = tInput.next_sibling("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Gradient"}, tInput);
+
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Filtered Gradient"}, tOutput);
+}
+
+TEST(PlatoTestXMLGenerator, AppendFilterControlToPlatoMainOperationForProjection)
+{
+    pugi::xml_document tDocument;
+    XMLGen::InputData tXMLMetaData;
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_type", "helmholtz");
+    tOptimizationParameters.append("filter_in_engine", "false");
+    tOptimizationParameters.append("projection_type", "heaviside");
+    tOptimizationParameters.append("optimization_type", "topology");
+    tXMLMetaData.set(tOptimizationParameters);
+    XMLGen::append_filter_control_to_plato_main_operation(tXMLMetaData, tDocument);
+    ASSERT_FALSE(tDocument.empty());
+
+    // TEST RESULTS AGAINST GOLD VALUES
+    auto tOperation = tDocument.child("Operation");
+    ASSERT_FALSE(tOperation.empty());
+    ASSERT_STREQ("Operation", tOperation.name());
+    std::vector<std::string> tKeys = {"Function", "Name", "Gradient", "Input", "Output"};
+    std::vector<std::string> tValues = {"Filter", "Project Control", "False", "", ""};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tOperation);
+
+    auto tInput = tOperation.child("Input");
+    ASSERT_FALSE(tInput.empty());
+    ASSERT_STREQ("Input", tInput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Field"}, tInput);
+    auto tOutput = tOperation.child("Output");
+    ASSERT_FALSE(tOutput.empty());
+    ASSERT_STREQ("Output", tOutput.name());
+    PlatoTestXMLGenerator::test_children({"ArgumentName"}, {"Filtered Field"}, tOutput);
 }
 
 }

@@ -275,6 +275,7 @@ public:
     std::string filter_heaviside_update() const {return value("filter_heaviside_update");}
     std::string filter_heaviside_max() const {return value("filter_heaviside_max");}
     std::string filter_type() const {return value("filter_type");}
+    std::string projection_type() const {return value("projection_type");}
     std::string write_restart_file() const {return value("write_restart_file");}
     std::string output_frequency() const {return value("output_frequency");}
     std::string gcmma_max_inner_iterations() const {return value("gcmma_max_inner_iterations");}

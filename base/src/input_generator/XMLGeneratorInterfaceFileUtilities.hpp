@@ -90,6 +90,29 @@ void append_topology_shared_data
  pugi::xml_document& aDocument);
 
 /******************************************************************************//**
+ * \fn append_helmholtz_topology_shared_data
+ * \brief Append topology shared data for helmholtz filter to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aParentNode    parent xml node
+**********************************************************************************/
+void append_helmholtz_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aParentNode);
+
+/******************************************************************************//**
+ * \fn append_projection_helmholtz_topology_shared_data
+ * \brief Append topology and filtered control shared data for helmholtz filter
+ * with projection to interface.xml file.
+ * \param [in]     aXMLMetaData Plato problem input metadata
+ * \param [in/out] aTopologyNode         topology shared data parent xml node
+ * \param [in/out] aFilteredControlNode  filtered control shared data xml node
+**********************************************************************************/
+void append_projection_helmholtz_topology_shared_data
+(const XMLGen::InputData& aXMLMetaData,
+ pugi::xml_node& aTopologyNode,
+ pugi::xml_node& aFilteredControlNode);
+
+/******************************************************************************//**
  * \fn append_shared_data
  * \brief Append shared data to interface.xml file.
  * \param [in]     aXMLMetaData Plato problem input metadata

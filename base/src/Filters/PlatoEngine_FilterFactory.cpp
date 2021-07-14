@@ -47,6 +47,8 @@
 #include "PlatoEngine_KernelFilter.hpp"
 #include "PlatoEngine_KernelThenHeavisideFilter.hpp"
 #include "PlatoEngine_KernelThenTANHFilter.hpp"
+#include "PlatoEngine_ProjectionHeavisideFilter.hpp"
+#include "PlatoEngine_ProjectionTANHFilter.hpp"
 #include "Plato_Interface.hpp"
 #include "data_mesh.hpp"
 #include "Plato_Parser.hpp"
@@ -83,6 +85,14 @@ Plato::AbstractFilter* build_filter(InputData aInputData, MPI_Comm& aLocalComm, 
         else if(tNameString == "KernelThenTANH")
         {
             tResult = new Plato::KernelThenTANHFilter();
+        }
+        else if(tNameString == "ProjectionHeaviside")
+        {
+            tResult = new Plato::ProjectionHeavisideFilter();
+        }
+        else if(tNameString == "ProjectionTANH")
+        {
+            tResult = new Plato::ProjectionTANHFilter();
         }
         else if(tNameString == "Identity")
         {

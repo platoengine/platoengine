@@ -82,6 +82,7 @@ void ParseOptimizationParameters::allocate()
     mTags.insert({ "check_gradient", { { {"check_gradient"}, ""}, "false" } });
     mTags.insert({ "check_hessian", { { {"check_hessian"}, ""}, "false" } });
     mTags.insert({ "filter_type", { { {"filter_type"}, ""}, "kernel" } });
+    mTags.insert({ "projection_type", { { {"projection_type"}, ""}, "" } });
     mTags.insert({ "filter_power", { { {"filter_power"}, ""}, "1" } });
     mTags.insert({ "gcmma_inner_kkt_tolerance", { { {"gcmma_inner_kkt_tolerance"}, ""}, "" } });
     mTags.insert({ "gcmma_outer_kkt_tolerance", { { {"gcmma_outer_kkt_tolerance"}, ""}, "" } });

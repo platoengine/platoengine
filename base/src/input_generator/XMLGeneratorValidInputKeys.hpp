@@ -708,6 +708,33 @@ public:
 };
 // struct ValidFilterKeys
 
+struct ValidProjectionKeys
+{
+private:
+    /*!<
+     * valid filters \n
+     * \brief map from light-input file key to Plato main operation XML file key, i.e. map<light_input_file_key,plato_main_operation_file_key>
+     **/
+    std::unordered_map<std::string, std::string> mKeys = 
+    { 
+        {"heaviside", "ProjectionHeaviside"}, 
+        {"tanh", "ProjectionTANH"} 
+    };
+
+public:
+    /******************************************************************************//**
+     * \fn value
+     * \brief Return projection keyword supported by Plato Engine.
+     * \param [in] aKey input file keyword
+     * \return supported projection keyword. If key is not supported, return an empty string.
+    **********************************************************************************/
+    std::string value(const std::string& aKey) const
+    {
+        return (XMLGen::return_supported_value(aKey, mKeys));
+    }
+};
+// struct ValidProjectionKeys
+
 struct ValidAnalyzeOutputKeys
 {
 private:
@@ -1303,6 +1330,7 @@ struct ValidOptimizationParameterKeys
      "check_gradient",
      "check_hessian",
      "filter_type",
+     "projection_type",
      "filter_power",
      "gcmma_inner_kkt_tolerance",
      "gcmma_outer_kkt_tolerance",
