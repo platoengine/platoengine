@@ -154,6 +154,7 @@
       int mOutputMethod;
       int mIsoOnly;
       int mTimeStep;
+      int mOutputSTL;
       IVEMeshAPISTK *mMeshAPIIn;
       IVEMeshAPISTK *mMeshAPIOut;
     };
