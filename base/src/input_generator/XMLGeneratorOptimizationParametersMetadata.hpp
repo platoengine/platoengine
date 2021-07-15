@@ -12,6 +12,12 @@
 
 namespace XMLGen
 {
+    enum OptimizationType
+    {
+        OT_TOPOLOGY=0,
+        OT_SHAPE,
+        OT_UNKNOWN
+    };
 
 /******************************************************************************//**
  * \struct OptimizationParameters
@@ -19,9 +25,21 @@ namespace XMLGen
 **********************************************************************************/
 struct OptimizationParameters
 {
+    struct ValueData
+    {
+        bool mIsDefault;
+        std::string mValue;
+    };
+
 // private member data
 private:
-    std::unordered_map<std::string, std::string> mMetaData; /*!< OptimizationParameters metadata, map< tag, value > */
+    bool mNormalizeInAggregator = false;
+    bool mEnforceBounds = false;
+    bool mFilterInEngine = true;
+    OptimizationType mOptimizationType = OT_TOPOLOGY;
+    bool mIsARestartRun = false;
+    std::unordered_map<std::string, ValueData> mMetaData; /*!< OptimizationParameters metadata, map< tag, value > */
+    //std::unordered_map<std::string, std::string> mMetaData; /*!< OptimizationParameters metadata, map< tag, value > */
     std::vector<std::string> mLevelsetNodesets;
     std::vector<std::string> mFixedBlockIDs;
     std::vector<std::string> mFixedSidesetIDs;
@@ -50,6 +68,71 @@ private:
     bool getBool(const std::string& aTag) const;
 
 public:
+    /******************************************************************************//**
+     * \fn normalizeInAggregator
+     * \brief Return whether to normalize in the aggregator
+     * \return whether to normalize in the aggregator
+    **********************************************************************************/
+    bool normalizeInAggregator() const { return mNormalizeInAggregator; }
+
+    /******************************************************************************//**
+     * \fn normalizeInAggregator
+     * \brief Set whether to normalize in the aggregator
+    **********************************************************************************/
+    void normalizeInAggregator(const bool& aVal) { mNormalizeInAggregator = aVal; }
+
+    /******************************************************************************//**
+     * \fn enforceBounds
+     * \brief Return whether to enforce bounds in the engine
+     * \return whether to enforce bounds in the engine
+    **********************************************************************************/
+    bool enforceBounds() const { return mEnforceBounds; }
+
+    /******************************************************************************//**
+     * \fn enforceBounds
+     * \brief Set whether to enforce bounds in engine type
+    **********************************************************************************/
+    void enforceBounds(const bool& aVal) { mEnforceBounds = aVal; }
+
+    /******************************************************************************//**
+     * \fn filterInEngine
+     * \brief Return whether to filter in the engine
+     * \return whether to filter in engine
+    **********************************************************************************/
+    bool filterInEngine() const { return mFilterInEngine; }
+
+    /******************************************************************************//**
+     * \fn filterInEngine
+     * \brief Set whether to filter in engine type
+    **********************************************************************************/
+    void filterInEngine(const bool& aVal) { mFilterInEngine = aVal; }
+
+    /******************************************************************************//**
+     * \fn optimizationType
+     * \brief Return the optimization type
+     * \return optimization type
+    **********************************************************************************/
+    OptimizationType optimizationType() const { return mOptimizationType; }
+
+    /******************************************************************************//**
+     * \fn optimizationType
+     * \brief Set optimization type
+    **********************************************************************************/
+    void optimizationType(const OptimizationType& aVal) { mOptimizationType = aVal; }
+
+    /******************************************************************************//**
+     * \fn isARestartRun
+     * \brief Return whether this is a restart run or not
+     * \return whether this is a restart run or not
+    **********************************************************************************/
+    bool isARestartRun() const { return mIsARestartRun; }
+
+    /******************************************************************************//**
+     * \fn isARestartRun
+     * \brief Set whether this is a restart run or not
+    **********************************************************************************/
+    void isARestartRun(const bool& aVal) { mIsARestartRun = aVal; }
+
     /******************************************************************************//**
      * \fn symmetryNormal
      * \brief Return scenario symmetry plane normal
@@ -99,8 +182,9 @@ public:
      * \brief Append parameter to metadata.
      * \param [in] aTag   parameter tag
      * \param [in] aValue parameter value
+     * \param [in] aIsDefault parameter specifying whether this is a default or user set value
     **********************************************************************************/
-    void append(const std::string& aTag, const std::string& aValue);
+    void append(const std::string& aTag, const std::string& aValue, const bool& aIsDefault=false);
 
     /******************************************************************************//**
      * \fn mesh_map_filter_radius 
@@ -222,7 +306,7 @@ public:
     std::string derivative_checker_final_superscript() const {return value("derivative_checker_final_superscript");}
     std::string max_iterations() const {return value("max_iterations");}
     std::string filter_in_engine() const {return value("filter_in_engine");}
-    void filter_in_engine(const std::string& aValue) { append("filter_in_engine", aValue); }
+    void filter_in_engine(const std::string& aValue) { append("filter_in_engine", aValue, true); }
     std::string output_method() const {return value("output_method");}
     std::string discretization() const {return value("discretization");}
     std::string initial_density_value() const {return value("initial_density_value");}
@@ -241,8 +325,12 @@ public:
     std::string mma_asymptote_expansion() const {return value("mma_asymptote_expansion");}
     std::string mma_asymptote_contraction() const {return value("mma_asymptote_contraction");}
     std::string mma_max_sub_problem_iterations() const {return value("mma_max_sub_problem_iterations");}
+    std::string mma_sub_problem_initial_penalty() const {return value("mma_sub_problem_initial_penalty");}
+    std::string mma_sub_problem_penalty_multiplier() const {return value("mma_sub_problem_penalty_multiplier");}
+    std::string mma_sub_problem_feasibility_tolerance() const {return value("mma_sub_problem_feasibility_tolerance");}
     std::string mma_control_stagnation_tolerance() const {return value("mma_control_stagnation_tolerance");}
     std::string mma_objective_stagnation_tolerance() const {return value("mma_objective_stagnation_tolerance");}
+    std::string mma_output_subproblem_diagnostics() const {return value("mma_output_subproblem_diagnostics");}
     std::string ks_trust_region_expansion_factor() const {return value("ks_trust_region_expansion_factor");}
     std::string ks_trust_region_contraction_factor() const {return value("ks_trust_region_contraction_factor");}
     std::string ks_max_trust_region_iterations() const {return value("ks_max_trust_region_iterations");}

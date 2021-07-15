@@ -16,18 +16,27 @@
 namespace XMLGen
 {
 
+
 /******************************************************************************//**
  * \struct Material
  * \brief Material metadata for Plato problems.
 **********************************************************************************/
 struct Material
 {
+
+    struct AttributeData
+    {
+        bool mIsDefault;
+        std::vector<std::string> mProperties;
+    };
+
 private:
     std::string mID; /*!< material identification number */
     std::string mCode = "plato_analyze";  /*!< performer/owner of material model, default: plato_analyze */
     std::string mCategory = "isotropic linear elastic";  /*!< material category, default: isotropic linear elastic */
     std::string mName;  /*!< material name, default: material_mID */
-    std::map< std::string, std::pair<std::string, std::vector<std::string>> > mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
+    //std::map< std::string, std::pair<std::string, std::vector<std::string>> > mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
+    std::map< std::string, std::pair<std::string, AttributeData> > mProperties; /*!< list of material properties, map< tag, pair<attribute,value> > */
 
 public:
     /******************************************************************************//**
@@ -136,7 +145,8 @@ public:
     {
         auto tTag = Plato::tolower(aTag);
         auto tItr = mProperties.find(tTag);
-        auto tOutput = tItr == mProperties.end() ? std::vector<std::string>{""} : tItr->second.second;
+        auto tOutput = tItr == mProperties.end() ? std::vector<std::string>{""} : tItr->second.second.mProperties;
+        //auto tOutput = tItr == mProperties.end() ? std::vector<std::string>{""} : tItr->second.second;
         return (tOutput);
     }
 
@@ -151,7 +161,21 @@ public:
     {
         auto tTag = Plato::tolower(aTag);
         auto tItr = mProperties.find(tTag);
-        auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second[0];
+        std::string tOutput = "";
+        if(tItr != mProperties.end())
+        {
+            tOutput = tItr->second.second.mProperties[0];
+            if(tItr->second.second.mIsDefault)
+            {
+                PRINTDEFAULTINFO(aTag, tOutput, std::string("Material ID: ") + mID + ", Material Model: " + mCategory);
+            }
+        }
+        else
+        {
+            PRINTEMPTYINFO(aTag, std::string("Material ID: ") + mID + ", Material Model: " + mCategory);
+        }
+        //auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second.mProperties[0];
+        //auto tOutput = tItr == mProperties.end() ? "" : tItr->second.second[0];
         return (tOutput);
     }
 
@@ -162,14 +186,17 @@ public:
      * \param [in] aValue     material property value
      * \param [in] aAttribute material attribute
     **********************************************************************************/
-    void property(const std::string& aTag, const std::string& aValue, std::string aAttribute = "homogeneous")
+    void property(const std::string& aTag, const std::string& aValue, const bool& aIsDefault=false, std::string aAttribute = "homogeneous")
     {
         if(aTag.empty()) { THROWERR("XML Generator Material: Material property tag is empty.") }
         if(aValue.empty()) { THROWERR("XML Generator Material: Material property value is empty.") }
         if(aAttribute.empty()) { THROWERR("XML Generator Material: Material property attribute is empty.") }
         auto tTag = Plato::tolower(aTag);
-        std::vector<std::string> tValue = {aValue};
-        mProperties[aTag] = std::make_pair(aAttribute, tValue);
+        AttributeData tAttData;
+        tAttData.mProperties = {aValue};
+        tAttData.mIsDefault = aIsDefault;
+        //std::vector<std::string> tValue = {aValue};
+        mProperties[aTag] = std::make_pair(aAttribute, tAttData);
     }
 
     /******************************************************************************//**
@@ -179,13 +206,17 @@ public:
      * \param [in] aValue     material property list
      * \param [in] aAttribute material attribute
     **********************************************************************************/
-    void property(const std::string& aTag, const std::vector<std::string>& aValue, std::string aAttribute = "homogeneous")
+    void property(const std::string& aTag, const std::vector<std::string>& aValue, const bool& aIsDefault=false, std::string aAttribute = "homogeneous")
     {
         if(aTag.empty()) { THROWERR("XML Generator Material: Material property tag is empty.") }
         if(aValue.empty()) { THROWERR("XML Generator Material: Material property value is empty.") }
         if(aAttribute.empty()) { THROWERR("XML Generator Material: Material property attribute is empty.") }
         auto tTag = Plato::tolower(aTag);
-        mProperties[aTag] = std::make_pair(aAttribute, aValue);
+        AttributeData tAttData;
+        tAttData.mProperties = aValue;
+        tAttData.mIsDefault = aIsDefault;
+        mProperties[aTag] = std::make_pair(aAttribute, tAttData);
+        //mProperties[aTag] = std::make_pair(aAttribute, aValue);
     }
 
     /******************************************************************************//**

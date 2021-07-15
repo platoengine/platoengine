@@ -8,14 +8,14 @@
 
 #include <string>
 #include <vector>
-#include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
+#include "XMLGeneratorLoadMetadata.hpp"
 
 namespace XMLGen
 {
 
 struct LoadCase
 {
-    std::vector<XMLGen::NaturalBoundaryCondition> loads;
+    std::vector<XMLGen::Load> loads;
     std::string id; // Same as Scenario id these loads belong to
 };
 

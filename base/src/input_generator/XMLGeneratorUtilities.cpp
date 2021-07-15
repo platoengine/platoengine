@@ -61,8 +61,7 @@ namespace XMLGen
 bool is_shape_optimization_problem(const XMLGen::InputData& aMetaData)
 /******************************************************************************/
 {
-    if(aMetaData.optimization_parameters().optimization_type() == "shape" &&
-       aMetaData.optimization_parameters().num_shape_design_variables() != "")
+    if(aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
         return true;
     else
         return false;
@@ -381,6 +380,14 @@ void set_key_value
 std::string set_value_keyword_to_ignore_if_empty
 (const std::string& aValue)
 {
+/*
+    if(aValue.empty())
+    {
+        std::string tContextString = "\n";
+        PRINTIGNOREINFO(aValue, tContextString);
+    }
+*/
+
     auto tMyValue = aValue.empty() ? std::string("IGNORE") : aValue;
     return tMyValue;
 }
@@ -393,6 +400,13 @@ void set_value_keyword_to_ignore_if_empty
 {
     for(auto& tValue : aValues)
     {
+/*
+        if(tValue.empty())
+        {
+            std::string tContextString = "\n";
+            PRINTIGNOREINFO(tValue, tContextString);
+        }
+*/
         auto tMyValue = tValue.empty() ? std::string("IGNORE") : tValue;
         tValue = tMyValue;
     }
@@ -447,7 +461,7 @@ void append_include_defines_xml_data
  pugi::xml_document& aDocument)
 {
     if(XMLGen::is_robust_optimization_problem(aMetaData) ||
-       aMetaData.optimization_parameters().optimization_type() == "shape")
+       aMetaData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         auto tInclude = aDocument.append_child("include");
         XMLGen::append_attributes({"filename"}, {"defines.xml"}, tInclude);

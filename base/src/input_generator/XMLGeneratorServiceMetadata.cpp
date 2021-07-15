@@ -238,5 +238,14 @@ bool Service::updateProblem() const
     return (this->getBool("update_problem"));
 }
 
+void Service::existingInputDeck(const std::string& aInput) {
+    mMetaData["existing_input_deck"] = aInput;
+}
+
+std::string Service::existingInputDeck() const {
+    return (this->getValue("existing_input_deck"));
+}
+
+
 }
 // namespace XMLGen

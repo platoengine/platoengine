@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorNaturalBoundaryConditionMetadata.hpp
+ * XMLGeneratorLoadMetadata.hpp
  *
  *  Created on: Jan 5, 2021
  */
@@ -17,19 +17,19 @@ namespace XMLGen
 {
 
 /******************************************************************************//**
- * \struct NaturalBoundaryCondition
- * \brief NaturalBoundaryCondition metadata for Plato problems.
+ * \struct Load
+ * \brief Load metadata for Plato problems.
 **********************************************************************************/
-struct NaturalBoundaryCondition
+struct Load
 {
 private:
-    std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of natural boundary condition properties, map< tag, pair<attribute,value> > */
+    std::map<std::string, std::pair<std::string, std::string>> mProperties; /*!< list of load properties, map< tag, pair<attribute,value> > */
     std::vector<std::string> mValues;
 
 public:
     /******************************************************************************//**
      * \fn id
-     * \brief Return natural boundary condition identification number.
+     * \brief Return load identification number.
      * \return identification number
     **********************************************************************************/
     std::string id() const
@@ -39,7 +39,7 @@ public:
 
     /******************************************************************************//**
      * \fn id
-     * \brief Set natural boundary condition identification number.
+     * \brief Set load identification number.
      * \param [in] aID identification number
     **********************************************************************************/
     void id(const std::string& aID)
@@ -52,7 +52,7 @@ public:
 
     /******************************************************************************//**
      * \fn type
-     * \brief Return natural boundary condition type
+     * \brief Return load type
      * \return type
     **********************************************************************************/
     std::string type() const
@@ -62,7 +62,7 @@ public:
 
     /******************************************************************************//**
      * \fn type
-     * \brief Set natural boundary condition type
+     * \brief Set load type
      * \param [in] aType type
     **********************************************************************************/
     void type(const std::string& aType)
@@ -75,7 +75,7 @@ public:
 
     /******************************************************************************//**
      * \fn locationType
-     * \brief Return natural boundary condition location type
+     * \brief Return load location type
      * \return location type
     **********************************************************************************/
     std::string location_type() const
@@ -85,7 +85,7 @@ public:
 
     /******************************************************************************//**
      * \fn locationType
-     * \brief Set natural boundary condition location type
+     * \brief Set load location type
      * \param [in] aLocationType location type
     **********************************************************************************/
     void location_type(const std::string& aLocationType)
@@ -98,7 +98,7 @@ public:
 
     /******************************************************************************//**
      * \fn location_name
-     * \brief Return natural boundary condition location name
+     * \brief Return load location name
      * \return location name
     **********************************************************************************/
     std::string location_name() const
@@ -108,7 +108,7 @@ public:
 
     /******************************************************************************//**
      * \fn location_name
-     * \brief Set natural boundary condition location name
+     * \brief Set load location name
      * \param [in] aLocationType location name
     **********************************************************************************/
     void location_name(const std::string& aLocationName)
@@ -121,7 +121,7 @@ public:
 
     /******************************************************************************//**
      * \fn location_id
-     * \brief Return natural boundary condition location id
+     * \brief Return load location id
      * \return location id
     **********************************************************************************/
     std::string location_id() const
@@ -131,7 +131,7 @@ public:
 
     /******************************************************************************//**
      * \fn location_id
-     * \brief Set natural boundary condition location id
+     * \brief Set load location id
      * \param [in] aLocationType location id
     **********************************************************************************/
     void location_id(const std::string& aLocationID)
@@ -144,7 +144,7 @@ public:
 
     /******************************************************************************//**
      * \fn is_random
-     * \brief Return whether natural boundary condition is randome
+     * \brief Return whether load is randome
      * \return location id
     **********************************************************************************/
     bool is_random() const
@@ -154,7 +154,7 @@ public:
 
     /******************************************************************************//**
      * \fn is_random
-     * \brief Set whether natural boundary condition is random
+     * \brief Set whether load is random
      * \param [in] aIsRandom input string specifying value of is_random variable
     **********************************************************************************/
     void is_random(const std::string& aIsRandom)
@@ -167,7 +167,7 @@ public:
 
     /******************************************************************************//**
      * \fn attribute
-     * \brief Return nbc attribute.
+     * \brief Return load attribute.
      * \return attribute
     **********************************************************************************/
     std::string attribute(const std::string& aTag) const
@@ -176,16 +176,16 @@ public:
         auto tItr = mProperties.find(tTag);
         if(tItr == mProperties.end())
         {
-            THROWERR(std::string("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition property '") + aTag + "' is not supported.")
+            THROWERR(std::string("XML Generator Load: Load property '") + aTag + "' is not supported.")
         }
         return (tItr->second.first);
     }
 
     /******************************************************************************//**
      * \fn value
-     * \brief If nbc property is defined, return its value; else, return an empty string.
-     * \param [in]  aTag    nbc property tag
-     * \return nbc property value
+     * \brief If load property is defined, return its value; else, return an empty string.
+     * \param [in]  aTag    load property tag
+     * \return load property value
     **********************************************************************************/
     std::string value(const std::string& aTag) const
     {
@@ -217,9 +217,9 @@ public:
 
     /******************************************************************************//**
      * \fn property
-     * \brief If nbc property is defined, return its value; else, throw an error.
-     * \param [in] aTag nbc property tag
-     * \return nbc property value
+     * \brief If load property is defined, return its value; else, throw an error.
+     * \param [in] aTag load property tag
+     * \return load property value
     **********************************************************************************/
     std::string property(const std::string& aTag) const
     {
@@ -227,38 +227,38 @@ public:
         auto tItr = mProperties.find(tTag);
         if(tItr == mProperties.end())
         {
-            THROWERR(std::string("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition property '") + aTag + "' is not defined.")
+            THROWERR(std::string("XML Generator Load: Load property '") + aTag + "' is not defined.")
         }
         return (tItr->second.second);
     }
 
     /******************************************************************************//**
      * \fn property
-     * \brief Set nbc property value.
-     * \param [in] aTag       nbc property tag
-     * \param [in] aValue     nbc property value
-     * \param [in] aAttribute nbc attribute
+     * \brief Set load property value.
+     * \param [in] aTag       load property tag
+     * \param [in] aValue     load property value
+     * \param [in] aAttribute load attribute
     **********************************************************************************/
     void property(const std::string& aTag, const std::string& aValue, std::string aAttribute = "homogeneous")
     {
         if(aTag.empty()) 
         { 
-            THROWERR("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition property tag is empty.")        }
+            THROWERR("XML Generator Load: Load property tag is empty.")        }
         if(aValue.empty()) 
         { 
-            THROWERR("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition property value is empty.")      
+            THROWERR("XML Generator Load: Load property value is empty.")      
         }
         if(aAttribute.empty()) 
         { 
-            THROWERR("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition property attribute is empty.")  }
+            THROWERR("XML Generator Load: Load property attribute is empty.")  }
         auto tTag = Plato::tolower(aTag);
         mProperties[aTag] = std::make_pair(aAttribute, aValue);
     }
 
     /******************************************************************************//**
      * \fn tags
-     * \brief Return list of nbc property tags.
-     * \return nbc property tags
+     * \brief Return list of load property tags.
+     * \return load property tags
     **********************************************************************************/
     std::vector<std::string> tags() const
     {
@@ -272,18 +272,18 @@ public:
 
     /******************************************************************************//**
      * \fn empty
-     * \brief Throw error if nbc is empty, i.e. nbc properties are not defined.
+     * \brief Throw error if load is empty, i.e. load properties are not defined.
     **********************************************************************************/
     void empty() const
     {
         if(mProperties.empty())
         {
-            THROWERR(std::string("XML Generator NaturalBoundaryCondition: NaturalBoundaryCondition with identification (id) '")
-                + id() + "' is empty, i.e. " + "nbc properties are not defined.")
+            THROWERR(std::string("XML Generator Load: Load with identification (id) '")
+                + id() + "' is empty, i.e. " + "load properties are not defined.")
         }
     }
 };
-// struct NaturalBoundaryCondition
+// struct Load
 
 }
 // namespace XMLGen

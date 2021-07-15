@@ -45,6 +45,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_OutputDataSetTrueButEmptyO
     tMetaData.append(tService);
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
     pugi::xml_document tDocument;
@@ -103,6 +104,7 @@ TEST(PlatoTestXMLGenerator, AppendWriteOuputOperation_Deterministic)
     tMetaData.append(tService);
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("1");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tMetaData.mOutputMetaData.push_back(tOutputMetadata);
     XMLGen::OptimizationParameters tOptimizationParameters;
@@ -176,6 +178,7 @@ TEST(PlatoTestXMLGenerator, AppendPlatoMainOutputStageDeterministic)
 
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("vonmises", "element field");
     tXMLMetaData.mOutputMetaData.push_back(tOutputMetadata);
 
@@ -1440,7 +1443,7 @@ TEST(PlatoTestXMLGenerator, AppendLowerBoundStage_TypeNotEqualToplogy)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("optimization_type", "inverse");
+    tOptimizationParameters.optimizationType(XMLGen::OT_UNKNOWN);
     tInputData.set(tOptimizationParameters);
     XMLGen::append_lower_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1508,7 +1511,7 @@ TEST(PlatoTestXMLGenerator, AppendUpperBoundStage_TypeNotEqualToplogy)
     pugi::xml_document tDocument;
     XMLGen::InputData tInputData;
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("optimization_type", "inverse");
+    tOptimizationParameters.optimizationType(XMLGen::OT_UNKNOWN);
     tInputData.set(tOptimizationParameters);
     XMLGen::append_upper_bound_stage(tInputData, tDocument);
     ASSERT_FALSE(tDocument.empty());
@@ -1789,7 +1792,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
@@ -1800,7 +1803,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -1811,7 +1814,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -1827,7 +1830,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -1838,7 +1841,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveValueOperation)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -2020,7 +2023,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
@@ -2031,7 +2034,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -2042,7 +2045,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -2058,7 +2061,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -2069,7 +2072,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveValueStageForNondeterministicUsecase)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -2274,7 +2277,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
@@ -2285,7 +2288,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -2296,7 +2299,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -2312,7 +2315,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -2323,7 +2326,7 @@ TEST(PlatoTestXMLGenerator, AppendSampleObjectiveGradientOperation)
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -2499,7 +2502,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
@@ -2510,7 +2513,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tValues.push_back("3");
     tLoad1.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
@@ -2521,7 +2524,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tValues.push_back("6");
     tLoad2.load_values(tValues);
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -2537,7 +2540,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
@@ -2548,7 +2551,7 @@ TEST(PlatoTestXMLGenerator, AppendObjectiveGradientStageForNondeterministicUseca
     tValues.push_back("13");
     tLoad4.load_values(tValues);
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -2856,6 +2859,10 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     tOptimizationParameters.append("mma_max_sub_problem_iterations", "50");
     tOptimizationParameters.append("mma_control_stagnation_tolerance", "1e-3");
     tOptimizationParameters.append("mma_objective_stagnation_tolerance", "1e-8");
+    tOptimizationParameters.append("mma_output_subproblem_diagnostics", "true");
+    tOptimizationParameters.append("mma_sub_problem_initial_penalty", "0.001");
+    tOptimizationParameters.append("mma_sub_problem_penalty_multiplier", "1.1");
+    tOptimizationParameters.append("mma_sub_problem_feasibility_tolerance", "1e-6");
     tXMLMetaData.set(tOptimizationParameters);
     tOptimizerNode = tDocument2.append_child("Optimizer");
     XMLGen::append_method_moving_asymptotes_options(tXMLMetaData, tOptimizerNode);
@@ -2867,8 +2874,9 @@ TEST(PlatoTestXMLGenerator, AppendOptimizationAlgorithmMMA_Options)
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptimizerNode);
     tOptionsNode = tOptimizerNode.child("Options");
     tGoldKeys = {"MaxNumOuterIterations", "MoveLimit", "AsymptoteExpansion", "AsymptoteContraction",
-        "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance"};
-    tGoldValues = {"11", "0.2", "2", "0.75", "50", "1e-3", "1e-8"};
+        "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance", "OutputSubProblemDiagnostics", 
+        "SubProblemInitialPenalty", "SubProblemPenaltyMultiplier", "SubProblemFeasibilityTolerance" };
+    tGoldValues = { "11", "0.2", "2", "0.75", "50", "1e-3", "1e-8", "true", "0.001", "1.1", "1e-6" };
     PlatoTestXMLGenerator::test_children(tGoldKeys, tGoldValues, tOptionsNode);
 }
 

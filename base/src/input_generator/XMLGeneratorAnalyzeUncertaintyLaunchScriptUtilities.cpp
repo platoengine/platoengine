@@ -206,14 +206,20 @@ void generate_mpirun_launch_script(const XMLGen::InputData& aInputData)
     FILE *fp = fopen("mpirun.source", "w");
 
     int tNextPerformerID = 0;
-    XMLGen::append_esp_initialization_line(aInputData, fp);
+    if(aInputData.optimization_parameters().optimizationType() == XMLGen::OT_SHAPE)
+    {
+        XMLGen::append_esp_initialization_line(aInputData, fp);
+    }
     XMLGen::append_decomp_lines_for_prune_and_refine(aInputData, fp);
     XMLGen::append_prune_and_refine_lines_to_mpirun_launch_script(aInputData, fp);
     XMLGen::append_decomp_lines_to_mpirun_launch_script(aInputData, fp);
     XMLGen::append_engine_mpirun_lines(aInputData, tNextPerformerID, fp);
     XMLGen::append_analyze_mpirun_lines(aInputData, tNextPerformerID, fp);
     XMLGen::append_sierra_sd_mpirun_lines(aInputData, tNextPerformerID, fp);
-    XMLGen::append_esp_mpirun_lines(aInputData, tNextPerformerID, fp);
+    if(aInputData.optimization_parameters().optimizationType() == XMLGen::OT_SHAPE)
+    {
+        XMLGen::append_esp_mpirun_lines(aInputData, tNextPerformerID, fp);
+    }
 
     fclose(fp);
 }

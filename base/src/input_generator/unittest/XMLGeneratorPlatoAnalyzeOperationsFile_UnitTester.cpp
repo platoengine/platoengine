@@ -156,6 +156,7 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     tXMLMetaData.objective = tObjective;
     XMLGen::Output tOutputMetadata;
     tOutputMetadata.serviceID("2");
+    tOutputMetadata.appendParam("native_service_output", "false");
     tOutputMetadata.appendDeterminsiticQoI("dispx", "nodal field");
     tOutputMetadata.appendDeterminsiticQoI("dispy", "nodal field");
     tOutputMetadata.appendDeterminsiticQoI("dispz", "nodal field");
@@ -186,21 +187,21 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
     tLoad1.location_name("sideset");
     tLoad1.load_values({"1", "2", "3"});
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
     tLoad2.location_name("sideset");
     tLoad2.load_values({"4", "5", "6"});
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -212,14 +213,14 @@ TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeOperationXmlFileForNondeterministic
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
     tLoad4.location_name("sideset");
     tLoad4.load_values({"11", "12", "13"});
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -286,21 +287,21 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
     // POSE RANDOM LOADS
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
     tLoad1.location_name("sideset");
     tLoad1.load_values({"1", "2", "3"});
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
     tLoad2.location_name("sideset");
     tLoad2.load_values({"4", "5", "6"});
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.is_random("false");
     tLoad3.type("traction");
@@ -311,14 +312,14 @@ TEST(PlatoTestXMLGenerator, AppendRandomTractionVectorToPlatoAnalyzeOperation)
 
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.id("1");
     tLoad4.is_random("true");
     tLoad4.type("traction");
     tLoad4.location_name("sideset");
     tLoad4.load_values({"11", "12", "13"});
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.id("2");
     tLoad5.is_random("true");
     tLoad5.type("traction");
@@ -442,21 +443,21 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     // POSE LOAD SET 1
     XMLGen::LoadCase tLoadCase1;
     tLoadCase1.id = "1";
-    XMLGen::NaturalBoundaryCondition tLoad1;
+    XMLGen::Load tLoad1;
     tLoad1.id("1");
     tLoad1.is_random("true");
     tLoad1.type("traction");
     tLoad1.location_name("sideset");
     tLoad1.load_values({"1", "2", "3"});
     tLoadCase1.loads.push_back(tLoad1);
-    XMLGen::NaturalBoundaryCondition tLoad2;
+    XMLGen::Load tLoad2;
     tLoad2.id("2");
     tLoad2.is_random("true");
     tLoad2.type("traction");
     tLoad2.location_name("sideset");
     tLoad2.load_values({"4", "5", "6"});
     tLoadCase1.loads.push_back(tLoad2);
-    XMLGen::NaturalBoundaryCondition tLoad3;
+    XMLGen::Load tLoad3;
     tLoad3.id("3");
     tLoad3.type("traction");
     tLoad3.is_random("false");
@@ -468,14 +469,14 @@ TEST(PlatoTestXMLGenerator, AppendLoadAndMaterialPropertiesToPlatoAnalyzeConstra
     // POSE LOAD SET 2
     XMLGen::LoadCase tLoadCase2;
     tLoadCase2.id = "2";
-    XMLGen::NaturalBoundaryCondition tLoad4;
+    XMLGen::Load tLoad4;
     tLoad4.is_random("true");
     tLoad4.id("1");
     tLoad4.type("traction");
     tLoad4.location_name("sideset");
     tLoad4.load_values({"11", "12", "13"});
     tLoadCase2.loads.push_back(tLoad4);
-    XMLGen::NaturalBoundaryCondition tLoad5;
+    XMLGen::Load tLoad5;
     tLoad5.is_random("true");
     tLoad5.id("2");
     tLoad5.type("traction");

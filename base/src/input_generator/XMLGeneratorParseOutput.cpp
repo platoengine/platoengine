@@ -22,6 +22,7 @@ void ParseOutput::allocate()
     mTags.insert({ "disable", { { {"disable"}, ""}, "false" } });
     mTags.insert({ "statistics", { { {"statistics"}, ""}, "" } });
     mTags.insert({ "output_samples", { { {"output_samples"}, ""}, "false" } });
+    mTags.insert({ "native_service_output", { { {"native_service_output"}, ""}, "false" } });
 }
 
 void ParseOutput::setParameters(XMLGen::Output &aOutput)

@@ -637,7 +637,7 @@ TEST(PlatoTestXMLGenerator, ParseScenario_ErrorNoLoads)
     tInputSS.str(tStringInput);
 
     XMLGen::ParseScenario tScenarioParser;
-    ASSERT_THROW(tScenarioParser.parse(tInputSS), std::runtime_error);
+    ASSERT_NO_THROW(tScenarioParser.parse(tInputSS));
 }
 
 TEST(PlatoTestXMLGenerator, ParseScenario_ErrorNoBoundaryConditions)

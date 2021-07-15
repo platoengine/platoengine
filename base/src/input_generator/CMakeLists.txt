@@ -3,6 +3,7 @@
 ###############################################################################
 SET(XMLGenerator_SRCS XMLGenerator_Main.cpp 
                       XMLGenerator.cpp
+                      XMLGeneratorParseLoads.cpp
                       XMLGeneratorParseOutput.cpp
                       XMLGeneratorParseScenario.cpp
                       XMLGeneratorParseOptimizationParameters.cpp
@@ -11,7 +12,6 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorParseObjective.cpp
                       XMLGeneratorParseMaterial.cpp
                       XMLGeneratorParseEssentialBoundaryCondition.cpp
-                      XMLGeneratorParseNaturalBoundaryCondition.cpp
                       XMLGeneratorParseCriteria.cpp
                       XMLGeneratorParseConstraint.cpp
                       XMLGeneratorParserUtilities.cpp
@@ -36,8 +36,8 @@ SET(XMLGenerator_SRCS XMLGenerator_Main.cpp
                       XMLGeneratorSierraSDOperationsFileUtilities.cpp
                       XMLGeneratorSierraSDInputDeckUtilities.cpp
                       XMLGeneratorLaunchScriptUtilities.cpp
-                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
-                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                      XMLGeneratorAnalyzeLoadFunctionInterface.cpp
+                      XMLGeneratorAnalyzeLoadTagFunctionInterface.cpp
                       XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
                       XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
                       XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
@@ -79,8 +79,8 @@ SET(XMLGenerator_HDRS XMLGenerator.hpp
                       XMLGeneratorSierraSDInputDeckUtilities.hpp
                       XMLGeneratorLaunchScriptUtilities.hpp
                       # XMLGeneratorAnalyzeCriterionUtilities.hpp
-                      XMLGeneratorAnalyzeNaturalBCFunctionInterface.hpp
-                      XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.hpp
+                      XMLGeneratorAnalyzeLoadFunctionInterface.hpp
+                      XMLGeneratorAnalyzeLoadTagFunctionInterface.hpp
                       XMLGeneratorAnalyzeEssentialBCFunctionInterface.hpp
                       XMLGeneratorAnalyzeEssentiallBCTagFunctionInterface.hpp
                       # XMLGeneratorAnalyzeMaterialModelFunctionInterface.hpp

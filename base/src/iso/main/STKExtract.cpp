@@ -116,6 +116,9 @@ bool STKExtract::create_mesh_apis_stand_alone(int argc, char **argv,
   if ( !read_command_line( argc, argv ) )
     return false;
 
+  if(mOutputSTL && !mIsoOnly)
+      throw(std::runtime_error("Error: STL can only be output if --iso_only=1"));
+
   if(!init_single_mesh_apis())
   {
     return false;
@@ -623,9 +626,32 @@ bool STKExtract::run_private_stand_alone()
 
   std::cout << "Done extracting iso-volume. " << std::endl;
 
-  std::cout << "Writing the new mesh to Exodus: " << mMeshOut << std::endl;
+  if(mOutputSTL)
+  {
+        std::cout << "Writing the new mesh to STL: " << mMeshOut << std::endl;
+      FILE *stl_fp = fopen(mMeshOut.c_str(), "wb");
+      if(stl_fp)
+      {
+          // write the header
+          char header[80];
+          for(int i = 0; i < 80; i++)
+              header[i] = '-';
+          fwrite(header, sizeof(char), 80, stl_fp);
 
-  mMeshAPIOut->write_exodus_mesh(mMeshOut, mOutputMethod, mIsoOnly);
+          int num_tris = fixed_tri_list.size() + optimized_tri_list.size();
+          int num_bytes = sizeof(int);
+          fwrite(&num_tris, num_bytes, 1, stl_fp);
+          write_tris_to_stl(stl_fp, fixed_tri_list);
+          write_tris_to_stl(stl_fp, optimized_tri_list);
+          fclose(stl_fp);
+      }
+  }
+
+  else
+  {
+      std::cout << "Writing the new mesh to Exodus: " << mMeshOut << std::endl;
+      mMeshAPIOut->write_exodus_mesh(mMeshOut, mOutputMethod, mIsoOnly);
+  }
 
   return return_val;
 }
@@ -647,6 +673,7 @@ bool STKExtract::read_command_line( int argc, char *argv[])
   clp.setOption("time_step",  &mTimeStep, "specify the time step to be read from the file.", false );
   clp.setOption("output_fields",  &mOutputFieldsString, "specify the fields (commma separated, no spaces) to output in the output mesh.", false );
   clp.setOption("fixed_blocks",  &mFixedBlocksString, "specify the blocks that are fixed (commma separated, no spaces).", false );
+  clp.setOption("output_stl",  &mOutputSTL, "specify output in stl format rather than exodus. Can only be used if --iso_only=1", false );
 
   Teuchos::CommandLineProcessor::EParseCommandLineReturn parseReturn =
                      Teuchos::CommandLineProcessor::PARSE_SUCCESSFUL;

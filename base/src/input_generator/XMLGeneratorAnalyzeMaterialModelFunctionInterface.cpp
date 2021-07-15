@@ -39,6 +39,13 @@ void append_material_property
     auto tAnalyzeMatPropertyTag = tValidKeys.tag(tMaterialModelTag, aMaterialPropertyTag);
     std::vector<std::string> tKeys = {"name", "type", "value"};
     auto tMaterialPropertyValue = XMLGen::set_value_keyword_to_ignore_if_empty(aMaterial.property(aMaterialPropertyTag));
+/*
+    if(tMaterialPropertyValue == "IGNORE")
+    {
+        std::string tContextString = "Material ID: " + aMaterial.id() + ", Material Model: " + tMaterialModelTag + "\n";
+        PRINTIGNOREINFO(aMaterialPropertyTag, tContextString);
+    }
+*/
     std::vector<std::string> tValues = {tAnalyzeMatPropertyTag, tValueType, tMaterialPropertyValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, aParentNode);
 }
@@ -233,19 +240,32 @@ void append_incompressible_fluid_material_to_plato_problem(
     // material properties
     XMLGen::Private::append_material_property("reynolds_number", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property("impermeability_number", aMaterial, tMaterialModel);
-    XMLGen::Private::append_material_property("dimensionless_viscocity", aMaterial, tMaterialModel);
+}
+// function append_incompressible_fluid_material_to_plato_problem
+
+void append_natural_buoyancy_material_to_plato_problem(
+    const XMLGen::Material &aMaterial,
+    pugi::xml_node &aParentNode)
+{
+    auto tMaterialName = aMaterial.name();
+    auto tMaterialModel = aParentNode.append_child("ParameterList");
+    XMLGen::append_attributes({"name"}, {tMaterialName}, tMaterialModel);
+
+    // material properties
+    XMLGen::Private::append_material_property("impermeability_number", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property("prandtl_number", aMaterial, tMaterialModel);
+    XMLGen::Private::append_material_property("thermal_diffusivity", aMaterial, tMaterialModel);
+    XMLGen::Private::append_material_property("kinematic_viscocity", aMaterial, tMaterialModel);
+    XMLGen::Private::append_material_property("thermal_conductivity", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property("reference_temperature", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property("characteristic_length", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property("thermal_diffusivity_ratio", aMaterial, tMaterialModel);
-    XMLGen::Private::append_material_property("thermal_conductivity", aMaterial, tMaterialModel);
 
     // material property arrays
     XMLGen::Private::append_material_property_array("grashof_number", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property_array("rayleigh_number", aMaterial, tMaterialModel);
     XMLGen::Private::append_material_property_array("richardson_number", aMaterial, tMaterialModel);
 }
-// function append_incompressible_fluid_material_to_plato_problem
 
 }
 // namespace Private
@@ -298,10 +318,15 @@ void AppendMaterialModelParameters::insert()
     mMap.insert(std::make_pair("thermoplasticity",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_thermoplasticity_material_to_plato_problem, tFuncIndex)));
     
-    // thermoplasticity material model
+    // incompressible flow material model
     tFuncIndex = std::type_index(typeid(XMLGen::Private::append_incompressible_fluid_material_to_plato_problem));
-    mMap.insert(std::make_pair("incompressible_fluid",
+    mMap.insert(std::make_pair("incompressible_flow",
       std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_incompressible_fluid_material_to_plato_problem, tFuncIndex)));
+    
+    // natural buoyancy material model
+    tFuncIndex = std::type_index(typeid(XMLGen::Private::append_natural_buoyancy_material_to_plato_problem));
+    mMap.insert(std::make_pair("natural_buoyancy",
+      std::make_pair((XMLGen::Analyze::MaterialModelFunc)XMLGen::Private::append_natural_buoyancy_material_to_plato_problem, tFuncIndex)));
 }
 
 void AppendMaterialModelParameters::call(const XMLGen::Material& aMaterial, pugi::xml_node &aParentNode) const

@@ -200,10 +200,8 @@ private:
         "frf_mismatch", 
         "limit_stress",
         "compliance_and_volume_min",
-        "inlet_pressure",
-        "outlet_pressure",
-        "inlet_temperature",
-        "outlet_temperature",
+        "surface_pressure",
+        "surface_temperature",
         "flow_rate"
     };
 
@@ -362,7 +360,7 @@ struct ValidLoadKeys
     /*!<
      * \brief Valid plato input deck essential boundary condition keywords.
      **/
-    std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure"};
+    std::vector<std::string> mKeys = {"traction", "uniform_surface_flux", "force", "pressure", "uniform_source"};
 };
 
 // struct ValidEssentialBoundaryConditionsKeys
@@ -536,7 +534,8 @@ private:
         "isotropic_linear_thermoelastic",
         "j2_plasticity",
         "thermoplasticity",
-        "incompressible_fluid"};
+        "natural_buoyancy",
+        "incompressible_flow"};
 
 public:
     /******************************************************************************//**
@@ -830,9 +829,9 @@ public:
         return (tKeyItr->second);
     }
 };
-struct ValidPhysicsNBCCombinations
+struct ValidPhysicsLoadCombinations
 {
-    // Map physics->NBC->parent node name
+    // Map physics->load->parent node name
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<std::string>>> mKeys =
     {
         {"steady_state_mechanics", 
@@ -872,36 +871,41 @@ struct ValidPhysicsNBCCombinations
         },
         {"steady_state_incompressible_fluids", 
             {
-                {"traction", {"Natural Boundary Conditions"}}
+                {"uniform_source", {"Thermal Sources"}},
+                {"traction", {"Momentum Natural Boundary Conditions"}},
+                {"uniform_surface_flux", {"Thermal Natural Boundary Conditions"}}
             }
         }
     };
 public:
-    void get_parent_names(const std::string &aPhysics,
-                          std::set<std::vector<std::string>> &aParentNames)
+    void get_parent_names
+    (const std::string &aPhysics,
+     std::set<std::vector<std::string>> &aParentNames)
     {
         auto tKeyItr = mKeys.find(aPhysics);
         if(tKeyItr == mKeys.end())
         {
-            THROWERR("Valid Physics NBC Combinations: Couldn't find physics: " + aPhysics)
+            THROWERR("Valid Physics-To-Load Combinations: Couldn't find physics: " + aPhysics)
         }
-        auto tNBCItr = tKeyItr->second.begin();
-        while(tNBCItr != tKeyItr->second.end())
+        auto tLoadItr = tKeyItr->second.begin();
+        while(tLoadItr != tKeyItr->second.end())
         {
-            aParentNames.insert(tNBCItr->second);
-            tNBCItr++;
+            aParentNames.insert(tLoadItr->second);
+            tLoadItr++;
         }
     }  
-    std::vector<std::string> get_parent_nbc_node_names(const std::string &aPhysics,
-                                                       const std::string &aLoadType)
+
+    std::vector<std::string> get_parent_load_node_names
+    (const std::string &aPhysics,
+     const std::string &aLoadType)
     {
         auto tKeyItr = mKeys.find(aPhysics);
         if(tKeyItr != mKeys.end())
         {
-            auto tNBCItr = tKeyItr->second.find(aLoadType);
-            if(tNBCItr != tKeyItr->second.end())
+            auto tLoadItr = tKeyItr->second.find(aLoadType);
+            if(tLoadItr != tKeyItr->second.end())
             {
-                return tNBCItr->second;
+                return tLoadItr->second;
             }
         }
         return {""};
@@ -1007,12 +1011,12 @@ private:
             }
         },
 
-        { "incompressible_fluid",
+        { "natural_buoyancy",
             {
-                { "reynolds_number", {"Reynolds Number", "double"} },
                 { "impermeability_number", {"Impermeability Number", "double"} },
-                { "dimensionless_viscocity", { "Dimensionless Viscocity", "double" } },
                 { "prandtl_number", { "Prandtl Number", "double" } }, 
+                { "thermal_diffusivity", { "Thermal Diffusivity", "double" } },
+                { "kinematic_viscocity", { "Kinematic Viscocity", "double" } },
                 { "reference_temperature", { "Reference Temperature", "double" } },
                 { "characteristic_length", { "Characteristic Length", "double" } },
                 { "grashof_number", { "Grashof Number", "Array(double)" } },
@@ -1020,6 +1024,13 @@ private:
                 { "rayleigh_number", {"Rayleigh Number", "Array(double)"} },
                 { "thermal_diffusivity_ratio", {"Thermal Diffusivity Ratio", "double"} },
                 { "thermal_conductivity", {"Thermal Conductivity", "double"} }
+            }
+        },
+
+        { "incompressible_flow",
+            {
+                { "reynolds_number", {"Reynolds Number", "double"} },
+                { "impermeability_number", {"Impermeability Number", "double"} },
             }
         }
     };
@@ -1212,10 +1223,8 @@ struct ValidAnalyzeCriteriaKeys
         { "thermal_compliance", { "Internal Thermal Energy", false } },
         { "flux_p-norm", { "Flux P-Norm", false } },
         { "thermomechanical_compliance", { "Internal Thermoelastic Energy", false } },
-        { "inlet_temperature", { "Average Surface Temperature", false } },
-        { "outlet_temperature", { "Average Surface Temperature", false } },
-        { "inlet_pressure", { "Average Surface Pressure", false } },
-        { "outlet_pressure", { "Average Surface Pressure", false } },
+        { "surface_temperature", { "Average Surface Temperature", false } },
+        { "surface_pressure", { "Average Surface Pressure", false } },
         { "flow_rate", { "Flow Rate", false } },
     };
 };
@@ -1393,8 +1402,12 @@ struct ValidOptimizationParameterKeys
      "mma_asymptote_expansion",
      "mma_asymptote_contraction",
      "mma_max_sub_problem_iterations",
+     "mma_sub_problem_initial_penalty",
+     "mma_sub_problem_penalty_multiplier",
+     "mma_sub_problem_feasibility_tolerance",
      "mma_control_stagnation_tolerance",
      "mma_objective_stagnation_tolerance",
+     "mma_output_subproblem_diagnostics",
      "oc_control_stagnation_tolerance",
      "oc_objective_stagnation_tolerance",
      "oc_gradient_tolerance",

@@ -63,10 +63,11 @@ template<typename ScalarType, typename OrdinalType = size_t>
 inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> & aInputs,
                                      Plato::MethodMovingAsymptotes<ScalarType, OrdinalType> & aAlgorithm)
 {
-    if(aInputs.mPrintDiagnostics == true)
+    if(aInputs.mPrintMMADiagnostics == true)
     {
-        aAlgorithm.enableDiagnostics(aInputs.mPrintDiagnostics);
+        aAlgorithm.enableDiagnostics(aInputs.mPrintMMADiagnostics);
     }
+    aAlgorithm.outputSubProblemDiagnostics(aInputs.mPrintAugLagSubProbDiagnostics);
 
     aAlgorithm.setInitialGuess(*aInputs.mInitialGuess);
     aAlgorithm.setControlLowerBounds(*aInputs.mLowerBounds);
@@ -76,19 +77,25 @@ inline void set_mma_algorithm_inputs(const Plato::AlgorithmInputsMMA<ScalarType,
     aAlgorithm.setUpdateFrequency(aInputs.mUpdateFrequency);
     aAlgorithm.setMaxNumIterations(aInputs.mMaxNumSolverIter);
     aAlgorithm.setMaxNumSubProblemIterations(aInputs.mMaxNumSubProblemIter);
+std::cout << "Max sub problem iter: " << aInputs.mMaxNumSubProblemIter << std::endl;
     aAlgorithm.setMaxNumTrustRegionIterations(aInputs.mMaxNumTrustRegionIter);
 
     aAlgorithm.setMoveLimit(aInputs.mMoveLimit);
+std::cout << "Move limit: " << aInputs.mMoveLimit << std::endl;
     aAlgorithm.setInitialAugLagPenalty(aInputs.mInitialAugLagPenalty);
     aAlgorithm.setInitialAymptoteScaling(aInputs.mInitialAymptoteScaling);
     aAlgorithm.setAsymptoteExpansionParameter(aInputs.mAsymptoteExpansion);
+std::cout << "Expansion: " << aInputs.mAsymptoteExpansion << std::endl;
+std::cout << "Contraction: " << aInputs.mAsymptoteContraction << std::endl;
     aAlgorithm.setSubProblemBoundsScaling(aInputs.mSubProblemBoundsScaling);
     aAlgorithm.setAsymptoteContractionParameter(aInputs.mAsymptoteContraction);
+    aAlgorithm.setAugLagSubProbPenaltyMultiplier(aInputs.mAugLagSubProbPenaltyMultiplier);
 
     aAlgorithm.setOptimalityTolerance(aInputs.mOptimalityTolerance);
     aAlgorithm.setFeasibilityTolerance(aInputs.mFeasibilityTolerance);
     aAlgorithm.setControlStagnationTolerance(aInputs.mControlStagnationTolerance);
     aAlgorithm.setObjectiveStagnationTolerance(aInputs.mObjectiveStagnationTolerance);
+    aAlgorithm.setSubProblemFeasibilityTolerance(aInputs.mAugLagSubProbFeasibilityTolerance);
 }
 // function set_mma_algorithm_inputs
 

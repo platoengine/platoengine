@@ -1,5 +1,5 @@
 /*
- * XMLGeneratorParseNaturalBoundaryCondition.hpp
+ * XMLGeneratorParseLoads.hpp
  *
  *  Created on: Jan 5, 2021
  */
@@ -7,17 +7,17 @@
 #pragma once
 
 #include "XMLGeneratorParseMetadata.hpp"
+#include "XMLGeneratorLoadMetadata.hpp"
 #include "XMLGeneratorParserUtilities.hpp"
-#include "XMLGeneratorNaturalBoundaryConditionMetadata.hpp"
 
 namespace XMLGen
 {
 
-class ParseNaturalBoundaryCondition : public XMLGen::ParseMetadata<std::vector<XMLGen::NaturalBoundaryCondition>>
+class ParseLoad : public XMLGen::ParseMetadata<std::vector<XMLGen::Load>>
 {
 private:
     XMLGen::MetaDataTags mTags; /*!< map from plato input file tags to valid tokens-value pairs, i.e. map<tag, pair<tokens,value> > */
-    std::vector<XMLGen::NaturalBoundaryCondition> mData; /*!< nbc metadata */
+    std::vector<XMLGen::Load> mData; /*!< load metadata */
 
 private:
     /******************************************************************************//**
@@ -28,35 +28,35 @@ private:
 
     /******************************************************************************//**
      * \fn insertCoreProperties
-     * \brief Insert core nbc properties, e.g. identifiers, to map from plato \n
+     * \brief Insert core load properties, e.g. identifiers, to map from plato \n
      * input file tags to valid tokens-value pairs
     **********************************************************************************/
     void insertCoreProperties();
 
     /******************************************************************************//**
      * \fn setMetaData
-     * \brief Set XMLGen::NaturalBoundaryCondition metadata.
+     * \brief Set XMLGen::Load metadata.
      * \param [in/out] aInputFile parsed input metadata
     **********************************************************************************/
-    void setMetadata(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setMetadata(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn checkUniqueIDs
-     * \brief Throw error if NaturalBoundaryCondition block identification numbers are not unique.
+     * \brief Throw error if Load block identification numbers are not unique.
     **********************************************************************************/
     void checkUniqueIDs();
 
 public:
     /******************************************************************************//**
      * \fn data
-     * \brief Return NaturalBoundaryCondition metadata.
+     * \brief Return Load metadata.
      * \return metadata
     **********************************************************************************/
-    std::vector<XMLGen::NaturalBoundaryCondition> data() const override;
+    std::vector<XMLGen::Load> data() const override;
 
     /******************************************************************************//**
      * \fn parse
-     * \brief Parse NaturalBoundaryCondition metadata.
+     * \brief Parse Load metadata.
      * \param [in] aInputFile input file metadata.
     **********************************************************************************/
     void parse(std::istream &aInputFile) override;
@@ -68,49 +68,49 @@ public:
     void expandDofs();
 
     /******************************************************************************//**
-     * \fn setNaturalBoundaryConditionIdentification
-     * \brief Set the NaturalBoundaryCondition id.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \fn setLoadIdentification
+     * \brief Set the Load id.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setNaturalBoundaryConditionIdentification(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setLoadIdentification(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn setType
-     * \brief Set the NaturalBoundaryCondition type.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \brief Set the Load type.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setType(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setType(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn setLocationType
-     * \brief Set the NaturalBoundaryCondition location type.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \brief Set the Load location type.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setLocationType(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setLocationType(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn setLocationID
-     * \brief Set the NaturalBoundaryCondition location id.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \brief Set the Load location id.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setLocationID(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setLocationID(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn setLocationName
-     * \brief Set the NaturalBoundaryCondition location name.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \brief Set the Load location name.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setLocationName(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setLocationName(XMLGen::Load& aMetadata);
 
     /******************************************************************************//**
      * \fn setValueMetadata
-     * \brief Set the NaturalBoundaryCondition value.
-     * \param [in] aMetadata natural boundary condition metadata.
+     * \brief Set the Load value.
+     * \param [in] aMetadata load metadata.
     **********************************************************************************/
-    void setValueMetadata(XMLGen::NaturalBoundaryCondition& aMetadata);
+    void setValueMetadata(XMLGen::Load& aMetadata);
 
 };
-// class ParseNaturalBoundaryCondition
+// class ParseLoad
 
 }
 // namespace XMLGen

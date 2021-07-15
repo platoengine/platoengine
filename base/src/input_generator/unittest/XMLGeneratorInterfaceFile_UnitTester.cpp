@@ -76,10 +76,12 @@ TEST(PlatoTestXMLGenerator, WritePlatoMainOperationsXmlFile)
     XMLGen::InputData tMetaData;
     XMLGen::OptimizationParameters tOptimizationParameters;
     tOptimizationParameters.append("max_iterations", "10");
+    tOptimizationParameters.append("filter_radius_scale", "2.0");
     tOptimizationParameters.append("discretization", "density");
     tOptimizationParameters.append("optimization_algorithm", "oc");
     tOptimizationParameters.append("optimization_type", "topology");
     tOptimizationParameters.append("filter_in_engine", "true");
+    tOptimizationParameters.normalizeInAggregator(true);
     tMetaData.set(tOptimizationParameters);
     XMLGen::Service tService;
     tService.id("1");
@@ -963,7 +965,7 @@ TEST(PlatoTestXMLGenerator, AppendNormalizationSharedData_non_multi_load_case)
     tMetaData.objective.criteriaIDs.push_back("8");
     tMetaData.objective.criteriaIDs.push_back("9");
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("normalize_in_aggregator", "true");
+    tOptimizationParameters.normalizeInAggregator(true);
     tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
@@ -1003,7 +1005,7 @@ TEST(PlatoTestXMLGenerator, AppendNormalizationSharedData_multi_load_case)
     tMetaData.objective.criteriaIDs.push_back("8");
     tMetaData.objective.criteriaIDs.push_back("9");
     XMLGen::OptimizationParameters tOptimizationParameters;
-    tOptimizationParameters.append("normalize_in_aggregator", "true");
+    tOptimizationParameters.normalizeInAggregator(true);
     tMetaData.set(tOptimizationParameters);
 
     pugi::xml_document tDocument;
@@ -1114,6 +1116,42 @@ TEST(PlatoTestXMLGenerator, AppendPhysicsPerformers)
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tPerformer);
     tPerformer = tPerformer.next_sibling("Performer");
     ASSERT_TRUE(tPerformer.empty());
+}
+
+TEST(PlatoTestXMLGenerator, AppendConstraintOptions)
+{
+    XMLGen::InputData tMetaData;
+    XMLGen::OptimizationParameters tOptParams;
+    tOptParams.optimizationType(XMLGen::OT_SHAPE);
+    tMetaData.set(tOptParams);
+
+    XMLGen::Service tService;
+    tService.id("1");
+    tService.code("platomain");
+    tMetaData.append(tService);
+
+    XMLGen::Criterion tCriterion;
+    tCriterion.id("1");
+    tMetaData.append(tCriterion);
+
+    XMLGen::Constraint tConstraint;
+    tConstraint.service("1");
+    tConstraint.criterion("1");
+    tConstraint.id("1");
+    tConstraint.append("absolute_target", ".008");
+    tMetaData.constraints.push_back(tConstraint);
+
+    pugi::xml_document tDocument;
+    ASSERT_NO_THROW(XMLGen::append_optimization_constraint_options(tMetaData, tDocument));
+  
+    auto tConstraintNode = tDocument.child("Constraint");
+    ASSERT_FALSE(tConstraintNode.empty());
+
+    std::vector<std::string> tKeys = {"ReferenceValue", "GradientName", "ValueStageName", "AbsoluteTargetValue",
+                   "GradientStageName", "ValueName"};
+    std::vector<std::string> tValues = {".008", "Constraint Gradient 1", "Compute Constraint Value 1",
+                   ".008", "Compute Constraint Gradient 1", "Constraint Value 1"};
+    PlatoTestXMLGenerator::test_children(tKeys, tValues, tConstraintNode);
 }
 
 }

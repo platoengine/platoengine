@@ -1552,19 +1552,19 @@ TEST(PlatoTest, solve_srom_problem_beta)
     size_t tRandVecDim = 0;
     ASSERT_EQ(tOutput.mProbabilities.size(), tStatsInputs.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 78.648223523346431, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 87.571021455893685, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 99.32086371389596, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 110.99183323634628, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 78.641408997073668, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 87.574639717693316, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 99.316701727020558, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 110.99533312667199, tTol);
     // GOLD PROBABILITIES
-    EXPECT_NEAR(tOutput.mProbabilities[0], 0.33023002965991671, tTol);
-    EXPECT_NEAR(tOutput.mProbabilities[1], 0.30856864775148274, tTol);
-    EXPECT_NEAR(tOutput.mProbabilities[2], 0.22787120519226264, tTol);
-    EXPECT_NEAR(tOutput.mProbabilities[3], 0.13333298643496919, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[0], 0.33023476704071925, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[1], 0.30856221169734127, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[2], 0.22785115263666769, tTol);
+    EXPECT_NEAR(tOutput.mProbabilities[3], 0.13335253974798947, tTol);
     // expect total probability of unity
     const double tTotalProbability =
         tOutput.mProbabilities[0] + tOutput.mProbabilities[1] + tOutput.mProbabilities[2] + tOutput.mProbabilities[3];
-    EXPECT_NEAR(tTotalProbability, 1.0000028690386313, tTol);
+    EXPECT_NEAR(tTotalProbability, 1.0000006711227176, tTol);
 }
 
 TEST(PlatoTest, solve_srom_problem_uniform)
@@ -1591,18 +1591,18 @@ TEST(PlatoTest, solve_srom_problem_uniform)
     size_t tRandVecDim = 0;
     ASSERT_EQ(tOutput.mProbabilities.size(), tStatsInputs.mNumSamples);
     // GOLD SAMPLES
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 33.56115301177298, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 41.869329138220166, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 50.230344395017241, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 58.605115000685984, tTol);
-    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][4], 66.974948215613182, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][0], 33.562195421953334, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][1], 41.870248515269992, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][2], 50.231395694359442, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][3], 58.606363921521968, tTol);
+    EXPECT_NEAR(tOutput.mSamples[tRandVecDim][4], 66.976410918426339, tTol);
     // expect total probability of unity
     double tTotalProbability = 0;
     for(size_t tIndex = 0; tIndex < tStatsInputs.mNumSamples; tIndex++)
     {
         tTotalProbability += tOutput.mProbabilities[tIndex];
     }
-    EXPECT_NEAR(tTotalProbability, 0.99992069897137525, tTol);
+    EXPECT_NEAR(tTotalProbability, 0.99995768126770301, tTol);
 }
 
 TEST(PlatoTest, SetSampleProbabilityPairsInitialGuess_UniformSampleInitialGuess)

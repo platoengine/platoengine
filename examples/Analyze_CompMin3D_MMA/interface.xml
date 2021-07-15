@@ -464,7 +464,14 @@
 <Optimizer>
   <Package>MMA</Package>
   <Options>
+    <MoveLimit>0.1</MoveLimit>
     <MaxNumOuterIterations>10</MaxNumOuterIterations>
+    <MoveLimit>0.5</MoveLimit>
+    <AsymptoteExpansion>1.2</AsymptoteExpansion>
+    <AsymptoteContraction>0.7</AsymptoteContraction>
+    <MaxNumSubProblemIter>50</MaxNumSubProblemIter>
+    <ControlStagnationTolerance>1e-6</ControlStagnationTolerance>
+    <ObjectiveStagnationTolerance>1e-8</ObjectiveStagnationTolerance>
   </Options>
   <Output>
     <OutputStage>Output To File</OutputStage>

@@ -98,26 +98,31 @@ private:
         {
             Plato::InputData tOptionsNode = aOptimizerNode.get<Plato::InputData>("Options");
             aData.mMemorySpace = this->memorySpace(tOptionsNode);
-            aData.mPrintDiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mPrintMMADiagnostics = this->outputDiagnostics(tOptionsNode);
+            aData.mPrintAugLagSubProbDiagnostics = this->outputSubProblemDiagnostics(tOptionsNode);
 
             aData.mUpdateFrequency = this->updateFrequency(tOptionsNode);
             aData.mNumControlVectors = this->numControlVectors(tOptionsNode);
-            aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
-            aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
-            aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
 
+            // core mma parameters
             aData.mMoveLimit = this->moveLimit(tOptionsNode);
             aData.mAsymptoteExpansion = this->asymptoteExpansion(tOptionsNode);
-            aData.mAsymptoteContraction = this->asymptoteContraction(tOptionsNode);
-            aData.mInitialAugLagPenalty = this->initialAugLagPenalty(tOptionsNode);
-            aData.mInitialAymptoteScaling = this->initialAymptoteScaling(tOptionsNode);
-            aData.mSubProblemBoundsScaling = this->subProblemBoundsScaling(tOptionsNode);
-            aData.mConstraintNormalizationMultipliers = this->constraintNormalizationMultipliers(tOptionsNode);
-
+            aData.mMaxNumSolverIter = this->maxNumOuterIterations(tOptionsNode);
             aData.mOptimalityTolerance = this->optimalityTolerance(tOptionsNode);
             aData.mFeasibilityTolerance = this->feasibilityTolerance(tOptionsNode);
+            aData.mAsymptoteContraction = this->asymptoteContraction(tOptionsNode);
+            aData.mInitialAymptoteScaling = this->initialAymptoteScaling(tOptionsNode);
             aData.mControlStagnationTolerance = this->controlStagnationTolerance(tOptionsNode);
             aData.mObjectiveStagnationTolerance = this->objectiveStagnationTolerance(tOptionsNode);
+
+            // core augmented Lagrangian subproblem parameters
+            aData.mMaxNumSubProblemIter = this->maxNumSubProblemIter(tOptionsNode);
+            aData.mMaxNumTrustRegionIter = this->maxNumTrustRegionIter(tOptionsNode);
+            aData.mInitialAugLagPenalty = this->augLagSubProblemInitialPenalty(tOptionsNode);
+            aData.mSubProblemBoundsScaling = this->augLagSubProblemBoundsScaling(tOptionsNode);
+            aData.mAugLagSubProbPenaltyMultiplier = this->augLagSubProbPenaltyMultiplier(tOptionsNode);
+            aData.mConstraintNormalizationMultipliers = this->constraintNormalizationMultipliers(tOptionsNode);
+            aData.mAugLagSubProbFeasibilityTolerance = this->augLagSubProblemFeasibilityTolerance(tOptionsNode);
         }
     }
 
@@ -132,6 +137,21 @@ private:
         if(aOptionsNode.size<std::string>("OutputDiagnosticsToFile"))
         {
             tOuput = Plato::Get::Bool(aOptionsNode, "OutputDiagnosticsToFile");
+        }
+        return (tOuput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse output diagnostic keyword for augmented Lagrangian subproblem.
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return output diagnostic flag, default = false
+    **********************************************************************************/
+    bool outputSubProblemDiagnostics(const Plato::InputData & aOptionsNode)
+    {
+        bool tOuput = false;
+        if(aOptionsNode.size<std::string>("OutputSubProblemDiagnostics"))
+        {
+            tOuput = Plato::Get::Bool(aOptionsNode, "OutputSubProblemDiagnostics");
         }
         return (tOuput);
     }
@@ -245,14 +265,29 @@ private:
     /******************************************************************************//**
      * @brief Parse initial augmented Lagrangian penalty keyword
      * @param [in] aOptimizerNode data structure with optimization related input options
-     * @return initial augmented Lagrangian penalty, default = 1
+     * @return initial augmented Lagrangian penalty, default = 0.0015
     **********************************************************************************/
-    ScalarType initialAugLagPenalty(const Plato::InputData & aOptionsNode)
+    ScalarType augLagSubProblemInitialPenalty(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 1.0;
-        if(aOptionsNode.size<std::string>("InitialAugLagPenalty"))
+        ScalarType tOutput = 0.0015;
+        if(aOptionsNode.size<std::string>("SubProblemInitialPenalty"))
         {
-            tOutput = Plato::Get::Double(aOptionsNode, "InitialAugLagPenalty");
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemInitialPenalty");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse augmented Lagrangian penalty penalty multiplier keyword
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return augmented Lagrangian penalty penalty multiplier, default = 1.025
+    **********************************************************************************/
+    ScalarType augLagSubProbPenaltyMultiplier(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1.025;
+        if(aOptionsNode.size<std::string>("SubProblemPenaltyMultiplier"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemPenaltyMultiplier");
         }
         return (tOutput);
     }
@@ -264,7 +299,7 @@ private:
     **********************************************************************************/
     ScalarType asymptoteExpansion(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 1.01;
+        ScalarType tOutput = 1.2;
         if(aOptionsNode.size<std::string>("AsymptoteExpansion"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteExpansion");
@@ -279,7 +314,7 @@ private:
     **********************************************************************************/
     ScalarType asymptoteContraction(const Plato::InputData & aOptionsNode)
     {
-        ScalarType tOutput = 0.99;
+        ScalarType tOutput = 0.7;
         if(aOptionsNode.size<std::string>("AsymptoteContraction"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "AsymptoteContraction");
@@ -307,7 +342,7 @@ private:
      * @param [in] aOptimizerNode data structure with optimization related input options
      * @return sub problem bound scaling, default = 0.1
     **********************************************************************************/
-    ScalarType subProblemBoundsScaling(const Plato::InputData & aOptionsNode)
+    ScalarType augLagSubProblemBoundsScaling(const Plato::InputData & aOptionsNode)
     {
         ScalarType tOutput = 0.1;
         if(aOptionsNode.size<std::string>("SubProblemBoundsScaling"))
@@ -354,6 +389,21 @@ private:
         if(aOptionsNode.size<std::string>("FeasibilityTolerance"))
         {
             tOutput = Plato::Get::Double(aOptionsNode, "FeasibilityTolerance");
+        }
+        return (tOutput);
+    }
+
+    /******************************************************************************//**
+     * @brief Parse feasibility tolerance keyword for augmented Lagrangian subproblem.
+     * @param [in] aOptimizerNode data structure with optimization related input options
+     * @return feasibility tolerance, default = 1e-8
+    **********************************************************************************/
+    ScalarType augLagSubProblemFeasibilityTolerance(const Plato::InputData & aOptionsNode)
+    {
+        ScalarType tOutput = 1e-8;
+        if(aOptionsNode.size<std::string>("SubProblemFeasibilityTolerance"))
+        {
+            tOutput = Plato::Get::Double(aOptionsNode, "SubProblemFeasibilityTolerance");
         }
         return (tOutput);
     }

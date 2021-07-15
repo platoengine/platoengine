@@ -18,6 +18,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       XMLGeneratorPlatoMainOperationFile_UnitTester.cpp
                                       XMLGeneratorPlatoAnalyzeInputFile_UnitTester.cpp
                                       XMLGeneratorPlatoAnalyzeOperationsFile_UnitTester.cpp
+                                      XMLGeneratorSierraSDInputFile_UnitTester.cpp
                                       ../XMLGeneratorParseOptimizationParameters.cpp
                                       ../XMLGeneratorOptimizationParametersMetadata.cpp
                                       ../XMLGeneratorParseOutput.cpp
@@ -28,7 +29,7 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorOutputMetadata.cpp
                                       ../XMLGeneratorParseObjective.cpp
                                       ../XMLGeneratorParseEssentialBoundaryCondition.cpp
-                                      ../XMLGeneratorParseNaturalBoundaryCondition.cpp
+                                      ../XMLGeneratorParseLoads.cpp
                                       ../XMLGeneratorParseConstraint.cpp
                                       ../XMLGeneratorParseUncertainty.cpp
                                       ../XMLGeneratorScenarioMetadata.cpp
@@ -50,8 +51,8 @@ SET(PlatoXMLGenerator_UnitTester_SRCS XMLGenerator_UnitMain.cpp
                                       ../XMLGeneratorPlatoAnalyzeOperationsFileUtilities.cpp
                                       ../XMLGeneratorSierraSDOperationsFileUtilities.cpp
                                       ../XMLGeneratorSierraSDInputDeckUtilities.cpp
-                                      ../XMLGeneratorAnalyzeNaturalBCFunctionInterface.cpp
-                                      ../XMLGeneratorAnalyzeNaturalBCTagFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeLoadFunctionInterface.cpp
+                                      ../XMLGeneratorAnalyzeLoadTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeEssentialBCTagFunctionInterface.cpp
                                       ../XMLGeneratorAnalyzeMaterialModelFunctionInterface.cpp
@@ -74,7 +75,6 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/tools ..)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
 set(PlatoXMLGenerator_UnitTester_LIBS ${GTEST_LIBRARY} ${PLATO_LIBRARIES} ${Trilinos_LIBRARIES} PlatoParser )
-#set(PlatoXMLGenerator_UnitTester_LIBS ${GTEST_LIBRARY} PlatoParser PlatoExceptions ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} )
 add_executable(PlatoXMLGenerator_UnitTester ${PlatoXMLGenerator_UnitTester_SRCS})
 target_link_libraries(PlatoXMLGenerator_UnitTester ${PlatoXMLGenerator_UnitTester_LIBS})
 add_test(NAME PlatoXMLGenerator_UnitTester COMMAND ${CMAKE_BINARY_DIR}/base/src/input_generator/unittest/PlatoXMLGenerator_UnitTester)

@@ -315,6 +315,21 @@ public:
      * \return output bool
     **********************************************************************************/
     bool updateProblem() const;
+
+    /******************************************************************************//**
+     * \fn existingInputDeck
+     * \brief Set string value for keyword 'existing_input_deck'.
+     * \param [in] aInput string value
+    **********************************************************************************/
+    void existingInputDeck(const std::string& aInput);
+
+    /******************************************************************************//**
+     * \fn existingInputDeck
+     * \brief Return string value for keyword 'existing_input_deck'.
+     * \return output string: non-empty if using an existing input deck
+    **********************************************************************************/
+    std::string existingInputDeck() const;
+
 };
 // struct Service
 

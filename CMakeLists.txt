@@ -111,7 +111,6 @@ if( UNIT_TESTING )
     set(CMAKE_PREFIX_PATH ${GTEST_HOME} ${CMAKE_PREFIX_PATH})
   endif()
   find_package(GTest REQUIRED)
-  set(PLATO_LIBRARIES ${GTEST_BOTH_LIBRARIES})
   include_directories( ${GTEST_INCLUDE_DIRS} )
 endif()
 
@@ -213,7 +212,7 @@ endif()
 
 
 if( ENABLE_ISO )
-  add_subdirectory(base/src/iso/main)
+  add_subdirectory(base/src/iso)
 endif()
 
 if( ENABLE_PRUNE )

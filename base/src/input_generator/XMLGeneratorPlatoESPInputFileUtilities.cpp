@@ -15,7 +15,7 @@ namespace XMLGen
 
 void write_plato_esp_input_deck_file(const XMLGen::InputData &aInputData)
 {
-    if(aInputData.optimization_parameters().optimization_type() == "shape")
+    if(aInputData.optimization_parameters().optimizationType() == OT_SHAPE)
     {
         pugi::xml_document doc;
         pugi::xml_node tmp_node1 = doc.append_child(pugi::node_declaration);
