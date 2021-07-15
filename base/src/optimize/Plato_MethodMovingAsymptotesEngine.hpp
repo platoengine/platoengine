@@ -127,7 +127,8 @@ public:
     void optimize()
     {
         mInterface->handleExceptions();
-        this->initialize();
+
+        this->initialize(); // add if (mOuterLoop) inside this function
 
         // PARSE INPUT DATA
         Plato::AlgorithmInputsMMA<ScalarType, OrdinalType> tInputs;
@@ -153,6 +154,12 @@ public:
 
         // SET PROBLEM CRITERIA
         std::shared_ptr<Plato::CriterionList<ScalarType, OrdinalType>> tConstraints;
+
+        /*
+          Below should be created with a factory
+          E.g.:
+          std::shared_ptr<Plato::Criterion<ScalarType, OrdinalType>> tObjective = tFactory.create(mComm);
+        */
         std::shared_ptr<Plato::EngineObjective<ScalarType, OrdinalType>> tObjective;
         const OrdinalType tNumConstraints = tInputs.mConstraintNormalizationParams->size();
         const OrdinalType tNumControls = (*tInputs.mUpperBounds)[0 /* vector index */].size();
@@ -162,7 +169,7 @@ public:
         Plato::AlgorithmOutputsMMA<ScalarType, OrdinalType> tOutputs;
         Plato::solve_mma<ScalarType, OrdinalType>(tObjective, tConstraints, tInputs, tOutputs);
 
-        this->finalize();
+        this->finalize(); // add if (mOuterLoop) inside this function
     }
 
 private:
@@ -174,6 +181,12 @@ private:
     {
         auto tInputData = mInterface->getInputData();
         auto tOptimizerNode = tInputData.get<Plato::InputData>("Optimizer");
+        /*
+        if(!mOuterLoop)
+        {
+          tOptimizerNode = tOptimizerNode.get<Plato::InputData>("Optimizer");
+        }
+        */
         Plato::MethodMovingAsymptotesParser<ScalarType, OrdinalType> tParser;
         mObjFuncStageName = tParser.getObjectiveStageName(tOptimizerNode);
         mConstraintStageNames = tParser.getConstraintStageNames(tOptimizerNode);

@@ -164,15 +164,24 @@ public:
     **********************************************************************************/
     void updateProblem(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
+        /*
+          Needs modification in Plato_NestedObjective
+          Notes:
+          1. call to compute will have two stages:
+            a. Update Shape
+            b. Update SharedData
+        */
         assert(mInterface != nullptr);
 
         this->setControls(aControl);
         // Tell performers to cache the state
         std::vector<std::string> tStageNames;
         std::string tUpdateProblemName = mEngineInputData.getUpdateProblemStageName();
+        // get the vector of stage names.  This is a refactor of getUpdateProblemStagename()
+        // std::vector<std::string> tStageNames = mEngineInputData.getUpdateProblemStageNames();
         if(tUpdateProblemName.empty() == false)
         {
-            tStageNames.push_back(tUpdateProblemName);
+            tStageNames.push_back(tUpdateProblemName);   // comment out
             mInterface->compute(tStageNames, *mParameterList);
         }
     }
@@ -183,6 +192,16 @@ public:
     **********************************************************************************/
     ScalarType value(const Plato::MultiVector<ScalarType, OrdinalType> & aControl)
     {
+        /*
+          Needs modification in derived class
+          Notes:
+          1.  create the inner loop optimizer
+          2.  create optimizer with a factory:
+          Plato::OptimizerFactory<double> tOptimizerFactory;
+          tOptimizer = tOptimizerFactory.create(mInterface, mComm, tNested);  <-- mComm is a member that's set to the input aComm into the constructor
+          tOptimizer.optimize();
+        */
+    //// below may not be necessary at all.
         assert(mInterface != nullptr);
 
         // ********* Set view to each control vector entry ********* //
