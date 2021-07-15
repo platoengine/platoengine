@@ -17,7 +17,7 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/tools ..)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
 
-set(PlatoSu2ToExodus_UnitTester_LIBS ${GTEST_LIBRARY})
+set(PlatoSu2ToExodus_UnitTester_LIBS ${GTEST_BOTH_LIBRARIES})
 add_executable(PlatoSu2ToExodus_UnitTester ${PlatoSu2ToExodus_UnitTester_SRCS})
 target_link_libraries(PlatoSu2ToExodus_UnitTester ${PlatoSu2ToExodus_UnitTester_LIBS} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES})
 add_test(NAME PlatoSu2ToExodus_UnitTester COMMAND ${CMAKE_BINARY_DIR}/base/src/Su2ToExodus/unittest/PlatoSu2ToExodus_UnitTester)
