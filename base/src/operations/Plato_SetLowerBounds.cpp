@@ -114,7 +114,10 @@ void SetLowerBounds::updateLowerBoundsBasedOnFixedEntitiesForDBTOP(double* aToDa
         else
         {
             auto tFluidFixedBlocksMetadata = Plato::FixedBlock::get_fixed_fluid_blocks_metadata(mFixedBlockMetadata);
-            this->updateLowerBoundsForDensityProblems(tFluidFixedBlocksMetadata, aToData);
+	    if( !tFluidFixedBlocksMetadata.mBlockIDs.empty() )
+	    {
+                this->updateLowerBoundsForDensityProblems(tFluidFixedBlocksMetadata, aToData);
+	    }
         }
     }
 }

@@ -63,10 +63,7 @@ SetUpperBounds::SetUpperBounds(PlatoApp* aPlatoApp, Plato::InputData& aNode) :
     this->parseOperationArguments(aNode);
     this->parseFixedBlocks(aNode);
     this->parseEntitySets(aNode);
-    mMaterialUseCase = Plato::Get::String(aNode, "UseCase");
-    mMaterialUseCase = Plato::tolower(mMaterialUseCase);
-    mDiscretization = Plato::Get::String(aNode, "Discretization");
-    mDiscretization = Plato::tolower(mDiscretization);
+    this->parseMemberData(aNode);
 }
 
 void SetUpperBounds::operator()()
