@@ -881,7 +881,13 @@ void write_plato_analyze_helmholtz_input_deck_file
     auto tLengthScale = tPlatoProblem.append_child("ParameterList");
     XMLGen::append_attributes({"name"}, {"Length Scale"}, tLengthScale);
     tKeys = {"name", "type", "value"};
+
     auto tLengthScaleValue = aXMLMetaData.optimization_parameters().filter_radius_absolute();
+    if(tLengthScaleValue.empty())
+    {
+        THROWERR("Filter radius absolute is not set. This is needed for Helmholtz filter")
+    }
+
     tValues = {"Length Scale", "double", tLengthScaleValue};
     XMLGen::append_parameter_plus_attributes(tKeys, tValues, tLengthScale);
 

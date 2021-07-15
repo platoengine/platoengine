@@ -2566,6 +2566,18 @@ TEST(PlatoTestXMLGenerator, AppendPlatoProblemToPlatoAnalyzeInputDeck)
     }
 }
 
+TEST(PlatoTestXMLGenerator, ErrorHelmholtzFilterLengthScale)
+{
+    // POSE INPUTS
+    XMLGen::InputData tXMLMetaData;
+
+    XMLGen::OptimizationParameters tOptimizationParameters;
+    tOptimizationParameters.append("filter_radius_scale", "3.0");
+    tXMLMetaData.set(tOptimizationParameters);
+
+    ASSERT_THROW(write_plato_analyze_helmholtz_input_deck_file(tXMLMetaData), std::runtime_error);
+}
+
 TEST(PlatoTestXMLGenerator, WritePlatoAnalyzeInputXmlFileForHelmholtzFilter)
 {
     // POSE INPUTS
