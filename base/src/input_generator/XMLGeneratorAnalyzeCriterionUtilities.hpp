@@ -243,6 +243,42 @@ inline pugi::xml_node append_stress_constrained_mass_minimization_criterion
     return tObjective;
 }
 
+/******************************************************************************//**
+ * \fn append_volume_average_criterion
+ * \brief Append volume average criterion to criterion parameter list.
+ * \tparam Criterion criterion metadata
+ * \param [in] aCriterion criterion metadata
+ * \param [in/out] aParentNode  pugi::xml_node
+**********************************************************************************/
+template<typename Criterion>
+pugi::xml_node append_volume_average_criterion
+(const Criterion& aCriterion,
+ pugi::xml_node& aParentNode)
+{
+    XMLGen::Private::is_criterion_supported_in_plato_analyze(aCriterion);
+    auto tName = std::string("my_") + Plato::tolower(aCriterion.type()) + "_criterion_id_" + aCriterion.id();
+    auto tObjective = aParentNode.append_child("ParameterList");
+    std::vector<std::string> tKeys = {"name"};
+    std::vector<std::string> tValues = {tName};
+    XMLGen::append_attributes(tKeys, tValues, tObjective);
+
+    tKeys = {"name", "type", "value"};
+    tValues = {"Type", "string", "Volume Average Criterion"};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+
+    std::string tLocalMeasureType = aCriterion.localMeasure();
+    tValues = {"Local Measure", "string", tLocalMeasureType};
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+
+    std::string tSpatialWeightingFunction = aCriterion.spatialWeightingFunction();
+    tValues = {"Function", "string", tSpatialWeightingFunction};
+    XMLGen::set_value_keyword_to_ignore_if_empty(tValues);
+    XMLGen::append_parameter_plus_attributes(tKeys, tValues, tObjective);
+
+    XMLGen::Private::append_simp_penalty_function(aCriterion, tObjective);
+    return tObjective;
+}
+
 }
 // namespace Private
 

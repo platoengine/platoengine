@@ -2210,6 +2210,7 @@ TEST(PlatoTestXMLGenerator, appendMMAOptions_topology)
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_output_subproblem_diagnostics(), "false");
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_sub_problem_penalty_multiplier(), "1.025");
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_sub_problem_initial_penalty(), "0.0015");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().problem_update_frequency(), "5");
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_method_moving_asymptotes_options(*(tester.exposeInputData()), tDocument));
@@ -2217,9 +2218,9 @@ TEST(PlatoTestXMLGenerator, appendMMAOptions_topology)
     std::vector<std::string> tKeys = {"MoveLimit", "AsymptoteExpansion", "AsymptoteContraction", 
                    "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance",
                    "OutputSubProblemDiagnostics", "SubProblemInitialPenalty", "SubProblemPenaltyMultiplier", 
-                   "SubProblemFeasibilityTolerance"};
+                   "SubProblemFeasibilityTolerance", "UpdateFrequency"};
     std::vector<std::string> tValues = {"0.5", "1.2", "0.7", "50", "1e-6", "1e-8", "false", "0.0015",
-                                        "1.025", "1e-8"};
+                                        "1.025", "1e-8", "5"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOptionsNode);
 }
 
@@ -2250,6 +2251,7 @@ TEST(PlatoTestXMLGenerator, appendMMAOptions_shape)
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_output_subproblem_diagnostics(), "false");
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_sub_problem_penalty_multiplier(), "1.025");
     EXPECT_EQ(tester.exposeInputData()->optimization_parameters().mma_sub_problem_initial_penalty(), "0.0015");
+    EXPECT_EQ(tester.exposeInputData()->optimization_parameters().problem_update_frequency(), "5");
 
     pugi::xml_document tDocument;
     ASSERT_NO_THROW(XMLGen::append_method_moving_asymptotes_options(*(tester.exposeInputData()), tDocument));
@@ -2257,9 +2259,9 @@ TEST(PlatoTestXMLGenerator, appendMMAOptions_shape)
     std::vector<std::string> tKeys = {"MoveLimit", "AsymptoteExpansion", "AsymptoteContraction", 
                    "MaxNumSubProblemIter", "ControlStagnationTolerance", "ObjectiveStagnationTolerance",
                    "OutputSubProblemDiagnostics", "SubProblemInitialPenalty", "SubProblemPenaltyMultiplier", 
-                   "SubProblemFeasibilityTolerance"};
+                   "SubProblemFeasibilityTolerance", "UpdateFrequency"};
     std::vector<std::string> tValues = {"0.5", "1.2", "0.7", "50", "-1", "-1", "false", "0.0015",
-                                        "1.025", "1e-8"};
+                                        "1.025", "1e-8", "5"};
     PlatoTestXMLGenerator::test_children(tKeys, tValues, tOptionsNode);
 }
 

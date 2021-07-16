@@ -66,6 +66,8 @@ void ParseCriteria::allocate()
     mTags.insert({ "scmm_mass_weight", { { {"scmm_mass_weight"}, ""}, "1.0" } });
 
     mTags.insert({ "stress_p_norm_exponent", { { {"stress_p_norm_exponent"}, ""}, "6.0" } });
+    mTags.insert({ "local_measure", { { {"local_measure"}, ""}, "vonmises" } });
+    mTags.insert({ "spatial_weighting_function", { { {"spatial_weighting_function"}, ""}, "1.0" } }); // function of x, y, and z
     mTags.insert({ "material_penalty_model", { { {"material_penalty_model"}, ""}, "simp" } });
     mTags.insert({ "material_penalty_exponent", { { {"material_penalty_exponent"}, ""}, "3.0" } });
     mTags.insert({ "minimum_ersatz_material_value", { { {"minimum_ersatz_material_value"}, ""}, "" } });
