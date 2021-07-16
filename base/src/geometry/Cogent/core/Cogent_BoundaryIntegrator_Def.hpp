@@ -36,7 +36,7 @@ void Cogent::BoundaryIntegrator::getQPoints(
 
   // get basis values, N_I(\xi_i), at m_boundarySimplexPoints, \xi_i.
   //
-  int nRefPoints = m_boundarySimplexPoints.dimension(0);
+  int nRefPoints = m_boundarySimplexPoints.extent(0);
   Cogent::FContainer<RealType> Nvals("Nvals",numNodes, nRefPoints);
   m_simplexBoundaryBasis->getValues(Nvals, m_boundarySimplexPoints, Intrepid2::OPERATOR_VALUE);
 

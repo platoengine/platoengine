@@ -46,7 +46,7 @@ void Cogent::BoundaryIntegrator_Direct::getCubature(
     getQPoints(boundarySimplexes, weights, points, coordCon);
 
 //    RealType scale = getUniformScaling(coordCon);
-//    int nQPs = weights.dimension(0);
+//    int nQPs = weights.extent(0);
 //    for(int j=0; j<nQPs; j++)
 //      weights(j) *= scale;
   }
@@ -115,7 +115,7 @@ void Cogent::BoundaryIntegrator_Direct::getQPoints(
   if( nSimplexes == 0 ) return;
 
   uint offset = 0;
-  uint nRefPoints = m_boundarySimplexPoints.dimension(0);
+  uint nRefPoints = m_boundarySimplexPoints.extent(0);
   uint nTopos = explicitSimplexes[0].fieldvals[0].size();
   uint nQPs = nSimplexes*nRefPoints;
   uint nNodes = m_baseElementBasis->getCardinality();
@@ -138,7 +138,7 @@ void Cogent::BoundaryIntegrator_Direct::getQPoints(
 //******************************************************************************//
 {
   uint offset = 0;
-  uint nRefPoints = m_boundarySimplexPoints.dimension(0);
+  uint nRefPoints = m_boundarySimplexPoints.extent(0);
   uint nSimplexes = explicitSimplexes.size();
   uint nQPs = nSimplexes*nRefPoints;
   weights = Cogent::FContainer<RealType>("weights",nQPs);

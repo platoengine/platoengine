@@ -6,10 +6,10 @@
  */
 
 #include "MeshBalance.hpp"
-#include <percept/stk_rebalance/ZoltanPartition.hpp>
-#include <percept/stk_rebalance/Rebalance.hpp>
+#include <ZoltanPartition.hpp>
+#include <Rebalance.hpp>
 /*
-#include <percept/PerceptMesh.hpp>
+#include <PerceptMesh.hpp>
 #include <adapt/UniformRefinerPattern.hpp>
 #include <adapt/UniformRefiner.hpp>
 #include <adapt/RefinerUtil.hpp>

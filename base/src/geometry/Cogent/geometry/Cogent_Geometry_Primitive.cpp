@@ -79,7 +79,7 @@ void Primitive::intersected(
 {
   lsIndices.clear();
 
-  uint nNodes = coordCon.dimension(0);
+  uint nNodes = coordCon.extent(0);
   inside = nodeIsInside(coordCon,0);
   bool intersected = false;
   for(uint iNode=1; iNode<nNodes; ++iNode){
@@ -171,7 +171,7 @@ void Primitive::compute(
 {
   std::vector<RealType> X(c_numDim);
   std::vector<RealType> vals(c_numLevelsets);
-  uint nNodes = coordCon.dimension(0);
+  uint nNodes = coordCon.extent(0);
   for(uint iNode=0; iNode<nNodes; iNode++){
     for(int i=0; i<c_numDim; ++i) X[i] = coordCon(iNode,i);
     topoVals(iNode,globalLSIndex) = compute(X,localLSIndex);
@@ -185,7 +185,7 @@ void Primitive::computeDeriv(
   int localLSIndex) const
 /******************************************************************************/
 {
-  uint nNodes = coordCon.dimension(0);
+  uint nNodes = coordCon.extent(0);
   std::vector<DFadType> X(c_numDim);
   for(uint iNode=0; iNode<nNodes; iNode++){
     for(int i=0; i<c_numDim; ++i) X[i] = coordCon(iNode,i);

@@ -86,7 +86,7 @@ TEST(ParameterizedModel, mapToGeometryData)
   Cogent::FContainer<RealType> topoData;
   model->getSignedDistance(topoData);
 
-  EXPECT_EQ(topoData.dimension(1), (unsigned int)1);
+  EXPECT_EQ(topoData.extent(1), (unsigned int)1);
   EXPECT_NEAR(topoData(0,0), -0.1, tolerance);
   EXPECT_NEAR(topoData(0,1),  0.1, tolerance);
   EXPECT_NEAR(topoData(0,2),  0.1, tolerance);

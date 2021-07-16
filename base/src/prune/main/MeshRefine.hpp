@@ -14,7 +14,7 @@
 #include <adapt/UniformRefinerPattern_def.hpp>
 
 #include "MeshManager.hpp"
-#include <percept/PerceptMesh.hpp>
+#include <PerceptMesh.hpp>
 
 class MeshRefine
 {

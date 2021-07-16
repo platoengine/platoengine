@@ -132,7 +132,7 @@ void ParameterizedModel::setModelData(const Cogent::FContainer<RealType>& geomDa
 {
   m_geomData = geomData;
   
-  int nParams = m_geomData.dimension(0);
+  int nParams = m_geomData.extent(0);
   std::vector<RealType> P(nParams);
   for(int i=0; i<nParams; ++i) P[i] = m_geomData(i);
 
@@ -173,7 +173,7 @@ bool ParameterizedModel::isEmptyElement()
 // true.  Boundary and body blocks have subDomains, so this function works
 // for both.
 
-  int nNodes = m_coordCon.dimension(0);
+  int nNodes = m_coordCon.extent(0);
   for(int i=0; i<nNodes; i++){
     bool isMat = false;
     for(const auto& geom : m_subDomains ){
@@ -202,7 +202,7 @@ bool ParameterizedModel::isPartialElement()
       firstMat = firstMat && !inside;
   }
 
-  int nNodes = m_coordCon.dimension(0);
+  int nNodes = m_coordCon.extent(0);
   for(int i=1; i<nNodes; i++){
     bool isMat = false;
     for(auto geom : m_subDomains ){
@@ -224,12 +224,12 @@ void ParameterizedModel::mapToGeometryData(
         FContainer<RealType>& dMdG )
 /******************************************************************************/
 {
-  int numNodes = m_coordCon.dimension(0);
+  int numNodes = m_coordCon.extent(0);
   int numParams = m_parameterNames.size();
 
   LocalMatrix<RealType> dTdG(numNodes,numParams);
 
-  int numMeas = dMdT.dimension(0);
+  int numMeas = dMdT.extent(0);
   dMdG = Cogent::FContainer<RealType>("dMdG",numMeas,numParams);
 
   int nActiveLS = m_LevelsetMap.size();
@@ -323,7 +323,7 @@ void ParameterizedModel::getSignedDistance(
 
   
   // size topoData
-  uint nNodes = m_coordCon.dimension(0);
+  uint nNodes = m_coordCon.extent(0);
   uint nActive = m_LevelsetMap.size();
   topoData = Cogent::FContainer<RealType>("topoData",nNodes, nActive);
 

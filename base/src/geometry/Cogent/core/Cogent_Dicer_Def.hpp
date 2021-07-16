@@ -12,7 +12,7 @@ void Cogent::Dicer::Project(
 
   int numNodes = m_basis->getCardinality();
   int nPoints = implicitSimplexes[0].points.size();
-  int nTopos = topoData.dimension(1);
+  int nTopos = topoData.extent(1);
 
   Cogent::FContainer<N> 
    Nvals = Kokkos::createDynRankView(topoData,"Nvals",numNodes,nPoints);

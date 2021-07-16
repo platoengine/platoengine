@@ -186,7 +186,7 @@ V Cogent::Integrator::Measure(Simplex<V,P>& simplex)
     for(uint j=0; j<m_numDims; j++)
       vertPoints(0, i, j) = simplex.points[i](j);
 
-  int numQPs = m_bodySimplexWeights.dimension(0);
+  int numQPs = m_bodySimplexWeights.extent(0);
   Cogent::FContainer<P> jacobian("jacobian",/*numCells=*/1,numQPs,m_numDims,m_numDims);
   Cogent::FContainer<P> jacobian_det("jacobian_det",/*numCells=*/1,numQPs);
   Cogent::FContainer<P> weighted_measure("weighted_measure",/*numCells=*/1,numQPs);

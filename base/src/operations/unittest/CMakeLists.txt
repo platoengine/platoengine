@@ -16,11 +16,10 @@ set(PLATOUNIT_INCLUDES ${CMAKE_SOURCE_DIR}/base/src/tools ..)
 INCLUDE_DIRECTORIES(${PLATOUNIT_INCLUDES})
 
 # The order of these libraries and the duplicates are necessary
-set(Plato_Operations_UnitTester_LIBS ${GTEST_BOTH_LIBRARIES} 
+set(Plato_Operations_UnitTester_LIBS ${GTEST_LIBRARY} 
                                      PlatoApp
                                      ${PLATO_LIBRARIES}
-                                     ${Trilinos_LIBRARIES}
-                                     ${Trilinos_TPL_LIBRARIES})
+                                     ${Trilinos_LIBRARIES})
  
 add_executable(Plato_Operations_UnitTester ${Plato_Operations_UnitTester_SRCS})
 target_link_libraries(Plato_Operations_UnitTester ${Plato_Operations_UnitTester_LIBS} ${Plato_Operations_UnitTester_LIBS})

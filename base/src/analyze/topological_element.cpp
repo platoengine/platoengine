@@ -176,8 +176,8 @@ CogentIntegration::CogentIntegration( pugi::xml_node& node,
   Kokkos::DynRankView<Real, Kokkos::Serial> points("points", 0, 0);
   mCubature->getStandardPoints(points);
 
-  mNumDims = points.dimension(1);
-  mNumPts = points.dimension(0);
+  mNumDims = points.extent(1);
+  mNumPts = points.extent(0);
 
   cubPoints = new Intrepid::FieldContainer<double>(mNumPts, mNumDims);
   cubWeights = new Intrepid::FieldContainer<double>(mNumPts);

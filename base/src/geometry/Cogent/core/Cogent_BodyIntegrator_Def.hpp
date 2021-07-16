@@ -21,13 +21,13 @@ void Cogent::BodyIntegrator::getQPoints(
 
   // get basis values, N_I(\xi_i), at m_bodySimplexPoints, \xi_i.
   //
-  int nRefPoints = m_bodySimplexPoints.dimension(0);
+  int nRefPoints = m_bodySimplexPoints.extent(0);
   Cogent::FContainer<RealType> Nvals("Nvals",numNodes, nRefPoints);
   m_simplexBodyBasis->getValues(Nvals, m_bodySimplexPoints, Intrepid2::OPERATOR_VALUE);
 
   // get Jacobian determinant at each refPoint
   //
-  int numQPs = m_bodySimplexWeights.dimension(0);
+  int numQPs = m_bodySimplexWeights.extent(0);
   Cogent::FContainer<P> jacobian = 
     Kokkos::createDynRankView(points,"jacobian",/*numCells=*/1,numQPs,m_numDims,m_numDims);
   Cogent::FContainer<P> jacobian_det = 
@@ -47,7 +47,7 @@ void Cogent::BodyIntegrator::getQPoints(
  
   // compute quadrature point locations, N_I(\xi_i) P_Ij, in parent reference coords
   //
-  int nDim = m_bodySimplexPoints.dimension(1);
+  int nDim = m_bodySimplexPoints.extent(1);
   for(int I=0; I<numNodes; I++)
     for(int i=0; i<nRefPoints; i++)
       for(int j=0; j<nDim; j++)

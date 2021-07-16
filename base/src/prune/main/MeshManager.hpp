@@ -8,7 +8,7 @@
 #ifndef ISO_PRUNE_MAIN_MESHMANAGER_HPP_
 #define ISO_PRUNE_MAIN_MESHMANAGER_HPP_
 
-#include <percept/PerceptMesh.hpp>
+#include <PerceptMesh.hpp>
 #include "Teuchos_CommandLineProcessor.hpp"
 #include "PruneMeshAPISTK.hpp"
 

@@ -93,7 +93,7 @@ TEST(BodyReducedTest, shapeParameter_tet)
 
   double conformalWeight = 0.0;
   std::vector<RealType> dWeightdGeomConf(numGeomVals,0.0);
-  int ncQPs = cweights.dimension(0);
+  int ncQPs = cweights.extent(0);
   for(int q=0; q<ncQPs; ++q){
     conformalWeight += cweights(q);
     for(int m=0; m<numGeomVals; m++)
@@ -114,7 +114,7 @@ TEST(BodyReducedTest, shapeParameter_tet)
   // compute total weight of projected GPs
 
   double projectedWeight = 0.0;
-  int nrQPs = rweights.dimension(0);
+  int nrQPs = rweights.extent(0);
   for(int j=0; j<nrQPs; j++){
     projectedWeight += rweights(j);
   }
@@ -277,7 +277,7 @@ TEST(BodyReducedTest, shapeParameter)
 
   double conformalWeight = 0.0;
   std::vector<RealType> dWeightdGeomConf(numGeomVals,0.0);
-  int ncQPs = cweights.dimension(0);
+  int ncQPs = cweights.extent(0);
   for(int q=0; q<ncQPs; ++q){
     conformalWeight += cweights(q);
     for(int m=0; m<numGeomVals; m++)
@@ -298,7 +298,7 @@ TEST(BodyReducedTest, shapeParameter)
   // compute total weight of projected GPs
 
   double projectedWeight = 0.0;
-  int nrQPs = rweights.dimension(0);
+  int nrQPs = rweights.extent(0);
   for(int j=0; j<nrQPs; j++){
     projectedWeight += rweights(j);
   }
